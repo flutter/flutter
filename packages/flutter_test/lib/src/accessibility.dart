@@ -313,6 +313,20 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
+    // Locate the text-bearing widgets whose contrast should be checked by
+    // inspecting the widget tree directly, rather than matching a semantics
+    // node's label or value against the rendered text. The label or value can
+    // legitimately differ from the visible text — for example when a Semantics
+    // widget contributes its own label that merges with a descendant Text, or
+    // when Text.semanticsLabel is set — in which case matching by string would
+    // fail to find the widget and silently skip the contrast check.
+    // See https://github.com/flutter/flutter/issues/180081.
+    final List<Element> textElements = find
+        .byWidgetPredicate((Widget widget) => widget is Text || widget is EditableText)
+        .hitTestable()
+        .evaluate()
+        .toList();
+
     var result = const Evaluation.pass();
     for (final RenderView renderView in tester.binding.renderViews) {
       final layer = renderView.debugLayer! as OffsetLayer;
@@ -329,7 +343,20 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return data;
       });
 
-      result += await _evaluateNode(root, tester, image, byteData!, renderView);
+      // Tracks which text elements have already been checked within this view,
+      // so that each one is evaluated against a single semantics node (the
+      // deepest one it belongs to) even though it geometrically falls within
+      // its ancestors too.
+      final evaluatedElements = <Element>{};
+      result += await _evaluateNode(
+        root,
+        tester,
+        image,
+        byteData!,
+        renderView,
+        textElements,
+        evaluatedElements,
+      );
     }
 
     return result;
@@ -341,6 +368,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
+    List<Element> textElements,
+    Set<Element> evaluatedElements,
   ) async {
     var result = const Evaluation.pass();
 
@@ -361,17 +390,65 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       return true;
     });
     for (final child in children) {
-      result += await _evaluateNode(child, tester, image, byteData, renderView);
+      result += await _evaluateNode(
+        child,
+        tester,
+        image,
+        byteData,
+        renderView,
+        textElements,
+        evaluatedElements,
+      );
     }
     if (shouldSkipNode(data)) {
       return result;
     }
-    final String text = data.label.isEmpty ? data.value : data.label;
-    final Iterable<Element> elements = find.text(text).hitTestable().evaluate();
-    for (final element in elements) {
+    // Check the contrast of every text-bearing widget rendered within this
+    // node's bounds. Children are visited first, so the deepest (most specific)
+    // node claims each element; the rest skip it via [evaluatedElements].
+    for (final element in textElements) {
+      if (evaluatedElements.contains(element)) {
+        continue;
+      }
+      if (!_elementCorrespondsToNode(node, element, renderView)) {
+        continue;
+      }
+      evaluatedElements.add(element);
       result += await _evaluateElement(node, element, tester, image, byteData, renderView);
     }
     return result;
+  }
+
+  /// Whether [element]'s painted region overlaps the region described by
+  /// [node], i.e. the text-bearing widget is rendered where the semantics node
+  /// reports itself to be.
+  bool _elementCorrespondsToNode(SemanticsNode node, Element element, RenderView renderView) {
+    final RenderObject? renderBox = element.renderObject;
+    if (renderBox is! RenderBox) {
+      return false;
+    }
+
+    final Matrix4 globalTransform = renderBox.getTransformTo(null);
+
+    // The semantics node transform will include root view transform, which is
+    // not included in renderBox.getTransformTo(null). Manually multiply the
+    // root transform to the global transform.
+    final rootTransform = Matrix4.identity();
+    renderView.applyPaintTransform(renderView.child!, rootTransform);
+    rootTransform.multiply(globalTransform);
+    final Rect screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+
+    Rect nodeBounds = node.rect;
+    SemanticsNode? current = node;
+    while (current != null) {
+      final Matrix4? transform = current.transform;
+      if (transform != null) {
+        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
+      }
+      current = current.parent;
+    }
+    final Rect intersection = nodeBounds.intersect(screenBounds);
+    return intersection.width > 0 && intersection.height > 0;
   }
 
   Future<Evaluation> _evaluateElement(
@@ -386,42 +463,16 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     late bool isBold;
     double? fontSize;
 
-    late final Rect screenBounds;
-    late final Rect paintBoundsWithOffset;
-
     final RenderObject? renderBox = element.renderObject;
     if (renderBox is! RenderBox) {
       throw StateError('Unexpected renderObject type: $renderBox');
     }
 
     final Matrix4 globalTransform = renderBox.getTransformTo(null);
-    paintBoundsWithOffset = MatrixUtils.transformRect(
+    final Rect paintBoundsWithOffset = MatrixUtils.transformRect(
       globalTransform,
       renderBox.paintBounds.inflate(4.0),
     );
-
-    // The semantics node transform will include root view transform, which is
-    // not included in renderBox.getTransformTo(null). Manually multiply the
-    // root transform to the global transform.
-    final rootTransform = Matrix4.identity();
-    renderView.applyPaintTransform(renderView.child!, rootTransform);
-    rootTransform.multiply(globalTransform);
-    screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
-    Rect nodeBounds = node.rect;
-    SemanticsNode? current = node;
-    while (current != null) {
-      final Matrix4? transform = current.transform;
-      if (transform != null) {
-        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
-      }
-      current = current.parent;
-    }
-    final Rect intersection = nodeBounds.intersect(screenBounds);
-    if (intersection.width <= 0 || intersection.height <= 0) {
-      // Skip this element since it doesn't correspond to the given semantic
-      // node.
-      return const Evaluation.pass();
-    }
 
     final Widget widget = element.widget;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);

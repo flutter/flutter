@@ -116,6 +116,84 @@ void main() {
       handle.dispose();
     });
 
+    // Regression tests for https://github.com/flutter/flutter/issues/180081
+    //
+    // The contrast of a Text/EditableText widget must be checked even when the
+    // enclosing semantics node's label or value does not match the visible
+    // text, e.g. when a Semantics widget contributes its own label that merges
+    // with the descendant Text, or when Text.semanticsLabel is set.
+    testWidgets('Semantics label that differs from the child Text still has its contrast checked', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.white,
+            child: Semantics(
+              label: 'Custom label',
+              child: const Text(
+                'Visible text',
+                style: TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets(
+      'Text.semanticsLabel that differs from the visible text still has its contrast checked',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _boilerplate(
+            Container(
+              width: 200.0,
+              height: 200.0,
+              color: Colors.white,
+              child: const Text(
+                'Visible text',
+                semanticsLabel: 'Custom label',
+                style: TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+            ),
+          ),
+        );
+        await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'Semantics label that differs from the child Text passes when contrast is sufficient',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _boilerplate(
+            Container(
+              width: 200.0,
+              height: 200.0,
+              color: Colors.white,
+              child: Semantics(
+                label: 'Custom label',
+                child: const Text(
+                  'Visible text',
+                  style: TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+              ),
+            ),
+          ),
+        );
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
+      },
+    );
+
     const surface = Color(0xFFF0F0F0);
 
     /// Shades of blue with contrast ratio of 2.9, 4.4, 4.5 from [surface].
