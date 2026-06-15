@@ -16,6 +16,7 @@ import '../device.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
 import 'android_workflow.dart';
+import 'ini_utils.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
   AndroidEmulators({
@@ -211,24 +212,4 @@ class AndroidEmulator extends Emulator {
     earlyFailure = false;
     return;
   }
-}
-
-@visibleForTesting
-Map<String, String> parseIniLines(List<String> contents) {
-  final results = <String, String>{};
-
-  final Iterable<List<String>> properties = contents
-      .map<String>((String l) => l.trim())
-      // Strip blank lines/comments
-      .where((String l) => l != '' && !l.startsWith('#'))
-      // Discard anything that isn't simple name=value
-      .where((String l) => l.contains('='))
-      // Split into name/value
-      .map<List<String>>((String l) => l.split('='));
-
-  for (final property in properties) {
-    results[property[0].trim()] = property[1].trim();
-  }
-
-  return results;
 }
