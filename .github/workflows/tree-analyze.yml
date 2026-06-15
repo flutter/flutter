@@ -55,7 +55,7 @@ jobs:
 
       - name: Wait for test check-in
         if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
-        uses: lewagon/wait-on-check-action@9312864dfbc9fd208e9c0417843430751c042800
+        uses: lewagon/wait-on-check-action@96d9100b431964d10e0136aff8b9ccb92470505e
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           check-name: 'Linux linux_host_engine'
