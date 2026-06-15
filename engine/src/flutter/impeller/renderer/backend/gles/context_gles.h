@@ -28,7 +28,8 @@ class ContextGLES final : public Context,
       const Flags& flags,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
-      bool enable_gpu_tracing);
+      bool enable_gpu_tracing,
+      std::shared_ptr<PipelineLibraryGLES>* shared_pipelines = nullptr);
 
   // |Context|
   ~ContextGLES() override;
@@ -64,7 +65,8 @@ class ContextGLES final : public Context,
       const Flags& flags,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
-      bool enable_gpu_tracing);
+      bool enable_gpu_tracing,
+      std::shared_ptr<PipelineLibraryGLES>* shared_pipelines = nullptr);
 
   // |Context|
   std::string DescribeGpuModel() const override;

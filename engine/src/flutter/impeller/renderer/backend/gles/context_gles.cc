@@ -22,16 +22,19 @@ std::shared_ptr<ContextGLES> ContextGLES::Create(
     const Flags& flags,
     std::unique_ptr<ProcTableGLES> gl,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
-    bool enable_gpu_tracing) {
-  return std::shared_ptr<ContextGLES>(new ContextGLES(
-      flags, std::move(gl), shader_libraries, enable_gpu_tracing));
+    bool enable_gpu_tracing,
+    std::shared_ptr<PipelineLibraryGLES>* shared_pipelines) {
+  return std::shared_ptr<ContextGLES>(
+      new ContextGLES(flags, std::move(gl), shader_libraries,
+                      enable_gpu_tracing, shared_pipelines));
 }
 
 ContextGLES::ContextGLES(
     const Flags& flags,
     std::unique_ptr<ProcTableGLES> gl,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_mappings,
-    bool enable_gpu_tracing)
+    bool enable_gpu_tracing,
+    std::shared_ptr<PipelineLibraryGLES>* shared_pipelines)
     : Context(flags) {
   reactor_ = std::make_shared<ReactorGLES>(std::move(gl));
   if (!reactor_->IsValid()) {
@@ -52,8 +55,15 @@ ContextGLES::ContextGLES(
 
   // Create the pipeline library.
   {
-    pipeline_library_ =
-        std::shared_ptr<PipelineLibraryGLES>(new PipelineLibraryGLES(reactor_));
+    if (shared_pipelines != nullptr) {
+      if (!shared_pipelines->get()) {
+        shared_pipelines->reset(new PipelineLibraryGLES(reactor_));
+      }
+      pipeline_library_ = *shared_pipelines;
+    } else {
+      pipeline_library_.reset(new PipelineLibraryGLES(reactor_));
+    }
+    FML_CHECK(pipeline_library_);
   }
 
   // Create allocators.

@@ -70,7 +70,9 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
 static std::vector<std::shared_ptr<fml::Mapping>>
 ShaderLibraryMappingsForPlayground(bool is_gles3);
 
-PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
+PlaygroundImplGLES::PlaygroundImplGLES(
+    PlaygroundSwitches switches,
+    std::shared_ptr<PipelineLibraryGLES>* shared_pipeline)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
       worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
@@ -142,9 +144,9 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
 #endif
   }
   bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
-  auto context_gles =
-      ContextGLES::Create(switches_.flags, std::move(gl),
-                          ShaderLibraryMappingsForPlayground(is_gles3), true);
+  auto context_gles = ContextGLES::Create(
+      switches_.flags, std::move(gl),
+      ShaderLibraryMappingsForPlayground(is_gles3), true, shared_pipeline);
   if (!context_gles) {
     FML_LOG(ERROR) << "Could not create context.";
     return;

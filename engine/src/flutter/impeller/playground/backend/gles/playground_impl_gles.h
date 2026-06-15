@@ -7,11 +7,15 @@
 
 #include "impeller/playground/playground_impl.h"
 
+#include "impeller/renderer/backend/gles/pipeline_library_gles.h"
+
 namespace impeller {
 
 class PlaygroundImplGLES final : public PlaygroundImpl {
  public:
-  explicit PlaygroundImplGLES(PlaygroundSwitches switches);
+  explicit PlaygroundImplGLES(
+      PlaygroundSwitches switches,
+      std::shared_ptr<PipelineLibraryGLES>* shared_pipeline = nullptr);
 
   ~PlaygroundImplGLES();
 
