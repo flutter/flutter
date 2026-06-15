@@ -90,8 +90,7 @@ fml::Status CommandQueueVK::Submit(
   // Submit will proceed, call callback with true when it is done and do not
   // call when `reset` is collected.
   auto fence_status = context->GetFenceWaiter()->AddFence(
-      std::move(fence), std::move(submit_callback),
-      std::move(fence_complete_callback));
+      std::move(fence), submit_callback, std::move(fence_complete_callback));
   if (!fence_status.ok()) {
     return fence_status;
   }

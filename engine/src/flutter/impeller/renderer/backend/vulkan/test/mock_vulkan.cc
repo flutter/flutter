@@ -33,7 +33,7 @@ struct MockCommandBuffer {
 
 class MockQueue {
  public:
-  MockQueue(MockDevice& device) : device_(device) {}
+  explicit MockQueue(MockDevice& device) : device_(device) {}
 
   MockDevice& device() const { return device_; }
 

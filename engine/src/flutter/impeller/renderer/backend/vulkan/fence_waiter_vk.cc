@@ -18,9 +18,9 @@ namespace impeller {
 class WaitSetEntry {
  public:
   static std::shared_ptr<WaitSetEntry> Create(vk::UniqueFence p_fence,
-                                              const fml::closure& p_callback) {
+                                              fml::closure p_callback) {
     return std::shared_ptr<WaitSetEntry>(
-        new WaitSetEntry(std::move(p_fence), p_callback));
+        new WaitSetEntry(std::move(p_fence), std::move(p_callback)));
   }
 
   void UpdateSignalledStatus(const vk::Device& device) {
@@ -39,9 +39,8 @@ class WaitSetEntry {
   fml::ScopedCleanupClosure callback_;
   bool is_signalled_ = false;
 
-  WaitSetEntry(vk::UniqueFence p_fence, const fml::closure& p_callback)
-      : fence_(std::move(p_fence)),
-        callback_(fml::ScopedCleanupClosure{p_callback}) {}
+  WaitSetEntry(vk::UniqueFence p_fence, fml::closure p_callback)
+      : fence_(std::move(p_fence)), callback_(std::move(p_callback)) {}
 
   WaitSetEntry(const WaitSetEntry&) = delete;
 
@@ -63,7 +62,7 @@ FenceWaiterVK::~FenceWaiterVK() {
 
 fml::Status FenceWaiterVK::AddFence(
     vk::UniqueFence fence,
-    std::function<fml::Status(vk::Fence)> submit_callback,
+    const std::function<fml::Status(vk::Fence)>& submit_callback,
     fml::closure completion_callback) {
   if (!fence || !submit_callback || !completion_callback) {
     return fml::Status(fml::StatusCode::kInvalidArgument, "Invalid arguments");
