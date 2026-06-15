@@ -251,7 +251,6 @@ $_simpleLoaderScript
     if (!window.\$dartReloadModifiedModules) {
       window.\$dartReloadModifiedModules = (function(filesToReload, appName) {
         return new Promise(function(resolve) {
-          let requestedScripts = [];
           function callback() {
             resolve(filesToReload);
           }
