@@ -166,6 +166,8 @@ dependency_overrides:
     path: ./third_party/pkg/googleapis/discoveryapis_commons
   _fe_analyzer_shared:
     path: ./third_party/dart/pkg/_fe_analyzer_shared
+  _js_interop_checks:
+    path: ./third_party/dart/pkg/_js_interop_checks
   analyzer:
     path: ./third_party/dart/pkg/analyzer
   archive:
@@ -178,10 +180,14 @@ dependency_overrides:
     path: ./third_party/dart/pkg/async_helper
   boolean_selector:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/boolean_selector
+  build_integration:
+    path: ./third_party/dart/pkg/build_integration
   cli_config:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/cli_config
   collection:
     path: ./third_party/dart/third_party/pkg/core/pkgs/collection
+  compiler:
+    path: ./third_party/dart/pkg/compiler
   convert:
     path: ./third_party/dart/third_party/pkg/core/pkgs/convert
   coverage:
@@ -190,6 +196,16 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   dart_mcp:
     path: ./third_party/ai/pkgs/dart_mcp
+  dart_runtime_service:
+    path: ./third_party/dart/pkg/dart_runtime_service
+  dart_runtime_service_vm:
+    path: ./third_party/dart/pkg/dart_runtime_service_vm
+  dart2js_info:
+    path: ./third_party/dart/pkg/dart2js_info
+  dart2wasm:
+    path: ./third_party/dart/pkg/dart2wasm
+  dev_compiler:
+    path: ./third_party/dart/pkg/dev_compiler
   equatable:
     path: ./third_party/pkg/equatable
   expect:
@@ -200,6 +216,10 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/native/pkgs/ffi
   fixnum:
     path: ./third_party/dart/third_party/pkg/core/pkgs/fixnum
+  front_end:
+    path: ./third_party/dart/pkg/front_end
+  frontend_server:
+    path: ./third_party/dart/pkg/frontend_server
   frontend_server_client:
     path: ./third_party/dart/third_party/pkg/webdev/frontend_server_client
   gcloud:
@@ -220,6 +240,12 @@ dependency_overrides:
     path: ./third_party/pkg/io
   js:
     path: ./third_party/dart/pkg/js
+  js_ast:
+    path: ./third_party/dart/pkg/js_ast
+  js_runtime:
+    path: ./third_party/dart/pkg/js_runtime
+  js_shared:
+    path: ./third_party/dart/pkg/js_shared
   json_rpc_2:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/json_rpc_2
   kernel:
@@ -260,6 +286,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/shelf/pkgs/shelf_static
   shelf_web_socket:
     path: ./third_party/dart/third_party/pkg/shelf/pkgs/shelf_web_socket
+  shell_arg_splitter:
+    path: ./third_party/dart/pkg/shell_arg_splitter
   sky_engine:
     path: ./sky/packages/sky_engine
   smith:
@@ -296,6 +324,8 @@ dependency_overrides:
     path: ./third_party/dart/pkg/vm_service_protos
   watcher:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/watcher
+  wasm_builder:
+    path: ./third_party/dart/pkg/wasm_builder
   web:
     path: ./third_party/dart/third_party/pkg/web/web
   web_socket:
