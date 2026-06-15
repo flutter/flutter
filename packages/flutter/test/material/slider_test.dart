@@ -5679,6 +5679,301 @@ void main() {
     );
     expect(tester.getSize(find.byType(Slider)), Size.zero);
   });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/184391
+  // Discrete Slider taps on tick marks must snap to the correct division.
+  //
+  // Tick marks are painted at `trackLeft + i/d * adjustedWidth + padding/2`
+  // (global coords) but tap detection previously used an unpadded formula,
+  // making lower-half tick taps snap to the wrong division.
+  //
+  // _PositionRecordingTickMarkShape records the actual painted centers so the
+  // tests can tap there without replicating the track-geometry math.
+  testWidgets(
+    'Discrete Slider tapping tick marks snaps to correct value (M2, LTR)',
+    (WidgetTester tester) async {
+      const divisions = 10;
+      double value = 0;
+      final tickPositions = <Offset>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: SliderTheme(
+            data: SliderThemeData(
+              tickMarkShape: _PositionRecordingTickMarkShape(tickPositions),
+            ),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Material(
+                  child: Center(
+                    child: Slider(
+                      max: 10,
+                      divisions: divisions,
+                      value: value,
+                      onChanged: (double v) => setState(() => value = v),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Snapshot the divisions+1 positions painted on the first frame.
+      // (Further pumps after taps add more entries; we ignore those.)
+      final List<Offset> tickCenters = tickPositions.take(divisions + 1).toList();
+      expect(tickCenters.length, equals(divisions + 1));
+
+      // tickCenters[i] is the painted center of the tick at value i.
+      // Ticks 1–5 are the lower-half regression cases.
+      for (var i = 1; i <= divisions; i++) {
+        await tester.tapAt(tickCenters[i]);
+        await tester.pump();
+        expect(
+          value,
+          equals(i.toDouble()),
+          reason: 'Tapping tick $i should snap to $i, got $value',
+        );
+      }
+    },
+  );
+
+  testWidgets(
+    'Discrete Slider tapping tick marks snaps to correct value (M3, LTR)',
+    (WidgetTester tester) async {
+      // M3 uses GappedSliderTrackShape (isRounded=true, trackHeight=16),
+      // making the coordinate mismatch ~4× larger than M2.
+      const divisions = 10;
+      double value = 0;
+      final tickPositions = <Offset>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: SliderTheme(
+            data: SliderThemeData(
+              tickMarkShape: _PositionRecordingTickMarkShape(tickPositions),
+            ),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Material(
+                  child: Center(
+                    child: Slider(
+                      max: 10,
+                      divisions: divisions,
+                      value: value,
+                      onChanged: (double v) => setState(() => value = v),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final List<Offset> tickCenters = tickPositions.take(divisions + 1).toList();
+      expect(tickCenters.length, equals(divisions + 1));
+
+      for (var i = 1; i <= divisions; i++) {
+        await tester.tapAt(tickCenters[i]);
+        await tester.pump();
+        expect(
+          value,
+          equals(i.toDouble()),
+          reason: 'Tapping tick $i (M3) should snap to $i, got $value',
+        );
+      }
+    },
+  );
+
+  testWidgets(
+    'Discrete Slider tapping tick marks snaps to correct value (RTL)',
+    (WidgetTester tester) async {
+      const divisions = 10;
+      double value = 0;
+      final tickPositions = <Offset>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: SliderTheme(
+              data: SliderThemeData(
+                tickMarkShape: _PositionRecordingTickMarkShape(tickPositions),
+              ),
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Material(
+                    child: Center(
+                      child: Slider(
+                        max: 10,
+                        divisions: divisions,
+                        value: value,
+                        onChanged: (double v) => setState(() => value = v),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final List<Offset> tickCenters = tickPositions.take(divisions + 1).toList();
+      expect(tickCenters.length, equals(divisions + 1));
+
+      // The paint loop iterates i=0..d left-to-right in pixel space regardless
+      // of text direction, so tickCenters[i] is at visual position i/d from
+      // the left. In RTL, visual position i/d = value (divisions - i), so to
+      // tap at value v we tap tickCenters[divisions - v].
+      for (var i = 1; i <= divisions; i++) {
+        await tester.tapAt(tickCenters[divisions - i]);
+        await tester.pump();
+        expect(
+          value,
+          equals(i.toDouble()),
+          reason: 'RTL: tapping pixel index ${divisions - i} should snap to $i, got $value',
+        );
+      }
+    },
+  );
+
+  testWidgets(
+    'Discrete Slider tap then drag stays in consistent coordinate space',
+    (WidgetTester tester) async {
+      // The drag-delta normalizer must use the same effective width as
+      // _getValueFromGlobalPosition to avoid a value jump on tap-then-drag.
+      const divisions = 10;
+      double value = 0;
+      final tickPositions = <Offset>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: SliderTheme(
+            data: SliderThemeData(
+              tickMarkShape: _PositionRecordingTickMarkShape(tickPositions),
+            ),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Material(
+                  child: Center(
+                    child: Slider(
+                      max: 10,
+                      divisions: divisions,
+                      value: value,
+                      onChanged: (double v) => setState(() => value = v),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final List<Offset> tickCenters = tickPositions.take(divisions + 1).toList();
+
+      // Tap tick 2.
+      await tester.tapAt(tickCenters[2]);
+      await tester.pump();
+      expect(value, equals(2.0));
+
+      // Drag exactly one tick-width to the right — should land on tick 3.
+      final double tickWidth = tickCenters[3].dx - tickCenters[2].dx;
+      final TestGesture gesture = await tester.startGesture(tickCenters[2]);
+      await gesture.moveBy(Offset(tickWidth, 0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(
+        value,
+        equals(3.0),
+        reason: 'Dragging one tick-width should advance exactly one division',
+      );
+    },
+  );
+
+  testWidgets(
+    'Discrete Slider _discretize does not under-round at IEEE 754 midpoints',
+    (WidgetTester tester) async {
+      // 0.35 * 10 = 3.4999...9 in IEEE 754, which .round() returns 3 instead
+      // of 4. Tapping at the exact pixel midpoint between ticks 3 and 4 should
+      // produce value 4 with the epsilon guard in _discretize.
+      const divisions = 10;
+      double value = 0;
+      final tickPositions = <Offset>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: SliderTheme(
+            data: SliderThemeData(
+              tickMarkShape: _PositionRecordingTickMarkShape(tickPositions),
+            ),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Material(
+                  child: Center(
+                    child: Slider(
+                      max: 10,
+                      divisions: divisions,
+                      value: value,
+                      onChanged: (double v) => setState(() => value = v),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final List<Offset> tickCenters = tickPositions.take(divisions + 1).toList();
+
+      // Pixel midpoint between ticks 3 and 4 → normalised value ≈ 0.35.
+      final midpoint = Offset(
+        (tickCenters[3].dx + tickCenters[4].dx) / 2,
+        tickCenters[3].dy,
+      );
+      await tester.tapAt(midpoint);
+      await tester.pump();
+      expect(value, equals(4.0));
+    },
+  );
+}
+
+/// Records the global center of each tick mark as it is painted.
+/// Used in regression tests for https://github.com/flutter/flutter/issues/184391
+/// to obtain actual tick pixel positions without replicating track-geometry math.
+class _PositionRecordingTickMarkShape extends SliderTickMarkShape {
+  _PositionRecordingTickMarkShape(this.positions);
+
+  final List<Offset> positions;
+
+  @override
+  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
+    return Size.zero;
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required Offset thumbCenter,
+    required bool isEnabled,
+    required TextDirection textDirection,
+  }) {
+    positions.add(center);
+  }
 }
 
 // A slider value indicator that's a circle with a fixed size and
