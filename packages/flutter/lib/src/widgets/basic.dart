@@ -6435,9 +6435,14 @@ class Flow extends MultiChildRenderObjectWidget {
 /// subtree of a [SelectionArea] or [SelectableRegion] and a
 /// [SelectionRegistrar] needs to be assigned to the
 /// [RichText.selectionRegistrar]. One can use
-/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a
-/// context. This enables users to select the text in [RichText]s with mice or
-/// touch events.
+/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a context
+/// that is below the [SelectionArea] or [SelectableRegion] in the widget tree.
+/// This enables users to select the text in [RichText]s with mice or touch
+/// events.
+///
+/// If the same build method creates both the [SelectionArea] and the
+/// [RichText], use a [Builder] so that [SelectionContainer.maybeOf] is called
+/// with a [BuildContext] below the [SelectionArea] in the widget tree.
 ///
 /// The [selectionColor] also needs to be set if the selection is enabled to
 /// draw the selection highlights.
@@ -6450,10 +6455,16 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
 ///
 /// ```dart
-/// RichText(
-///   text: const TextSpan(text: 'Hello'),
-///   selectionRegistrar: SelectionContainer.maybeOf(context),
-///   selectionColor: const Color(0xAF6694e8),
+/// SelectionArea(
+///   child: Builder(
+///     builder: (BuildContext context) {
+///       return RichText(
+///         text: const TextSpan(text: 'Hello'),
+///         selectionRegistrar: SelectionContainer.maybeOf(context),
+///         selectionColor: const Color(0xAF6694e8),
+///       );
+///     },
+///   ),
 /// )
 /// ```
 /// {@end-tool}
