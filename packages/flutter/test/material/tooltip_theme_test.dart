@@ -18,10 +18,74 @@ void main() {
     expect(const TooltipThemeData().hashCode, const TooltipThemeData().copyWith().hashCode);
   });
 
+  test('TooltipThemeData copyWith overrides exitDuration', () {
+    const Duration duration = Duration(seconds: 3);
+    final TooltipThemeData theme = const TooltipThemeData().copyWith(exitDuration: duration);
+    expect(theme.exitDuration, duration);
+  });
+
+  test('TooltipThemeData copyWith preserves exitDuration when not overridden', () {
+    const Duration duration = Duration(seconds: 3);
+    const TooltipThemeData original = TooltipThemeData(exitDuration: duration);
+    expect(original.copyWith().exitDuration, duration);
+  });
+
   test('TooltipThemeData lerp special cases', () {
     expect(TooltipThemeData.lerp(null, null, 0), null);
     const data = TooltipThemeData();
     expect(identical(TooltipThemeData.lerp(data, data, 0.5), data), true);
+  });
+
+  test('TooltipThemeData lerp interpolates timing and behavior properties', () {
+    const Duration shortDuration = Duration(milliseconds: 100);
+    const Duration longDuration = Duration(milliseconds: 500);
+    const TooltipThemeData themeA = TooltipThemeData(
+      waitDuration: shortDuration,
+      showDuration: shortDuration,
+      exitDuration: shortDuration,
+      triggerMode: TooltipTriggerMode.tap,
+      enableFeedback: false,
+    );
+    const TooltipThemeData themeB = TooltipThemeData(
+      waitDuration: longDuration,
+      showDuration: longDuration,
+      exitDuration: longDuration,
+      triggerMode: TooltipTriggerMode.longPress,
+      enableFeedback: true,
+    );
+
+    final TooltipThemeData lerp0 = TooltipThemeData.lerp(themeA, themeB, 0.25)!;
+    expect(lerp0.waitDuration, shortDuration);
+    expect(lerp0.showDuration, shortDuration);
+    expect(lerp0.exitDuration, shortDuration);
+    expect(lerp0.triggerMode, TooltipTriggerMode.tap);
+    expect(lerp0.enableFeedback, false);
+
+    final TooltipThemeData lerp1 = TooltipThemeData.lerp(themeA, themeB, 0.75)!;
+    expect(lerp1.waitDuration, longDuration);
+    expect(lerp1.showDuration, longDuration);
+    expect(lerp1.exitDuration, longDuration);
+    expect(lerp1.triggerMode, TooltipTriggerMode.longPress);
+    expect(lerp1.enableFeedback, true);
+  });
+
+  test('TooltipThemeData lerp handles null timing and behavior properties', () {
+    const TooltipThemeData themeA = TooltipThemeData(
+      waitDuration: Duration(milliseconds: 100),
+      triggerMode: TooltipTriggerMode.tap,
+      enableFeedback: true,
+    );
+    const TooltipThemeData themeB = TooltipThemeData();
+
+    final TooltipThemeData lerp0 = TooltipThemeData.lerp(themeA, themeB, 0.25)!;
+    expect(lerp0.waitDuration, const Duration(milliseconds: 100));
+    expect(lerp0.triggerMode, TooltipTriggerMode.tap);
+    expect(lerp0.enableFeedback, true);
+
+    final TooltipThemeData lerp1 = TooltipThemeData.lerp(themeA, themeB, 0.75)!;
+    expect(lerp1.waitDuration, isNull);
+    expect(lerp1.triggerMode, isNull);
+    expect(lerp1.enableFeedback, isNull);
   });
 
   test('TooltipThemeData defaults', () {
