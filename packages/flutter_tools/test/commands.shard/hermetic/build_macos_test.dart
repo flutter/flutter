@@ -133,7 +133,11 @@ void main() {
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
   }) {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final String xcodeWorkspacePath = fileSystem.path.join(
+      fileSystem.currentDirectory.path,
+      'macos',
+      'Runner.xcworkspace',
+    );
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     final destination = configuration == 'Debug'
         ? 'platform=macOS,arch=$hostPlatformArch'
@@ -144,7 +148,7 @@ void main() {
         'xcrun',
         'xcodebuild',
         '-workspace',
-        flutterProject.macos.xcodeWorkspace!.path,
+        xcodeWorkspacePath,
         '-configuration',
         configuration,
         '-scheme',

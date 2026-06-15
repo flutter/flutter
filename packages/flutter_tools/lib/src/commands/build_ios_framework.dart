@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -40,11 +41,12 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Platform? platform,
     required this.codesign,
     required super.logger,
-    this.xcode,
+    Xcode? xcode,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
        _injectedCache = cache,
        _injectedPlatform = platform,
+       _injectedXcode = xcode,
        super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -111,7 +113,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   }
   final DarwinAddToAppCodesigning codesign;
 
-  final Xcode? xcode;
+  final Xcode? _injectedXcode;
+  Xcode? get xcode => _injectedXcode ?? context.get<Xcode>();
 
   final BuildSystem? _buildSystem;
   @protected

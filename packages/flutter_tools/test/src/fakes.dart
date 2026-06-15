@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -921,13 +923,49 @@ class FakeProcessUtils extends Fake implements ProcessUtils {}
 class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
 
 class FakeXcode extends Fake implements Xcode {
-  FakeXcode({this.currentVersion = const Version.withText(15, 0, 0, '15.0.0')});
+  FakeXcode({Version? currentVersion, this.isRequiredVersionSatisfactory = true})
+    : _currentVersion = currentVersion;
+
+  final Version? _currentVersion;
 
   @override
-  final Version? currentVersion;
+  Version? get currentVersion {
+    if (_currentVersion != null) {
+      return _currentVersion;
+    }
+    try {
+      final Version? version = context.get<XcodeProjectInterpreter>()?.version;
+      if (version != null) {
+        return version;
+      }
+    } on StateError catch (_) {}
+    return const Version.withText(15, 0, 0, '15.0.0');
+  }
+
+  @override
+  final bool isRequiredVersionSatisfactory;
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject project,
+    Directory buildDirectory, {
+    bool skipPackageUpdatesAndValidation = false,
+  }) async {
+    try {
+      final XcodeProjectInterpreter? interpreter = context.get<XcodeProjectInterpreter>();
+      if (interpreter != null) {
+        return await interpreter.fetchDependenciesAndGenerateXcodebuildArgs(
+          project,
+          buildDirectory,
+          skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+        );
+      }
+    } on StateError catch (_) {}
+    return <String>['xcrun', 'xcodebuild'];
+  }
 }
 
 class FakeArtifacts extends Fake implements Artifacts {}
