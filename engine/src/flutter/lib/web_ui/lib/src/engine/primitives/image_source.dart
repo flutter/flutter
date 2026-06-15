@@ -247,6 +247,23 @@ void _bgrToRawRgba(ByteBuffer pixels) {
   }
 }
 
+/// Mutates the [pixels] in-place, converting them from premultiplied alpha
+/// RGBA layout to straight/unpremultiplied RGBA layout.
+void unpremultiplyRawRgba(Uint8List pixels) {
+  for (var i = 0; i < pixels.length; i += 4) {
+    final int a = pixels[i + 3];
+    if (a == 0) {
+      pixels[i] = 0;
+      pixels[i + 1] = 0;
+      pixels[i + 2] = 0;
+    } else if (a < 255) {
+      pixels[i] = ((pixels[i] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
+      pixels[i + 1] = ((pixels[i + 1] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
+      pixels[i + 2] = ((pixels[i + 2] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
+    }
+  }
+}
+
 /// Determines if the pixels of a video frame can be read without conversion.
 bool _shouldReadPixelsUnmodified(VideoFrame videoFrame, ui.ImageByteFormat format) {
   if (format == ui.ImageByteFormat.rawUnmodified) {
