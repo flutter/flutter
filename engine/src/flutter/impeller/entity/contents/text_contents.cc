@@ -75,9 +75,7 @@ void TextContents::SetForceTextColor(bool value) {
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  const Matrix entity_offset_transform =
-      entity.GetTransform() * Matrix::MakeTranslation(position_);
-  return frame_->GetBounds().TransformBounds(entity_offset_transform);
+  return frame_->GetBounds().TransformBounds(entity.GetTransform());
 }
 
 void TextContents::SetTextProperties(
@@ -110,7 +108,7 @@ Scalar AttractToOne(Scalar x) {
 }  // namespace
 
 void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
-                                     const Matrix& entity_transform,
+                                     const Matrix& entity_offset_transform,
                                      const std::shared_ptr<TextFrame>& frame,
                                      Point position,
                                      const Matrix& screen_transform,
@@ -125,9 +123,6 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
 
   constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
                                                 Point{0, 1}, Point{1, 1}};
-
-  Matrix entity_offset_transform =
-      entity_transform * Matrix::MakeTranslation(position);
 
   ISize atlas_size = atlas->GetTexture()->GetSize();
   bool is_translation_scale = entity_offset_transform.IsTranslationScaleOnly();
