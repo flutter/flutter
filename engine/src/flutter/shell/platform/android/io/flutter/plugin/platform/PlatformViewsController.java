@@ -1232,26 +1232,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
 
     final FlutterMutatorView parentView = platformViewParent.get(viewId);
-    parentView.readyToDisplay(mutatorsStack, x, y, width, height, viewWidth, viewHeight);
+    parentView.readyToDisplay(mutatorsStack, x, y, width, height);
     parentView.setVisibility(View.VISIBLE);
     parentView.bringToFront();
-
-    Log.e(
-        "PlatformViewsController",
-        "onDisplayPlatformView: viewId="
-            + viewId
-            + " x="
-            + x
-            + " y="
-            + y
-            + " width="
-            + width
-            + " height="
-            + height
-            + " viewWidth="
-            + viewWidth
-            + " viewHeight="
-            + viewHeight);
 
     final FrameLayout.LayoutParams layoutParams =
         new FrameLayout.LayoutParams(viewWidth, viewHeight);
