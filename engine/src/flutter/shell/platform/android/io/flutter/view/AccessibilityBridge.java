@@ -126,6 +126,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // Font weight adjustment for bold text. FontWeight.Bold - FontWeight.Normal = w700 - w400 = 300.
   private static final int BOLD_TEXT_WEIGHT_ADJUSTMENT = 300;
 
+  private static final Role[] ROLE_VALUES = Role.values();
+
   // Default transition animation scale (animations enabled)
   private static final float DEFAULT_TRANSITION_ANIMATION_SCALE = 1.0f;
 
@@ -678,7 +680,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     accessibilityChannel.setAccessibilityFeatures(accessibilityFeatureFlags);
   }
 
-  public boolean shouldSetCollectionInfo(final SemanticsNode semanticsNode) {
+  boolean shouldSetCollectionInfo(final SemanticsNode semanticsNode) {
     // TalkBack expects a number of rows and/or columns greater than 0 to announce
     // in list and out of list.  For an infinite or growing list, you have to
     // specify something > 0 to get "in list" announcements.
@@ -696,7 +698,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
   }
 
-  public boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
+  boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
     return semanticsNode.parent != null
         && shouldSetCollectionInfo(semanticsNode.parent)
         && semanticsNode.parent.hasFlag(Flag.HAS_IMPLICIT_SCROLLING);
@@ -858,7 +860,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     result.setPackageName(rootAccessibilityView.getContext().getPackageName());
     result.setClassName("android.view.View");
     result.setSource(rootAccessibilityView, virtualViewId);
-    Role role = Role.values()[semanticsNode.role];
+    Role role = ROLE_VALUES[semanticsNode.role];
     AccessibilityNodeConfigurator roleConfigurator = RoleConfiguratorFactory.getConfigurator(role);
     roleConfigurator.configure(result, semanticsNode);
 
