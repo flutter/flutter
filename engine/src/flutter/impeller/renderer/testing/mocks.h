@@ -251,7 +251,9 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(bool, SupportsTriangleFan, (), (const override));
   MOCK_METHOD(bool, SupportsPrimitiveRestart, (), (const override));
   MOCK_METHOD(bool, Supports32BitPrimitiveIndices, (), (const override));
+  MOCK_METHOD(bool, SupportsManuallyMippedTextures, (), (const override));
   MOCK_METHOD(bool, SupportsExtendedRangeFormats, (), (const override));
+  MOCK_METHOD(bool, SupportsFramebufferRenderMipmap, (), (const override));
   MOCK_METHOD(bool,
               SupportsTextureCompression,
               (CompressedTextureFamily),

@@ -45,7 +45,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
     skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -62,7 +62,7 @@ class CkCanvas implements LayerCanvas {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
     skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -120,11 +120,16 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
     assert(offsetIsValid(offset));
+    assert(
+      image is EngineImage && image.backendImage is CkImageDelegate,
+      'The image being drawn must be a CanvasKit image.',
+    );
     final ui.FilterQuality filterQuality = paint.filterQuality;
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
+
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageCubic(
-        (image as CkImage).skImage,
+        ((image as EngineImage).backendImage as CkImageDelegate).skImage,
         offset.dx,
         offset.dy,
         _kMitchellNetravali_B,
@@ -133,7 +138,7 @@ class CkCanvas implements LayerCanvas {
       );
     } else {
       skCanvas.drawImageOptions(
-        (image as CkImage).skImage,
+        ((image as EngineImage).backendImage as CkImageDelegate).skImage,
         offset.dx,
         offset.dy,
         toSkFilterMode(filterQuality),
@@ -148,12 +153,17 @@ class CkCanvas implements LayerCanvas {
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
+    assert(
+      image is EngineImage && image.backendImage is CkImageDelegate,
+      'The image being drawn must be a CanvasKit image.',
+    );
 
     final ui.FilterQuality filterQuality = paint.filterQuality;
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
+
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageRectCubic(
-        (image as CkImage).skImage,
+        ((image as EngineImage).backendImage as CkImageDelegate).skImage,
         toSkRect(src),
         toSkRect(dst),
         _kMitchellNetravali_B,
@@ -162,7 +172,7 @@ class CkCanvas implements LayerCanvas {
       );
     } else {
       skCanvas.drawImageRectOptions(
-        (image as CkImage).skImage,
+        ((image as EngineImage).backendImage as CkImageDelegate).skImage,
         toSkRect(src),
         toSkRect(dst),
         toSkFilterMode(filterQuality),
@@ -177,9 +187,13 @@ class CkCanvas implements LayerCanvas {
   void drawImageNine(ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
     assert(rectIsValid(center));
     assert(rectIsValid(dst));
+    assert(
+      image is EngineImage && image.backendImage is CkImageDelegate,
+      'The image being drawn must be a CanvasKit image.',
+    );
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
     skCanvas.drawImageNine(
-      (image as CkImage).skImage,
+      ((image as EngineImage).backendImage as CkImageDelegate).skImage,
       toSkRect(center),
       toSkRect(dst),
       toSkFilterMode(paint.filterQuality),
@@ -227,7 +241,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     final SkPaint skPaint = (paint as CkPaint).toSkPaint();
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    skCanvas.drawPath(((path as EnginePath).backendPath as CkPath).skiaObject, skPaint);
     skPaint.delete();
   }
 
@@ -269,7 +283,7 @@ class CkCanvas implements LayerCanvas {
     final SkPaint skPaint = (paint as CkPaint).toSkPaint();
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    skCanvas.drawPath(((path as EnginePath).backendPath as CkPath).skiaObject, skPaint);
     translate(-offset.dx, -offset.dy);
     skPaint.delete();
   }
@@ -286,7 +300,7 @@ class CkCanvas implements LayerCanvas {
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
     drawSkShadow(
       skCanvas,
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
       color,
       elevation,
       transparentOccluder,
@@ -427,6 +441,10 @@ class CkCanvas implements LayerCanvas {
     ui.Paint paint,
   ) {
     assert(colors == null || colors.isEmpty || blendMode != null);
+    assert(
+      atlas is EngineImage && atlas.backendImage is CkImageDelegate,
+      'The atlas image must be a CanvasKit image.',
+    );
 
     final int rectCount = rects.length;
     if (transforms.length != rectCount) {
@@ -465,7 +483,7 @@ class CkCanvas implements LayerCanvas {
 
     _drawAtlas(
       paint as CkPaint,
-      atlas as CkImage,
+      (atlas as EngineImage).backendImage as CkImageDelegate,
       rstTransformBuffer,
       rectBuffer,
       colorBuffer,
@@ -484,6 +502,10 @@ class CkCanvas implements LayerCanvas {
     ui.Paint paint,
   ) {
     assert(colors == null || blendMode != null);
+    assert(
+      atlas is EngineImage && atlas.backendImage is CkImageDelegate,
+      'The atlas image must be a CanvasKit image.',
+    );
 
     final int rectCount = rects.length;
     if (rstTransforms.length != rectCount) {
@@ -505,7 +527,7 @@ class CkCanvas implements LayerCanvas {
 
     _drawAtlas(
       paint as CkPaint,
-      atlas as CkImage,
+      (atlas as EngineImage).backendImage as CkImageDelegate,
       rstTransforms,
       rects,
       unsignedColors,
@@ -516,7 +538,7 @@ class CkCanvas implements LayerCanvas {
   // TODO(flar): CanvasKit does not expose sampling options available on SkCanvas.drawAtlas
   void _drawAtlas(
     CkPaint paint,
-    CkImage atlas,
+    CkImageDelegate atlas,
     Float32List rstTransforms,
     Float32List rects,
     Uint32List? colors,

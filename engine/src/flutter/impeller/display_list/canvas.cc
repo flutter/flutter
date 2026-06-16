@@ -2057,7 +2057,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   text_contents->SetColor(paint.color);
   text_contents->SetTextProperties(paint.color, paint.GetStroke());
 
-  entity.SetTransform(GetCurrentTransform());
+  entity.SetTransform(GetCurrentTransform().Translate(position));
 
   if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
                                      paint)) {
