@@ -1725,29 +1725,8 @@ TEST_F(FlutterWindowsEngineTest, OnViewFocusChangeRequest) {
 
   FlutterViewFocusChangeRequest request;
   request.view_id = kImplicitViewId;
-  request.state = kFocused;
 
   EXPECT_CALL(view, Focus()).WillOnce(Return(true));
-  modifier.OnViewFocusChangeRequest(&request);
-}
-
-TEST_F(FlutterWindowsEngineTest, OnViewFocusChangeRequestIgnoresUnfocus) {
-  FlutterWindowsEngineBuilder builder{GetContext()};
-  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
-  auto window_binding_handler =
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
-  MockFlutterWindowsView view(engine.get(), std::move(window_binding_handler));
-
-  EngineModifier modifier(engine.get());
-  modifier.SetImplicitView(&view);
-
-  FlutterViewFocusChangeRequest request;
-  request.view_id = kImplicitViewId;
-  request.state = kUnfocused;
-
-  // An unfocus request must not move native focus, which would otherwise
-  // activate the view's window via SetFocus.
-  EXPECT_CALL(view, Focus()).Times(0);
   modifier.OnViewFocusChangeRequest(&request);
 }
 

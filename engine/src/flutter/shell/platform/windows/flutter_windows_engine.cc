@@ -1145,12 +1145,6 @@ void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
 
 void FlutterWindowsEngine::OnViewFocusChangeRequest(
     const FlutterViewFocusChangeRequest* request) {
-  // Only focus requests move native focus; an unfocus request must not call
-  // SetFocus on the view, as that would activate its window.
-  if (request->state != kFocused) {
-    return;
-  }
-
   std::shared_lock read_lock(views_mutex_);
 
   auto iterator = views_.find(request->view_id);
