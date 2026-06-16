@@ -1357,13 +1357,14 @@ class ManifestAssetBundle implements AssetBundle {
     // bundle files from outside the package on the build machine, which the consuming app never
     // declared. (The absolute-path check above is preserved for all assets.)
     if (packageName != null) {
+      final String assetPath = assetUri.toFilePath(windows: _platform.isWindows);
       final String base = _fileSystem.path.canonicalize(assetsBaseDir);
       final String resolved = _fileSystem.path.canonicalize(
-        _fileSystem.path.join(assetsBaseDir, assetUri.toFilePath(windows: _platform.isWindows)),
+        _fileSystem.path.join(assetsBaseDir, assetPath),
       );
       if (base != resolved && !_fileSystem.path.isWithin(base, resolved)) {
         throwToolExit(
-          'Asset path "${assetUri.toFilePath(windows: _platform.isWindows)}" of package '
+          'Asset path "$assetPath" of package '
           '"$packageName" resolves to a location outside the package directory. Package asset '
           'paths must stay within the package.',
         );
