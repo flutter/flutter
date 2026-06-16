@@ -1037,7 +1037,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           error                                   // error (out)
           )) {
     // Error is populated by call to startup.
-    FML_DLOG(ERROR) << *error;
+    FML_LOG(ERROR) << "DartServiceIsolate::Startup failed: " << *error;
     return nullptr;
   }
 
