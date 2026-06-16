@@ -330,9 +330,10 @@ class EmbeddedViewParams {
     // interior pixels is applied to the box edges, so the view's outer limits
     // follow the surrounding stretched content. ApplyOverscrollStretch is a
     // no-op when no stretch mutator is present.
-    final_bounding_rect_ = ApplyOverscrollStretch(
-        DlRect::MakeSize(size_points).TransformAndClipBounds(matrix),
-        mutators_stack_);
+    natural_bounding_rect_ =
+        DlRect::MakeSize(size_points).TransformAndClipBounds(matrix);
+    final_bounding_rect_ =
+        ApplyOverscrollStretch(natural_bounding_rect_, mutators_stack_);
   }
 
   // The transformation Matrix corresponding to the sum of all the
@@ -347,7 +348,18 @@ class EmbeddedViewParams {
   // The bounding rect of the platform view after applying all the mutations.
   //
   // Clippings are ignored.
+  //
+  // NOTE: when an overscroll stretch is present this is the *stretched* box
+  // (moved/grown to follow the stretch). It is the region the platform view's
+  // Android view occupies on screen. For slicing/overlap against Flutter content
+  // -- which is recorded in pre-stretch coordinates -- use naturalBoundingRect().
   const DlRect& finalBoundingRect() const { return final_bounding_rect_; }
+
+  // The bounding rect of the platform view in pre-stretch (natural) coordinates,
+  // i.e. before any overscroll stretch is applied. This is the same coordinate
+  // space the Flutter content slices are recorded in, so it is what the embedder
+  // must use when computing which Flutter content overlaps the platform view.
+  const DlRect& naturalBoundingRect() const { return natural_bounding_rect_; }
 
   // Pushes the stored DlImageFilter object to the mutators stack.
   //
@@ -392,6 +404,7 @@ class EmbeddedViewParams {
   DlSize size_points_;
   MutatorsStack mutators_stack_;
   DlRect final_bounding_rect_;
+  DlRect natural_bounding_rect_;
 };
 
 enum class PostPrerollResult {
