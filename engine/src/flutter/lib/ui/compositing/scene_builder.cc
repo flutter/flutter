@@ -191,8 +191,10 @@ void SceneBuilder::pushOverscrollStretch(
     const fml::RefPtr<EngineLayer>& old_layer) {
   auto layer = std::make_shared<flutter::OverscrollStretchLayer>(
       image_filter->filter(DlTileMode::kDecal), x_stretch, y_stretch,
-      DlRect::MakeLTRB(viewport_left, viewport_top, viewport_right,
-                       viewport_bottom));
+      DlRect::MakeLTRB(static_cast<DlScalar>(viewport_left),
+                       static_cast<DlScalar>(viewport_top),
+                       static_cast<DlScalar>(viewport_right),
+                       static_cast<DlScalar>(viewport_bottom)));
   PushLayer(layer);
   EngineLayer::MakeRetained(layer_handle, layer);
 
