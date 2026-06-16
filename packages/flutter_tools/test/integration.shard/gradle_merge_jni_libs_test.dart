@@ -18,12 +18,47 @@ void main() {
 
   setUp(() async {
     Cache.flutterRoot = getFlutterRoot();
-    tempDir = createResolvedTempDirectorySync('flutter_gradle_jni_test.');
+    tempDir = createResolvedTempDirectorySync('gradle_merge_jni_libs_test.');
   });
 
   tearDown(() async {
     tryToDelete(tempDir);
   });
+
+  String getTestFileString(String probe) {
+    return '''
+         import 'package:flutter/material.dart';
+
+         void main() {
+           print('$probe');
+           runApp(const MyApp());
+         }
+
+         class MyApp extends StatelessWidget {
+           const MyApp({super.key});
+
+           @override
+           Widget build(BuildContext context) {
+             return const MaterialApp(
+               home: Scaffold(
+                 body: Center(
+                   child: Text('Hello World'),
+                 ),
+               ),
+             );
+           }
+         }
+         ''';
+  }
+
+  ArchiveFile? getLibAppFile(File apkFile) {
+    List<int> apkBytes = apkFile.readAsBytesSync();
+    Archive archive = ZipDecoder().decodeBytes(apkBytes);
+    return
+        archive.findFile('lib/arm64-v8a/libapp.so') ??
+        archive.findFile('lib/armeabi-v7a/libapp.so') ??
+        archive.findFile('lib/x86_64/libapp.so');
+  }
 
   // Reproduction test for https://github.com/flutter/flutter/issues/187553
   testWithoutContext('mergeJniLibFolders runs when Dart AOT source changes with flavors', () async {
@@ -59,32 +94,12 @@ android {
     }''');
     buildGradleFile.writeAsStringSync(buildGradleContents);
 
+    const PROBE_A = 'probe-AAAA';
+    const PROBE_B = 'probe-BBBB';
     // 3. Configure main.dart with probe-AAAA.
     final File mainDartFile = projectDir.childDirectory('lib').childFile('main.dart');
     expect(mainDartFile, exists);
-    mainDartFile.writeAsStringSync('''
-import 'package:flutter/material.dart';
-
-void main() {
-  print('probe-AAAA');
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World'),
-        ),
-      ),
-    );
-  }
-}
-''');
+    mainDartFile.writeAsStringSync(getTestFileString(PROBE_A));
 
     // 4. Build APK with flavor prod (Build 1).
     final ProcessResult build1Result = processManager.runSync(<String>[
@@ -104,41 +119,14 @@ class MyApp extends StatelessWidget {
         .childFile('app-prod-release.apk');
     expect(apkFile, exists);
 
-    List<int> apkBytes = apkFile.readAsBytesSync();
-    Archive archive = ZipDecoder().decodeBytes(apkBytes);
-    ArchiveFile? libappFile =
-        archive.findFile('lib/arm64-v8a/libapp.so') ??
-        archive.findFile('lib/armeabi-v7a/libapp.so') ??
-        archive.findFile('lib/x86_64/libapp.so');
+    ArchiveFile? libappFile = getLibAppFile(apkFile);
     expect(libappFile, isNotNull);
     String libappContent = latin1.decode(libappFile!.content as List<int>, allowInvalid: true);
-    expect(libappContent.contains('probe-AAAA'), isTrue);
-    expect(libappContent.contains('probe-BBBB'), isFalse);
+    expect(libappContent.contains(PROBE_A), isTrue);
+    expect(libappContent.contains(PROBE_B), isFalse);
 
     // 5. Change main.dart to probe-BBBB.
-    mainDartFile.writeAsStringSync('''
-import 'package:flutter/material.dart';
-
-void main() {
-  print('probe-BBBB');
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World'),
-        ),
-      ),
-    );
-  }
-}
-''');
+    mainDartFile.writeAsStringSync(getTestFileString(PROBE_B));
 
     // 6. Build APK with flavor prod (Build 2 - incremental).
     final ProcessResult build2Result = processManager.runSync(<String>[
@@ -153,12 +141,7 @@ class MyApp extends StatelessWidget {
     expect(build2Result, const ProcessResultMatcher());
 
     // Verify APK contains probe-BBBB and NOT probe-AAAA.
-    apkBytes = apkFile.readAsBytesSync();
-    archive = ZipDecoder().decodeBytes(apkBytes);
-    libappFile =
-        archive.findFile('lib/arm64-v8a/libapp.so') ??
-        archive.findFile('lib/armeabi-v7a/libapp.so') ??
-        archive.findFile('lib/x86_64/libapp.so');
+    libappFile = getLibAppFile(apkFile);
     expect(libappFile, isNotNull);
     libappContent = latin1.decode(libappFile!.content as List<int>, allowInvalid: true);
     expect(libappContent.contains('probe-BBBB'), isTrue);
