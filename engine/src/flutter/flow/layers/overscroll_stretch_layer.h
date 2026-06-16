@@ -14,6 +14,7 @@ class OverscrollStretchLayer : public ImageFilterLayer {
   explicit OverscrollStretchLayer(const std::shared_ptr<DlImageFilter>& filter,
                                   double x_stretch,
                                   double y_stretch,
+                                  const DlRect& viewport_rect,
                                   const DlPoint& offset = DlPoint());
 
   void Preroll(PrerollContext* context) override;
@@ -21,6 +22,9 @@ class OverscrollStretchLayer : public ImageFilterLayer {
  private:
   double x_stretch_;
   double y_stretch_;
+  // The stretch viewport (this layer's bounds) in the layer's local/paint
+  // space. Transformed to screen space at Preroll, where the CTM is known.
+  DlRect viewport_rect_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(OverscrollStretchLayer);
 };

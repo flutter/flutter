@@ -1103,7 +1103,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_mutators_stack_push_overscroll_stretch_method = env->GetMethodID(
-      g_mutators_stack_class->obj(), "pushOverscrollStretch", "(FF)V");
+      g_mutators_stack_class->obj(), "pushOverscrollStretch", "(FFFFFF)V");
   if (g_mutators_stack_push_overscroll_stretch_method == nullptr) {
     FML_LOG(ERROR)
         << "Could not locate FlutterMutatorsStack.pushOverscrollStretch method";
@@ -1770,10 +1770,14 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
       }
       case MutatorType::kOverscrollStretch: {
         const auto& mutation = (*iter)->GetOverscrollStretch();
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_overscroll_stretch_method,
-                            static_cast<float>(mutation.x_stretch),
-                            static_cast<float>(mutation.y_stretch));
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_overscroll_stretch_method,
+            static_cast<float>(mutation.x_stretch),
+            static_cast<float>(mutation.y_stretch),
+            static_cast<float>(mutation.viewport_rect.GetLeft()),
+            static_cast<float>(mutation.viewport_rect.GetTop()),
+            static_cast<float>(mutation.viewport_rect.GetRight()),
+            static_cast<float>(mutation.viewport_rect.GetBottom()));
         break;
       }
 
@@ -2264,10 +2268,14 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
       }
       case MutatorType::kOverscrollStretch: {
         const auto& mutation = (*iter)->GetOverscrollStretch();
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_overscroll_stretch_method,
-                            static_cast<float>(mutation.x_stretch),
-                            static_cast<float>(mutation.y_stretch));
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_overscroll_stretch_method,
+            static_cast<float>(mutation.x_stretch),
+            static_cast<float>(mutation.y_stretch),
+            static_cast<float>(mutation.viewport_rect.GetLeft()),
+            static_cast<float>(mutation.viewport_rect.GetTop()),
+            static_cast<float>(mutation.viewport_rect.GetRight()),
+            static_cast<float>(mutation.viewport_rect.GetBottom()));
         break;
       }
 

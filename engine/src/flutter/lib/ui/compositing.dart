@@ -427,6 +427,12 @@ abstract class SceneBuilder {
   /// before compositing them into the scene. On Android, this generates a platform
   /// view mutator. For Flutter content, it relies on a stretch fragment shader.
   ///
+  /// `viewportRect` is the bounds of the stretched viewport (the stretch effect's
+  /// own bounds) in the local coordinate space of this layer. It is used so that
+  /// a platform view occupying only a sub-region of the viewport receives the
+  /// correct local slice of the stretch, staying aligned with the surrounding
+  /// stretched Flutter content.
+  ///
   /// {@macro dart.ui.sceneBuilder.oldLayer}
   ///
   /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
@@ -434,9 +440,9 @@ abstract class SceneBuilder {
   /// See [pop] for details about the operation stack.
   OverscrollStretchEngineLayer pushOverscrollStretch(
     ImageFilter filter,
-
     double xStretch,
-    double yStretch, {
+    double yStretch,
+    Rect viewportRect, {
     OverscrollStretchEngineLayer? oldLayer,
   });
 
@@ -898,28 +904,53 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
   @override
   OverscrollStretchEngineLayer pushOverscrollStretch(
     ImageFilter filter,
-
     double xStretch,
-    double yStretch, {
+    double yStretch,
+    Rect viewportRect, {
     OverscrollStretchEngineLayer? oldLayer,
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushOverscrollStretch'));
     final _ImageFilter nativeFilter = filter._toNativeImageFilter();
     final EngineLayer engineLayer = _NativeEngineLayer._();
-    _pushOverscrollStretch(engineLayer, nativeFilter, xStretch, yStretch, oldLayer?._nativeLayer);
+    _pushOverscrollStretch(
+      engineLayer,
+      nativeFilter,
+      xStretch,
+      yStretch,
+      viewportRect.left,
+      viewportRect.top,
+      viewportRect.right,
+      viewportRect.bottom,
+      oldLayer?._nativeLayer,
+    );
     final layer = OverscrollStretchEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Double, Handle)>(
-    symbol: 'SceneBuilder::pushOverscrollStretch',
-  )
+  @Native<
+    Void Function(
+      Pointer<Void>,
+      Handle,
+      Pointer<Void>,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Handle,
+    )
+  >(symbol: 'SceneBuilder::pushOverscrollStretch')
   external void _pushOverscrollStretch(
     EngineLayer outEngineLayer,
     _ImageFilter filter,
     double xStretch,
     double yStretch,
+    double viewportLeft,
+    double viewportTop,
+    double viewportRight,
+    double viewportBottom,
     EngineLayer? oldLayer,
   );
 

@@ -2030,21 +2030,24 @@ class ImageFilterLayer extends OffsetLayer {
   }
 }
 
-/// A composited layer that applies a given transformation matrix to its
+/// A composited layer that applies an overscroll stretch effect to its
 /// children.
 ///
-/// This class inherits from [OffsetLayer] to make it one of the layers that
-/// can be used at the root of a [RenderObject] hierarchy.
-/// A layer that applies the overscroll stretch effect.
+/// This class inherits from [ImageFilterLayer] so that Flutter content under it
+/// is stretched via the image filter, while platform views (which are not
+/// touched by the image filter) receive an overscroll stretch mutator carrying
+/// [xStretch], [yStretch], and [viewportRect].
 class OverscrollStretchLayer extends ImageFilterLayer {
   /// Creates a layer that applies an overscroll stretch effect.
   OverscrollStretchLayer({
     super.imageFilter,
     double xStretch = 0.0,
     double yStretch = 0.0,
+    Rect viewportRect = Rect.zero,
     super.offset,
   }) : _xStretch = xStretch,
-       _yStretch = yStretch;
+       _yStretch = yStretch,
+       _viewportRect = viewportRect;
 
   /// The horizontal stretch amount.
   double get xStretch => _xStretch;
@@ -2066,6 +2069,21 @@ class OverscrollStretchLayer extends ImageFilterLayer {
     }
   }
 
+  /// The bounds of the stretched viewport, in this layer's local coordinate
+  /// space.
+  ///
+  /// The stretch is normalized over this rect, so a platform view that only
+  /// covers part of the viewport gets the correct local slice of the stretch
+  /// and stays aligned with the surrounding stretched content.
+  Rect get viewportRect => _viewportRect;
+  Rect _viewportRect;
+  set viewportRect(Rect value) {
+    if (value != _viewportRect) {
+      _viewportRect = value;
+      markNeedsAddToScene();
+    }
+  }
+
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(imageFilter != null);
@@ -2073,6 +2091,7 @@ class OverscrollStretchLayer extends ImageFilterLayer {
       imageFilter!,
       xStretch,
       yStretch,
+      viewportRect,
       oldLayer: _engineLayer as ui.OverscrollStretchEngineLayer?,
     );
     addChildrenToScene(builder);
@@ -2084,6 +2103,7 @@ class OverscrollStretchLayer extends ImageFilterLayer {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('xStretch', xStretch));
     properties.add(DoubleProperty('yStretch', yStretch));
+    properties.add(DiagnosticsProperty<Rect>('viewportRect', viewportRect));
   }
 }
 

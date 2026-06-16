@@ -44,7 +44,14 @@ public class FlutterMutatorView extends FrameLayout {
           + "uniform float u_overscroll_y;\n"
           + "uniform float u_interpolation_strength;\n"
           + "uniform shader u_texture;\n"
-          + "uniform vec2 u_size;\n"
+          // Size of the stretch viewport (the StretchEffect's bounds), in the
+          // same pixel space as fragCoord/u_texture.
+          + "uniform vec2 u_viewport_size;\n"
+          // Offset of this view's (stretched) box origin from the viewport
+          // origin, in the same pixel space. Lets a fragment in the view be
+          // located within the whole viewport so it gets the correct local
+          // slice of the stretch curve.
+          + "uniform vec2 u_box_offset;\n"
           + "float ease_in(float t, float d) { return t * d; }\n"
           + "float compute_overscroll_start(float in_pos, float overscroll, float u_stretch_affected_dist, float u_inverse_stretch_affected_dist, float distance_stretched, float interpolation_strength) {\n"
           + "  float offset_pos = u_stretch_affected_dist - in_pos;\n"
@@ -69,17 +76,22 @@ public class FlutterMutatorView extends FrameLayout {
           + "  } else { return in_pos; }\n"
           + "}\n"
           + "half4 main(vec2 fragCoord) {\n"
-          // fragCoord and u_texture.eval() both operate in the rendered view's
-          // pixel space, whose dimensions are u_size. Normalize and de-normalize
-          // by that single size so the mapping is self-consistent and
-          // density-independent (mirrors shaders/stretch_effect.frag).
-          + "  vec2 uv = fragCoord / u_size;\n"
+          // The stretch is defined over the whole viewport, but this view may be
+          // only a sub-region of it. Place the output fragment within the
+          // viewport (out_px), normalize, run the same backward map the Flutter
+          // content uses, then convert the resulting source position back into
+          // this view's local pixel space to sample. Sampling outside the drawn
+          // content returns transparent, which is what we want for the area the
+          // stretch reveals.
+          + "  vec2 out_px = fragCoord + u_box_offset;\n"
+          + "  vec2 o = out_px / u_viewport_size;\n"
           + "  float overscroll = u_overscroll_y != 0.0 ? u_overscroll_y : u_overscroll_x;\n"
           + "  float distance_stretched = 1.0 / (1.0 + abs(overscroll));\n"
           + "  float distance_diff = distance_stretched - 1.0;\n"
-          + "  float out_u_norm = u_overscroll_y != 0.0 ? uv.x : compute_streched_effect(uv.x, overscroll, 1.0, 1.0, distance_stretched, distance_diff, u_interpolation_strength, 1.0);\n"
-          + "  float out_v_norm = u_overscroll_y != 0.0 ? compute_streched_effect(uv.y, overscroll, 1.0, 1.0, distance_stretched, distance_diff, u_interpolation_strength, 1.0) : uv.y;\n"
-          + "  return u_texture.eval(vec2(out_u_norm, out_v_norm) * u_size);\n"
+          + "  float src_u = u_overscroll_y != 0.0 ? o.x : compute_streched_effect(o.x, overscroll, 1.0, 1.0, distance_stretched, distance_diff, u_interpolation_strength, 1.0);\n"
+          + "  float src_v = u_overscroll_y != 0.0 ? compute_streched_effect(o.y, overscroll, 1.0, 1.0, distance_stretched, distance_diff, u_interpolation_strength, 1.0) : o.y;\n"
+          + "  vec2 src_px = vec2(src_u, src_v) * u_viewport_size;\n"
+          + "  return u_texture.eval(src_px - u_box_offset);\n"
           + "}\n";
 
   /**
@@ -157,18 +169,35 @@ public class FlutterMutatorView extends FrameLayout {
     if (android.os.Build.VERSION.SDK_INT >= io.flutter.Build.API_LEVELS.API_31) {
       float totalXStretch = 0.0f;
       float totalYStretch = 0.0f;
+      float viewportLeft = 0.0f;
+      float viewportTop = 0.0f;
+      float viewportRight = 0.0f;
+      float viewportBottom = 0.0f;
       for (FlutterMutatorsStack.FlutterMutator mutator : mutatorsStack.getMutators()) {
         if (mutator.getType() == FlutterMutatorsStack.FlutterMutatorType.STRETCH_OVERSCROLL) {
           totalXStretch += mutator.getXStretch();
           totalYStretch += mutator.getYStretch();
+          // A single overscroll viewport is expected in practice; if nested,
+          // the innermost (last) wins, matching the engine-side bounds math.
+          viewportLeft = mutator.getViewportLeft();
+          viewportTop = mutator.getViewportTop();
+          viewportRight = mutator.getViewportRight();
+          viewportBottom = mutator.getViewportBottom();
         }
       }
-      if (totalXStretch != 0.0f || totalYStretch != 0.0f) {
+      float viewportWidth = viewportRight - viewportLeft;
+      float viewportHeight = viewportBottom - viewportTop;
+      if ((totalXStretch != 0.0f || totalYStretch != 0.0f)
+          && viewportWidth > 0.0f
+          && viewportHeight > 0.0f) {
         RuntimeShader shader = new RuntimeShader(STRETCH_SHADER);
         shader.setFloatUniform("u_overscroll_x", totalXStretch);
         shader.setFloatUniform("u_overscroll_y", totalYStretch);
         shader.setFloatUniform("u_interpolation_strength", 0.7f);
-        shader.setFloatUniform("u_size", (float) width, (float) height);
+        shader.setFloatUniform("u_viewport_size", viewportWidth, viewportHeight);
+        // left/top are this view's (already stretched) box origin in the same
+        // screen-pixel space as the viewport rect.
+        shader.setFloatUniform("u_box_offset", left - viewportLeft, top - viewportTop);
         this.setRenderEffect(RenderEffect.createRuntimeShaderEffect(shader, "u_texture"));
       } else {
         this.setRenderEffect(null);

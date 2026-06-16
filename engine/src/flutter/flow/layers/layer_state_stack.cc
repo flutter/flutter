@@ -276,18 +276,24 @@ class OpacityEntry : public LayerStateStack::StateEntry {
 
 class OverscrollStretchEntry : public LayerStateStack::StateEntry {
  public:
-  OverscrollStretchEntry(DlScalar x_stretch, DlScalar y_stretch)
-      : x_stretch_(x_stretch), y_stretch_(y_stretch) {}
+  OverscrollStretchEntry(DlScalar x_stretch,
+                         DlScalar y_stretch,
+                         const DlRect& viewport_rect)
+      : x_stretch_(x_stretch),
+        y_stretch_(y_stretch),
+        viewport_rect_(viewport_rect) {}
 
   void apply(LayerStateStack* stack) const override {}
   void restore(LayerStateStack* stack) const override {}
   void update_mutators(MutatorsStack* mutators_stack) const override {
-    mutators_stack->PushOverscrollStretch(x_stretch_, y_stretch_);
+    mutators_stack->PushOverscrollStretch(x_stretch_, y_stretch_,
+                                          viewport_rect_);
   }
 
  private:
   const DlScalar x_stretch_;
   const DlScalar y_stretch_;
+  const DlRect viewport_rect_;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(OverscrollStretchEntry);
 };
@@ -562,8 +568,10 @@ void MutatorContext::applyOpacity(const DlRect& bounds, DlScalar opacity) {
 }
 
 void MutatorContext::applyOverscrollStretch(DlScalar x_stretch,
-                                            DlScalar y_stretch) {
-  layer_state_stack_->push_overscroll_stretch(x_stretch, y_stretch);
+                                            DlScalar y_stretch,
+                                            const DlRect& viewport_rect) {
+  layer_state_stack_->push_overscroll_stretch(x_stretch, y_stretch,
+                                              viewport_rect);
 }
 
 void MutatorContext::applyImageFilter(
@@ -711,9 +719,10 @@ void LayerStateStack::push_opacity(const DlRect& bounds, DlScalar opacity) {
 }
 
 void LayerStateStack::push_overscroll_stretch(DlScalar x_stretch,
-                                              DlScalar y_stretch) {
-  state_stack_.emplace_back(
-      std::make_unique<OverscrollStretchEntry>(x_stretch, y_stretch));
+                                              DlScalar y_stretch,
+                                              const DlRect& viewport_rect) {
+  state_stack_.emplace_back(std::make_unique<OverscrollStretchEntry>(
+      x_stretch, y_stretch, viewport_rect));
   apply_last_entry();
 }
 

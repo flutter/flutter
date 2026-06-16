@@ -331,7 +331,10 @@ class _RenderOverscrollStretch extends RenderProxyBox {
         stretchLayer
           ..imageFilter = _imageFilter
           ..xStretch = _xStretch
-          ..yStretch = _yStretch;
+          ..yStretch = _yStretch
+          // The viewport the stretch is normalized over is this render object's
+          // own bounds, in the same coordinate space as the layer's children.
+          ..viewportRect = offset & size;
         layer = stretchLayer;
         context.pushLayer(stretchLayer, super.paint, offset, childPaintBounds: offset & size);
       } else {
