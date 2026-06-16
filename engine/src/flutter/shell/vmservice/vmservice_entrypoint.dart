@@ -111,18 +111,13 @@ void _populateResidentCompilerInfoFile(String? residentCompilerInfoFilePathArgum
 
 @pragma('vm:entry-point', 'get')
 Future<void> main([List<String> args = const []]) async {
-  print('CUSTOM_VMSERVICE: main started, args: $args');
-  print(
-    'CUSTOM_VMSERVICE: global vars: _port=$_port, _ip=$_ip, _autoStart=$_autoStart, _authCodesDisabled=$_authCodesDisabled, _originCheckDisabled=$_originCheckDisabled, _enableServicePortFallback=$_enableServicePortFallback',
-  );
   if (args case ['--help']) {
     return;
   }
   try {
-    print('CUSTOM_VMSERVICE: Initializing DartRuntimeService...');
     final service = await DartRuntimeService.initialize(
       config: DartRuntimeServiceOptions(
-        enableLogging: true, // Force logging
+        enableLogging: Platform.environment.containsKey('VM_SERVICE_LOGGING'),
         port: _port,
         disableAuthCodes: _authCodesDisabled,
         disableOriginCheck: _originCheckDisabled,
@@ -145,11 +140,16 @@ Future<void> main([List<String> args = const []]) async {
         residentCompilerInfoFile: _residentCompilerInfoFile,
       ),
     );
-    print('CUSTOM_VMSERVICE: DartRuntimeService initialized successfully.');
-    print('CUSTOM_VMSERVICE: silenceServiceOutput: ${service.silenceServiceOutput}');
-    print('The Dart VM service is listening on ${service.httpUri}');
-    print('CUSTOM_VMSERVICE: Printed VM service listening URI.');
+    // On Android and iOS, stdout is not always redirected to the system log
+    // (logcat/syslog), so the printServiceOutput call in
+    // DartRuntimeServiceVMBackend.onServerStarted (which uses stdout.writeln)
+    // might not be visible to the host tool. We force print it here using
+    // print() which is correctly redirected.
+    if ((Platform.isAndroid || Platform.isIOS) && service.isServerRunning) {
+      print('The Dart VM service is listening on ${service.httpUri}');
+    }
   } catch (e, st) {
-    print('CUSTOM_VMSERVICE: Failed to initialize DartRuntimeService: $e\n$st');
+    print('Failed to initialize DartRuntimeService: $e\n$st');
+    rethrow;
   }
 }
