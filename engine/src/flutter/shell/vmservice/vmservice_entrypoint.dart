@@ -112,13 +112,15 @@ void _populateResidentCompilerInfoFile(String? residentCompilerInfoFilePathArgum
 @pragma('vm:entry-point', 'get')
 Future<void> main([List<String> args = const []]) async {
   print('CUSTOM_VMSERVICE: main started, args: $args');
-  print('CUSTOM_VMSERVICE: global vars: _port=$_port, _ip=$_ip, _autoStart=$_autoStart, _authCodesDisabled=$_authCodesDisabled, _originCheckDisabled=$_originCheckDisabled, _enableServicePortFallback=$_enableServicePortFallback');
+  print(
+    'CUSTOM_VMSERVICE: global vars: _port=$_port, _ip=$_ip, _autoStart=$_autoStart, _authCodesDisabled=$_authCodesDisabled, _originCheckDisabled=$_originCheckDisabled, _enableServicePortFallback=$_enableServicePortFallback',
+  );
   if (args case ['--help']) {
     return;
   }
   try {
     print('CUSTOM_VMSERVICE: Initializing DartRuntimeService...');
-    await DartRuntimeService.initialize(
+    final service = await DartRuntimeService.initialize(
       config: DartRuntimeServiceOptions(
         enableLogging: true, // Force logging
         port: _port,
@@ -144,6 +146,9 @@ Future<void> main([List<String> args = const []]) async {
       ),
     );
     print('CUSTOM_VMSERVICE: DartRuntimeService initialized successfully.');
+    print('CUSTOM_VMSERVICE: silenceServiceOutput: ${service.silenceServiceOutput}');
+    print('The Dart VM service is listening on ${service.httpUri}');
+    print('CUSTOM_VMSERVICE: Printed VM service listening URI.');
   } catch (e, st) {
     print('CUSTOM_VMSERVICE: Failed to initialize DartRuntimeService: $e\n$st');
   }
