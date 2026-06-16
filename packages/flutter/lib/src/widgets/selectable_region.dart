@@ -54,12 +54,14 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. Wrapping a widget subtree
-/// with a [SelectableRegion] widget enables selection within that subtree (for
-/// example, [Text] widgets automatically look for selectable regions to enable
-/// selection). The wrapped subtree can be selected by users using mouse or
-/// touch gestures, e.g. users can select widgets by holding the mouse
-/// left-click and dragging across widgets, or they can use long press gestures
-/// to select words on touch devices.
+/// with a [SelectableRegion] widget enables selection for widgets in the
+/// subtree that participate in selection. For example, [Text] widgets
+/// automatically look for selectable regions to enable selection, while widgets
+/// such as [RichText] must be configured with a [SelectionRegistrar] and
+/// [RichText.selectionColor]. The wrapped subtree can be selected by users
+/// using mouse or touch gestures, e.g. users can select widgets by holding the
+/// mouse left-click and dragging across widgets, or they can use long press
+/// gestures to select words on touch devices.
 ///
 /// A [SelectableRegion] widget requires configuration; in particular specific
 /// [selectionControls] must be provided.
@@ -94,8 +96,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 ///
 /// Both [SelectionContainer]s and the leaf [Selectable]s need to register
 /// themselves to the [SelectionRegistrar] from the
-/// [SelectionContainer.maybeOf] if they want to participate in the
-/// selection.
+/// [SelectionContainer.maybeOf] if they want to participate in the selection.
+/// The [BuildContext] used with [SelectionContainer.maybeOf] must be below the
+/// [SelectionContainer], [SelectableRegion], or [SelectionArea] that provides
+/// the registrar in the widget tree.
 ///
 /// An example selection tree will look like:
 ///
@@ -296,10 +300,10 @@ class SelectableRegion extends StatefulWidget {
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   static List<ContextMenuButtonItem> getSelectableButtonItems({
-    required final SelectionGeometry selectionGeometry,
-    required final VoidCallback onCopy,
-    required final VoidCallback onSelectAll,
-    required final VoidCallback? onShare,
+    required SelectionGeometry selectionGeometry,
+    required VoidCallback onCopy,
+    required VoidCallback onSelectAll,
+    required VoidCallback? onShare,
   }) {
     final canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
@@ -1022,10 +1026,10 @@ class SelectableRegionState extends State<SelectableRegion>
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _finalizeSelectableRegionStatus();
-    _showToolbar();
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
+    _showToolbar();
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
@@ -1845,8 +1849,8 @@ class SelectableRegionState extends State<SelectableRegion>
     clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
-      _showToolbar();
       _showHandles();
+      _showToolbar();
     }
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
@@ -2934,12 +2938,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final int skipIndex = currentSelectionStartIndex == -1
           ? currentSelectionEndIndex
           : currentSelectionStartIndex;
-      selectables
-          .where((Selectable target) => target != selectables[skipIndex])
-          .forEach(
-            (Selectable target) =>
-                dispatchSelectionEventToChild(target, const ClearSelectionEvent()),
-          );
+      _clearSelectables(skipIndex: skipIndex);
       return;
     }
     final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
@@ -2963,30 +2962,50 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
+  // Clears the selection in all [selectables], optionally skipping
+  // the [Selectable] at the given index.
+  void _clearSelectables({int? skipIndex}) {
+    for (var i = 0; i < selectables.length; i++) {
+      if (i == skipIndex) {
+        continue;
+      }
+      dispatchSelectionEventToChild(selectables[i], const ClearSelectionEvent());
+    }
+  }
+
   SelectionResult _handleSelectBoundary(SelectionEvent event) {
     assert(
       event is SelectWordSelectionEvent || event is SelectParagraphSelectionEvent,
       'This method should only be given selection events that select text boundaries.',
     );
-    late final Offset effectiveGlobalPosition;
-    if (event.type == SelectionEventType.selectWord) {
-      effectiveGlobalPosition = (event as SelectWordSelectionEvent).globalPosition;
-    } else if (event.type == SelectionEventType.selectParagraph) {
-      effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
-    }
+    final Offset effectiveGlobalPosition = switch (event) {
+      SelectWordSelectionEvent(:final globalPosition) => globalPosition,
+      SelectParagraphSelectionEvent(:final globalPosition) => globalPosition,
+      _ => throw ArgumentError('Unsupported selection event: $event'),
+    };
     SelectionResult? lastSelectionResult;
+    // For tracking the nearest index if no bounding box contains the position.
+    double minDistanceSquared = double.infinity;
+    var nearestIndex = 0;
     for (var index = 0; index < selectables.length; index += 1) {
       var globalRectsContainPosition = false;
-      if (selectables[index].boundingBoxes.isNotEmpty) {
-        for (final Rect rect in selectables[index].boundingBoxes) {
-          final Rect globalRect = MatrixUtils.transformRect(
-            selectables[index].getTransformTo(null),
-            rect,
-          );
-          if (globalRect.contains(effectiveGlobalPosition)) {
-            globalRectsContainPosition = true;
-            break;
-          }
+      final Matrix4 transform = selectables[index].getTransformTo(null);
+      for (final Rect rect in selectables[index].boundingBoxes) {
+        final Rect globalRect = MatrixUtils.transformRect(transform, rect);
+        if (globalRect.contains(effectiveGlobalPosition)) {
+          globalRectsContainPosition = true;
+          break;
+        }
+        final double dx =
+            effectiveGlobalPosition.dx -
+            clampDouble(effectiveGlobalPosition.dx, globalRect.left, globalRect.right);
+        final double dy =
+            effectiveGlobalPosition.dy -
+            clampDouble(effectiveGlobalPosition.dy, globalRect.top, globalRect.bottom);
+        final double distanceSquared = dx * dx + dy * dy;
+        if (distanceSquared < minDistanceSquared) {
+          minDistanceSquared = distanceSquared;
+          nearestIndex = index;
         }
       }
       if (globalRectsContainPosition) {
@@ -3004,12 +3023,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the
           // selection of other selectables to keep selection in sync.
-          selectables
-              .where((Selectable target) => target != selectables[index])
-              .forEach(
-                (Selectable target) =>
-                    dispatchSelectionEventToChild(target, const ClearSelectionEvent()),
-              );
+          _clearSelectables(skipIndex: index);
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
         return SelectionResult.end;
@@ -3021,6 +3035,18 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       }
     }
     assert(lastSelectionResult == null);
+    // No selectable's bounding box contained the position. Clamp to the nearest
+    // selectable so that the boundary selection event always produces a valid selection.
+    if (selectables.isNotEmpty) {
+      final SelectionGeometry existingGeometry = selectables[nearestIndex].value;
+      dispatchSelectionEventToChild(selectables[nearestIndex], event);
+      if (selectables[nearestIndex].value != existingGeometry) {
+        // Geometry has changed as a result of select word, need to clear the
+        // selection of other selectables to keep selection in sync.
+        _clearSelectables(skipIndex: nearestIndex);
+        currentSelectionStartIndex = currentSelectionEndIndex = nearestIndex;
+      }
+    }
     return SelectionResult.end;
   }
 
@@ -3234,11 +3260,24 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     var newIndex = -1;
     var hasFoundEdgeIndex = false;
     SelectionResult? result;
-    for (var index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
+    bool? forward;
+    // If we already have an opposite edge initialized, start our sweep from there
+    // to ensure all items between the two edges are properly visited.
+    final int oppositeEdgeIndex = isEnd ? currentSelectionStartIndex : currentSelectionEndIndex;
+    int index = max(oppositeEdgeIndex, 0);
+
+    while (index >= 0 && index < selectables.length) {
       final Selectable child = selectables[index];
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
         case SelectionResult.next:
+          if (forward == false) {
+            hasFoundEdgeIndex = true;
+            result = SelectionResult.end;
+          } else {
+            forward = true;
+            newIndex = index;
+          }
         case SelectionResult.none:
           newIndex = index;
         case SelectionResult.end:
@@ -3246,17 +3285,28 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           result = SelectionResult.end;
           hasFoundEdgeIndex = true;
         case SelectionResult.previous:
-          hasFoundEdgeIndex = true;
           if (index == 0) {
+            hasFoundEdgeIndex = true;
             newIndex = 0;
             result = SelectionResult.previous;
+            break;
           }
-          result ??= SelectionResult.end;
+          if (forward ?? false) {
+            hasFoundEdgeIndex = true;
+            result = SelectionResult.end;
+          } else {
+            forward = false;
+            newIndex = index;
+          }
         case SelectionResult.pending:
           newIndex = index;
           result = SelectionResult.pending;
           hasFoundEdgeIndex = true;
       }
+      if (hasFoundEdgeIndex) {
+        break;
+      }
+      index += (forward ?? true) ? 1 : -1;
     }
 
     if (newIndex == -1) {

@@ -68,7 +68,9 @@ class GitHubTemplateCreator {
       // Force comma separator to standardize.
       return 'String: <${NumberFormat(null, 'en_US').format(error.length)} characters>';
     }
-    // Exception, other.
+    // Tool crash issue templates benefit from the concrete Dart error type.
+    // The tool is not obfuscated, and collapsing unknown types loses useful signal.
+    // ignore: avoid_type_to_string
     return error.runtimeType.toString();
   }
 

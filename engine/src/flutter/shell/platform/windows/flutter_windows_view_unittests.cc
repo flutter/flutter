@@ -992,7 +992,7 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
   EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(true));
 
   EXPECT_CALL(*egl_manager.get(),
-              CreateWindowSurface(_, /*width=*/500, /*height=*/500))
+              CreateWindowSurface(_, /*width=*/500, /*height=*/300))
       .WillOnce(Return(std::move((resized_surface))));
   EXPECT_CALL(*resized_surface_ptr, MakeCurrent).WillOnce(Return(true));
   EXPECT_CALL(*resized_surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
@@ -1028,7 +1028,7 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
 
   // Start the window resize. This sends the new window metrics
   // and then blocks until another thread completes the window resize.
-  EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
+  EXPECT_TRUE(view->OnWindowSizeChanged(500, 300));
   frame_thread.join();
 }
 

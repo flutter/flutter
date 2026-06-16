@@ -30,7 +30,35 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.44 Changes
+
+### [3.44.2](https://github.com/flutter/flutter/releases/tag/3.44.2)
+- [flutter/187322](https://github.com/flutter/flutter/issues/187322) When DTD connection is lost or fails at startup during widget-preview on all platforms, the tool crashes with unhandled exceptions instead of exiting gracefully.
+- [flutter/186723](https://github.com/flutter/flutter/issues/186723) When Android apps switch from any `SystemUiMode` to edge-to-edge, the system bars unexpectedly remain invisible.
+- [flutter/186054](https://github.com/flutter/flutter/issues/186054) When building an iOS or macOS app with Swift Package Manager enabled, remote package dependencies may fail to download.
+- [flutter/185775](https://github.com/flutter/flutter/issues/185775) When building for non-iOS or macOS apps, Swift Package Manager warnings may appear.
+
+### [3.44.1](https://github.com/flutter/flutter/releases/tag/3.44.1)
+- [flutter/186962](https://github.com/flutter/flutter/issues/186962) When the analysis server exits unexpectedly, the `flutter` tool can crash instead of outputting a descriptive error message.
+- [flutter/186963](https://github.com/flutter/flutter/issues/186963) When failing to connect to a Chrome instance on Windows, the `flutter` tool can crash instead of outputting a descriptive error message.
+
+### [3.44.0](https://github.com/flutter/flutter/releases/tag/3.44.0)
+
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-44-b0cc1ad3c527), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.44.0) for a detailed list of all the new changes.
+
+
 ## Flutter 3.41 Changes
+
+### [3.41.9](https://github.com/flutter/flutter/releases/tag/3.41.9)
+- [flutter/185621](https://github.com/flutter/flutter/pull/185621) Fixes a potential integer overflow that can happen when handling some animated PNG files.
+
+### [3.41.8](https://github.com/flutter/flutter/releases/tag/3.41.8)
+- [flutter/185150](https://github.com/flutter/flutter/issues/185150) When using profile mode on a physical iOS device, the app may fail to connect to the Dart VM.
+
+### [3.41.7](https://github.com/flutter/flutter/releases/tag/3.41.7)
+- [flutter/184376](https://github.com/flutter/flutter/issues/184376) When building an iOS or macOS app, the build may fail due to git multi-pack-index error.
+- [flutter/184254](https://github.com/flutter/flutter/issues/184254) When debugging on physical iOS devices and Xcode 26.4+, app often crashes.
+- [flutter/184689](https://github.com/flutter/flutter/issues/184689) When using an ffi Windows package, don't require a plugin class.
 
 ### [3.41.6](https://github.com/flutter/flutter/releases/tag/3.41.6)
 - [flutter/184025](https://github.com/flutter/flutter/pull/184025) Include a fix from Skia that ensures that the correct atlas for the glyph mask format is used consistently.

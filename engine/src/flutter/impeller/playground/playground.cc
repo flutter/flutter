@@ -52,6 +52,8 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
       return "MetalSDF";
     case PlaygroundBackend::kOpenGLES:
       return "OpenGLES";
+    case PlaygroundBackend::kOpenGLESSDF:
+      return "OpenGLESSDF";
     case PlaygroundBackend::kVulkan:
       return "Vulkan";
   }
@@ -111,6 +113,7 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
       return false;
 #endif  // IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
 #if IMPELLER_ENABLE_OPENGLES
       return true;
 #else   // IMPELLER_ENABLE_OPENGLES
@@ -188,6 +191,10 @@ Point Playground::GetCursorPosition() const {
 
 ISize Playground::GetWindowSize() const {
   return window_size_;
+}
+
+IRect Playground::GetWindowBounds() const {
+  return IRect::MakeSize(window_size_);
 }
 
 Point Playground::GetContentScale() const {

@@ -3293,6 +3293,22 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
         );
 
+        final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
+        expect(scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist'), exists);
+        expect(
+          scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist').readAsStringSync(),
+          r'''
+$(BUILT_PRODUCTS_DIR)/Flutter.framework/Flutter
+$(BUILT_PRODUCTS_DIR)/Flutter.framework/Info.plist
+$(BUILT_PRODUCTS_DIR)/App.framework/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Flutter.framework/Flutter
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Flutter.framework/Info.plist
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Flutter.framework/_CodeSignature/CodeResources
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/_CodeSignature/CodeResources
+''',
+        );
+
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
         expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -3527,6 +3543,22 @@ let package = Package(
           outputDirectory: outputDirectory,
           flutterIntegrationPackage: flutterIntegrationPackage,
           highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
+        );
+
+        final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
+        expect(scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist'), exists);
+        expect(
+          scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist').readAsStringSync(),
+          r'''
+$(BUILT_PRODUCTS_DIR)/FlutterMacOS.framework/Versions/A/FlutterMacOS
+$(BUILT_PRODUCTS_DIR)/FlutterMacOS.framework/Versions/A/Resources/Info.plist
+$(BUILT_PRODUCTS_DIR)/App.framework/Versions/A/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/FlutterMacOS.framework/Versions/A/FlutterMacOS
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/FlutterMacOS.framework/Versions/A/Resources/Info.plist
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/FlutterMacOS.framework/_CodeSignature/CodeResources
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/Versions/A/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/_CodeSignature/CodeResources
+''',
         );
 
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);

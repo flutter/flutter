@@ -50,6 +50,8 @@ source_set("gpu") {
       "shader.h",
       "shader_library.cc",
       "shader_library.h",
+      "surface.cc",
+      "surface.h",
       "texture.cc",
       "texture.h",
     ]
@@ -61,6 +63,9 @@ source_set("gpu") {
     "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
     "//flutter/lib/ui",
     "//flutter/third_party/tonic",
+    "//third_party/abseil-cpp/absl/status",
+    "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 
   if (impeller_supports_rendering) {
@@ -73,5 +78,24 @@ source_set("gpu") {
   }
 }
 
-if (enable_unittests) {
+if (enable_unittests && !is_fuchsia) {
+  test_fixtures("gpu_unittests_fixtures") {
+    fixtures = []
+  }
+
+  executable("gpu_unittests") {
+    testonly = true
+
+    sources = [ "command_buffer_unittests.cc" ]
+
+    deps = [
+      ":gpu",
+      ":gpu_unittests_fixtures",
+      "//flutter/impeller/renderer/testing:mocks",
+      "//flutter/testing",
+      "//flutter/testing:dart",
+      "//third_party/googletest:gmock",
+      "//third_party/googletest:gtest",
+    ]
+  }
 }

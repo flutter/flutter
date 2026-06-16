@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -240,7 +239,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -248,7 +247,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -308,7 +307,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'reload-barred',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -316,7 +315,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -361,7 +360,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -369,7 +368,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -424,12 +423,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -482,12 +476,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -547,12 +536,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -594,11 +578,8 @@ void main() {
       final Event event = fakeAnalytics.sentEvents.first;
       expect(event.eventName.label, 'hot_runner_info');
       expect(event.eventData['label'], 'reload');
-      expect(
-        event.eventData['targetPlatform'],
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+      expect(event.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
+    }),
   );
 
   testUsingContext(
@@ -677,7 +658,6 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(),
         ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-        Usage: () => TestUsage(),
       },
     ),
   );
@@ -703,10 +683,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -747,11 +724,8 @@ void main() {
       expect(hotRunnerInfoEvents, hasLength(1));
       final Event newEvent = hotRunnerInfoEvents.first;
       expect(newEvent.eventData['label'], 'restart');
-      expect(
-        newEvent.eventData['targetPlatform'],
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+      expect(newEvent.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
+    }),
   );
 
   testUsingContext(
@@ -786,10 +760,7 @@ void main() {
             method: 'resume',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -846,10 +817,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -881,10 +849,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -916,10 +881,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -980,7 +942,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: true,
@@ -988,7 +950,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -2103,6 +2065,63 @@ flutter:
   );
 
   testUsingContext(
+    'HotRunner reinitializes Flutter GPU shader libraries for changed .shaderbundle assets',
+    () => testbed.run(() async {
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, setAssetBundlePath, reinitializeShaderLibrary],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      // A `.shaderbundle` asset reloads the compiled Flutter GPU ShaderLibrary
+      // instead of going through the generic asset eviction.
+      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'foo.shaderbundle'};
+
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
+    'HotRunner evicts a changed .shaderbundle asset generically on web',
+    () => testbed.run(() async {
+      final webFlutterDevice = FakeFlutterDevice()
+        ..vmServiceHost = (() => fakeVmServiceHost)
+        ..fakeDevFS = devFS
+        ..targetPlatform = TargetPlatform.web_javascript;
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          listViews,
+          setAssetBundlePath,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.evict',
+            args: <String, Object>{'value': 'foo.shaderbundle', 'isolateId': '1'},
+          ),
+        ],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[webFlutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      // The Flutter GPU reload extension is unavailable on web, so the bundle
+      // falls back to the generic asset eviction.
+      (webFlutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'foo.shaderbundle'};
+
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
     'HotRunner does not sets asset directory when no assets to evict',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -2139,6 +2158,48 @@ flutter:
       await (residentRunner as HotRunner).evictDirtyAssets();
       expect(flutterDevice.devFS!.hasSetAssetDirectory, true);
       expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
+    'HotRunner evictDirtyAssets correctly finds UI isolate and view ID when multiple views are present and the first view has no isolate',
+    () => testbed.run(() async {
+      final viewWithoutIsolate = FlutterView(id: 'view_empty', uiIsolate: null);
+      final viewWithIsolate = FlutterView(id: 'view_active', uiIsolate: fakeUnpausedIsolate);
+
+      final listMultipleViews = FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[viewWithoutIsolate.toJson(), viewWithIsolate.toJson()],
+        },
+      );
+
+      const setAssetBundlePathForActiveView = FakeVmServiceRequest(
+        method: '_flutter.setAssetBundlePath',
+        args: <String, Object>{
+          'viewId': 'view_active',
+          'assetDirectory': 'build/flutter_assets',
+          'isolateId': '1',
+        },
+      );
+
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listMultipleViews, setAssetBundlePathForActiveView, evict],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
+
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isFalse);
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isTrue);
+      expect(fakeVmServiceHost!.hasRemainingExpectations, isFalse);
     }),
   );
 

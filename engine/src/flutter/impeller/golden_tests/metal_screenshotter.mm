@@ -20,7 +20,7 @@ MetalScreenshotter::MetalScreenshotter(const PlaygroundSwitches& switches) {
 }
 
 std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
-    AiksContext& aiks_context,
+    const AiksContext& aiks_context,
     const std::shared_ptr<Texture> texture) {
   @autoreleasepool {
     std::shared_ptr<Context> context = aiks_context.GetContext();

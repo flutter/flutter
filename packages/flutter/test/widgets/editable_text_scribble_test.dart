@@ -3,12 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
+import 'widgets_app_tester.dart';
+
+const Color _blue = Color(0xFF0000FF);
+const Color _grey = Color(0xFF888888);
+const Color _black = Color(0xFF000000);
 
 void main() {
   const textStyle = TextStyle();
@@ -79,9 +85,9 @@ void main() {
                     maxLines: null,
                     focusNode: focusNode,
                     cursorWidth: 0,
-                    style: Typography.material2018().black.titleMedium!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
+                    style: const TextStyle(),
+                    cursorColor: _blue,
+                    backgroundCursorColor: _grey,
                   ),
                 ),
               ),
@@ -133,14 +139,14 @@ void main() {
       late SelectionChangedCause selectionCause;
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
             onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
               if (cause != null) {
                 selectionCause = cause;
@@ -187,14 +193,14 @@ void main() {
       late SelectionChangedCause selectionCause;
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
             onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
               if (cause != null) {
                 selectionCause = cause;
@@ -225,14 +231,14 @@ void main() {
       controller.text = 'Lorem ipsum dolor sit amet';
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
           ),
         ),
       );
@@ -252,15 +258,15 @@ void main() {
 
       // Widget is read only.
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             readOnly: true,
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
           ),
         ),
       );
@@ -272,24 +278,18 @@ void main() {
 
       // Widget is not touchable.
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Stack(
             children: <Widget>[
               EditableText(
                 controller: controller,
-                backgroundCursorColor: Colors.grey,
+                backgroundCursorColor: _grey,
                 focusNode: focusNode,
                 style: textStyle,
                 cursorColor: cursorColor,
-                selectionControls: materialTextSelectionControls,
+                selectionControls: testTextSelectionHandleControls,
               ),
-              Positioned(
-                left: 0,
-                top: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(color: Colors.black),
-              ),
+              Positioned(left: 0, top: 0, right: 0, bottom: 0, child: Container(color: _black)),
             ],
           ),
         ),
@@ -302,14 +302,14 @@ void main() {
 
       // Widget has scribble disabled.
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
             stylusHandwritingEnabled: false,
           ),
         ),
@@ -333,14 +333,14 @@ void main() {
       controller.text = 'Lorem ipsum dolor sit amet';
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
           ),
         ),
       );
@@ -373,14 +373,14 @@ void main() {
 
       // Widget has scribble disabled.
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
             stylusHandwritingEnabled: false,
           ),
         ),
@@ -416,14 +416,14 @@ void main() {
       controller.text = 'Lorem ipsum dolor sit amet';
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
             maxLines: 2,
           ),
         ),
@@ -458,14 +458,14 @@ void main() {
 
       // Widget has scribble disabled.
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
             maxLines: 2,
             stylusHandwritingEnabled: false,
           ),
@@ -553,9 +553,9 @@ void main() {
                     maxLines: null,
                     focusNode: focusNode,
                     cursorWidth: 0,
-                    style: Typography.material2018().black.titleMedium!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
+                    style: const TextStyle(),
+                    cursorColor: _blue,
+                    backgroundCursorColor: _grey,
                   ),
                 ),
               ),
@@ -679,9 +679,9 @@ void main() {
                   key: ValueKey<String>(controller.text),
                   controller: controller,
                   focusNode: focusNode,
-                  style: Typography.material2018().black.titleMedium!,
-                  cursorColor: Colors.blue,
-                  backgroundCursorColor: Colors.grey,
+                  style: const TextStyle(),
+                  cursorColor: _blue,
+                  backgroundCursorColor: _grey,
                   stylusHandwritingEnabled: false,
                 ),
               ],
@@ -756,9 +756,9 @@ void main() {
                     focusNode: focusNode,
                     cursorWidth: 0,
                     key: editableTextKey,
-                    style: Typography.material2018().black.titleMedium!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
+                    style: const TextStyle(),
+                    cursorColor: _blue,
+                    backgroundCursorColor: _grey,
                   ),
                 ),
               ),
@@ -802,25 +802,23 @@ void main() {
       final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             key: editableTextKey,
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: _grey,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionHandleControls,
+            selectionControls: testTextSelectionHandleControls,
             contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-              return AdaptiveTextSelectionToolbar.editableText(
-                editableTextState: editableTextState,
-              );
+              return const SizedBox(key: Key('test-toolbar'));
             },
           ),
         ),
       );
 
-      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byKey(const Key('test-toolbar')), findsNothing);
 
       await tester.showKeyboard(find.byType(EditableText));
 
@@ -833,21 +831,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byKey(const Key('test-toolbar')), findsNothing);
 
       expect(editableTextKey.currentState!.showToolbar(), isTrue);
       await tester.pumpAndSettle();
 
-      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byKey(const Key('test-toolbar')), findsOneWidget);
 
       expect(editableTextKey.currentState!.showToolbar(), isFalse);
       await tester.pump();
 
-      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byKey(const Key('test-toolbar')), findsOneWidget);
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byKey(const Key('test-toolbar')), findsOneWidget);
 
       await tester.testTextInput.finishScribbleInteraction();
     },

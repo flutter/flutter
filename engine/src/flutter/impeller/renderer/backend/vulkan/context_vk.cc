@@ -580,7 +580,6 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
 
   return std::shared_ptr<CommandBufferVK>(new CommandBufferVK(
       shared_from_this(),         //
-      GetDeviceHolder(),          //
       std::move(tracked_objects)  //
       ));
 }
@@ -674,6 +673,11 @@ bool ContextVK::FlushCommandBuffers() {
   } else {
     return true;
   }
+}
+
+bool ContextVK::FinishQueue() {
+  GetIdleWaiter()->WaitIdle();
+  return true;
 }
 
 // Creating a render pass is observed to take an additional 6ms on a Pixel 7

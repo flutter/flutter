@@ -231,7 +231,7 @@ void skiaDecodeImageFromPixels(
         colorSpace: SkColorSpaceSRGB,
       ),
       pixels,
-      (rowBytes ?? 4 * width).toDouble(),
+      rowBytes ?? 4 * width,
     );
 
     if (skImage == null) {
@@ -405,7 +405,9 @@ class CkImage implements ui.Image, StackTraceDebugger {
       skImage,
       this,
       'SkImage',
-      onDisposed: (CkImage image) => ui.Image.onDispose?.call(image),
+      onDisposed: (CkImage image) {
+        ui.Image.onDispose?.call(image);
+      },
     );
     _init();
     ui.Image.onCreate?.call(this);
@@ -689,8 +691,7 @@ class ImageElementImageSource extends ImageSource {
 
   @override
   void _doClose() {
-    // There's no way to immediately close the <img> element. Just let the
-    // browser garbage collect it.
+    imageElement.src = '';
   }
 
   @override

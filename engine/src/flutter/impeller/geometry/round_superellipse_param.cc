@@ -191,6 +191,7 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
       .circle_start = pointJ,
       .circle_center = circle_center,
       .circle_max_angle = circle_max_angle,
+      .circle_radius = R,
   };
 }
 
@@ -582,6 +583,10 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
         .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
                                      radii.top_right, {-1, 1}),
         .all_corners_same = true,
+        .top_split = bounds.GetCenter().x,
+        .bottom_split = bounds.GetCenter().x,
+        .left_split = bounds.GetCenter().y,
+        .right_split = bounds.GetCenter().y,
     };
   }
   Scalar top_split = Split(bounds.GetLeft(), bounds.GetRight(),
@@ -608,6 +613,10 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
           ComputeQuadrant(Point{top_split, left_split}, bounds.GetLeftTop(),
                           radii.top_left, {-1, -1}),
       .all_corners_same = false,
+      .top_split = top_split,
+      .bottom_split = bottom_split,
+      .left_split = left_split,
+      .right_split = right_split,
   };
 }
 

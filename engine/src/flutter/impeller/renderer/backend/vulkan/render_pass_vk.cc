@@ -49,6 +49,22 @@ static vk::ClearDepthStencilValue VKClearValueFromDepthStencil(uint32_t stencil,
   return value;
 }
 
+/// Converts an Impeller `Viewport` to a `vk::Viewport`. Impeller specifies
+/// viewports in top-left-origin framebuffer coordinates, so the
+/// negative-height trick from VK_KHR_maintenance1 is used to flip the Y axis
+/// to match the GL convention that the rest of the engine assumes (NDC +Y
+/// maps to the smaller framebuffer Y).
+static vk::Viewport ToVkViewport(const Viewport& viewport) {
+  const auto& rect = viewport.rect;
+  return vk::Viewport()
+      .setX(rect.GetX())
+      .setY(rect.GetY() + rect.GetHeight())
+      .setWidth(rect.GetWidth())
+      .setHeight(-rect.GetHeight())
+      .setMinDepth(viewport.depth_range.z_near)
+      .setMaxDepth(viewport.depth_range.z_far);
+}
+
 static size_t GetVKClearValues(
     const RenderTarget& target,
     std::array<vk::ClearValue, kMaxAttachments>& values) {
@@ -149,15 +165,17 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   bool is_swapchain = false;
   SampleCount sample_count =
       color_image_vk_->GetTextureDescriptor().sample_count;
-  if (resolve_image_vk_) {
-    frame_data =
-        TextureVK::Cast(*resolve_image_vk_).GetCachedFrameData(sample_count);
-    is_swapchain = TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage();
-  } else {
-    frame_data =
-        TextureVK::Cast(*color_image_vk_).GetCachedFrameData(sample_count);
-    is_swapchain = TextureVK::Cast(*color_image_vk_).IsSwapchainImage();
-  }
+  // The framebuffer references attachment views bound to a specific
+  // subresource, so the cache is keyed on color0's (mip_level, slice) as
+  // well as sample count. Caller-side invariants on the rest of the
+  // attachment set are the same as before.
+  const uint32_t cache_mip_level = color0.mip_level;
+  const uint32_t cache_slice = color0.slice;
+  TextureVK& frame_data_texture = TextureVK::Cast(
+      resolve_image_vk_ ? *resolve_image_vk_ : *color_image_vk_);
+  is_swapchain = frame_data_texture.IsSwapchainImage();
+  frame_data = frame_data_texture.GetCachedFrameData(
+      sample_count, cache_mip_level, cache_slice);
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
@@ -187,13 +205,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   frame_data.framebuffer = framebuffer;
   frame_data.render_pass = render_pass_;
 
-  if (resolve_image_vk_) {
-    TextureVK::Cast(*resolve_image_vk_)
-        .SetCachedFrameData(frame_data, sample_count);
-  } else {
-    TextureVK::Cast(*color_image_vk_)
-        .SetCachedFrameData(frame_data, sample_count);
-  }
+  frame_data_texture.SetCachedFrameData(frame_data, sample_count,
+                                        cache_mip_level, cache_slice);
 
   // If the resolve image exists and has mipmaps, transition mip levels besides
   // the base to shader read only in preparation for mipmap generation.
@@ -234,18 +247,23 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                          : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
   if (color_image_vk_) {
+    // Mirror the Vulkan render pass's `finalLayout` for the color attachment
+    // (see ComputeFinalLayout in render_pass_builder_vk.cc): swapchain and
+    // MSAA targets stay in eGeneral, but a non-swapchain, single-sampled
+    // color attachment transitions to eShaderReadOnlyOptimal on
+    // endRenderPass. Tracking it as eGeneral here desyncs the bookkeeping
+    // and produces an incorrect oldLayout on the next barrier (caught by
+    // Vulkan validation as VUID-vkCmdDraw-None-09600).
     TextureVK::Cast(*color_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetLayoutWithoutEncoding(
+            (is_swapchain || sample_count != SampleCount::kCount1)
+                ? vk::ImageLayout::eGeneral
+                : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
 
   // Set the initial viewport.
   const auto vp = Viewport{.rect = Rect::MakeSize(target_size)};
-  vk::Viewport viewport = vk::Viewport()
-                              .setWidth(vp.rect.GetWidth())
-                              .setHeight(-vp.rect.GetHeight())
-                              .setY(vp.rect.GetHeight())
-                              .setMinDepth(0.0f)
-                              .setMaxDepth(1.0f);
+  vk::Viewport viewport = ToVkViewport(vp);
   command_buffer_vk_.setViewport(0, 1, &viewport);
 
   // Set the initial scissor.
@@ -257,8 +275,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   command_buffer_vk_.setScissor(0, 1, &scissor);
 
   // Set the initial stencil reference.
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, 0u);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         0u);
 
   is_valid_ = true;
 }
@@ -299,8 +317,10 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
         // The bind point doesn't matter here since that information is present
         // in the render pass.
         attachments[count++] =
-            TextureVK::Cast(*attachment.texture).GetRenderTargetView();
+            TextureVK::Cast(*attachment.texture)
+                .GetRenderTargetView(attachment.mip_level, attachment.slice);
         if (attachment.resolve_texture) {
+          // The resolve texture resolves into its own base level/layer.
           attachments[count++] = TextureVK::Cast(*attachment.resolve_texture)
                                      .GetRenderTargetView();
         }
@@ -309,11 +329,13 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
 
   if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
     attachments[count++] =
-        TextureVK::Cast(*depth->texture).GetRenderTargetView();
+        TextureVK::Cast(*depth->texture)
+            .GetRenderTargetView(depth->mip_level, depth->slice);
   } else if (auto stencil = render_target_.GetStencilAttachment();
              stencil.has_value()) {
     attachments[count++] =
-        TextureVK::Cast(*stencil->texture).GetRenderTargetView();
+        TextureVK::Cast(*stencil->texture)
+            .GetRenderTargetView(stencil->mip_level, stencil->slice);
   }
 
   fb_info.setPAttachments(attachments.data());
@@ -376,8 +398,8 @@ void RenderPassVK::SetStencilReference(uint32_t value) {
     return;
   }
   current_stencil_ = value;
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         value);
 }
 
 // |RenderPass|
@@ -387,12 +409,7 @@ void RenderPassVK::SetBaseVertex(uint64_t value) {
 
 // |RenderPass|
 void RenderPassVK::SetViewport(Viewport viewport) {
-  vk::Viewport viewport_vk = vk::Viewport()
-                                 .setWidth(viewport.rect.GetWidth())
-                                 .setHeight(-viewport.rect.GetHeight())
-                                 .setY(viewport.rect.GetHeight())
-                                 .setMinDepth(0.0f)
-                                 .setMaxDepth(1.0f);
+  vk::Viewport viewport_vk = ToVkViewport(viewport);
   command_buffer_vk_.setViewport(0, 1, &viewport_vk);
 }
 
