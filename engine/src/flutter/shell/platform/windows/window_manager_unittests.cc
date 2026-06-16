@@ -3,15 +3,36 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_context.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_window_surface.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/window_manager.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
 
 namespace {
+
+using ::testing::NiceMock;
+using ::testing::Return;
+
+// Builds a mock |WindowSurface| whose lifecycle operations all succeed. Used to
+// keep the EGL surface lifecycle deterministic in tests so that resize paths
+// (e.g. |FlutterWindowsView::OnFrameGenerated|) do not perform real, flaky
+// cross-thread ANGLE/D3D calls against an actual GPU surface.
+std::unique_ptr<egl::MockWindowSurface> CreateMockWindowSurface() {
+  auto surface = std::make_unique<NiceMock<egl::MockWindowSurface>>();
+  ON_CALL(*surface, IsValid).WillByDefault(Return(true));
+  ON_CALL(*surface, MakeCurrent).WillByDefault(Return(true));
+  ON_CALL(*surface, SetVSyncEnabled).WillByDefault(Return(true));
+  ON_CALL(*surface, Destroy).WillByDefault(Return(true));
+  return surface;
+}
 
 class WindowManagerTest : public WindowsTest {
  public:
@@ -39,6 +60,24 @@ class WindowManagerTest : public WindowsTest {
     while (!signalled) {
       engine_->task_runner()->ProcessTasks();
     }
+
+    // Replace the engine's EGL manager with a permissive mock so that EGL
+    // surface creation and resizing are deterministic and never issue real,
+    // cross-thread GPU calls. These tests do not exercise real EGL rendering,
+    // and without this, tests that drive |FlutterWindowsView::OnFrameGenerated|
+    // from the test thread race the engine's raster thread for the EGL context,
+    // intermittently producing an EGL_BAD_ACCESS and a crash. Installed here,
+    // before any windows (and thus render surfaces) are created.
+    auto egl_manager = std::make_unique<NiceMock<egl::MockManager>>();
+    ON_CALL(*egl_manager, CreateWindowSurface)
+        .WillByDefault([](HWND, size_t, size_t) {
+          return CreateMockWindowSurface();
+        });
+    ON_CALL(*egl_manager, render_context)
+        .WillByDefault(Return(&mock_egl_context_));
+    ON_CALL(mock_egl_context_, ClearCurrent).WillByDefault(Return(true));
+    ON_CALL(mock_egl_context_, MakeCurrent).WillByDefault(Return(true));
+    EngineModifier{engine_.get()}.SetEGLManager(std::move(egl_manager));
   }
 
   void TearDown() override { engine_->Stop(); }
@@ -52,6 +91,7 @@ class WindowManagerTest : public WindowsTest {
 
  private:
   std::unique_ptr<FlutterWindowsEngine> engine_;
+  NiceMock<egl::MockContext> mock_egl_context_;
   std::optional<flutter::Isolate> isolate_;
   RegularWindowCreationRequest regular_creation_request_{
       .preferred_size =
