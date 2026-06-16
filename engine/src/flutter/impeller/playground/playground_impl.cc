@@ -34,11 +34,17 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
       return std::make_unique<PlaygroundImplMTL>(switches);
 #endif  // IMPELLER_ENABLE_METAL
 #if IMPELLER_ENABLE_OPENGLES
-    case PlaygroundBackend::kOpenGLES:
-      return std::make_unique<PlaygroundImplGLES>(switches);
-    case PlaygroundBackend::kOpenGLESSDF:
+    case PlaygroundBackend::kOpenGLES: {
+      static std::shared_ptr<PlaygroundImplGLES::ShareableContext>
+          shared_context;
+      return std::make_unique<PlaygroundImplGLES>(switches, &shared_context);
+    }
+    case PlaygroundBackend::kOpenGLESSDF: {
+      static std::shared_ptr<PlaygroundImplGLES::ShareableContext>
+          shared_context;
       switches.flags.use_sdfs = true;
-      return std::make_unique<PlaygroundImplGLES>(switches);
+      return std::make_unique<PlaygroundImplGLES>(switches, &shared_context);
+    }
 #endif  // IMPELLER_ENABLE_OPENGLES
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:

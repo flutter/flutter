@@ -7,16 +7,25 @@
 
 #include "impeller/playground/playground_impl.h"
 
+#include "impeller/renderer/backend/gles/context_gles.h"
+
 namespace impeller {
 
 class PlaygroundImplGLES final : public PlaygroundImpl {
  public:
-  explicit PlaygroundImplGLES(PlaygroundSwitches switches);
+  struct ShareableContext;
+
+  explicit PlaygroundImplGLES(
+      PlaygroundSwitches switches,
+      std::shared_ptr<ShareableContext>* shared_context = nullptr);
 
   ~PlaygroundImplGLES();
 
   fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
+
+  static std::shared_ptr<ShareableContext> MakeContextGLES(
+      const PlaygroundSwitches& switches);
 
  private:
   class ReactorWorker;
@@ -42,6 +51,9 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   // |PlaygroundImpl|
   Playground::GLProcAddressResolver CreateGLProcAddressResolver()
       const override;
+
+  static Playground::GLProcAddressResolver CreateGLProcAddressResolver(
+      const PlaygroundSwitches& switches);
 
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 
