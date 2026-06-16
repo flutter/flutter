@@ -111,6 +111,7 @@ void _populateResidentCompilerInfoFile(String? residentCompilerInfoFilePathArgum
 
 @pragma('vm:entry-point', 'get')
 Future<void> main([List<String> args = const []]) async {
+  print('CUSTOM_VMSERVICE: main started, args: $args');
   if (args case ['--help']) {
     return;
   }
