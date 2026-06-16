@@ -115,29 +115,35 @@ Future<void> main([List<String> args = const []]) async {
   if (args case ['--help']) {
     return;
   }
-  await DartRuntimeService.initialize(
-    config: DartRuntimeServiceOptions(
-      enableLogging: Platform.environment.containsKey('VM_SERVICE_LOGGING'),
-      port: _port,
-      disableAuthCodes: _authCodesDisabled,
-      disableOriginCheck: _originCheckDisabled,
-      autoStart: _autoStart,
-      serveDevTools: _serveDevtools,
-      enableServicePortFallback: _enableServicePortFallback,
-      host: _ip,
-    ),
-    backendBuilder: (frontend) => DartRuntimeServiceVMBackend(
-      frontend: frontend,
-      signalWatch: _signalWatch ?? (sig) => const Stream.empty(),
-      runningIsolatesStream: _isolateRegistrationStreamController.stream,
-      ddsManager: DartDevelopmentServiceManager(
-        frontend: frontend,
-        launchOnStart: _waitForDdsToAdvertiseService ?? false,
-        printDtd: _printDtd,
-        host: _ddsIP ?? '127.0.0.1',
-        port: _ddsPort,
+  try {
+    print('CUSTOM_VMSERVICE: Initializing DartRuntimeService...');
+    await DartRuntimeService.initialize(
+      config: DartRuntimeServiceOptions(
+        enableLogging: true, // Force logging
+        port: _port,
+        disableAuthCodes: _authCodesDisabled,
+        disableOriginCheck: _originCheckDisabled,
+        autoStart: _autoStart,
+        serveDevTools: _serveDevtools,
+        enableServicePortFallback: _enableServicePortFallback,
+        host: _ip,
       ),
-      residentCompilerInfoFile: _residentCompilerInfoFile,
-    ),
-  );
+      backendBuilder: (frontend) => DartRuntimeServiceVMBackend(
+        frontend: frontend,
+        signalWatch: _signalWatch ?? (sig) => const Stream.empty(),
+        runningIsolatesStream: _isolateRegistrationStreamController.stream,
+        ddsManager: DartDevelopmentServiceManager(
+          frontend: frontend,
+          launchOnStart: _waitForDdsToAdvertiseService ?? false,
+          printDtd: _printDtd,
+          host: _ddsIP ?? '127.0.0.1',
+          port: _ddsPort,
+        ),
+        residentCompilerInfoFile: _residentCompilerInfoFile,
+      ),
+    );
+    print('CUSTOM_VMSERVICE: DartRuntimeService initialized successfully.');
+  } catch (e, st) {
+    print('CUSTOM_VMSERVICE: Failed to initialize DartRuntimeService: $e\n$st');
+  }
 }
