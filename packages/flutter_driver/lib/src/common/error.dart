@@ -58,5 +58,10 @@ void _defaultDriverLogger(String source, String message) {
     stderr.writeln('$source: $message');
   } on FileSystemException {
     // May encounter IO error: https://github.com/flutter/flutter/issues/69314
+  } on UnsupportedError {
+    // dart:io stderr is not implemented on web; fall back to print so the
+    // message still reaches the browser console.
+    // https://github.com/flutter/flutter/issues/186751
+    print('$source: $message'); // ignore: avoid_print
   }
 }

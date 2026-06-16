@@ -110,14 +110,19 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   gl.Disable(GL_DEPTH_TEST);
   gl.Disable(GL_STENCIL_TEST);
 
+  const auto destination_right =
+      destination_origin.x + source_region.GetWidth();
+  const auto destination_bottom =
+      destination_origin.y + source_region.GetHeight();
+
   gl.BlitFramebuffer(source_region.GetX(),       // srcX0
                      source_region.GetY(),       // srcY0
-                     source_region.GetWidth(),   // srcX1
-                     source_region.GetHeight(),  // srcY1
+                     source_region.GetRight(),   // srcX1
+                     source_region.GetBottom(),  // srcY1
                      destination_origin.x,       // dstX0
                      destination_origin.y,       // dstY0
-                     source_region.GetWidth(),   // dstX1
-                     source_region.GetHeight(),  // dstY1
+                     destination_right,          // dstX1
+                     destination_bottom,         // dstY1
                      GL_COLOR_BUFFER_BIT,        // mask
                      GL_NEAREST                  // filter
   );
@@ -155,12 +160,11 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
 
   if (!tex_descriptor.IsValid() ||
       source.GetRange().length !=
-          BytesPerPixelForPixelFormat(tex_descriptor.format) *
-              destination_region.Area()) {
+          BytesForTextureRegion(tex_descriptor.format,
+                                destination_region.GetWidth(),
+                                destination_region.GetHeight())) {
     return false;
   }
-
-  destination->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
 
   GLenum texture_type;
   GLenum texture_target;
@@ -203,6 +207,34 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   gl.BindTexture(texture_type, gl_handle.value());
   const GLvoid* tex_data =
       source.GetBuffer()->OnGetContents() + source.GetRange().offset;
+
+  // Block-compressed textures cannot be allocated empty and then filled with a
+  // sub-image; glCompressedTexImage2D redefines the entire mip level. Require
+  // the upload to cover the full mip level starting at the origin.
+  if (gles_format->is_compressed) {
+    const auto mip_width =
+        std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
+    const auto mip_height =
+        std::max<int32_t>(1, tex_descriptor.size.height >> mip_level);
+    if (destination_region.GetX() != 0 || destination_region.GetY() != 0 ||
+        destination_region.GetWidth() != mip_width ||
+        destination_region.GetHeight() != mip_height) {
+      VALIDATION_LOG << "Compressed textures must be uploaded as a full mip "
+                        "level starting at the origin.";
+      return false;
+    }
+    gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    gl.CompressedTexImage2D(texture_target,                // target
+                            mip_level,                     // LOD level
+                            gles_format->internal_format,  // internal format
+                            mip_width,                     // width
+                            mip_height,                    // height
+                            0u,                            // border
+                            source.GetRange().length,      // image size
+                            tex_data);                     // data
+    texture_gles.MarkSliceMipLevelInitialized(slice, mip_level);
+    return true;
+  }
 
   // GL_INVALID_OPERATION if the requested mip level has not been defined by
   // a previous glTexImage2D operation. Allocate the requested mip lazily on
@@ -325,8 +357,6 @@ bool BlitResizeTextureCommandGLES::Encode(const ReactorGLES& reactor) const {
     VALIDATION_LOG << "Texture blit fallback not implemented yet for GLES2.";
     return false;
   }
-
-  destination->SetCoordinateSystem(source->GetCoordinateSystem());
 
   GLuint read_fbo = GL_NONE;
   GLuint draw_fbo = GL_NONE;
