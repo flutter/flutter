@@ -1435,6 +1435,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       _scribbleFocusStatus == FlutterScribbleFocusStatusFocused) {
     NSAssert([selectedTextRange isKindOfClass:[FlutterTextRange class]],
              @"Expected a FlutterTextRange for range (got %@).", [selectedTextRange class]);
+
     FlutterTextRange* flutterTextRange = (FlutterTextRange*)selectedTextRange;
     if (flutterTextRange.range.length > 0) {
       [self.textInputDelegate flutterTextInputView:self showToolbar:_textInputClient];
