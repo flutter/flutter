@@ -820,10 +820,7 @@ assembleProfile
   group('java heap space', () {
     testWithoutContext('pattern', () {
       expect(javaHeapSpaceHandler.test('> Java heap space'), isTrue);
-      expect(
-        javaHeapSpaceHandler.test('java.lang.OutOfMemoryError: Java heap space'),
-        isTrue,
-      );
+      expect(javaHeapSpaceHandler.test('java.lang.OutOfMemoryError: Java heap space'), isTrue);
     });
 
     testUsingContext(
@@ -839,7 +836,9 @@ assembleProfile
         expect(testLogger.statusText, contains('Java heap space'));
         expect(
           testLogger.statusText,
-          contains('https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory'),
+          contains(
+            'https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory',
+          ),
         );
       },
       overrides: <Type, Generator>{
