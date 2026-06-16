@@ -110,14 +110,19 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   gl.Disable(GL_DEPTH_TEST);
   gl.Disable(GL_STENCIL_TEST);
 
+  const auto destination_right =
+      destination_origin.x + source_region.GetWidth();
+  const auto destination_bottom =
+      destination_origin.y + source_region.GetHeight();
+
   gl.BlitFramebuffer(source_region.GetX(),       // srcX0
                      source_region.GetY(),       // srcY0
-                     source_region.GetWidth(),   // srcX1
-                     source_region.GetHeight(),  // srcY1
+                     source_region.GetRight(),   // srcX1
+                     source_region.GetBottom(),  // srcY1
                      destination_origin.x,       // dstX0
                      destination_origin.y,       // dstY0
-                     source_region.GetWidth(),   // dstX1
-                     source_region.GetHeight(),  // dstY1
+                     destination_right,          // dstX1
+                     destination_bottom,         // dstY1
                      GL_COLOR_BUFFER_BIT,        // mask
                      GL_NEAREST                  // filter
   );
