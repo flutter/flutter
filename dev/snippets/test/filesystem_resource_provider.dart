@@ -249,16 +249,12 @@ class _PhysicalFolder extends _PhysicalResource implements Folder {
 
   @override
   _PhysicalFile getChildAssumingFile(String relPath) {
-    final String canonicalPath = canonicalizePath(relPath);
-    final file = io.File(canonicalPath);
-    return _PhysicalFile(file);
+    return getFile(relPath);
   }
 
   @override
   _PhysicalFolder getChildAssumingFolder(String relPath) {
-    final String canonicalPath = canonicalizePath(relPath);
-    final directory = io.Directory(canonicalPath);
-    return _PhysicalFolder(directory);
+    return getFolder(relPath);
   }
 
   @override
@@ -280,6 +276,20 @@ class _PhysicalFolder extends _PhysicalResource implements Folder {
     } on io.FileSystemException catch (exception) {
       throw _wrapException(exception);
     }
+  }
+
+  @override
+  _PhysicalFile getFile(String relPath) {
+    final String canonicalPath = canonicalizePath(relPath);
+    final file = io.File(canonicalPath);
+    return _PhysicalFile(file);
+  }
+
+  @override
+  _PhysicalFolder getFolder(String relPath) {
+    final String canonicalPath = canonicalizePath(relPath);
+    final directory = io.Directory(canonicalPath);
+    return _PhysicalFolder(directory);
   }
 
   @override
