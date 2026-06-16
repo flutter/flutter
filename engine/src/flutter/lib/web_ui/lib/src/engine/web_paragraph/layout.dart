@@ -23,6 +23,7 @@ class TextLayout {
 
   final WebParagraph paragraph;
 
+  static const epsilon = 0.001;
   bool _isFirstLayout = true;
 
   late final AllCodeUnitFlags codeUnitFlags;
@@ -512,8 +513,6 @@ class TextLayout {
     paragraph.paintBounds = ui.Rect.fromLTRB(left, top, right, bottom);
   }
 
-  static const epsilon = 0.001;
-
   List<ui.TextBox> getBoxesForRange(
     int start,
     int end,
@@ -572,18 +571,16 @@ class TextLayout {
             bottom = firstRect.top + line.advance.bottom;
             assert((line.advance.height - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.strut:
-            if (paragraph.paragraphStyle.strutStyle == null) {
+            final double baseline = line.fontBoundingBoxAscent;
+            final WebStrutStyle? strutStyle = paragraph.paragraphStyle.strutStyle;
+
+            if (strutStyle == null) {
               top = firstRect.top + line.advance.top;
               bottom = firstRect.top + line.advance.bottom;
-              break;
+            } else {
+              top = baseline - strutStyle.strutAscent;
+              bottom = baseline + strutStyle.strutDescent;
             }
-            final WebStrutStyle strutStyle = paragraph.paragraphStyle.strutStyle!;
-            top =
-                firstRect.top +
-                line.advance.top +
-                line.fontBoundingBoxAscent -
-                strutStyle.strutAscent;
-            bottom = top + strutStyle.strutAscent + strutStyle.strutDescent;
           case ui.BoxHeightStyle.includeLineSpacingMiddle:
             final double shift = (line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent) / 2;
             top = line.advance.top + shift;
@@ -1079,18 +1076,24 @@ class PlaceholderCluster extends WebCluster {
 
 // This is the minimal range of cluster that belongs to the same bidi run and to the same style block
 abstract class LineBlock {
-  LineBlock(this.span, this._bidiLevel, this.clusterRange, this.textRange, this.shiftFromLineStart);
-
-  double? get _styleHeight;
-
-  double get _heightMultiplier {
-    if (_styleHeight == null) {
-      return 1.0;
+  LineBlock(this.span, this._bidiLevel, this.clusterRange, this.textRange, this.shiftFromLineStart)
+    : _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent,
+      _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent {
+    if (span.style.height == null) {
+      return;
     }
-    return (_styleHeight! * span.style.fontSize!) / _rawHeight;
+    final double runHeight = span.style.height! * span.style.fontSize!;
+    final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
+    if (span.style.leadingDistribution == ui.TextLeadingDistribution.even) {
+      final double extraLeading = (runHeight - fontHeight) / 2;
+      _multipliedFontBoundingBoxAscent += extraLeading;
+      _multipliedFontBoundingBoxDescent += extraLeading;
+    } else {
+      final double multiplier = runHeight / fontHeight;
+      _multipliedFontBoundingBoxAscent *= multiplier;
+      _multipliedFontBoundingBoxDescent *= multiplier;
+    }
   }
-
-  double get _rawHeight => rawFontBoundingBoxAscent + rawFontBoundingBoxDescent;
 
   // TODO(jlavrova): Make this private and don't use it anywhere outside this class.
   double get rawFontBoundingBoxAscent => span.fontBoundingBoxAscent;
@@ -1098,11 +1101,14 @@ abstract class LineBlock {
   // TODO(jlavrova): Make this private and don't use it anywhere outside this class.
   double get rawFontBoundingBoxDescent => span.fontBoundingBoxDescent;
 
-  double get multipliedHeight => _rawHeight * _heightMultiplier;
+  double get multipliedHeight =>
+      _multipliedFontBoundingBoxAscent + _multipliedFontBoundingBoxDescent;
 
-  double get multipliedFontBoundingBoxAscent => rawFontBoundingBoxAscent * _heightMultiplier;
+  double _multipliedFontBoundingBoxAscent;
+  double get multipliedFontBoundingBoxAscent => _multipliedFontBoundingBoxAscent;
 
-  double get multipliedFontBoundingBoxDescent => rawFontBoundingBoxDescent * _heightMultiplier;
+  double _multipliedFontBoundingBoxDescent;
+  double get multipliedFontBoundingBoxDescent => _multipliedFontBoundingBoxDescent;
 
   final ParagraphSpan span;
 
@@ -1159,9 +1165,6 @@ class TextBlock extends LineBlock {
   @override
   double spanShiftFromLineStart;
 
-  @override
-  double? get _styleHeight => style.height;
-
   int get visualClusterStart => isLtr ? clusterRange.start : clusterRange.end - 1;
   int get visualClusterEnd => isLtr ? clusterRange.end : clusterRange.start - 1;
 
@@ -1210,9 +1213,6 @@ class PlaceholderBlock extends LineBlock {
 
   @override
   final double spanShiftFromLineStart;
-
-  @override
-  double? get _styleHeight => span.style.height;
 
   void calculatePlaceholderTop(double lineAscent, double lineDescent) {
     double baselineAdjustment = 0;

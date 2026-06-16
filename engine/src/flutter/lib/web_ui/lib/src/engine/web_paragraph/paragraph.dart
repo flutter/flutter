@@ -457,7 +457,8 @@ class WebTextStyle implements ui.TextStyle {
   void applyToContext(DomCanvasRenderingContext2D context) {
     // Setup all the font-affecting attributes
     // Set 'lang' attribute as a combination of locale+language
-    context.font = _buildCssFontString();
+    final String cssFontString = _buildCssFontString();
+    context.font = cssFontString;
     context.letterSpacing = _buildLetterSpacingString();
     context.wordSpacing = _buildWordSpacingString();
     context.lang = _buildLangString();
@@ -643,7 +644,8 @@ class TextSpan extends ParagraphSpan {
     // Canvas2D will return all clusters placed right to left starting from 0.
     // Also, we have a separate (possibly, different) textDirection for the ellipsis.
     layoutContext.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
-    return layoutContext.measureText(text);
+    final DomTextMetrics result = layoutContext.measureText(text);
+    return result;
   }
 
   double? advanceWidth() {
