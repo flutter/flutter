@@ -225,11 +225,21 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
   }
 
   void _scopeFocusChangeListener() {
-    if (_viewHasFocus == _scopeNode.hasFocus || !_scopeNode.hasFocus) {
+    // [FocusScopeNode.hasFocus] is also true when the focus is held by a
+    // descendant view (for example a child window rendered through a
+    // [ViewAnchor]), whose scope is nested under this view's scope. Reacting to
+    // that would make a background view request native focus and pull its
+    // window to the front when a nested view is focused. Only react when the
+    // primary focus is hosted by this view itself, which is the case when the
+    // nearest enclosing view of the focused node is this view.
+    final BuildContext? focusContext = FocusManager.instance.primaryFocus?.context;
+    final focusInThisView =
+        focusContext?.getInheritedWidgetOfExactType<_ViewScope>()?.view == widget.view;
+    if (_viewHasFocus == focusInThisView || !focusInThisView) {
       return;
     }
-    // Scope has gained focus, and it doesn't match the view focus, so inform
-    // the view so it knows to change its focus.
+    // Focus has moved into this view, and the view isn't focused natively yet,
+    // so inform the engine so it knows to change its focus.
     WidgetsBinding.instance.platformDispatcher.requestViewFocusChange(
       direction: ViewFocusDirection.forward,
       state: ViewFocusState.focused,
