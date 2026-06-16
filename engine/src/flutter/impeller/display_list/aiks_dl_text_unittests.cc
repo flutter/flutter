@@ -1184,5 +1184,41 @@ TEST_P(AiksTest, TextWithShadowAndPosition) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, HandlesMissingAndPlaceholderGlyphs) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+
+  // Use a font fixture and a string with characters likely not in the font
+  constexpr const char* font_fixture = "Roboto-Regular.ttf";
+  auto mapping = flutter::testing::OpenFixtureAsSkData(font_fixture);
+  ASSERT_TRUE(mapping);
+
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), 48);
+
+  // String containing standard and some obscure/unsupported characters
+  const std::string text =
+      "Hello \U0001F600 World \u2603 \x1D15E";  // Emoji and rare symbols
+
+  auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
+  ASSERT_TRUE(blob);
+
+  // This call goes through MakeTextFrameFromTextBlobSkia, which uses
+  // TypographerContextSkia and will hit the modified logic.
+  auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto dl_text = flutter::DlTextImpeller::Make(text_frame);
+
+  // Draw the text. The important part is that this doesn't crash,
+  // and even missing glyphs are handled (e.g., by drawing degenerate tris).
+  builder.DrawText(dl_text, 50, 100, DlPaint(DlColor::kGreen()));
+
+  // Open the playground to visually inspect what is rendered.
+  // We expect "Hello World" to render, and the missing glyphs
+  // to not cause a crash, potentially rendering as empty spaces.
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

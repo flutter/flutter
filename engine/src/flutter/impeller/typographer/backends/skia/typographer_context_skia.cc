@@ -525,7 +525,10 @@ TypographerContextSkia::CollectNewGlyphs(
         const auto& font_glyph_bounds =
             font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
-        if (!font_glyph_bounds.has_value()) {
+        // Treat placeholder glyphs as missing so they are forced to be packed
+        // into the atlas.
+        if (!font_glyph_bounds.has_value() ||
+            font_glyph_bounds.value().is_placeholder) {
           new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
           auto glyph_bounds = ComputeGlyphSize(
               sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));

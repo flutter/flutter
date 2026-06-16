@@ -155,8 +155,16 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
 
     if (!font_atlas) {
       VALIDATION_LOG << "Could not find font in the atlas.";
-      // We will not find glyph bounds data for any characters in this run.
-      break;
+      // Emit degenerate triangles for ALL glyphs in this run to maintain buffer
+      // count.
+      for (size_t g = 0; g < run.GetGlyphPositions().size(); ++g) {
+        for ([[maybe_unused]] const Point& point : unit_points) {
+          vtx.uv = Point(0, 0);
+          vtx.position = Point(0, 0);
+          vtx_contents[i++] = vtx;
+        }
+      }
+      continue;  // Skip to next run
     }
 
     // Adjust glyph position based on the subpixel rounding used by the font.
@@ -199,6 +207,13 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
       if (frame_bounds.is_placeholder) {
         VALIDATION_LOG << "Frame bounds are not present in the atlas "
                        << font_atlas;
+        // Emit degenerate triangles to maintain buffer count and avoid drawing
+        // garbage.
+        for ([[maybe_unused]] const Point& point : unit_points) {
+          vtx.uv = Point(0, 0);
+          vtx.position = Point(0, 0);
+          vtx_contents[i++] = vtx;
+        }
         continue;
       }
 
