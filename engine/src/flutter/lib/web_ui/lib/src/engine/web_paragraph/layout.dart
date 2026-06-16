@@ -705,11 +705,7 @@ class TextLayout {
         // We didn't find a line that contains the offset. All previous lines are placed above it and this one - below.
         // Actually, it's only possible for the first line (no lines before) because lines cover all vertical space.
         assert(lineNum == 1);
-        return ui.TextPosition(
-          offset: line.textClusterRange.start,
-          /*affinity: ui.TextAffinity.downstream,*/
-        );
-      } else if (line.advance.bottom < offset.dy) {
+      } else if (line.advance.bottom < offset.dy && (lineNum != lines.length)) {
         // We are not there yet; we need a line closest to the offset.
         continue;
       }
@@ -728,12 +724,17 @@ class TextLayout {
           // We are not there yet; we need a block containing the offset (or the closest to it)
           continue;
         } else if (left > offset.dx) {
-          return ui.TextPosition(
-            offset: line.textClusterRange.end - 1,
-            /*affinity: ui.TextAffinity.downstream,*/
-          );
+          // This must be the very left block visually or we would find the block before
+          final LineBlock firstVisualBlockInLine = line.visualBlocks.first;
+          if (firstVisualBlockInLine.isLtr) {
+            return ui.TextPosition(offset: firstVisualBlockInLine.clusterRange.start);
+          } else {
+            return ui.TextPosition(
+              offset: firstVisualBlockInLine.clusterRange.end,
+              affinity: ui.TextAffinity.upstream,
+            );
+          }
         }
-
         if (WebParagraphDebug.logging) {
           WebParagraphDebug.log('found block: $block $left:$right vs $offset');
         }
@@ -757,10 +758,10 @@ class TextLayout {
             if (offset.dx - left <= right - offset.dx) {
               position = block.isLtr
                   ? ui.TextPosition(offset: cluster.start)
-                  : ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream);
+                  : ui.TextPosition(offset: cluster.end - 1, affinity: ui.TextAffinity.upstream);
             } else {
               position = block.isLtr
-                  ? ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream)
+                  ? ui.TextPosition(offset: cluster.end - 1, affinity: ui.TextAffinity.upstream)
                   : ui.TextPosition(offset: cluster.start);
             }
             return position;
@@ -769,23 +770,25 @@ class TextLayout {
         // We found the block but not the cluster? How could that happen
         assert(false);
       }
-
-      // We didn't find the block containing our offset and
-      // we didn't find the block that is on the right of the offset
-      // So all the blocks are on the left
-      return paragraph.text.isEmpty
-          ? const ui.TextPosition(offset: 0)
-          : ui.TextPosition(
-              offset: line.textClusterRange.end - 1,
-              /*affinity: ui.TextAffinity.downstream,*/
-            );
+      // This must be the last block in the line
+      final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
+      return lastVisualBlockInLine.isLtr
+          ? ui.TextPosition(
+              offset: lastVisualBlockInLine.clusterRange.end,
+              affinity: ui.TextAffinity.upstream,
+            )
+          : ui.TextPosition(offset: lastVisualBlockInLine.clusterRange.start);
     }
     // We didn't find the line containing our offset and
     // we didn't find the line that is down from the offset
-    // So all the line are above the offset
-    return paragraph.text.isEmpty
-        ? const ui.TextPosition(offset: 0)
-        : ui.TextPosition(offset: paragraph.text.length, affinity: ui.TextAffinity.upstream);
+    // So all the line are above the offset and we need to return the last position on the last line
+    final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
+    return lastVisualBlockInLine.isLtr
+        ? ui.TextPosition(
+            offset: lastVisualBlockInLine.clusterRange.end,
+            affinity: ui.TextAffinity.upstream,
+          )
+        : ui.TextPosition(offset: lastVisualBlockInLine.clusterRange.start);
   }
 
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
