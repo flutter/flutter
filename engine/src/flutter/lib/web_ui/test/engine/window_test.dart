@@ -821,4 +821,72 @@ void testMain() {
       expect(myWindow.physicalSize, initialPhysicalSize);
     });
   });
+
+  group('browser resize metrics deduplication', () {
+    final DomEventTarget resizeEventTarget = domWindow.visualViewport ?? domWindow;
+    late int metricsChangedCount;
+
+    Future<void> dispatchResizeEvent() async {
+      resizeEventTarget.dispatchEvent(createDomEvent('Event', 'resize'));
+      // Resize events are delivered through an asynchronous broadcast stream.
+      await Future<void>.delayed(Duration.zero);
+    }
+
+    setUp(() {
+      metricsChangedCount = 0;
+      dispatcher.onMetricsChanged = () {
+        metricsChangedCount++;
+      };
+    });
+
+    tearDown(() {
+      dispatcher.onMetricsChanged = null;
+      myWindow.debugPhysicalSizeOverride = null;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
+    });
+
+    test('notifies only once for redundant resize events', () async {
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 1);
+
+      await dispatchResizeEvent();
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 1);
+    });
+
+    test('notifies again when the physical size changes', () async {
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 1);
+
+      // Sizes taller than the viewport keep the computed keyboard insets
+      // non-negative.
+      myWindow.debugPhysicalSizeOverride = const ui.Size(5000.0, 5000.0);
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 2);
+
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 2);
+
+      myWindow.debugPhysicalSizeOverride = const ui.Size(6000.0, 6000.0);
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 3);
+    });
+
+    test('notifies when the device pixel ratio changes', () async {
+      // Freeze the physical size so only the device-pixel-ratio change can
+      // drive the notification. Without this the dpr-scaled physical size would
+      // change too, and `sizeChanged` alone would satisfy the gate — masking
+      // whether the `dprChanged` clause works.
+      myWindow.debugPhysicalSizeOverride = const ui.Size(5000.0, 5000.0);
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 1);
+
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.7);
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 2);
+
+      await dispatchResizeEvent();
+      expect(metricsChangedCount, 2);
+    });
+  });
 }
