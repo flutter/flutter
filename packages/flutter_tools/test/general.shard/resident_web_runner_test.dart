@@ -1410,6 +1410,39 @@ name: my_app
   );
 
   testUsingContext(
+    'ResidentWebRunner forwards platform args when starting a web app',
+    () async {
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      final ResidentRunner runner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        platformArgs: <String, Object?>{'no-launch-chrome': true},
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+      );
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(runner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(mockDevice.lastPlatformArgs, isNotNull);
+      expect(mockDevice.lastPlatformArgs!['no-launch-chrome'], true);
+      expect(mockDevice.lastPlatformArgs!['uri'], isNotNull);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
     'Exits when initial compile fails',
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
@@ -2227,6 +2260,7 @@ class FakeDevice extends Fake implements WebDevice {
   int count = 0;
 
   bool isRunning = false;
+  Map<String, dynamic>? lastPlatformArgs;
 
   @override
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
@@ -2249,6 +2283,7 @@ class FakeDevice extends Fake implements WebDevice {
     String? userIdentifier,
   }) async {
     isRunning = true;
+    lastPlatformArgs = platformArgs;
     return LaunchResult.succeeded();
   }
 
@@ -2299,7 +2334,10 @@ class FakeAppConnection extends Fake implements AppConnection {
   }
 }
 
-class FakeChromeDevice extends Fake implements ChromiumDevice {}
+class FakeChromeDevice extends FakeDevice implements ChromiumDevice {
+  @override
+  final ChromiumLauncher chromeLauncher = TestChromiumLauncher();
+}
 
 class FakeWipDebugger extends Fake implements WipDebugger {}
 
