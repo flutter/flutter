@@ -830,7 +830,7 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     if (!shouldCheckAnnotation) {
       return;
     }
-    final NodeList<Expression>? arguments = node.arguments?.arguments;
+    final NodeList<Argument>? arguments = node.arguments?.arguments;
     if (arguments == null || arguments.length != 1) {
       _addErrorWithLineInfo(
         node,
@@ -838,7 +838,7 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
       );
       return;
     }
-    final Expression deprecationNotice = arguments.first;
+    final Argument deprecationNotice = arguments.first;
     if (deprecationNotice is! AdjacentStrings) {
       _addErrorWithLineInfo(node, error: 'Deprecation notice must be an adjacent string.');
       return;
@@ -1138,7 +1138,7 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
   static final Pattern _skipTestTrackingBugPattern = RegExp(
     r'// .*https+?://github.com/.*/issues/\d+',
   );
-  bool _hasValidJustificationComment(Label skipLabel) {
+  bool _hasValidJustificationComment(AstNode skipLabel) {
     return hasInlineIgnore(skipLabel, parseResult, _skipTestIntentionalPattern) ||
         hasInlineIgnore(skipLabel, parseResult, _skipTestTrackingBugPattern);
   }
@@ -1146,10 +1146,10 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
   @override
   T? visitMethodInvocation(MethodInvocation node) {
     if (isTestMethod(node.methodName.toString())) {
-      for (final Expression argument in node.argumentList.arguments) {
-        if (argument is NamedExpression &&
-            argument.name.label.name == 'skip' &&
-            !_hasValidJustificationComment(argument.name)) {
+      for (final Argument argument in node.argumentList.arguments) {
+        if (argument is NamedArgument &&
+            argument.name.lexeme == 'skip' &&
+            !_hasValidJustificationComment(argument)) {
           skips.add(_getLine(parseResult, argument.beginToken.charOffset));
         }
       }

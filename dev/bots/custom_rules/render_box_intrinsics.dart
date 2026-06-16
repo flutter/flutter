@@ -96,7 +96,7 @@ class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
   void visitClassDeclaration(ClassDeclaration node) {
     // Ignore the RenderBox class implementation: that's the only place the
     // compute* methods are supposed to be called.
-    if (node.name.lexeme != 'RenderBox') {
+    if (node.namePart.typeName.lexeme != 'RenderBox') {
       super.visitClassDeclaration(node);
     }
   }
