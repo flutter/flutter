@@ -122,7 +122,16 @@ DlRect EmbeddedViewParams::ApplyOverscrollStretch(
   StretchAxis(y_stretch, viewport_rect.GetTop(), viewport_rect.GetHeight(), top,
               bottom);
 
-  return DlRect::MakeLTRB(left, top, right, bottom);
+  const DlRect stretched_rect = DlRect::MakeLTRB(left, top, right, bottom);
+
+  // The platform view's child is rasterized at its natural position relative to
+  // the box origin, then the interior shader remaps it into the stretched
+  // region. The RenderEffect input is clipped to the box, so the box must
+  // contain BOTH the natural content (so nothing is clipped before sampling)
+  // and the stretched output (so the result isn't clipped) -- i.e. their union.
+  // Using only the stretched rect would clip the natural content on the side the
+  // box moved toward, shifting the interior.
+  return stretched_rect.Union(natural_screen_rect);
 }
 
 DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(DlRect view_bounds) {
