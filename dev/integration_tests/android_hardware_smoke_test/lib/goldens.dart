@@ -40,7 +40,7 @@ Future<void> handleGoldenRequest(
       if (settleFuture != null) {
         await settleFuture;
       }
-      for (int i = 0; i < 3; i++) {
+      for (var i = 0; i < 3; i++) {
         await WidgetsBinding.instance.endOfFrame;
       }
 
@@ -60,8 +60,7 @@ Future<void> handleGoldenRequest(
       final Offset position = renderObject.localToGlobal(Offset.zero);
       final Size size = renderObject.size;
       // We can assume one window for these tests since they are android-only.
-      final double devicePixelRatio =
-          ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+      final double devicePixelRatio = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
 
       final int x = (position.dx * devicePixelRatio).round();
       final int y = (position.dy * devicePixelRatio).round();
@@ -86,9 +85,7 @@ Future<void> handleGoldenRequest(
         resultImageBytes,
         goldenVariantValue,
       );
-      completer.complete(<String, Object?>{
-        'message': failureMessage ?? 'Rendered $testName',
-      });
+      completer.complete(<String, Object?>{'message': failureMessage ?? 'Rendered $testName'});
     } else {
       completer.complete(<String, Object?>{
         'message': 'Rendered $testName',
@@ -98,8 +95,7 @@ Future<void> handleGoldenRequest(
   } catch (e, stackTrace) {
     // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      'message':
-          'Error occurred during golden request handling: $e\n$stackTrace',
+      'message': 'Error occurred during golden request handling: $e\n$stackTrace',
     });
   }
 }
@@ -147,10 +143,7 @@ Future<void> _writeBytesToFile(String filePath, Uint8List bytes) async {
   await file.writeAsBytes(bytes);
 }
 
-Future<void> _copyGoldenAssetToTemp(
-  String goldenAssetPath,
-  String tempGoldenPath,
-) async {
+Future<void> _copyGoldenAssetToTemp(String goldenAssetPath, String tempGoldenPath) async {
   try {
     final ByteData byteData = await rootBundle.load(goldenAssetPath);
     final Uint8List bytes = byteData.buffer.asUint8List(
@@ -189,9 +182,7 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   final RenderRepaintBoundary boundary = renderObject;
   final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
   try {
-    final ByteData? byteData = await image.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     if (byteData == null) {
       throw StateError(
         'Failed to capture screenshot for $testName: ui.Image.toByteData returned null.',
