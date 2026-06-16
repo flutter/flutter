@@ -35,6 +35,9 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
   void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass);
 
+  bool AddCompletionCallback(
+      impeller::CommandBuffer::CompletionCallback completion_callback);
+
   bool CopyBufferToTexture(DeviceBuffer& source,
                            size_t source_offset,
                            size_t source_length,
@@ -73,6 +76,9 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   std::shared_ptr<impeller::BlitPass> GetOrCreateBlitPass();
 
   std::vector<Encodable> encodables_;
+  std::vector<impeller::CommandBuffer::CompletionCallback>
+      completion_callbacks_;
+  bool submitted_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
 };
