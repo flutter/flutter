@@ -303,7 +303,6 @@ object FlutterPluginUtils {
     internal fun shouldForceVersionCodeIgnoringAbi(project: Project): Boolean =
         project.findProperty(PROP_FORCE_VERSION_CODE_IGNORING_ABI)?.toString()?.toBoolean() ?: false
 
-
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
      *
