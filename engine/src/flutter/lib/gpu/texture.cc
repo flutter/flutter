@@ -39,11 +39,6 @@ std::shared_ptr<impeller::Texture> Texture::GetTexture() {
   return texture_;
 }
 
-void Texture::SetCoordinateSystem(
-    impeller::TextureCoordinateSystem coordinate_system) {
-  texture_->SetCoordinateSystem(coordinate_system);
-}
-
 // Returns the size in pixels of the given dimension at `mip_level`, clamped
 // at 1, matching standard mip-chain semantics. The Dart-side helper
 // `Texture.getMipLevelSizeInBytes` uses the same `max(1, dim >> level)`
@@ -174,7 +169,6 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            int width,
                                            int height,
                                            int sample_count,
-                                           int coordinate_system,
                                            int texture_type,
                                            bool enable_render_target_usage,
                                            bool enable_shader_read_usage,
@@ -222,20 +216,10 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
     return false;
   }
 
-  texture->SetCoordinateSystem(
-      flutter::gpu::ToImpellerTextureCoordinateSystem(coordinate_system));
-
   auto res = fml::MakeRefCounted<flutter::gpu::Texture>(std::move(texture));
   res->AssociateWithDartWrapper(wrapper);
 
   return true;
-}
-
-void InternalFlutterGpu_Texture_SetCoordinateSystem(
-    flutter::gpu::Texture* wrapper,
-    int coordinate_system) {
-  return wrapper->SetCoordinateSystem(
-      flutter::gpu::ToImpellerTextureCoordinateSystem(coordinate_system));
 }
 
 bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,

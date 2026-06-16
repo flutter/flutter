@@ -540,6 +540,10 @@ bool CapabilitiesVK::Supports32BitPrimitiveIndices() const {
   return true;
 }
 
+bool CapabilitiesVK::SupportsManuallyMippedTextures() const {
+  return true;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
