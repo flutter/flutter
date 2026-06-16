@@ -165,10 +165,6 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
       Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
   SHUTDOWN_ON_ERROR(result);
 
-  if (is_custom_vmservice) {
-    return true;
-  }
-
   // Set the HTTP server's ip.
   std::string host = server_ip;
   if (host.empty()) {
