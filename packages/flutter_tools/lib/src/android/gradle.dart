@@ -27,7 +27,10 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../platform_plugins.dart';
+import '../plugins.dart';
 import '../project.dart';
 import 'android_builder.dart';
 import 'android_studio.dart';
@@ -569,38 +572,34 @@ class AndroidGradleBuilder implements AndroidBuilder {
       options.add('-Psplit-per-abi=true');
     }
 
-    // Query AGP version from the host app.
-    final RunResult agpResult = await _processUtils.run(
-      <String>[gradleExecutablePath, ':app:printAgpVersion', '-q'],
-      workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: <String, String>{
-        'JAVA_HOME': '/Users/mackall/development/flutter/engine/src/flutter/third_party/java/openjdk/Contents/Home/',
-      },
-    );
-    String? agpVersion;
-    for (final line in agpResult.stdout.split('\n')) {
-      if (line.startsWith('FLUTTER_AGP_VERSION=')) {
-        agpVersion = line.substring('FLUTTER_AGP_VERSION='.length).trim();
-        break;
-      }
-    }
-    if (agpVersion != null) {
-      // In a real implementation, the Flutter tool would iterate over all resolved plugins
-      // and write this version to their local.properties.
-      // For this prototype, we hardcode the paths to our test plugins.
-      final File samplePluginLocalProperties = project.directory.parent.childDirectory('sample_plugin').childDirectory('android').childFile('local.properties');
-      if (samplePluginLocalProperties.existsSync()) {
-        final String content = samplePluginLocalProperties.readAsStringSync();
-        if (!content.contains('agp.version=')) {
-          samplePluginLocalProperties.writeAsStringSync('$content\nagp.version=$agpVersion\n');
+    // Migrated plugins are consumed as Gradle composite (included) builds. AGP currently requires
+    // every build participating in a composite to resolve the same AGP version, so query the
+    // version the host app resolved and forward it to the included plugin builds.
+    //
+    // The version is passed as a JVM system property (-D) rather than written to each plugin's
+    // local.properties: -D propagates to every build in the invocation (unlike -P project
+    // properties), needs no on-disk mutation, and works for plugins resolved from the pub cache.
+    //
+    // This whole handshake (and the extra `printAgpVersion` Gradle invocation) is a stopgap.
+    // TODO(gmackall): Remove once AGP natively unifies its version across composite builds.
+    if (await _hasMigratedAndroidPlugins(project)) {
+      final RunResult agpResult = await _processUtils.run(
+        <String>[gradleExecutablePath, ':app:printAgpVersion', '-q'],
+        workingDirectory: project.android.hostAppGradleRoot.path,
+        environment: _java?.environment,
+      );
+      String? agpVersion;
+      for (final String line in LineSplitter.split(agpResult.stdout)) {
+        if (line.startsWith('FLUTTER_AGP_VERSION=')) {
+          agpVersion = line.substring('FLUTTER_AGP_VERSION='.length).trim();
+          break;
         }
       }
-      final File sampleConsumingPluginLocalProperties = project.directory.parent.childDirectory('sample_consuming_plugin').childDirectory('android').childFile('local.properties');
-      if (sampleConsumingPluginLocalProperties.existsSync()) {
-        final String content = sampleConsumingPluginLocalProperties.readAsStringSync();
-        if (!content.contains('agp.version=')) {
-          sampleConsumingPluginLocalProperties.writeAsStringSync('$content\nagp.version=$agpVersion\n');
-        }
+      if (agpVersion != null && agpVersion != 'unknown') {
+        options.add('-Dflutter.agp.version=$agpVersion');
+      } else {
+        _logger.printTrace('Could not determine the host app AGP version; '
+            'migrated plugin builds will use their default AGP version.');
       }
     }
 
@@ -696,6 +695,30 @@ class AndroidGradleBuilder implements AndroidBuilder {
         await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
       }
     }
+  }
+
+  // Whether any Android plugin used by [project] has opted into the composite-build
+  // ("migrated") model, signaled by `flutter.plugin.migrated=true` in its
+  // `android/gradle.properties`.
+  //
+  // TODO(gmackall): Remove once AGP natively unifies its version across composite builds; the
+  // AGP-version handshake that this gates is unneeded at that point.
+  Future<bool> _hasMigratedAndroidPlugins(FlutterProject project) async {
+    final List<Plugin> plugins = await findPlugins(project);
+    for (final Plugin plugin in plugins) {
+      if (!plugin.platforms.containsKey(AndroidPlugin.kConfigKey)) {
+        continue;
+      }
+      final File gradleProperties = _fileSystem
+          .directory(plugin.path)
+          .childDirectory('android')
+          .childFile('gradle.properties');
+      if (gradleProperties.existsSync() &&
+          gradleProperties.readAsStringSync().contains('flutter.plugin.migrated=true')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // Checks whether AGP has successfully stripped debug symbols from native libraries

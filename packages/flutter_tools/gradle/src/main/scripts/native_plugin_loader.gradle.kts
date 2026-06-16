@@ -74,7 +74,7 @@ class NativePluginLoader {
                 @Suppress("UNCHECKED_CAST")
                 val pluginMap = (androidPlugin as Map<String, Any>).toMutableMap()
                 pluginMap["is_migrated"] = isMigrated
-                
+
                 nativePlugins.add(pluginMap.toMap())
             }
         }

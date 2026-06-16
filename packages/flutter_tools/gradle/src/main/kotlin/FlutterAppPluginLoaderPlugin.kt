@@ -69,9 +69,9 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
                     pluginDirectory.exists()
                 ) { "Plugin directory does not exist: ${pluginDirectory.absolutePath}" }
                 val pluginName = androidPlugin["name"] as String
-                
+
                 val isMigrated = androidPlugin["is_migrated"] as? Boolean ?: false
-                
+
                 if (isMigrated) {
                     settings.includeBuild(pluginDirectory) {
                         name = pluginName

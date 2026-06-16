@@ -501,6 +501,74 @@ object FlutterPluginUtils {
         project.extensions.getByType(ApplicationExtension::class.java)
 
     /**
+     * Resolves the Flutter SDK root for [project], checking (in order) the `flutter.sdk` Gradle
+     * property, the `FLUTTER_ROOT` environment variable, and the `flutter.sdk` entry in the
+     * project's `local.properties`. Returns `null` if none are set.
+     *
+     * Shared between [FlutterPlugin] (applied to the app) and FlutterPluginGradlePlugin (applied
+     * inside migrated plugin composite builds) so both resolve the SDK identically.
+     */
+    internal fun resolveFlutterRoot(project: Project): File? {
+        (project.findProperty("flutter.sdk") as? String)?.let { return File(it) }
+        System.getenv("FLUTTER_ROOT")?.let { return File(it) }
+        val localPropertiesFile = File(project.projectDir, "local.properties")
+        if (localPropertiesFile.exists()) {
+            readPropertiesIfExist(localPropertiesFile).getProperty("flutter.sdk")?.let { return File(it) }
+        }
+        return null
+    }
+
+    /**
+     * Computes the Flutter engine artifact version string for [project].
+     *
+     * Returns `"+"` when building against a local engine (there is only one version available),
+     * otherwise `"1.0.0-<engine stamp>"` read from `<flutterRoot>/bin/cache/engine.stamp`.
+     */
+    internal fun getFlutterEngineVersion(
+        project: Project,
+        flutterRoot: File
+    ): String =
+        if (shouldProjectUseLocalEngine(project)) {
+            "+" // Match any version since there's only one.
+        } else {
+            val engineStampFile = File(flutterRoot, "bin/cache/engine.stamp")
+            "1.0.0-${engineStampFile.readText().trim()}"
+        }
+
+    /**
+     * Computes the Maven repository URL that hosts the Flutter engine artifacts for [project].
+     *
+     * Honors the `FLUTTER_STORAGE_BASE_URL` override (corp/mirror hosts), the engine realm
+     * (`<flutterRoot>/bin/cache/engine.realm`), and local engine builds.
+     */
+    internal fun getFlutterEngineRepoUrl(
+        project: Project,
+        flutterRoot: File
+    ): String {
+        if (shouldProjectUseLocalEngine(project)) {
+            return project.property(PROP_LOCAL_ENGINE_REPO) as String
+        }
+        val hostedRepository: String =
+            System.getenv(FlutterPluginConstants.FLUTTER_STORAGE_BASE_URL)
+                ?: FlutterPluginConstants.DEFAULT_MAVEN_HOST
+        val realmFile = File(flutterRoot, "bin/cache/engine.realm")
+        val engineRealm: String = if (realmFile.exists()) realmFile.readText().trim() else ""
+        val realmPrefix: String = if (engineRealm.isNotEmpty()) "$engineRealm/" else ""
+        return "$hostedRepository/${realmPrefix}download.flutter.io"
+    }
+
+    /**
+     * Adds the Flutter engine Maven repository (see [getFlutterEngineRepoUrl]) to [project].
+     */
+    internal fun addFlutterEngineMavenRepository(
+        project: Project,
+        flutterRoot: File
+    ) {
+        val repoUrl: String = getFlutterEngineRepoUrl(project, flutterRoot)
+        project.repositories.maven { it.setUrl(project.uri(repoUrl)) }
+    }
+
+    /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
      * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
      * e.g. `android-UpsideDownCake`.
