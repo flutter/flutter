@@ -1585,6 +1585,7 @@ String _getPrebuiltTarget(Platform platform, OperatingSystemUtils operatingSyste
     case TargetPlatform.linux_riscv64:
       return 'linux-riscv64';
     case TargetPlatform.linux_arm:
+      return 'linux-arm';
     case TargetPlatform.linux_arm64:
       return 'linux-arm64';
     case TargetPlatform.linux_x64:
