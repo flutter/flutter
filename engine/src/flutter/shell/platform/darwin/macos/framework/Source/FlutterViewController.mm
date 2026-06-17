@@ -795,29 +795,27 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return std::make_shared<flutter::AccessibilityBridgeMac>(engine, self);
 }
 
-- (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
-                                          commandQueue:(id<MTLCommandQueue>)commandQueue {
+- (BOOL)enableWideGamut {
   FlutterDartProject* project = _project ?: self.engine.project;
   BOOL enableWideGamut = project.enableWideGamut;
   const std::vector<std::string>& switches = self.engine.switches;
   if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
     enableWideGamut = NO;
   }
+  return enableWideGamut;
+}
+
+- (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
+                                          commandQueue:(id<MTLCommandQueue>)commandQueue {
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
                                  viewIdentifier:_viewIdentifier
-                                enableWideGamut:enableWideGamut];
+                                enableWideGamut:self.enableWideGamut];
 }
 
 - (void)updateWideGamutForScreen {
-  FlutterDartProject* project = _project ?: self.engine.project;
-  BOOL enableWideGamut = project.enableWideGamut;
-  const std::vector<std::string>& switches = self.engine.switches;
-  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
-    enableWideGamut = NO;
-  }
-  if (!enableWideGamut) {
+  if (!self.enableWideGamut) {
     return;
   }
   NSScreen* screen = self.view.window.screen;
