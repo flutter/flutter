@@ -32,6 +32,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
+import java.util.concurrent.Callable
 
 class FlutterPlugin : Plugin<Project> {
     private var project: Project? = null
@@ -313,7 +314,8 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo.layout.buildDirectory.dir(
                     "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter_jnilibs/${sourceSet.name}"
                 )
-            // Register the directory as a lazy provider rather than resolving it eagerly with
+            // Register the directory as a lazy Callable returning the resolved File rather than
+            // registering a Provider (which is disallowed in AGP 9.0+) or resolving it eagerly with
             // `.get().asFile`. Resolving eagerly captured the build directory at the time `:app` was
             // configured, which disagreed with the (lazily resolved) destination that `copyJniLibs`
             // writes to when `:app` was evaluated before its build directory had been redirected
@@ -325,7 +327,7 @@ class FlutterPlugin : Plugin<Project> {
             // `intermediates/flutter/<variant>` output directory, so that `copyJniLibs` writing into
             // it does not create overlapping task outputs (which undermine Gradle's incremental
             // checks, e.g. for flavored builds: https://github.com/flutter/flutter/issues/187388).
-            sourceSet.jniLibs.srcDir(jniLibsDir)
+            sourceSet.jniLibs.srcDir(Callable { jniLibsDir.get().asFile })
         }
 
         val flutterPlugin = this
@@ -759,6 +761,12 @@ class FlutterPlugin : Plugin<Project> {
             project.tasks.configureEach {
                 if (name == mergeJniLibsTaskName) {
                     dependsOn(copyJniLibsTaskProvider)
+                    // Explicitly register the output of `copyJniLibs` as an input directory of the
+                    // merge task. AGP fails to track variant-specific `jniLibs` directories added dynamically
+                    // during variant creation for up-to-date checks. Without this, Gradle would skip
+                    // the merge task as up-to-date when the Flutter task compilation outputs changed
+                    // (e.g. multi-ABI builds following a single-ABI build: https://github.com/flutter/flutter/issues/187388).
+                    inputs.dir(jniLibsDir)
                 }
             }
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
