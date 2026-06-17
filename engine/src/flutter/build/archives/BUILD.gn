@@ -188,7 +188,7 @@ zip_bundle("flutter_patched_sdk") {
 
 # You may also need to update
 # dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart
-# when adding/removing binaries from the entltlement config.
+# when adding/removing binaries from the entitlement config.
 generated_file("dart_sdk_entitlement_config") {
   outputs = [ "$target_gen_dir/dart_sdk_entitlements.txt" ]
 
