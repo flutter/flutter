@@ -348,7 +348,7 @@ bool _apkHasVersionCode(
   }
   final String aapt = fileSystem
       .directory(toolsDir)
-      .childFile(Platform.isWindows ? 'aapt.bat' : 'aapt')
+      .childFile(Platform.isWindows ? 'aapt.exe' : 'aapt')
       .path;
 
   String apkName = (productFlavor.isEmpty)
