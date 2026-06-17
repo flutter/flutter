@@ -170,7 +170,7 @@ platform_properties:
         ]
       os: Mac-15.7
       device_type: none
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -188,7 +188,7 @@ platform_properties:
       os: Mac-15.7
       device_type: none
       cpu: arm64
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -208,7 +208,7 @@ platform_properties:
       os: Mac-15.7
       tags: >
         ["devicelab", "hostonly", "mac"]
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -226,7 +226,7 @@ platform_properties:
       os: Mac-15.7
       device_type: none
       cpu: x86
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -245,7 +245,7 @@ platform_properties:
       os: Mac-15.7
       device_type: none
       cpu: x86
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -286,7 +286,7 @@ platform_properties:
         ]
       os: Mac-15.7
       device_os: iOS-18|iOS-26
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -305,7 +305,7 @@ platform_properties:
       os: Mac-15.7
       cpu: x86
       device_os: iOS-18|iOS-26
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -324,7 +324,7 @@ platform_properties:
       os: Mac-15.7
       cpu: arm64
       device_os: iOS-18|iOS-26
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -624,6 +624,7 @@ targets:
         {"build": "stable"}
     drone_dimensions:
       - os=Linux
+
 
   # This step runs on the release channel "stable", after the same commit SHA
   # has been run and built by Linux flutter_release_builder as part of a release
@@ -1756,7 +1757,7 @@ targets:
     properties:
       shard: android_engine_vulkan_tests
       tags: >
-        ["framework", "hostonly", "shard", "linux"]
+         ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -1768,7 +1769,7 @@ targets:
     properties:
       shard: android_engine_opengles_tests
       tags: >
-        ["framework", "hostonly", "shard", "linux"]
+         ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v9unmodified"},
@@ -1782,7 +1783,7 @@ targets:
     properties:
       shard: android_hardware_smoke_vulkan_tests
       tags: >
-        ["framework", "hostonly", "shard", "linux"]
+         ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -1795,7 +1796,7 @@ targets:
     properties:
       shard: android_hardware_smoke_opengles_tests
       tags: >
-        ["framework", "hostonly", "shard", "linux"]
+         ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v9unmodified"},
@@ -2362,6 +2363,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: static_path_tessellation_perf__timeline_summary
+
 
   # Uses Impeller.
   - name: Linux_pixel_7pro dynamic_path_stroke_tessellation_perf__timeline_summary
@@ -5548,7 +5550,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: ios_debug_workflow
       os: Mac-15.7
-      $flutter/osx_sdk: >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
         }
@@ -6805,12 +6807,12 @@ targets:
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
+    - dev/**
+    - packages/flutter_tools/**
+    - bin/**
+    - .ci.yaml
+    - engine/**
+    - DEPS
 
   - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -6837,6 +6839,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_home_scroll_perf__timeline_summary
+
 
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
@@ -6877,20 +6880,6 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: texture_impeller_windows
-
-  - name: Windows hello_world_windows_impeller
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    bringup: true
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "hostonly", "windows"]
-      dependencies: >-
-        [
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      task_name: hello_world_windows_impeller
 
   - name: Windows_arm64 hello_world_windows_impeller
     recipe: devicelab/devicelab_drone
@@ -7197,6 +7186,7 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos
 
+
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -7259,6 +7249,7 @@ targets:
     drone_dimensions:
       - os=Mac
       - cpu=x86
+
 
   - name: Mac_arm64 flutter_packaging
     recipe: packaging/packaging
