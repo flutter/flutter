@@ -79,6 +79,9 @@ DEF_SWITCH(
     "disable-vm-service",
     "Disable the Dart VM Service. The Dart VM Service is never available "
     "in release mode.")
+DEF_SWITCH(ExperimentalVMService,
+           "experimental-vm-service",
+           "Enable the experimental new VM Service.")
 DEF_SWITCH(DisableVMServicePublication,
            "disable-vm-service-publication",
            "Disable mDNS Dart VM Service publication.")

@@ -25,6 +25,24 @@ template("flutter_snapshot") {
   is_aot =
       flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
 
+  if (defined(invoker.output_aot_lib)) {
+    _unused_output_aot_lib = invoker.output_aot_lib
+    assert(_unused_output_aot_lib != "")
+  }
+
+  if (is_aot && (is_ios || is_mac || is_win)) {
+    invoker_target_name = target_name
+    compile_target = "_${target_name}_compile"
+    if (is_ios) {
+      snapshot_dir = "$target_gen_dir/ios"
+    } else if (is_mac) {
+      snapshot_dir = "$target_gen_dir/mac"
+    } else if (is_win) {
+      snapshot_dir = "$target_gen_dir/win"
+    }
+    snapshot_assembly = "$snapshot_dir/snapshot_assembly.S"
+  }
+
   kernel_output = "$target_gen_dir/kernel_blob.bin"
 
   extra_frontend_server_args = []
@@ -94,8 +112,7 @@ template("flutter_snapshot") {
 
     if (is_aot) {
       args += [ "--deterministic" ]
-      if (is_ios) {
-        snapshot_assembly = "$target_gen_dir/ios/snapshot_assembly.S"
+      if (is_ios || is_mac || is_win) {
         outputs += [ snapshot_assembly ]
         args += [
           "--snapshot_kind=app-aot-assembly",
@@ -108,6 +125,18 @@ template("flutter_snapshot") {
           output_aot_lib = "libapp.so"
         }
         libapp = "$target_gen_dir/android/libs/$android_app_abi/$output_aot_lib"
+        outputs += [ libapp ]
+        args += [
+          "--snapshot_kind=app-aot-elf",
+          "--elf=" + rebase_path(libapp),
+        ]
+      } else if (is_linux) {
+        if (defined(invoker.output_aot_lib)) {
+          output_aot_lib = invoker.output_aot_lib
+        } else {
+          output_aot_lib = "libapp.so"
+        }
+        libapp = "$root_out_dir/$output_aot_lib"
         outputs += [ libapp ]
         args += [
           "--snapshot_kind=app-aot-elf",
@@ -143,10 +172,63 @@ template("flutter_snapshot") {
     args += [ rebase_path(kernel_output) ]
   }
 
+  if (is_aot && (is_ios || is_mac || is_win)) {
+    if (is_win) {
+      compile_asm_target = "_${target_name}_compile_asm"
+      obj_output = "$target_gen_dir/${target_name}.obj"
+
+      clang_cl =
+          rebase_path("//flutter/buildtools/windows-x64/clang/bin/clang-cl.exe",
+                      root_build_dir)
+      if (target_cpu == "x64") {
+        target_arch = "x86_64-pc-windows-msvc"
+      } else if (target_cpu == "arm64") {
+        target_arch = "aarch64-pc-windows-msvc"
+      } else if (target_cpu == "x86") {
+        target_arch = "i686-pc-windows-msvc"
+      } else if (target_cpu == "arm") {
+        target_arch = "arm-pc-windows-msvc"
+      } else {
+        assert(false, "Unsupported Windows CPU: $target_cpu")
+      }
+
+      action(compile_asm_target) {
+        deps = [ ":$snapshot_target" ]
+        script = "//flutter/build/raw_command.py"
+
+        inputs = [ snapshot_assembly ]
+        outputs = [ obj_output ]
+
+        args = [
+          clang_cl,
+          "--target=$target_arch",
+          "/c",
+          "/Fo" + rebase_path(obj_output, root_build_dir),
+          rebase_path(snapshot_assembly, root_build_dir),
+        ]
+      }
+
+      shared_library(compile_target) {
+        public_deps = [ ":$compile_asm_target" ]
+        sources = [ obj_output ]
+        output_name = invoker_target_name
+        ldflags = [ "/NOENTRY" ]
+      }
+    } else {
+      shared_library(compile_target) {
+        public_deps = [ ":$snapshot_target" ]
+        sources = [ snapshot_assembly ]
+        output_name = invoker_target_name
+      }
+    }
+  }
+
   group(target_name) {
-    public_deps = [
-      ":$kernel_target",
-      ":$snapshot_target",
-    ]
+    public_deps = [ ":$kernel_target" ]
+    if (is_aot && (is_ios || is_mac || is_win)) {
+      public_deps += [ ":$compile_target" ]
+    } else {
+      public_deps += [ ":$snapshot_target" ]
+    }
   }
 }

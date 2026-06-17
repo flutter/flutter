@@ -100,8 +100,9 @@ source_set("skia") {
 }
 
 dart_snapshot_kernel("vmservice_kernel") {
-  dart_main = "//flutter/shell/vmservice/empty.dart"
+  dart_main = "//flutter/shell/vmservice/vmservice_entrypoint.dart"
   dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
+  package_config = "//flutter/third_party/dart/.dart_tool/package_config.json"
 }
 
 dart_snapshot_aot("vmservice_snapshot") {
@@ -233,7 +234,7 @@ if (!is_ios) {
   }
 }
 
-if (current_toolchain == host_toolchain) {
+if (enable_unittests && current_toolchain == host_toolchain) {
   source_set("test_swangle_utils") {
     sources = [
       "test_swangle_utils.cc",

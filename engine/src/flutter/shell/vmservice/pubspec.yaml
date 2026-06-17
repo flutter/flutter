@@ -12,3 +12,6 @@ environment:
 # This package is managed as part of the engine workspace.
 resolution: workspace
 
+dependencies:
+  dart_runtime_service: any
+  dart_runtime_service_vm: any

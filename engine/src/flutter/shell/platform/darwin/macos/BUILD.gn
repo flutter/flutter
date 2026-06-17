@@ -407,6 +407,9 @@ zip_bundle("zip_macos_flutter_framework") {
     ":_generate_symlinks",
     ":macos_framework_without_entitlement_config",
   ]
+  if (flutter_runtime_mode == "profile") {
+    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
   prefix = "$full_platform_name-$flutter_runtime_mode/"
   if (flutter_runtime_mode == "debug") {
     prefix = "$full_platform_name/"
@@ -419,6 +422,14 @@ zip_bundle("zip_macos_flutter_framework") {
       destination = "FlutterMacOS.framework"
     },
   ]
+  if (flutter_runtime_mode == "profile") {
+    files += [
+      {
+        source = "$root_out_dir/libvmservice_snapshot.dylib"
+        destination = "libvmservice_snapshot.dylib"
+      },
+    ]
+  }
 }
 
 generated_file("macos_framework_without_entitlement_config") {

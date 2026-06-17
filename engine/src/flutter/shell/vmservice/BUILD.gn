@@ -5,7 +5,15 @@
 import("//flutter/build/dart/rules.gni")
 
 # Build a minimal snapshot that can be used to launch the VM service isolate.
+ext = "so"
+if (is_mac || is_ios) {
+  ext = "dylib"
+} else if (is_win) {
+  ext = "dll"
+}
+
 flutter_snapshot("vmservice_snapshot") {
-  main_dart = "empty.dart"
-  output_aot_lib = "libvmservice_snapshot.so"
+  main_dart = "vmservice_entrypoint.dart"
+  output_aot_lib = "libvmservice_snapshot.$ext"
+  package_config = "//flutter/third_party/dart/.dart_tool/package_config.json"
 }

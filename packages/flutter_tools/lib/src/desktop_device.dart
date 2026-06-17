@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -126,7 +127,12 @@ abstract class DesktopDevice extends Device {
     try {
       process = await _processManager.start(
         command,
-        environment: _computeEnvironment(debuggingOptions, traceStartup, route),
+        environment: _computeEnvironment(
+          debuggingOptions,
+          await targetPlatform,
+          traceStartup,
+          route,
+        ),
       );
     } on ProcessException catch (e) {
       _logger.printError('Unable to start executable "${command.join(' ')}": $e');
@@ -238,6 +244,7 @@ abstract class DesktopDevice extends Device {
   ///   * `FLUTTER_ENGINE_SWITCH_<N>` (indexing from 1) to the individual switches.
   Map<String, String> _computeEnvironment(
     DebuggingOptions debuggingOptions,
+    TargetPlatform targetPlatform,
     bool traceStartup,
     String? route,
   ) {
@@ -314,6 +321,16 @@ abstract class DesktopDevice extends Device {
       if (debuggingOptions.buildInfo.isDebug) {
         addFlag('enable-checked-mode=true');
         addFlag('verify-entry-points=true');
+      }
+      if (debuggingOptions.buildInfo.isProfile && globals.artifacts != null) {
+        final String artifactPath = globals.artifacts!.getArtifactPath(
+          Artifact.vmserviceSharedLibrary,
+          platform: targetPlatform,
+          mode: BuildMode.profile,
+        );
+        if (globals.fs.file(artifactPath).existsSync()) {
+          addFlag('aot-vmservice-shared-library-name=$artifactPath');
+        }
       }
       if (debuggingOptions.startPaused) {
         addFlag('start-paused=true');

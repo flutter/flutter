@@ -1019,6 +1019,12 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   }
 
   tonic::DartState::Scope scope(service_isolate);
+  bool is_fallback_vmservice =
+      (vm_data->GetServiceIsolateSnapshot() == vm_data->GetIsolateSnapshot());
+  Dart_Handle library = Dart_RootLibrary();
+  bool is_custom_vmservice = !is_fallback_vmservice &&
+                             !(Dart_IsError(library) || library == Dart_Null());
+
   if (!DartServiceIsolate::Startup(
           settings.vm_service_host,            // server IP address
           settings.vm_service_port,            // server VM service port
@@ -1027,6 +1033,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           settings.disable_service_auth_codes,  // disable VM service auth codes
           settings.enable_service_port_fallback,  // enable fallback to port 0
                                                   // when bind fails.
+          is_custom_vmservice,                    // is custom VM Service
           error                                   // error (out)
           )) {
     // Error is populated by call to startup.

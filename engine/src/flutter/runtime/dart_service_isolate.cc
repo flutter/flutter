@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/runtime/embedder_resources.h"
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -132,6 +133,7 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
                                  bool disable_origin_check,
                                  bool disable_service_auth_codes,
                                  bool enable_service_port_fallback,
+                                 bool is_custom_vmservice,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
   FML_CHECK(isolate);
@@ -149,21 +151,29 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
     });
   }
 
-  Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
-  Dart_Handle library = Dart_LookupLibrary(uri);
-  SHUTDOWN_ON_ERROR(library);
-  Dart_Handle result = Dart_SetRootLibrary(library);
-  SHUTDOWN_ON_ERROR(result);
-  result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
-  SHUTDOWN_ON_ERROR(result);
+  Dart_Handle library = Dart_RootLibrary();
 
-  library = Dart_RootLibrary();
-  SHUTDOWN_ON_ERROR(library);
+  if (!is_custom_vmservice) {
+    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
+    library = Dart_LookupLibrary(uri);
+    SHUTDOWN_ON_ERROR(library);
+    Dart_Handle result = Dart_SetRootLibrary(library);
+    SHUTDOWN_ON_ERROR(result);
+  }
+
+  Dart_Handle result =
+      Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
+  SHUTDOWN_ON_ERROR(result);
 
   // Set the HTTP server's ip.
+  std::string host = server_ip;
+  if (host.empty()) {
+    host = "127.0.0.1";
+  }
   result = Dart_SetField(library, Dart_NewStringFromCString("_ip"),
-                         Dart_NewStringFromCString(server_ip.c_str()));
+                         Dart_NewStringFromCString(host.c_str()));
   SHUTDOWN_ON_ERROR(result);
+
   // If we have a port specified, start the server immediately.
   bool auto_start = server_port >= 0;
   if (server_port < 0) {
