@@ -696,4 +696,46 @@ TEST(FlAccessibleTextFieldTest, TextBoundary) {
   EXPECT_EQ(end_offset, 70);
 }
 
+// Tests that line and paragraph boundaries are computed in character offsets
+// rather than byte offsets when the text contains multi-byte UTF-8 characters.
+TEST(FlAccessibleTextFieldTest, TextBoundaryMultiByte) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
+
+  // "Café" is 4 characters but 5 bytes (é is 2 bytes).
+  // "Münch" is 5 characters but 6 bytes (ü is 2 bytes).
+  // Character offsets: C(0) a(1) f(2) é(3) \n(4) M(5) ü(6) n(7) c(8) h(9)
+  fl_accessible_node_set_value(node, "Café\nMünch");
+
+  // The field has 10 characters.
+  EXPECT_EQ(atk_text_get_character_count(ATK_TEXT(node)), 10);
+
+  // First line: "Café" at character offsets [0, 4).
+  gint start_offset = -1, end_offset = -1;
+  g_autofree gchar* line0 = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_LINE, &start_offset, &end_offset);
+  EXPECT_STREQ(line0, "Café");
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 4);
+
+  // Second line: "Münch" at character offsets [5, 10). Query at offset 6
+  // (the 'ü'), which sits in the middle of a multi-byte sequence in byte
+  // space - the buggy byte-based logic would return the wrong substring here.
+  g_autofree gchar* line1 = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 6, ATK_TEXT_GRANULARITY_LINE, &start_offset, &end_offset);
+  EXPECT_STREQ(line1, "Münch");
+  EXPECT_EQ(start_offset, 5);
+  EXPECT_EQ(end_offset, 10);
+
+  // Whole text is a single paragraph spanning both lines.
+  g_autofree gchar* paragraph = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 6, ATK_TEXT_GRANULARITY_PARAGRAPH, &start_offset,
+      &end_offset);
+  EXPECT_STREQ(paragraph, "Café\nMünch");
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 10);
+}
+
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
