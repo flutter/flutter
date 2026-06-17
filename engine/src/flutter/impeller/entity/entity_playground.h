@@ -22,6 +22,8 @@ class EntityPlayground : public PlaygroundTest {
 
   ~EntityPlayground();
 
+  void TearDown() override;
+
   void SetTypographerContext(
       std::shared_ptr<TypographerContext> typographer_context);
 

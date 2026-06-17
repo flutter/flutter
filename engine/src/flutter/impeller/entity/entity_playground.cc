@@ -15,6 +15,14 @@ EntityPlayground::EntityPlayground()
 
 EntityPlayground::~EntityPlayground() = default;
 
+void EntityPlayground::TearDown() {
+  if (content_context_) {
+    (void)content_context_->GetContext()->FlushCommandBuffers();
+    content_context_.reset();
+  }
+  PlaygroundTest::TearDown();
+}
+
 void EntityPlayground::SetTypographerContext(
     std::shared_ptr<TypographerContext> typographer_context) {
   typographer_context_ = std::move(typographer_context);

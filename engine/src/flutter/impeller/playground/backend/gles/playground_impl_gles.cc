@@ -62,8 +62,21 @@ class PlaygroundImplGLES::ReactorWorker final : public ReactorGLES::Worker {
 
 struct PlaygroundImplGLES::ShareableContext final {
  public:
-  std::shared_ptr<ReactorWorker> worker;
-  std::shared_ptr<ContextGLES> context;
+  ShareableContext(UniqueHandle window,
+                   std::shared_ptr<ReactorWorker> worker,
+                   std::shared_ptr<ContextGLES> context)
+      : window(std::move(window)),
+        worker(std::move(worker)),
+        context(std::move(context)) {}
+
+  ~ShareableContext() {
+    if (window) {
+      ::glfwMakeContextCurrent(window.get());
+    }
+    context.reset();
+    worker.reset();
+    window.reset();
+  }
 
   // This is a placeholder/dummy window. It is not rendered to by playground
   // tests. Instead, it is created so different playground tests can create
@@ -71,6 +84,9 @@ struct PlaygroundImplGLES::ShareableContext final {
   // See https://www.glfw.org/docs/latest/context_guide.html#context_sharing for
   // details.
   UniqueHandle window = {nullptr, &DestroyWindowHandle};
+
+  std::shared_ptr<ReactorWorker> worker;
+  std::shared_ptr<ContextGLES> context;
 };
 
 void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
@@ -85,7 +101,7 @@ ShaderLibraryMappingsForPlayground(bool is_gles3);
 
 PlaygroundImplGLES::PlaygroundImplGLES(
     PlaygroundSwitches switches,
-    std::shared_ptr<ShareableContext>* shared_context)
+    std::shared_ptr<ShareableContext>& shared_context)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
       use_angle_(switches.use_angle) {
@@ -96,20 +112,20 @@ PlaygroundImplGLES::PlaygroundImplGLES(
     FML_CHECK(angle_glesv2_ != nullptr);
   }
 
-  if (shared_context->get() == nullptr) {
-    *shared_context = MakeShareableContext(switches_);
-    if (shared_context->get() == nullptr) {
+  if (!shared_context) {
+    shared_context = MakeShareableContext(switches_);
+    if (!shared_context) {
       FML_LOG(ERROR) << "Could not create GLES context.";
       return;
     }
   }
 
-  context_ = (*shared_context)->context;
+  context_ = shared_context->context;
 
-  auto window = CreateGLWindow(switches_, (*shared_context)->window.get());
+  auto window = CreateGLWindow(switches_, shared_context->window.get());
   handle_.reset(window);
 
-  (*shared_context)->context->GetGPUTracer()->Reset();
+  shared_context->context->GetGPUTracer()->Reset();
 }
 
 GLFWwindow* PlaygroundImplGLES::CreateGLWindow(
@@ -201,8 +217,8 @@ PlaygroundImplGLES::MakeShareableContext(const PlaygroundSwitches& switches) {
     return nullptr;
   }
 
-  return std::make_shared<ShareableContext>(worker, context_gles,
-                                            std::move(window));
+  return std::make_shared<ShareableContext>(std::move(window), worker,
+                                            context_gles);
 }
 
 PlaygroundImplGLES::~PlaygroundImplGLES() {

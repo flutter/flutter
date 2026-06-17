@@ -19,7 +19,7 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
 
   explicit PlaygroundImplGLES(
       PlaygroundSwitches switches,
-      std::shared_ptr<ShareableContext>* shared_context);
+      std::shared_ptr<ShareableContext>& shared_context);
 
   ~PlaygroundImplGLES();
 
