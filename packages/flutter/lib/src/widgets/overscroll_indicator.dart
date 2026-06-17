@@ -816,6 +816,10 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final Widget transform = StretchEffect(
             stretchStrength: overscroll,
             axis: widget.axis,
+            // Normalize the stretch over the whole viewport so that a scene split
+            // into compositing slices (e.g. by a platform view) stretches
+            // continuously instead of resetting at each slice boundary.
+            viewportMainAxisExtent: viewportDimension,
             child: widget.child ?? const SizedBox.shrink(),
           );
 

@@ -144,6 +144,28 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Size size = Size(input_snapshot->texture->GetSize());
   memcpy(uniforms_->data(), &size, sizeof(Size));
 
+  // If the shader declares a second vec2 uniform, populate it with this input's
+  // offset within the effect space. Position-dependent filters need this: when a
+  // platform view splits the scene, the same image filter is applied to each
+  // Flutter slice separately, and without a shared origin each slice normalizes
+  // the effect over its own bounds (e.g. the overscroll stretch "resets" at every
+  // slice boundary). With the offset, the shader can place its fragments in one
+  // shared viewport coordinate space.
+  //
+  // NOTE: today only the overscroll stretch uses ImageFilter.shader, so this
+  // writes the second vec2 whenever the buffer is large enough. Before landing,
+  // gate this on an explicit opt-in so an unrelated shader's second uniform is
+  // not overwritten.
+  //
+  // ASSUMPTION TO VERIFY ON-DEVICE: the offset is the input coverage's top-left
+  // in the filter's space; the stretch shader treats it as viewport-relative
+  // (i.e. 0 when the content is not sliced). If it is screen-relative instead,
+  // the viewport origin must be subtracted (pass it from Dart).
+  if (uniforms_->size() >= 2 * sizeof(Size)) {
+    Point input_offset = maybe_input_coverage->GetLeftTop();
+    memcpy(uniforms_->data() + sizeof(Size), &input_offset, sizeof(Point));
+  }
+
   Matrix snapshot_transform = input_snapshot->transform;
   //----------------------------------------------------------------------------
   /// Create AnonymousContents for rendering.

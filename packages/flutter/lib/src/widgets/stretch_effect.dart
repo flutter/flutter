@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 
 /// A widget that applies a stretching visual effect to its child.
 ///
@@ -26,6 +27,7 @@ class StretchEffect extends StatelessWidget {
     super.key,
     this.stretchStrength = 0.0,
     required this.axis,
+    this.viewportMainAxisExtent,
     required this.child,
   }) : assert(
          stretchStrength >= -1.0 && stretchStrength <= 1.0,
@@ -66,6 +68,16 @@ class StretchEffect extends StatelessWidget {
   /// Determines the direction of the stretch, either horizontal or vertical.
   final Axis axis;
 
+  /// The extent of the stretch viewport along [axis], in logical pixels.
+  ///
+  /// The stretch is normalized over this extent so that, when the scene is split
+  /// into multiple compositing slices (e.g. by a platform view), every slice
+  /// stretches as one continuous image instead of resetting at slice boundaries.
+  ///
+  /// When null, each slice falls back to normalizing over its own bounds (the
+  /// behavior when no platform view is present).
+  final double? viewportMainAxisExtent;
+
   /// The child widget that the stretching overscroll effect applies to.
   final Widget child;
 
@@ -87,7 +99,12 @@ class StretchEffect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (ui.ImageFilter.isShaderFilterSupported) {
-      return _StretchOverscrollEffect(stretchStrength: stretchStrength, axis: axis, child: child);
+      return _StretchOverscrollEffect(
+        stretchStrength: stretchStrength,
+        axis: axis,
+        viewportMainAxisExtent: viewportMainAxisExtent,
+        child: child,
+      );
     }
 
     final TextDirection textDirection = Directionality.of(context);
@@ -122,6 +139,7 @@ class _StretchOverscrollEffect extends StatefulWidget {
   const _StretchOverscrollEffect({
     this.stretchStrength = 0.0,
     required this.axis,
+    this.viewportMainAxisExtent,
     required this.child,
   }) : assert(
          stretchStrength >= -1.0 && stretchStrength <= 1.0,
@@ -139,6 +157,10 @@ class _StretchOverscrollEffect extends StatefulWidget {
   ///
   /// Determines the direction of the stretch, either horizontal or vertical.
   final Axis axis;
+
+  /// The extent of the stretch viewport along [axis], in logical pixels, or null
+  /// to normalize each slice over its own bounds. See [StretchEffect].
+  final double? viewportMainAxisExtent;
 
   /// The child widget that the stretching overscroll effect applies to.
   final Widget child;
@@ -180,15 +202,27 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
     if (_StretchEffectShader._initialized) {
       _fragmentShader?.dispose();
       _fragmentShader = _StretchEffectShader._program!.fragmentShader();
-      _fragmentShader!.setFloat(2, maxStretchIntensity);
+
+      // Floats 0..3 (u_size and u_input_offset) are populated by the engine.
+      // u_viewport_size (floats 4,5) is in device pixels to match the engine's
+      // u_size/u_input_offset. The cross axis self-cancels, so both components
+      // can carry the main-axis extent. 0 makes the shader fall back to
+      // per-slice normalization.
+      final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+      final double viewportExtentDevice =
+          (widget.viewportMainAxisExtent ?? 0.0) * devicePixelRatio;
+      _fragmentShader!.setFloat(4, viewportExtentDevice);
+      _fragmentShader!.setFloat(5, viewportExtentDevice);
+
+      _fragmentShader!.setFloat(6, maxStretchIntensity);
       if (widget.axis == Axis.vertical) {
-        _fragmentShader!.setFloat(3, 0.0);
-        _fragmentShader!.setFloat(4, widget.stretchStrength);
+        _fragmentShader!.setFloat(7, 0.0);
+        _fragmentShader!.setFloat(8, widget.stretchStrength);
       } else {
-        _fragmentShader!.setFloat(3, widget.stretchStrength);
-        _fragmentShader!.setFloat(4, 0.0);
+        _fragmentShader!.setFloat(7, widget.stretchStrength);
+        _fragmentShader!.setFloat(8, 0.0);
       }
-      _fragmentShader!.setFloat(5, interpolationStrength);
+      _fragmentShader!.setFloat(9, interpolationStrength);
 
       imageFilter = ui.ImageFilter.shader(_fragmentShader!);
     } else {
