@@ -77,13 +77,7 @@ Widget myNewPreview() => Container();
       );
       await reloadSub.cancel();
 
-      final DTDResponse result = await getPreviews(dtdConnection);
-      final FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
-        result.result['result']! as Map<String, Object?>,
-      );
-      if (previews.previews.isEmpty) {
-        throw StateError('No previews detected in Add test!');
-      }
+      await waitForPreviews(dtdConnection);
     });
 
     testUsingContext('Removed previews are detected (LSP)', () async {
@@ -125,13 +119,7 @@ Widget myRemovePreview() => Container();
       );
       await initReloadSub.cancel();
 
-      DTDResponse result = await getPreviews(dtdConnection);
-      FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
-        result.result['result']! as Map<String, Object?>,
-      );
-      if (previews.previews.isEmpty) {
-        throw StateError('Preview was not detected initially in Remove test!');
-      }
+      await waitForPreviews(dtdConnection);
 
       removeFile.deleteSync();
 
@@ -148,11 +136,16 @@ Widget myRemovePreview() => Container();
       );
       await deleteReloadSub.cancel();
 
-      result = await getPreviews(dtdConnection);
-      previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
-      if (previews.previews.isNotEmpty) {
-        throw StateError('Preview was still detected after deletion!');
-      }
+      // We can safely check for the empty state immediately here because we
+      // already waited for the reload trigger above. The tool only triggers
+      // the reload after it has successfully processed the deletion, waited
+      // for the Analysis Server, and verified the empty state in DTD.
+      // This guarantees that DTD is in its final empty state and won't
+      // succeed prematurely.
+      await waitForPreviews(
+        dtdConnection,
+        predicate: (FlutterWidgetPreviews p) => p.previews.isEmpty,
+      );
     });
 
     testUsingContext('Modified previews are detected (LSP)', () async {
@@ -194,13 +187,7 @@ Widget myModifyPreview() => Container();
       );
       await initReloadSub.cancel();
 
-      DTDResponse result = await getPreviews(dtdConnection);
-      FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
-        result.result['result']! as Map<String, Object?>,
-      );
-      if (previews.previews.isEmpty) {
-        throw StateError('Preview was not detected initially in Modify test!');
-      }
+      await waitForPreviews(dtdConnection);
 
       modifyFile.writeAsStringSync('''
 import 'package:flutter/material.dart';
@@ -223,17 +210,11 @@ Widget myModifyPreview() => Container();
       );
       await modifyReloadSub.cancel();
 
-      result = await getPreviews(dtdConnection);
-      previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
-      if (previews.previews.isEmpty) {
-        throw StateError('Preview was lost after modification!');
-      }
-      final FlutterWidgetPreviewDetails preview = previews.previews.first;
-      if (!preview.previewAnnotation.contains("'Updated'")) {
-        throw StateError(
-          r'Preview annotation was not updated after modification! Found: ${preview.previewAnnotation}',
-        );
-      }
+      await waitForPreviews(
+        dtdConnection,
+        predicate: (FlutterWidgetPreviews p) =>
+            p.previews.isNotEmpty && p.previews.first.previewAnnotation.contains("'Updated'"),
+      );
     });
 
     testUsingContext('Previews within libraries with parts are detected (LSP)', () async {
@@ -286,13 +267,7 @@ Widget myPartPreview() => Container();
       );
       await reloadSub.cancel();
 
-      final DTDResponse result = await getPreviews(dtdConnection);
-      final FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
-        result.result['result']! as Map<String, Object?>,
-      );
-      if (previews.previews.isEmpty) {
-        throw StateError('No previews detected in Parts test!');
-      }
+      final FlutterWidgetPreviews previews = await waitForPreviews(dtdConnection);
 
       final FlutterWidgetPreviewDetails preview = previews.previews.first;
       if (preview.functionName != 'myPartPreview') {
