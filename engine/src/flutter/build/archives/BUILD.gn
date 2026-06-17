@@ -13,6 +13,7 @@ generated_file("artifacts_entitlement_config") {
   deps = [ "//flutter/lib/snapshot:generate_snapshot_bin" ]
   if (flutter_runtime_mode == "debug") {
     deps += [
+      "//flutter/flutter_frontend_server:frontend_server",
       "//flutter/impeller/compiler:impellerc",
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/shell/testing",
@@ -193,6 +194,17 @@ generated_file("dart_sdk_entitlement_config") {
     "dart-sdk/bin/dartvm",
     "dart-sdk/bin/utils/gen_snapshot",
     "dart-sdk/bin/utils/wasm-opt",
+    "dart-sdk/bin/snapshots/analysis_server_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/dart2bytecode.dart.snapshot",
+    "dart-sdk/bin/snapshots/dart2js_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/dart2wasm_product.snapshot",
+    "dart-sdk/bin/snapshots/dart_tooling_daemon_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/dartdev_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/dartdevc_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/dds_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/gen_kernel_aot.dart.snapshot",
+    "dart-sdk/bin/snapshots/kernel_worker_aot.dart.snapshot",
   ]
 
   deps = []
