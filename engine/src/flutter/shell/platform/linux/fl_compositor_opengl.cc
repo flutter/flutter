@@ -110,6 +110,12 @@ static bool ensure_pixel_buffer(FlCompositorOpenGL* self,
 }
 
 #if FLUTTER_LINUX_GTK4
+static gboolean gtk4_readback_disabled() {
+  return g_strcmp0(g_getenv("FLUTTER_GTK4_DISABLE_READBACK"), "1") == 0;
+}
+
+// Used only by the GTK4 readback/memory-texture fallback. The native
+// GdkGLTexture path keeps the frame on the GPU and does not swizzle pixels.
 static void swizzle_rgba_to_bgra(uint8_t* pixels, size_t width, size_t height) {
   const size_t pixel_count = width * height;
   for (size_t i = 0; i < pixel_count; ++i) {
@@ -327,6 +333,8 @@ static GdkTexture* acquire_memory_texture(FlCompositorOpenGL* self,
   const int width = static_cast<int>(fl_framebuffer_get_width(framebuffer));
   const int height = static_cast<int>(fl_framebuffer_get_height(framebuffer));
   if (!self->pixels_are_bgra) {
+    // glReadPixels populates RGBA bytes. GDK_MEMORY_DEFAULT matches Cairo's
+    // native-endian ARGB32 memory layout, which is BGRA on little-endian hosts.
     swizzle_rgba_to_bgra(self->pixels, width, height);
     self->pixels_are_bgra = TRUE;
   }
@@ -385,6 +393,13 @@ static GdkTexture* fl_compositor_opengl_acquire_texture(
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     texture = acquire_shareable_texture(self->framebuffer, context);
   } else {
+    if (gtk4_readback_disabled()) {
+      g_warning(
+          "GTK4 OpenGL compositor readback disabled, but native texture "
+          "sharing is unavailable");
+      g_mutex_unlock(&self->frame_mutex);
+      return nullptr;
+    }
     texture = acquire_memory_texture(self, self->framebuffer);
   }
 
