@@ -82,8 +82,7 @@ class BotDetector {
   }
 
   /// The detected AI agent executing the tool, if any.
-  String? get aiAgentName => _aiAgentName ??= AiAgent.detectAgentName(_platform.environment);
-  String? _aiAgentName;
+  late final String? aiAgentName = AiAgent.detectAgentName(_platform.environment);
 }
 
 // Are we running on Azure?
