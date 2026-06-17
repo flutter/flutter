@@ -58,7 +58,7 @@ class FlutterPlugin : Plugin<Project> {
             resolveFlutterSdkProperty(flutterRootSystemVal)
                 ?: throw GradleException(
                     "Flutter SDK not found. Define location with flutter.sdk in the " +
-                        "local.properties file or with a FLUTTER_ROOT environment variable."
+                        "local.properties file or with a FLUTTER_ROOT environment variable.",
                 )
 
         flutterRoot = project.file(flutterRootPath)
@@ -112,8 +112,8 @@ class FlutterPlugin : Plugin<Project> {
                     "src",
                     "main",
                     "scripts",
-                    "native_plugin_loader.gradle.kts"
-                )
+                    "native_plugin_loader.gradle.kts",
+                ),
             )
         }
 
@@ -180,7 +180,7 @@ class FlutterPlugin : Plugin<Project> {
                     project.logger.error(
                         "Warning: Flutter was unable to detect project Gradle, Java, " +
                             "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
+                            e,
                     )
                 } else {
                     // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
@@ -198,7 +198,7 @@ class FlutterPlugin : Plugin<Project> {
                     "packages",
                     "flutter_tools",
                     "gradle",
-                    "flutter_proguard_rules.pro"
+                    "flutter_proguard_rules.pro",
                 ).toFile()
         // TODO(gmackall): reconsider getting the android extension every time
         val debugBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("debug")
@@ -209,14 +209,14 @@ class FlutterPlugin : Plugin<Project> {
                 // TODO(gmackall): do we need to clear?
                 this.matchingFallbacks.clear()
                 this.matchingFallbacks.addAll(listOf("debug", "release"))
-            }
+            },
         )
         if (FlutterPluginUtils.shouldShrinkResources(project)) {
             val releaseBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("release")
             releaseBuildType.isMinifyEnabled = true
             releaseBuildType.isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
             releaseBuildType.proguardFiles.add(
-                FlutterPluginUtils.getAndroidExtension(project).getDefaultProguardFile("proguard-android-optimize.txt")
+                FlutterPluginUtils.getAndroidExtension(project).getDefaultProguardFile("proguard-android-optimize.txt"),
             )
             releaseBuildType.proguardFiles.add(flutterProguardRules)
             val proguardRulesPro = File("${project.projectDir}/proguard-rules.pro")
@@ -254,7 +254,7 @@ class FlutterPlugin : Plugin<Project> {
             project!!,
             buildType,
             getPluginHandler(project!!),
-            engineVersion!!
+            engineVersion!!,
         )
     }
 
@@ -269,7 +269,7 @@ class FlutterPlugin : Plugin<Project> {
         }
         return project?.findProperty(propertyName) as? String ?: localProperties!!.getProperty(
             propertyName,
-            defaultValue
+            defaultValue,
         )
     }
 
@@ -311,7 +311,7 @@ class FlutterPlugin : Plugin<Project> {
             val sourceSet = this
             val jniLibsDir =
                 projectToAddTasksTo.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
+                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs",
                 )
             sourceSet.jniLibs.srcDir(jniLibsDir.get().asFile)
         }
@@ -328,7 +328,7 @@ class FlutterPlugin : Plugin<Project> {
                 val assembleTask = variant.assembleProvider.get()
                 if (!FlutterPluginUtils.shouldConfigureFlutterTask(
                         projectToAddTasksTo,
-                        assembleTask
+                        assembleTask,
                     )
                 ) {
                     return@configureEach
@@ -394,10 +394,10 @@ class FlutterPlugin : Plugin<Project> {
             getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
-                getPluginHandler(projectToAddTasksTo).getPluginList()
+                getPluginHandler(projectToAddTasksTo).getPluginList(),
             )
             FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
-                projectToAddTasksTo
+                projectToAddTasksTo,
             )
             return
         }
@@ -405,7 +405,7 @@ class FlutterPlugin : Plugin<Project> {
         val hostAppProjectName: String? =
             if (projectToAddTasksTo.rootProject.hasProperty("flutter.hostAppProjectName")) {
                 projectToAddTasksTo.rootProject.property(
-                    "flutter.hostAppProjectName"
+                    "flutter.hostAppProjectName",
                 ) as? String
             } else {
                 "app"
@@ -460,7 +460,7 @@ class FlutterPlugin : Plugin<Project> {
                     copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(
                         libraryVariant,
                         flutterPlugin,
-                        targetPlatforms
+                        targetPlatforms,
                     )
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
@@ -476,10 +476,10 @@ class FlutterPlugin : Plugin<Project> {
         getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
-            getPluginHandler(projectToAddTasksTo).getPluginList()
+            getPluginHandler(projectToAddTasksTo).getPluginList(),
         )
         FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
-            projectToAddTasksTo
+            projectToAddTasksTo,
         )
     }
 
@@ -507,7 +507,7 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun configureAbis(
             projectToAddTasksTo: Project,
-            androidExtension: ApplicationExtension
+            androidExtension: ApplicationExtension,
         ) {
             // By default, assembling APKs generates fat APKs if multiple platforms are passed.
             // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -551,7 +551,7 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun configureAbiWithoutSplits(
             projectToAddTasksTo: Project,
-            extension: ApplicationExtension
+            extension: ApplicationExtension,
         ) {
             if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(projectToAddTasksTo)) {
                 extension.defaultConfig.ndk {
@@ -566,7 +566,7 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun findTaskOrNull(
             project: Project,
-            taskName: String
+            taskName: String,
         ): Task? =
             try {
                 project.tasks.named(taskName).get()
@@ -579,7 +579,7 @@ class FlutterPlugin : Plugin<Project> {
         private fun addFlutterDeps(
             @Suppress("DEPRECATION") variant: com.android.build.gradle.api.BaseVariant,
             flutterPlugin: FlutterPlugin,
-            targetPlatforms: List<String>
+            targetPlatforms: List<String>,
         ): Task {
             // Shorthand
             val project: Project = flutterPlugin.project!!
@@ -647,12 +647,12 @@ class FlutterPlugin : Plugin<Project> {
             val packageAssets: Task? =
                 findTaskOrNull(
                     project,
-                    "package${FlutterPluginUtils.capitalize(variant.name)}Assets"
+                    "package${FlutterPluginUtils.capitalize(variant.name)}Assets",
                 )
             val cleanPackageAssets: Task? =
                 findTaskOrNull(
                     project,
-                    "cleanPackage${FlutterPluginUtils.capitalize(variant.name)}Assets"
+                    "cleanPackage${FlutterPluginUtils.capitalize(variant.name)}Assets",
                 )
 
             val isUsedAsSubproject: Boolean =
@@ -665,8 +665,8 @@ class FlutterPlugin : Plugin<Project> {
                     listOf(
                         "compile",
                         FLUTTER_BUILD_PREFIX,
-                        variant.name
-                    )
+                        variant.name,
+                    ),
                 )
             // The task provider below will shadow a lot of the variable names, so provide this reference
             // to access them within that scope.
@@ -695,7 +695,7 @@ class FlutterPlugin : Plugin<Project> {
                     sourceDir = FlutterPluginUtils.getFlutterSourceDirectory(project)
                     intermediateDir =
                         project.file(
-                            project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/")
+                            project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/"),
                         )
                     frontendServerStarterPath = frontendServerStarterPathValue
                     extraFrontEndOptions = extraFrontEndOptionsValue
@@ -713,12 +713,12 @@ class FlutterPlugin : Plugin<Project> {
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val jniLibsDir =
                 project.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs"
+                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs",
                 )
             val copyJniLibsTaskProvider: TaskProvider<Sync> =
                 project.tasks.register(
                     "copyJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
-                    Sync::class.java
+                    Sync::class.java,
                 ) {
                     dependsOn(flutterCompileTask)
                     into(jniLibsDir)
@@ -748,7 +748,7 @@ class FlutterPlugin : Plugin<Project> {
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
                 project.tasks.register(
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
-                    Copy::class.java
+                    Copy::class.java,
                 ) {
                     dependsOn(flutterCompileTask)
                     with(flutterCompileTask.assets)
@@ -802,7 +802,7 @@ class FlutterPlugin : Plugin<Project> {
                 listOf(
                     "compress${FlutterPluginUtils.capitalize(variant.name)}Assets",
                     "bundle${FlutterPluginUtils.capitalize(variant.name)}Aar",
-                    "bundle${FlutterPluginUtils.capitalize(variant.name)}LocalLintAar"
+                    "bundle${FlutterPluginUtils.capitalize(variant.name)}LocalLintAar",
                 )
             tasksToCheck.forEach { taskTocheck ->
                 try {

@@ -54,8 +54,7 @@ void main() {
   ArchiveFile? getLibAppFile(File apkFile) {
     List<int> apkBytes = apkFile.readAsBytesSync();
     Archive archive = ZipDecoder().decodeBytes(apkBytes);
-    return
-        archive.findFile('lib/arm64-v8a/libapp.so') ??
+    return archive.findFile('lib/arm64-v8a/libapp.so') ??
         archive.findFile('lib/armeabi-v7a/libapp.so') ??
         archive.findFile('lib/x86_64/libapp.so');
   }
