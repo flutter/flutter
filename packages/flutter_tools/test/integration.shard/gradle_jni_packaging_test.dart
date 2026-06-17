@@ -351,7 +351,7 @@ bool _apkHasVersionCode(
       .childFile(Platform.isWindows ? 'aapt.exe' : 'aapt')
       .path;
 
-  String apkName = (productFlavor.isEmpty)
+  var apkName = (productFlavor.isEmpty)
       ? '${buildMode.cliName}.apk'
       : '$productFlavor-${buildMode.cliName}.apk';
   if (abi.isNotEmpty) {
