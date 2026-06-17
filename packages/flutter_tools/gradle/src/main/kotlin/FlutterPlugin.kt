@@ -311,9 +311,21 @@ class FlutterPlugin : Plugin<Project> {
             val sourceSet = this
             val jniLibsDir =
                 projectToAddTasksTo.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
+                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter_jnilibs/${sourceSet.name}"
                 )
-            sourceSet.jniLibs.srcDir(jniLibsDir.get().asFile)
+            // Register the directory as a lazy provider rather than resolving it eagerly with
+            // `.get().asFile`. Resolving eagerly captured the build directory at the time `:app` was
+            // configured, which disagreed with the (lazily resolved) destination that `copyJniLibs`
+            // writes to when `:app` was evaluated before its build directory had been redirected
+            // (e.g. a combined `subprojects { ... evaluationDependsOn(":app") }` block plus a plugin
+            // whose Gradle subproject name sorts before ":app"). That mismatch dropped `libapp.so`
+            // from the merged native libraries. See https://github.com/flutter/flutter/issues/186810.
+            //
+            // The directory is also kept as a sibling of (not nested inside) the Flutter task's
+            // `intermediates/flutter/<variant>` output directory, so that `copyJniLibs` writing into
+            // it does not create overlapping task outputs (which undermine Gradle's incremental
+            // checks, e.g. for flavored builds: https://github.com/flutter/flutter/issues/187388).
+            sourceSet.jniLibs.srcDir(jniLibsDir)
         }
 
         val flutterPlugin = this
@@ -711,9 +723,14 @@ class FlutterPlugin : Plugin<Project> {
                     flavor = flavorValue
                 }
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
+            // Kept a sibling of the Flutter task's `intermediates/flutter/<variant>` output
+            // directory (not nested inside it) to avoid overlapping task outputs, and matched to the
+            // lazily-registered source set `srcDir` above. See the `sourceSets.all` block and
+            // https://github.com/flutter/flutter/issues/186810 /
+            // https://github.com/flutter/flutter/issues/187388.
             val jniLibsDir =
                 project.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs"
+                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter_jnilibs/${variant.name}"
                 )
             val copyJniLibsTaskProvider: TaskProvider<Sync> =
                 project.tasks.register(
