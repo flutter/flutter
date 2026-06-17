@@ -444,6 +444,47 @@ void main() {
       await setAppLifecycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isFalse);
     });
+
+    testWidgets(
+      'Suspended focus is not restored on resume when another node claimed focus.',
+      (WidgetTester tester) async {
+        Future<void> setAppLifecycleState(AppLifecycleState state) async {
+          final ByteData? message = const StringCodec().encodeMessage(state.toString());
+          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+        }
+
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        scope.attach(context).reparent(parent: tester.binding.focusManager.rootScope);
+        final nodeA = FocusNode(debugLabel: 'A');
+        addTearDown(nodeA.dispose);
+        nodeA.attach(context).reparent(parent: scope);
+        final nodeB = FocusNode(debugLabel: 'B');
+        addTearDown(nodeB.dispose);
+        nodeB.attach(context).reparent(parent: scope);
+
+        nodeA.requestFocus();
+        await tester.pump();
+        expect(nodeA.hasPrimaryFocus, isTrue);
+
+        // App goes inactive: nodeA's focus is suspended and parked.
+        await setAppLifecycleState(AppLifecycleState.inactive);
+        expect(nodeA.hasPrimaryFocus, isFalse);
+
+        // Another node requests focus before the app resumes (e.g. a different
+        // window/view was activated).
+        nodeB.requestFocus();
+
+        // On resume, the suspended nodeA must not steal focus back from nodeB.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pump();
+        expect(nodeB.hasPrimaryFocus, isTrue);
+        expect(nodeA.hasPrimaryFocus, isFalse);
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
   });
 
   group(FocusScopeNode, () {
