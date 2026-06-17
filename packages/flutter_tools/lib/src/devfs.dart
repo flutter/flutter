@@ -36,13 +36,13 @@ DevFSConfig? get devFSConfig => context.get<DevFSConfig>();
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
-  /// Return true if this is the first time this method is called
-  /// or if the entry has been modified since this method was last called.
+  /// Return true if the entry has been modified since it was last marked clean.
   bool get isModified;
 
-  /// Return true if this is the first time this method is called
-  /// or if the entry has been modified after the given time
-  /// or if the given time is null.
+  /// Mark the content as clean, resetting the [isModified] state.
+  void markClean();
+
+  /// Return true if the entry has been modified after the given time.
   bool isModifiedAfter(DateTime time);
 
   int get size;
@@ -76,66 +76,73 @@ class DevFSFileContent extends DevFSContent {
     return file as File;
   }
 
-  void _stat() {
-    final File? linkTarget = _linkTarget;
+  (FileStat?, File?) _statFile() {
+    File? linkTarget = _linkTarget;
     if (linkTarget != null) {
       // Stat the cached symlink target.
       final FileStat fileStat = linkTarget.statSync();
-      if (fileStat.type == FileSystemEntityType.notFound) {
-        _linkTarget = null;
-      } else {
-        _fileStat = fileStat;
-        return;
+      if (fileStat.type != FileSystemEntityType.notFound) {
+        return (fileStat, linkTarget);
       }
+      linkTarget = null;
     }
     final FileStat fileStat = file.statSync();
-    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
-    if (_fileStat != null && _fileStat?.type == FileSystemEntityType.link) {
-      // Resolve, stat, and maybe cache the symlink target.
-      final String resolved = file.resolveSymbolicLinksSync();
-      final File linkTarget = file.fileSystem.file(resolved);
-      // Stat the link target.
-      final FileStat fileStat = linkTarget.statSync();
-      if (fileStat.type == FileSystemEntityType.notFound) {
-        _fileStat = null;
-        _linkTarget = null;
-      } else if (devFSConfig?.cacheSymlinks ?? false) {
-        _linkTarget = linkTarget;
+    if (fileStat.type == FileSystemEntityType.notFound) {
+      return (null, null);
+    }
+    if (fileStat.type == FileSystemEntityType.link) {
+      try {
+        final String resolved = file.resolveSymbolicLinksSync();
+        final File resolvedFile = file.fileSystem.file(resolved);
+        // Stat the link target.
+        final FileStat fileStat = resolvedFile.statSync();
+        if (fileStat.type == FileSystemEntityType.notFound) {
+          return (null, null);
+        }
+        return (fileStat, resolvedFile);
+      } on FileSystemException {
+        return (null, null);
       }
     }
+    return (fileStat, null);
   }
 
   @override
   bool get isModified {
-    final FileStat? oldFileStat = _fileStat;
-    _stat();
-    final FileStat? newFileStat = _fileStat;
-    if (oldFileStat == null && newFileStat == null) {
+    final (FileStat? currentStat, _) = _statFile();
+    if (_fileStat == null && currentStat == null) {
       return false;
     }
-    return oldFileStat == null ||
-        newFileStat == null ||
-        newFileStat.modified.isAfter(oldFileStat.modified);
+    return _fileStat == null ||
+        currentStat == null ||
+        currentStat.modified.isAfter(_fileStat!.modified);
+  }
+
+  @override
+  void markClean() {
+    final (FileStat? fileStat, File? linkTarget) = _statFile();
+    _fileStat = fileStat;
+    if (linkTarget != null && (devFSConfig?.cacheSymlinks ?? false)) {
+      _linkTarget = linkTarget;
+    } else {
+      _linkTarget = null;
+    }
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
-    final FileStat? oldFileStat = _fileStat;
-    _stat();
-    final FileStat? newFileStat = _fileStat;
-    if (oldFileStat == null && newFileStat == null) {
-      return false;
-    }
-    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(time);
+    // Whether the file changed after [time] only depends on the file's current
+    // modification time, not on the cached [_fileStat]. Falling back to the
+    // cached stat (e.g. `_fileStat == null`) would report a freshly created
+    // DevFSFileContent as modified even when its file is older than [time].
+    final (FileStat? currentStat, _) = _statFile();
+    return currentStat != null && currentStat.modified.isAfter(time);
   }
 
   @override
   int get size {
-    if (_fileStat == null) {
-      _stat();
-    }
-    // Can still be null if the file wasn't found.
-    return _fileStat?.size ?? 0;
+    final FileStat? stat = _fileStat ?? _statFile().$1;
+    return stat?.size ?? 0;
   }
 
   @override
@@ -155,12 +162,12 @@ class DevFSByteContent extends DevFSContent {
 
   List<int> get bytes => _bytes;
 
-  /// Return true only once so that the content is written to the device only once.
   @override
-  bool get isModified {
-    final bool modified = _isModified;
+  bool get isModified => _isModified;
+
+  @override
+  void markClean() {
     _isModified = false;
-    return modified;
   }
 
   @override
@@ -213,12 +220,12 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   late final List<int> bytes = _compressor.convert(utf8.encode(_string));
 
-  /// Return true only once so that the content is written to the device only once.
   @override
-  bool get isModified {
-    final bool modified = _isModified;
+  bool get isModified => _isModified;
+
+  @override
+  void markClean() {
     _isModified = false;
-    return modified;
   }
 
   @override
@@ -714,6 +721,9 @@ class DevFS {
     void Function()? onFontManifestUpdated,
   }) async {
     if (bundleFirstUpload && !syncAllAssetsOnFirstUpload) {
+      for (final AssetBundleEntry entry in bundle.entries.values) {
+        entry.content.markClean();
+      }
       return 0;
     }
 
@@ -721,10 +731,12 @@ class DevFS {
     final pendingAssetBuilds = <Future<void>>[];
     var syncedBytes = 0;
 
+    final syncedEntries = <AssetBundleEntry>[];
     bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
       if (!bundleFirstUpload && !entry.content.isModified) {
         return;
       }
+      syncedEntries.add(entry);
 
       // Modified shaders must be recompiled per-target platform.
       final Uri deviceUri = fileSystem.path.toUri(
@@ -791,6 +803,9 @@ class DevFS {
     });
 
     await Future.wait(pendingAssetBuilds);
+    for (final entry in syncedEntries) {
+      entry.content.markClean();
+    }
     return syncedBytes;
   }
 }

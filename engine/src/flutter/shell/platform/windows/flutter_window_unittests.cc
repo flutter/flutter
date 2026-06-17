@@ -831,7 +831,9 @@ TEST_F(FlutterWindowTest, OnMousePointerDown) {
         if (pointer_info != nullptr) {
           pointer_info->pointerType = PT_MOUSE;
           pointer_info->pointerId = pointer_id;
-          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT |
+                                       POINTER_FLAG_FIRSTBUTTON |
+                                       POINTER_FLAG_DOWN;
         }
         return TRUE;
       });
@@ -859,7 +861,9 @@ TEST_F(FlutterWindowTest, OnTouchPointerDown) {
         if (pointer_info != nullptr) {
           pointer_info->pointerType = PT_TOUCH;
           pointer_info->pointerId = pointer_id;
-          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT |
+                                       POINTER_FLAG_FIRSTBUTTON |
+                                       POINTER_FLAG_DOWN;
         }
         return TRUE;
       });
@@ -890,7 +894,9 @@ TEST_F(FlutterWindowTest, PointerMessageScreenCoordinatesAreConvertedToClient) {
         if (pointer_info != nullptr) {
           pointer_info->pointerType = PT_TOUCH;
           pointer_info->pointerId = pointer_id;
-          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT |
+                                       POINTER_FLAG_FIRSTBUTTON |
+                                       POINTER_FLAG_DOWN;
         }
         return TRUE;
       });
