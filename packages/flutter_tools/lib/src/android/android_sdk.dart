@@ -537,17 +537,24 @@ class AndroidSdk {
         'the cmdline-tools are installed to resolve this.',
       );
     }
-    final RunResult result = globals.processUtils.runSync(<String>[
-      sdkManagerPath!,
-      '--version',
-    ], environment: _java?.environment);
-    if (result.exitCode != 0) {
+    Java? currentJava = _java;
+    while (true) {
+      final RunResult result = globals.processUtils.runSync(<String>[
+        sdkManagerPath!,
+        '--version',
+      ], environment: currentJava?.environment);
+      if (result.exitCode == 0) {
+        return result.stdout.trim();
+      }
       globals.printTrace(
         'sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}',
       );
-      return null;
+      if (currentJava == null) {
+        break;
+      }
+      currentJava = currentJava.fallback;
     }
-    return result.stdout.trim();
+    return null;
   }
 
   @override

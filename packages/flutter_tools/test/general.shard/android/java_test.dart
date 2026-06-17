@@ -30,6 +30,7 @@ void main() {
     config = Config.test();
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
+    fs.file('/fake/which/java/path').createSync(recursive: true);
     platform = FakePlatform(environment: <String, String>{'PATH': ''});
     processManager = FakeProcessManager.empty();
   });
@@ -44,8 +45,12 @@ void main() {
           'bin',
           'java',
         );
+        fs.file(expectedJavaBinaryPath).createSync(recursive: true);
         const JavaSource expectedJavaHomeSource = JavaSource.androidStudio;
 
+        processManager.addCommand(
+          const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
+        );
         processManager.addCommand(
           FakeCommand(
             command: <String>[expectedJavaBinaryPath, '--version'],
@@ -82,6 +87,10 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
           const javaHome = '/java/home';
           final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
+          fs.file(expectedJavaBinaryPath).createSync(recursive: true);
+          processManager.addCommand(
+            const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
+          );
           const JavaSource expectedJavaHomeSource = JavaSource.javaHome;
 
           final Java java = Java.find(
@@ -119,7 +128,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
         )!;
 
-        expect(java.javaHome, isNull);
+        expect(java.javaHome, '/fake/which');
         expect(java.binaryPath, os.which('java')!.path);
         expect(java.javaSource, expectedJavaHomeSource);
       });
@@ -149,10 +158,15 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
         );
 
+        fs.file(fs.path.join(configuredJdkPath, 'bin', 'java')).createSync(recursive: true);
+
         final androidStudio = _FakeAndroidStudioWithJdk();
+        fs.file(fs.path.join(androidStudio.javaPath!, 'bin', 'java')).createSync(recursive: true);
+
         final platformWithJavaHome = FakePlatform(
           environment: <String, String>{'JAVA_HOME': '/old/jdk'},
         );
+        fs.file(fs.path.join('/old/jdk', 'bin', 'java')).createSync(recursive: true);
         Java? java = Java.find(
           config: config,
           androidStudio: androidStudio,
@@ -171,6 +185,9 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
         expectedJavaHomeSource = JavaSource.androidStudio;
 
+        processManager.addCommand(
+          const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
+        );
         java = Java.find(
           config: config,
           androidStudio: androidStudio,

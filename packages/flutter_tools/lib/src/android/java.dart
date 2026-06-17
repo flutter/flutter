@@ -13,8 +13,6 @@ import '../base/process.dart';
 import '../base/version.dart';
 import 'android_studio.dart';
 
-const _javaExecutable = 'java';
-
 enum JavaSource {
   /// JDK bundled with latest Android Studio installation.
   androidStudio,
@@ -29,8 +27,6 @@ enum JavaSource {
   flutterConfig,
 }
 
-typedef _JavaHomePathWithSource = ({String path, JavaSource source});
-
 /// Represents an installation of Java.
 class Java {
   Java({
@@ -42,6 +38,7 @@ class Java {
     required OperatingSystemUtils os,
     required Platform platform,
     required ProcessManager processManager,
+    this.fallback,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _os = os,
@@ -82,38 +79,73 @@ class Java {
       platform: platform,
       processManager: processManager,
     );
-    final _JavaHomePathWithSource? home = _findJavaHome(
-      config: config,
-      logger: logger,
-      androidStudio: androidStudio,
-      platform: platform,
-    );
-    final String? binary = _findJavaBinary(
-      logger: logger,
-      javaHome: home?.path,
-      fileSystem: fileSystem,
-      operatingSystemUtils: os,
-      platform: platform,
-    );
 
-    if (binary == null) {
+    final javaExecutableName = platform.isWindows ? 'java.exe' : 'java';
+    final List<({String? javaHome, String binaryPath, JavaSource source})> candidates = [];
+    final seenBinaries = <String>{};
+
+    void addCandidate(String? homePath, JavaSource source) {
+      if (homePath == null) {
+        return;
+      }
+      final String binary = fileSystem.path.join(homePath, 'bin', javaExecutableName);
+      if (fileSystem.file(binary).existsSync()) {
+        final String canonical = fileSystem.path.canonicalize(binary);
+        if (seenBinaries.add(canonical)) {
+          candidates.add((javaHome: homePath, binaryPath: binary, source: source));
+        }
+      }
+    }
+
+    // 1. flutterConfig
+    final Object? configured = config.getValue('jdk-dir');
+    if (configured is String) {
+      addCandidate(configured, JavaSource.flutterConfig);
+    }
+
+    // 2. androidStudio
+    addCandidate(androidStudio?.javaPath, JavaSource.androidStudio);
+
+    // 3. javaHome
+    addCandidate(platform.environment[Java.javaHomeEnvironmentVariable], JavaSource.javaHome);
+
+    // 4. path
+    final String? pathBinary = os.which(javaExecutableName)?.path;
+    if (pathBinary != null) {
+      final String canonical = fileSystem.path.canonicalize(pathBinary);
+      if (seenBinaries.add(canonical)) {
+        var resolvedBinary = canonical;
+        try {
+          resolvedBinary = fileSystem.file(canonical).resolveSymbolicLinksSync();
+        } on Exception {
+          // ignore
+        }
+        final String javaHome = fileSystem.path.dirname(fileSystem.path.dirname(resolvedBinary));
+        candidates.add((javaHome: javaHome, binaryPath: pathBinary, source: JavaSource.path));
+      }
+    }
+
+    if (candidates.isEmpty) {
       return null;
     }
 
-    // If javaHome == null and binary is not null, it means that
-    // binary obtained from PATH as fallback.
-    final JavaSource javaSource = home?.source ?? JavaSource.path;
+    Java? currentFallback;
+    for (final ({String? javaHome, String binaryPath, JavaSource source}) candidate
+        in candidates.reversed) {
+      currentFallback = Java(
+        javaHome: candidate.javaHome,
+        binaryPath: candidate.binaryPath,
+        javaSource: candidate.source,
+        logger: logger,
+        fileSystem: fileSystem,
+        os: os,
+        platform: platform,
+        processManager: processManager,
+        fallback: currentFallback,
+      );
+    }
 
-    return Java(
-      javaHome: home?.path,
-      binaryPath: binary,
-      javaSource: javaSource,
-      logger: logger,
-      fileSystem: fileSystem,
-      os: os,
-      platform: platform,
-      processManager: processManager,
-    );
+    return currentFallback;
   }
 
   /// The path of the runtime environments' home directory.
@@ -124,6 +156,10 @@ class Java {
   /// If you need to inspect the files of the runtime, considering adding
   /// a new method to this class instead.
   final String? javaHome;
+
+  /// A fallback Java installation if this one is not working or compatible
+  /// with some tools (like sdkmanager).
+  final Java? fallback;
 
   /// The path of the runtime environments' java binary.
   ///
@@ -221,44 +257,6 @@ class Java {
   bool canRun() {
     return _processManager.canRun(binaryPath);
   }
-}
-
-_JavaHomePathWithSource? _findJavaHome({
-  required Config config,
-  required Logger logger,
-  required AndroidStudio? androidStudio,
-  required Platform platform,
-}) {
-  final Object? configured = config.getValue('jdk-dir');
-  if (configured != null) {
-    return (path: configured as String, source: JavaSource.flutterConfig);
-  }
-
-  final String? androidStudioJavaPath = androidStudio?.javaPath;
-  if (androidStudioJavaPath != null) {
-    return (path: androidStudioJavaPath, source: JavaSource.androidStudio);
-  }
-
-  final String? javaHomeEnv = platform.environment[Java.javaHomeEnvironmentVariable];
-  if (javaHomeEnv != null) {
-    return (path: javaHomeEnv, source: JavaSource.javaHome);
-  }
-  return null;
-}
-
-String? _findJavaBinary({
-  required Logger logger,
-  required String? javaHome,
-  required FileSystem fileSystem,
-  required OperatingSystemUtils operatingSystemUtils,
-  required Platform platform,
-}) {
-  if (javaHome != null) {
-    return fileSystem.path.join(javaHome, 'bin', 'java');
-  }
-
-  // Fallback to PATH based lookup.
-  return operatingSystemUtils.which(_javaExecutable)?.path;
 }
 
 // Returns a user visible String that says the tool failed to parse

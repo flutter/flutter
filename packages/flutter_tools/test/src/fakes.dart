@@ -813,6 +813,9 @@ class FakeJava extends Fake implements Java {
   @override
   JavaSource javaSource;
 
+  @override
+  Java? fallback;
+
   final Map<String, String> _environment;
   final bool _canRun;
 
