@@ -740,6 +740,51 @@ void main() {
     expect(events.map((ViewFocusEvent event) => event.viewId), isNot(contains(parentView!.viewId)));
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
   });
+
+  testWidgets(
+    'Moving focus from a nested child view to the parent view requests focus for the parent view',
+    (WidgetTester tester) async {
+      final parentNode = FocusNode(debugLabel: 'parent');
+      final childNode = FocusNode(debugLabel: 'child');
+      addTearDown(parentNode.dispose);
+      addTearDown(childNode.dispose);
+
+      final childFlutterView = FakeView(tester.view);
+      final FlutterView parentFlutterView = tester.view;
+
+      await tester.pumpWidget(
+        ViewAnchor(
+          view: View(
+            view: childFlutterView,
+            child: Focus(focusNode: childNode, child: const SizedBox()),
+          ),
+          child: Focus(focusNode: parentNode, child: const SizedBox()),
+        ),
+      );
+
+      // Focus a node in the nested child view first.
+      childNode.requestFocus();
+      await tester.pump();
+      expect(childNode.hasPrimaryFocus, isTrue);
+      tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+      // Move focus to a node in the parent view: the parent view must be asked to
+      // take focus.
+      parentNode.requestFocus();
+      await tester.pump();
+      expect(parentNode.hasPrimaryFocus, isTrue);
+      final List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+      expect(
+        events.map((ViewFocusEvent event) => event.viewId),
+        contains(parentFlutterView.viewId),
+      );
+      expect(
+        events.map((ViewFocusEvent event) => event.viewId),
+        isNot(contains(childFlutterView.viewId)),
+      );
+      tester.binding.platformDispatcher.resetFocusedViewTestValues();
+    },
+  );
 }
 
 class SpyRenderWidget extends SizedBox {

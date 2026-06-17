@@ -225,22 +225,11 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
   }
 
   void _scopeFocusChangeListener() {
-    // [FocusScopeNode.hasFocus] is also true when the focus is held by a
-    // descendant view (for example a child window rendered through a
-    // [ViewAnchor]), whose scope is nested under this view's scope. Reacting to
-    // that would make a background view request native focus and pull its
-    // window to the front when a nested view is focused. Only react when the
-    // primary focus is hosted by this view itself, which is the case when the
-    // nearest enclosing view of the focused node is this view.
-    final BuildContext? focusContext = FocusManager.instance.primaryFocus?.context;
-    final bool focusInThisView =
-        focusContext != null &&
-        LookupBoundary.getInheritedWidgetOfExactType<_ViewScope>(focusContext)?.view == widget.view;
-    if (_viewHasFocus == focusInThisView || !focusInThisView) {
+    if (_viewHasFocus == _scopeNode.hasFocus || !_scopeNode.hasFocus) {
       return;
     }
-    // Focus has moved into this view, and the view isn't focused natively yet,
-    // so inform the engine so it knows to change its focus.
+    // Scope has gained focus, and it doesn't match the view focus, so inform
+    // the view so it knows to change its focus.
     WidgetsBinding.instance.platformDispatcher.requestViewFocusChange(
       direction: ViewFocusDirection.forward,
       state: ViewFocusState.focused,
@@ -287,6 +276,13 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
         view: widget.view,
         child: FocusTraversalGroup(
           policy: _policy,
+          // Attach this view's focus subtree directly to the root scope rather
+          // than nesting it under an enclosing view's scope (which happens when
+          // a view is rendered inside another via a [ViewAnchor]). Each view is
+          // an independent focus root: nesting would otherwise make an ancestor
+          // view report hasFocus when a descendant view is focused, causing it
+          // to request native focus and pull its window forward.
+          parentNode: FocusManager.instance.rootScope,
           child: FocusScope.withExternalFocusNode(
             includeSemantics: false,
             focusScopeNode: _scopeNode,
