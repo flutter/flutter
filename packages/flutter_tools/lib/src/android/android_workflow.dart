@@ -165,6 +165,10 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(androidCantRunJavaBinary(_java.binaryPath)));
         return false;
       }
+      if (!_java.javacExists) {
+        messages.add(ValidationMessage.error(_androidMissingJdk));
+        return false;
+      }
       Version? javaVersion;
       try {
         javaVersion = _java.version;

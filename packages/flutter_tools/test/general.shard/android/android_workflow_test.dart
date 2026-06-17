@@ -867,6 +867,37 @@ Android sdkmanager tool was found, but failed to run
     );
   });
 
+  testUsingContext('AndroidValidator fails validation if javac does not exist', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..latestVersion = (FakeAndroidSdkVersion()
+        ..sdkLevel = gradle_utils.compileSdkVersionInt
+        ..buildToolsVersion = gradle_utils.minBuildToolsVersion);
+
+    final ValidationResult validationResult = await AndroidValidator(
+      java: FakeJava(javacExists: false),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+      processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
+    ).validate();
+
+    expect(validationResult.type, isNot(ValidationType.success));
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) =>
+            message.type == ValidationMessageType.error &&
+            message.message.contains('No Java Development Kit (JDK) found'),
+      ),
+      true,
+    );
+  });
+
   testUsingContext('AndroidValidator warns when multiple adb binaries are found', () async {
     sdk
       ..licensesAvailable = true

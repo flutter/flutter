@@ -221,6 +221,17 @@ class Java {
   bool canRun() {
     return _processManager.canRun(binaryPath);
   }
+
+  /// Returns true if the Java compiler (javac) exists.
+  bool get javacExists {
+    final javacBinaryName = _platform.isWindows ? 'javac.exe' : 'javac';
+    if (javaHome != null) {
+      return _fileSystem
+          .file(_fileSystem.path.join(javaHome!, 'bin', javacBinaryName))
+          .existsSync();
+    }
+    return _os.which(javacBinaryName) != null;
+  }
 }
 
 _JavaHomePathWithSource? _findJavaHome({

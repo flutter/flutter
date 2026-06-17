@@ -796,6 +796,7 @@ class FakeJava extends Fake implements Java {
     String binary = '/android-studio/jbr/bin/java',
     Version? version,
     bool canRun = true,
+    this.javacExists = true,
   }) : binaryPath = binary,
        version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
        _environment = <String, String>{
@@ -812,6 +813,9 @@ class FakeJava extends Fake implements Java {
 
   @override
   JavaSource javaSource;
+
+  @override
+  final bool javacExists;
 
   final Map<String, String> _environment;
   final bool _canRun;
