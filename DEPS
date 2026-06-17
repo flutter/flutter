@@ -18,10 +18,6 @@ vars = {
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
   'skia_revision': '5d19002eb73e4510fdf19b6ce7c3e49e271e6b0e',
 
-  # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
-  # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
-  'canvaskit_cipd_instance': '61aeJQ9laGfEFF_Vlc_u0MCkqB6xb2hAYHRBxKH-Uw4C',
-
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
   # which do not build for the web. This toolchain is needed to build CanvasKit
