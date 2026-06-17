@@ -69,8 +69,9 @@ void FlutterWindowsEngineBuilder::SetSwitches(
   switches_ = std::move(switches);
 }
 
-void FlutterWindowsEngineBuilder::SetEnableImpeller(bool enable_impeller) {
-  properties_.enable_impeller = enable_impeller;
+void FlutterWindowsEngineBuilder::SetImpellerSwitch(
+    FlutterDesktopImpellerSwitch impeller_switch) {
+  properties_.impeller_switch = impeller_switch;
 }
 
 void FlutterWindowsEngineBuilder::SetCreateKeyboardHandlerCallbacks(

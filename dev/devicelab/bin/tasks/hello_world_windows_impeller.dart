@@ -78,7 +78,7 @@ Future<TaskResult> run() async {
         final String originalContent = mainCppFile.readAsStringSync();
         final String modifiedContent = originalContent.replaceFirst(
           'flutter::DartProject project(L"data");',
-          'flutter::DartProject project(L"data");\n  project.set_enable_impeller(true);',
+          'flutter::DartProject project(L"data");\n  project.set_impeller_switch(flutter::ImpellerSwitch::Enabled);',
         );
         if (modifiedContent == originalContent) {
           res = TaskResult.failure('Failed to modify main.cpp');

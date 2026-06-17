@@ -71,6 +71,16 @@ typedef enum {
   IAccessibleExMode,
 } FlutterDesktopAccessibilityMode;
 
+// Configures the Impeller enablement switch.
+typedef enum {
+  // Use the default Impeller enablement behavior.
+  DefaultImpeller,
+  // Enable Impeller.
+  EnabledImpeller,
+  // Disable Impeller.
+  DisabledImpeller,
+} FlutterDesktopImpellerSwitch;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -105,17 +115,19 @@ typedef struct {
   const char** dart_entrypoint_argv;
 
   // GPU choice preference
+  // If not set defaults to NoPreference;
   FlutterDesktopGpuPreference gpu_preference;
 
   // Policy for the thread that runs UI isolate.
+  // If not set defaults to Default;
   FlutterDesktopUIThreadPolicy ui_thread_policy;
 
   // The accessibility mode.
   // This can be used to enable the experimental IAccessibleEx implementation.
   FlutterDesktopAccessibilityMode accessibility_mode;
 
-  // Whether to enable the Impeller renderer.
-  bool enable_impeller;
+  // Policy for enabling the Impeller renderer.
+  FlutterDesktopImpellerSwitch impeller_switch;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========

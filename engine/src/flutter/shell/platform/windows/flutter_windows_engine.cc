@@ -194,7 +194,12 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 
   // Check for impeller support.
   auto& switches = project_->GetSwitches();
-  bool enable_impeller = project_->enable_impeller();
+  bool enable_impeller = false;
+  if (project_->impeller_switch() == FlutterImpellerSwitch::Enabled) {
+    enable_impeller = true;
+  } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
+    enable_impeller = false;
+  }
   for (const auto& env_switch : switches) {
     if (env_switch == "--enable-impeller" ||
         env_switch == "--enable-impeller=true") {
@@ -312,6 +317,13 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
       // Impeller was enabled programmatically, so forward the switch to the
       // engine.
       switches.push_back("--enable-impeller");
+    }
+  } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
+    if (std::find(switches.begin(), switches.end(),
+                  "--enable-impeller=false") == switches.end()) {
+      // Impeller was disabled programmatically, so forward the switch to the
+      // engine.
+      switches.push_back("--enable-impeller=false");
     }
   }
   std::transform(

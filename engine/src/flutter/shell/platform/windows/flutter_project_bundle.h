@@ -35,6 +35,12 @@ enum class FlutterAccessibilityMode {
   IAccessibleEx,
 };
 
+enum class FlutterImpellerSwitch {
+  Default,
+  Enabled,
+  Disabled,
+};
+
 // The data associated with a Flutter project needed to run it in an engine.
 class FlutterProjectBundle {
  public:
@@ -88,8 +94,8 @@ class FlutterProjectBundle {
     return accessibility_mode_;
   }
 
-  // Returns whether to enable the Impeller renderer.
-  bool enable_impeller() const { return enable_impeller_; }
+  // Returns the Impeller enablement switch.
+  FlutterImpellerSwitch impeller_switch() const { return impeller_switch_; }
 
  private:
   std::filesystem::path assets_path_;
@@ -116,8 +122,8 @@ class FlutterProjectBundle {
   // The current accessibility mode.
   FlutterAccessibilityMode accessibility_mode_;
 
-  // Whether to enable the Impeller renderer.
-  bool enable_impeller_ = false;
+  // The Impeller enablement switch.
+  FlutterImpellerSwitch impeller_switch_ = FlutterImpellerSwitch::Default;
 };
 
 }  // namespace flutter

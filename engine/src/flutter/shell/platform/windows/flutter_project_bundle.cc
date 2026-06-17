@@ -39,7 +39,8 @@ FlutterProjectBundle::FlutterProjectBundle(
   accessibility_mode_ =
       static_cast<FlutterAccessibilityMode>(properties.accessibility_mode);
 
-  enable_impeller_ = properties.enable_impeller;
+  impeller_switch_ =
+      static_cast<FlutterImpellerSwitch>(properties.impeller_switch);
 
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
