@@ -12,6 +12,7 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
+#include "impeller/renderer/backend/gles/unique_handle_gles.h"
 
 namespace impeller {
 
@@ -78,9 +79,6 @@ class TextureGLES final : public Texture,
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
               TextureDescriptor desc,
               bool threadsafe = false);
-
-  // |Texture|
-  ~TextureGLES() override;
 
   // |Texture|
   bool IsValid() const override;
@@ -156,12 +154,12 @@ class TextureGLES final : public Texture,
  private:
   std::shared_ptr<ReactorGLES> reactor_;
   const Type type_;
-  HandleGLES handle_;
-  mutable std::optional<HandleGLES> fence_ = std::nullopt;
+  UniqueHandleGLES handle_;
+  mutable UniqueHandleGLES fence_;
   mutable std::bitset<6> slices_initialized_ = 0;
   const bool is_wrapped_;
   const std::optional<GLuint> wrapped_fbo_;
-  HandleGLES cached_fbo_ = HandleGLES::DeadHandle();
+  UniqueHandleGLES cached_fbo_;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
