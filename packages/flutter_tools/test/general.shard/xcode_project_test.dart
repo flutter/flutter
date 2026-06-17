@@ -569,8 +569,6 @@ void main() {
       testWithoutContext('returns early if usesSwiftPackageManager is false', () async {
         final fs = MemoryFileSystem.test();
         final testLogger = BufferLogger.test();
-        const projectPath = 'path/to/project';
-        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
         final fakeProcessManager = FakeProcessManager.empty();
         final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
@@ -579,12 +577,7 @@ void main() {
           usesSwiftPackageManager: false,
         );
         await iosProject.prefetchSwiftPackages(
-          xcodebuildProjectCommandArguments: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/${buildDirectory.path}/SourcePackages',
-          ],
+          xcodebuildProjectCommandArguments: <String>[],
           processUtils: processUtils,
           logger: testLogger,
         );
@@ -596,8 +589,6 @@ void main() {
         () async {
           final fs = MemoryFileSystem.test();
           final testLogger = BufferLogger.test();
-          const projectPath = 'path/to/project';
-          final Directory buildDirectory = fs.directory('$projectPath/build/ios');
           final fakeProcessManager = FakeProcessManager.empty();
           final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
@@ -606,12 +597,7 @@ void main() {
             flutterPluginSwiftPackageInProjectSettings: false,
           );
           await iosProject.prefetchSwiftPackages(
-            xcodebuildProjectCommandArguments: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-clonedSourcePackagesDirPath',
-              '/${buildDirectory.path}/SourcePackages',
-            ],
+            xcodebuildProjectCommandArguments: <String>[],
             processUtils: processUtils,
             logger: testLogger,
           );
