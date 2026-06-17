@@ -36,6 +36,12 @@ absl::StatusOr<ShaderArchive> ShaderArchive::Create(
     return absl::InvalidArgumentError("Invalid shader magic.");
   }
 
+  flatbuffers::Verifier verifier(payload->GetMapping(), payload->GetSize());
+  if (!fb::VerifyShaderArchiveBuffer(verifier)) {
+    return absl::InvalidArgumentError(
+        "Shader archive buffer failed verification.");
+  }
+
   auto shader_archive = fb::GetShaderArchive(payload->GetMapping());
   if (!shader_archive) {
     return absl::InvalidArgumentError("Could not read shader archive.");
