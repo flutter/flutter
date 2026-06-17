@@ -334,10 +334,11 @@ class FlutterPlugin : Plugin<Project> {
                     CopyFlutterJniLibsTask::class.java
                 ) {
                     dependsOn(compileTaskName)
-                    val intermediateDirProvider = projectToAddTasksTo.layout.buildDirectory.dir(
-                        "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}"
-                    )
-                    intermediateDir.set(intermediateDirProvider)
+                    val compileTaskProvider = projectToAddTasksTo.tasks.named(compileTaskName, FlutterTask::class.java)
+                    val outputDirProvider = compileTaskProvider.flatMap { task ->
+                        projectToAddTasksTo.layout.dir(projectToAddTasksTo.provider { task.outputDirectory })
+                    }
+                    intermediateDir.set(outputDirProvider)
                     this.targetPlatforms.set(targetPlatformsList)
                 }
             variant.sources.jniLibs?.addGeneratedSourceDirectory(
@@ -832,7 +833,7 @@ class FlutterPlugin : Plugin<Project> {
 
 abstract class CopyFlutterJniLibsTask : DefaultTask() {
 
-    @get:InputFiles
+    @get:InputDirectory
     abstract val intermediateDir: DirectoryProperty
 
     @get:Input
