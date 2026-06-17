@@ -33,6 +33,17 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
 import java.util.concurrent.Callable
+import com.android.build.api.variant.AndroidComponentsExtension
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
+import javax.inject.Inject
 
 class FlutterPlugin : Plugin<Project> {
     private var project: Project? = null
@@ -306,29 +317,36 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
-        // TODO(reidbaker): Migrate to getAndroidApplicationExtension and getAndroidLibraryExtension.
-        val androidExtension = FlutterPluginUtils.getLegacyAndroidExtension(projectToAddTasksTo)
-        androidExtension.sourceSets.all {
-            val sourceSet = this
-            val jniLibsDir =
-                projectToAddTasksTo.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter_jnilibs/${sourceSet.name}"
+        val androidComponents = projectToAddTasksTo.extensions.findByType(AndroidComponentsExtension::class.java)
+        val targetPlatformsList = targetPlatforms
+        androidComponents?.onVariants { variant ->
+            val capitalizeVariantName = FlutterPluginUtils.capitalize(variant.name)
+            val compileTaskName = FlutterPluginUtils.toCamelCase(
+                listOf(
+                    "compile",
+                    FLUTTER_BUILD_PREFIX,
+                    variant.name
                 )
-            // Register the directory as a lazy Callable returning the resolved File rather than
-            // registering a Provider (which is disallowed in AGP 9.0+) or resolving it eagerly with
-            // `.get().asFile`. Resolving eagerly captured the build directory at the time `:app` was
-            // configured, which disagreed with the (lazily resolved) destination that `copyJniLibs`
-            // writes to when `:app` was evaluated before its build directory had been redirected
-            // (e.g. a combined `subprojects { ... evaluationDependsOn(":app") }` block plus a plugin
-            // whose Gradle subproject name sorts before ":app"). That mismatch dropped `libapp.so`
-            // from the merged native libraries. See https://github.com/flutter/flutter/issues/186810.
-            //
-            // The directory is also kept as a sibling of (not nested inside) the Flutter task's
-            // `intermediates/flutter/<variant>` output directory, so that `copyJniLibs` writing into
-            // it does not create overlapping task outputs (which undermine Gradle's incremental
-            // checks, e.g. for flavored builds: https://github.com/flutter/flutter/issues/187388).
-            sourceSet.jniLibs.srcDir(Callable { jniLibsDir.get().asFile })
+            )
+            val copyJniLibsTaskProvider: TaskProvider<CopyFlutterJniLibsTask> =
+                projectToAddTasksTo.tasks.register(
+                    "copyJniLibs${FLUTTER_BUILD_PREFIX}${capitalizeVariantName}",
+                    CopyFlutterJniLibsTask::class.java
+                ) {
+                    dependsOn(compileTaskName)
+                    val intermediateDirProvider = projectToAddTasksTo.layout.buildDirectory.dir(
+                        "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}"
+                    )
+                    intermediateDir.set(intermediateDirProvider)
+                    this.targetPlatforms.set(targetPlatformsList)
+                }
+            variant.sources.jniLibs?.addGeneratedSourceDirectory(
+                copyJniLibsTaskProvider,
+                CopyFlutterJniLibsTask::destinationDir
+            )
         }
+
+
 
         val flutterPlugin = this
 
@@ -730,45 +748,7 @@ class FlutterPlugin : Plugin<Project> {
             // lazily-registered source set `srcDir` above. See the `sourceSets.all` block and
             // https://github.com/flutter/flutter/issues/186810 /
             // https://github.com/flutter/flutter/issues/187388.
-            val jniLibsDir =
-                project.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter_jnilibs/${variant.name}"
-                )
-            val copyJniLibsTaskProvider: TaskProvider<Sync> =
-                project.tasks.register(
-                    "copyJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
-                    Sync::class.java
-                ) {
-                    dependsOn(flutterCompileTask)
-                    into(jniLibsDir)
-                    targetPlatforms.forEach { targetPlatform ->
-                        val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                        from("${flutterCompileTask.intermediateDir}/$abi") {
-                            include("*.so")
-                            rename { filename: String -> "lib$filename" }
-                            into(abi ?: "null")
-                        }
-                        // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                        val nativeAssetsDir =
-                            "${flutterCompileTask.intermediateDir}/native_assets/jniLibs/lib"
-                        from("$nativeAssetsDir/$abi") {
-                            include("*.so")
-                            into(abi ?: "null")
-                        }
-                    }
-                }
-            val mergeJniLibsTaskName = "merge${FlutterPluginUtils.capitalize(variant.name)}JniLibFolders"
-            project.tasks.configureEach {
-                if (name == mergeJniLibsTaskName) {
-                    dependsOn(copyJniLibsTaskProvider)
-                    // Explicitly register the output of `copyJniLibs` as an input directory of the
-                    // merge task. AGP fails to track variant-specific `jniLibs` directories added dynamically
-                    // during variant creation for up-to-date checks. Without this, Gradle would skip
-                    // the merge task as up-to-date when the Flutter task compilation outputs changed
-                    // (e.g. multi-ABI builds following a single-ABI build: https://github.com/flutter/flutter/issues/187388).
-                    inputs.dir(jniLibsDir)
-                }
-            }
+
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
                 project.tasks.register(
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
@@ -848,4 +828,39 @@ class FlutterPlugin : Plugin<Project> {
      * This property is set by Android Studio when it invokes a Gradle task.
      */
     private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
+}
+
+abstract class CopyFlutterJniLibsTask : DefaultTask() {
+
+    @get:InputFiles
+    abstract val intermediateDir: DirectoryProperty
+
+    @get:Input
+    abstract val targetPlatforms: ListProperty<String>
+
+    @get:OutputDirectory
+    abstract val destinationDir: DirectoryProperty
+
+    @Inject
+    abstract fun getFileSystemOperations(): FileSystemOperations
+
+    @TaskAction
+    fun copy() {
+        getFileSystemOperations().sync {
+            into(destinationDir)
+            targetPlatforms.get().forEach { targetPlatform ->
+                val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
+                from(intermediateDir.dir(abi ?: "null")) {
+                    include("*.so")
+                    rename { filename: String -> "lib$filename" }
+                    into(abi ?: "null")
+                }
+                val nativeAssetsDir = intermediateDir.dir("native_assets/jniLibs/lib/$abi")
+                from(nativeAssetsDir) {
+                    include("*.so")
+                    into(abi ?: "null")
+                }
+            }
+        }
+    }
 }
