@@ -49,6 +49,10 @@ const hasChromiumBreakIterators = () => {
     (typeof Intl.Segmenter !== "undefined");
 }
 
+const hasTextCluster = () => {
+  return (typeof window.TextCluster !== "undefined");
+}
+
 const supportsWasmGC = () => {
   // This attempts to instantiate a wasm module that only will validate if the
   // final WasmGC spec is implemented in the browser.
@@ -83,6 +87,7 @@ export const browserEnvironment = {
   browserEngine: browserEngine,
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
+  hasTextCluster: hasTextCluster(),
   supportsWasmGC: supportsWasmGC(),
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),

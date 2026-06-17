@@ -273,11 +273,17 @@ class CapabilitiesVK final : public Capabilities,
   bool Supports32BitPrimitiveIndices() const override;
 
   // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|
   bool SupportsTextureCompression(
       CompressedTextureFamily family) const override;
+
+  // |Capabilities|
+  bool SupportsFramebufferRenderMipmap() const override;
 
   // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
