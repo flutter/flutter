@@ -39,46 +39,45 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test(
-    'libapp.so is packaged in an app bundle with a combined subprojects block '
-    'and a plugin sorted before ":app"',
-    () async {
-      final Directory appDir = _createApp(tempDir);
+  test('libapp.so is packaged in an app bundle with a combined subprojects block '
+      'and a plugin sorted before ":app"', () async {
+    final Directory appDir = _createApp(tempDir);
 
-      // A plugin whose Gradle subproject (":aaa_plugin") sorts before ":app", so
-      // the combined subprojects loop reaches it (and triggers
-      // evaluationDependsOn(":app")) before ":app"'s build dir is redirected.
-      _createPlugin(tempDir, 'aaa_plugin');
-      _addPathDependency(appDir, 'aaa_plugin', tempDir.childDirectory('aaa_plugin'));
+    // A plugin whose Gradle subproject (":aaa_plugin") sorts before ":app", so
+    // the combined subprojects loop reaches it (and triggers
+    // evaluationDependsOn(":app")) before ":app"'s build dir is redirected.
+    _createPlugin(tempDir, 'aaa_plugin');
+    _addPathDependency(appDir, 'aaa_plugin', tempDir.childDirectory('aaa_plugin'));
 
-      _useCombinedSubprojectsBlock(appDir);
+    _useCombinedSubprojectsBlock(appDir);
+    _disableR8(appDir);
 
-      final ProcessResult result = processManager.runSync(<String>[
-        flutterBin,
-        'build',
-        'appbundle',
-        '--release',
-      ], workingDirectory: appDir.path);
+    final ProcessResult result = processManager.runSync(<String>[
+      flutterBin,
+      'build',
+      'appbundle',
+      '--release',
+    ], workingDirectory: appDir.path);
+    expect(
+      result.exitCode,
+      0,
+      reason: 'flutter build appbundle --release failed:\n${result.stdout}\n${result.stderr}',
+    );
+
+    final List<String> files = _appBundleFileList(appDir, _releaseBundle(appDir));
+    for (final arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
       expect(
-        result.exitCode,
-        0,
-        reason: 'flutter build appbundle --release failed:\n${result.stdout}\n${result.stderr}',
+        files,
+        contains('base/lib/$arch/libapp.so'),
+        reason: 'libapp.so missing for $arch in the app bundle',
       );
-
-      final List<String> files = _appBundleFileList(appDir, _releaseBundle(appDir));
-      for (final arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
-        expect(
-          files,
-          contains('base/lib/$arch/libapp.so'),
-          reason: 'libapp.so missing for $arch in the app bundle',
-        );
-      }
-    },
-  );
+    }
+  });
 
   test('libapp.so is packaged for every ABI after a single-ABI build of a flavored app', () async {
     final Directory appDir = _createApp(tempDir);
     _addFlavors(appDir, <String>['prod']);
+    _disableR8(appDir);
 
     // Simulate a prior `flutter run` on a single-architecture device, which only
     // builds `app.so` for that ABI.
@@ -230,6 +229,22 @@ void _addFlavors(Directory appDir, List<String> flavors) {
   buildGradle.writeAsStringSync(updated);
 }
 
+void _disableR8(Directory appDir) {
+  final File buildGradle = appDir
+      .childDirectory('android')
+      .childDirectory('app')
+      .childFile('build.gradle.kts');
+  final String contents = buildGradle.readAsStringSync();
+  final String updated = contents.replaceFirst(
+    'signingConfig = signingConfigs.getByName("debug")',
+    'signingConfig = signingConfigs.getByName("debug")\n            isMinifyEnabled = false\n            isShrinkResources = false',
+  );
+  if (updated == contents) {
+    throw StateError('Failed to disable R8 in ${buildGradle.path}');
+  }
+  buildGradle.writeAsStringSync(updated);
+}
+
 File _releaseBundle(Directory appDir) => appDir
     .childDirectory('build')
     .childDirectory('app')
@@ -244,7 +259,9 @@ List<String> _appBundleFileList(Directory appDir, File appBundle) {
     throw StateError('App bundle not found at ${appBundle.path}');
   }
   final File localProperties = appDir.childDirectory('android').childFile('local.properties');
-  final RegExpMatch? match = RegExp(r'sdk\.dir=(.+)').firstMatch(localProperties.readAsStringSync());
+  final RegExpMatch? match = RegExp(
+    r'sdk\.dir=(.+)',
+  ).firstMatch(localProperties.readAsStringSync());
   final String sdkPath = match?.group(1)?.trim() ?? '';
   if (sdkPath.isEmpty) {
     throw StateError('SDK path not found in ${localProperties.path}');
@@ -264,11 +281,12 @@ List<String> _appBundleFileList(Directory appDir, File appBundle) {
     appBundle.path,
   ]);
   if (result.exitCode != 0) {
-    throw ProcessException(apkAnalyzer, <String>[
-      'files',
-      'list',
-      appBundle.path,
-    ], 'apkanalyzer failed:\n${result.stderr}', result.exitCode);
+    throw ProcessException(
+      apkAnalyzer,
+      <String>['files', 'list', appBundle.path],
+      'apkanalyzer failed:\n${result.stderr}',
+      result.exitCode,
+    );
   }
   // apkanalyzer prints entries like `/base/lib/arm64-v8a/libapp.so`; normalize
   // by trimming the leading slash.
