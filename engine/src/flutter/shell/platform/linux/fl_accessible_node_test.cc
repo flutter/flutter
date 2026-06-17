@@ -380,16 +380,17 @@ TEST_F(FlAccessibleNodeTest, ExposesTextViaAtkText) {
 
   start_offset = -1;
   end_offset = -1;
-  g_autofree gchar* text_at_offset = atk_text_get_text_at_offset(
-      ATK_TEXT(node), 0, ATK_TEXT_BOUNDARY_CHAR, &start_offset, &end_offset);
+  g_autofree gchar* text_at_offset = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_CHAR, &start_offset,
+      &end_offset);
   EXPECT_STREQ(text_at_offset, "S");
   EXPECT_EQ(start_offset, 0);
   EXPECT_EQ(end_offset, 1);
 
   start_offset = -1;
   end_offset = -1;
-  g_autofree gchar* text_at_line_offset = atk_text_get_text_at_offset(
-      ATK_TEXT(node), 0, ATK_TEXT_BOUNDARY_LINE_START, &start_offset,
+  g_autofree gchar* text_at_line_offset = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_LINE, &start_offset,
       &end_offset);
   EXPECT_STREQ(text_at_line_offset, "Section One");
   EXPECT_EQ(start_offset, 0);
@@ -397,8 +398,9 @@ TEST_F(FlAccessibleNodeTest, ExposesTextViaAtkText) {
 
   start_offset = -1;
   end_offset = -1;
-  g_autofree gchar* text_out_of_bounds = atk_text_get_text_at_offset(
-      ATK_TEXT(node), 100, ATK_TEXT_BOUNDARY_CHAR, &start_offset, &end_offset);
+  g_autofree gchar* text_out_of_bounds = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 100, ATK_TEXT_GRANULARITY_CHAR, &start_offset,
+      &end_offset);
   EXPECT_EQ(text_out_of_bounds, nullptr);
   EXPECT_EQ(start_offset, 0);
   EXPECT_EQ(end_offset, 0);

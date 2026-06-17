@@ -629,13 +629,11 @@ static gchar* fl_accessible_node_get_selection(AtkText* text,
   return nullptr;
 }
 
-// Implements AtkText::get_text_at_offset (deprecated, but still used by some
-// ATK clients to read the text content of non-editable objects such as
-// headings).
-static gchar* fl_accessible_node_get_text_at_offset(
+// Implements AtkText::get_string_at_offset.
+static gchar* fl_accessible_node_get_string_at_offset(
     AtkText* text,
     gint offset,
-    AtkTextBoundary boundary_type,
+    AtkTextGranularity granularity,
     gint* start_offset,
     gint* end_offset) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(text);
@@ -650,23 +648,60 @@ static gchar* fl_accessible_node_get_text_at_offset(
     return nullptr;
   }
 
-  if (boundary_type == ATK_TEXT_BOUNDARY_CHAR) {
-    if (start_offset != nullptr) {
-      *start_offset = offset;
-    }
-    if (end_offset != nullptr) {
-      *end_offset = offset + 1;
-    }
-    return g_utf8_substring(priv->name, offset, offset + 1);
+  switch (granularity) {
+    case ATK_TEXT_GRANULARITY_CHAR:
+      if (start_offset != nullptr) {
+        *start_offset = offset;
+      }
+      if (end_offset != nullptr) {
+        *end_offset = offset + 1;
+      }
+      return g_utf8_substring(priv->name, offset, offset + 1);
+    case ATK_TEXT_GRANULARITY_WORD:
+    case ATK_TEXT_GRANULARITY_SENTENCE:
+    case ATK_TEXT_GRANULARITY_LINE:
+    case ATK_TEXT_GRANULARITY_PARAGRAPH:
+      if (start_offset != nullptr) {
+        *start_offset = 0;
+      }
+      if (end_offset != nullptr) {
+        *end_offset = count;
+      }
+      return g_strdup(priv->name != nullptr ? priv->name : "");
+    default:
+      return nullptr;
   }
+}
 
-  if (start_offset != nullptr) {
-    *start_offset = 0;
+// Implements AtkText::get_text_at_offset (deprecated, but still used by some
+// ATK clients to read the text content of non-editable objects such as
+// headings).
+static gchar* fl_accessible_node_get_text_at_offset(
+    AtkText* text,
+    gint offset,
+    AtkTextBoundary boundary_type,
+    gint* start_offset,
+    gint* end_offset) {
+  switch (boundary_type) {
+    case ATK_TEXT_BOUNDARY_CHAR:
+      return fl_accessible_node_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_CHAR, start_offset, end_offset);
+    case ATK_TEXT_BOUNDARY_WORD_START:
+    case ATK_TEXT_BOUNDARY_WORD_END:
+      return fl_accessible_node_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_WORD, start_offset, end_offset);
+    case ATK_TEXT_BOUNDARY_SENTENCE_START:
+    case ATK_TEXT_BOUNDARY_SENTENCE_END:
+      return fl_accessible_node_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_SENTENCE, start_offset,
+          end_offset);
+    case ATK_TEXT_BOUNDARY_LINE_START:
+    case ATK_TEXT_BOUNDARY_LINE_END:
+      return fl_accessible_node_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_LINE, start_offset, end_offset);
+    default:
+      return nullptr;
   }
-  if (end_offset != nullptr) {
-    *end_offset = count;
-  }
-  return g_strdup(priv->name != nullptr ? priv->name : "");
 }
 
 static void fl_accessible_node_text_interface_init(AtkTextIface* iface) {
@@ -677,6 +712,7 @@ static void fl_accessible_node_text_interface_init(AtkTextIface* iface) {
   iface->get_n_selections = fl_accessible_node_get_n_selections;
   iface->get_selection = fl_accessible_node_get_selection;
   iface->get_text_at_offset = fl_accessible_node_get_text_at_offset;
+  iface->get_string_at_offset = fl_accessible_node_get_string_at_offset;
 }
 
 static void fl_accessible_node_init(FlAccessibleNode* self) {
