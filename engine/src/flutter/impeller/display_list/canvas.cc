@@ -635,7 +635,7 @@ Scalar Canvas::GetShadowDeviceRadius(const Matrix& matrix,
 
 bool Canvas::AttemptDrawBlurredPathSource(const PathSource& source,
                                           const Paint& paint) {
-  FML_DCHECK(IsShadowBlurDrawOperation);
+  FML_DCHECK(IsShadowBlurDrawOperation(paint));
 
   // This has_value() test should always succeed as it is checked by the
   // IsShadowBlurDrawOperation method which should have been called before
