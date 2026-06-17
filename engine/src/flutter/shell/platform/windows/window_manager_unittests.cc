@@ -70,9 +70,8 @@ class WindowManagerTest : public WindowsTest {
     // before any windows (and thus render surfaces) are created.
     auto egl_manager = std::make_unique<NiceMock<egl::MockManager>>();
     ON_CALL(*egl_manager, CreateWindowSurface)
-        .WillByDefault([](HWND, size_t, size_t) {
-          return CreateMockWindowSurface();
-        });
+        .WillByDefault(
+            [](HWND, size_t, size_t) { return CreateMockWindowSurface(); });
     ON_CALL(*egl_manager, render_context)
         .WillByDefault(Return(&mock_egl_context_));
     ON_CALL(mock_egl_context_, ClearCurrent).WillByDefault(Return(true));
