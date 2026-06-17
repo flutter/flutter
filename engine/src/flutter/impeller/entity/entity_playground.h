@@ -35,6 +35,7 @@ class EntityPlayground : public PlaygroundTest {
 
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
+  mutable std::shared_ptr<ContentContext> content_context_;
 
   EntityPlayground(const EntityPlayground&) = delete;
 

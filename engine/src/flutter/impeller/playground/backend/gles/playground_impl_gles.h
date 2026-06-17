@@ -9,6 +9,8 @@
 
 #include "impeller/renderer/backend/gles/context_gles.h"
 
+struct GLFWwindow;
+
 namespace impeller {
 
 class PlaygroundImplGLES final : public PlaygroundImpl {
@@ -17,23 +19,23 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
 
   explicit PlaygroundImplGLES(
       PlaygroundSwitches switches,
-      std::shared_ptr<ShareableContext>* shared_context = nullptr);
+      std::shared_ptr<ShareableContext>* shared_context);
 
   ~PlaygroundImplGLES();
 
   fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
 
-  static std::shared_ptr<ShareableContext> MakeContextGLES(
+  static std::shared_ptr<ShareableContext> MakeShareableContext(
       const PlaygroundSwitches& switches);
 
  private:
   class ReactorWorker;
 
   static void DestroyWindowHandle(WindowHandle handle);
-  using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
+  using UniqueHandle =
+      std::unique_ptr<GLFWwindow, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
-  std::shared_ptr<ReactorWorker> worker_;
   const bool use_angle_;
   void* angle_glesv2_;
   std::shared_ptr<Context> context_;
@@ -54,6 +56,9 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
 
   static Playground::GLProcAddressResolver CreateGLProcAddressResolver(
       const PlaygroundSwitches& switches);
+
+  static GLFWwindow* CreateGLWindow(const PlaygroundSwitches& switches,
+                                    GLFWwindow* share_window);
 
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 

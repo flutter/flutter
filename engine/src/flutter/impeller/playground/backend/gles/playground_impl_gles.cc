@@ -64,6 +64,13 @@ struct PlaygroundImplGLES::ShareableContext final {
  public:
   std::shared_ptr<ReactorWorker> worker;
   std::shared_ptr<ContextGLES> context;
+
+  // This is a placeholder/dummy window. It is not rendered to by playground
+  // tests. Instead, it is created so different playground tests can create
+  // windows that share the same context.
+  // See https://www.glfw.org/docs/latest/context_guide.html#context_sharing for
+  // details.
+  UniqueHandle window = {nullptr, &DestroyWindowHandle};
 };
 
 void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
@@ -89,10 +96,29 @@ PlaygroundImplGLES::PlaygroundImplGLES(
     FML_CHECK(angle_glesv2_ != nullptr);
   }
 
+  if (shared_context->get() == nullptr) {
+    *shared_context = MakeShareableContext(switches_);
+    if (shared_context->get() == nullptr) {
+      FML_LOG(ERROR) << "Could not create GLES context.";
+      return;
+    }
+  }
+
+  context_ = (*shared_context)->context;
+
+  auto window = CreateGLWindow(switches_, (*shared_context)->window.get());
+  handle_.reset(window);
+
+  (*shared_context)->context->GetGPUTracer()->Reset();
+}
+
+GLFWwindow* PlaygroundImplGLES::CreateGLWindow(
+    const PlaygroundSwitches& switches,
+    GLFWwindow* share_window) {
   ::glfwDefaultWindowHints();
 
 #if FML_OS_MACOSX
-  FML_CHECK(use_angle_) << "Must use Angle on macOS for OpenGL ES.";
+  FML_CHECK(switches.use_angle) << "Must use Angle on macOS for OpenGL ES.";
   ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 #endif  // FML_OS_MACOSX
 #if FML_OS_LINUX
@@ -116,30 +142,20 @@ PlaygroundImplGLES::PlaygroundImplGLES(
   ::glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
 #endif
 
-  auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, nullptr);
-
+  auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, share_window);
   ::glfwMakeContextCurrent(window);
-
-  handle_.reset(window);
-
-  if (shared_context != nullptr && shared_context->get() != nullptr) {
-    context_ = (*shared_context)->context;
-  } else {
-    auto shareable = MakeContextGLES(switches_);
-    if (!shareable || !shareable->context) {
-      FML_LOG(ERROR) << "Could not create context.";
-      return;
-    }
-    if (shared_context != nullptr) {
-      *shared_context = shareable;
-    }
-    worker_ = shareable->worker;
-    context_ = shareable->context;
-  }
+  return window;
 }
 
 std::shared_ptr<PlaygroundImplGLES::ShareableContext>
-PlaygroundImplGLES::MakeContextGLES(const PlaygroundSwitches& switches) {
+PlaygroundImplGLES::MakeShareableContext(const PlaygroundSwitches& switches) {
+  auto window =
+      UniqueHandle(CreateGLWindow(switches, nullptr), &DestroyWindowHandle);
+  if (!window) {
+    FML_LOG(ERROR) << "Could not create GLES window.";
+    return nullptr;
+  }
+
   auto gl =
       std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver(switches));
   if (!gl->IsValid()) {
@@ -185,7 +201,8 @@ PlaygroundImplGLES::MakeContextGLES(const PlaygroundSwitches& switches) {
     return nullptr;
   }
 
-  return std::make_shared<ShareableContext>(worker, context_gles);
+  return std::make_shared<ShareableContext>(worker, context_gles,
+                                            std::move(window));
 }
 
 PlaygroundImplGLES::~PlaygroundImplGLES() = default;
