@@ -6,6 +6,7 @@ package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
@@ -16,14 +17,21 @@ import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.FlutterTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Sync
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -32,17 +40,6 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
-import java.util.concurrent.Callable
-import com.android.build.api.variant.AndroidComponentsExtension
-import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileSystemOperations
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
 class FlutterPlugin : Plugin<Project> {
@@ -321,23 +318,25 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatformsList = targetPlatforms
         androidComponents?.onVariants { variant ->
             val capitalizeVariantName = FlutterPluginUtils.capitalize(variant.name)
-            val compileTaskName = FlutterPluginUtils.toCamelCase(
-                listOf(
-                    "compile",
-                    FLUTTER_BUILD_PREFIX,
-                    variant.name
+            val compileTaskName =
+                FlutterPluginUtils.toCamelCase(
+                    listOf(
+                        "compile",
+                        FLUTTER_BUILD_PREFIX,
+                        variant.name
+                    )
                 )
-            )
             val copyJniLibsTaskProvider: TaskProvider<CopyFlutterJniLibsTask> =
                 projectToAddTasksTo.tasks.register(
-                    "copyJniLibs${FLUTTER_BUILD_PREFIX}${capitalizeVariantName}",
+                    "copyJniLibs${FLUTTER_BUILD_PREFIX}$capitalizeVariantName",
                     CopyFlutterJniLibsTask::class.java
                 ) {
                     dependsOn(compileTaskName)
                     val compileTaskProvider = projectToAddTasksTo.tasks.named(compileTaskName, FlutterTask::class.java)
-                    val outputDirProvider = compileTaskProvider.flatMap { task ->
-                        projectToAddTasksTo.layout.dir(projectToAddTasksTo.provider { task.outputDirectory })
-                    }
+                    val outputDirProvider =
+                        compileTaskProvider.flatMap { task ->
+                            projectToAddTasksTo.layout.dir(projectToAddTasksTo.provider { task.outputDirectory })
+                        }
                     intermediateDir.set(outputDirProvider)
                     this.targetPlatforms.set(targetPlatformsList)
                 }
@@ -346,8 +345,6 @@ class FlutterPlugin : Plugin<Project> {
                 CopyFlutterJniLibsTask::destinationDir
             )
         }
-
-
 
         val flutterPlugin = this
 
@@ -832,7 +829,6 @@ class FlutterPlugin : Plugin<Project> {
 }
 
 abstract class CopyFlutterJniLibsTask : DefaultTask() {
-
     @get:InputDirectory
     abstract val intermediateDir: DirectoryProperty
 
