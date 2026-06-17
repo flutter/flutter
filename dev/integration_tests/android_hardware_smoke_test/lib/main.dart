@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'backdrop_filter_blur.dart';
 import 'goldens.dart';
 import 'image_drawing_canvas.dart';
+import 'platform_view.dart';
 import 'text_drawing_canvas.dart';
 import 'vector_drawings_canvas.dart';
 
@@ -32,15 +34,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
 }
 
-/// A stateful widget rendering vector drawings or blur effects based on test driver requests.
+/// A stateful widget rendering vector drawings, blur effects, or platform views based on test driver requests.
 class MyWidget extends StatefulWidget {
   const MyWidget({super.key, required this.imageLoader});
 
@@ -64,6 +64,7 @@ class _MyState extends State<MyWidget> {
   String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
   ui.Image? _loadedImage;
+  Completer<void>? _platformViewCreatedCompleter;
 
   Future<ui.Image> _loadImage() async {
     return widget.imageLoader();
@@ -72,6 +73,24 @@ class _MyState extends State<MyWidget> {
   Future<Map<String, Object?>?> _handler(Object? message) async {
     final Map<String, Object?>? messageMap = (message as Map<Object?, Object?>?)
         ?.cast<String, Object?>();
+
+    if (messageMap?['command'] == 'compare_golden') {
+      // Handle the out-of-band comparison request. This is triggered by the on-device test runner
+      // once it has captured and cropped the platform view screenshot using UiAutomation.
+      final testName = messageMap!['testName']! as String;
+      final imageBase64 = messageMap['imageBytes']! as String;
+      final Uint8List imageBytes = base64.decode(imageBase64);
+      final String? goldenVariantValue = await _goldenVariantFuture;
+
+      final String? failureMessage = await compareGoldenOnDevice(
+        testName,
+        imageBytes,
+        goldenVariantValue,
+      );
+
+      return <String, Object?>{'message': failureMessage ?? 'Comparison Success'};
+    }
+
     final testName = messageMap?['testName'] as String?;
     final bool performAppSideGoldenCompare =
         messageMap?['performAppSideGoldenCompare'] as bool? ?? true;
@@ -79,8 +98,7 @@ class _MyState extends State<MyWidget> {
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot =
-        messageMap?['captureScreenshot'] as bool? ?? true;
+    final bool captureScreenshot = messageMap?['captureScreenshot'] as bool? ?? true;
 
     // Lazily load the image asset only when requested. This avoids loading it
     // unnecessarily, blocks rendering until fully loaded, and catches load
@@ -101,13 +119,17 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{
-          'message': 'Failed to load image asset: $e\n$stackTrace',
-        };
+        return <String, Object?>{'message': 'Failed to load image asset: $e\n$stackTrace'};
       }
     }
 
     final completer = Completer<Map<String, Object?>>();
+
+    if (testName == 'platformViewTest') {
+      _platformViewCreatedCompleter = Completer<void>();
+    } else {
+      _platformViewCreatedCompleter = null;
+    }
 
     setState(() {
       _message = testName ?? 'Empty message';
@@ -121,12 +143,10 @@ class _MyState extends State<MyWidget> {
           performAppSideGoldenCompare,
           targetKey,
           _goldenVariantFuture,
+          settleFuture: _platformViewCreatedCompleter?.future,
         );
       } else {
-        completer.complete(<String, Object?>{
-          'message': 'Rendered $testName',
-          'imageBytes': null,
-        });
+        completer.complete(<String, Object?>{'message': 'Rendered $testName', 'imageBytes': null});
       }
     }, debugLabel: 'Rendered $testName');
 
@@ -137,9 +157,7 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
-      'impeller_backend',
-    );
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>('impeller_backend');
     _testChannel.setMessageHandler(_handler);
   }
 
@@ -152,16 +170,19 @@ class _MyState extends State<MyWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget testContent;
-    if (_message == 'backdropFilterBlurTest') {
-      testContent = const BackdropFilterBlur();
-    } else if (_message == 'textTest') {
-      testContent = const TextDrawingCanvas();
-    } else if (_message == 'imageTest') {
-      testContent = ImageDrawingCanvas(image: _loadedImage);
-    } else {
-      testContent = VectorDrawingsCanvas(message: _message);
-    }
+    final Widget testContent = switch (_message) {
+      'backdropFilterBlurTest' => const BackdropFilterBlur(),
+      'platformViewTest' => AndroidPlatformView(
+        onCreated: () {
+          if (_platformViewCreatedCompleter?.isCompleted == false) {
+            _platformViewCreatedCompleter?.complete();
+          }
+        },
+      ),
+      'textTest' => const TextDrawingCanvas(),
+      'imageTest' => ImageDrawingCanvas(image: _loadedImage),
+      _ => VectorDrawingsCanvas(message: _message),
+    };
 
     return SafeArea(
       child: Stack(
