@@ -523,7 +523,10 @@ static void fl_view_dispose(GObject* object) {
       self->cursor_changed_cb_id = 0;
     }
 
-    // Release the view ID from the engine.
+    // The implicit view is owned by the engine and cannot be removed through
+    // the embedder RemoveView API. Only views created with AddView need
+    // releasing. This matches the embedder API contract and avoids a
+    // pre-existing shutdown warning in the Linux shell.
     fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
                           nullptr);
   }
