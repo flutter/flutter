@@ -158,6 +158,33 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Scrollable exposes implicit scrolling before dimensions are available', (
+    WidgetTester tester,
+  ) async {
+    semantics = SemanticsTester(tester);
+    final controller = _NoDimensionsScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: List<Widget>.generate(60, (int i) => Text('$i')),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]));
+    expect(
+      semantics.nodesWith(
+        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+      ),
+      isEmpty,
+    );
+    semantics.dispose();
+  });
+
   testWidgets('scrollToOffset respects implicit scrolling configuration', (
     WidgetTester tester,
   ) async {
@@ -856,4 +883,48 @@ class _NoImplicitScrollingScrollPhysics extends ScrollPhysics {
 
   @override
   ScrollPhysics applyTo(ScrollPhysics? ancestor) => this;
+}
+
+class _NoDimensionsScrollController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _NoDimensionsScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+      initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      debugLabel: debugLabel,
+    );
+  }
+}
+
+class _NoDimensionsScrollPosition extends ScrollPositionWithSingleContext {
+  _NoDimensionsScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+    super.initialPixels,
+    super.keepScrollOffset,
+    super.debugLabel,
+  });
+
+  bool _applyingContentDimensions = false;
+
+  @override
+  bool get haveDimensions => _applyingContentDimensions && super.haveDimensions;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    _applyingContentDimensions = true;
+    try {
+      return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    } finally {
+      _applyingContentDimensions = false;
+    }
+  }
 }
