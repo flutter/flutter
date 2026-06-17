@@ -17,6 +17,7 @@ import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.FlutterTask
+import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -335,7 +336,7 @@ class FlutterPlugin : Plugin<Project> {
                     val compileTaskProvider = projectToAddTasksTo.tasks.named(compileTaskName, FlutterTask::class.java)
                     val outputDirProvider =
                         compileTaskProvider.flatMap { task ->
-                            projectToAddTasksTo.layout.dir(projectToAddTasksTo.provider { task.outputDirectory })
+                            projectToAddTasksTo.layout.dir(projectToAddTasksTo.provider { task.outputDirectory!! })
                         }
                     intermediateDir.set(outputDirProvider)
                     this.targetPlatforms.set(targetPlatformsList)
@@ -826,38 +827,4 @@ class FlutterPlugin : Plugin<Project> {
      * This property is set by Android Studio when it invokes a Gradle task.
      */
     private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
-}
-
-abstract class CopyFlutterJniLibsTask : DefaultTask() {
-    @get:InputDirectory
-    abstract val intermediateDir: DirectoryProperty
-
-    @get:Input
-    abstract val targetPlatforms: ListProperty<String>
-
-    @get:OutputDirectory
-    abstract val destinationDir: DirectoryProperty
-
-    @Inject
-    abstract fun getFileSystemOperations(): FileSystemOperations
-
-    @TaskAction
-    fun copy() {
-        getFileSystemOperations().sync {
-            into(destinationDir)
-            targetPlatforms.get().forEach { targetPlatform ->
-                val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                from(intermediateDir.dir(abi ?: "null")) {
-                    include("*.so")
-                    rename { filename: String -> "lib$filename" }
-                    into(abi ?: "null")
-                }
-                val nativeAssetsDir = intermediateDir.dir("native_assets/jniLibs/lib/$abi")
-                from(nativeAssetsDir) {
-                    include("*.so")
-                    into(abi ?: "null")
-                }
-            }
-        }
-    }
 }
