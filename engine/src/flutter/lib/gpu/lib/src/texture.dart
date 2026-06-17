@@ -69,6 +69,23 @@ base class Texture extends NativeFieldWrapperClass1 {
     }
   }
 
+  Texture._surface(
+    GpuContext gpuContext,
+    PixelFormat format,
+    int width,
+    int height,
+  ) : _gpuContext = gpuContext,
+      storageMode = StorageMode.devicePrivate,
+      format = format,
+      width = width,
+      height = height,
+      sampleCount = 1,
+      textureType = TextureType.texture2D,
+      enableRenderTargetUsage = true,
+      enableShaderReadUsage = true,
+      enableShaderWriteUsage = false,
+      mipLevelCount = 1;
+
   GpuContext _gpuContext;
 
   final StorageMode storageMode;
@@ -100,14 +117,26 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// 1 for 2D and external textures, 6 for cubemap textures.
   int get sliceCount => textureType == TextureType.textureCube ? 6 : 1;
 
+  /// Returns the width of the texture at [mipLevel], clamped at 1.
+  int getMipLevelWidth(int mipLevel) {
+    _validateMipLevel(mipLevel);
+    final int mipWidth = width >> mipLevel;
+    return mipWidth > 0 ? mipWidth : 1;
+  }
+
+  /// Returns the height of the texture at [mipLevel], clamped at 1.
+  int getMipLevelHeight(int mipLevel) {
+    _validateMipLevel(mipLevel);
+    final int mipHeight = height >> mipLevel;
+    return mipHeight > 0 ? mipHeight : 1;
+  }
+
   /// Returns the size in bytes of the [mipLevel] mip level (one slice). Mip
   /// dimensions are clamped at 1, matching standard mip chain semantics. For
   /// block-compressed formats the dimensions are rounded up to whole blocks.
   int getMipLevelSizeInBytes(int mipLevel) {
-    final int mipWidth = width >> mipLevel;
-    final int mipHeight = height >> mipLevel;
-    final int w = mipWidth > 0 ? mipWidth : 1;
-    final int h = mipHeight > 0 ? mipHeight : 1;
+    final int w = getMipLevelWidth(mipLevel);
+    final int h = getMipLevelHeight(mipLevel);
     final int bw = format.blockWidth;
     final int bh = format.blockHeight;
     final int blocksWide = (w + bw - 1) ~/ bw;
@@ -139,17 +168,7 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// Throws an exception if the write fails due to an internal error or if
   /// any of the parameters are out of range.
   void overwrite(ByteData sourceBytes, {int mipLevel = 0, int slice = 0}) {
-    if (mipLevel < 0 || mipLevel >= mipLevelCount) {
-      throw Exception(
-        'mipLevel ($mipLevel) must be in the range [0, ${mipLevelCount - 1}] for this texture',
-      );
-    }
-    final int slices = sliceCount;
-    if (slice < 0 || slice >= slices) {
-      throw Exception(
-        'slice ($slice) must be in the range [0, ${slices - 1}] for textures of type $textureType',
-      );
-    }
+    _validateMipLevelAndSlice(mipLevel, slice);
     final int expectedSize = getMipLevelSizeInBytes(mipLevel);
     if (sourceBytes.lengthInBytes != expectedSize) {
       throw Exception(
@@ -159,6 +178,24 @@ base class Texture extends NativeFieldWrapperClass1 {
     bool success = _overwrite(_gpuContext, sourceBytes, mipLevel, slice);
     if (!success) {
       throw Exception("Texture overwrite failed");
+    }
+  }
+
+  void _validateMipLevel(int mipLevel) {
+    if (mipLevel < 0 || mipLevel >= mipLevelCount) {
+      throw Exception(
+        'mipLevel ($mipLevel) must be in the range [0, ${mipLevelCount - 1}] for this texture',
+      );
+    }
+  }
+
+  void _validateMipLevelAndSlice(int mipLevel, int slice) {
+    _validateMipLevel(mipLevel);
+    final int slices = sliceCount;
+    if (slice < 0 || slice >= slices) {
+      throw Exception(
+        'slice ($slice) must be in the range [0, ${slices - 1}] for textures of type $textureType',
+      );
     }
   }
 
