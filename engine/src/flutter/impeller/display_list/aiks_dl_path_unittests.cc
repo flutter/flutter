@@ -983,6 +983,32 @@ TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, TwoContourPathWithConnectingLines) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(15.0);
+
+  builder.Translate(100, 0);
+  for (auto join : std::vector<DlStrokeJoin>{
+           DlStrokeJoin::kMiter, DlStrokeJoin::kRound, DlStrokeJoin::kBevel}) {
+    builder.Translate(0, 100);
+    paint.setStrokeJoin(join);
+
+    DlPathBuilder path_builder;
+    path_builder.MoveTo(DlPoint(0, 0));
+    path_builder.LineTo(DlPoint(50, 50));
+    path_builder.MoveTo(DlPoint(50, 50));
+    path_builder.LineTo(DlPoint(100, 0));
+
+    builder.DrawPath(path_builder.TakePath(), paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, StrokeCapsAndJoins) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);

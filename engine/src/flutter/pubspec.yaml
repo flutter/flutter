@@ -189,7 +189,7 @@ dependency_overrides:
   crypto:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   dart_mcp:
-    path: ./third_party/dart/third_party/pkg/ai/pkgs/dart_mcp
+    path: ./third_party/ai/pkgs/dart_mcp
   equatable:
     path: ./third_party/pkg/equatable
   expect:
@@ -201,7 +201,7 @@ dependency_overrides:
   fixnum:
     path: ./third_party/dart/third_party/pkg/core/pkgs/fixnum
   frontend_server_client:
-    path: ./third_party/dart/third_party/pkg/webdev/frontend_server_client
+    path: ./third_party/dart/pkg/frontend_server_client
   gcloud:
     path: ./third_party/pkg/gcloud
   glob:

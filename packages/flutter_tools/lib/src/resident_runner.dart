@@ -1508,8 +1508,21 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
 
       // 3. Perform the standard, cross-platform eviction calls.
+      final supportsShaderReload = device.targetPlatform != TargetPlatform.web_javascript;
       for (final String assetPath in devFS.assetPathsToEvict) {
-        futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        // Flutter GPU shader bundles reload the compiled ShaderLibrary in place
+        // via the `ext.ui.gpu.reinitializeShaderLibrary` extension. It is
+        // registered lazily on the first `ShaderLibrary.fromAsset` and the engine
+        // no-ops if nothing is registered at the asset key, so dispatch is gated
+        // only by the `.shaderbundle` suffix. The extension is unavailable on the
+        // web engine, where the bundle falls back to the generic asset eviction.
+        if (supportsShaderReload && assetPath.endsWith('.shaderbundle')) {
+          futures.add(
+            vmService.flutterReinitializeShaderLibrary(assetPath, isolateId: firstUiIsolate.id!),
+          );
+        } else {
+          futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        }
       }
       // Shaders are not supported during hot reload on the web yet. Attempting
       // to evict shaders will call the `ext.ui.window.reinitializeShader` service
