@@ -178,7 +178,7 @@ void _addPathDependency(Directory appDir, String name, Directory packageDir) {
 /// template into the single combined block that triggers the regression.
 void _useCombinedSubprojectsBlock(Directory appDir) {
   final File buildGradle = appDir.childDirectory('android').childFile('build.gradle.kts');
-  final String contents = buildGradle.readAsStringSync();
+  final String contents = buildGradle.readAsStringSync().replaceAll('\r\n', '\n');
   const separateBlocks = '''
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
