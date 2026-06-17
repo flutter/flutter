@@ -798,9 +798,11 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 - (BOOL)enableWideGamut {
   FlutterDartProject* project = _project ?: self.engine.project;
   BOOL enableWideGamut = project.enableWideGamut;
-  const std::vector<std::string>& switches = self.engine.switches;
-  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
-    enableWideGamut = NO;
+  if (self.engine) {
+    const std::vector<std::string>& switches = self.engine.switches;
+    if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+      enableWideGamut = NO;
+    }
   }
   return enableWideGamut;
 }
