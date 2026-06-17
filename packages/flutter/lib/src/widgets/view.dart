@@ -233,8 +233,9 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
     // primary focus is hosted by this view itself, which is the case when the
     // nearest enclosing view of the focused node is this view.
     final BuildContext? focusContext = FocusManager.instance.primaryFocus?.context;
-    final focusInThisView =
-        focusContext?.getInheritedWidgetOfExactType<_ViewScope>()?.view == widget.view;
+    final bool focusInThisView =
+        focusContext != null &&
+        LookupBoundary.getInheritedWidgetOfExactType<_ViewScope>(focusContext)?.view == widget.view;
     if (_viewHasFocus == focusInThisView || !focusInThisView) {
       return;
     }
