@@ -205,7 +205,12 @@ PlaygroundImplGLES::MakeShareableContext(const PlaygroundSwitches& switches) {
                                             std::move(window));
 }
 
-PlaygroundImplGLES::~PlaygroundImplGLES() = default;
+PlaygroundImplGLES::~PlaygroundImplGLES() {
+  if (context_) {
+    ::glfwMakeContextCurrent(handle_.get());
+    (void)context_->FlushCommandBuffers();
+  }
+}
 
 static std::vector<std::shared_ptr<fml::Mapping>>
 ShaderLibraryMappingsForPlayground(bool is_gles3) {
