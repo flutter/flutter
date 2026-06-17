@@ -12,7 +12,7 @@ generated_file("artifacts_entitlement_config") {
 
   # You may also need to update
   # dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart
-  # when adding/removing binaries from the entltlement config.
+  # when adding/removing binaries from the entitlement config.
   deps = [ "//flutter/lib/snapshot:generate_snapshot_bin" ]
   if (flutter_runtime_mode == "debug") {
     deps += [
