@@ -14,9 +14,17 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+
+final _FakeAnalytics fakeAnalytics = _FakeAnalytics();
+
+class _FakeAnalytics extends Fake implements Analytics {
+  @override
+  bool get telemetryEnabled => false;
+}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -30,7 +38,20 @@ final Platform macOSPlatform = FakePlatform(
   environment: <String, String>{},
 );
 
+ProcessManager createProcessManager({
+  required ProcessManager delegate,
+  required Platform platform,
+}) => ErrorHandlingProcessManager(
+  delegate: delegate,
+  platform: platform,
+  analytics: () => fakeAnalytics,
+);
+
 void main() {
+  setUpAll(() {
+    overrideWindowsRetryBackoffs = const <Duration>[];
+  });
+
   testWithoutContext('deleteIfExists does not delete if file does not exist', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('file');
@@ -51,7 +72,26 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
-    final File file = FakeExistsFile()..error = const FileSystemException('', '', OSError('', 2));
+    late MemoryFileSystem memoryFileSystem;
+    var inOpHandle = false;
+    memoryFileSystem = MemoryFileSystem.test(
+      opHandle: (String path, FileSystemOp op) {
+        if (inOpHandle) {
+          return;
+        }
+        if (path == '/file' && op == FileSystemOp.delete) {
+          inOpHandle = true;
+          try {
+            memoryFileSystem.file(path).deleteSync();
+          } finally {
+            inOpHandle = false;
+          }
+          throw const FileSystemException('', '', OSError('', 2));
+        }
+      },
+    );
+    final fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: linuxPlatform);
+    final File file = fileSystem.file('/file')..createSync();
 
     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
@@ -579,7 +619,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Rethrows os error $kSystemCodeCannotFindFile', () {
+    testWithoutContext('throws ToolExit on os error $kSystemCodeCannotFindFile', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -592,10 +632,9 @@ void main() {
         FileSystemException('', file.path, const OSError('', kSystemCodeCannotFindFile)),
       );
 
-      // Error is not caught by other operations.
       expect(
         () => fileSystem.file('foo').readAsStringSync(),
-        throwsFileSystemException(kSystemCodeCannotFindFile),
+        throwsToolExit(message: 'The file or directory could not be found'),
       );
     });
   });
@@ -968,7 +1007,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           ),
         ]);
 
-        final ProcessManager processManager = ErrorHandlingProcessManager(
+        final ProcessManager processManager = createProcessManager(
           delegate: fakeProcessManager,
           platform: windowsPlatform,
         );
@@ -1001,7 +1040,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           ),
         ]);
 
-        final ProcessManager processManager = ErrorHandlingProcessManager(
+        final ProcessManager processManager = createProcessManager(
           delegate: fakeProcessManager,
           platform: windowsPlatform,
         );
@@ -1029,7 +1068,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         ),
       ]);
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: windowsPlatform,
       );
@@ -1066,7 +1105,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         ),
       ]);
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: windowsPlatform,
       );
@@ -1102,7 +1141,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         ),
       ]);
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: windowsPlatform,
       );
@@ -1129,7 +1168,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         const ProcessException('', <String>[], '', kUserPermissionDenied),
       );
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: throwingFakeProcessManager,
         platform: windowsPlatform,
       );
@@ -1163,7 +1202,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         ),
       ]);
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: linuxPlatform,
       );
@@ -1198,7 +1237,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           exception: ProcessException('', <String>[], '', eacces),
         ),
       ]);
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: linuxPlatform,
       );
@@ -1226,7 +1265,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         const ProcessException('', <String>[], '', eacces),
       );
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: throwingFakeProcessManager,
         platform: linuxPlatform,
       );
@@ -1265,7 +1304,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           exception: ProcessException('', <String>[], '', enospc),
         ),
       ]);
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: macOSPlatform,
       );
@@ -1301,7 +1340,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           exception: ProcessException('', <String>[], '', eacces),
         ),
       ]);
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: macOSPlatform,
       );
@@ -1329,7 +1368,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         const ProcessException('', <String>[], '', eacces),
       );
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: throwingFakeProcessManager,
         platform: macOSPlatform,
       );
@@ -1362,7 +1401,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         ),
       ]);
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: macOSPlatform,
       );
@@ -1393,7 +1432,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         ),
       ]);
 
-      final ProcessManager processManager = ErrorHandlingProcessManager(
+      final ProcessManager processManager = createProcessManager(
         delegate: fakeProcessManager,
         platform: macOSPlatform,
       );
@@ -1412,7 +1451,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
   testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly', () async {
     final fakeProcessManager = FakeSignalProcessManager();
-    final ProcessManager processManager = ErrorHandlingProcessManager(
+    final ProcessManager processManager = createProcessManager(
       delegate: fakeProcessManager,
       platform: linuxPlatform,
     );
@@ -1520,6 +1559,215 @@ Please ensure that the SDK and/or project is installed in a location that has re
       },
     );
   });
+
+  group('Async I/O wrapping', () {
+    late FileExceptionHandler exceptionHandler;
+    late ErrorHandlingFileSystem fileSystem;
+
+    setUp(() {
+      exceptionHandler = FileExceptionHandler();
+      fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+    });
+
+    testWithoutContext('asynchronous exists is wrapped and throws ToolExit on eacces', () async {
+      final File file = fileSystem.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.exists,
+        const FileSystemException('', '', OSError('', 13)), // eacces
+      );
+      // ignore: avoid_slow_async_io
+      expect(() => file.exists(), throwsToolExit());
+    });
+
+    testWithoutContext(
+      'asynchronous readAsString is wrapped and throws ToolExit on eacces',
+      () async {
+        final File file = fileSystem.file('file')..createSync();
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.read,
+          const FileSystemException('', '', OSError('', 13)), // eacces
+        );
+        expect(() => file.readAsString(), throwsToolExit());
+      },
+    );
+  });
+
+  group('Missing file mapping', () {
+    late FileExceptionHandler exceptionHandler;
+    late ErrorHandlingFileSystem linuxFileSystem;
+    late ErrorHandlingFileSystem windowsFileSystem;
+
+    setUp(() {
+      exceptionHandler = FileExceptionHandler();
+      linuxFileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      windowsFileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+    });
+
+    testWithoutContext('POSIX enoent (2) throws clean ToolExit', () async {
+      final File file = linuxFileSystem.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        const FileSystemException('', '', OSError('', 2)), // enoent
+      );
+      expect(
+        () => file.readAsStringSync(),
+        throwsToolExit(message: 'The file or directory could not be found'),
+      );
+    });
+
+    testWithoutContext('Windows kFileNotFound (2) throws clean ToolExit', () async {
+      final File file = windowsFileSystem.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        const FileSystemException('', '', OSError('', 2)), // kFileNotFound
+      );
+      expect(
+        () => file.readAsStringSync(),
+        throwsToolExit(message: 'The file or directory could not be found'),
+      );
+    });
+
+    testWithoutContext('Windows kPathNotFound (3) throws clean ToolExit', () async {
+      final File file = windowsFileSystem.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        const FileSystemException('', '', OSError('', 3)), // kPathNotFound
+      );
+      expect(
+        () => file.readAsStringSync(),
+        throwsToolExit(message: 'The file or directory could not be found'),
+      );
+    });
+  });
+
+  group('Windows transient lock retry', () {
+    late ErrorHandlingFileSystem fileSystem;
+    late int attemptsLeft;
+    late List<Duration>? originalBackoffs;
+
+    setUp(() {
+      originalBackoffs = overrideWindowsRetryBackoffs;
+      overrideWindowsRetryBackoffs = const <Duration>[
+        Duration.zero,
+        Duration.zero,
+        Duration.zero,
+        Duration.zero,
+        Duration.zero,
+      ];
+    });
+
+    tearDown(() {
+      overrideWindowsRetryBackoffs = originalBackoffs;
+    });
+
+    testWithoutContext('recovers from transient lock during retry loop (sync)', () {
+      attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (path == '/file' && op == FileSystemOp.write) {
+            if (attemptsLeft > 0) {
+              attemptsLeft--;
+              throw const FileSystemException(
+                '',
+                '/file',
+                OSError('', 32),
+              ); // ERROR_SHARING_VIOLATION
+            }
+          }
+        },
+      );
+      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+      final File file = fileSystem.file('/file');
+
+      // This should succeed because we succeed after 3 attempts (within the 5 attempts max)
+      file.writeAsStringSync('content');
+      expect(attemptsLeft, 0);
+      expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
+    });
+
+    testWithoutContext('fails after 5 transient locks and throws ToolExit (sync)', () {
+      attemptsLeft = 6; // Fails 6 times
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (path == '/file' && op == FileSystemOp.write) {
+            if (attemptsLeft > 0) {
+              attemptsLeft--;
+              throw const FileSystemException(
+                '',
+                '/file',
+                OSError('', 32),
+              ); // ERROR_SHARING_VIOLATION
+            }
+          }
+        },
+      );
+      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+      final File file = fileSystem.file('/file');
+
+      expect(
+        () => file.writeAsStringSync('content'),
+        throwsToolExit(message: 'The file is being used by another program'),
+      );
+    });
+
+    testWithoutContext('recovers from transient lock during retry loop (async)', () async {
+      attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (path == '/file' && op == FileSystemOp.write) {
+            if (attemptsLeft > 0) {
+              attemptsLeft--;
+              throw const FileSystemException(
+                '',
+                '/file',
+                OSError('', 32),
+              ); // ERROR_SHARING_VIOLATION
+            }
+          }
+        },
+      );
+      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+      final File file = fileSystem.file('/file');
+
+      // This should succeed because we succeed after 3 attempts (within the 5 attempts max)
+      await file.writeAsString('content');
+      expect(attemptsLeft, 0);
+      expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
+    });
+  });
+
+  group('deleteIfExists with broken symlinks', () {
+    testWithoutContext('successfully clears a broken symlink on disk', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Link link = fileSystem.link('broken_link');
+      link.createSync('non_existent_target');
+
+      // Treat it as a File entity (which is what happens in the real crash)
+      final File file = fileSystem.file('broken_link');
+
+      // The link exists (as a link entity), but the file entity thinks it does not exist because the target is missing
+      expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.link);
+      expect(file.existsSync(), false); // follows links, target is missing
+
+      // Calling deleteIfExists should return true and clear the link entity
+      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
+      expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.notFound);
+    });
+  });
 }
 
 class FakeSignalProcessManager extends Fake implements ProcessManager {
@@ -1550,25 +1798,6 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 
   @override
   Directory get currentDirectory => throw FileSystemException('', '', OSError('', errorCode));
-}
-
-class FakeExistsFile extends Fake implements File {
-  late Exception error;
-  int existsCount = 0;
-
-  @override
-  bool existsSync() {
-    if (existsCount == 0) {
-      existsCount += 1;
-      return true;
-    }
-    return false;
-  }
-
-  @override
-  void deleteSync({bool recursive = false}) {
-    throw error;
-  }
 }
 
 class FakeFileSystem extends Fake implements FileSystem {

@@ -99,9 +99,15 @@ class StandardCapabilities final : public Capabilities {
   bool Supports32BitPrimitiveIndices() const override { return true; }
 
   // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override { return true; }
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {
     return supports_extended_range_formats_;
   }
+
+  // |Capabilities|
+  bool SupportsFramebufferRenderMipmap() const override { return true; }
 
   // |Capabilities|
   bool SupportsTextureCompression(
