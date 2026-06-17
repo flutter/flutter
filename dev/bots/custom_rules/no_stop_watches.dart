@@ -119,9 +119,6 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitConstructorName(ConstructorName node) {
     final Element? element = node.element;
-    if (element == null) {
-      return;
-    }
     if (element is! ConstructorElement) {
       assert(false, '$element of $node is not a ConstructorElement.');
       return;
