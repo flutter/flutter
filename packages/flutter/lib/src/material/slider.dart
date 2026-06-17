@@ -51,9 +51,15 @@ class SliderScrollIncrementDetails {
   /// The type of scroll increment (line or page).
   final SliderScrollIncrementType type;
 
-  /// The semantic action unit for this slider.
-  /// For discrete sliders: 1.0 / divisions
-  /// For continuous sliders: platform-dependent (0.05 or 0.1)
+  /// The amount by which the slider value changes during a semantic adjustment.
+  ///
+  /// This value represents the standard increment or decrement applied to the
+  /// slider when an accessibility service (like TalkBack or VoiceOver) requests
+  /// a change. It serves as a baseline configuration or reference point that
+  /// custom calculators can use to determine final scroll increments.
+  ///
+  /// For discrete sliders, this is calculated as `1.0 / divisions`.
+  /// For continuous sliders, it defaults to a platform-dependent value: 0.1 for iOS or macOS, and 0.05 otherwise.
   final double semanticActionUnit;
 }
 
