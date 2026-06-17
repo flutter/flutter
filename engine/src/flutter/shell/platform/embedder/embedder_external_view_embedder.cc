@@ -180,6 +180,7 @@ struct PlatformView {
           break;
         }
         case MutatorType::kOpacity:
+        case MutatorType::kOverscrollStretch:
         case MutatorType::kBackdropFilter:
         case MutatorType::kBackdropClipRect:
         case MutatorType::kBackdropClipRRect:

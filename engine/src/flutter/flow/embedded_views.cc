@@ -4,7 +4,135 @@
 
 #include "flutter/flow/embedded_views.h"
 
+#include <cmath>
+
 namespace flutter {
+
+namespace {
+
+// Strength of the position-based interpolation. Must match
+// `interpolationStrength` in widgets/stretch_effect.dart and the
+// `u_interpolation_strength` uniform supplied on the Android side.
+constexpr DlScalar kInterpolationStrength = 0.7f;
+
+// Maps an output (on-screen) normalized position to the source (content)
+// normalized position for a single axis. This mirrors compute_streched_effect()
+// in shaders/stretch_effect.frag with the normalized constants used there
+// (stretch_affected_dist = 1, inverse_stretch_affected_dist = 1, viewport = 1),
+// i.e. it is the *backward* map the interior shader performs. It is monotonically
+// increasing in `in_pos`, including across the branch boundaries.
+DlScalar StretchSourceFromOutput(DlScalar in_pos, DlScalar overscroll) {
+  if (overscroll == 0.0f) {
+    return in_pos;
+  }
+  const DlScalar distance_stretched = 1.0f / (1.0f + std::abs(overscroll));
+  const DlScalar distance_diff = distance_stretched - 1.0f;
+  if (overscroll > 0.0f) {
+    if (in_pos <= 1.0f) {
+      const DlScalar offset_pos = 1.0f - in_pos;
+      // mix(1.0, offset_pos, kInterpolationStrength)
+      const DlScalar pos_based_variation =
+          (1.0f - kInterpolationStrength) + kInterpolationStrength * offset_pos;
+      const DlScalar stretch_intensity = overscroll * pos_based_variation;
+      return distance_stretched - offset_pos / (1.0f + stretch_intensity);
+    }
+    return distance_diff + in_pos;
+  }
+  // overscroll < 0: stretch_affected_dist_calc = viewport(1) - 1 = 0.
+  if (in_pos >= 0.0f) {
+    const DlScalar offset_pos = in_pos;
+    const DlScalar pos_based_variation =
+        (1.0f - kInterpolationStrength) + kInterpolationStrength * offset_pos;
+    const DlScalar stretch_intensity = (-overscroll) * pos_based_variation;
+    return 1.0f - (distance_stretched - offset_pos / (1.0f + stretch_intensity));
+  }
+  return -distance_diff + in_pos;
+}
+
+// Inverse of StretchSourceFromOutput: given a source (content) normalized
+// position, returns the output (on-screen) normalized position. Found by
+// bisection because the forward map has no convenient closed form. The bracket
+// [-2, 2] comfortably contains the pre-image of any source in [0, 1] for
+// |overscroll| <= 1.
+DlScalar StretchOutputFromSource(DlScalar source, DlScalar overscroll) {
+  if (overscroll == 0.0f) {
+    return source;
+  }
+  DlScalar lo = -2.0f;
+  DlScalar hi = 2.0f;
+  for (int i = 0; i < 30; i++) {
+    const DlScalar mid = (lo + hi) * 0.5f;
+    if (StretchSourceFromOutput(mid, overscroll) < source) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  return (lo + hi) * 0.5f;
+}
+
+// Maps the [low, high] edges of one axis of a platform view through the stretch
+// forward map, given the viewport's [vp_low, vp_size] extent on that axis.
+void StretchAxis(DlScalar overscroll,
+                 DlScalar vp_low,
+                 DlScalar vp_size,
+                 DlScalar& low,
+                 DlScalar& high) {
+  if (overscroll == 0.0f || vp_size <= 0.0f) {
+    return;
+  }
+  const DlScalar source_low = (low - vp_low) / vp_size;
+  const DlScalar source_high = (high - vp_low) / vp_size;
+  low = vp_low + StretchOutputFromSource(source_low, overscroll) * vp_size;
+  high = vp_low + StretchOutputFromSource(source_high, overscroll) * vp_size;
+}
+
+}  // namespace
+
+DlRect EmbeddedViewParams::ApplyOverscrollStretch(
+    const DlRect& natural_screen_rect,
+    const MutatorsStack& mutators) {
+  DlScalar x_stretch = 0.0f;
+  DlScalar y_stretch = 0.0f;
+  DlRect viewport_rect;
+  bool has_stretch = false;
+  for (auto it = mutators.Begin(); it != mutators.End(); ++it) {
+    if ((*it)->GetType() == MutatorType::kOverscrollStretch) {
+      const auto& stretch = (*it)->GetOverscrollStretch();
+      x_stretch += stretch.x_stretch;
+      y_stretch += stretch.y_stretch;
+      // A single overscroll viewport is expected in practice (one scrollable
+      // overscrolling at a time); if nested, the innermost wins.
+      viewport_rect = stretch.viewport_rect;
+      has_stretch = true;
+    }
+  }
+  if (!has_stretch || (x_stretch == 0.0f && y_stretch == 0.0f) ||
+      viewport_rect.IsEmpty()) {
+    return natural_screen_rect;
+  }
+
+  DlScalar left = natural_screen_rect.GetLeft();
+  DlScalar right = natural_screen_rect.GetRight();
+  DlScalar top = natural_screen_rect.GetTop();
+  DlScalar bottom = natural_screen_rect.GetBottom();
+
+  StretchAxis(x_stretch, viewport_rect.GetLeft(), viewport_rect.GetWidth(), left,
+              right);
+  StretchAxis(y_stretch, viewport_rect.GetTop(), viewport_rect.GetHeight(), top,
+              bottom);
+
+  const DlRect stretched_rect = DlRect::MakeLTRB(left, top, right, bottom);
+
+  // The platform view's child is rasterized at its natural position relative to
+  // the box origin, then the interior shader remaps it into the stretched
+  // region. The RenderEffect input is clipped to the box, so the box must
+  // contain BOTH the natural content (so nothing is clipped before sampling)
+  // and the stretched output (so the result isn't clipped) -- i.e. their union.
+  // Using only the stretched rect would clip the natural content on the side the
+  // box moved toward, shifting the interior.
+  return stretched_rect.Union(natural_screen_rect);
+}
 
 DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(DlRect view_bounds) {
   builder_ = std::make_unique<DisplayListBuilder>(
@@ -93,6 +221,14 @@ void MutatorsStack::PushBackdropFilter(
     const DlRect& filter_rect) {
   std::shared_ptr<Mutator> element =
       std::make_shared<Mutator>(filter, filter_rect);
+  vector_.push_back(element);
+}
+
+void MutatorsStack::PushOverscrollStretch(DlScalar x_stretch,
+                                          DlScalar y_stretch,
+                                          const DlRect& viewport_rect) {
+  std::shared_ptr<Mutator> element = std::make_shared<Mutator>(
+      OverscrollStretchMutation{x_stretch, y_stretch, viewport_rect});
   vector_.push_back(element);
 }
 

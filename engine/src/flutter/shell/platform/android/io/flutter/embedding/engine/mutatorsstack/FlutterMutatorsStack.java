@@ -31,7 +31,8 @@ public class FlutterMutatorsStack {
     CLIP_RRECT,
     CLIP_PATH,
     TRANSFORM,
-    OPACITY
+    OPACITY,
+    STRETCH_OVERSCROLL
   }
 
   /**
@@ -48,6 +49,12 @@ public class FlutterMutatorsStack {
     @Nullable private Path path;
     @Nullable private float[] radiis;
     private float opacity = 1.f;
+    private float xStretch = 0.f;
+    private float yStretch = 0.f;
+    private float viewportLeft = 0.f;
+    private float viewportTop = 0.f;
+    private float viewportRight = 0.f;
+    private float viewportBottom = 0.f;
 
     private FlutterMutatorType type;
 
@@ -104,6 +111,22 @@ public class FlutterMutatorsStack {
       this.opacity = opacity;
     }
 
+    public FlutterMutator(
+        float xStretch,
+        float yStretch,
+        float viewportLeft,
+        float viewportTop,
+        float viewportRight,
+        float viewportBottom) {
+      this.type = FlutterMutatorType.STRETCH_OVERSCROLL;
+      this.xStretch = xStretch;
+      this.yStretch = yStretch;
+      this.viewportLeft = viewportLeft;
+      this.viewportTop = viewportTop;
+      this.viewportRight = viewportRight;
+      this.viewportBottom = viewportBottom;
+    }
+
     /**
      * Get the mutator type.
      *
@@ -147,6 +170,30 @@ public class FlutterMutatorsStack {
      */
     public float getOpacity() {
       return opacity;
+    }
+
+    public float getXStretch() {
+      return xStretch;
+    }
+
+    public float getYStretch() {
+      return yStretch;
+    }
+
+    public float getViewportLeft() {
+      return viewportLeft;
+    }
+
+    public float getViewportTop() {
+      return viewportTop;
+    }
+
+    public float getViewportRight() {
+      return viewportRight;
+    }
+
+    public float getViewportBottom() {
+      return viewportBottom;
     }
   }
 
@@ -218,6 +265,19 @@ public class FlutterMutatorsStack {
     FlutterMutator mutator = new FlutterMutator(opacity);
     mutators.add(mutator);
     finalOpacity *= opacity;
+  }
+
+  public void pushOverscrollStretch(
+      float xStretch,
+      float yStretch,
+      float viewportLeft,
+      float viewportTop,
+      float viewportRight,
+      float viewportBottom) {
+    FlutterMutator mutator =
+        new FlutterMutator(
+            xStretch, yStretch, viewportLeft, viewportTop, viewportRight, viewportBottom);
+    mutators.add(mutator);
   }
 
   /**

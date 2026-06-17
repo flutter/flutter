@@ -58,7 +58,11 @@ DlRect AndroidExternalViewEmbedder::GetViewRect(int64_t view_id) const {
   // TODO(egarciad): The rect should be computed from the mutator stack.
   // (Clipping is missing)
   // https://github.com/flutter/flutter/issues/59821
-  return params.finalBoundingRect();
+  //
+  // Use the pre-stretch (natural) rect for slicing/overlap: it is compared
+  // against Flutter content recorded in pre-stretch coordinates. The stretched
+  // box is used only to position/size the Android view (see below).
+  return params.naturalBoundingRect();
 }
 
 // |ExternalViewEmbedder|
@@ -101,8 +105,11 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
   }
 
   for (int64_t view_id : composition_order_) {
-    DlRect view_rect = GetViewRect(view_id);
     const EmbeddedViewParams& params = view_params_.at(view_id);
+    // Position/size the Android view at the *stretched* box so its RenderEffect
+    // renders the stretched content (GetViewRect, used for slicing above,
+    // intentionally returns the natural rect instead).
+    const DlRect view_rect = params.finalBoundingRect();
     // Display the platform view. If it's already displayed, then it's
     // just positioned and sized.
     jni_facade_->FlutterViewOnDisplayPlatformView(

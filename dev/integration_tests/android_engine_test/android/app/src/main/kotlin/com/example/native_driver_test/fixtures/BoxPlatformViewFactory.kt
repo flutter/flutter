@@ -42,7 +42,24 @@ private class BoxPlatformView(
     override fun dispose() {}
 
     override fun onDraw(canvas: Canvas) {
+        paint.style = Paint.Style.FILL
+        paint.color = Color.rgb(0x41, 0x69, 0xE1)
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
+
+        paint.style = Paint.Style.STROKE
+        paint.color = Color.WHITE
+        paint.strokeWidth = 10f
+        var x = 0
+        while (x <= width) {
+            canvas.drawLine(x.toFloat(), 0f, x.toFloat(), height.toFloat(), paint)
+            x += 100
+        }
+        var y = 0
+        while (y <= height) {
+            canvas.drawLine(0f, y.toFloat(), width.toFloat(), y.toFloat(), paint)
+            y += 100
+        }
+
         super.onDraw(canvas)
     }
 
@@ -52,7 +69,6 @@ private class BoxPlatformView(
         oldw: Int,
         oldh: Int
     ) {
-        paint.color = Color.rgb(0x41, 0x69, 0xE1)
         super.onSizeChanged(w, h, oldw, oldh)
     }
 }

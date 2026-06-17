@@ -59,7 +59,13 @@ DlRect AndroidExternalViewEmbedder2::GetViewRect(
     const std::unordered_map<int64_t, EmbeddedViewParams>& view_params) {
   const EmbeddedViewParams& params = view_params.at(view_id);
   // https://github.com/flutter/flutter/issues/59821
-  return params.finalBoundingRect();
+  //
+  // Use the pre-stretch (natural) rect here: this drives slicing and overlay
+  // computation, which compares against Flutter content recorded in pre-stretch
+  // coordinates. Using the stretched rect would make the (grown) box overlap
+  // Flutter content that does not actually overlap it once both are stretched,
+  // wrongly slicing that content into a clipped overlay and leaving a gap.
+  return params.naturalBoundingRect();
 }
 
 // |ExternalViewEmbedder|
@@ -180,8 +186,11 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         jni_facade->swapTransaction();
 
         for (int64_t view_id : composition_order) {
-          DlRect view_rect = GetViewRect(view_id, view_params);
           const EmbeddedViewParams& params = view_params.at(view_id);
+          // The Android view is positioned/sized at the *stretched* box so its
+          // RenderEffect renders the stretched content (GetViewRect, used for
+          // slicing, intentionally returns the natural rect instead).
+          const DlRect view_rect = params.finalBoundingRect();
           jni_facade->onDisplayPlatformView2(
               view_id,                //
               view_rect.GetX(),       //

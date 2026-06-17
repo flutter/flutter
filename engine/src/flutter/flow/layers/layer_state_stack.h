@@ -171,6 +171,10 @@ class LayerStateStack {
     // outstanding attributes.
     void applyOpacity(const DlRect& bounds, DlScalar opacity);
 
+    void applyOverscrollStretch(DlScalar x_stretch,
+                                DlScalar y_stretch,
+                                const DlRect& viewport_rect);
+
     // Records the image filter for application at the next call to
     // saveLayer or applyState. A saveLayer may be executed at
     // this time if the image filter cannot be batched with other
@@ -320,6 +324,9 @@ class LayerStateStack {
   // ---------------------
   // void push_attributes();
   void push_opacity(const DlRect& rect, DlScalar opacity);
+  void push_overscroll_stretch(DlScalar x_stretch,
+                               DlScalar y_stretch,
+                               const DlRect& viewport_rect);
   void push_color_filter(const DlRect& bounds,
                          const std::shared_ptr<const DlColorFilter>& filter);
   void push_image_filter(const DlRect& bounds,
@@ -412,6 +419,7 @@ class LayerStateStack {
   friend class ClipRRectEntry;
   friend class ClipRSuperellipseEntry;
   friend class ClipPathEntry;
+  friend class OverscrollStretchEntry;
 
   class Delegate {
    public:

@@ -2030,6 +2030,83 @@ class ImageFilterLayer extends OffsetLayer {
   }
 }
 
+/// A composited layer that applies an overscroll stretch effect to its
+/// children.
+///
+/// This class inherits from [ImageFilterLayer] so that Flutter content under it
+/// is stretched via the image filter, while platform views (which are not
+/// touched by the image filter) receive an overscroll stretch mutator carrying
+/// [xStretch], [yStretch], and [viewportRect].
+class OverscrollStretchLayer extends ImageFilterLayer {
+  /// Creates a layer that applies an overscroll stretch effect.
+  OverscrollStretchLayer({
+    super.imageFilter,
+    double xStretch = 0.0,
+    double yStretch = 0.0,
+    Rect viewportRect = Rect.zero,
+    super.offset,
+  }) : _xStretch = xStretch,
+       _yStretch = yStretch,
+       _viewportRect = viewportRect;
+
+  /// The horizontal stretch amount.
+  double get xStretch => _xStretch;
+  double _xStretch;
+  set xStretch(double value) {
+    if (value != _xStretch) {
+      _xStretch = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  /// The vertical stretch amount.
+  double get yStretch => _yStretch;
+  double _yStretch;
+  set yStretch(double value) {
+    if (value != _yStretch) {
+      _yStretch = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  /// The bounds of the stretched viewport, in this layer's local coordinate
+  /// space.
+  ///
+  /// The stretch is normalized over this rect, so a platform view that only
+  /// covers part of the viewport gets the correct local slice of the stretch
+  /// and stays aligned with the surrounding stretched content.
+  Rect get viewportRect => _viewportRect;
+  Rect _viewportRect;
+  set viewportRect(Rect value) {
+    if (value != _viewportRect) {
+      _viewportRect = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder) {
+    assert(imageFilter != null);
+    engineLayer = builder.pushOverscrollStretch(
+      imageFilter!,
+      xStretch,
+      yStretch,
+      viewportRect,
+      oldLayer: _engineLayer as ui.OverscrollStretchEngineLayer?,
+    );
+    addChildrenToScene(builder);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('xStretch', xStretch));
+    properties.add(DoubleProperty('yStretch', yStretch));
+    properties.add(DiagnosticsProperty<Rect>('viewportRect', viewportRect));
+  }
+}
+
 /// A composited layer that applies a given transformation matrix to its
 /// children.
 ///

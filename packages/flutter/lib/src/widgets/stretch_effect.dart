@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'image_filter.dart';
 
 /// A widget that applies a stretching visual effect to its child.
 ///
@@ -199,8 +198,10 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
       imageFilter = _emptyFilter;
     }
 
-    return ImageFiltered(
+    return _OverscrollStretch(
       imageFilter: imageFilter,
+      xStretch: widget.axis == Axis.horizontal ? widget.stretchStrength : 0.0,
+      yStretch: widget.axis == Axis.vertical ? widget.stretchStrength : 0.0,
       enabled: isShaderNeeded,
       // A nearly-transparent pixels is used to ensure the shader gets applied,
       // even when the child is visually transparent or has no paint operations.
@@ -233,6 +234,115 @@ class _StretchEffectPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _OverscrollStretch extends SingleChildRenderObjectWidget {
+  const _OverscrollStretch({
+    required this.imageFilter,
+    required this.xStretch,
+    required this.yStretch,
+    required this.enabled,
+    super.child,
+  });
+
+  final ui.ImageFilter imageFilter;
+  final double xStretch;
+  final double yStretch;
+  final bool enabled;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderOverscrollStretch(
+      imageFilter: imageFilter,
+      xStretch: xStretch,
+      yStretch: yStretch,
+      enabled: enabled,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderOverscrollStretch renderObject) {
+    renderObject
+      ..imageFilter = imageFilter
+      ..xStretch = xStretch
+      ..yStretch = yStretch
+      ..enabled = enabled;
+  }
+}
+
+class _RenderOverscrollStretch extends RenderProxyBox {
+  _RenderOverscrollStretch({
+    required ui.ImageFilter imageFilter,
+    required double xStretch,
+    required double yStretch,
+    required bool enabled,
+    RenderBox? child,
+  }) : _imageFilter = imageFilter,
+       _xStretch = xStretch,
+       _yStretch = yStretch,
+       _enabled = enabled,
+       super(child);
+
+  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter _imageFilter;
+  set imageFilter(ui.ImageFilter value) {
+    if (_imageFilter != value) {
+      _imageFilter = value;
+      markNeedsPaint();
+    }
+  }
+
+  double get xStretch => _xStretch;
+  double _xStretch;
+  set xStretch(double value) {
+    if (_xStretch != value) {
+      _xStretch = value;
+      markNeedsPaint();
+    }
+  }
+
+  double get yStretch => _yStretch;
+  double _yStretch;
+  set yStretch(double value) {
+    if (_yStretch != value) {
+      _yStretch = value;
+      markNeedsPaint();
+    }
+  }
+
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (_enabled != value) {
+      _enabled = value;
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null && _enabled;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      if (_enabled) {
+        assert(needsCompositing);
+        final OverscrollStretchLayer stretchLayer = (layer as OverscrollStretchLayer?) ?? OverscrollStretchLayer();
+        stretchLayer
+          ..imageFilter = _imageFilter
+          ..xStretch = _xStretch
+          ..yStretch = _yStretch
+          // The viewport the stretch is normalized over is this render object's
+          // own bounds, in the same coordinate space as the layer's children.
+          ..viewportRect = offset & size;
+        layer = stretchLayer;
+        context.pushLayer(stretchLayer, super.paint, offset, childPaintBounds: offset & size);
+      } else {
+        layer = null;
+        super.paint(context, offset);
+      }
+    }
+  }
 }
 
 class _StretchEffectShader {

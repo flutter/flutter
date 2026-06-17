@@ -44,6 +44,7 @@ enum class MutatorType {
   kBackdropClipRRect,
   kBackdropClipRSuperellipse,
   kBackdropClipPath,
+  kOverscrollStretch,
 };
 
 // Represents an image filter mutation.
@@ -103,6 +104,22 @@ struct BackdropClipPath {
   }
 };
 
+struct OverscrollStretchMutation {
+  DlScalar x_stretch;
+  DlScalar y_stretch;
+  // The rect of the stretch viewport (the StretchEffect's bounds), in the same
+  // coordinate space as a platform view's final bounding rect (screen/device
+  // pixels). The stretch is normalized over this rect, so a platform view that
+  // is only a sub-region of the viewport gets the correct local slice of the
+  // stretch curve (and stays aligned with the surrounding stretched content).
+  DlRect viewport_rect;
+
+  bool operator==(const OverscrollStretchMutation& other) const {
+    return x_stretch == other.x_stretch && y_stretch == other.y_stretch &&
+           viewport_rect == other.viewport_rect;
+  }
+};
+
 // Stores mutation information like clipping or kTransform.
 //
 // The `type` indicates the type of the mutation: kClipRect, kTransform and etc.
@@ -131,6 +148,8 @@ class Mutator {
       : data_(backdrop_rse) {}
   explicit Mutator(const BackdropClipPath& backdrop_path)
       : data_(backdrop_path) {}
+  explicit Mutator(const OverscrollStretchMutation& overscroll_stretch)
+      : data_(overscroll_stretch) {}
 
   MutatorType GetType() const {
     return static_cast<MutatorType>(data_.index());
@@ -161,6 +180,9 @@ class Mutator {
   const BackdropClipPath& GetBackdropClipPath() const {
     return std::get<BackdropClipPath>(data_);
   }
+  const OverscrollStretchMutation& GetOverscrollStretch() const {
+    return std::get<OverscrollStretchMutation>(data_);
+  }
   const uint8_t& GetAlpha() const { return std::get<uint8_t>(data_); }
   float GetAlphaFloat() const { return DlColor::toOpacity(GetAlpha()); }
 
@@ -180,6 +202,7 @@ class Mutator {
       case MutatorType::kOpacity:
       case MutatorType::kTransform:
       case MutatorType::kBackdropFilter:
+      case MutatorType::kOverscrollStretch:
         return false;
     }
   }
@@ -195,7 +218,8 @@ class Mutator {
                BackdropClipRect,
                BackdropClipRRect,
                BackdropClipRSuperellipse,
-               BackdropClipPath>
+               BackdropClipPath,
+               OverscrollStretchMutation>
       data_;
 };  // Mutator
 
@@ -221,6 +245,9 @@ class MutatorsStack {
   // `filter_rect` is in global coordinates.
   void PushBackdropFilter(const std::shared_ptr<DlImageFilter>& filter,
                           const DlRect& filter_rect);
+  void PushOverscrollStretch(DlScalar x_stretch,
+                             DlScalar y_stretch,
+                             const DlRect& viewport_rect);
   void PushPlatformViewClipRect(const DlRect& rect);
   void PushPlatformViewClipRRect(const DlRoundRect& rrect);
   void PushPlatformViewClipRSuperellipse(const DlRoundSuperellipse& rse);
@@ -298,8 +325,15 @@ class EmbeddedViewParams {
       : matrix_(matrix),
         size_points_(size_points),
         mutators_stack_(std::move(mutators_stack)) {
-    final_bounding_rect_ =
+    // An overscroll stretch carried in the mutator stack moves and resizes the
+    // platform view's bounding box: the same non-linear map that distorts the
+    // interior pixels is applied to the box edges, so the view's outer limits
+    // follow the surrounding stretched content. ApplyOverscrollStretch is a
+    // no-op when no stretch mutator is present.
+    natural_bounding_rect_ =
         DlRect::MakeSize(size_points).TransformAndClipBounds(matrix);
+    final_bounding_rect_ =
+        ApplyOverscrollStretch(natural_bounding_rect_, mutators_stack_);
   }
 
   // The transformation Matrix corresponding to the sum of all the
@@ -314,7 +348,18 @@ class EmbeddedViewParams {
   // The bounding rect of the platform view after applying all the mutations.
   //
   // Clippings are ignored.
+  //
+  // NOTE: when an overscroll stretch is present this is the *stretched* box
+  // (moved/grown to follow the stretch). It is the region the platform view's
+  // Android view occupies on screen. For slicing/overlap against Flutter content
+  // -- which is recorded in pre-stretch coordinates -- use naturalBoundingRect().
   const DlRect& finalBoundingRect() const { return final_bounding_rect_; }
+
+  // The bounding rect of the platform view in pre-stretch (natural) coordinates,
+  // i.e. before any overscroll stretch is applied. This is the same coordinate
+  // space the Flutter content slices are recorded in, so it is what the embedder
+  // must use when computing which Flutter content overlaps the platform view.
+  const DlRect& naturalBoundingRect() const { return natural_bounding_rect_; }
 
   // Pushes the stored DlImageFilter object to the mutators stack.
   //
@@ -348,10 +393,18 @@ class EmbeddedViewParams {
   }
 
  private:
+  // Returns `natural_screen_rect` transformed by any overscroll stretch present
+  // in `mutators`, or unchanged when there is none. The stretch edges are mapped
+  // through the same curve as the interior shader (see overscroll stretch
+  // shader / shaders/stretch_effect.frag).
+  static DlRect ApplyOverscrollStretch(const DlRect& natural_screen_rect,
+                                       const MutatorsStack& mutators);
+
   DlMatrix matrix_;
   DlSize size_points_;
   MutatorsStack mutators_stack_;
   DlRect final_bounding_rect_;
+  DlRect natural_bounding_rect_;
 };
 
 enum class PostPrerollResult {
@@ -556,6 +609,10 @@ class ExternalViewEmbedder {
   virtual void PushClipRSuperellipseToVisitedPlatformViews(
       const DlRoundSuperellipse& clip_rse) {}
   virtual void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) {}
+  virtual void PushOverscrollStretchToVisitedPlatformViews(
+      DlScalar x_stretch,
+      DlScalar y_stretch,
+      const DlRect& viewport_rect) {}
 
  private:
   bool used_this_frame_ = false;

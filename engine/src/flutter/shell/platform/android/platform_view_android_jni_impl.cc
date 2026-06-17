@@ -164,6 +164,7 @@ static jmethodID g_mutators_stack_push_transform_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprect_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
 static jmethodID g_mutators_stack_push_opacity_method = nullptr;
+static jmethodID g_mutators_stack_push_overscroll_stretch_method = nullptr;
 static jmethodID g_mutators_stack_push_clippath_method = nullptr;
 
 // android.graphics.Path class, methods, and nested classes.
@@ -1107,6 +1108,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_mutators_stack_push_overscroll_stretch_method = env->GetMethodID(
+      g_mutators_stack_class->obj(), "pushOverscrollStretch", "(FFFFFF)V");
+  if (g_mutators_stack_push_overscroll_stretch_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushOverscrollStretch method";
+    return false;
+  }
+
   g_mutators_stack_push_clippath_method =
       env->GetMethodID(g_mutators_stack_class->obj(), "pushClipPath",
                        "(Landroid/graphics/Path;)V");
@@ -1767,6 +1776,19 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
                             transformMatrix.obj());
         break;
       }
+      case MutatorType::kOverscrollStretch: {
+        const auto& mutation = (*iter)->GetOverscrollStretch();
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_overscroll_stretch_method,
+            static_cast<float>(mutation.x_stretch),
+            static_cast<float>(mutation.y_stretch),
+            static_cast<float>(mutation.viewport_rect.GetLeft()),
+            static_cast<float>(mutation.viewport_rect.GetTop()),
+            static_cast<float>(mutation.viewport_rect.GetRight()),
+            static_cast<float>(mutation.viewport_rect.GetBottom()));
+        break;
+      }
+
       case MutatorType::kClipRect: {
         const DlRect& rect = (*iter)->GetRect();
         env->CallVoidMethod(mutatorsStack,
@@ -2252,6 +2274,19 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
                             transformMatrix.obj());
         break;
       }
+      case MutatorType::kOverscrollStretch: {
+        const auto& mutation = (*iter)->GetOverscrollStretch();
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_overscroll_stretch_method,
+            static_cast<float>(mutation.x_stretch),
+            static_cast<float>(mutation.y_stretch),
+            static_cast<float>(mutation.viewport_rect.GetLeft()),
+            static_cast<float>(mutation.viewport_rect.GetTop()),
+            static_cast<float>(mutation.viewport_rect.GetRight()),
+            static_cast<float>(mutation.viewport_rect.GetBottom()));
+        break;
+      }
+
       case MutatorType::kClipRect: {
         const DlRect& rect = (*iter)->GetRect();
         env->CallVoidMethod(mutatorsStack,
@@ -2312,6 +2347,7 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
                             opacity);
         break;
       }
+
       case MutatorType::kClipPath: {
         auto& dlPath = (*iter)->GetPath();
         // The layer mutator mechanism should have already caught and

@@ -81,6 +81,15 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                        double dx,
                        double dy,
                        const fml::RefPtr<EngineLayer>& old_layer);
+  void pushOverscrollStretch(Dart_Handle layer_handle,
+                             const ImageFilter* image_filter,
+                             double x_stretch,
+                             double y_stretch,
+                             double viewport_left,
+                             double viewport_top,
+                             double viewport_right,
+                             double viewport_bottom,
+                             const fml::RefPtr<EngineLayer>& old_layer);
   void pushBackdropFilter(Dart_Handle layer_handle,
                           ImageFilter* filter,
                           int blend_mode,
