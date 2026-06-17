@@ -48,7 +48,7 @@ class SliderScrollIncrementDetails {
   /// Creates a [SliderScrollIncrementDetails].
   const SliderScrollIncrementDetails({required this.type, required this.semanticActionUnit});
 
-  /// The type of scroll increment (line or page).
+  /// The type of scroll increment (line or page) of the [ScrollIntent].
   final SliderScrollIncrementType type;
 
   /// The amount by which the slider value changes during a semantic adjustment.
