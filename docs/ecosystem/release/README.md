@@ -30,12 +30,13 @@ The most common source of failure of the `release` task is that another test fai
 
 High-traffic packages can enable "Batch release" to group multiple commits into a single periodic release, rather than publishing after every commit (the default "Automatic release" behavior).
 
+**Packages in this mode must not be in pre-release versions, as the batch release tooling does not support them.**
+
 ### Configuration
 
 To enable batch release for a package:
 
-1.  **Request a branch:** Ask a repo admin to create a protected `release-<package_name>` branch.
-2.  **Submit a PR:** Create a PR with the following changes:
+1.  **Submit a PR:** Create a PR with the following changes:
     *   Add `ci_config.yaml` to the package root:
         ```yaml
         release:
@@ -44,7 +45,7 @@ To enable batch release for a package:
     *   Create a `pending_changes` directory in the package root containing a `template.yaml` file:
         ```yaml
         # Use this file as a template to draft an unreleased changelog file.
-        # Make a copy of this file in the same directory, give it an approrpriate name, and fill in the details.
+        # Make a copy of this file in the same directory, give it an appropriate name, and fill in the details.
         changelog: |
           - Can include a list of changes.
           - with markdown supported.
@@ -77,16 +78,16 @@ To enable batch release for a package:
         on:
           push:
             branches:
-              - 'release-<package_name>'
+              - 'release-<package_name>-*'
         ```
     *   Add a trigger to [sync_release_pr.yml](https://github.com/flutter/packages/blob/main/.github/workflows/sync_release_pr.yml):
         ```yaml
         on:
           push:
             branches:
-              - 'release-<package_name>'
+              - 'release-<package_name>-*'
         ```
-3.  **Merge:** Merge the PR to finalize setup.
+2.  **Merge:** Merge the PR to finalize setup.
 
 ### Workflow
 
@@ -94,7 +95,7 @@ Once enabled, contributors **should not** modify `CHANGELOG.md` or `pubspec.yaml
 
 The release process runs automatically:
 
-1.  The cron job in `<package_name>_batch.yml` triggers a new release PR targeting the `release-<package_name>` branch.
+1.  The cron job in `<package_name>_batch.yml` triggers a new release PR targeting the `release-<package_name>-<version>` branch.
 2.  The PR aggregates all files in `pending_changes` to update `CHANGELOG.md` and `pubspec.yaml`.
 3.  A package owner reviews and merges the PR.
 4.  Merging triggers [release_from_branches.yml](https://github.com/flutter/packages/blob/main/.github/workflows/release_from_branches.yml), which publishes the package to pub.dev.

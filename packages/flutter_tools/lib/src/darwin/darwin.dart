@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/config.dart';
+import '../base/file_system.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/swift_packages.dart';
+import '../platform_plugins.dart';
 import '../project.dart';
 
 /// Encapsulates platform-specific values for Darwin targets ([ios] and [macos]).
@@ -62,6 +65,13 @@ enum FlutterDarwinPlatform {
 
   /// A list of supported [XcodeSdk].
   final List<XcodeSdk> sdks;
+
+  String get pluginConfigKey {
+    return switch (this) {
+      ios => IOSPlugin.kConfigKey,
+      macos => MacOSPlugin.kConfigKey,
+    };
+  }
 
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
@@ -123,5 +133,15 @@ enum FlutterDarwinPlatform {
       ios => project.ios,
       macos => project.macos,
     };
+  }
+
+  /// Returns the corresponding build directory for the platform.
+  String buildDirectory({Config? config, FileSystem? fileSystem}) {
+    switch (this) {
+      case FlutterDarwinPlatform.ios:
+        return getIosBuildDirectory(config: config, fileSystem: fileSystem);
+      case FlutterDarwinPlatform.macos:
+        return getMacOSBuildDirectory(config: config, fileSystem: fileSystem);
+    }
   }
 }

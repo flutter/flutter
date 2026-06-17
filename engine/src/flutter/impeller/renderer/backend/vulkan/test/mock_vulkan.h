@@ -89,6 +89,12 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  MockVulkanContextBuilder& SetDeviceExtensions(
+      const std::vector<std::string>& device_extensions) {
+    device_extensions_ = device_extensions;
+    return *this;
+  }
+
   /// Set the behavior of vkGetPhysicalDeviceFormatProperties, which needs to
   /// respond differently for different formats.
   MockVulkanContextBuilder& SetPhysicalDeviceFormatPropertiesCallback(
@@ -114,10 +120,36 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  MockVulkanContextBuilder SetAcquireNextImageCallback(
+      std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
+          acquire_next_image_callback) {
+    acquire_next_image_callback_ = std::move(acquire_next_image_callback);
+    return *this;
+  }
+
+  MockVulkanContextBuilder SetWaitForFencesCallback(
+      std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
+          wait_for_fences_callback) {
+    wait_for_fences_callback_ = std::move(wait_for_fences_callback);
+    return *this;
+  }
+
+  /// Make the next `count` calls to vkCreateImage for a fixed-rate-compressed
+  /// image (one carrying a VkImageCompressionControlEXT in its pNext chain)
+  /// fail with VK_ERROR_COMPRESSION_EXHAUSTED_EXT. Also advertises the
+  /// VK_EXT_image_compression_control feature/format support so the
+  /// fixed-rate-compression path is exercised.
+  MockVulkanContextBuilder& SetCompressionExhaustedCreateImageFailures(
+      int count) {
+    compression_exhausted_create_image_failures_ = count;
+    return *this;
+  }
+
  private:
   std::function<void(ContextVK::Settings&)> settings_callback_;
   std::vector<std::string> instance_extensions_;
   std::vector<std::string> instance_layers_;
+  std::vector<std::string> device_extensions_;
   std::optional<ContextVK::EmbedderData> embedder_data_;
   std::function<void(VkPhysicalDevice physicalDevice,
                      VkFormat format,
@@ -126,6 +158,11 @@ class MockVulkanContextBuilder {
   std::function<void(VkPhysicalDevice device,
                      VkPhysicalDeviceProperties* physicalProperties)>
       physical_properties_callback_;
+  std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
+      acquire_next_image_callback_;
+  std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
+      wait_for_fences_callback_;
+  int compression_exhausted_create_image_failures_ = 0;
 };
 
 /// @brief Override the image size returned by all swapchain images.
@@ -133,6 +170,10 @@ void SetSwapchainImageSize(ISize size);
 
 std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
     VkCommandBuffer buffer);
+
+/// @brief Returns the viewports passed to `vkCmdSetViewport` calls on the
+///        given command buffer, in call order.
+const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
 
 }  // namespace testing
 }  // namespace impeller

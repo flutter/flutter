@@ -256,18 +256,28 @@ typedef enum {
    * Flutter blocks all the UIGestureRecognizers on the platform view as soon as it
    * decides they should be blocked.
    *
-   * With this policy, only the `touchesBegan` method for all the UIGestureRecognizers is guaranteed
-   * to be called.
+   * This policy employs a dual blocking strategy: synchronous blocking via hitTest results and
+   * asynchronous blocking managed through the framework’s gesture arena. With this policy, only the
+   * `touchesBegan` method for all the UIGestureRecognizers is guaranteed to be called.
    */
   FlutterPlatformViewGestureRecognizersBlockingPolicyEager,
   /**
-   * Flutter blocks the platform view's UIGestureRecognizers from recognizing only after
-   * touchesEnded was invoked.
+   * Flutter blocks all the UIGestureRecognizers on the platform view only after touchesEnded was
+   * invoked.
    *
    * This results in the platform view's UIGestureRecognizers seeing the entire touch sequence,
    * but never recognizing the gesture (and never invoking actions).
    */
   FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded,
+  /**
+   * Flutter blocks all the UIGestureRecognizers on the platform view based on results from hitTest.
+   *
+   * Unlike FlutterPlatformViewGestureRecognizersBlockingPolicyEager, this policy does not rely on
+   * Flutter's gesture arena. This is a workaround to address a few bugs related to platform view's
+   * gesture recognizers being stuck in a stale state. See:
+   * https://github.com/flutter/flutter/issues/175099.
+   */
+  FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture,
   // NOLINTEND(readability-identifier-naming)
 } FlutterPlatformViewGestureRecognizersBlockingPolicy;
 
@@ -421,6 +431,16 @@ typedef enum {
  * @return the file name to be used for lookup in the main bundle.
  */
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
+
+/**
+ * Returns a value published by the specified plugin.
+ *
+ * @param pluginKey The unique key identifying the plugin.
+ * @return An object published by the plugin, if any. Will be `NSNull` if
+ *   nothing has been published. Will be `nil` if the plugin has not been
+ *   registered.
+ */
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey;
 @end
 
 #pragma mark -

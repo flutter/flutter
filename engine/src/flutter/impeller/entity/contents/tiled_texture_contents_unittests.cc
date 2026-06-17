@@ -28,9 +28,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
       GetContext()->GetResourceAllocator()->CreateTexture(texture_desc);
 
   auto geom = Geometry::MakeCover();
-  TiledTextureContents contents;
+  TiledTextureContents contents(geom.get());
   contents.SetTexture(texture);
-  contents.SetGeometry(geom.get());
 
   auto content_context = GetContentContext();
   auto buffer = content_context->GetContext()->CreateCommandBuffer();
@@ -63,7 +62,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
 // GL_OES_EGL_image_external isn't supported on MacOS hosts.
 #if !defined(FML_OS_MACOSX)
 TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
-  if (GetParam() != PlaygroundBackend::kOpenGLES) {
+  if (GetParam() != PlaygroundBackend::kOpenGLES &&
+      GetParam() != PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP()
         << "External OES textures are only valid for the OpenGLES backend.";
   }

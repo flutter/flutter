@@ -28,17 +28,8 @@ const bool _debugLogPointerEvents = false;
 /// Set this to true to log all the events sent to the Flutter framework.
 const bool _debugLogFlutterEvents = false;
 
-/// Resets iframe detection cache for tests.
-@visibleForTesting
-void debugResetIframeDetectionCache() {
-  _WheelEventListenerMixin._cachedIsInIframe = null;
-}
-
-/// Overrides iframe detection for tests. Pass `null` to restore auto-detection.
-@visibleForTesting
-void debugSetIframeEmbeddingForTests(bool? isInIframe) {
-  _WheelEventListenerMixin._cachedIsInIframe = isInIframe;
-}
+// Note: debugResetIframeDetectionCache() and debugSetIframeEmbeddingForTests()
+// are now in dom.dart as shared utilities.
 
 /// Resets full-page app detection override for tests.
 @visibleForTesting
@@ -321,6 +312,7 @@ class ClickDebouncer {
       // The semantic node is not listening to taps. Flush the pointer events
       // for the framework to figure out what to do with them. It's possible
       // the framework is interested in gestures other than taps.
+      click.stopPropagation();
       _flush();
     }
   }
@@ -640,37 +632,8 @@ abstract class _BaseAdapter {
 mixin _WheelEventListenerMixin on _BaseAdapter {
   static double? _defaultScrollLineHeight;
 
-  /// Cached result of iframe detection.
-  static bool? _cachedIsInIframe;
-
   /// Test-only override for full-page app detection.
   static bool? _debugIsFullPageApp;
-
-  /// Check if Flutter is embedded inside an iframe.
-  ///
-  /// Used to determine whether to prevent scroll chaining to the parent page.
-  bool _isEmbeddedInIframe() {
-    if (_cachedIsInIframe != null) {
-      return _cachedIsInIframe!;
-    }
-
-    try {
-      // If window.parent is the same object as window, we're not in an iframe.
-      // If they're different, we're in an iframe.
-      final DomWindow? parent = domWindow.parent;
-      if (parent == null) {
-        _cachedIsInIframe = false;
-        return false;
-      }
-      // Use identical() to check if parent and window are the same object
-      _cachedIsInIframe = !identical(parent, domWindow);
-      return _cachedIsInIframe!;
-    } catch (e) {
-      // Cross-origin iframe - assume embedded
-      _cachedIsInIframe = true;
-      return true;
-    }
-  }
 
   /// Check if Flutter is running as a full-page app (not embedded as a component).
   ///
@@ -871,7 +834,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     _callback(event, _convertWheelEventToPointerData(wheelEvent));
 
     // Determine if we should prevent default
-    final bool isInIframe = _isEmbeddedInIframe();
+    final bool isInIframe = isEmbeddedInIframe();
 
     // Special handling only for full-page Flutter apps running inside an iframe.
     // Custom element apps (Flutter embedded as a component) should let the

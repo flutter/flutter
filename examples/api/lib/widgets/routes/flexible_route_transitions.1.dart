@@ -34,7 +34,7 @@ class FlexibleRouteTransitionsApp extends StatelessWidget {
             // on iOS the default is the Cupertino sliding transition. Setting
             // it to use zoom on all platforms allows the example to show multiple
             // transitions in one app for all platforms.
-            TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+            .iOS: ZoomPageTransitionsBuilder(),
           },
         ),
       ),
@@ -240,7 +240,7 @@ class _MyPageScaffold extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             TextButton(
               onPressed: () {
@@ -269,26 +269,13 @@ class _MyPageScaffold extends StatelessWidget {
 
 // A Page that applies a _VerticalPageTransition.
 class _VerticalTransitionPage<T> extends Page<T> {
-  const _VerticalTransitionPage({
-    required this.child,
-    this.maintainState = true,
-    this.fullscreenDialog = false,
-    this.allowSnapshotting = true,
-    super.key,
-    super.canPop,
-    super.onPopInvoked,
-    super.name,
-    super.arguments,
-    super.restorationId,
-  });
+  const _VerticalTransitionPage({required this.child, super.restorationId});
 
   final Widget child;
 
-  final bool maintainState;
+  final bool maintainState = true;
 
-  final bool fullscreenDialog;
-
-  final bool allowSnapshotting;
+  final bool fullscreenDialog = false;
 
   @override
   Route<T> createRoute(BuildContext context) {
@@ -297,10 +284,8 @@ class _VerticalTransitionPage<T> extends Page<T> {
 }
 
 class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
-  _PageBasedVerticalPageRoute({
-    required _VerticalTransitionPage<T> page,
-    super.allowSnapshotting,
-  }) : super(settings: page);
+  _PageBasedVerticalPageRoute({required _VerticalTransitionPage<T> page})
+    : super(settings: page);
 
   _VerticalTransitionPage<T> get _page =>
       settings as _VerticalTransitionPage<T>;
@@ -428,7 +413,7 @@ class _VerticalPageTransition extends StatelessWidget {
         position: _primaryPositionAnimation,
         textDirection: textDirection,
         child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          borderRadius: const .vertical(top: Radius.circular(12)),
           child: child,
         ),
       ),

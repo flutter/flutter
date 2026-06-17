@@ -17,8 +17,8 @@ class ExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: Directionality(
-        // TRY THIS: Switch to TextDirection.rtl to see how the borders change.
-        textDirection: TextDirection.ltr,
+        // TRY THIS: Switch to .rtl to see how the borders change.
+        textDirection: .ltr,
         child: Home(),
       ),
     );
@@ -45,10 +45,10 @@ class SampleCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const .all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: .start,
+          mainAxisSize: .min,
           children: <Widget>[
             Text(title, style: textTheme.titleMedium),
             Text(
@@ -105,9 +105,9 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const .all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: <Widget>[
               // Demonstrates using LinearBorder.bottom() to define
               // an underline border for the standard button types.

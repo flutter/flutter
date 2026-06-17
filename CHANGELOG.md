@@ -30,7 +30,61 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.44 Changes
+
+### [3.44.2](https://github.com/flutter/flutter/releases/tag/3.44.2)
+- [flutter/187322](https://github.com/flutter/flutter/issues/187322) When DTD connection is lost or fails at startup during widget-preview on all platforms, the tool crashes with unhandled exceptions instead of exiting gracefully.
+- [flutter/186723](https://github.com/flutter/flutter/issues/186723) When Android apps switch from any `SystemUiMode` to edge-to-edge, the system bars unexpectedly remain invisible.
+- [flutter/186054](https://github.com/flutter/flutter/issues/186054) When building an iOS or macOS app with Swift Package Manager enabled, remote package dependencies may fail to download.
+- [flutter/185775](https://github.com/flutter/flutter/issues/185775) When building for non-iOS or macOS apps, Swift Package Manager warnings may appear.
+
+### [3.44.1](https://github.com/flutter/flutter/releases/tag/3.44.1)
+- [flutter/186962](https://github.com/flutter/flutter/issues/186962) When the analysis server exits unexpectedly, the `flutter` tool can crash instead of outputting a descriptive error message.
+- [flutter/186963](https://github.com/flutter/flutter/issues/186963) When failing to connect to a Chrome instance on Windows, the `flutter` tool can crash instead of outputting a descriptive error message.
+
+### [3.44.0](https://github.com/flutter/flutter/releases/tag/3.44.0)
+
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-44-b0cc1ad3c527), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.44.0) for a detailed list of all the new changes.
+
+
 ## Flutter 3.41 Changes
+
+### [3.41.9](https://github.com/flutter/flutter/releases/tag/3.41.9)
+- [flutter/185621](https://github.com/flutter/flutter/pull/185621) Fixes a potential integer overflow that can happen when handling some animated PNG files.
+
+### [3.41.8](https://github.com/flutter/flutter/releases/tag/3.41.8)
+- [flutter/185150](https://github.com/flutter/flutter/issues/185150) When using profile mode on a physical iOS device, the app may fail to connect to the Dart VM.
+
+### [3.41.7](https://github.com/flutter/flutter/releases/tag/3.41.7)
+- [flutter/184376](https://github.com/flutter/flutter/issues/184376) When building an iOS or macOS app, the build may fail due to git multi-pack-index error.
+- [flutter/184254](https://github.com/flutter/flutter/issues/184254) When debugging on physical iOS devices and Xcode 26.4+, app often crashes.
+- [flutter/184689](https://github.com/flutter/flutter/issues/184689) When using an ffi Windows package, don't require a plugin class.
+
+### [3.41.6](https://github.com/flutter/flutter/releases/tag/3.41.6)
+- [flutter/184025](https://github.com/flutter/flutter/pull/184025) Include a fix from Skia that ensures that the correct atlas for the glyph mask format is used consistently.
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) Visual issues with circles appearing jagged. Especially on thin stroked circles and circles with small radii.
+- [flutter/183887](https://github.com/flutter/flutter/issues/183887) During SCREEN_OFF event a deadlock preventing new frames causing an ANR can occur on android devices running the Android 16 March Security update.
+
+### [3.41.5](https://github.com/flutter/flutter/releases/tag/3.41.5)
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) When using Impeller on any platform, bur artifacts in circles rendering at 45 degree angles.
+
+### [3.41.4](https://github.com/flutter/flutter/releases/tag/3.41.4)
+- [flutter/182748](https://github.com/flutter/flutter/issues/182748) When building for an iOS simulator with Xcode 26, the build will fail when there is a CocoaPod dependency that does not support arm.
+- [flutter/182361](https://github.com/flutter/flutter/issues/182361) When iOS plugins register to receive lifecycle events during an event, a crash may occur.
+- [flutter/182367](https://github.com/flutter/flutter/issues/182367) Crash on Flutter Web Skwasm apps.
+- [flutter/183071](https://github.com/flutter/flutter/issues/183071) Updated test package and related dependencies.
+
+### [3.41.3](https://github.com/flutter/flutter/releases/tag/3.41.3)
+
+- [flutter/182501](https://github.com/flutter/flutter/issues/182501) Reduce CPU utilization of idle Flutter Windows apps.
+- [flutter/182233](https://github.com/flutter/flutter/issues/182233) Tapping on the status bar may crash the app on iOS when there's a primary scroll view that has never been laid out.
+
+### [3.41.2](https://github.com/flutter/flutter/releases/tag/3.41.2)
+
+- [flutter/179673](https://github.com/flutter/flutter/issues/179673) When content sizing is not enabled on Android, a race condition can sometimes make platform views not render correctly.
+- [flutter/182076](https://github.com/flutter/flutter/issues/182076) Fix flutter build web ignoring --web-define flag
+- [flutter/182243](https://github.com/flutter/flutter/issues/182243) Don't throw an exception if no web define variable is set.
+- [flutter/182292](https://github.com/flutter/flutter/issues/182292) Fix bug in multisurfacerenderer where canvases do not have "position: absolute"
 
 ### [3.41.1](https://github.com/flutter/flutter/releases/tag/3.41.1)
 

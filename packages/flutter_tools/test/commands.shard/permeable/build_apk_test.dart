@@ -67,6 +67,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -81,6 +82,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -95,6 +97,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -109,6 +112,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -123,6 +127,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -152,6 +157,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -169,6 +175,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -186,6 +193,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -203,6 +211,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -220,6 +229,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -412,7 +422,7 @@ void main() {
       );
 
       testUsingContext(
-        'EnableImpeller="false" reports an disabled event',
+        'EnableImpeller="false" reports a disabled event',
         () async {
           final String projectPath = await createProject(
             tempDir,
@@ -732,16 +742,7 @@ void main() {
         // The command throws a [ToolExit] because it expects an APK in the file system.
         await expectLater(() => runBuildApkCommand(projectPath), throwsToolExit());
 
-        expect(
-          testLogger.statusText,
-          allOf(
-            containsIgnoringWhitespace("Your app isn't using AndroidX"),
-            containsIgnoringWhitespace(
-              'To avoid potential build failures, you can quickly migrate your app by '
-              'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
-            ),
-          ),
-        );
+        expect(testLogger.statusText, isNot(contains("Your app isn't using AndroidX")));
 
         expect(
           analytics.sentEvents,

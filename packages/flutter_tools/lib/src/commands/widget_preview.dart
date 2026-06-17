@@ -23,10 +23,12 @@ import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/analysis.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
+import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
@@ -34,6 +36,8 @@ import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
+import '../widget_preview/dtd_types.dart';
+import '../widget_preview/lsp_preview_detector.dart';
 import '../widget_preview/preview_code_generator.dart';
 import '../widget_preview/preview_detector.dart';
 import '../widget_preview/preview_manifest.dart';
@@ -52,7 +56,9 @@ class WidgetPreviewCommand extends FlutterCommand {
     required OperatingSystemUtils os,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    required Terminal terminal,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
@@ -67,6 +73,8 @@ class WidgetPreviewCommand extends FlutterCommand {
         processManager: processManager,
         artifacts: artifacts,
         dtdServicesOverride: dtdServicesOverride,
+        analysisServerFactoryOverride: analysisServerFactoryOverride,
+        terminal: terminal,
       ),
     );
     addSubcommand(
@@ -131,11 +139,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.os,
     required this.processManager,
     required this.artifacts,
+    required this.terminal,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) : _logger = logger {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }
+    _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
     addMachineOutputFlag(verboseHelp: verbose);
     addDevToolsOptions(verboseHelp: verbose);
@@ -171,6 +182,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         kDisableDtdServiceUuid,
         help: 'Disables the addition of a UUID to the widget preview DTD service and stream.',
         hide: !verbose,
+      )
+      ..addFlag(
+        kLegacyPreviewDetection,
+        help:
+            'Enables the legacy preview detection mechanism that uses '
+            'package:analyzer instead of LSP.',
+        hide: !verbose,
       );
   }
 
@@ -181,6 +199,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const kWebServer = 'web-server';
   static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
   static const kDisableDtdServiceUuid = 'disable-dtd-service-uuid';
+  static const kLegacyPreviewDetection = 'legacy-preview-detection';
 
   @visibleForTesting
   static const kBrowserNotFoundErrorMessage =
@@ -223,6 +242,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final Artifacts artifacts;
 
+  final Terminal terminal;
+
   late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
 
   late final FlutterProject rootProject = getRootProject();
@@ -241,9 +262,28 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     project: rootProject,
     logger: logger,
     fs: fs,
-    onChangeDetected: onChangeDetected,
-    onPubspecChangeDetected: _previewPubspecBuilder.onPubspecChangeDetected,
+    onChangeDetected: onLegacyChangeDetected,
+    onPubspecChangeDetected: _onPubspecChangeDetected,
   );
+
+  late final _lspPreviewDetector = LspPreviewDetector(
+    platform: platform,
+    previewAnalytics: previewAnalytics,
+    project: rootProject,
+    logger: logger,
+    fs: fs,
+    onChangeDetected: onChangeDetected,
+    onPubspecChangeDetected: _onPubspecChangeDetected,
+    shutdownHooks: shutdownHooks,
+    dtd: _dtdService,
+    processManager: processManager,
+    terminal: terminal,
+    suppressAnalytics: !analytics.okToSend,
+    analysisServerFactory: _analysisServerFactoryOverride,
+    artifacts: artifacts,
+  );
+
+  late final Future<AnalysisServer> Function()? _analysisServerFactoryOverride;
 
   late final PreviewCodeGenerator _previewCodeGenerator;
   late final _previewManifest = PreviewManifest(
@@ -282,6 +322,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // Start the timer tracking how long it takes to launch the preview environment.
     previewAnalytics.initializeLaunchStopwatch();
     logger.sendInitializingEvent();
+
+    await WidgetPreviewGitignoreMigration(rootProject, logger).migrate();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
     widgetPreviewScaffold = customPreviewScaffoldOutput != null
@@ -352,15 +394,49 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
     }
 
+    final bool legacyDetection = boolArg('legacy-preview-detection');
+
     shutdownHooks.addShutdownHook(() async {
       await _widgetPreviewApp?.exitApp();
-      await _previewDetector.dispose();
+      if (legacyDetection) {
+        await _previewDetector.dispose();
+      } else {
+        await _lspPreviewDetector.dispose();
+      }
     });
 
-    final PreviewDependencyGraph graph = await _previewDetector.initialize();
-    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
+    if (legacyDetection) {
+      final PreviewDependencyGraph graph = await _previewDetector.initialize();
+      _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
+    } else {
+      await configureDtd();
 
-    await configureDtd();
+      await _lspPreviewDetector.initialize();
+
+      _previewCodeGenerator.populateDtdConnectionInfo(
+        dtdUri: _dtdService.dtdUri!,
+        widgetPreviewServiceName: _dtdService.widgetPreviewService,
+        widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
+        projectRootPath: rootProject.directory.absolute.path,
+      );
+
+      final FlutterWidgetPreviews originalPreviews;
+      try {
+        originalPreviews = await _dtdService.getFlutterWidgetPreviews();
+      } on Exception catch (e) {
+        throwToolExit(
+          'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
+          'Ensure that the analysis server is running and reachable. Details: $e',
+        );
+      } on StateError catch (e) {
+        throwToolExit(
+          'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
+          'Ensure that the analysis server is running and reachable. Details: $e',
+        );
+      }
+      _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(originalPreviews);
+    }
+
     final int result = await runPreviewEnvironment(
       widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
     );
@@ -371,7 +447,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     return FlutterCommandResult.success();
   }
 
-  void onChangeDetected(PreviewDependencyGraph previews) {
+  void onLegacyChangeDetected(PreviewDependencyGraph previews) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
     _widgetPreviewApp?.restart();
@@ -380,6 +456,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   void onHotRestartRequest() {
     logger.printStatus('Triggering restart based on request from preview environment.');
     _widgetPreviewApp?.restart(fullRestart: true);
+  }
+
+  Future<void> _onPubspecChangeDetected(String path) async {
+    logger.printStatus('Triggering restart based on update to pubspec.yaml: $path');
+    await _previewPubspecBuilder.populatePreviewPubspec(
+      rootProject: project,
+      updatedPubspecPath: path,
+    );
+    await _widgetPreviewApp?.restart(fullRestart: true);
+  }
+
+  void onChangeDetected(FlutterWidgetPreviews update) {
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
+    logger.printStatus('Triggering reload based on update to script: ${update.scriptUris}');
+    _widgetPreviewApp?.restart();
   }
 
   /// Configures the Dart Tooling Daemon connection.
@@ -398,18 +489,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     } on FormatException {
       logger.printWarning('Failed to parse value of --dtd-uri: $existingDtdUriStr.');
     }
-    if (existingDtdUri == null) {
-      logger.printTrace('Launching a fresh DTD instance...');
-      await _dtdService.launchAndConnect();
-    } else {
+    if (existingDtdUri != null) {
       logger.printTrace('Connecting to existing DTD instance at: $existingDtdUri...');
       await _dtdService.connect(dtdWsUri: existingDtdUri);
     }
-    _previewCodeGenerator.populateDtdConnectionInfo(
-      dtdUri: _dtdService.dtdUri!,
-      widgetPreviewServiceName: _dtdService.widgetPreviewService,
-      widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
-    );
   }
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {

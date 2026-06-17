@@ -10,6 +10,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "flutter/fml/paths.h"
@@ -32,6 +33,68 @@ namespace {
 constexpr const char* kEGLImageExternalExtension = "GL_OES_EGL_image_external";
 constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
+constexpr int kVerboseErrorLineThreshold = 6;
+
+// Set per pass by RenderPassGLES: +1.0 swapchain, -1.0 offscreen FBO. See
+// flutter/flutter#186554.
+constexpr const char* kYFlipUniformName = "_impeller_y_flip";
+constexpr const char* kUserMainName = "_impeller_user_main";
+
+bool IsGLTargetPlatform(TargetPlatform platform) {
+  return platform == TargetPlatform::kOpenGLES ||
+         platform == TargetPlatform::kOpenGLDesktop ||
+         platform == TargetPlatform::kRuntimeStageGLES ||
+         platform == TargetPlatform::kRuntimeStageGLES3;
+}
+
+// Wraps the SPIRV-Cross-emitted entry point so `gl_Position.y *=
+// _impeller_y_flip;` runs on every exit, including early returns. Renames
+// `void main(` to `void _impeller_user_main(` and appends a wrapper that
+// calls it then applies the flip.
+std::string InjectYFlipForGLESVertexShader(std::string source) {
+  // Anchor on leading newline; spirv-cross emits the entry point at file
+  // scope, so the match is unambiguous in its comment-free output.
+  constexpr std::string_view kMainPattern = "\nvoid main(";
+  const size_t main_pos = source.find(kMainPattern);
+  if (main_pos == std::string::npos) {
+    return source;
+  }
+  const std::string user_main_decl =
+      std::string("\nvoid ") + kUserMainName + "(";
+  source.replace(main_pos, kMainPattern.size(), user_main_decl);
+
+  std::string wrapper = "\nvoid main() {\n  ";
+  wrapper += kUserMainName;
+  wrapper += "();\n  gl_Position.y *= ";
+  wrapper += kYFlipUniformName;
+  wrapper += ";\n}\n";
+  source.append(wrapper);
+
+  // Declare the uniform after the last `precision` directive, falling
+  // back to right after `#version`, falling back to the top.
+  const std::string declaration =
+      std::string("\nuniform float ") + kYFlipUniformName + ";\n";
+  size_t inject_at = std::string::npos;
+  for (size_t pos = source.find("\nprecision "); pos != std::string::npos;
+       pos = source.find("\nprecision ", pos + 1)) {
+    const size_t eol = source.find('\n', pos + 1);
+    if (eol == std::string::npos) {
+      break;
+    }
+    inject_at = eol;
+  }
+  if (inject_at == std::string::npos) {
+    const size_t version_pos = source.find("#version");
+    if (version_pos != std::string::npos) {
+      inject_at = source.find('\n', version_pos);
+    }
+  }
+  if (inject_at == std::string::npos) {
+    inject_at = 0;
+  }
+  source.insert(inject_at, declaration);
+  return source;
+}
 }  // namespace
 
 // This value should be <= 7372. UBOs can be larger on some devices but a
@@ -178,10 +241,17 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
     sl_options.version = source_options.gles_language_version > 0
                              ? source_options.gles_language_version
                              : 100;
-    sl_options.es = true;
-    if (source_options.target_platform == TargetPlatform::kRuntimeStageGLES3) {
+    // If we have requested GLES3 and/or Compute Shaders,
+    // promote the language version accordingly
+    if (source_options.type == SourceType::kComputeShader &&
+        sl_options.version < 310) {
+      sl_options.version = 310;
+    } else if (source_options.target_platform ==
+                   TargetPlatform::kRuntimeStageGLES3 &&
+               sl_options.version < 300) {
       sl_options.version = 300;
     }
+    sl_options.es = true;
     if (source_options.require_framebuffer_fetch &&
         source_options.type == SourceType::kFragmentShader) {
       gl_compiler->remap_ext_framebuffer_fetch(0, 0, true);
@@ -197,6 +267,10 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
     sl_options.version = source_options.gles_language_version > 0
                              ? source_options.gles_language_version
                              : 120;
+    if (source_options.type == SourceType::kComputeShader &&
+        sl_options.version < 430) {
+      sl_options.version = 430;
+    }
     sl_options.es = false;
   }
   gl_compiler->set_common_options(sl_options);
@@ -242,7 +316,6 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
     case TargetPlatform::kRuntimeStageVulkan:
       compiler = CreateVulkanCompiler(ir, source_options);
       break;
-    case TargetPlatform::kUnknown:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
@@ -251,6 +324,9 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
       break;
     case TargetPlatform::kSkSL:
       compiler = CreateSkSLCompiler(ir, source_options);
+      break;
+    case TargetPlatform::kUnknown:
+      FML_UNREACHABLE();
   }
   if (!compiler) {
     return {};
@@ -275,6 +351,50 @@ uint32_t CalculateUBOSize(const spirv_cross::Compiler* compiler) {
     result += size;
   }
   return result;
+}
+
+// Mirrors BufferBindingsGLES's uniform key normalization: ASCII uppercase
+// and drop underscores. GLSL identifiers are ASCII, so this is locale-safe.
+std::string StripUnderscoresAndUpper(std::string_view name) {
+  std::string result;
+  result.reserve(name.size());
+  for (char ch : name) {
+    if (ch == '_') {
+      continue;
+    }
+    if (ch >= 'a' && ch <= 'z') {
+      result.push_back(static_cast<char>(ch - 'a' + 'A'));
+    } else {
+      result.push_back(ch);
+    }
+  }
+  return result;
+}
+
+// On pre-`#version 140` GL targets, SPIRV-Cross lowers each uniform block to a
+// flat `uniform StructType instanceName;` and BufferBindingsGLES resolves
+// members by the block name modulo `StripUnderscoresAndUpper`. A
+// non-conforming instance name (e.g. `uniform ToonInfo { ... } toon;`) causes
+// every member to silently bind to GL location `-1`. Rename the instance to
+// `_<BlockName>`, which reduces to the block name under the same fold.
+// See flutter/flutter#186393.
+void CanonicalizeUniformBlockInstanceNamesForGL(
+    TargetPlatform target_platform,
+    spirv_cross::Compiler* compiler) {
+  if (target_platform != TargetPlatform::kOpenGLES &&
+      target_platform != TargetPlatform::kOpenGLDesktop) {
+    return;
+  }
+  for (const spirv_cross::Resource& ubo :
+       compiler->get_shader_resources().uniform_buffers) {
+    const std::string block_name = compiler->get_name(ubo.base_type_id);
+    const std::string instance_name = compiler->get_name(ubo.id);
+    if (StripUnderscoresAndUpper(instance_name) ==
+        StripUnderscoresAndUpper(block_name)) {
+      continue;
+    }
+    compiler->set_name(ubo.id, "_" + block_name);
+  }
 }
 
 }  // namespace
@@ -369,6 +489,10 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
           source_options.target_platform ==
               TargetPlatform::kRuntimeStageGLES3) {
         spirv_options.macro_definitions.push_back("IMPELLER_TARGET_OPENGLES");
+        // A temporary macro that allows fragment shader authors to target
+        // Flutter <= 3.44 before the OpenGLES flip was removed.
+        spirv_options.macro_definitions.push_back(
+            "IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED");
       }
     } break;
     case TargetPlatform::kSkSL: {
@@ -437,6 +561,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     return;
   }
 
+  CanonicalizeUniformBlockInstanceNamesForGL(source_options.target_platform,
+                                             sl_compiler.GetCompiler());
+
   uint32_t ubo_size = CalculateUBOSize(sl_compiler.GetCompiler());
   if (ubo_size > kMaxUniformBufferSize) {
     COMPILER_ERROR(error_stream_) << "Uniform buffer size exceeds max ("
@@ -448,6 +575,15 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   // for Vulkan. The reflector needs information that is only valid after a
   // successful compilation call.
   auto sl_compilation_result_str = sl_compiler.GetCompiler()->compile();
+
+  // GL vertex shaders get a y-flip epilogue; see
+  // https://github.com/flutter/flutter/issues/186554.
+  if (IsGLTargetPlatform(source_options.target_platform) &&
+      source_options.type == SourceType::kVertexShader) {
+    sl_compilation_result_str =
+        InjectYFlipForGLESVertexShader(std::move(sl_compilation_result_str));
+  }
+
   auto sl_compilation_result =
       CreateMappingWithString(sl_compilation_result_str);
 
@@ -469,17 +605,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     return;
   }
 
-  if (sl_compiler.GetType() == CompilerBackend::Type::kSkSL) {
-    // Validate compiled SkSL by trying to create a SkRuntimeEffect.
-    SkRuntimeEffect::Result result =
-        SkRuntimeEffect::MakeForShader(SkString(sl_compilation_result_str));
-    if (result.effect == nullptr) {
-      COMPILER_ERROR(error_stream_)
-          << "Compiled to invalid SkSL:\n"
-          << sl_compilation_result_str << "\nSkSL Error:\n"
-          << result.errorText.c_str();
-      return;
-    }
+  if (sl_compiler.GetType() == CompilerBackend::Type::kSkSL &&
+      !ValidateSkSLResult(sl_compilation_result_str).ok()) {
+    return;
   }
 
   reflector_ = std::make_unique<Reflector>(std::move(reflector_options),  //
@@ -495,6 +623,59 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   }
 
   is_valid_ = true;
+}
+
+absl::Status Compiler::ValidateSkSLResult(const std::string& sksl) {
+  // Validate compiled SkSL by trying to create a SkRuntimeEffect.
+  SkRuntimeEffect::Result result =
+      SkRuntimeEffect::MakeForShader(SkString(sksl));
+
+  if (result.effect != nullptr) {
+    return absl::OkStatus();
+  }
+
+  // SkSL is invalid. Output the SkSL and the error.
+
+  std::stringstream output;
+  bool is_truncated = false;
+
+  // Lambda to append text to the output stream, truncating if needed.
+  auto append_and_truncate = [&](const std::string& text) {
+    std::stringstream text_stream(text);
+    std::string line;
+    int lines_outputted = 0;
+    while (std::getline(text_stream, line)) {
+      output << "\n        " << line;
+      if (++lines_outputted == kVerboseErrorLineThreshold) {
+        break;
+      }
+    }
+    if (lines_outputted == kVerboseErrorLineThreshold) {
+      auto full_line_count = std::count(text.begin(), text.end(), '\n') + 1;
+      output << "\n... (truncated " << full_line_count - lines_outputted
+             << " lines)";
+      is_truncated = true;
+    }
+  };
+
+  output << "\nCompiled to invalid SkSL:";
+  append_and_truncate(sksl);
+  output << "\nSkSL Error:";
+  std::string error_text(result.errorText.c_str());
+  append_and_truncate(error_text);
+
+  // Output maybe-truncated SkSL and error to error_stream_.
+  COMPILER_ERROR(error_stream_) << output.str();
+
+  // If the output was truncated, output the full SkSL and error to
+  // verbose_error_stream_.
+  if (is_truncated) {
+    COMPILER_ERROR(verbose_error_stream_) << "\nCompiled to invalid SkSL:\n"
+                                          << sksl << "\nSkSL Error:\n"
+                                          << error_text;
+  }
+
+  return absl::InternalError("SkSL validation failed.");
 }
 
 Compiler::~Compiler() = default;
@@ -519,6 +700,10 @@ std::string Compiler::GetSourcePrefix() const {
 
 std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
+}
+
+std::string Compiler::GetVerboseErrorMessages() const {
+  return verbose_error_stream_.str();
 }
 
 const std::vector<std::string>& Compiler::GetIncludedFileNames() const {

@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -62,7 +62,6 @@ void main() {
   late FakeProcessManager processManager;
   late Artifacts artifacts;
   late BufferLogger logger;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
@@ -70,7 +69,6 @@ void main() {
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -137,6 +135,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
+        ),
+        FakeCommand(
           command: <String>[
             'codesign',
             '--force',
@@ -187,6 +188,9 @@ void main() {
         ),
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
         ),
         FakeCommand(
           command: <String>[
@@ -259,6 +263,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkBinary.path],
+        ),
+        FakeCommand(
           command: <String>[
             'codesign',
             '--force',
@@ -328,6 +335,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -420,6 +436,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -527,6 +552,15 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
             'codesign',
             '--force',
             '--sign',
@@ -603,6 +637,15 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
             'codesign',
             '--force',
             '--sign',
@@ -631,7 +674,6 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
       expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
-      expect(usage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
     },
     overrides: <Type, Generator>{
@@ -668,6 +710,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -1567,7 +1618,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> schemes;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    XcodeBasedProject xcodeProject, {
+    required Directory buildDirectory,
+    String? projectFilename,
+  }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 }

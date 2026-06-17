@@ -16,9 +16,10 @@ export const loadCanvasKit = (deps, config, browserEnvironment, canvasKitBaseUrl
       throw "Chromium CanvasKit variant specifically requested, but unsupported in this browser";
     }
     const useChromiumCanvasKit = supportsChromiumCanvasKit && (config.canvasKitVariant !== "full");
+    const useWebParagraphCanvasKit = useChromiumCanvasKit && config.preferWebParagraph && browserEnvironment.hasTextCluster;
     let baseUrl = canvasKitBaseUrl;
-    if (config.canvasKitVariant == "experimentalWebParagraph") {
-      baseUrl = resolveUrlWithSegments(baseUrl, "experimental_webparagraph");
+    if (useWebParagraphCanvasKit) {
+      baseUrl = resolveUrlWithSegments(baseUrl, "webparagraph");
     } else if (useChromiumCanvasKit) {
       baseUrl = resolveUrlWithSegments(baseUrl, "chromium");
     }
@@ -26,7 +27,13 @@ export const loadCanvasKit = (deps, config, browserEnvironment, canvasKitBaseUrl
     if (deps.flutterTT.policy) {
       canvasKitUrl = deps.flutterTT.policy.createScriptURL(canvasKitUrl);
     }
-    const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, "canvaskit.wasm"));
+    let filename = "canvaskit.wasm";
+    if (useWebParagraphCanvasKit) {
+      filename = "webparagraph/canvaskit.wasm";
+    } else if (useChromiumCanvasKit) {
+      filename = "chromium/canvaskit.wasm";
+    }
+    const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, "canvaskit.wasm"), filename);
     const canvasKitModule = await import(canvasKitUrl);
     window.flutterCanvasKit = await canvasKitModule.default({
       instantiateWasm: wasmInstantiator,

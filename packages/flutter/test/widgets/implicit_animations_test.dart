@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockOnEndFunction {
@@ -584,31 +584,6 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        child: TestAnimatedWidget(
-          callback: mockOnEndFunction.handler,
-          switchKey: switchKey,
-          state: _TestAnimatedThemeWidgetState(),
-        ),
-      ),
-    );
-
-    final Finder widgetFinder = find.byKey(switchKey);
-
-    await tester.tap(widgetFinder);
-
-    await tester.pump();
-    expect(mockOnEndFunction.called, 0);
-    await tester.pump(animationDuration);
-    expect(mockOnEndFunction.called, 0);
-    await tester.pump(additionalDelay);
-    expect(mockOnEndFunction.called, 1);
-
-    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
-  });
-
   testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
     final key = GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
     final curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
@@ -622,7 +597,7 @@ void main() {
             opacity: 1.0,
             duration: const Duration(seconds: 1),
             curve: c,
-            child: Container(color: Colors.green),
+            child: Container(color: const Color(0xFF00FF00)),
           ),
         ),
       ),
@@ -680,6 +655,21 @@ void main() {
     // TODO(nate-thegrate): add every class!
   });
 
+  testWidgets('AnimatedSlide does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSlide(offset: Offset(100, 0), duration: Duration(milliseconds: 300)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedSlide)), Size.zero);
+  });
+
   testWidgets('AnimatedScale does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -713,6 +703,112 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(AnimatedRotation)), Size.zero);
   });
+
+  testWidgets('AnimatedOpacity does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            child: AnimatedOpacity(opacity: 0.5, duration: Duration(milliseconds: 300)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedOpacity)), Size.zero);
+  });
+
+  testWidgets('AnimatedDefaultTextStyle does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedDefaultTextStyle(
+              style: TextStyle(fontStyle: FontStyle.italic),
+              duration: Duration(milliseconds: 300),
+              child: Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedDefaultTextStyle)), Size.zero);
+  });
+
+  testWidgets('AnimatedPhysicalModel does not crash at zero area', (WidgetTester tester) async {
+    const physicalModelColor = Color(0xFF009688);
+    const physicalModelShadowColor = Color(0xFF64FFDA);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedPhysicalModel(
+              color: physicalModelColor,
+              shadowColor: physicalModelShadowColor,
+              duration: Duration(milliseconds: 300),
+              child: Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedPhysicalModel)), Size.zero);
+  });
+
+  testWidgets('AnimatedFractionallySizedBox does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedFractionallySizedBox(
+              duration: Duration(milliseconds: 300),
+              widthFactor: 0.5,
+              heightFactor: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedFractionallySizedBox)), Size.zero);
+  });
+
+  testWidgets('SlideTransition does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    addTearDown(curvedAnimation.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset.zero,
+              end: const Offset(1.5, 0.0),
+            ).animate(curvedAnimation),
+            child: const Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SlideTransition)), Size.zero);
+  });
 }
 
 Future<void> tapTest2and3(
@@ -736,7 +832,7 @@ Future<void> tapTest2and3(
 Widget wrap({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: Material(child: Center(child: child)),
+    child: Center(child: child),
   );
 }
 
@@ -775,6 +871,17 @@ abstract class _TestAnimatedWidgetState extends RebuildCountingState<TestAnimate
     });
   }
 
+  Widget buildToggle() {
+    return GestureDetector(
+      key: widget.switchKey,
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        onChanged(!toggle);
+      },
+      child: const SizedBox(width: 48.0, height: 48.0),
+    );
+  }
+
   Widget getAnimatedWidget();
 
   @override
@@ -782,12 +889,7 @@ abstract class _TestAnimatedWidgetState extends RebuildCountingState<TestAnimate
     builds++;
     final Widget animatedWidget = getAnimatedWidget();
 
-    return Stack(
-      children: <Widget>[
-        animatedWidget,
-        Switch(key: widget.switchKey, value: toggle, onChanged: onChanged),
-      ],
-    );
+    return Stack(children: <Widget>[animatedWidget, buildToggle()]);
   }
 }
 
@@ -929,17 +1031,13 @@ class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
     builds++;
     final Widget animatedWidget = getAnimatedWidget();
 
-    return Material(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            animatedWidget,
-            SliverToBoxAdapter(
-              child: Switch(key: widget.switchKey, value: toggle, onChanged: onChanged),
-            ),
-          ],
-        ),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          animatedWidget,
+          SliverToBoxAdapter(child: buildToggle()),
+        ],
       ),
     );
   }
@@ -965,8 +1063,8 @@ class _TestAnimatedPhysicalModelWidgetState extends _TestAnimatedWidgetState {
     return AnimatedPhysicalModel(
       duration: duration,
       onEnd: widget.callback,
-      color: toggle ? Colors.red : Colors.green,
-      shadowColor: Colors.blue,
+      color: toggle ? const Color(0xFFFF0000) : const Color(0xFF00FF00),
+      shadowColor: const Color(0xFF0000FF),
       child: child,
     );
   }
@@ -983,18 +1081,6 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
       builder: (BuildContext context, double? size, Widget? child) {
         return SizedBox(width: size, height: size, child: child);
       },
-    );
-  }
-}
-
-class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
-  @override
-  Widget getAnimatedWidget() {
-    return AnimatedTheme(
-      data: toggle ? ThemeData.dark() : ThemeData(),
-      duration: duration,
-      onEnd: widget.callback,
-      child: child,
     );
   }
 }

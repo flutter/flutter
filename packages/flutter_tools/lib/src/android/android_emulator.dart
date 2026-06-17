@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -68,38 +69,59 @@ class AndroidEmulators extends EmulatorDiscovery {
     return emulators;
   }
 
+  static final RegExp _emulatorIdRegex = RegExp(r'^[A-Za-z0-9_.-]+$');
+
   /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
   /// of emulators by reading information from the relevant ini files.
   void _extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
-    for (final String id in text.trim().split('\n').where((String l) => l != '')) {
+    final Iterable<String> ids = text
+        .split('\n')
+        .map((String l) => l.trim())
+        // Strip blank lines and error messages that can appear in the output.
+        .where((String l) => l.isNotEmpty && _emulatorIdRegex.hasMatch(l));
+    for (final id in ids) {
       emulators.add(_loadEmulatorInfo(id));
     }
   }
 
   AndroidEmulator _loadEmulatorInfo(String id) {
-    id = id.trim();
     final String? avdPath = _androidSdk?.getAvdPath();
-    final androidEmulatorWithoutProperties = AndroidEmulator(
-      id,
-      processManager: _processManager,
-      logger: _logger,
-      androidSdk: _androidSdk,
-    );
     if (avdPath == null) {
-      return androidEmulatorWithoutProperties;
+      return AndroidEmulator(
+        id,
+        processManager: _processManager,
+        logger: _logger,
+        androidSdk: _androidSdk,
+      );
     }
     final File iniFile = _fileSystem.file(_fileSystem.path.join(avdPath, '$id.ini'));
     if (!iniFile.existsSync()) {
-      return androidEmulatorWithoutProperties;
+      return AndroidEmulator(
+        id,
+        processManager: _processManager,
+        logger: _logger,
+        androidSdk: _androidSdk,
+      );
     }
     final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
     final String? path = ini['path'];
     if (path == null) {
-      return androidEmulatorWithoutProperties;
+      return AndroidEmulator(
+        id,
+        processManager: _processManager,
+        logger: _logger,
+        androidSdk: _androidSdk,
+      );
     }
     final File configFile = _fileSystem.file(_fileSystem.path.join(path, 'config.ini'));
     if (!configFile.existsSync()) {
-      return androidEmulatorWithoutProperties;
+      return AndroidEmulator(
+        id,
+        processManager: _processManager,
+        logger: _logger,
+        androidSdk: _androidSdk,
+        avdDirectory: path,
+      );
     }
     final Map<String, String> properties = parseIniLines(configFile.readAsLinesSync());
     return AndroidEmulator(
@@ -108,6 +130,7 @@ class AndroidEmulators extends EmulatorDiscovery {
       processManager: _processManager,
       logger: _logger,
       androidSdk: _androidSdk,
+      avdDirectory: path,
     );
   }
 }
@@ -119,6 +142,7 @@ class AndroidEmulator extends Emulator {
     required Logger logger,
     AndroidSdk? androidSdk,
     required ProcessManager processManager,
+    this.avdDirectory,
   }) : _properties = properties,
        _logger = logger,
        _androidSdk = androidSdk,
@@ -129,6 +153,7 @@ class AndroidEmulator extends Emulator {
   final Logger _logger;
   final ProcessUtils _processUtils;
   final AndroidSdk? _androidSdk;
+  final String? avdDirectory;
 
   // Android Studio uses the ID with underscores replaced with spaces
   // for the name if displayname is not set so we do the same.
@@ -155,15 +180,43 @@ class AndroidEmulator extends Emulator {
     final command = <String>[emulatorPath, '-avd', id, if (coldBoot) '-no-snapshot-load'];
     final Process process = await _processUtils.start(command);
 
+    final completer = Completer<void>();
+    var hasAvdLockError = false;
+
     // Record output from the emulator process.
     final stdoutList = <String>[];
     final stderrList = <String>[];
     final StreamSubscription<String> stdoutSubscription = process.stdout
         .transform(utf8LineDecoder)
         .listen(stdoutList.add);
-    final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform(utf8LineDecoder)
-        .listen(stderrList.add);
+
+    late final StreamSubscription<String> stderrSubscription;
+    stderrSubscription = process.stderr.transform(utf8LineDecoder).listen((String line) {
+      stderrList.add(line);
+      if (line.contains(
+        'Running multiple emulators with the same AVD is an experimental feature',
+      )) {
+        final explanation =
+            'An emulator with the name "$id" is already running or has active lock files.\n'
+            'This usually happens because another instance of this emulator is already running, '
+            'or a previous instance crashed leaving lock files behind.\n'
+            'To resolve this, please close any other running instances of this emulator.\n'
+            'If no other instances are running, you can manually delete the lock files (*.lock) ';
+        final message = avdDirectory != null
+            ? '$explanation\nin the AVD directory located at:\n  $avdDirectory'
+            : '$explanation\nin your AVD directory.';
+
+        try {
+          hasAvdLockError = true;
+          throwToolExit(message);
+        } on Object catch (error, stackTrace) {
+          if (!completer.isCompleted) {
+            completer.completeError(error, stackTrace);
+          }
+        }
+      }
+    });
+
     final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),
       stderrSubscription.asFuture<void>(),
@@ -176,12 +229,21 @@ class AndroidEmulator extends Emulator {
     var earlyFailure = true;
     unawaited(
       process.exitCode.then((int status) async {
+        if (hasAvdLockError) {
+          return;
+        }
         if (status == 0) {
           _logger.printTrace('The Android emulator exited successfully');
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
           return;
         }
         // Make sure the process' stdout and stderr are drained.
         await stdioFuture;
+        if (hasAvdLockError) {
+          return;
+        }
         unawaited(stdoutSubscription.cancel());
         unawaited(stderrSubscription.cancel());
         if (stdoutList.isNotEmpty) {
@@ -190,6 +252,9 @@ class AndroidEmulator extends Emulator {
         }
         if (!earlyFailure && stderrList.isEmpty) {
           _logger.printStatus('The Android emulator exited with code $status');
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
           return;
         }
         final when = earlyFailure ? 'during startup' : 'after startup';
@@ -197,12 +262,31 @@ class AndroidEmulator extends Emulator {
         _logger.printError('Android emulator stderr:');
         stderrList.forEach(_logger.printError);
         _logger.printError('Address these issues and try again.');
+
+        if (earlyFailure && !completer.isCompleted) {
+          final String stderrString = stderrList.join('\n');
+          try {
+            throwToolExit(
+              'The Android emulator exited with code $status during startup.\n$stderrString',
+            );
+          } catch (error, stackTrace) {
+            completer.completeError(error, stackTrace);
+          }
+        }
       }),
     );
 
     // Wait a few seconds for the emulator to start.
-    await Future<void>.delayed(startupDuration ?? const Duration(seconds: 3));
-    earlyFailure = false;
+    unawaited(
+      Future<void>.delayed(startupDuration ?? const Duration(seconds: 3)).then((_) {
+        earlyFailure = false;
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }),
+    );
+
+    await completer.future;
     return;
   }
 }

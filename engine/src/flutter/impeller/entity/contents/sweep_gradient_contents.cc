@@ -14,9 +14,14 @@
 
 namespace impeller {
 
-SweepGradientContents::SweepGradientContents() = default;
+SweepGradientContents::SweepGradientContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 SweepGradientContents::~SweepGradientContents() = default;
+
+const Geometry* SweepGradientContents::GetGeometry() const {
+  return geometry_;
+}
 
 void SweepGradientContents::SetCenterAndAngles(Point center,
                                                Degrees start_angle,
@@ -196,8 +201,6 @@ bool SweepGradientContents::RenderTexture(const ContentContext& renderer,
         frag_info.center = center_;
         frag_info.bias = bias_;
         frag_info.scale = scale_;
-        frag_info.texture_sampler_y_coord_scale =
-            gradient_texture->GetYCoordScale();
         frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
         frag_info.decal_border_color = decal_border_color_;
         frag_info.alpha =

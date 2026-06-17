@@ -96,7 +96,7 @@ class NestedScrollViewExample extends StatelessWidget {
                               ),
                         ),
                         SliverPadding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const .all(8.0),
                           // In this example, the inner scroll view has
                           // fixed-height list items, hence the use of
                           // SliverFixedExtentList. However, one could use any

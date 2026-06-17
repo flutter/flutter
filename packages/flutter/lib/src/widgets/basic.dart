@@ -22,8 +22,10 @@ import 'package:flutter/services.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'indexed_stack.dart';
 import 'localizations.dart';
-import 'visibility.dart';
+import 'media_query.dart';
+import 'view.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -2678,14 +2680,10 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 
 /// A box with a specified size.
 ///
-/// If given a child, this widget forces it to have a specific width and/or height.
-/// These values will be ignored if this widget's parent does not permit them.
-/// For example, this happens if the parent is the screen (forces the child to
-/// be the same size as the parent), or another [SizedBox] (forces its child to
-/// have a specific width and/or height). This can be remedied by wrapping the
-/// child [SizedBox] in a widget that does permit it to be any size up to the
-/// size of the parent, such as [Center] or [Align].
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
+/// If given a child, this widget will try to size its child as close to the
+/// specified [height] and [width] as possible given the parent's constraints.
 /// If either the width or height is null, this widget will try to size itself to
 /// match the child's size in that dimension. If the child's size depends on the
 /// size of its parent, the height and width must be provided.
@@ -2697,8 +2695,6 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// The [SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.infinity].
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
 /// {@tool snippet}
 ///
@@ -2713,6 +2709,36 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// ## Troubleshooting
+///
+/// ### Why is my [SizedBox] ignored?
+///
+/// In Flutter's layout protocol constraints go down, and sizes go up.
+/// A widget must respect the constraints passed by its parent. This can cause a
+/// [SizedBox]'s values to be ignored:
+///
+/// {@tool snippet}
+///
+/// This snippet makes the [ColoredBox] size 200x200. The 100x100 size is
+/// ignored because it is incompatible with its parent constraints of exactly
+/// 200x200:
+///
+/// ```dart
+/// const SizedBox(
+///   width: 200.0,
+///   height: 200.0,
+///   child: SizedBox( // Ignored!
+///     width: 100.0,
+///     height: 100.0,
+///     child: ColoredBox(color: Colors.green),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// This can be fixed by wrapping the child [SizedBox] in a widget that lets
+/// it be any size up to the size of the parent, such as [Center] or [Align].
 ///
 /// See also:
 ///
@@ -4224,6 +4250,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
+  /// Setting [SemanticsProperties.identifier] also implicitly introduces a new
+  /// node, even if [container] is false.
+  ///
   /// Whether descendants of this widget can add their semantic information to the
   /// [SemanticsNode] introduced by this configuration is controlled by
   /// [explicitChildNodes].
@@ -4758,6 +4787,10 @@ class Stack extends MultiChildRenderObjectWidget {
   /// To clip children whose geometry does not overflow the stack, consider
   /// using a [ClipRect] widget.
   ///
+  /// Even when this is set to [Clip.none], the stack itself does not extend its
+  /// hit-test region: pointer events that fall outside the stack's own bounds
+  /// will not reach a child even if that child is painted in that area.
+  ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
@@ -4806,165 +4839,6 @@ class Stack extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<StackFit>('fit', fit));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
-  }
-}
-
-/// A [Stack] that shows a single child from a list of children.
-///
-/// The displayed child is the one with the given [index]. The stack is
-/// always as big as the largest child.
-///
-/// If value is null, then nothing is displayed.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=_O0PPD1Xfbk}
-///
-/// {@tool dartpad}
-/// This example shows a [IndexedStack] widget being used to lay out one card
-/// at a time from a series of cards, each keeping their respective states.
-///
-/// ** See code in examples/api/lib/widgets/basic/indexed_stack.0.dart **
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [Stack], for more details about stacks.
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class IndexedStack extends StatelessWidget {
-  /// Creates a [Stack] widget that paints a single child.
-  const IndexedStack({
-    super.key,
-    this.alignment = AlignmentDirectional.topStart,
-    this.textDirection,
-    this.clipBehavior = Clip.hardEdge,
-    this.sizing = StackFit.loose,
-    this.index = 0,
-    this.children = const <Widget>[],
-  });
-
-  /// How to align the non-positioned and partially-positioned children in the
-  /// stack.
-  ///
-  /// Defaults to [AlignmentDirectional.topStart].
-  ///
-  /// See [Stack.alignment] for more information.
-  final AlignmentGeometry alignment;
-
-  /// The text direction with which to resolve [alignment].
-  ///
-  /// Defaults to the ambient [Directionality].
-  final TextDirection? textDirection;
-
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.hardEdge].
-  final Clip clipBehavior;
-
-  /// How to size the non-positioned children in the stack.
-  ///
-  /// Defaults to [StackFit.loose].
-  ///
-  /// See [Stack.fit] for more information.
-  final StackFit sizing;
-
-  /// The index of the child to show.
-  ///
-  /// If this is null, none of the children will be shown.
-  final int? index;
-
-  /// The child widgets of the stack.
-  ///
-  /// Only the child at index [index] will be shown.
-  ///
-  /// See [Stack.children] for more information.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final wrappedChildren = List<Widget>.generate(children.length, (int i) {
-      return Visibility(
-        visible: i == index,
-        maintainInteractivity: true,
-        maintainSize: true,
-        maintainState: true,
-        maintainAnimation: true,
-        child: children[i],
-      );
-    });
-    return _RawIndexedStack(
-      alignment: alignment,
-      textDirection: textDirection,
-      clipBehavior: clipBehavior,
-      sizing: sizing,
-      index: index,
-      children: wrappedChildren,
-    );
-  }
-}
-
-/// The render object widget that backs [IndexedStack].
-class _RawIndexedStack extends Stack {
-  /// Creates a [Stack] widget that paints a single child.
-  const _RawIndexedStack({
-    super.alignment,
-    super.textDirection,
-    super.clipBehavior,
-    StackFit sizing = StackFit.loose,
-    this.index = 0,
-    super.children,
-  }) : assert(
-         index == null ||
-             (index == 0 && children.length == 0) ||
-             (index >= 0 && index < children.length),
-         'The index must be null or within the range of children.',
-       ),
-       super(fit: sizing);
-
-  /// The index of the child to show.
-  final int? index;
-
-  @override
-  RenderIndexedStack createRenderObject(BuildContext context) {
-    assert(_debugCheckHasDirectionality(context));
-    return RenderIndexedStack(
-      index: index,
-      fit: fit,
-      clipBehavior: clipBehavior,
-      alignment: alignment,
-      textDirection: textDirection ?? Directionality.maybeOf(context),
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
-    assert(_debugCheckHasDirectionality(context));
-    renderObject
-      ..index = index
-      ..fit = fit
-      ..clipBehavior = clipBehavior
-      ..alignment = alignment
-      ..textDirection = textDirection ?? Directionality.maybeOf(context);
-  }
-
-  @override
-  MultiChildRenderObjectElement createElement() {
-    return _IndexedStackElement(this);
-  }
-}
-
-class _IndexedStackElement extends MultiChildRenderObjectElement {
-  _IndexedStackElement(_RawIndexedStack super.widget);
-
-  @override
-  _RawIndexedStack get widget => super.widget as _RawIndexedStack;
-
-  @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    final int? index = widget.index;
-    // If the index is null, no child is onstage. Otherwise, only the child at
-    // the selected index is.
-    if (index != null && children.isNotEmpty) {
-      visitor(children.elementAt(index));
-    }
   }
 }
 
@@ -6561,9 +6435,14 @@ class Flow extends MultiChildRenderObjectWidget {
 /// subtree of a [SelectionArea] or [SelectableRegion] and a
 /// [SelectionRegistrar] needs to be assigned to the
 /// [RichText.selectionRegistrar]. One can use
-/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a
-/// context. This enables users to select the text in [RichText]s with mice or
-/// touch events.
+/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a context
+/// that is below the [SelectionArea] or [SelectableRegion] in the widget tree.
+/// This enables users to select the text in [RichText]s with mice or touch
+/// events.
+///
+/// If the same build method creates both the [SelectionArea] and the
+/// [RichText], use a [Builder] so that [SelectionContainer.maybeOf] is called
+/// with a [BuildContext] below the [SelectionArea] in the widget tree.
 ///
 /// The [selectionColor] also needs to be set if the selection is enabled to
 /// draw the selection highlights.
@@ -6576,10 +6455,16 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
 ///
 /// ```dart
-/// RichText(
-///   text: const TextSpan(text: 'Hello'),
-///   selectionRegistrar: SelectionContainer.maybeOf(context),
-///   selectionColor: const Color(0xAF6694e8),
+/// SelectionArea(
+///   child: Builder(
+///     builder: (BuildContext context) {
+///       return RichText(
+///         text: const TextSpan(text: 'Hello'),
+///         selectionRegistrar: SelectionContainer.maybeOf(context),
+///         selectionColor: const Color(0xAF6694e8),
+///       );
+///     },
+///   ),
 /// )
 /// ```
 /// {@end-tool}
@@ -6731,6 +6616,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// widgets.
   final Color? selectionColor;
 
+  double _getDevicePixelRatio(BuildContext context) =>
+      MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6748,6 +6636,7 @@ class RichText extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
+      devicePixelRatio: _getDevicePixelRatio(context),
     );
   }
 
@@ -6767,7 +6656,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textHeightBehavior = textHeightBehavior
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
-      ..selectionColor = selectionColor;
+      ..selectionColor = selectionColor
+      ..devicePixelRatio = _getDevicePixelRatio(context);
   }
 
   @override

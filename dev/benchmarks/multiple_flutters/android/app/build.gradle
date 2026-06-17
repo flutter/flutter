@@ -4,7 +4,6 @@
 
 plugins {
     id 'com.android.application'
-    id 'kotlin-android'
 }
 
 android {
@@ -15,15 +14,12 @@ android {
 
     namespace = "dev.flutter.multipleflutters"
     compileSdk = 36
+    ndkVersion = "28.2.13676358" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
 
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -42,6 +38,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = debug.signingConfig
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

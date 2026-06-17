@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
@@ -90,12 +91,8 @@ class SkwasmLineMetrics implements ui.LineMetrics {
 }
 
 class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Paragraph {
-  SkwasmParagraph(ParagraphHandle handle) : super(handle, _registry);
-
-  static final SkwasmFinalizationRegistry<RawParagraph> _registry =
-      SkwasmFinalizationRegistry<RawParagraph>(
-        (ParagraphHandle handle) => paragraphDispose(handle),
-      );
+  SkwasmParagraph(ParagraphHandle handle)
+    : super(handle, (ParagraphHandle h) => paragraphDispose(h), 'Paragraph');
 
   bool _hasCheckedForMissingCodePoints = false;
 
@@ -147,8 +144,8 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
             missingCodePointCount,
           );
           assert(missingCodePointCount == returnedCodePointCount);
-          renderer.fontCollection.fontFallbackManager!.addMissingCodePoints(
-            List<int>.generate(missingCodePointCount, (int index) => codePointBuffer[index]),
+          FallbackFontService.instance.addMissingCodePoints(
+            codePointBuffer.toUint32List(missingCodePointCount),
           );
         });
       }
@@ -311,14 +308,10 @@ void withScopedFontList(
 }
 
 class SkwasmNativeTextStyle extends SkwasmObjectWrapper<RawTextStyle> {
-  SkwasmNativeTextStyle(TextStyleHandle handle) : super(handle, _registry);
+  SkwasmNativeTextStyle(TextStyleHandle handle)
+    : super(handle, (TextStyleHandle h) => textStyleDispose(h), 'TextStyle');
 
   factory SkwasmNativeTextStyle.defaultTextStyle() => SkwasmNativeTextStyle(textStyleCreate());
-
-  static final SkwasmFinalizationRegistry<RawTextStyle> _registry =
-      SkwasmFinalizationRegistry<RawTextStyle>(
-        (TextStyleHandle handle) => textStyleDispose(handle),
-      );
 
   SkwasmNativeTextStyle copy() {
     return SkwasmNativeTextStyle(textStyleCopy(handle));
@@ -929,14 +922,9 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     ParagraphBuilderHandle handle,
     this.style,
     SkwasmNativeTextStyle baseTextStyle,
-  ) : super(handle, _registry) {
+  ) : super(handle, (ParagraphBuilderHandle h) => paragraphBuilderDispose(h), 'ParagraphBuilder') {
     textStyleStack.add(baseTextStyle);
   }
-
-  static final SkwasmFinalizationRegistry<RawParagraphBuilder> _registry =
-      SkwasmFinalizationRegistry<RawParagraphBuilder>(
-        (ParagraphBuilderHandle handle) => paragraphBuilderDispose(handle),
-      );
 
   final SkwasmParagraphStyle style;
   final List<SkwasmNativeTextStyle> textStyleStack = <SkwasmNativeTextStyle>[];
@@ -991,8 +979,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       text = '';
       jsText = ''.toJS;
     } else {
-      final codeUnitList = List<int>.generate(outSize.value, (int index) => utf8Data[index]);
-      text = utf8.decode(codeUnitList);
+      text = utf8.decode(utf8Data.toUint8List(outSize.value));
       jsText = _utf8Decoder.decode(
         // In an ideal world we would just use a subview of wasm memory rather
         // than a slice, but the TextDecoder API doesn't work on shared buffer
@@ -1102,5 +1089,31 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     textStyle.applyToNative(nativeStyle);
     textStyleStack.add(nativeStyle);
     paragraphBuilderPushStyle(handle, nativeStyle.handle);
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i];
+    }
+    return list;
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint32> {
+  Uint32List toUint32List(int length) {
+    final list = Uint32List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i];
+    }
+    return list;
   }
 }

@@ -59,15 +59,14 @@ class _AnimatedFractionallySizedBoxExampleState
         });
       },
       child: Center(
-        child: SizedBox(
-          width: 200,
-          height: 200,
+        child: SizedBox.square(
+          dimension: 200,
           child: ColoredBox(
             color: Colors.red,
             child: AnimatedFractionallySizedBox(
               widthFactor: selected ? 0.25 : 0.75,
               heightFactor: selected ? 0.75 : 0.25,
-              alignment: selected ? Alignment.topLeft : Alignment.bottomRight,
+              alignment: selected ? .topLeft : .bottomRight,
               duration: widget.duration,
               curve: widget.curve,
               child: const ColoredBox(

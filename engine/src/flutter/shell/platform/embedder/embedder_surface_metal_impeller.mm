@@ -28,7 +28,8 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
     GPUMTLDeviceHandle device,
     GPUMTLCommandQueueHandle command_queue,
     MetalDispatchTable metal_dispatch_table,
-    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
+    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+    impeller::Flags impeller_flags)
     : GPUSurfaceMetalDelegate(MTLRenderTargetType::kMTLTexture),
       metal_dispatch_table_(std::move(metal_dispatch_table)),
       external_view_embedder_(std::move(external_view_embedder)) {
@@ -41,14 +42,18 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
                                              impeller_framebuffer_blend_shaders_length),
   };
   context_ = impeller::ContextMTL::Create(
-      impeller::Flags{},
+      impeller_flags,
       (__bridge id<MTLDevice>)device,               // device
       (__bridge id<MTLCommandQueue>)command_queue,  // command_queue
       shader_mappings,                              // shader_libraries_data
       std::make_shared<fml::SyncSwitch>(false),     // is_gpu_disabled_sync_switch
       "Impeller Library"                            // library_label
   );
-  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Metal).";
+  if (impeller_flags.use_sdfs) {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (MetalSDF).";
+  } else {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Metal).";
+  }
 
   valid_ = !!context_;
 }

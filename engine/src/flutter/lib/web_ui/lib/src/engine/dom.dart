@@ -207,6 +207,51 @@ external double parseFloatImpl(String value);
 @JS('window')
 external DomWindow get domWindow;
 
+/// Cached result of iframe detection for [isEmbeddedInIframe].
+bool? _cachedIsEmbeddedInIframe;
+
+/// Resets the iframe detection cache. Used for testing.
+@visibleForTesting
+void debugResetIframeDetectionCache() {
+  _cachedIsEmbeddedInIframe = null;
+}
+
+/// Overrides iframe detection for tests. Pass `null` to restore auto-detection.
+@visibleForTesting
+void debugSetIframeEmbeddingForTests(bool? isInIframe) {
+  _cachedIsEmbeddedInIframe = isInIframe;
+}
+
+/// Returns true if the current window is inside an iframe.
+///
+/// This is a shared utility used by multiple engine components that need
+/// to detect iframe embedding (e.g., pointer binding, text editing).
+///
+/// The result is cached since iframe status doesn't change during the app's
+/// lifetime. Handles cross-origin iframes gracefully by assuming embedded
+/// context when security exceptions occur.
+bool isEmbeddedInIframe() {
+  if (_cachedIsEmbeddedInIframe != null) {
+    return _cachedIsEmbeddedInIframe!;
+  }
+
+  try {
+    final DomWindow? parent = domWindow.parent;
+    if (parent == null) {
+      _cachedIsEmbeddedInIframe = false;
+      return false;
+    }
+    // If window.parent is the same object as window, we're not in an iframe.
+    // If they're different, we're in an iframe.
+    _cachedIsEmbeddedInIframe = !identical(parent, domWindow);
+    return _cachedIsEmbeddedInIframe!;
+  } catch (e) {
+    // Cross-origin iframe - assume embedded
+    _cachedIsEmbeddedInIframe = true;
+    return true;
+  }
+}
+
 @JS('Intl')
 external DomIntl get domIntl;
 
@@ -482,6 +527,25 @@ extension type DomElement._(JSObject _) implements DomNode {
   external double scrollTop;
   external double scrollLeft;
   external DomTokenList get classList;
+
+  /// Scrolls the element into the visible area of the browser window.
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+  @JS('scrollIntoView')
+  external void _scrollIntoView([JSAny? options]);
+
+  /// Scrolls the element into view with optional configuration.
+  ///
+  /// If [options] is null, scrolls with default behavior.
+  /// Common options: {'block': 'center', 'inline': 'nearest', 'behavior': 'smooth'}
+  void scrollIntoView([Map<String, dynamic>? options]) {
+    if (options == null) {
+      _scrollIntoView();
+    } else {
+      _scrollIntoView(options.toJSAnyDeep);
+    }
+  }
+
   external String className;
 
   external void blur();
@@ -808,8 +872,8 @@ extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntr
 
 @JS('HTMLCanvasElement')
 extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
-  external double? width;
-  external double? height;
+  external num? width;
+  external num? height;
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
@@ -905,6 +969,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external String textRendering;
   external String fontKerning;
   external String fontVariantCaps;
+  external String lang;
   external set lineWidth(num? value);
 
   @JS('setLineDash')
@@ -997,6 +1062,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   }
 
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void putImageData(DomImageData imagedata, int dx, int dy);
   external void lineTo(num x, num y);
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
@@ -1506,16 +1572,16 @@ extension type DomTextMetrics._(JSObject _) implements JSObject {
   external JSArray<JSAny?> _getTextClusters();
   List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
 
-  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+  external DomRectReadOnly getActualBoundingBox(int start, int end);
 
   external double get fontBoundingBoxAscent;
 
   external double get fontBoundingBoxDescent;
 
   @JS('getSelectionRects')
-  external JSArray<JSAny> _getSelectionRects(int begin, int end);
-  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
-      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
+  external JSArray<JSAny> _getSelectionRects(int start, int end);
+  List<DomRectReadOnly> getSelectionRects(int start, int end) =>
+      _getSelectionRects(start, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -2636,6 +2702,11 @@ extension JSArrayExtension on JSArray<JSAny?> {
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
 }
+
+@JS('window.TextCluster')
+external JSAny? get _textClusterConstructor;
+
+bool browserSupportsTextCluster = _textClusterConstructor != null;
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {

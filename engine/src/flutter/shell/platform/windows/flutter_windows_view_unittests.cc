@@ -992,7 +992,7 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
   EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(true));
 
   EXPECT_CALL(*egl_manager.get(),
-              CreateWindowSurface(_, /*width=*/500, /*height=*/500))
+              CreateWindowSurface(_, /*width=*/500, /*height=*/300))
       .WillOnce(Return(std::move((resized_surface))));
   EXPECT_CALL(*resized_surface_ptr, MakeCurrent).WillOnce(Return(true));
   EXPECT_CALL(*resized_surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
@@ -1028,7 +1028,7 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
 
   // Start the window resize. This sends the new window metrics
   // and then blocks until another thread completes the window resize.
-  EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
+  EXPECT_TRUE(view->OnWindowSizeChanged(500, 300));
   frame_thread.join();
 }
 
@@ -1800,5 +1800,102 @@ TEST(FlutterWindowsViewTest, SizeChangeTriggersMetricsEventWhichHasDisplayId) {
   view.OnWindowSizeChanged(100, 100);
   EXPECT_TRUE(received_metrics);
 }
+
+// Verify that the first frame callback fires after OnFramePresented (OpenGL
+// rendering path).
+TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnFramePresented) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
+
+  bool callback_fired = false;
+  view->SetFirstFrameCallback([&callback_fired]() { callback_fired = true; });
+
+  // Simulate the raster thread presenting a frame.
+  view->OnFramePresented();
+
+  // The callback is posted to the platform thread's task runner.
+  // Process pending tasks to execute it.
+  engine->task_runner()->ProcessTasks();
+
+  EXPECT_TRUE(callback_fired);
+}
+
+// Verify that the first frame callback fires after PresentSoftwareBitmap
+// (software rendering path).
+TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnSoftwareBitmapPresent) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  EXPECT_CALL(*window_binding_handler, OnBitmapSurfaceUpdated)
+      .WillOnce(Return(true));
+
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::move(window_binding_handler),
+                         /*is_sized_to_content=*/false, BoxConstraints());
+
+  bool callback_fired = false;
+  view->SetFirstFrameCallback([&callback_fired]() { callback_fired = true; });
+
+  // Simulate software rendering presenting a bitmap.
+  const uint32_t pixel = 0;
+  view->PresentSoftwareBitmap(&pixel, sizeof(pixel), 1);
+
+  // Process pending tasks.
+  engine->task_runner()->ProcessTasks();
+
+  EXPECT_TRUE(callback_fired);
+}
+
+// Verify that the first frame callback fires only once, even if multiple
+// frames are presented.
+TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnlyOnce) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
+
+  int callback_count = 0;
+  view->SetFirstFrameCallback([&callback_count]() { callback_count++; });
+
+  // Present two frames.
+  view->OnFramePresented();
+  view->OnFramePresented();
+
+  // Process all pending tasks.
+  engine->task_runner()->ProcessTasks();
+
+  EXPECT_EQ(callback_count, 1);
+}
+
+// Verify that the first frame callback does not fire if PresentSoftwareBitmap
+// fails.
+TEST(FlutterWindowsViewTest, FirstFrameCallbackSkippedOnFailedSoftwarePresent) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  EXPECT_CALL(*window_binding_handler, OnBitmapSurfaceUpdated)
+      .WillOnce(Return(false));
+
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::move(window_binding_handler),
+                         /*is_sized_to_content=*/false, BoxConstraints());
+
+  bool callback_fired = false;
+  view->SetFirstFrameCallback([&callback_fired]() { callback_fired = true; });
+
+  const uint32_t pixel = 0;
+  view->PresentSoftwareBitmap(&pixel, sizeof(pixel), 1);
+
+  engine->task_runner()->ProcessTasks();
+
+  EXPECT_FALSE(callback_fired);
+}
+
 }  // namespace testing
 }  // namespace flutter

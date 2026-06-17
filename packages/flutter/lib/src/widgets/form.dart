@@ -243,6 +243,9 @@ class FormState extends State<Form> {
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
+  /// The [FormFieldState] objects that are currently registered with this [Form].
+  Iterable<FormFieldState<dynamic>> get fields => _fields;
+
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
@@ -405,12 +408,23 @@ class FormState extends State<Form> {
         unawaited(
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-            SemanticsService.sendAnnouncement(
-              view,
-              errorMessage,
-              directionality,
-              assertiveness: Assertiveness.assertive,
-            );
+            try {
+              await SemanticsService.sendAnnouncement(
+                view,
+                errorMessage,
+                directionality,
+                assertiveness: Assertiveness.assertive,
+              );
+            } catch (exception, stack) {
+              FlutterError.reportError(
+                FlutterErrorDetails(
+                  exception: exception,
+                  stack: stack,
+                  library: 'widgets library',
+                  context: ErrorDescription('while sending semantics announcement'),
+                ),
+              );
+            }
           }),
         );
       } else {
@@ -419,7 +433,16 @@ class FormState extends State<Form> {
           errorMessage,
           directionality,
           assertiveness: Assertiveness.assertive,
-        );
+        ).catchError((Object exception, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'widgets library',
+              context: ErrorDescription('while sending semantics announcement'),
+            ),
+          );
+        });
       }
     }
 
@@ -878,7 +901,7 @@ enum AutovalidateMode {
   onUnfocus,
 
   /// Used to auto-validate [Form] and [FormField] after each user
-  /// interaction, only if the the field already has an error.
+  /// interaction, only if the field already has an error.
   ///
   /// This is useful for reducing unnecessary validation calls while
   /// still ensuring errors are re-checked when the user attempts to fix them.

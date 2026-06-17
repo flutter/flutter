@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 #include <chrono>
+#include <cmath>
 
 #include "flutter/common/constants.h"
 #include "flutter/fml/make_copyable.h"
@@ -18,6 +19,11 @@
 namespace flutter {
 
 namespace {
+// The windows API sends pressure as a normalized value between 0 and 1024
+// See
+// https://learn.microsoft.com/windows/win32/api/winuser/ns-winuser-pointer_pen_info
+static const int kMaxPenPressure = 1024;
+
 // The maximum duration to block the Windows event loop while waiting
 // for a window resize operation to complete.
 constexpr std::chrono::milliseconds kWindowResizeTimeout{100};
@@ -146,7 +152,7 @@ bool FlutterWindowsView::OnEmptyFrameGenerated() {
     return true;
   }
 
-  if (!ResizeRenderSurface(resize_target_height_, resize_target_width_)) {
+  if (!ResizeRenderSurface(resize_target_width_, resize_target_height_)) {
     return false;
   }
 
@@ -202,6 +208,9 @@ void FlutterWindowsView::ForceRedraw() {
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   if (IsSizedToContent()) {
     // No resize synchronization needed for views sized to content.
+    // Still send metrics so the engine renders at the correct viewport size
+    // (e.g. after the child window is resized to the host's client area).
+    SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
   }
 
@@ -258,33 +267,43 @@ void FlutterWindowsView::OnPointerMove(double x,
                                        double y,
                                        FlutterPointerDeviceKind device_kind,
                                        int32_t device_id,
+                                       uint64_t buttons,
+                                       uint32_t rotation,
+                                       uint32_t pressure,
                                        int modifiers_state) {
   engine_->keyboard_key_handler()->SyncModifiersIfNeeded(modifiers_state);
-  SendPointerMove(x, y, GetOrCreatePointerState(device_kind, device_id));
+  auto state = GetOrCreatePointerState(device_kind, device_id);
+  state->buttons = buttons;
+  state->rotation = rotation;
+  state->pressure = pressure;
+  SendPointerMove(x, y, state);
 }
 
-void FlutterWindowsView::OnPointerDown(
-    double x,
-    double y,
-    FlutterPointerDeviceKind device_kind,
-    int32_t device_id,
-    FlutterPointerMouseButtons flutter_button) {
-  if (flutter_button != 0) {
+void FlutterWindowsView::OnPointerDown(double x,
+                                       double y,
+                                       FlutterPointerDeviceKind device_kind,
+                                       int32_t device_id,
+                                       uint64_t buttons,
+                                       uint32_t rotation,
+                                       uint32_t pressure) {
+  if (buttons != 0) {
     auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons |= flutter_button;
+    state->buttons |= buttons;
+    state->rotation = rotation;
+    state->pressure = pressure;
     SendPointerDown(x, y, state);
   }
 }
 
-void FlutterWindowsView::OnPointerUp(
-    double x,
-    double y,
-    FlutterPointerDeviceKind device_kind,
-    int32_t device_id,
-    FlutterPointerMouseButtons flutter_button) {
-  if (flutter_button != 0) {
-    auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons &= ~flutter_button;
+void FlutterWindowsView::OnPointerUp(double x,
+                                     double y,
+                                     FlutterPointerDeviceKind device_kind,
+                                     int32_t device_id,
+                                     uint64_t buttons) {
+  auto state = GetOrCreatePointerState(device_kind, device_id);
+  const uint64_t released_buttons = buttons == 0 ? state->buttons : buttons;
+  if (released_buttons != 0) {
+    state->buttons &= ~released_buttons;
     SendPointerUp(x, y, state);
   }
 }
@@ -686,6 +705,11 @@ void FlutterWindowsView::SendPointerEventWithData(
   event.device = state->pointer_id;
   event.buttons = state->buttons;
   event.view_id = view_id_;
+  event.rotation = (double)state->rotation * (M_PI / 180);
+  event.pressure = state->pressure;
+  // Normalized between 0 and 1024 by the windows API
+  event.pressure_min = 0;
+  event.pressure_max = kMaxPenPressure;
 
   // Set metadata that's always the same regardless of the event.
   event.struct_size = sizeof(event);
@@ -706,8 +730,24 @@ void FlutterWindowsView::SendPointerEventWithData(
   }
 }
 
+void FlutterWindowsView::SetFirstFrameCallback(fml::closure callback) {
+  std::scoped_lock lock(first_frame_callback_mutex_);
+  first_frame_callback_ = std::move(callback);
+}
+
+void FlutterWindowsView::FireFirstFrameCallbackIfSet() {
+  std::scoped_lock lock(first_frame_callback_mutex_);
+  if (first_frame_callback_) {
+    fml::closure callback = std::move(first_frame_callback_);
+    first_frame_callback_ = nullptr;
+    engine_->task_runner()->PostTask(std::move(callback));
+  }
+}
+
 void FlutterWindowsView::OnFramePresented() {
   // Called on the engine's raster thread.
+  FireFirstFrameCallbackIfSet();
+
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
   switch (resize_status_) {
@@ -746,8 +786,14 @@ bool FlutterWindowsView::ClearSoftwareBitmap() {
 bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
                                                size_t row_bytes,
                                                size_t height) {
-  return binding_handler_->OnBitmapSurfaceUpdated(allocation, row_bytes,
-                                                  height);
+  bool result =
+      binding_handler_->OnBitmapSurfaceUpdated(allocation, row_bytes, height);
+  if (result) {
+    // The software compositor does not call OnFramePresented, so fire the
+    // first frame callback here.
+    FireFirstFrameCallbackIfSet();
+  }
+  return result;
 }
 
 FlutterViewId FlutterWindowsView::view_id() const {
@@ -890,6 +936,11 @@ bool FlutterWindowsView::NeedsVsync() const {
 
 bool FlutterWindowsView::IsSizedToContent() const {
   return is_sized_to_content_;
+}
+
+void FlutterWindowsView::SetSizedToContent(bool sized_to_content) {
+  is_sized_to_content_ = sized_to_content;
+  engine_->SendWindowMetricsEvent(CreateWindowMetricsEvent());
 }
 
 BoxConstraints FlutterWindowsView::GetConstraints() const {

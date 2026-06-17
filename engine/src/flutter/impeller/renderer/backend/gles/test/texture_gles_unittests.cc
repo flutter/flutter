@@ -67,6 +67,38 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
   ASSERT_FALSE(sync_fence.has_value());
 }
 
+TEST_P(TextureGLESTest, TextureDtorDeletesFence) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  if (!context_gles.GetReactor()
+           ->GetProcTable()
+           .GetDescription()
+           ->GetGlVersion()
+           .IsAtLeast(Version{3, 0, 0})) {
+    GTEST_SKIP() << "GL Version too low to test sync fence.";
+  }
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(!!texture);
+
+  HandleGLES fence =
+      context_gles.GetReactor()->CreateHandle(HandleType::kFence);
+  bool fence_collected = false;
+  context_gles.GetReactor()->RegisterCleanupCallback(
+      fence, [&]() { fence_collected = true; });
+  TextureGLES::Cast(*texture).SetFence(fence);
+
+  texture.reset();
+  ASSERT_TRUE(context_gles.GetReactor()->AddOperation(
+      [](const ReactorGLES& reactor) {}));
+  ASSERT_TRUE(context_gles.GetReactor()->React());
+  EXPECT_TRUE(fence_collected);
+}
+
 TEST_P(TextureGLESTest, Binds2DTexture) {
   TextureDescriptor desc;
   desc.storage_mode = StorageMode::kDevicePrivate;
@@ -114,6 +146,27 @@ TEST_P(TextureGLESTest, Leak) {
   ScopedValidationDisable disable_validation;
   handle = TextureGLES::Cast(*texture).GetGLHandle();
   EXPECT_FALSE(handle.has_value());
+}
+
+TEST_P(TextureGLESTest, CreatingAndBindingEmptyTexturesDoesNotCrash) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  const ProcTableGLES& gl = context_gles.GetReactor()->GetProcTable();
+  GLuint texture_name;
+  gl.GenTextures(1, &texture_name);
+
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = StorageMode::kDevicePrivate;
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.size = ISize(0, 0);
+  texture_descriptor.mip_count = 1u;
+
+  impeller::HandleGLES texture_handle = context_gles.GetReactor()->CreateHandle(
+      impeller::HandleType::kTexture, texture_name);
+  auto texture = TextureGLES::WrapTexture(context_gles.GetReactor(),
+                                          texture_descriptor, texture_handle);
+  // The texture descriptor is invalid because its size is empty, so WrapTexture
+  // will return null.
+  ASSERT_EQ(texture, nullptr);
 }
 
 }  // namespace impeller::testing

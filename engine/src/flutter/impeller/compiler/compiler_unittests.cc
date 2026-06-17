@@ -15,6 +15,46 @@ namespace impeller {
 namespace compiler {
 namespace testing {
 
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTest,
+    ::testing::Values(TargetPlatform::kOpenGLES,
+                      TargetPlatform::kOpenGLDesktop,
+                      TargetPlatform::kMetalDesktop,
+                      TargetPlatform::kMetalIOS,
+                      TargetPlatform::kVulkan),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestRuntime,
+    ::testing::Values(TargetPlatform::kRuntimeStageMetal,
+                      TargetPlatform::kRuntimeStageGLES,
+                      TargetPlatform::kRuntimeStageGLES3,
+                      TargetPlatform::kRuntimeStageVulkan,
+                      TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestSkSL,
+    ::testing::Values(TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestUnknownPlatform,
+    ::testing::Values(TargetPlatform::kUnknown),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
 TEST(CompilerTest, Defines) {
   std::shared_ptr<const fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("check_gles_definition.frag");
@@ -39,6 +79,147 @@ TEST(CompilerTest, Defines) {
   EXPECT_NE(compiler_2.GetSPIRVAssembly(), nullptr);
 }
 
+TEST(CompilerTest, DeprecatedUnflippedDefines) {
+  std::shared_ptr<const fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping(
+          "check_gles_unflipped_definition.frag");
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.entry_point_name = "main";
+  options.type = SourceType::kFragmentShader;
+
+  Reflector::Options reflector_options;
+
+  // Test that IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED is defined on
+  // TargetPlatform::kRuntimeStageGLES.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageGLES;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    // Should fail as the shader has a compilation error in it.
+    EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+  }
+
+  // Test that IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED is defined on
+  // TargetPlatform::kRuntimeStageGLES3.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageGLES3;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES3;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    // Should fail as the shader has a compilation error in it.
+    EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+  }
+
+  // Should succeed as the compilation error is ifdef'd out.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    EXPECT_NE(compiler.GetSPIRVAssembly(), nullptr);
+  }
+}
+
+TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
+  // Compiles `fixture_name` for `platform` and returns the generated SL
+  // source. See https://github.com/flutter/flutter/issues/186554.
+  auto compile = [](const char* fixture_name, SourceType type,
+                    TargetPlatform platform) -> std::string {
+    std::shared_ptr<fml::Mapping> fixture =
+        flutter::testing::OpenFixtureAsMapping(fixture_name);
+    FML_CHECK(fixture);
+
+    SourceOptions options(fixture_name, type);
+    options.source_language = SourceLanguage::kGLSL;
+    options.target_platform = platform;
+    options.working_directory = std::make_shared<fml::UniqueFD>(
+        flutter::testing::OpenFixturesDirectory());
+    options.entry_point_name = "main";
+
+    Reflector::Options reflector_options;
+    reflector_options.target_platform = platform;
+    reflector_options.header_file_name = "y_flip_injection.h";
+    reflector_options.shader_name = "shader";
+
+    Compiler compiler(fixture, options, reflector_options);
+    if (!compiler.IsValid()) {
+      return "";
+    }
+    auto sl = compiler.GetSLShaderSource();
+    if (!sl || !sl->GetMapping()) {
+      return "";
+    }
+    return std::string(reinterpret_cast<const char*>(sl->GetMapping()),
+                       sl->GetSize());
+  };
+
+  // GL vertex shader: gets both the declaration and the epilogue.
+  const std::string gl_vert = compile("sample.vert", SourceType::kVertexShader,
+                                      TargetPlatform::kOpenGLES);
+  EXPECT_NE(gl_vert.find("uniform float _impeller_y_flip"), std::string::npos)
+      << "GLES vertex shader is missing the y-flip uniform declaration:\n"
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
+            std::string::npos)
+      << "GLES vertex shader is missing the y-flip epilogue:\n"
+      << gl_vert;
+
+  // GL fragment shader: not injected.
+  const std::string gl_frag = compile(
+      "sample.frag", SourceType::kFragmentShader, TargetPlatform::kOpenGLES);
+  EXPECT_EQ(gl_frag.find("_impeller_y_flip"), std::string::npos)
+      << "GLES fragment shader was unexpectedly injected:\n"
+      << gl_frag;
+
+  // Metal vertex shader: not injected.
+  const std::string mtl_vert = compile("sample.vert", SourceType::kVertexShader,
+                                       TargetPlatform::kMetalIOS);
+  EXPECT_EQ(mtl_vert.find("_impeller_y_flip"), std::string::npos)
+      << "Metal vertex shader was unexpectedly injected:\n"
+      << mtl_vert;
+}
+
+TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
+  // `y_flip_early_return.vert` has an early `return` before main's implicit
+  // exit; the wrap-main injection must flip on both paths.
+  std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("y_flip_early_return.vert");
+  FML_CHECK(fixture);
+
+  SourceOptions options("y_flip_early_return.vert", SourceType::kVertexShader);
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kOpenGLES;
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+  options.entry_point_name = "main";
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kOpenGLES;
+  reflector_options.header_file_name = "y_flip_early_return.h";
+  reflector_options.shader_name = "shader";
+
+  Compiler compiler(fixture, options, reflector_options);
+  ASSERT_TRUE(compiler.IsValid());
+  auto sl = compiler.GetSLShaderSource();
+  ASSERT_TRUE(sl && sl->GetMapping());
+  const std::string gl_vert(reinterpret_cast<const char*>(sl->GetMapping()),
+                            sl->GetSize());
+
+  EXPECT_NE(gl_vert.find("void _impeller_user_main("), std::string::npos)
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("_impeller_user_main();"), std::string::npos)
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
+            std::string::npos)
+      << gl_vert;
+
+  // Only the wrapper's `void main(` should remain after the rename.
+  const size_t first_main = gl_vert.find("\nvoid main(");
+  ASSERT_NE(first_main, std::string::npos);
+  EXPECT_EQ(gl_vert.find("\nvoid main(", first_main + 1), std::string::npos)
+      << gl_vert;
+}
+
 TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
   ASSERT_EQ(SourceTypeFromFileName("hello.vert"), SourceType::kVertexShader);
   ASSERT_EQ(SourceTypeFromFileName("hello.frag"), SourceType::kFragmentShader);
@@ -48,9 +229,6 @@ TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
 }
 
 TEST_P(CompilerTest, CanCompile) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ASSERT_TRUE(CanCompileAndReflect("sample.vert"));
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader,
@@ -58,17 +236,11 @@ TEST_P(CompilerTest, CanCompile) {
 }
 
 TEST_P(CompilerTest, CanCompileHLSL) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ASSERT_TRUE(CanCompileAndReflect(
       "simple.vert.hlsl", SourceType::kVertexShader, SourceLanguage::kHLSL));
 }
 
 TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
                                    SourceType::kVertexShader,
                                    SourceLanguage::kHLSL, "VertexShader"));
@@ -78,29 +250,36 @@ TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
 }
 
 TEST_P(CompilerTest, CanCompileComputeShader) {
-  if (!TargetPlatformIsMetal(GetParam())) {
-    GTEST_SKIP()
-        << "Only enabled on Metal backends till ES 3.2 support is added.";
-  }
-  ASSERT_TRUE(CanCompileAndReflect("sample.comp"));
-  ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader));
+  ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader,
+                                   SourceLanguage::kGLSL, "main"));
 }
 
 TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ScopedValidationDisable disable_validation;
   ASSERT_FALSE(
       CanCompileAndReflect("resources_limit.vert", SourceType::kVertexShader));
 }
 
 TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ScopedValidationDisable disable_validation;
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
+}
+
+TEST_P(CompilerTest, UniformBlockInstanceNameCanonicalizedForGL) {
+  if (!TargetPlatformIsOpenGL(GetParam())) {
+    GTEST_SKIP() << "Only GL targets lower uniform blocks to flat structs.";
+  }
+  // `mat2_test.frag` has `uniform Params { ... } uParams;`. Without
+  // canonicalization, BufferBindingsGLES cannot resolve `uParams.uMat2`.
+  ASSERT_TRUE(
+      CanCompileAndReflect("mat2_test.frag", SourceType::kFragmentShader));
+  auto sl_source = GetCompiler()->GetSLShaderSource();
+  ASSERT_NE(sl_source, nullptr);
+  const std::string source(
+      reinterpret_cast<const char*>(sl_source->GetMapping()),
+      sl_source->GetSize());
+  EXPECT_EQ(source.find("uParams."), std::string::npos) << source;
+  EXPECT_NE(source.find("_Params."), std::string::npos) << source;
 }
 
 TEST_P(CompilerTest, BindingBaseForFragShader) {
@@ -202,6 +381,12 @@ inline std::ostream& operator<<(std::ostream& out, const UniformInfo& info) {
 }  // namespace
 
 TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
+  if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
+    GTEST_SKIP() << "Not supported with Vulkan";
+  }
+
   ASSERT_TRUE(CanCompileAndReflect("sample_with_uniforms.frag",
                                    SourceType::kFragmentShader,
                                    SourceLanguage::kGLSL));
@@ -248,6 +433,12 @@ TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
 }
 
 TEST_P(CompilerTestRuntime, PositionedUniformsAppearInJson) {
+  if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
+    GTEST_SKIP() << "Not supported with Vulkan";
+  }
+
   ASSERT_TRUE(CanCompileAndReflect("sample_with_positioned_uniforms.frag",
                                    SourceType::kFragmentShader,
                                    SourceLanguage::kGLSL));
@@ -369,6 +560,60 @@ TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayAssignment) {
   // fails.
   ASSERT_FALSE(CanCompileAndReflect("array_assignment.frag",
                                     SourceType::kFragmentShader));
+
+  const Compiler* compiler = GetCompiler();
+  ASSERT_TRUE(compiler);
+  // Truncated error message.
+  ASSERT_STREQ(
+      compiler->GetErrorMessages().c_str(),
+      "\"array_assignment.frag\": \n"
+      "Compiled to invalid SkSL:\n"
+      "        // This SkSL shader is autogenerated by spirv-cross.\n"
+      "        \n"
+      "        float4 flutter_FragCoord;\n"
+      "        \n"
+      "        vec4 frag_color;\n"
+      "        \n"
+      "... (truncated 16 lines)\n"
+      "SkSL Error:\n"
+      "        error: 12: initializers are not permitted on arrays (or structs "
+      "containing arrays)\n"
+      "            float more_nums[2] = nums;\n"
+      "                                 ^^^^\n"
+      "        1 error\n");
+  // Full error message.
+  ASSERT_STREQ(compiler->GetVerboseErrorMessages().c_str(),
+               "\"array_assignment.frag\": \n"
+               "Compiled to invalid SkSL:\n"
+               "// This SkSL shader is autogenerated by spirv-cross.\n"
+               "\n"
+               "float4 flutter_FragCoord;\n"
+               "\n"
+               "vec4 frag_color;\n"
+               "\n"
+               "void FLT_main()\n"
+               "{\n"
+               "    float nums[2];\n"
+               "    nums[0] = 1.0;\n"
+               "    nums[1] = 0.5;\n"
+               "    float more_nums[2] = nums;\n"
+               "    frag_color = vec4(nums[0], nums[1], 1.0, 1.0);\n"
+               "}\n"
+               "\n"
+               "half4 main(float2 iFragCoord)\n"
+               "{\n"
+               "      flutter_FragCoord = float4(iFragCoord, 0, 0);\n"
+               "      FLT_main();\n"
+               "      return frag_color;\n"
+               "}\n"
+               "\n"
+               "SkSL Error:\n"
+               "error: 12: initializers are not permitted on arrays (or "
+               "structs containing arrays)\n"
+               "    float more_nums[2] = nums;\n"
+               "                         ^^^^\n"
+               "1 error\n"
+               "\n");
 }
 
 TEST_P(CompilerTestSkSL, CompilesWithValidArrayInitialization) {
@@ -377,39 +622,11 @@ TEST_P(CompilerTestSkSL, CompilesWithValidArrayInitialization) {
                            SourceType::kFragmentShader));
 }
 
-#define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)               \
-  INSTANTIATE_TEST_SUITE_P(                                                \
-      suite_name, CompilerTest,                                            \
-      ::testing::Values(TargetPlatform::kOpenGLES,                         \
-                        TargetPlatform::kOpenGLDesktop,                    \
-                        TargetPlatform::kMetalDesktop,                     \
-                        TargetPlatform::kMetalIOS, TargetPlatform::kSkSL), \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {  \
-        return TargetPlatformToString(info.param);                         \
-      });
-
-INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
-#define INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(suite_name)      \
-  INSTANTIATE_TEST_SUITE_P(                                               \
-      suite_name, CompilerTestRuntime,                                    \
-      ::testing::Values(TargetPlatform::kRuntimeStageMetal),              \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
-        return TargetPlatformToString(info.param);                        \
-      });
-
-INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
-#define INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(suite_name)             \
-  INSTANTIATE_TEST_SUITE_P(                                                   \
-      suite_name, CompilerTestSkSL, ::testing::Values(TargetPlatform::kSkSL), \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {     \
-        return TargetPlatformToString(info.param);                            \
-      });
-
-INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
 TEST_P(CompilerTestRuntime, Mat2Reflection) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
+
   ASSERT_TRUE(CanCompileAndReflect(
       "mat2_test.frag", SourceType::kFragmentShader, SourceLanguage::kGLSL));
 
@@ -446,6 +663,11 @@ TEST_P(CompilerTestRuntime, Mat2Reflection) {
 
   // Offset 0
   EXPECT_EQ(mat2Member["offset"], 0u);
+}
+
+TEST_P(CompilerTestUnknownPlatform, MustFailDueToUnknownPlatform) {
+  ASSERT_FALSE(
+      CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
 }
 
 }  // namespace testing

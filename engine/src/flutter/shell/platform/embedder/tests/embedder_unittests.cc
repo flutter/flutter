@@ -206,27 +206,41 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   auto ui_thread = std::make_unique<fml::Thread>("test_ui_thread");
   auto ui_task_runner = ui_thread->GetTaskRunner();
+  std::mutex ui_task_runner_mutex;
+  bool ui_task_runner_destroyed = false;
   auto platform_thread = std::make_unique<fml::Thread>("test_platform_thread");
   auto platform_task_runner = platform_thread->GetTaskRunner();
-  static std::mutex engine_mutex;
   UniqueEngine engine;
 
-  EmbedderTestTaskRunner test_ui_task_runner(
-      ui_task_runner, [&](FlutterTask task) {
-        std::scoped_lock lock(engine_mutex);
-        if (!engine.is_valid()) {
-          return;
-        }
-        FlutterEngineRunTask(engine.get(), &task);
-      });
-  EmbedderTestTaskRunner test_platform_task_runner(
-      platform_task_runner, [&](FlutterTask task) {
-        std::scoped_lock lock(engine_mutex);
-        if (!engine.is_valid()) {
-          return;
-        }
-        FlutterEngineRunTask(engine.get(), &task);
-      });
+  EmbedderTestTaskRunner test_ui_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(ui_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            // The UI task runner will be destroyed during engine shutdown.  It
+            // should continue dispatching tasks until the engine invokes the
+            // destruction callback.  After that it must stop using the engine.
+            std::scoped_lock lock(ui_task_runner_mutex);
+            if (ui_task_runner_destroyed) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .SetDestructionCallback([&]() {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            ui_task_runner_destroyed = true;
+          })
+          .Build();
+
+  EmbedderTestTaskRunner test_platform_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(platform_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            if (!engine.is_valid()) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .Build();
 
   fml::AutoResetWaitableEvent signal_latch_ui;
   fml::AutoResetWaitableEvent signal_latch_platform;
@@ -253,10 +267,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
           ASSERT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
           signal_latch_platform.Signal();
         });
-    {
-      std::scoped_lock lock(engine_mutex);
-      engine = builder.InitializeEngine();
-    }
+    engine = builder.InitializeEngine();
     ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
     ASSERT_TRUE(engine.is_valid());
   });
@@ -444,29 +455,32 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   auto platform_task_runner = CreateNewThread("test_platform_thread");
   static std::mutex engine_mutex;
   static bool signaled_once = false;
-  static std::atomic<bool> destruction_callback_called = false;
+  std::atomic<bool> destruction_callback_called = false;
   UniqueEngine engine;
 
-  EmbedderTestTaskRunner test_task_runner(
-      platform_task_runner, [&](FlutterTask task) {
-        std::scoped_lock lock(engine_mutex);
-        if (!engine.is_valid()) {
-          return;
-        }
-        // There may be multiple tasks posted but we only need to check
-        // assertions once.
-        if (signaled_once) {
-          FlutterEngineRunTask(engine.get(), &task);
-          return;
-        }
+  EmbedderTestTaskRunner test_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(platform_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            std::scoped_lock lock(engine_mutex);
+            if (!engine.is_valid()) {
+              return;
+            }
+            // There may be multiple tasks posted but we only need to check
+            // assertions once.
+            if (signaled_once) {
+              FlutterEngineRunTask(engine.get(), &task);
+              return;
+            }
 
-        signaled_once = true;
-        ASSERT_TRUE(engine.is_valid());
-        ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
-        latch.Signal();
-      });
-  test_task_runner.SetDestructionCallback(
-      [](void* user_data) { destruction_callback_called = true; });
+            signaled_once = true;
+            ASSERT_TRUE(engine.is_valid());
+            ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+            latch.Signal();
+          })
+          .SetDestructionCallback(
+              [&]() { destruction_callback_called.store(true); })
+          .Build();
 
   platform_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
@@ -501,7 +515,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   ASSERT_TRUE(signaled_once);
   signaled_once = false;
 
-  ASSERT_TRUE(destruction_callback_called);
+  ASSERT_TRUE(destruction_callback_called.load());
   destruction_callback_called = false;
 }
 
@@ -3633,7 +3647,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
   };
 
   // Send an event.
-  sample_event.timestamp = 1.0l;
+  sample_event.timestamp = 1.0;
   platform_task_runner->PostTask([&]() {
     FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
     message_latch->Signal();
@@ -3671,7 +3685,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
   EXPECT_EQ(echoed_events.size(), 1u);
 
   // Send a second event.
-  sample_event.timestamp = 10.0l;
+  sample_event.timestamp = 10.0;
   platform_task_runner->PostTask([&]() {
     FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
   });
@@ -4051,6 +4065,59 @@ TEST_F(EmbedderTest, CanSendPointer) {
   FlutterPointerEvent pointer_event = {};
   pointer_event.struct_size = sizeof(FlutterPointerEvent);
   pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.x = 123;
+  pointer_event.y = 456;
+  pointer_event.timestamp = static_cast<size_t>(1234567890);
+  pointer_event.view_id = 0;
+
+  FlutterEngineResult result =
+      FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
+  ASSERT_EQ(result, kSuccess);
+
+  count_latch.Wait();
+  message_latch.Wait();
+}
+
+/// Send a stylus pointer event to Dart and verify the buttons mask.
+TEST_F(EmbedderTest, CanSendStylusPointerButtons) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("pointer_data_packet_stylus_buttons");
+
+  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+  context.AddNativeCallback(
+      "SignalNativeCount",
+      CREATE_NATIVE_ENTRY([&count_latch](Dart_NativeArguments args) {
+        int count = tonic::DartConverter<int>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        EXPECT_EQ(count, 1);
+        count_latch.Signal();
+      }));
+  context.AddNativeCallback(
+      "SignalNativeMessage",
+      CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
+        auto message = tonic::DartConverter<std::string>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        EXPECT_EQ("buttons: 3", message);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(FlutterPointerEvent);
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.device_kind = kFlutterPointerDeviceKindStylus;
+  pointer_event.buttons =
+      kFlutterPointerButtonStylusContact | kFlutterPointerButtonStylusPrimary;
   pointer_event.x = 123;
   pointer_event.y = 456;
   pointer_event.timestamp = static_cast<size_t>(1234567890);

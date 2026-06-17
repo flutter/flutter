@@ -5,7 +5,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -225,15 +225,17 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: Stack(
               children: <Widget>[
                 Positioned.fromRelativeRect(
                   rect: const RelativeRect.fromLTRB(100, 100, 100, 100),
                   child: Container(
-                    decoration: const ShapeDecoration(color: Colors.green, shape: StarBorder()),
+                    decoration: const ShapeDecoration(
+                      color: Color(0xFF00FF00),
+                      shape: StarBorder(),
+                    ),
                   ),
                 ),
               ],

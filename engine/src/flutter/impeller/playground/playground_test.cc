@@ -103,8 +103,10 @@ std::string PlaygroundTest::GetWindowTitle() const {
          << flutter::testing::GetCurrentTestName() << "' ";
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       break;
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
       if (switches_.use_angle) {
         stream << " (Angle) ";
       }

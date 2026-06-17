@@ -20,9 +20,14 @@ flutter/flutter repository. It is based on the more comprehensive official
   [Effective Dart: Style](https://dart.dev/effective-dart/style)
   should only be followed when it does not conflict with the former.
 
+
 ## Review Agent Guidelines
 
 - Only review changes to the `master` branch. Other changes have already been reviewed (and are being cherrypicked).
+- **Check for potential regressions**: Look for changes that might break existing functionality or introduce unexpected behavior in related areas.
+- **Verify test validity**: Confirm that new or modified tests effectively catch the issue being fixed and would fail if the fix were reverted.
+- **Search for counter-examples**: Identify scenarios or edge cases that the proposed code does not handle. If a counter-example is found, propose a test case to demonstrate the gap.
+- **Suggest simplification and refactoring**: Assess whether the code can be made simpler or refactored to enhance readability and maintainability.
 
 ## General Philosophy
 

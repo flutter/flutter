@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -87,6 +88,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.shrinkWrap = false,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.scrollCacheExtent,
   }) : assert(initialItemCount >= 0);
 
   /// A scrolling container that animates items with separators when they are inserted or removed.
@@ -128,10 +130,18 @@ class AnimatedList extends _AnimatedScrollView {
   ///         );
   ///       },
   ///       separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
-  ///         return const Divider();
+  ///         return const SizedBox(
+  ///           height: 1.0,
+  ///           width: double.infinity,
+  ///           child: ColoredBox(color: Color(0xFF000000)),
+  ///         );
   ///       },
   ///       removedSeparatorBuilder: (BuildContext context, int index, Animation<double> animation) {
-  ///         return const Divider();
+  ///         return const SizedBox(
+  ///           height: 1.0,
+  ///           width: double.infinity,
+  ///           child: ColoredBox(color: Color(0xFF000000)),
+  ///         );
   ///       }
   ///     ),
   ///   );
@@ -163,6 +173,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.shrinkWrap = false,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.scrollCacheExtent,
   }) : assert(initialItemCount >= 0),
        super(
          initialItemCount: _computeChildCountWithSeparators(initialItemCount),
@@ -386,6 +397,7 @@ class AnimatedGrid extends _AnimatedScrollView {
     super.physics,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.scrollCacheExtent,
   }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedGrid.gridDelegate}
@@ -543,6 +555,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
     this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollCacheExtent,
   }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
@@ -660,6 +673,9 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  final ScrollCacheExtent? scrollCacheExtent;
 }
 
 abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends State<T>
@@ -741,10 +757,14 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
     } else {
       final int itemIndex = _computeItemIndex(index);
+      // Children animating out from earlier removeItem calls still count
+      // towards [_itemsCount], so subtract them to recognize the new tail
+      // of the visible list while a previous removal is still in flight.
+      final int visibleItemsCount = _itemsCount - _outgoingItemsCount;
       // Remove the item
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex, builder, duration: duration);
-      if (_itemsCount > 1) {
-        if (itemIndex == _itemsCount - 1) {
+      if (visibleItemsCount > 1) {
+        if (itemIndex == visibleItemsCount - 1) {
           // The item was removed from the end of the list, so the separator to remove is the one at `last index` - 1.
           _sliverAnimatedMultiBoxKey.currentState!.removeItem(
             itemIndex - 1,
@@ -807,6 +827,8 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 
   int get _itemsCount => _sliverAnimatedMultiBoxKey.currentState!._itemsCount;
+
+  int get _outgoingItemsCount => _sliverAnimatedMultiBoxKey.currentState!._outgoingItems.length;
 
   // Helper method to compute the index for the item to insert or remove considering the separators in between.
   int _computeItemIndex(int index) {
@@ -871,6 +893,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       physics: widget.physics,
       clipBehavior: widget.clipBehavior,
       shrinkWrap: widget.shrinkWrap,
+      scrollCacheExtent: widget.scrollCacheExtent,
       slivers: <Widget>[sliver],
     );
   }

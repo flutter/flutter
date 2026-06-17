@@ -19,12 +19,12 @@ unset CDPATH
 # The function is enclosed in a subshell to avoid changing the working directory
 # of the caller.
 function follow_links() (
-  cd -P "$(dirname -- "$1")"
+  cd -P -- "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
   while [[ -h "$file" ]]; do
-    cd -P "$(dirname -- "$file")"
+    cd -P -- "$(dirname -- "$file")"
     file="$(readlink -- "$file")"
-    cd -P "$(dirname -- "$file")"
+    cd -P -- "$(dirname -- "$file")"
     file="$PWD/$(basename -- "$file")"
   done
   echo "$file"
@@ -61,5 +61,7 @@ cd "$SCRIPT_DIR"
   --json $ENGINE_PATH/src/out/${VARIANT}/display_list_region_benchmarks.json "$@"
 "$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/display_list_transform_benchmarks.json "$@"
+"$DART" bin/parse_and_send.dart \
+  --json $ENGINE_PATH/src/out/${VARIANT}/primitive_rendering_benchmarks.json "$@"
 "$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/geometry_benchmarks.json "$@"

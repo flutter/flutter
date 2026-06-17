@@ -10,10 +10,42 @@
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles/modern_shaders_gles.h"
+#include "impeller/entity/gles3/entity_shaders_gles.h"
+#include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
 namespace flutter {
+
+namespace {
+std::vector<std::shared_ptr<fml::Mapping>> GetShaderMappings(bool is_gles3) {
+  if (is_gles3) {
+    return {
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_entity_shaders_gles3_data,
+            impeller_entity_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_shaders_gles3_data,
+            impeller_modern_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_framebuffer_blend_shaders_gles3_data,
+            impeller_framebuffer_blend_shaders_gles3_length),
+    };
+  }
+  return {
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_entity_shaders_gles_data,
+          impeller_entity_shaders_gles_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_modern_shaders_gles_data,
+          impeller_modern_shaders_gles_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_gles_data,
+          impeller_framebuffer_blend_shaders_gles_length),
+  };
+}
+}  // namespace
 
 class ReactorWorker final : public impeller::ReactorGLES::Worker {
  public:
@@ -45,7 +77,8 @@ class ReactorWorker final : public impeller::ReactorGLES::Worker {
 EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
     EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table,
     bool fbo_reset_after_present,
-    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
+    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+    impeller::Flags impeller_flags)
     : gl_dispatch_table_(std::move(gl_dispatch_table)),
       fbo_reset_after_present_(fbo_reset_after_present),
       external_view_embedder_(std::move(external_view_embedder)),
@@ -63,25 +96,18 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   // state can be accessed.
   gl_dispatch_table_.gl_make_current_callback();
 
-  std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_entity_shaders_gles_data,
-          impeller_entity_shaders_gles_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_modern_shaders_gles_data,
-          impeller_modern_shaders_gles_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_framebuffer_blend_shaders_gles_data,
-          impeller_framebuffer_blend_shaders_gles_length),
-  };
   auto gl = std::make_unique<impeller::ProcTableGLES>(
       gl_dispatch_table_.gl_proc_resolver);
   if (!gl->IsValid()) {
     return;
   }
 
+  const auto is_gles3 =
+      gl->GetDescription()->GetGlVersion().IsAtLeast(impeller::Version(3));
+  const auto shader_mappings = GetShaderMappings(is_gles3);
+
   impeller_context_ = impeller::ContextGLES::Create(
-      impeller::Flags{}, std::move(gl), shader_mappings,
+      impeller_flags, std::move(gl), shader_mappings,
       /*enable_gpu_tracing=*/false);
 
   if (!impeller_context_) {
@@ -96,7 +122,11 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   }
 
   gl_dispatch_table_.gl_clear_current_callback();
-  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGL).";
+  if (impeller_flags.use_sdfs) {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLESSDF).";
+  } else {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLES).";
+  }
   valid_ = true;
 }
 

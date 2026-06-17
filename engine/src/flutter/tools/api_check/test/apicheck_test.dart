@@ -31,9 +31,9 @@ void main() {
 /// never done. See the note at the top of `shell/platform/embedder/embedder.h`
 /// for further details.
 void checkApiConsistency(String flutterRoot) {
-  test('AccessibilityFeatures enums match', () {
+  test('AccessibilityFeatures enums match', () async {
     // Dart values: _kFooBarIndex = 1 << N
-    final List<String> uiFields = getDartClassFields(
+    final List<String> uiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'ui', 'window.dart'),
       className: 'AccessibilityFeatures',
     );
@@ -82,13 +82,13 @@ void checkApiConsistency(String flutterRoot) {
     expect(swiftOptionSetProperties, uiFields);
   });
 
-  test('SemanticsAction enums match', () {
+  test('SemanticsAction enums match', () async {
     // Dart values: _kFooBarIndex = 1 << N.
-    final List<String> uiFields = getDartClassFields(
+    final List<String> uiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics.dart'),
       className: 'SemanticsAction',
     );
-    final List<String> webuiFields = getDartClassFields(
+    final List<String> webuiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'semantics.dart'),
       className: 'SemanticsAction',
     );
@@ -123,13 +123,13 @@ void checkApiConsistency(String flutterRoot) {
     expect(javaEnumValues, uiFields);
   });
 
-  test('AppLifecycleState enums match', () {
+  test('AppLifecycleState enums match', () async {
     // Dart values: _kFooBarIndex = 1 << N.
-    final List<String> uiFields = getDartClassFields(
+    final List<String> uiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'ui', 'platform_dispatcher.dart'),
       className: 'AppLifecycleState',
     );
-    final List<String> webuiFields = getDartClassFields(
+    final List<String> webuiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'platform_dispatcher.dart'),
       className: 'AppLifecycleState',
     );
@@ -162,13 +162,13 @@ void checkApiConsistency(String flutterRoot) {
 
   // TODO(hangyujin): Add this test back after fixing https://github.com/flutter/flutter/issues/166101
 
-  // test('SemanticsFlag enums match', () {
+  // test('SemanticsFlag enums match', () async {
   //   // Dart values: _kFooBarIndex = 1 << N.
-  //   final List<String> uiFields = getDartClassFields(
+  //   final List<String> uiFields = await getDartClassFields(
   //     sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics.dart'),
   //     className: 'SemanticsFlag',
   //   );
-  //   final List<String> webuiFields = getDartClassFields(
+  //   final List<String> webuiFields = await getDartClassFields(
   //     sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics.dart'),
   //     className: 'SemanticsFlag',
   //   );
@@ -262,11 +262,21 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
   void check(String description, FormalParameterList parameters) {
     for (final FormalParameter parameter in parameters.parameters) {
       TypeAnnotation? type;
-      if (parameter is SimpleFormalParameter) {
-        type = parameter.type;
-      } else if (parameter is DefaultFormalParameter) {
-        type = (parameter.parameter as SimpleFormalParameter).type;
+      try {
+        // ignore: avoid_dynamic_calls
+        type = (parameter as dynamic).type as TypeAnnotation?;
+      } catch (_) {
+        try {
+          // ignore: avoid_dynamic_calls
+          type = (parameter as dynamic).parameter.type as TypeAnnotation?;
+        } catch (_) {
+          // Ignore if not accessible.
+        }
       }
+      // Clean Analyzer 13 version (uncomment once migrated):
+      // if (parameter is RegularFormalParameter) {
+      //   type = parameter.type;
+      // }
       if (type! is NamedType) {
         final String name = (type as NamedType).name.lexeme;
         if (type.question != null && simpleTypes.contains(name)) {

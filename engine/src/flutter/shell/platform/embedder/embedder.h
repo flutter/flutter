@@ -1311,6 +1311,7 @@ typedef enum {
   kFlutterPointerDeviceKindTouch,
   kFlutterPointerDeviceKindStylus,
   kFlutterPointerDeviceKindTrackpad,
+  kFlutterPointerDeviceKindInvertedStylus,
 } FlutterPointerDeviceKind;
 
 /// Flags for the `buttons` field of `FlutterPointerEvent` when `device_kind`
@@ -1324,6 +1325,21 @@ typedef enum {
   /// If a mouse has more than five buttons, send higher bit shifted values
   /// corresponding to the button number: 1 << 5 for the 6th, etc.
 } FlutterPointerMouseButtons;
+
+/// Flags for the `buttons` field of `FlutterPointerEvent` when `device_kind`
+/// is `kFlutterPointerDeviceKindStylus` or
+/// `kFlutterPointerDeviceKindInvertedStylus`.
+typedef enum {
+  /// Whether the stylus has contact with the screen.
+  /// This matches the framework's `kStylusContact`.
+  kFlutterPointerButtonStylusContact = 1 << 0,
+  /// Whether the stylus's primary button is pressed.
+  /// This matches the framework's `kPrimaryStylusButton`.
+  kFlutterPointerButtonStylusPrimary = 1 << 1,
+  /// Whether the stylus's secondary button is pressed.
+  /// This matches the framework's `kSecondaryStylusButton`.
+  kFlutterPointerButtonStylusSecondary = 1 << 2,
+} FlutterPointerStylusButtons;
 
 /// The type of a pointer signal.
 typedef enum {
@@ -1360,6 +1376,7 @@ typedef struct {
   /// correct buttons.
   FlutterPointerDeviceKind device_kind;
   /// The buttons currently pressed, if any.
+  /// See `FlutterPointerMouseButtons` or `FlutterPointerStylusButtons`.
   int64_t buttons;
   /// The x offset of the pan/zoom in physical pixels.
   double pan_x;
@@ -1371,6 +1388,14 @@ typedef struct {
   double rotation;
   /// The identifier of the view that received the pointer event.
   FlutterViewId view_id;
+  /// The pressure of the current pointer, where 0.0 is the default value.
+  double pressure;
+  /// The minimum bound of the pressure of the current pointer, where 0.0 is the
+  /// default minimum bound.
+  double pressure_min;
+  /// The maximum bound of the pressure of the current pointer, where 0.0 is the
+  /// default maximum bound.
+  double pressure_max;
 } FlutterPointerEvent;
 
 typedef enum {

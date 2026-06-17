@@ -96,7 +96,7 @@ function parse_args() {
     esac
     shift
   done
-  if [[ -z $STAGING_DIR ]]; then
+  if [[ -z "$STAGING_DIR" ]]; then
     STAGING_DIR=$(mktemp -d /tmp/dartdoc.XXXXX)
   fi
   DOC_DIR="$STAGING_DIR/doc"
@@ -154,7 +154,7 @@ function main() {
     echo "Staging documentation output left in $STAGING_DIR"
   else
     echo "Removing staging documentation output from $STAGING_DIR"
-    rm -rf "$STAGING_DIR"
+    rm -rf -- "$STAGING_DIR"
   fi
   echo "Wrote docs ZIP file to $DESTINATION"
 }

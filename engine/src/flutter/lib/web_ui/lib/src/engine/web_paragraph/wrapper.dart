@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-
 import 'package:ui/ui.dart' as ui;
-
 import 'code_unit_flags.dart';
-import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
@@ -58,8 +55,6 @@ class TextWrapper {
 
       if (hardLineBreak) {
         // Break the line and then continue with the current cluster as usual
-        WebParagraphDebug.log('isHardLineBreak: $index');
-
         line.consumePendingText();
 
         // This is the case when the ellipsis will be added to the empty line; weird...
@@ -70,7 +65,6 @@ class TextWrapper {
         }
       } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
-        WebParagraphDebug.log('isSoftLineBreak: $index');
         if (line.hasLeadingWhitespaces) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
           // these are the leading spaces and Flutter wants them to be preserved
@@ -130,7 +124,6 @@ class TextWrapper {
     if (!line.reachedMaxLines()) {
       // Special case: we have only whitespaces in the whole paragraph
       if (_layout.lines.isEmpty && line.hasOnlyWhitespaces) {
-        line._maxIntrinsicWidth = line._widthWhitespaces;
         line._minIntrinsicWidth = line._widthWhitespaces;
         line._longestLine = line._widthWhitespaces;
         line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
@@ -146,38 +139,35 @@ class TextWrapper {
       }
     }
 
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line._maxIntrinsicWidth);
+    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
+    // This empty line gets in a way of detecting line visual runs (there isn't any)
+    if (hardLineBreak) {
+      final emptyClusterRange = ClusterRange(
+        start: _layout.allClusters.length - 1,
+        end: _layout.allClusters.length - 1,
+      );
+      line._top += _layout.addLine(emptyClusterRange, emptyClusterRange, false, line._top);
+    }
+
     _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
     _longestLine = math.max(_longestLine, line._longestLine);
     _maxLineWidthWithTrailingSpaces = math.max(_longestLine, line._maxLineWidthWithTrailingSpaces);
     _height = line._top;
 
-    // TODO(jlavrova): Discuss with Mouad
-    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
-    // This empty line gets in a way of detecting line visual runs (there isn't any)
-    /*
-    if (hardLineBreak) {
-      final emptyClusterRange = ClusterRange(
-        start: _layout.textClusters.length - 1,
-        end: _layout.textClusters.length - 1,
-      );
-      _top +=_layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false, _top,);
-    }
-    */
-    /*
-    if (WebParagraphDebug.logging) {
-      for (int i = 0; i < _layout.lines.length; ++i) {
-        final TextLine line = _layout.lines[i];
-        final String text = _text.substring(line.textRange.start, line.textRange.end);
-        final String whitespaces =
-            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
-        final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
-        WebParagraphDebug.log(
-          '$i: "$text" [${line.textRange.start}:${line.textRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
-        );
+    _calculateMaxIntrinsicWidth();
+  }
+
+  void _calculateMaxIntrinsicWidth() {
+    var currentWidth = 0.0;
+    for (final WebCluster cluster in _layout.allClusters) {
+      if (_isHardLineBreak(cluster)) {
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, currentWidth);
+        currentWidth = 0.0;
+      } else {
+        currentWidth += cluster.advance.width;
       }
     }
-    */
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, currentWidth);
   }
 }
 
@@ -208,9 +198,6 @@ class _LineBuilder {
 
   double get minIntrinsicWidth => _minIntrinsicWidth;
   double _minIntrinsicWidth = 0.0;
-
-  double get maxIntrinsicWidth => _maxIntrinsicWidth;
-  double _maxIntrinsicWidth = 0.0;
 
   double get longestLine => _longestLine;
   double _longestLine = 0.0;
@@ -354,8 +341,6 @@ class _LineBuilder {
   ///
   /// Returns the height of the line.
   double build(bool hardLineBreak) {
-    // Update max intrinsic width.
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthConsumedText);
     _longestLine = math.max(_longestLine, _widthConsumedText);
     _maxLineWidthWithTrailingSpaces = math.max(
       _maxLineWidthWithTrailingSpaces,
@@ -410,9 +395,7 @@ class _LineBuilder {
     while (true) {
       if (clusterIndex <= start) {
         // We have removed all the clusters in this line and still can't fit the ellipsis
-        // Not sure what to do in this case
-        // TODO(jlavrova): Implement this case
-        assert(false, 'Ellipsizing requires removing the whole line, not implemented yet');
+        // Not really important. Could go without an ellipsis in this case.
         return false;
       }
       final WebCluster cluster = _layout.allClusters[clusterIndex - 1];
@@ -426,33 +409,23 @@ class _LineBuilder {
             ? ui.TextDirection.ltr
             : ui.TextDirection.rtl,
       );
-      WebParagraphDebug.log(
-        'Ellipsize: $clusterIndex $_widthConsumedText $_widthWhitespaces $_widthPendingText - $cutOffWidth - $widthCluster + ${ellipsisSpan.advanceWidth()!} ??? $_maxWidth',
-      );
       cutOffWidth += widthCluster;
       if (_isWhitespace(cluster)) {
         // We skip whitespaces when cutting off for ellipsis, so just continue
-        WebParagraphDebug.log('Ellipsize: whitespace');
       } else if (canFit(ellipsisSpan.advanceWidth()! - cutOffWidth)) {
-        WebParagraphDebug.log('Ellipsize: stop $clusterIndex');
         // We can fit the ellipsis now
         _layout.ellipsisClusters = ellipsisSpan.extractClusters();
         break;
-      } else {
-        WebParagraphDebug.log('Ellipsize: continue $clusterIndex');
       }
       // Remove this cluster, correct the structures and try again
       clusterIndex -= 1;
       if (clusterIndex >= _whitespaceEnd) {
-        WebParagraphDebug.log('Ellipsize: pending text >= $_whitespaceEnd');
         _widthPendingText -= widthCluster;
         _pendingTextEnd = clusterIndex;
       } else if (clusterIndex >= _whitespaceStart) {
-        WebParagraphDebug.log('Ellipsize: whitespaces => $_whitespaceStart');
         _widthWhitespaces -= widthCluster;
         _whitespaceEnd = clusterIndex;
       } else {
-        WebParagraphDebug.log('Ellipsize: consumed text >= $start');
         _widthConsumedText -= widthCluster;
         _whitespaceStart = clusterIndex;
         _whitespaceEnd = clusterIndex;

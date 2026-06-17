@@ -44,6 +44,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowBuild;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterRendererTest {
@@ -821,6 +823,23 @@ public class FlutterRendererTest {
     } finally {
       FlutterRenderer.debugForceSurfaceProducerGlTextures = false;
     }
+  }
+
+  @Test
+  @Config(sdk = 29)
+  public void createSurfaceProducer_usesSurfaceTextureWhenHardwareBufferDefect() {
+    // Setup: Simulate a Huawei device on API 29 where HardwareBuffer has known defects.
+    // See: https://github.com/flutter/flutter/issues/166481
+    ShadowBuild.setManufacturer("HUAWEI");
+
+    // Execute the behavior under test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Verify: Should return SurfaceTextureSurfaceProducer instead of ImageReaderSurfaceProducer.
+    assertTrue(
+        "Expected SurfaceTextureSurfaceProducer on Huawei API <= 29 due to HardwareBuffer defect causing video playback failures",
+        producer instanceof SurfaceTextureSurfaceProducer);
   }
 
   @Test

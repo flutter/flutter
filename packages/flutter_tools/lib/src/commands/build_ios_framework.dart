@@ -20,11 +20,14 @@ import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart'
+    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../version.dart';
 import 'build.dart';
+import 'darwin_add_to_app.dart';
 
 abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildFrameworkCommand({
@@ -34,6 +37,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required bool verboseHelp,
     Cache? cache,
     Platform? platform,
+    required this.codesign,
     required super.logger,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
@@ -48,6 +52,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     addDartObfuscationOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    usesDarwinCodeSignXCFrameworksOption();
 
     argParser
       ..addFlag(
@@ -102,6 +107,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         hide: !verboseHelp,
       );
   }
+  final DarwinAddToAppCodesigning codesign;
 
   final BuildSystem? _buildSystem;
   @protected
@@ -159,39 +165,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         .map((Directory d) => d.basename);
   }
 
-  /// Parses the NativeAssetsManifest.json in [outputDirectory] and returns a
-  /// mapping from asset ID to the path of the code asset within the bundle
-  /// (e.g., "MyFramework.framework/MyFramework").
-  static Map<String, String> parseNativeAssetsManifest(Directory outputDirectory) {
-    final File manifestFile = outputDirectory
-        .childDirectory('App.framework')
-        .childDirectory('flutter_assets')
-        .childFile('NativeAssetsManifest.json');
-    if (!manifestFile.existsSync()) {
-      return const <String, String>{};
-    }
-    final manifest = json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
-    final nativeAssets = manifest['native-assets'] as Map<String, Object?>?;
-    if (nativeAssets == null) {
-      return const <String, String>{};
-    }
-    final result = <String, String>{};
-    for (final Object? targetAssets in nativeAssets.values) {
-      if (targetAssets is! Map<String, Object?>) {
-        continue;
-      }
-      for (final MapEntry<String, Object?> entry in targetAssets.entries) {
-        final String assetId = entry.key;
-        final Object? pathInfo = entry.value;
-        if (pathInfo is List<Object?> && pathInfo.length >= 2) {
-          final path = pathInfo[1]! as String;
-          result[assetId] = path;
-        }
-      }
-    }
-    return result;
-  }
-
   /// Verifies that code assets built for physical devices and simulators are
   /// consistent.
   ///
@@ -202,12 +175,15 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
   ) {
-    final Map<String, String> deviceAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
+    final Map<String, String> deviceAssets = DarwinAddToAppNativeAssets.parseNativeAssetsManifest(
       iPhoneBuildOutput,
+      FlutterDarwinPlatform.ios,
     );
-    final Map<String, String> simulatorAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
-      simulatorBuildOutput,
-    );
+    final Map<String, String> simulatorAssets =
+        DarwinAddToAppNativeAssets.parseNativeAssetsManifest(
+          simulatorBuildOutput,
+          FlutterDarwinPlatform.ios,
+        );
 
     for (final String assetId in deviceAssets.keys) {
       final String deviceAssetPath = deviceAssets[assetId]!;
@@ -247,6 +223,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     String frameworkBinaryName,
     Directory outputDirectory,
     ProcessManager processManager,
+    String? codesignIdentity,
+    BuildMode buildMode,
   ) async {
     final xcframeworkCommand = <String>[
       'xcrun',
@@ -275,7 +253,189 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         'Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}',
       );
     }
+    if (codesignIdentity != null) {
+      await DarwinAddToAppCodesigning.codesign(
+        codesignIdentity: codesignIdentity,
+        artifact: outputDirectory.childDirectory('$frameworkBinaryName.xcframework'),
+        processManager: processManager,
+        buildMode: buildMode,
+      );
+    }
   }
+
+  /// Copies vendored frameworks from CocoaPods plugins to the output directory.
+  ///
+  /// Parses the Pods.xcodeproj/project.pbxproj to find vendored frameworks
+  /// in PBXGroups named "Frameworks", then copies them to the output directory.
+  /// This approach is more reliable than parsing podspecs because CocoaPods
+  /// has already resolved all paths, wildcards, and platform-specific entries.
+  ///
+  /// Note: This only copies frameworks from CocoaPods-based plugins.
+  /// Swift Package Manager support will be added in a separate command.
+  Future<void> copyVendoredFrameworks(
+    Directory modeDirectory,
+    Directory hostAppRoot,
+    PlistParser plistParser,
+  ) async {
+    final File projectFile = hostAppRoot
+        .childDirectory('Pods')
+        .childDirectory('Pods.xcodeproj')
+        .childFile('project.pbxproj');
+
+    if (!projectFile.existsSync()) {
+      globals.logger.printTrace('Pods.xcodeproj not found, skipping vendored frameworks');
+      return;
+    }
+
+    final List<String> frameworkPaths = parseVendoredFrameworksFromPbxproj(
+      projectFile,
+      plistParser,
+      globals.logger,
+    );
+
+    if (frameworkPaths.isEmpty) {
+      return;
+    }
+
+    final processedFrameworks = <String>{};
+    final Directory podsRoot = hostAppRoot.childDirectory('Pods');
+
+    for (final frameworkPath in frameworkPaths) {
+      final String frameworkName = globals.fs.path.basename(frameworkPath);
+
+      // Skip Flutter's own frameworks.
+      if (frameworkName == 'Flutter.framework' ||
+          frameworkName == 'Flutter.xcframework' ||
+          frameworkName == 'App.framework' ||
+          frameworkName == 'App.xcframework') {
+        continue;
+      }
+
+      // Framework paths from CocoaPods virtual groups (e.g. "Development Pods/[plugin]/Frameworks")
+      // may have a "../../../" prefix. Strip it so the path resolves correctly relative to Pods.
+      final String absolutePath = globals.fs.path.normalize(
+        globals.fs.path.join(podsRoot.path, frameworkPath.replaceFirst('../../../', '')),
+      );
+      final Directory frameworkEntity = globals.fs.directory(absolutePath);
+
+      if (!frameworkEntity.existsSync()) {
+        globals.logger.printTrace('Vendored framework not found: $absolutePath');
+        continue;
+      }
+
+      final String binaryName = globals.fs.path.basenameWithoutExtension(frameworkName);
+
+      // Skip if we've already processed this framework name
+      if (processedFrameworks.contains(binaryName)) {
+        continue;
+      }
+      processedFrameworks.add(binaryName);
+
+      final bool isXcframework = frameworkName.endsWith('.xcframework');
+      final bool isFramework = frameworkName.endsWith('.framework');
+      if (!isXcframework && !isFramework) {
+        continue;
+      }
+
+      final Directory destination = modeDirectory.childDirectory(frameworkName);
+      if (destination.existsSync()) {
+        continue;
+      }
+
+      final kind = isXcframework ? 'xcframework' : 'framework';
+      globals.logger.printTrace('Copying vendored $kind: $frameworkName');
+      copyDirectory(frameworkEntity, destination);
+    }
+  }
+}
+
+/// Parses vendored framework paths from a Pods.xcodeproj/project.pbxproj file.
+///
+/// This function uses PlistParser to parse the project.pbxproj file and finds
+/// all framework/xcframework references in PBXGroups named "Frameworks".
+///
+/// Returns a list of framework paths relative to the Pods directory.
+@visibleForTesting
+List<String> parseVendoredFrameworksFromPbxproj(
+  File projectFile,
+  PlistParser plistParser,
+  Logger logger,
+) {
+  final String? jsonContent = plistParser.plistJsonContent(projectFile.path);
+  if (jsonContent == null) {
+    logger.printTrace('Failed to parse project.pbxproj');
+    return <String>[];
+  }
+
+  final Map<String, Object?> projectData;
+  try {
+    projectData = json.decode(jsonContent) as Map<String, Object?>;
+  } on FormatException catch (e) {
+    logger.printTrace('Failed to decode project.pbxproj JSON: $e');
+    return <String>[];
+  }
+
+  final objects = projectData['objects'] as Map<String, Object?>?;
+  if (objects == null) {
+    return <String>[];
+  }
+
+  final results = <String>[];
+  final fileReferenceIds = <String>{};
+
+  // Find all PBXGroups named "Frameworks" and collect their children
+  for (final MapEntry<String, Object?> entry in objects.entries) {
+    final objectValue = entry.value as Map<String, Object?>?;
+    if (objectValue == null) {
+      continue;
+    }
+
+    final isa = objectValue['isa'] as String?;
+    if (isa != 'PBXGroup') {
+      continue;
+    }
+
+    final name = objectValue['name'] as String?;
+    if (name != 'Frameworks') {
+      continue;
+    }
+
+    final children = objectValue['children'] as List<Object?>?;
+    if (children == null) {
+      continue;
+    }
+
+    for (final Object? child in children) {
+      if (child is String) {
+        fileReferenceIds.add(child);
+      }
+    }
+  }
+
+  // Look up the file paths for each file reference
+  for (final refId in fileReferenceIds) {
+    final fileRef = objects[refId] as Map<String, Object?>?;
+    if (fileRef == null) {
+      continue;
+    }
+
+    final isa = fileRef['isa'] as String?;
+    if (isa != 'PBXFileReference') {
+      continue;
+    }
+
+    final path = fileRef['path'] as String?;
+    if (path == null) {
+      continue;
+    }
+
+    // Only include .framework and .xcframework files
+    if (path.endsWith('.framework') || path.endsWith('.xcframework')) {
+      results.add(path);
+    }
+  }
+
+  return results;
 }
 
 /// Produces a .framework for integration into a host iOS app. The .framework
@@ -290,6 +450,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required bool verboseHelp,
     super.cache,
     super.platform,
+    required super.codesign,
   }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();
 
@@ -352,6 +513,15 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)),
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
+
+    final String? codesignIdentity = await codesign.getCodesignIdentity(
+      buildInfo: buildInfos.first,
+      codesignEnabled: boolArg(FlutterOptions.kCodesign),
+      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
+      identityFile: outputDirectory.childFile('.codesign_identity'),
+      xcodeProject: project.ios,
+    );
+
     for (final buildInfo in buildInfos) {
       // Create the build-mode specific metadata.
       //
@@ -381,7 +551,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
       } else {
         // Copy Flutter.xcframework.
-        await _produceFlutterFramework(buildInfo, modeDirectory);
+        await _produceFlutterFramework(buildInfo, modeDirectory, codesignIdentity);
       }
 
       // Build aot, create module.framework and copy.
@@ -391,7 +561,13 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final Directory simulatorBuildOutput = modeDirectory.childDirectory(
         XcodeSdk.IPhoneSimulator.platformName,
       );
-      await _produceAppFramework(buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
+      await _produceAppFramework(
+        buildInfo,
+        modeDirectory,
+        iPhoneBuildOutput,
+        simulatorBuildOutput,
+        codesignIdentity,
+      );
 
       // Build and copy plugins.
       await processPodsIfNeeded(
@@ -407,6 +583,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           iPhoneBuildOutput,
           simulatorBuildOutput,
           modeDirectory,
+          codesignIdentity,
         );
       }
 
@@ -437,6 +614,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           frameworkName.replaceAll('.framework', ''),
           modeDirectory,
           globals.processManager,
+          codesignIdentity,
+          buildInfo.mode,
         );
       }
 
@@ -557,7 +736,11 @@ end
     }
   }
 
-  Future<void> _produceFlutterFramework(BuildInfo buildInfo, Directory modeDirectory) async {
+  Future<void> _produceFlutterFramework(
+    BuildInfo buildInfo,
+    Directory modeDirectory,
+    String? codesignIdentity,
+  ) async {
     final Status status = globals.logger.startProgress(' ├─Copying Flutter.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
       Artifact.flutterXcframework,
@@ -575,6 +758,14 @@ end
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
       );
+      if (codesignIdentity != null) {
+        await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
+          codesignIdentity: codesignIdentity,
+          xcframework: flutterFrameworkCopy,
+          processManager: globals.processManager,
+          buildMode: buildInfo.mode,
+        );
+      }
     } finally {
       status.stop();
     }
@@ -585,6 +776,7 @@ end
     Directory outputDirectory,
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
+    String? codesignIdentity,
   ) async {
     const appFrameworkName = 'App.framework';
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
@@ -606,7 +798,7 @@ end
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+            kTargetPlatform: TargetPlatform.ios.getName(),
             kIosArchs: defaultIOSArchsForEnvironment(
               sdkType,
               globals.artifacts!,
@@ -651,6 +843,8 @@ end
       'App',
       outputDirectory,
       globals.processManager,
+      codesignIdentity,
+      buildInfo.mode,
     );
   }
 
@@ -660,6 +854,7 @@ end
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
     Directory modeDirectory,
+    String? codesignIdentity,
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
@@ -743,9 +938,14 @@ end
             binaryName,
             modeDirectory,
             globals.processManager,
+            codesignIdentity,
+            mode,
           );
         }
       }
+
+      // Copy vendored frameworks from CocoaPods plugins.
+      await copyVendoredFrameworks(modeDirectory, project.ios.hostAppRoot, globals.plistParser);
     } finally {
       status.stop();
     }

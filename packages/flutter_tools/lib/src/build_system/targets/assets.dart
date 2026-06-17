@@ -108,6 +108,9 @@ Future<Depfile> copyAssets(
     }),
   };
 
+  // Suppress IconTreeShaker summary messages
+  final quiet = environment.defines[kBuildSwiftPackage] == 'true';
+
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource copyResource = await copyFilesPool.request();
@@ -152,10 +155,31 @@ Future<Depfile> copyAssets(
                 input: content.file as File,
                 outputPath: file.path,
                 relativePath: entry.key,
+                quiet: quiet,
               );
             case AssetKind.shader:
+              var inputToCompiler = content.file as File;
+              if (entry.value.transformers.isNotEmpty) {
+                transformResource = await transformPool.request();
+                final transformedShaderSourcePath = '${file.path}.transformed';
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+                  asset: inputToCompiler,
+                  outputPath: transformedShaderSourcePath,
+                  workingDirectory: environment.projectDir.path,
+                  transformerEntries: entry.value.transformers,
+                  logger: environment.logger,
+                );
+                if (failure != null) {
+                  throwToolExit(
+                    'User-defined transformation of shader "${entry.key}" failed.\n'
+                    '${failure.message}',
+                  );
+                }
+                inputToCompiler = environment.fileSystem.file(transformedShaderSourcePath);
+              }
+
               doCopy = !await shaderCompiler.compileShader(
-                input: content.file as File,
+                input: inputToCompiler,
                 outputPath: file.path,
                 targetPlatform: targetPlatform,
               );
@@ -221,6 +245,7 @@ Future<Depfile> copyAssets(
                   input: content.file as File,
                   outputPath: file.path,
                   relativePath: entry.key,
+                  quiet: quiet,
                 )) {
                   await (content.file as File).copy(file.path);
                 }
@@ -247,14 +272,14 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[DartBuildForNative(), KernelSnapshot()];
+  List<Target> get dependencies => const <Target>[LinkHooks(), KernelSnapshot()];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart',
     ),
-    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
+    Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -277,7 +302,7 @@ class CopyAssets extends Target {
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       output,

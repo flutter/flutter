@@ -162,7 +162,13 @@ class SimControl {
       '--json',
     ];
     _logger.printTrace(command.join(' '));
-    final RunResult results = await _processUtils.run(command);
+    final RunResult results;
+    try {
+      results = await _processUtils.run(command);
+    } on Exception catch (exception) {
+      _logger.printError('Error executing simctl:\n$exception');
+      return <String, Map<String, Object?>>{};
+    }
     if (results.exitCode != 0) {
       _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, Object?>>{};
@@ -185,6 +191,11 @@ class SimControl {
 
   /// Returns all the connected simulator devices.
   Future<List<BootedSimDevice>> getConnectedDevices() async {
+    if (!_xcode.isSimctlInstalled) {
+      _logger.printTrace('Skipping iOS simulator discovery because simctl is not available.');
+      return <BootedSimDevice>[];
+    }
+
     final Map<String, Object?> devicesSection = await _listBootedDevices();
 
     return <BootedSimDevice>[
@@ -559,6 +570,7 @@ class IOSSimulator extends Device {
         logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
     }

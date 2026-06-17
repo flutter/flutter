@@ -14,9 +14,10 @@ void main() {
     pageDelay: const Duration(seconds: 1),
     driverOps: (FlutterDriver driver) async {
       final SerializableFinder textfield = find.byValueKey('basic-textfield');
+      // ignore: unawaited_futures
       driver.tap(textfield);
       // Caret should be cached, so repeated blinking should not require recompute.
-      await Future<void>.delayed(const Duration(milliseconds: 5000));
+      await Future<void>.delayed(const Duration(seconds: 10));
     },
   );
 }

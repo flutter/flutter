@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
+import 'semantics_tester.dart';
 
 void main() {
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
@@ -960,9 +960,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: TextButton(
             autofocus: true,
             onPressed: () {},
@@ -987,9 +986,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: TextButton(
             focusNode: focusNode,
             onHover: (bool value) {
@@ -1018,9 +1016,8 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100.0,
             child: TextButton(
               onPressed: enabled ? () {} : null,
               onHover: (bool value) {
@@ -1575,32 +1572,30 @@ void main() {
     }
   });
 
-  testWidgets(
-    'TextButton uses InkSparkle only for Android non-web when useMaterial3 is true',
-    (WidgetTester tester) async {
-      final theme = ThemeData();
+  testWidgets('TextButton uses InkSparkle only for Android non-web when useMaterial3 is true', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: theme,
-          home: Center(
-            child: TextButton(onPressed: () {}, child: const Text('button')),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton(onPressed: () {}, child: const Text('button')),
         ),
-      );
+      ),
+    );
 
-      final InkWell buttonInkWell = tester.widget<InkWell>(
-        find.descendant(of: find.byType(TextButton), matching: find.byType(InkWell)),
-      );
+    final InkWell buttonInkWell = tester.widget<InkWell>(
+      find.descendant(of: find.byType(TextButton), matching: find.byType(InkWell)),
+    );
 
-      if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
-        expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
-      } else {
-        expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
-      }
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
+      expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
+    } else {
+      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('TextButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
     final theme = ThemeData(useMaterial3: false);
@@ -2005,11 +2000,11 @@ void main() {
   }
 
   testWidgets('TextButton statesController', (WidgetTester tester) async {
-    testStatesController(null, tester);
+    await testStatesController(null, tester);
   });
 
   testWidgets('TextButton.icon statesController', (WidgetTester tester) async {
-    testStatesController(const Icon(Icons.add), tester);
+    await testStatesController(const Icon(Icons.add), tester);
   });
 
   testWidgets('Disabled TextButton statesController', (WidgetTester tester) async {

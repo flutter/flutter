@@ -53,6 +53,7 @@ import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
 import 'suite_runners/run_android_engine_tests.dart';
+import 'suite_runners/run_android_hardware_smoke_tests.dart';
 import 'suite_runners/run_android_java17_integration_tool_tests.dart';
 import 'suite_runners/run_android_preview_integration_tool_tests.dart';
 import 'suite_runners/run_customer_testing_tests.dart';
@@ -142,6 +143,10 @@ Future<void> main(List<String> args) async {
           runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests': () =>
           runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_hardware_smoke_vulkan_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
+      'android_hardware_smoke_opengles_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
@@ -247,6 +252,7 @@ Future<void> _runIntegrationToolTests() async {
 
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));
+  await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'));
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {
@@ -354,6 +360,7 @@ Future<void> _runBuildTests() async {
         )
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'channels')))
+        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
         ..add(
@@ -363,6 +370,7 @@ Future<void> _runBuildTests() async {
           Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')),
         )
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
+        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'record_use_test_app')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 

@@ -10,8 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'button_tester.dart';
 import 'semantics_tester.dart';
-import 'utils.dart';
 
 void main() {
   setUp(() {
@@ -1146,9 +1146,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('semantics node cant be keyboard focusable but accessibility unfocusable', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('accessibilityBlockType also blocks keyboard focus', (WidgetTester tester) async {
     await tester.pumpWidget(
       Semantics(
         container: true,
@@ -1160,13 +1158,42 @@ void main() {
         child: const SizedBox(width: 10, height: 10),
       ),
     );
-    final Object? exception = tester.takeException();
-    expect(exception, isFlutterError);
-    final error = exception! as FlutterError;
-    expect(
-      error.message,
-      startsWith('A node that is keyboard focusable cannot be set to accessibility unfocusable'),
-    );
+
+    final SemanticsNode node = tester.getSemantics(find.byType(Semantics));
+    expect(node.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+    expect(node.getSemanticsData().flagsCollection.isFocused, Tristate.none);
+  });
+
+  testWidgets('Updating accessibilityFocusBlockType on parent updates children semantics', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame(AccessibilityFocusBlockType blockType) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          accessibilityFocusBlockType: blockType,
+          child: Semantics(
+            container: true,
+            label: 'child',
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(AccessibilityFocusBlockType.none));
+
+    SemanticsNode child = tester.semantics.find(find.bySemanticsLabel('child'));
+    expect(child.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, false);
+    expect(child.parent!.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, false);
+
+    // Rebuild with blockSubtree
+    await tester.pumpWidget(buildFrame(AccessibilityFocusBlockType.blockSubtree));
+
+    child = tester.semantics.find(find.bySemanticsLabel('child'));
+    expect(child.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+    expect(child.parent!.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
   });
 
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {

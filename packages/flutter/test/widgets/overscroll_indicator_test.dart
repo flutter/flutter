@@ -731,6 +731,56 @@ void main() {
       );
     });
   });
+
+  testWidgets('StretchingOverscrollIndicator does not crash when child is null', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: StretchingOverscrollIndicator(axisDirection: AxisDirection.down),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('GlowingOverscrollIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: GlowingOverscrollIndicator(
+              axisDirection: AxisDirection.down,
+              color: Color(0xFF112233),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(GlowingOverscrollIndicator)), Size.zero);
+  });
+
+  testWidgets('StretchingOverscrollIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: StretchingOverscrollIndicator(
+              axisDirection: AxisDirection.down,
+              child: ListView(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(StretchingOverscrollIndicator)), Size.zero);
+  });
 }
 
 class TestScrollBehavior1 extends ScrollBehavior {

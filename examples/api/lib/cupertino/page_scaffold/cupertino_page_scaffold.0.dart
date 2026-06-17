@@ -14,7 +14,7 @@ class PageScaffoldApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: PageScaffoldExample(),
     );
   }
@@ -40,7 +40,7 @@ class _PageScaffoldExampleState extends State<PageScaffoldExample> {
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Center(child: Text('You have pressed the button $_count times.')),
             const SizedBox(height: 20.0),

@@ -17,6 +17,7 @@ import 'basic.dart';
 import 'constants.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'localizations.dart';
@@ -437,7 +438,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
       _optionsViewController.show();
-    } else {
+    } else if (_optionsViewController.isShowing) {
       _optionsViewController.hide();
     }
   }
@@ -450,7 +451,20 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final String optionsHint = resultsAvailable
         ? localizations.searchResultsFound
         : localizations.noResultsFound;
-    SemanticsService.sendAnnouncement(View.of(context), optionsHint, localizations.textDirection);
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      optionsHint,
+      localizations.textDirection,
+    ).catchError((Object exception, StackTrace stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while sending semantics announcement'),
+        ),
+      );
+    });
   }
 
   // Assigning an ID to every call of _onChangedField is necessary to avoid a
@@ -516,6 +530,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
+    _lastFieldText = selectionString;
     widget.onSelected?.call(nextSelection);
     if (_optionsViewController.isShowing) {
       _optionsViewController.hide(); // Close the options view after a selection is made.
@@ -633,7 +648,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
-                child: child,
+                // Exclude the options overlay from the ambient focus
+                // traversal tree. Autocomplete options are navigated by
+                // arrow keys (via the widget's own shortcuts) and selected
+                // via Enter or tap, so they don't participate in TAB
+                // traversal. Without this, TAB from the field would
+                // detour into focusable items in the options overlay
+                // instead of advancing to the next form field.
+                child: ExcludeFocus(child: child),
               ),
             ),
           ),

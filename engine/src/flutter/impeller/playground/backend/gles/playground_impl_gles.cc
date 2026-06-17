@@ -17,9 +17,15 @@
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles/modern_shaders_gles.h"
+#include "impeller/entity/gles3/entity_shaders_gles.h"
+#include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/fixtures/gles/fixtures_shaders_gles.h"
 #include "impeller/fixtures/gles/modern_fixtures_shaders_gles.h"
+#include "impeller/fixtures/gles3/fixtures_shaders_gles.h"
+#include "impeller/fixtures/gles3/modern_fixtures_shaders_gles.h"
 #include "impeller/playground/imgui/gles/imgui_shaders_gles.h"
+#include "impeller/playground/imgui/gles3/imgui_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/surface_gles.h"
 
@@ -60,6 +66,9 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
   }
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
+
+static std::vector<std::shared_ptr<fml::Mapping>>
+ShaderLibraryMappingsForPlayground(bool is_gles3);
 
 PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
     : PlaygroundImpl(switches),
@@ -106,12 +115,75 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   worker_->SetReactionsAllowedOnCurrentThread(true);
 
   handle_.reset(window);
+
+  auto gl = std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver());
+  if (!gl->IsValid()) {
+    FML_LOG(ERROR) << "Proc table when creating a playground was invalid.";
+    return;
+  }
+
+  if (gl->GetDescription()->HasDebugExtension()) {
+    gl->DebugMessageCallbackKHR(
+        +[](GLenum /* source */, GLenum message_type, GLuint /* message_id */,
+            GLenum /* severity */, GLsizei /* length */, const GLchar* message,
+            const void* /* user_param */) {
+          switch (message_type) {
+            case GL_DEBUG_TYPE_ERROR_KHR:
+              FML_LOG(ERROR) << "GL Error: " << message;
+              return;
+            default:
+              return;
+          }
+        },
+        nullptr);
+
+#ifndef NDEBUG
+    gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+#endif
+  }
+  bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+  auto context_gles =
+      ContextGLES::Create(switches_.flags, std::move(gl),
+                          ShaderLibraryMappingsForPlayground(is_gles3), true);
+  if (!context_gles) {
+    FML_LOG(ERROR) << "Could not create context.";
+    return;
+  }
+
+  auto worker_id = context_gles->AddReactorWorker(worker_);
+  if (!worker_id.has_value()) {
+    FML_LOG(ERROR) << "Could not add reactor worker.";
+    return;
+  }
+  context_ = std::move(context_gles);
 }
 
 PlaygroundImplGLES::~PlaygroundImplGLES() = default;
 
 static std::vector<std::shared_ptr<fml::Mapping>>
-ShaderLibraryMappingsForPlayground() {
+ShaderLibraryMappingsForPlayground(bool is_gles3) {
+  if (is_gles3) {
+    return {
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_entity_shaders_gles3_data,
+            impeller_entity_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_shaders_gles3_data,
+            impeller_modern_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_framebuffer_blend_shaders_gles3_data,
+            impeller_framebuffer_blend_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_fixtures_shaders_gles3_data,
+            impeller_fixtures_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_fixtures_shaders_gles3_data,
+            impeller_modern_fixtures_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_imgui_shaders_gles3_data,
+            impeller_imgui_shaders_gles3_length),
+    };
+  }
   return {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
@@ -135,45 +207,7 @@ ShaderLibraryMappingsForPlayground() {
 
 // |PlaygroundImpl|
 std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
-  auto gl = std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver());
-  if (!gl->IsValid()) {
-    FML_LOG(ERROR) << "Proc table when creating a playground was invalid.";
-    return nullptr;
-  }
-
-  if (gl->GetDescription()->HasDebugExtension()) {
-    gl->DebugMessageCallbackKHR(
-        +[](GLenum /* source */, GLenum message_type, GLuint /* message_id */,
-            GLenum /* severity */, GLsizei /* length */, const GLchar* message,
-            const void* /* user_param */) {
-          switch (message_type) {
-            case GL_DEBUG_TYPE_ERROR_KHR:
-              FML_LOG(ERROR) << "GL Error: " << message;
-              return;
-            default:
-              return;
-          }
-        },
-        nullptr);
-
-#ifndef NDEBUG
-    gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
-#endif
-  }
-  auto context =
-      ContextGLES::Create(switches_.flags, std::move(gl),
-                          ShaderLibraryMappingsForPlayground(), true);
-  if (!context) {
-    FML_LOG(ERROR) << "Could not create context.";
-    return nullptr;
-  }
-
-  auto worker_id = context->AddReactorWorker(worker_);
-  if (!worker_id.has_value()) {
-    FML_LOG(ERROR) << "Could not add reactor worker.";
-    return nullptr;
-  }
-  return context;
+  return context_;
 }
 
 // |PlaygroundImpl|
@@ -225,6 +259,18 @@ fml::Status PlaygroundImplGLES::SetCapabilities(
   return fml::Status(
       fml::StatusCode::kUnimplemented,
       "PlaygroundImplGLES doesn't support setting the capabilities.");
+}
+
+RuntimeStageBackend PlaygroundImplGLES::GetRuntimeStageBackend() const {
+  const auto gl =
+      std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver());
+  if (!gl->IsValid()) {
+    FML_LOG(ERROR) << "Proc table was invalid. Assuming baseline OpenGL ES";
+    return RuntimeStageBackend::kOpenGLES;
+  }
+  bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+  return is_gles3 ? RuntimeStageBackend::kOpenGLES3
+                  : RuntimeStageBackend::kOpenGLES;
 }
 
 }  // namespace impeller

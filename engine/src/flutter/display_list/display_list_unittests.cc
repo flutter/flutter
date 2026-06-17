@@ -223,6 +223,16 @@ class DisplayListTestBase : public BaseT {
                            erode_bounds, desc + " LR&TB swapped, erode 2");
   }
 
+  static int CountOps(const sk_sp<DisplayList>& dl, DisplayListOpType op_type) {
+    int count = 0;
+    for (DlIndex i = 0; i < dl->GetRecordCount(); i++) {
+      if (dl->GetOpType(i) == op_type) {
+        count++;
+      }
+    }
+    return count;
+  }
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(DisplayListTestBase);
 };
@@ -5083,6 +5093,117 @@ TEST_F(DisplayListTest, DrawOvalRRectPromoteToDrawOval) {
   ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
+// DrawDiffRoundRect with an equivalent RoundRect draws the RoundRect.
+TEST_F(DisplayListTest, DrawDiffRoundRectPromoteToDrawRoundRect) {
+  DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset = 5.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+
+  DisplayListBuilder builder;
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
+  auto dl = builder.Build();
+
+  EXPECT_EQ(CountOps(dl, DisplayListOpType::kDrawDiffRoundRect), 0);
+  EXPECT_EQ(CountOps(dl, DisplayListOpType::kDrawRoundRect), 1);
+
+  DlScalar expected_stroke_width = inner_inset;
+  DlScalar half_width = expected_stroke_width * 0.5f;
+  DlRoundRect expected_round_rect = DlRoundRect::MakeRectRadii(
+      inner_rect.Expand(half_width),
+      {.top_left = DlSize(inner_radii.top_left.width + half_width),
+       .top_right = DlSize(inner_radii.top_right.width + half_width),
+       .bottom_left = DlSize(inner_radii.bottom_left.width + half_width),
+       .bottom_right = DlSize(inner_radii.bottom_right.width + half_width)});
+  DlPaint expected_paint = DlPaint()
+                               .setDrawStyle(DlDrawStyle::kStroke)
+                               .setStrokeWidth(expected_stroke_width);
+
+  DisplayListBuilder expected;
+  expected.DrawRoundRect(expected_round_rect, expected_paint);
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+// DrawDiffRoundRect with stroked paint does not have an equivalent RoundRect,
+// and draws the DiffRoundRect.
+TEST_F(DisplayListTest, DrawStrokedDiffRoundRectDoesNotPromoteToDrawRoundRect) {
+  // All values match the above
+  // `DrawDiffRoundRectPromoteToDrawRoundRect` test, except with a stroke paint.
+  DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset = 5.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kStroke);
+
+  DisplayListBuilder builder;
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
+  auto dl = builder.Build();
+
+  EXPECT_EQ(CountOps(dl, DisplayListOpType::kDrawDiffRoundRect), 1);
+  EXPECT_EQ(CountOps(dl, DisplayListOpType::kDrawRoundRect), 0);
+}
+
+// DrawDiffRoundRect with unequal side widths does not have an equivalent
+// RoundRect, and draws the DiffRoundRect.
+TEST_F(DisplayListTest,
+       DrawDiffRoundRectWithUnequalSidesDoesNotPromoteToDrawRoundRect) {
+  // All values match the above
+  // `DrawDiffRoundRectPromoteToDrawRoundRect` test, except the inner rect is
+  // inset by a different amount vertically and horizontally.
+  DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset_x = 5.0f;
+  DlScalar inner_inset_y = 4.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset_x, -inner_inset_y);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset_x),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset_x),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset_x),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset_x)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+
+  DisplayListBuilder builder;
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
+  auto dl = builder.Build();
+
+  EXPECT_EQ(CountOps(dl, DisplayListOpType::kDrawDiffRoundRect), 1);
+  EXPECT_EQ(CountOps(dl, DisplayListOpType::kDrawRoundRect), 0);
+}
+
 TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
   DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
 
@@ -5094,9 +5215,78 @@ TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest, DrawFilledRectangularLinesPromoteToDrawRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  // Unclosed set of lines forming 3 sides of a rectangle.
+  DlPath path = DlPathBuilder()
+                    .MoveTo(rect.GetLeftBottom())
+                    .LineTo(rect.GetLeftTop())
+                    .LineTo(rect.GetRightTop())
+                    .LineTo(rect.GetRightBottom())
+                    .TakePath();
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(path, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRect(rect, paint);
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest,
+       DrawStrokedUnclosedRectangularLinesDoesNotPromoteToDrawRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  // Unclosed set of lines forming 3 sides of a rectangle.
+  DlPath path = DlPathBuilder()
+                    .MoveTo(rect.GetLeftBottom())
+                    .LineTo(rect.GetLeftTop())
+                    .LineTo(rect.GetRightTop())
+                    .LineTo(rect.GetRightBottom())
+                    .TakePath();
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kStroke);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(path, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder rect_dl_builder;
+  rect_dl_builder.DrawRect(rect, paint);
+  auto rect_dl = rect_dl_builder.Build();
+
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, rect_dl));
+}
+
+TEST_F(DisplayListTest, DrawStrokedRectangularLinesPromoteToDrawRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  // Closed set of lines forming a full rectangle.
+  DlPath path = DlPathBuilder()
+                    .MoveTo(rect.GetLeftBottom())
+                    .LineTo(rect.GetLeftTop())
+                    .LineTo(rect.GetRightTop())
+                    .LineTo(rect.GetRightBottom())
+                    .Close()
+                    .TakePath();
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kStroke);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(path, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRect(rect, paint);
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
@@ -5110,9 +5300,7 @@ TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRoundRect) {
@@ -5127,12 +5315,31 @@ TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRoundRect) {
   expected.DrawRoundRect(rrect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
-TEST_F(DisplayListTest, DrawRectRoundRectPathPromoteToDrawRect) {
+TEST_F(DisplayListTest, DrawRRectPathUnequalRadiiPromoteToDrawRoundRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  DlRoundRect rrect =
+      DlRoundRect::MakeRectRadii(rect, {
+                                           DlSize(0.0f, 0.0f),  // top_left
+                                           DlSize(2.0f, 2.0f),  // top_right
+                                           DlSize(4.0f, 4.0f),  // bottom_right
+                                           DlSize(3.0f, 5.0f),  // bottom_left
+                                       });
+
+  DisplayListBuilder builder;
+  builder.DrawPath(DlPath::MakeRoundRect(rrect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRoundRect(rrect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRect) {
   DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
   DlRoundRect rrect = DlRoundRect::MakeRect(rect);
 
@@ -5144,9 +5351,22 @@ TEST_F(DisplayListTest, DrawRectRoundRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest, DrawLinePathPromoteToDrawLine) {
+  DlPoint start = DlPoint::MakeXY(10.0f, 10.0f);
+  DlPoint end = DlPoint::MakeXY(20.0f, 20.0f);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(DlPath::MakeLine(start, end), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawLine(start, end, DlPaint());
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
@@ -5161,9 +5381,7 @@ TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRectRRectPromoteToClipRect) {

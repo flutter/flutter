@@ -32,6 +32,7 @@ export interface BuildConfig {
   engineRevision: string;
   useLocalCanvasKit?: boolean;
   builds: ApplicationBuild[];
+  wasmHashes?: { [key: string]: string };
 }
 
 export interface BrowserEnvironment {
@@ -58,6 +59,7 @@ export interface FlutterConfiguration {
   canvasKitBaseUrl?: string;
   canvasKitVariant?: CanvasKitVariant;
   renderer?: WebRenderer;
+  preferWebParagraph?: boolean;
   enableWimp?: boolean;
   hostElement?: HTMLElement;
   fontFallbackBaseUrl?: string;

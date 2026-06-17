@@ -16,6 +16,18 @@
 
 namespace impeller {
 
+// The dimensions of `texture` at `mip_level`, clamped to a minimum of 1x1.
+// Rendering into a mip level uses that level's size, not the base size.
+static ISize SizeForMipLevel(const std::shared_ptr<Texture>& texture,
+                             uint32_t mip_level) {
+  ISize size = texture->GetSize();
+  // Any real texture reaches 1x1 well before this; clamping the shift also
+  // avoids undefined behavior for absurd mip levels.
+  uint32_t shift = std::min(mip_level, 31u);
+  return ISize{std::max<int64_t>(1, size.width >> shift),
+               std::max<int64_t>(1, size.height >> shift)};
+}
+
 RenderTarget::RenderTarget() = default;
 
 RenderTarget::~RenderTarget() = default;
@@ -34,10 +46,12 @@ bool RenderTarget::IsValid() const {
     std::optional<ISize> size;
     bool sizes_are_same = true;
     auto iterator = [&](const Attachment& attachment) -> bool {
+      ISize attachment_size =
+          SizeForMipLevel(attachment.texture, attachment.mip_level);
       if (!size.has_value()) {
-        size = attachment.texture->GetSize();
+        size = attachment_size;
       }
-      if (size != attachment.texture->GetSize()) {
+      if (size != attachment_size) {
         sizes_are_same = false;
         return false;
       }
@@ -155,7 +169,8 @@ bool RenderTarget::HasColorAttachment(size_t index) const {
 std::optional<ISize> RenderTarget::GetColorAttachmentSize(size_t index) const {
   if (index == 0u) {
     if (color0_.has_value()) {
-      return color0_.value().texture->GetSize();
+      return SizeForMipLevel(color0_.value().texture,
+                             color0_.value().mip_level);
     }
     return std::nullopt;
   }
@@ -165,7 +180,7 @@ std::optional<ISize> RenderTarget::GetColorAttachmentSize(size_t index) const {
     return std::nullopt;
   }
 
-  return found->second.texture->GetSize();
+  return SizeForMipLevel(found->second.texture, found->second.mip_level);
 }
 
 ISize RenderTarget::GetRenderTargetSize() const {
@@ -188,7 +203,7 @@ PixelFormat RenderTarget::GetRenderTargetPixelFormat() const {
   return PixelFormat::kUnknown;
 }
 
-size_t RenderTarget::GetMaxColorAttacmentBindIndex() const {
+size_t RenderTarget::GetMaxColorAttachmentBindIndex() const {
   size_t max = 0;
   for (const auto& color : colors_) {
     max = std::max(color.first, max);

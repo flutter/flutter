@@ -224,6 +224,8 @@ struct GLProc {
   PROC(StencilOpSeparate);                   \
   PROC(TexImage2D);                          \
   PROC(TexSubImage2D);                       \
+  PROC(CompressedTexImage2D);                \
+  PROC(CompressedTexSubImage2D);             \
   PROC(TexParameteri);                       \
   PROC(TexParameterfv);                      \
   PROC(Uniform1fv);                          \
@@ -265,8 +267,9 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(UniformBlockBinding);               \
   PROC(BindBufferRange);                   \
   PROC(WaitSync);                          \
-  PROC(RenderbufferStorageMultisample)     \
-  PROC(BlitFramebuffer);
+  PROC(RenderbufferStorageMultisample);    \
+  PROC(BlitFramebuffer);                   \
+  PROC(InvalidateFramebuffer);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \
@@ -283,7 +286,13 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(BeginQueryEXT);                      \
   PROC(EndQueryEXT);                        \
   PROC(GetQueryObjectuivEXT);               \
-  PROC(BlitFramebufferANGLE);
+  PROC(BlitFramebufferANGLE);               \
+  PROC(VertexAttribDivisor);                \
+  PROC(VertexAttribDivisorEXT);             \
+  PROC(DrawArraysInstanced);                \
+  PROC(DrawArraysInstancedEXT);             \
+  PROC(DrawElementsInstanced);              \
+  PROC(DrawElementsInstancedEXT);
 
 enum class DebugResourceType {
   kTexture,

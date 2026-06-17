@@ -18,20 +18,11 @@ class SkwasmRenderer extends Renderer {
 
   bool get isWimp => skwasmIsWimp();
 
+  @override
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
   @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
-
-  @override
-  ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) {
-    return LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
-  }
-
-  @override
-  ui.Path copyPath(ui.Path src) {
-    return LazyPath.fromLazyPath(src as LazyPath);
-  }
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
@@ -101,7 +92,7 @@ class SkwasmRenderer extends Renderer {
     ui.TileMode tmy,
     Float64List matrix4,
     ui.FilterQuality? filterQuality,
-  ) => SkwasmImageShader.imageShader(image as SkwasmImage, tmx, tmy, matrix4, filterQuality);
+  ) => SkwasmImageShader.imageShader(image, tmx, tmy, matrix4, filterQuality);
 
   @override
   ui.Gradient createLinearGradient(
@@ -126,6 +117,11 @@ class SkwasmRenderer extends Renderer {
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
       SkwasmParagraphBuilder(style as SkwasmParagraphStyle, fontCollection);
+
+  @override
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) {
+    throw UnimplementedError('WebParagraph is not supported on Skwasm');
+  }
 
   @override
   ui.ParagraphStyle createParagraphStyle({
@@ -155,9 +151,6 @@ class SkwasmRenderer extends Renderer {
     ellipsis: ellipsis,
     locale: locale,
   );
-
-  @override
-  ui.Path createPath() => LazyPath(pathConstructors);
 
   @override
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
@@ -313,7 +306,7 @@ class SkwasmRenderer extends Renderer {
     int? targetHeight,
     bool allowUpscaling = true,
   }) {
-    final pixelImage = SkwasmImage.fromPixels(pixels, width, height, format);
+    final EngineImage pixelImage = createSkwasmImageFromPixels(pixels, width, height, format);
     final ui.Image scaledImage = scaleImageIfNeeded(
       pixelImage,
       targetWidth: targetWidth,
@@ -448,13 +441,22 @@ class SkwasmRenderer extends Renderer {
 
   @override
   ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
-    return SkwasmImage(
-      imageCreateFromTextureSource(
-        imageSource,
-        imageSource.width,
-        imageSource.height,
-        (pictureToImageSurface as SkwasmSurface).handle,
-      ),
+    // Cache the dimensions before passing the image to the texture source creator,
+    // which may transfer ownership of the bitmap to a web worker and detach it.
+    final int width = imageSource.width;
+    final int height = imageSource.height;
+
+    final ImageHandle handle = imageCreateFromTextureSource(
+      imageSource,
+      width,
+      height,
+      (pictureToImageSurface as SkwasmSurface).handle,
+    );
+    return EngineImage(
+      SkwasmImage(handle),
+      width,
+      height,
+      imageSource: ImageBitmapImageSource(imageSource),
     );
   }
 
@@ -465,7 +467,10 @@ class SkwasmRenderer extends Renderer {
     required int height,
     required bool transferOwnership,
   }) async {
-    if (!transferOwnership) {
+    // If the caller does not wish to transfer ownership, or if the runtime environment
+    // is multi-threaded and the provided texture type cannot be natively transferred
+    // between threads, convert the texture to a transferable DomImageBitmap first.
+    if (!transferOwnership || (isMultiThreaded && !_isTransferable(textureSource))) {
       textureSource = (await createImageBitmap(textureSource, (
         x: 0,
         y: 0,
@@ -473,15 +478,17 @@ class SkwasmRenderer extends Renderer {
         height: height,
       ))).toJSAnyShallow;
     }
-    return SkwasmImage(
-      imageCreateFromTextureSource(
-        textureSource as JSObject,
-        width,
-        height,
-        (pictureToImageSurface as SkwasmSurface).handle,
-      ),
+    final ImageHandle handle = imageCreateFromTextureSource(
+      textureSource as JSObject,
+      width,
+      height,
+      (pictureToImageSurface as SkwasmSurface).handle,
     );
+    return EngineImage(SkwasmImage(handle), width, height);
   }
+
+  bool _isTransferable(JSAny object) =>
+      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
 
   @override
   void dumpDebugInfo() {

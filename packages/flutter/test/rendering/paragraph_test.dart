@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, ClipOp, Paragraph, TextBox;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -396,6 +397,57 @@ void main() {
 
     paragraph.paint(MockPaintingContext(), Offset.zero);
     expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
+  });
+
+  test('RenderParagraph devicePixelRatio control test', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+    pumpFrame(phase: EnginePhase.paint);
+
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    expect(paragraph.devicePixelRatio, 1.0);
+
+    paragraph.devicePixelRatio = 2.0;
+    expect(paragraph.devicePixelRatio, 2.0);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    // On the web, changing devicePixelRatio triggers a repaint.
+    expect(paragraph.debugNeedsPaint, kIsWeb);
+
+    if (kIsWeb) {
+      pumpFrame(phase: EnginePhase.paint);
+      expect(paragraph.debugNeedsPaint, isFalse);
+      paragraph.devicePixelRatio = 2.0;
+      expect(paragraph.debugNeedsPaint, isFalse);
+    }
+  });
+
+  test('RenderParagraph devicePixelRatio constructor test', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+      devicePixelRatio: 2.0,
+    );
+    expect(paragraph.devicePixelRatio, 2.0);
+  });
+
+  test('RenderParagraph.debugFillProperties', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+      devicePixelRatio: 2.5,
+    );
+    final builder = DiagnosticPropertiesBuilder();
+    paragraph.debugFillProperties(builder);
+
+    final List<DiagnosticsNode> nodes = builder.properties;
+    expect(
+      nodes.any((DiagnosticsNode node) => node.name == 'devicePixelRatio' && node.value == 2.5),
+      isTrue,
+    );
   });
 
   group('didExceedMaxLines', () {
@@ -1031,6 +1083,44 @@ void main() {
       expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/182776.
+    test('paints selection highlights outside fade layer and handles after text', () async {
+      final registrar = TestSelectionRegistrar();
+      const selectionColor = Color(0xAF6694e8);
+      final paragraph = RenderParagraph(
+        const TextSpan(text: 'a\na\na\na'),
+        textDirection: .ltr,
+        registrar: registrar,
+        selectionColor: selectionColor,
+        maxLines: 3,
+        overflow: .fade,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(paragraph.debugHasOverflowShader, isTrue);
+
+      for (final Selectable selectable in registrar.selectables) {
+        selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+        selectable.pushHandleLayers(LayerLink(), LayerLink());
+      }
+
+      final paintingContext = MockPaintingContext();
+      paragraph.paint(paintingContext, Offset.zero);
+
+      final List<String> operations = paintingContext.operations;
+      final int saveLayerIndex = operations.indexOf('saveLayer');
+      final int paragraphIndex = operations.indexOf('paragraph');
+      final int shaderRectIndex = operations.indexOf('shaderRect');
+      final int firstPushLayerIndex = operations.indexOf('pushLayer');
+
+      expect(saveLayerIndex, isNonNegative);
+      expect(paragraphIndex, greaterThan(saveLayerIndex));
+      expect(shaderRectIndex, greaterThan(paragraphIndex));
+      expect(firstPushLayerIndex, greaterThan(shaderRectIndex));
+      expect(operations.take(saveLayerIndex), contains('selectionRect'));
+      expect(operations.skip(saveLayerIndex), isNot(contains('selectionRect')));
+      expect(paintingContext.pushedLayers.whereType<LeaderLayer>(), hasLength(2));
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/126652.
     test('paints selection when tap at chinese character', () async {
       final registrar = TestSelectionRegistrar();
@@ -1508,39 +1598,150 @@ void main() {
 
     semanticsHandle.dispose();
   });
+
+  group('positionInlineChildren', () {
+    test('asserts when boxes length exceeds childCount', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(text: 'How are you \n'),
+        textDirection: TextDirection.ltr,
+      );
+
+      // Manually add two child RenderBoxes
+      final children = List<RenderBox>.generate(
+        2,
+        (_) => RenderConstrainedBox(
+          additionalConstraints: const BoxConstraints.tightFor(width: 10, height: 10),
+        ),
+      );
+      children.forEach(paragraph.add);
+      // Now childCount == 2
+
+      // Create 3 TextBoxes (more than children)
+      final boxes = List<ui.TextBox>.generate(
+        3,
+        (i) => ui.TextBox.fromLTRBD(i * 10.0, 0.0, (i + 1) * 10.0, 10.0, TextDirection.ltr),
+      );
+
+      expect(
+        // ignore: invalid_use_of_protected_member
+        () => paragraph.positionInlineChildren(boxes),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Invalid number of boxes provided'),
+          ),
+        ),
+      );
+    });
+
+    test('does not assert when boxes length is less than or equal to childCount', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(text: 'How are you \n'),
+        textDirection: TextDirection.ltr,
+      );
+
+      // Adding three children
+      final children = List<RenderBox>.generate(
+        3,
+        (_) => RenderConstrainedBox(
+          additionalConstraints: const BoxConstraints.tightFor(width: 10, height: 10),
+        ),
+      );
+      children.forEach(paragraph.add);
+      // childCount == 3
+
+      // Create 2 TextBoxes (less than the number of children)
+      final boxes = List<ui.TextBox>.generate(
+        2,
+        (i) => ui.TextBox.fromLTRBD(i * 10.0, 0.0, (i + 1) * 10.0, 10.0, TextDirection.ltr),
+      );
+
+      // We expect the function to not throw an exception
+      // ignore: invalid_use_of_protected_member
+      expect(() => paragraph.positionInlineChildren(boxes), returnsNormally);
+    });
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {
+  MockCanvas(this.operations);
+
+  final List<String> operations;
   Rect? drawnRect;
   Paint? drawnRectPaint;
   List<Type> drawnItemTypes = <Type>[];
+
+  @override
+  void save() {
+    operations.add('save');
+  }
+
+  @override
+  void saveLayer(Rect? bounds, Paint paint) {
+    operations.add('saveLayer');
+  }
+
+  @override
+  void clipRect(Rect rect, {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
+    operations.add('clipRect');
+  }
 
   @override
   void drawRect(Rect rect, Paint paint) {
     drawnRect = rect;
     drawnRectPaint = paint;
     drawnItemTypes.add(Rect);
+    operations.add(paint.shader == null ? 'selectionRect' : 'shaderRect');
   }
 
   @override
   void drawParagraph(ui.Paragraph paragraph, Offset offset) {
     drawnItemTypes.add(ui.Paragraph);
+    operations.add('paragraph');
+  }
+
+  @override
+  void restore() {
+    operations.add('restore');
+  }
+
+  @override
+  void translate(double dx, double dy) {
+    operations.add('translate');
   }
 
   void clear() {
     drawnRect = null;
     drawnRectPaint = null;
     drawnItemTypes.clear();
+    operations.clear();
   }
 }
 
 class MockPaintingContext extends Fake implements PaintingContext {
+  final List<String> operations = <String>[];
+
   @override
-  final MockCanvas canvas = MockCanvas();
+  late final MockCanvas canvas = MockCanvas(operations);
+
+  final List<ContainerLayer> pushedLayers = <ContainerLayer>[];
+
+  @override
+  void pushLayer(
+    ContainerLayer childLayer,
+    PaintingContextCallback painter,
+    Offset offset, {
+    Rect? childPaintBounds,
+  }) {
+    operations.add('pushLayer');
+    pushedLayers.add(childLayer);
+  }
 }
 
 class TestSelectionRegistrar extends SelectionRegistrar {
   final List<Selectable> selectables = <Selectable>[];
+
   @override
   void add(Selectable selectable) {
     selectables.add(selectable);
