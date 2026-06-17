@@ -14,20 +14,73 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import 'pixel_exact_local_file_comparator.dart';
+
 /// Captures the image bytes of the widget associated with [targetKey] and either compares it to a golden file or returns the bytes to the test driver for host-side comparison, depending on the value of [performAppSideGoldenCompare].
+///
+/// The optional [settleFuture] parameter allows injecting an asynchronous
+/// initialization or layout completion signal (such as a platform view creation
+/// event). If provided, execution will await [settleFuture] before capturing
+/// physical screen coordinates.
 Future<void> handleGoldenRequest(
   String testName,
   Completer<Map<String, Object?>> completer,
   bool performAppSideGoldenCompare,
   GlobalKey targetKey,
-  Future<String?> goldenVariant,
-) async {
+  Future<String?> goldenVariant, {
+  Future<void>? settleFuture,
+}) async {
   try {
     final String? goldenVariantValue = await goldenVariant;
+
+    if (testName == 'platformViewTest') {
+      // Platform views cannot be captured using RepaintBoundary.toImage() since they reside in separate
+      // native surface layers. Instead, we wait for layout to settle, calculate the widget's physical
+      // coordinates on screen, and return them so the runner can perform a compositor-level capture.
+      if (settleFuture != null) {
+        await settleFuture;
+      }
+      for (var i = 0; i < 3; i++) {
+        await WidgetsBinding.instance.endOfFrame;
+      }
+
+      final BuildContext? context = targetKey.currentContext;
+      if (context == null || !context.mounted) {
+        throw StateError(
+          'Failed to capture coordinates for $testName: targetKey is not mounted in the widget tree.',
+        );
+      }
+      final RenderObject? renderObject = context.findRenderObject();
+      if (renderObject is! RenderBox) {
+        throw StateError(
+          'Failed to capture coordinates for $testName: the associated RenderObject is not a RenderBox.',
+        );
+      }
+
+      final Offset position = renderObject.localToGlobal(Offset.zero);
+      final Size size = renderObject.size;
+      // We can assume one window for these tests since they are android-only.
+      final double devicePixelRatio = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+
+      final int x = (position.dx * devicePixelRatio).round();
+      final int y = (position.dy * devicePixelRatio).round();
+      final int w = (size.width * devicePixelRatio).round();
+      final int h = (size.height * devicePixelRatio).round();
+
+      completer.complete(<String, Object?>{
+        'message': 'Rendered $testName',
+        'x': x,
+        'y': y,
+        'width': w,
+        'height': h,
+      });
+      return;
+    }
+
     final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
 
     if (performAppSideGoldenCompare) {
-      final String? failureMessage = await _compareGoldenOnDevice(
+      final String? failureMessage = await compareGoldenOnDevice(
         testName,
         resultImageBytes,
         goldenVariantValue,
@@ -47,11 +100,18 @@ Future<void> handleGoldenRequest(
   }
 }
 
-Future<String?> _compareGoldenOnDevice(
+/// Compares [resultImageBytes] against the golden asset associated with
+/// [testName] and an optional [goldenVariant] on the device.
+///
+/// Returns an error message string if the comparison fails, or `null` if the
+/// image matches the golden perfectly.
+Future<String?> compareGoldenOnDevice(
   String testName,
   Uint8List resultImageBytes,
   String? goldenVariant,
 ) async {
+  goldenFileComparator = const PixelExactLocalFileComparator();
+
   final io.Directory tempDir = await getTemporaryDirectory();
   final variantSuffix = (goldenVariant != null && goldenVariant.isNotEmpty)
       ? '.$goldenVariant'
@@ -108,6 +168,12 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   }
 
   final RenderObject? renderObject = context.findRenderObject();
+  if (renderObject == null) {
+    throw StateError(
+      'Failed to capture screenshot for $testName: the associated RenderObject is null.',
+    );
+  }
+
   if (renderObject is! RenderRepaintBoundary) {
     throw StateError(
       'Failed to capture screenshot for $testName: the associated RenderObject is not a RenderRepaintBoundary.',
