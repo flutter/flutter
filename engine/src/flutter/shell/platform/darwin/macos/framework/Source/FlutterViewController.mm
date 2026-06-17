@@ -798,16 +798,26 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 - (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
                                           commandQueue:(id<MTLCommandQueue>)commandQueue {
   FlutterDartProject* project = _project ?: self.engine.project;
+  BOOL enableWideGamut = project.enableWideGamut;
+  const std::vector<std::string>& switches = self.engine.switches;
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+    enableWideGamut = NO;
+  }
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
                                  viewIdentifier:_viewIdentifier
-                                enableWideGamut:project.enableWideGamut];
+                                enableWideGamut:enableWideGamut];
 }
 
 - (void)updateWideGamutForScreen {
   FlutterDartProject* project = _project ?: self.engine.project;
-  if (!project.enableWideGamut) {
+  BOOL enableWideGamut = project.enableWideGamut;
+  const std::vector<std::string>& switches = self.engine.switches;
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+    enableWideGamut = NO;
+  }
+  if (!enableWideGamut) {
     return;
   }
   NSScreen* screen = self.view.window.screen;
