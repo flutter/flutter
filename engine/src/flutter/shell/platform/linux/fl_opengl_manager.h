@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_OPENGL_MANAGER_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_OPENGL_MANAGER_H_
 
+#include <epoxy/gl.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
@@ -63,6 +64,46 @@ gboolean fl_opengl_manager_make_platform_current(FlOpenGLManager* manager);
  * Returns: %TRUE if the context cleared.
  */
 gboolean fl_opengl_manager_clear_current(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_get_program:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the shader program used for rendering Flutter content.
+ *
+ * Returns: the shader program.
+ */
+GLuint fl_opengl_manager_get_program(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_get_vertex_buffer:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the vertex buffer object containing vertices for a uniform square.
+ *
+ * Returns: the vertex buffer object.
+ */
+GLuint fl_opengl_manager_get_vertex_buffer(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_get_offset_location:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the location of the offset uniform in the shader program.
+ *
+ * Returns: the location of the offset uniform.
+ */
+GLuint fl_opengl_manager_get_offset_location(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_get_scale_location:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the location of the scale uniform in the shader program.
+ *
+ * Returns: the location of the scale uniform.
+ */
+GLuint fl_opengl_manager_get_scale_location(FlOpenGLManager* manager);
 
 G_END_DECLS
 

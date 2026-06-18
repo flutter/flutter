@@ -341,6 +341,73 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   cairo_destroy(cr);
 }
 
+TEST(FlCompositorOpenGLTest, SharedShaders) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+
+  // Shaders must be compiled exactly once regardless of how many compositors
+  // share the same FlOpenGLManager.
+  EXPECT_CALL(epoxy, glCreateProgram).Times(1);
+  EXPECT_CALL(epoxy, glCreateShader(GL_VERTEX_SHADER)).Times(1);
+  EXPECT_CALL(epoxy, glCreateShader(GL_FRAGMENT_SHADER)).Times(1);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(engine);
+
+  constexpr size_t width = 100;
+  constexpr size_t height = 100;
+
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+
+  // Two compositors sharing the same OpenGL manager.
+  g_autoptr(FlCompositorOpenGL) compositor1 =
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
+  g_autoptr(FlCompositorOpenGL) compositor2 =
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
+
+  g_autoptr(FlFramebuffer) framebuffer1 =
+      fl_framebuffer_new(GL_RGB, width, height, FALSE);
+  FlutterBackingStore backing_store1 = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.framebuffer = {.user_data = framebuffer1}}};
+  FlutterLayer layer1 = {.type = kFlutterLayerContentTypeBackingStore,
+                         .backing_store = &backing_store1,
+                         .offset = {0, 0},
+                         .size = {width, height}};
+  const FlutterLayer* layers1[1] = {&layer1};
+  std::thread([&]() {
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor1), layers1, 1);
+  }).join();
+
+  g_autoptr(FlFramebuffer) framebuffer2 =
+      fl_framebuffer_new(GL_RGB, width, height, FALSE);
+  FlutterBackingStore backing_store2 = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.framebuffer = {.user_data = framebuffer2}}};
+  FlutterLayer layer2 = {.type = kFlutterLayerContentTypeBackingStore,
+                         .backing_store = &backing_store2,
+                         .offset = {0, 0},
+                         .size = {width, height}};
+  const FlutterLayer* layers2[1] = {&layer2};
+  std::thread([&]() {
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor2), layers2, 1);
+  }).join();
+
+  size_t frame_width1, frame_height1;
+  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor1), &frame_width1,
+                               &frame_height1);
+  EXPECT_EQ(frame_width1, width);
+  EXPECT_EQ(frame_height1, height);
+
+  size_t frame_width2, frame_height2;
+  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor2), &frame_width2,
+                               &frame_height2);
+  EXPECT_EQ(frame_width2, width);
+  EXPECT_EQ(frame_height2, height);
+}
+
 TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();

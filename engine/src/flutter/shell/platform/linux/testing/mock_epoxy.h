@@ -30,6 +30,8 @@ class MockEpoxy {
                const EGLint* attrib_list));
   MOCK_METHOD(EGLBoolean, eglDestroyImageKHR, (EGLDisplay dpy, EGLImage image));
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
+  MOCK_METHOD(GLuint, glCreateProgram, ());
+  MOCK_METHOD(GLuint, glCreateShader, (GLenum shaderType));
   MOCK_METHOD(void,
               glBlitFramebuffer,
               (GLint srcX0,
