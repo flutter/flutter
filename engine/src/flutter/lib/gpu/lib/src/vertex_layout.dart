@@ -63,6 +63,28 @@ enum VertexFormat {
   final int componentCount;
 }
 
+/// Controls how a [VertexBuffer] advances through its elements while drawing.
+///
+/// The step mode is a property of the buffer slot, not of an individual
+/// attribute. All attributes in the same [VertexBuffer] advance together.
+enum VertexStepMode {
+  /// Advance to the next buffer element for each vertex.
+  ///
+  /// This is the default mode and is appropriate for ordinary mesh data such
+  /// as positions, normals, texture coordinates, and vertex colors. During an
+  /// instanced draw, a vertex-rate buffer supplies the same sequence of vertex
+  /// elements to every instance.
+  vertex,
+
+  /// Advance to the next buffer element for each instance.
+  ///
+  /// Use this for per-instance data such as an object offset, transform, or
+  /// tint color. During a draw with `instanceCount: n`, the first instance
+  /// reads element 0 from this buffer, the second instance reads element 1,
+  /// and so on.
+  instance,
+}
+
 /// Describes a single vertex attribute: which shader input it feeds (by name),
 /// its byte offset within the owning vertex buffer's element, and its format.
 ///
@@ -100,27 +122,33 @@ final class VertexAttribute {
   final int offsetInBytes;
 }
 
-/// Describes one vertex buffer slot: its per-element stride and the
-/// attributes that are read from it.
+/// Describes one vertex buffer slot: its per-element stride, step mode, and
+/// the attributes that are read from it.
 ///
 /// A buffer's position in [VertexLayout.buffers] determines the binding
 /// slot it is bound to via [RenderPass.bindVertexBuffer]; the first buffer
 /// is slot 0, the second is slot 1, and so on. Sparse binding slots are
 /// not currently supported.
 ///
-/// Step mode (vertex vs instance) and instance step rate are not yet
-/// configurable; every buffer currently advances per vertex. Both options
-/// will be added later as named parameters with sensible defaults, and the
-/// addition will be a non-breaking change for existing call sites.
-// TODO(https://github.com/flutter/flutter/issues/186307): Allow specifying
-// vertex step mode and instance step rate.
+/// The [stepMode] determines whether the buffer advances once per vertex or
+/// once per instance. Keep the default [VertexStepMode.vertex] for mesh data
+/// that describes the geometry being repeated. Use [VertexStepMode.instance]
+/// for data that changes from one instance to the next when calling
+/// [RenderPass.draw] or [RenderPass.drawIndexed] with an `instanceCount`
+/// greater than 1.
+// TODO(https://github.com/flutter/flutter/issues/186307): Add support for
+// instance step rates greater than one.
 // TODO(https://github.com/flutter/flutter/issues/186308): Allow sparse
 // vertex buffer binding slots.
 final class VertexBuffer {
   /// Creates a vertex buffer slot description with the given per-element
   /// [strideInBytes] and the list of [attributes] that the vertex shader
   /// reads from this buffer.
-  const VertexBuffer({required this.strideInBytes, required this.attributes});
+  const VertexBuffer({
+    required this.strideInBytes,
+    required this.attributes,
+    this.stepMode = VertexStepMode.vertex,
+  });
 
   /// Byte distance from the start of one element to the start of the next
   /// element in this vertex buffer (not the gap between an element's end and
@@ -132,6 +160,13 @@ final class VertexBuffer {
 
   /// Attributes read from this vertex buffer by the vertex shader.
   final List<VertexAttribute> attributes;
+
+  /// How this vertex buffer advances while drawing.
+  ///
+  /// Defaults to [VertexStepMode.vertex]. Set this to
+  /// [VertexStepMode.instance] when the buffer contains one element per
+  /// instance rather than one element per vertex.
+  final VertexStepMode stepMode;
 }
 
 /// A complete vertex input layout: zero or more vertex buffer slots and the
