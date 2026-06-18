@@ -70,9 +70,6 @@ struct _FlView {
   // Monitor to track window state.
   FlWindowStateMonitor* window_state_monitor;
 
-  // Signal subscription for window delete event.
-  guint window_delete_event_cb_id;
-
   // Manages scrolling events.
   FlScrollingManager* scrolling_manager;
 
@@ -533,9 +530,9 @@ static void realize_cb(FlView* self) {
                                   GTK_WINDOW(toplevel_window));
 
   // Handle requests by the user to close the application.
-  self->window_delete_event_cb_id =
-      g_signal_connect_swapped(toplevel_window, "delete-event",
-                               G_CALLBACK(window_delete_event_cb), self);
+  g_signal_connect_object(toplevel_window, "delete-event",
+                          G_CALLBACK(window_delete_event_cb), self,
+                          G_CONNECT_SWAPPED);
 
   // Flutter engine will need to make the context current from raster thread
   // during initialization.
@@ -628,11 +625,6 @@ static void fl_view_dispose(GObject* object) {
   if (self->update_semantics_cb_id != 0) {
     g_signal_handler_disconnect(self->engine, self->update_semantics_cb_id);
     self->update_semantics_cb_id = 0;
-  }
-
-  if (self->window_delete_event_cb_id != 0) {
-    g_signal_handler_disconnect(self->engine, self->window_delete_event_cb_id);
-    self->window_delete_event_cb_id = 0;
   }
 
   g_clear_object(&self->render_context);
