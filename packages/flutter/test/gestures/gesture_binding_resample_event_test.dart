@@ -26,8 +26,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
 
   @override
   Duration get currentSystemFrameTimeStamp {
-    assert(frameTime != null);
-    return frameTime!;
+    return frameTime ?? Duration.zero;
   }
 
   @override
