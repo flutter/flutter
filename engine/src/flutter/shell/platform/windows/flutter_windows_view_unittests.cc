@@ -187,19 +187,16 @@ FlutterProjectBundle GetTestProject(
 class ViewTestEGLManager : public egl::MockManager {
  public:
   ViewTestEGLManager() {
-    ON_CALL(*this, CreateWindowSurface)
-        .WillByDefault([](HWND, size_t, size_t) {
-          auto surface = std::make_unique<NiceMock<egl::MockWindowSurface>>();
-          ON_CALL(*surface, IsValid).WillByDefault(Return(true));
-          ON_CALL(*surface, MakeCurrent).WillByDefault(Return(true));
-          ON_CALL(*surface, SetVSyncEnabled).WillByDefault(Return(true));
-          ON_CALL(*surface, Destroy).WillByDefault(Return(true));
-          return surface;
-        });
-    ON_CALL(*this, render_context)
-        .WillByDefault(Return(&mock_context_));
-    ON_CALL(*this, resource_context)
-        .WillByDefault(Return(&mock_context_));
+    ON_CALL(*this, CreateWindowSurface).WillByDefault([](HWND, size_t, size_t) {
+      auto surface = std::make_unique<NiceMock<egl::MockWindowSurface>>();
+      ON_CALL(*surface, IsValid).WillByDefault(Return(true));
+      ON_CALL(*surface, MakeCurrent).WillByDefault(Return(true));
+      ON_CALL(*surface, SetVSyncEnabled).WillByDefault(Return(true));
+      ON_CALL(*surface, Destroy).WillByDefault(Return(true));
+      return surface;
+    });
+    ON_CALL(*this, render_context).WillByDefault(Return(&mock_context_));
+    ON_CALL(*this, resource_context).WillByDefault(Return(&mock_context_));
     ON_CALL(mock_context_, ClearCurrent).WillByDefault(Return(true));
     ON_CALL(mock_context_, MakeCurrent).WillByDefault(Return(true));
   }
@@ -221,21 +218,17 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine(
   if (impeller_switch == EnabledImpeller) {
     modifier.SetEGLManager(std::make_unique<NiceMock<ViewTestEGLManager>>());
     modifier.embedder_api().Run = MOCK_ENGINE_PROC(
-        Run,
-        ([](size_t version,
-            const FlutterRendererConfig* config,
-            const FlutterProjectArgs* args,
-            void* user_data,
-            FLUTTER_API_SYMBOL(FlutterEngine)* engine) {
+        Run, ([](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine) * engine) {
           *engine =
               reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x12345678);
           return kSuccess;
         }));
 
     modifier.embedder_api().Shutdown = MOCK_ENGINE_PROC(
-        Shutdown, ([](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
-          return kSuccess;
-        }));
+        Shutdown,
+        ([](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; }));
 
     modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
         UpdateLocales, ([](FLUTTER_API_SYMBOL(FlutterEngine) engine,
@@ -245,11 +238,10 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine(
     modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
         UpdateAccessibilityFeatures,
         ([](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-           FlutterAccessibilityFeature flags) { return kSuccess; }));
+            FlutterAccessibilityFeature flags) { return kSuccess; }));
 
     modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
-        PostRenderThreadTask,
-        ([](auto engine, auto callback, auto context) {
+        PostRenderThreadTask, ([](auto engine, auto callback, auto context) {
           callback(context);
           return kSuccess;
         }));
@@ -305,8 +297,7 @@ class MockFlutterWindowsEngine : public FlutterWindowsEngine {
 // Ensure that submenu buttons have their expanded/collapsed status set
 // apropriately.
 TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(EnabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
@@ -416,7 +407,7 @@ TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
 // The view's surface must be destroyed after the engine is shutdown.
 // See: https://github.com/flutter/flutter/issues/124463
 TEST(FlutterWindowsViewTest, Shutdown) {
-  auto engine = std::make_unique<MockFlutterWindowsEngine>(DisabledImpeller);
+  auto engine = std::make_unique<MockFlutterWindowsEngine>(EnabledImpeller);
   auto window_binding_handler =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   auto egl_manager = std::make_unique<egl::MockManager>();
@@ -467,8 +458,7 @@ TEST(FlutterWindowsViewTest, Shutdown) {
 }
 
 TEST(FlutterWindowsViewTest, KeySequence) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
 
   test_response = false;
 
@@ -487,8 +477,7 @@ TEST(FlutterWindowsViewTest, KeySequence) {
 }
 
 TEST(FlutterWindowsViewTest, KeyEventCallback) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
 
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
@@ -518,8 +507,7 @@ TEST(FlutterWindowsViewTest, KeyEventCallback) {
 }
 
 TEST(FlutterWindowsViewTest, EnableSemantics) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
 
   bool semantics_enabled = false;
@@ -542,8 +530,7 @@ TEST(FlutterWindowsViewTest, EnableSemantics) {
 }
 
 TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
@@ -645,8 +632,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
 //
 // node0 and node2 are grouping nodes. node1 and node2 are static text nodes.
 TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdateWithChildren) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
@@ -848,8 +834,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdateWithChildren) {
 //
 // node1 is a grouping node, node0 is a static text node.
 TEST(FlutterWindowsViewTest, NonZeroSemanticsRoot) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
@@ -1298,8 +1283,7 @@ TEST_F(WindowsTest, WindowResizeWithoutSurface) {
 }
 
 TEST(FlutterWindowsViewTest, WindowRepaintTests) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
 
   FlutterWindowsView view{kImplicitViewId, engine.get(),
@@ -1325,8 +1309,7 @@ TEST(FlutterWindowsViewTest, WindowRepaintTests) {
 // This test ensures that the native state of Checkboxes on Windows,
 // specifically, is updated as desired.
 TEST(FlutterWindowsViewTest, CheckboxNativeState) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
@@ -1475,8 +1458,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
 
 // Ensure that switches have their toggle status set apropriately
 TEST(FlutterWindowsViewTest, SwitchNativeState) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
@@ -1599,8 +1581,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
 }
 
 TEST(FlutterWindowsViewTest, TooltipNodeData) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
@@ -1661,7 +1642,7 @@ TEST(FlutterWindowsViewTest, TooltipNodeData) {
 // The surface is updated on the platform thread at startup.
 TEST(FlutterWindowsViewTest, DisablesVSyncAtStartup) {
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
-  auto engine = std::make_unique<MockFlutterWindowsEngine>(DisabledImpeller,
+  auto engine = std::make_unique<MockFlutterWindowsEngine>(EnabledImpeller,
                                                            windows_proc_table);
   auto egl_manager = std::make_unique<egl::MockManager>();
   egl::MockContext render_context;
@@ -1699,7 +1680,7 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAtStartup) {
 // The surface is updated on the platform thread at startup.
 TEST(FlutterWindowsViewTest, EnablesVSyncAtStartup) {
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
-  auto engine = std::make_unique<MockFlutterWindowsEngine>(DisabledImpeller,
+  auto engine = std::make_unique<MockFlutterWindowsEngine>(EnabledImpeller,
                                                            windows_proc_table);
   auto egl_manager = std::make_unique<egl::MockManager>();
   egl::MockContext render_context;
@@ -1736,7 +1717,7 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAtStartup) {
 // The surface is updated on the raster thread if the engine is running.
 TEST(FlutterWindowsViewTest, DisablesVSyncAfterStartup) {
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
-  auto engine = std::make_unique<MockFlutterWindowsEngine>(DisabledImpeller,
+  auto engine = std::make_unique<MockFlutterWindowsEngine>(EnabledImpeller,
                                                            windows_proc_table);
   auto egl_manager = std::make_unique<egl::MockManager>();
   egl::MockContext render_context;
@@ -1781,7 +1762,7 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAfterStartup) {
 // The surface is updated on the raster thread if the engine is running.
 TEST(FlutterWindowsViewTest, EnablesVSyncAfterStartup) {
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
-  auto engine = std::make_unique<MockFlutterWindowsEngine>(DisabledImpeller,
+  auto engine = std::make_unique<MockFlutterWindowsEngine>(EnabledImpeller,
                                                            windows_proc_table);
   auto egl_manager = std::make_unique<egl::MockManager>();
   egl::MockContext render_context;
@@ -1830,7 +1811,7 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAfterStartup) {
 // screen tearing.
 TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
-  auto engine = std::make_unique<MockFlutterWindowsEngine>(DisabledImpeller,
+  auto engine = std::make_unique<MockFlutterWindowsEngine>(EnabledImpeller,
                                                            windows_proc_table);
   auto egl_manager = std::make_unique<egl::MockManager>();
   egl::MockContext render_context;
@@ -1892,8 +1873,7 @@ TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
 }
 
 TEST(FlutterWindowsViewTest, FocusTriggersWindowFocus) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   auto window_binding_handler =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   EXPECT_CALL(*window_binding_handler, Focus()).WillOnce(Return(true));
@@ -1904,8 +1884,7 @@ TEST(FlutterWindowsViewTest, FocusTriggersWindowFocus) {
 }
 
 TEST(FlutterWindowsViewTest, OnFocusTriggersSendFocusViewEvent) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   auto window_binding_handler =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   std::unique_ptr<FlutterWindowsView> view =
@@ -1930,8 +1909,7 @@ TEST(FlutterWindowsViewTest, OnFocusTriggersSendFocusViewEvent) {
 }
 
 TEST(FlutterWindowsViewTest, WindowMetricsEventContainsDisplayId) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
 
   auto window_binding_handler =
@@ -1947,8 +1925,7 @@ TEST(FlutterWindowsViewTest, WindowMetricsEventContainsDisplayId) {
 }
 
 TEST(FlutterWindowsViewTest, SizeChangeTriggersMetricsEventWhichHasDisplayId) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
   EngineModifier modifier(engine.get());
 
   auto window_binding_handler =
@@ -1975,8 +1952,7 @@ TEST(FlutterWindowsViewTest, SizeChangeTriggersMetricsEventWhichHasDisplayId) {
 // Verify that the first frame callback fires after OnFramePresented (OpenGL
 // rendering path).
 TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnFramePresented) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
 
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
@@ -1998,8 +1974,7 @@ TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnFramePresented) {
 // Verify that the first frame callback fires after PresentSoftwareBitmap
 // (software rendering path).
 TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnSoftwareBitmapPresent) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
 
   auto window_binding_handler =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
@@ -2026,8 +2001,7 @@ TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnSoftwareBitmapPresent) {
 // Verify that the first frame callback fires only once, even if multiple
 // frames are presented.
 TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnlyOnce) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
 
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
@@ -2049,8 +2023,7 @@ TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnlyOnce) {
 // Verify that the first frame callback does not fire if PresentSoftwareBitmap
 // fails.
 TEST(FlutterWindowsViewTest, FirstFrameCallbackSkippedOnFailedSoftwarePresent) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(DisabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(EnabledImpeller);
 
   auto window_binding_handler =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
