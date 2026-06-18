@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../primitives/image.dart';
 import '../web_paragraph/painter.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
@@ -14,7 +13,7 @@ import 'image.dart';
 class CanvasKitPainter extends WebParagraphPainter {
   CanvasKitPainter(super.paragraph);
 
-  EngineImage? _singleImageCache;
+  CkImage? _singleImageCache;
 
   @override
   bool get hasCache => _singleImageCache != null;
@@ -36,6 +35,7 @@ class CanvasKitPainter extends WebParagraphPainter {
   }) {
     final double dpr = ui.window.devicePixelRatio;
     if (_lastDevicePixelRatio != dpr) {
+      // We need to clear the image cache whenever the device pixel ratio changes
       clearCache();
     }
     _lastDevicePixelRatio = dpr;
@@ -58,11 +58,7 @@ class CanvasKitPainter extends WebParagraphPainter {
       if (skImage == null) {
         throw Exception('Failed to convert text image bitmap to an SkImage.');
       }
-      _singleImageCache = EngineImage(
-        CkImageDelegate(skImage),
-        skImage.width().toInt(),
-        skImage.height().toInt(),
-      );
+      _singleImageCache = CkImage(skImage);
     }
 
     canvas.drawImageRect(

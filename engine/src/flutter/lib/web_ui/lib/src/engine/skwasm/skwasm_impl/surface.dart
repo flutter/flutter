@@ -147,38 +147,20 @@ class SkwasmSurface implements OffscreenSurface {
   @override
   Future<ByteData> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
     await initialized;
-
-    final engineImage = image as EngineImage;
-    assert(
-      engineImage.backendImage is SkwasmImage,
-      'The image being rasterized must be a Skwasm image.',
-    );
-    final skwasmImage = engineImage.backendImage as SkwasmImage;
-
-    await setSize(BitmapSize(engineImage.width, engineImage.height));
-
-    // Initiate the native rasterization call. This schedules the rasterization on the C++
-    // side and returns a callback ID that will resolve when the image bytes are ready.
-    final int callbackId = surfaceRasterizeImage(handle, skwasmImage.handle, format.index);
-
+    // Cast [image] to [SkwasmImage].
+    image as SkwasmImage;
+    await setSize(BitmapSize(image.width, image.height));
+    final int callbackId = surfaceRasterizeImage(handle, image.handle, format.index);
     final int context =
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId) as JSNumber).toDartInt;
-
     final SkDataHandle dataHandle = SkDataHandle.fromAddress(context);
     final int byteCount = skDataGetSize(dataHandle);
     final Pointer<Uint8> dataPointer = skDataGetConstPointer(dataHandle).cast<Uint8>();
-
     final output = Uint8List(byteCount);
     for (var i = 0; i < byteCount; i++) {
       output[i] = dataPointer[i];
     }
-
-    if (format == ui.ImageByteFormat.rawStraightRgba) {
-      unpremultiplyRawRgba(output);
-    }
-
     skDataDispose(dataHandle);
-
     return ByteData.sublistView(output);
   }
 

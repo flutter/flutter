@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -22,17 +21,8 @@ class SkwasmBrowserImageDecoder extends BrowserImageDecoder {
   ui.Image generateImageFromVideoFrame(VideoFrame frame) {
     final int width = frame.displayWidth.toInt();
     final int height = frame.displayHeight.toInt();
-
     final surface = renderer.pictureToImageSurface as SkwasmSurface;
-
-    final ImageHandle handle = imageCreateFromTextureSource(frame, width, height, surface.handle);
-
-    return EngineImage(
-      SkwasmImage(handle),
-      width,
-      height,
-      imageSource: VideoFrameImageSource(frame),
-    );
+    return SkwasmImage(imageCreateFromTextureSource(frame, width, height, surface.handle));
   }
 }
 
@@ -60,15 +50,12 @@ class SkwasmDomImageDecoder extends HtmlBlobCodec {
 class SkwasmAnimatedImageDecoder implements ui.Codec {
   factory SkwasmAnimatedImageDecoder(Uint8List imageData, [int? width, int? height]) {
     final SkDataHandle data = skDataCreate(imageData.length);
-    final int dataAddress = skDataGetPointer(data).cast<Int8>().address;
-
-    final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
-    wasmMemory.set(imageData.toJS, dataAddress);
-
+    final Pointer<Int8> dataPointer = skDataGetPointer(data).cast<Int8>();
+    for (var i = 0; i < imageData.length; i++) {
+      dataPointer[i] = imageData[i];
+    }
     final AnimatedImageHandle handle = animatedImageCreate(data, width ?? 0, height ?? 0);
-
     skDataDispose(data);
-
     return SkwasmAnimatedImageDecoder._(handle);
   }
 
@@ -99,15 +86,7 @@ class SkwasmAnimatedImageDecoder implements ui.Codec {
     final duration = Duration(
       milliseconds: animatedImageGetCurrentFrameDurationMilliseconds(handle),
     );
-
-    final ImageHandle frameHandle = animatedImageGetCurrentFrame(handle);
-
-    final image = EngineImage(
-      SkwasmImage(frameHandle),
-      imageGetWidth(frameHandle),
-      imageGetHeight(frameHandle),
-    );
-
+    final image = SkwasmImage(animatedImageGetCurrentFrame(handle));
     final ui.FrameInfo frameInfo = AnimatedImageFrameInfo(duration, image);
     return frameInfo;
   }

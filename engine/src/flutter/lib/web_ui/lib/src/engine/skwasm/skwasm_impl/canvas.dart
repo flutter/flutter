@@ -227,16 +227,12 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
-    assert(
-      image is EngineImage && image.backendImage is SkwasmImage,
-      'The image being drawn must be a Skwasm image.',
-    );
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
     canvasDrawImage(
       _handle,
-      ((image as EngineImage).backendImage as SkwasmImage).handle,
+      (image as SkwasmImage).handle,
       offset.dx,
       offset.dy,
       paintHandle,
@@ -247,10 +243,6 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    assert(
-      image is EngineImage && image.backendImage is SkwasmImage,
-      'The image being drawn must be a Skwasm image.',
-    );
     withStackScope((StackScope scope) {
       final Pointer<Float> sourceRect = scope.convertRectToNative(src);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -259,7 +251,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageRect(
         _handle,
-        ((image as EngineImage).backendImage as SkwasmImage).handle,
+        (image as SkwasmImage).handle,
         sourceRect,
         destRect,
         paintHandle,
@@ -271,10 +263,6 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageNine(ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
-    assert(
-      image is EngineImage && image.backendImage is SkwasmImage,
-      'The image being drawn must be a Skwasm image.',
-    );
     withStackScope((StackScope scope) {
       final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -283,7 +271,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageNine(
         _handle,
-        ((image as EngineImage).backendImage as SkwasmImage).handle,
+        (image as SkwasmImage).handle,
         centerRect,
         destRect,
         paintHandle,
@@ -337,38 +325,29 @@ class SkwasmCanvas implements LayerCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) {
-    assert(
-      atlas is EngineImage && atlas.backendImage is SkwasmImage,
-      'The atlas image must be a Skwasm image.',
+  ) => withStackScope((StackScope scope) {
+    final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
+    final RawRect rawRects = scope.convertRectsToNative(rects);
+    final RawColorArray rawColors = colors != null
+        ? scope.convertColorArrayToNative(colors)
+        : nullptr;
+    final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
+    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      defaultBlurTileMode: ui.TileMode.clamp,
     );
-    withStackScope((StackScope scope) {
-      final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
-      final RawRect rawRects = scope.convertRectsToNative(rects);
-      final RawColorArray rawColors = colors != null
-          ? scope.convertColorArrayToNative(colors)
-          : nullptr;
-      final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
-        defaultBlurTileMode: ui.TileMode.clamp,
-      );
-
-      canvasDrawAtlas(
-        _handle,
-        ((atlas as EngineImage).backendImage as SkwasmImage).handle,
-        rawTransforms,
-        rawRects,
-        rawColors,
-        transforms.length,
-        (blendMode ?? ui.BlendMode.src).index,
-        rawCullRect,
-        paintHandle,
-      );
-
-      paintDispose(paintHandle);
-    });
-  }
+    canvasDrawAtlas(
+      _handle,
+      (atlas as SkwasmImage).handle,
+      rawTransforms,
+      rawRects,
+      rawColors,
+      transforms.length,
+      (blendMode ?? ui.BlendMode.src).index,
+      rawCullRect,
+      paintHandle,
+    );
+    paintDispose(paintHandle);
+  });
 
   @override
   void drawRawAtlas(
@@ -379,38 +358,29 @@ class SkwasmCanvas implements LayerCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) {
-    assert(
-      atlas is EngineImage && atlas.backendImage is SkwasmImage,
-      'The atlas image must be a Skwasm image.',
+  ) => withStackScope((StackScope scope) {
+    final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
+    final RawRect rawRects = scope.convertDoublesToNative(rects);
+    final RawColorArray rawColors = colors != null
+        ? scope.convertIntsToUint32Native(colors)
+        : nullptr;
+    final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
+    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      defaultBlurTileMode: ui.TileMode.clamp,
     );
-    withStackScope((StackScope scope) {
-      final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
-      final RawRect rawRects = scope.convertDoublesToNative(rects);
-      final RawColorArray rawColors = colors != null
-          ? scope.convertIntsToUint32Native(colors)
-          : nullptr;
-      final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
-        defaultBlurTileMode: ui.TileMode.clamp,
-      );
-
-      canvasDrawAtlas(
-        _handle,
-        ((atlas as EngineImage).backendImage as SkwasmImage).handle,
-        rawTransforms,
-        rawRects,
-        rawColors,
-        rstTransforms.length ~/ 4,
-        (blendMode ?? ui.BlendMode.src).index,
-        rawCullRect,
-        paintHandle,
-      );
-
-      paintDispose(paintHandle);
-    });
-  }
+    canvasDrawAtlas(
+      _handle,
+      (atlas as SkwasmImage).handle,
+      rawTransforms,
+      rawRects,
+      rawColors,
+      rstTransforms.length ~/ 4,
+      (blendMode ?? ui.BlendMode.src).index,
+      rawCullRect,
+      paintHandle,
+    );
+    paintDispose(paintHandle);
+  });
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
