@@ -61,7 +61,6 @@ runs:
         shell: bash
         if: env.ACT
         run: |
-          echo "ANDROID_SDK_ROOT=/opt/android/sdk" >> $GITHUB_ENV
           echo "ANDROID_HOME=/opt/android/sdk" >> $GITHUB_ENV
       - name: Get Android SDK version
         shell: bash

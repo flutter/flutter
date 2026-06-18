@@ -209,11 +209,13 @@ class AndroidValidator extends DoctorValidator {
           ValidationMessage.error(_userMessages.androidBadSdkDir(kAndroidHome, androidHomeDir)),
         );
       } else {
-        // Instruct user to set [kAndroidSdkRoot] and not deprecated [kAndroidHome]
-        // See https://github.com/flutter/flutter/issues/39301
+        // Instruct user on how to locate the Android SDK.
         messages.add(
           ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)),
         );
+      }
+      if (_platform.environment.containsKey(kAndroidSdkRoot)) {
+        messages.add(ValidationMessage.hint(_userMessages.androidSdkRootDeprecatedWarning));
       }
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -284,6 +286,7 @@ class AndroidValidator extends DoctorValidator {
     if (_platform.environment.containsKey(kAndroidSdkRoot)) {
       final String androidSdkRoot = _platform.environment[kAndroidSdkRoot]!;
       messages.add(ValidationMessage('$kAndroidSdkRoot = $androidSdkRoot'));
+      messages.add(ValidationMessage.hint(_userMessages.androidSdkRootDeprecatedWarning));
     }
 
     _task = 'Validating Android SDK';
