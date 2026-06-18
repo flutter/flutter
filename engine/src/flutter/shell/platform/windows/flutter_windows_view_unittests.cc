@@ -1249,29 +1249,29 @@ TEST_F(WindowsTest, WindowResizeInvalidSurface) {
 
 // Window resize should succeed even if EGL initialized successfully
 // but the EGL surface could not be created.
-TEST_F(WindowsTest, WindowResizeWithoutSurface) {
-  auto& context = GetContext();
-  WindowsConfigBuilder builder(context);
-  EnginePtr engine = builder.InitializeEngine();
-  ASSERT_NE(engine, nullptr);
+TEST(FlutterWindowsViewTest, WindowResizeWithoutSurface) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
 
-  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
-  EngineModifier engine_modifier(windows_engine);
+  auto egl_manager = std::make_unique<egl::MockManager>();
 
-  windows_engine->SetRootIsolateCreateCallback(
-      context.GetRootIsolateCallback());
+  EXPECT_CALL(*egl_manager.get(), CreateWindowSurface).Times(0);
 
-  // Use real EGL manager so the engine starts successfully under Impeller,
-  // but we do NOT use a view controller. Instead, we create a view directly
-  // with a MockWindowBindingHandler which returns a null HWND, so EGL surface
-  // creation will fail.
-  std::unique_ptr<FlutterWindowsView> view = windows_engine->CreateView(
-      std::make_unique<NiceMock<MockWindowBindingHandler>>(),
-      /*is_sized_to_content=*/false, BoxConstraints());
-  ASSERT_NE(view, nullptr);
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
 
-  // The view does not have a surface. Resizing it should return true/succeed.
-  EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
+  modifier.SetEGLManager(std::move(egl_manager));
+
+  auto metrics_sent = false;
+  modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
+      SendWindowMetricsEvent,
+      ([&metrics_sent](auto engine, const FlutterWindowMetricsEvent* event) {
+        metrics_sent = true;
+        return kSuccess;
+      }));
+
+  view->OnWindowSizeChanged(500, 500);
 }
 
 TEST(FlutterWindowsViewTest, WindowRepaintTests) {
