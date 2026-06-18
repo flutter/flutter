@@ -4,6 +4,7 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
@@ -950,31 +951,36 @@ class FlutterPluginUtilsTest {
             @BeforeEach
             fun setUp() {
                 mockkObject(FlutterPluginUtils)
+                mockkObject(VersionFetcher)
                 every { FlutterPluginUtils.getRuntimeAGPVersion() } returns Version(9, 0, 0)
+                every { VersionFetcher.getAGPVersion(any()) } returns AndroidPluginVersion(9, 0, 0)
             }
 
             @AfterEach
             fun tearDown() {
                 unmockkObject(FlutterPluginUtils)
+                unmockkObject(VersionFetcher)
             }
 
             @Test
-            fun `exits early when AGP major version is not 9`(
+            fun `does not log warnings when AGP major version is not 9`(
                 @TempDir tempDir: Path
             ) {
-                every { FlutterPluginUtils.getRuntimeAGPVersion() } returns Version(8, 0, 0)
+                every { VersionFetcher.getAGPVersion(any()) } returns AndroidPluginVersion(8, 0, 0)
 
                 val testProject =
                     setupTest(
                         tempDir = tempDir,
-                        builtInKotlin = "false",
-                        captureActions = false
+                        builtInKotlin = "false"
                     )
 
-                detectApplyingKotlinGradlePlugin(testProject.appProject)
+                executeDetectApplyingKotlinGradlePlugin(testProject)
 
-                verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
-                verify(exactly = 0) { mockGradle.projectsEvaluated(any<Action<Gradle>>()) }
+                val appPluginManager = testProject.appPluginManager
+                val plugin1Manager = testProject.plugin1Manager
+                verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                verify { mockLogger wasNot called }
             }
 
             private fun writeGradleProperties(
@@ -1024,6 +1030,12 @@ class FlutterPluginUtilsTest {
                 every { project.pluginManager } returns pluginManager
                 every { project.rootProject } returns rootProject
                 every { project.gradle } returns mockGradle
+
+                val pluginContainer = mockk<org.gradle.api.plugins.PluginContainer>(relaxed = true)
+                every { pluginContainer.withId(any(), any()) } answers {
+                    (args[1] as Action<org.gradle.api.Plugin<*>>).execute(mockk<org.gradle.api.Plugin<*>>(relaxed = true))
+                }
+                every { project.plugins } returns pluginContainer
 
                 return project
             }

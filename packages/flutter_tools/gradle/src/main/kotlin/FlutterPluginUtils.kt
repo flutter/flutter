@@ -581,24 +581,29 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
-        val agpVersion = getRuntimeAGPVersion()
+        var isBuiltInKotlinEnabledGlobally: Boolean? = null
+        // Check for the Android Application plugin
+        project.plugins.withId("com.android.application") {
+            val agpVersFromHook = VersionFetcher.getAGPVersion(project)
+            // AGP is applied; execute your custom build logic safely here
+            println("Android Application plugin version: ${agpVersFromHook?.major} detected on ${project.name}!")
 
-        if (agpVersion != null && agpVersion.major != 9) {
-            return
-        }
-
-        // Supports global configuration via root project 'gradle.properties' or command line
-        // (e.g., -Pandroid.builtInKotlin=false). Built-in Kotlin is enabled by default in AGP 9.0+,
-        // so defaults to true if the property is not explicitly set.
-        val isBuiltInKotlinEnabledGlobally =
-            project.rootProject.findProperty("android.builtInKotlin")?.toString()?.toBoolean() ?: true
-
-        if (isBuiltInKotlinEnabledGlobally && hasNoSubprojectsApplyingKgp(project)) {
-            return
+            // Supports global configuration via root project 'gradle.properties' or command line
+            // (e.g., -Pandroid.builtInKotlin=false). Built-in Kotlin is enabled by default in AGP 9.0+,
+            // so defaults to true if the property is not explicitly set.
+            isBuiltInKotlinEnabledGlobally =
+                project.rootProject
+                    .findProperty("android.builtInKotlin")
+                    ?.toString()
+                    ?.toBoolean() ?: (agpVersFromHook != null && agpVersFromHook.major >= 9)
         }
 
         val pluginsWithKGPAppliedList = mutableListOf<String>()
-
+        if (isBuiltInKotlinEnabledGlobally == true && hasNoSubprojectsApplyingKgp(project)) {
+            println("safely enable bk")
+            return
+        }
+        println("bk is not enabled")
         var shouldLogForApp = false
         project.rootProject.subprojects {
             val pluginState = getSubprojectPluginState(this) ?: return@subprojects
@@ -607,8 +612,10 @@ object FlutterPluginUtils {
             if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
             if (!pluginState.hasKgpPlugin) {
+                println("KGP plugin does not exist ${project.name}!")
                 try {
                     pluginManager.apply("kotlin-android")
+                    println("KGP plugin applied on ${project.name}!")
                 } catch (_: Exception) {
                     logger.quiet(
                         """
@@ -632,6 +639,10 @@ object FlutterPluginUtils {
         }
 
         project.gradle.projectsEvaluated {
+            val agpVersion = VersionFetcher.getAGPVersion(project)
+            if (agpVersion == null || agpVersion.major != 9) {
+                return@projectsEvaluated
+            }
             if (shouldLogForApp) {
                 project.logger.error(
                     """
