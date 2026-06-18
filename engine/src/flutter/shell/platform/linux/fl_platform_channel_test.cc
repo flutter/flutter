@@ -9,10 +9,23 @@
 
 #include "gtest/gtest.h"
 
-TEST(FlPlatformChannelTest, ExitResponse) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+class FlPlatformChannelTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    loop = g_main_loop_new(nullptr, 0);
+    messenger = fl_mock_binary_messenger_new();
+  }
 
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ~FlPlatformChannelTest() {
+    g_clear_object(&messenger);
+    g_clear_pointer(&loop, g_main_loop_unref);
+  }
+
+  GMainLoop* loop = nullptr;
+  FlMockBinaryMessenger* messenger = nullptr;
+};
+
+TEST_F(FlPlatformChannelTest, ExitResponse) {
   fl_mock_binary_messenger_set_json_method_channel(
       messenger, "flutter/platform",
       [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,
