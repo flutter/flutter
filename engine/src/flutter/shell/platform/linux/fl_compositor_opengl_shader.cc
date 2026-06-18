@@ -143,17 +143,19 @@ static void setup_shader(FlCompositorOpenGLShader* self) {
 static void fl_compositor_opengl_shader_dispose(GObject* object) {
   FlCompositorOpenGLShader* self = FL_COMPOSITOR_OPENGL_SHADER(object);
 
-  if (fl_opengl_manager_make_platform_current(self->opengl_manager)) {
-    if (self->program != 0) {
-      glDeleteProgram(self->program);
+  if (self->opengl_manager != nullptr) {
+    if (fl_opengl_manager_make_platform_current(self->opengl_manager)) {
+      if (self->program != 0) {
+        glDeleteProgram(self->program);
+      }
+      if (self->vertex_buffer != 0) {
+        glDeleteBuffers(1, &self->vertex_buffer);
+      }
+    } else {
+      g_warning(
+          "Failed to cleanup compositor shaders, unable to make OpenGL context "
+          "current");
     }
-    if (self->vertex_buffer != 0) {
-      glDeleteBuffers(1, &self->vertex_buffer);
-    }
-  } else {
-    g_warning(
-        "Failed to cleanup compositor shaders, unable to make OpenGL context "
-        "current");
   }
   self->program = 0;
   self->vertex_buffer = 0;
@@ -172,6 +174,8 @@ static void fl_compositor_opengl_shader_init(FlCompositorOpenGLShader* self) {}
 
 FlCompositorOpenGLShader* fl_compositor_opengl_shader_new(
     FlOpenGLManager* opengl_manager) {
+  g_return_val_if_fail(FL_IS_OPENGL_MANAGER(opengl_manager), nullptr);
+
   FlCompositorOpenGLShader* self = FL_COMPOSITOR_OPENGL_SHADER(
       g_object_new(fl_compositor_opengl_shader_get_type(), nullptr));
 

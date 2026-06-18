@@ -58,7 +58,7 @@ static void composite_layer(FlCompositorOpenGL* self,
   size_t texture_width = fl_framebuffer_get_width(framebuffer);
   size_t texture_height = fl_framebuffer_get_height(framebuffer);
   fl_compositor_opengl_shader_set_offset(self->shader, (2 * x / width) - 1.0,
-                                         (2 * y / width) - 1.0);
+                                         (2 * y / height) - 1.0);
   fl_compositor_opengl_shader_set_scale(self->shader, texture_width / width,
                                         texture_height / height);
 
