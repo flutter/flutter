@@ -111,6 +111,7 @@ class FlPlatformHandlerTest : public ::testing::Test {
   }
 
   ~FlPlatformHandlerTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
     g_clear_object(&messenger);
     g_clear_pointer(&loop, g_main_loop_unref);
   }
@@ -142,8 +143,6 @@ TEST_F(FlPlatformHandlerTest, PlaySound) {
       },
       &called);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlPlatformHandlerTest, ExitApplication) {
@@ -215,8 +214,6 @@ TEST_F(FlPlatformHandlerTest, ExitApplication) {
   g_main_loop_run(loop);
 
   EXPECT_TRUE(request_exit_called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlPlatformHandlerTest, ExitApplicationDispose) {

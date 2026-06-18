@@ -47,6 +47,7 @@ class FlKeyChannelResponderTest : public ::testing::Test {
   }
 
   ~FlKeyChannelResponderTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
     g_clear_object(&responder);
     g_clear_object(&messenger);
     g_clear_pointer(&loop, g_main_loop_unref);
@@ -100,8 +101,6 @@ TEST_F(FlKeyChannelResponderTest, SendKeyEvent) {
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 void FlKeyChannelResponderTest::TestLockEvent(guint key_code,
@@ -136,8 +135,6 @@ void FlKeyChannelResponderTest::TestLockEvent(guint key_code,
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 // Test sending a "NumLock" keypress.
@@ -186,8 +183,6 @@ TEST_F(FlKeyChannelResponderTest, TestKeyEventHandledByFramework) {
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
@@ -210,6 +205,4 @@ TEST_F(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }

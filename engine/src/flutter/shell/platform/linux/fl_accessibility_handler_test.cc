@@ -90,6 +90,7 @@ class FlAccessibilityHandlerTest : public ::testing::Test {
   }
 
   ~FlAccessibilityHandlerTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
     g_clear_object(&engine);
     g_clear_object(&messenger);
   }
@@ -128,8 +129,6 @@ TEST_F(FlAccessibilityHandlerTest, Announce) {
   if (atk_supports_announce()) {
     EXPECT_TRUE(signalled);
   }
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlAccessibilityHandlerTest, AnnounceAssertive) {
@@ -165,8 +164,6 @@ TEST_F(FlAccessibilityHandlerTest, AnnounceAssertive) {
   if (atk_supports_announce()) {
     EXPECT_TRUE(signalled);
   }
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlAccessibilityHandlerTest, AnnounceUnknownView) {
@@ -199,8 +196,6 @@ TEST_F(FlAccessibilityHandlerTest, AnnounceUnknownView) {
       &called);
   EXPECT_TRUE(called);
   EXPECT_FALSE(signalled);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlAccessibilityHandlerTest, UnknownType) {
@@ -226,6 +221,4 @@ TEST_F(FlAccessibilityHandlerTest, UnknownType) {
       &called);
   EXPECT_TRUE(called);
   EXPECT_FALSE(signalled);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }

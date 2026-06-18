@@ -30,6 +30,7 @@ class FlSettingsHandlerTest : public ::testing::Test {
   }
 
   ~FlSettingsHandlerTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
     g_clear_object(&handler);
     g_clear_object(&engine);
     g_clear_object(&messenger);
@@ -88,8 +89,6 @@ TEST_F(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
       &called);
   fl_settings_emit_changed(settings);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlSettingsHandlerTest, PlatformBrightness) {
@@ -137,8 +136,6 @@ TEST_F(FlSettingsHandlerTest, PlatformBrightness) {
       &called);
   fl_settings_emit_changed(settings);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST_F(FlSettingsHandlerTest, TextScaleFactor) {
@@ -186,8 +183,6 @@ TEST_F(FlSettingsHandlerTest, TextScaleFactor) {
       &called);
   fl_settings_emit_changed(settings);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 // MOCK_ENGINE_PROC is leaky by design
