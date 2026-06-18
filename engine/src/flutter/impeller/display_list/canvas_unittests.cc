@@ -172,6 +172,8 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
                     /*total_content_depth=*/1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+
+  canvas.reset();
   EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
@@ -213,6 +215,8 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
                     /*backdrop_id=*/1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+
+  canvas.reset();
   EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
@@ -248,6 +252,8 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
                     ContentBoundsPromise::kContainsContents, 1, false, 1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+
+  canvas.reset();
   EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
@@ -284,6 +290,8 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
   canvas->Restore();
   EXPECT_TRUE(canvas->RequiresReadback());
+
+  canvas.reset();
   EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
