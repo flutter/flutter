@@ -726,7 +726,10 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   }
 
   private void notifyViewEntered() {
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_26 || afm == null || !needsAutofill()) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_26
+        || afm == null
+        || !needsAutofill()
+        || lastClientRect == null) {
       return;
     }
 
@@ -872,6 +875,24 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       }
     }
     textInputChannel.updateEditingStateWithTag(inputTarget.id, editingValues);
+  }
+
+  /**
+   * Invoked when the window focus changes.
+   *
+   * <p>When window focus is lost (e.g. the app is backgrounded or another application is switched
+   * to), this propagates a notifyViewExited to the AutofillManager so that the autofill provider is
+   * informed the virtual field has been exited, dismissing any visible autofill UI.
+   *
+   * <p>When window focus is regained, this propagates a notifyViewEntered to restore any autofill
+   * UI.
+   */
+  public void onWindowFocusChanged(boolean hasWindowFocus) {
+    if (hasWindowFocus) {
+      notifyViewEntered();
+    } else {
+      notifyViewExited();
+    }
   }
   // -------- End: Autofill -------
 }
