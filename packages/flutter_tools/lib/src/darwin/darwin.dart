@@ -76,7 +76,7 @@ enum FlutterDarwinPlatform {
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
     return switch (this) {
-      ios => Version(13, 0, null),
+      ios => Version(15, 0, null),
       macos => Version(10, 15, null),
     };
   }
