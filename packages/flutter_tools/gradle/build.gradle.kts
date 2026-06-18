@@ -40,6 +40,7 @@ tasks.withType<JavaCompile> {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("net.bytebuddy.experimental", "true")
 }
 
 // https://stackoverflow.com/questions/55456176/unresolved-reference-compilekotlin-in-build-gradle-kts
