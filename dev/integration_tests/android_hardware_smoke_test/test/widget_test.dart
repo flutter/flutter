@@ -17,9 +17,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late ui.Image testImage;
+  late bool mockHcppSupported;
 
   setUp(() async {
     testImage = await createTestImage(width: 10, height: 10);
+    mockHcppSupported = true;
 
     // Mock the native platform MethodChannel to prevent MissingPluginException during tests
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -27,6 +29,17 @@ void main() {
       (MethodCall methodCall) async {
         if (methodCall.method == 'impeller_backend') {
           return 'vulkan';
+        }
+        return null;
+      },
+    );
+
+    // Mock the built-in system platform views channel to allow mocking HCPP support checks
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('flutter/platform_views_2'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'isSurfaceControlEnabled') {
+          return mockHcppSupported;
         }
         return null;
       },
@@ -228,36 +241,92 @@ void main() {
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
-  testWidgets('platformViewTest message channel handler - success behavior', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const MyApp());
+  for (final testName in <String>[
+    'platformViewTextureLayerTest',
+    'platformViewHybridCompositionTest',
+    'platformViewHybridCompositionPlusPlusTest',
+  ]) {
+    testWidgets('$testName message channel handler - success behavior', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const MyApp());
 
-    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-      'testName': 'platformViewTest',
-      'performAppSideGoldenCompare': false,
-      'captureScreenshot': false,
-    })!;
+      final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
+        'testName': testName,
+        'performAppSideGoldenCompare': false,
+        'captureScreenshot': false,
+      })!;
 
-    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
-        .handlePlatformMessage(
-          'com.example.android_hardware_smoke_test/test_channel',
-          encodedMessage,
-          null,
-        );
+      final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
+          .instance
+          .defaultBinaryMessenger
+          .handlePlatformMessage(
+            'com.example.android_hardware_smoke_test/test_channel',
+            encodedMessage,
+            null,
+          );
 
-    await tester.pump();
-    await tester.pump();
+      await tester.pump();
+      await tester.pump();
 
-    final ByteData? responseBytes = await responseFuture;
-    expect(responseBytes, isNotNull);
-    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
-    expect(replyMap['message'], equals('Rendered platformViewTest'));
+      final ByteData? responseBytes = await responseFuture;
+      expect(responseBytes, isNotNull);
+      final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
+      final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>)
+          .cast<String, Object?>();
+      expect(replyMap['message'], equals('Rendered $testName'));
 
-    // Verify AndroidPlatformView widget is present in the tree
-    expect(find.byType(AndroidPlatformView), findsOneWidget);
-  });
+      // Verify AndroidPlatformView widget is present in the tree
+      expect(find.byType(AndroidPlatformView), findsOneWidget);
+
+      final AndroidPlatformView view = tester.widget<AndroidPlatformView>(
+        find.byType(AndroidPlatformView),
+      );
+      final PlatformViewMode expectedMode = switch (testName) {
+        'platformViewTextureLayerTest' => PlatformViewMode.textureLayer,
+        'platformViewHybridCompositionTest' => PlatformViewMode.hybridComposition,
+        'platformViewHybridCompositionPlusPlusTest' => PlatformViewMode.hybridCompositionPlusPlus,
+        _ => fail('Unexpected testName: $testName'),
+      };
+      expect(view.mode, equals(expectedMode));
+    });
+  }
+
+  testWidgets(
+    'platformViewHybridCompositionPlusPlusTest message channel handler - HCPP unsupported skip behavior',
+    (WidgetTester tester) async {
+      mockHcppSupported = false; // set HCPP to unsupported!
+
+      await tester.pumpWidget(const MyApp());
+
+      final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
+        'testName': 'platformViewHybridCompositionPlusPlusTest',
+        'performAppSideGoldenCompare': false,
+        'captureScreenshot': false,
+      })!;
+
+      final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
+          .instance
+          .defaultBinaryMessenger
+          .handlePlatformMessage(
+            'com.example.android_hardware_smoke_test/test_channel',
+            encodedMessage,
+            null,
+          );
+
+      await tester.pump();
+      await tester.pump();
+
+      final ByteData? responseBytes = await responseFuture;
+      expect(responseBytes, isNotNull);
+      final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
+      final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>)
+          .cast<String, Object?>();
+      expect(replyMap['message'], equals('Skipped'));
+      expect(replyMap['reason'], contains('HCPP is not supported on this device/configuration'));
+
+      // Verify AndroidPlatformView widget is NOT present in the tree
+      expect(find.byType(AndroidPlatformView), findsNothing);
+    },
+  );
 }

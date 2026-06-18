@@ -34,7 +34,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
@@ -88,7 +90,9 @@ class _MyState extends State<MyWidget> {
         goldenVariantValue,
       );
 
-      return <String, Object?>{'message': failureMessage ?? 'Comparison Success'};
+      return <String, Object?>{
+        'message': failureMessage ?? 'Comparison Success',
+      };
     }
 
     final testName = messageMap?['testName'] as String?;
@@ -98,7 +102,19 @@ class _MyState extends State<MyWidget> {
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot = messageMap?['captureScreenshot'] as bool? ?? true;
+    final bool captureScreenshot =
+        messageMap?['captureScreenshot'] as bool? ?? true;
+
+    if (testName == 'platformViewHybridCompositionPlusPlusTest') {
+      final bool isHcpp = await HybridAndroidViewController.checkIfSupported();
+      if (!isHcpp) {
+        return <String, Object?>{
+          'message': 'Skipped',
+          'reason':
+              'HCPP is not supported on this device/configuration (requires Vulkan and Android 14+)',
+        };
+      }
+    }
 
     // Lazily load the image asset only when requested. This avoids loading it
     // unnecessarily, blocks rendering until fully loaded, and catches load
@@ -119,13 +135,16 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{'message': 'Failed to load image asset: $e\n$stackTrace'};
+        return <String, Object?>{
+          'message': 'Failed to load image asset: $e\n$stackTrace',
+        };
       }
     }
 
     final completer = Completer<Map<String, Object?>>();
 
-    if (testName == 'platformViewTest') {
+    final bool isPlatformView = testName?.startsWith('platformView') ?? false;
+    if (isPlatformView) {
       _platformViewCreatedCompleter = Completer<void>();
     } else {
       _platformViewCreatedCompleter = null;
@@ -146,7 +165,10 @@ class _MyState extends State<MyWidget> {
           settleFuture: _platformViewCreatedCompleter?.future,
         );
       } else {
-        completer.complete(<String, Object?>{'message': 'Rendered $testName', 'imageBytes': null});
+        completer.complete(<String, Object?>{
+          'message': 'Rendered $testName',
+          'imageBytes': null,
+        });
       }
     }, debugLabel: 'Rendered $testName');
 
@@ -157,7 +179,9 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = _nativeChannel.invokeMethod<String>('impeller_backend');
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
+      'impeller_backend',
+    );
     _testChannel.setMessageHandler(_handler);
   }
 
@@ -172,7 +196,24 @@ class _MyState extends State<MyWidget> {
   Widget build(BuildContext context) {
     final Widget testContent = switch (_message) {
       'backdropFilterBlurTest' => const BackdropFilterBlur(),
-      'platformViewTest' => AndroidPlatformView(
+      'platformViewTextureLayerTest' => AndroidPlatformView(
+        mode: PlatformViewMode.textureLayer,
+        onCreated: () {
+          if (_platformViewCreatedCompleter?.isCompleted == false) {
+            _platformViewCreatedCompleter?.complete();
+          }
+        },
+      ),
+      'platformViewHybridCompositionTest' => AndroidPlatformView(
+        mode: PlatformViewMode.hybridComposition,
+        onCreated: () {
+          if (_platformViewCreatedCompleter?.isCompleted == false) {
+            _platformViewCreatedCompleter?.complete();
+          }
+        },
+      ),
+      'platformViewHybridCompositionPlusPlusTest' => AndroidPlatformView(
+        mode: PlatformViewMode.hybridCompositionPlusPlus,
         onCreated: () {
           if (_platformViewCreatedCompleter?.isCompleted == false) {
             _platformViewCreatedCompleter?.complete();

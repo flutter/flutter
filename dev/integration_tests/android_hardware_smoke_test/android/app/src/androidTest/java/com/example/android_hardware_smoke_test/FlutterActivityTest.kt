@@ -27,7 +27,9 @@ import java.util.concurrent.TimeUnit
 class FlutterActivityTest {
     companion object {
         private const val TAG = "FlutterActivityTest"
-        private const val PLATFORM_VIEW_TEST_NAME = "platformViewTest"
+        private const val PLATFORM_VIEW_TEXTURE_LAYER_TEST_NAME = "platformViewTextureLayerTest"
+        private const val PLATFORM_VIEW_HYBRID_COMPOSITION_TEST_NAME = "platformViewHybridCompositionTest"
+        private const val PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST_NAME = "platformViewHybridCompositionPlusPlusTest"
         private const val SCREENSHOT_CAPTURE_DELAY_MS = 200L
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
@@ -54,7 +56,7 @@ class FlutterActivityTest {
             assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
 
             try {
-                val isPlatformView = testName == PLATFORM_VIEW_TEST_NAME
+                val isPlatformView = testName.startsWith("platformView")
                 val message =
                     JSONObject().apply {
                         put("testName", testName)
@@ -70,7 +72,10 @@ class FlutterActivityTest {
                                 ?: throw IllegalStateException("Expected JSONObject reply from Dart, but received: $reply")
                         val replyMessage = replyJson.getString("message")
 
-                        if (isPlatformView && replyMessage == "Rendered $PLATFORM_VIEW_TEST_NAME") {
+                        if (replyMessage == "Skipped") {
+                            val reason = replyJson.optString("reason", "Unsupported")
+                            future.complete("Skipped: $reason")
+                        } else if (isPlatformView && replyMessage.startsWith("Rendered platformView")) {
                             val x = replyJson.getInt("x")
                             val y = replyJson.getInt("y")
                             val width = replyJson.getInt("width")
@@ -116,7 +121,13 @@ class FlutterActivityTest {
         }
 
         Log.d(TAG, "Received $reply on message channel")
-        if (testName == PLATFORM_VIEW_TEST_NAME) {
+        if (reply.startsWith("Skipped")) {
+            Log.w(TAG, "$testName: Skipped - $reply")
+            org.junit.Assume.assumeTrue(reply, false)
+            return
+        }
+
+        if (testName.startsWith("platformView")) {
             assertEquals("Comparison Success", reply)
         } else {
             assertEquals("Rendered $testName", reply)
@@ -231,7 +242,17 @@ class FlutterActivityTest {
     }
 
     @Test
-    fun platformViewTest() {
-        templateTest(PLATFORM_VIEW_TEST_NAME)
+    fun platformViewTextureLayerTest() {
+        templateTest(PLATFORM_VIEW_TEXTURE_LAYER_TEST_NAME)
+    }
+
+    @Test
+    fun platformViewHybridCompositionTest() {
+        templateTest(PLATFORM_VIEW_HYBRID_COMPOSITION_TEST_NAME)
+    }
+
+    @Test
+    fun platformViewHybridCompositionPlusPlusTest() {
+        templateTest(PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST_NAME)
     }
 }
