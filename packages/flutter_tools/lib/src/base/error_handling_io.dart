@@ -373,7 +373,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
             sink.writeFromSync(buffer, 0, chunkLength);
             bytes += chunkLength;
           }
-        } catch (err) {
+        } catch (_) {
           ErrorHandlingFileSystem.deleteIfExists(resultFile, recursive: true);
           rethrow;
         } finally {
