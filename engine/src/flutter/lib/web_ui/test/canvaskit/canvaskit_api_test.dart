@@ -1839,6 +1839,56 @@ void _paragraphTests() {
       expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>['chromium/canvaskit.js']);
       expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>['canvaskit.js']);
     });
+
+    test('with preferWebParagraph enabled and supported', () {
+      v8BreakIterator = Object().toJSBox; // Any non-null value.
+      intlSegmenter = Object().toJSBox; // Any non-null value.
+      browserSupportsImageDecoder = true;
+      browserSupportsTextCluster = true;
+
+      debugOverrideJsConfiguration(
+        <String, Object?>{'preferWebParagraph': true}.jsify() as JsFlutterConfiguration?,
+      );
+
+      try {
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.full), <String>[
+          'webparagraph/canvaskit.js',
+        ]);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>[
+          'webparagraph/canvaskit.js',
+        ]);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>[
+          'webparagraph/canvaskit.js',
+        ]);
+      } finally {
+        debugOverrideJsConfiguration(null);
+        browserSupportsTextCluster = false;
+      }
+    });
+
+    test('with preferWebParagraph enabled but NOT supported', () {
+      v8BreakIterator = Object().toJSBox; // Any non-null value.
+      intlSegmenter = Object().toJSBox; // Any non-null value.
+      browserSupportsImageDecoder = true;
+      browserSupportsTextCluster = false; // Not supported!
+
+      debugOverrideJsConfiguration(
+        <String, Object?>{'preferWebParagraph': true}.jsify() as JsFlutterConfiguration?,
+      );
+
+      try {
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.full), <String>['canvaskit.js']);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>[
+          'chromium/canvaskit.js',
+        ]);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>[
+          'chromium/canvaskit.js',
+          'canvaskit.js',
+        ]);
+      } finally {
+        debugOverrideJsConfiguration(null);
+      }
+    });
   });
 
   test('respects actual location of canvaskit files', () {

@@ -241,10 +241,17 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
     sl_options.version = source_options.gles_language_version > 0
                              ? source_options.gles_language_version
                              : 100;
-    sl_options.es = true;
-    if (source_options.target_platform == TargetPlatform::kRuntimeStageGLES3) {
+    // If we have requested GLES3 and/or Compute Shaders,
+    // promote the language version accordingly
+    if (source_options.type == SourceType::kComputeShader &&
+        sl_options.version < 310) {
+      sl_options.version = 310;
+    } else if (source_options.target_platform ==
+                   TargetPlatform::kRuntimeStageGLES3 &&
+               sl_options.version < 300) {
       sl_options.version = 300;
     }
+    sl_options.es = true;
     if (source_options.require_framebuffer_fetch &&
         source_options.type == SourceType::kFragmentShader) {
       gl_compiler->remap_ext_framebuffer_fetch(0, 0, true);
@@ -260,6 +267,10 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
     sl_options.version = source_options.gles_language_version > 0
                              ? source_options.gles_language_version
                              : 120;
+    if (source_options.type == SourceType::kComputeShader &&
+        sl_options.version < 430) {
+      sl_options.version = 430;
+    }
     sl_options.es = false;
   }
   gl_compiler->set_common_options(sl_options);
@@ -478,6 +489,10 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
           source_options.target_platform ==
               TargetPlatform::kRuntimeStageGLES3) {
         spirv_options.macro_definitions.push_back("IMPELLER_TARGET_OPENGLES");
+        // A temporary macro that allows fragment shader authors to target
+        // Flutter <= 3.44 before the OpenGLES flip was removed.
+        spirv_options.macro_definitions.push_back(
+            "IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED");
       }
     } break;
     case TargetPlatform::kSkSL: {
