@@ -67,10 +67,10 @@ struct _FlCompositorOpenGL {
   GLuint program;
 
   // Location of layer offset in [program].
-  GLuint offset_location;
+  GLint offset_location;
 
   // Location of layer scale in [program].
-  GLuint scale_location;
+  GLint scale_location;
 
   // Verticies for the uniform square.
   GLuint vertex_buffer;
