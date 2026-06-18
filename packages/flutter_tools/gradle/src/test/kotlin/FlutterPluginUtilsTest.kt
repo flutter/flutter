@@ -460,11 +460,17 @@ class FlutterPluginUtilsTest {
         verify { project.dependencies.add("debugCompile", dependency) }
     }
 
+    private fun mockBuildType(name: String, isDebuggable: Boolean): BuildType {
+        val buildType = mockk<BuildType>()
+        every { buildType.name } returns name
+        every { buildType.isDebuggable } returns isDebuggable
+        return buildType
+    }
+
     // buildModeFor
     @Test
     fun `buildModeFor returns profile if the BuildType has name profile`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.name } returns "profile"
+        val buildType = mockBuildType("profile", isDebuggable = false)
 
         val result = FlutterPluginUtils.buildModeFor(buildType)
         assertEquals("profile", result)
@@ -472,9 +478,7 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `buildModeFor returns debug if the BuildType is debuggable`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.name } returns "something random"
-        every { buildType.isDebuggable } returns true
+        val buildType = mockBuildType("something random", isDebuggable = true)
 
         val result = FlutterPluginUtils.buildModeFor(buildType)
         assertEquals("debug", result)
@@ -482,9 +486,55 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `buildModeFor returns release if the BuildType is not debuggable and not named profile`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.isDebuggable } returns false
-        every { buildType.name } returns "something random"
+        val buildType = mockBuildType("something random", isDebuggable = false)
+
+        val result = FlutterPluginUtils.buildModeFor(buildType)
+        assertEquals("release", result)
+    }
+
+    @Test
+    fun `buildModeFor - release build type with debuggable true maps to release mode`() {
+        val buildType = mockBuildType("release", isDebuggable = true)
+
+        val result = FlutterPluginUtils.buildModeFor(buildType)
+        assertEquals("release", result)
+    }
+
+    @Test
+    fun `buildModeFor - devRelease build type with debuggable true maps to release mode`() {
+        val buildType = mockBuildType("devRelease", isDebuggable = true)
+
+        val result = FlutterPluginUtils.buildModeFor(buildType)
+        assertEquals("release", result)
+    }
+
+    @Test
+    fun `buildModeFor - devProfile build type with debuggable true maps to profile mode`() {
+        val buildType = mockBuildType("devProfile", isDebuggable = true)
+
+        val result = FlutterPluginUtils.buildModeFor(buildType)
+        assertEquals("profile", result)
+    }
+
+    @Test
+    fun `buildModeFor - devDebug build type with debuggable true maps to debug mode`() {
+        val buildType = mockBuildType("devDebug", isDebuggable = true)
+
+        val result = FlutterPluginUtils.buildModeFor(buildType)
+        assertEquals("debug", result)
+    }
+
+    @Test
+    fun `buildModeFor - custom build type with debuggable true falls back to debug mode`() {
+        val buildType = mockBuildType("staging", isDebuggable = true)
+
+        val result = FlutterPluginUtils.buildModeFor(buildType)
+        assertEquals("debug", result)
+    }
+
+    @Test
+    fun `buildModeFor - custom build type with debuggable false falls back to release mode`() {
+        val buildType = mockBuildType("staging", isDebuggable = false)
 
         val result = FlutterPluginUtils.buildModeFor(buildType)
         assertEquals("release", result)
