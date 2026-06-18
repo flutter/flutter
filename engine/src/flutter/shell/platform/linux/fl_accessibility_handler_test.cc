@@ -87,6 +87,7 @@ class FlAccessibilityHandlerTest : public ::testing::Test {
     messenger = fl_mock_binary_messenger_new();
     engine =
         fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+    view = fl_view_new_for_engine(engine);
   }
 
   ~FlAccessibilityHandlerTest() {
@@ -97,11 +98,10 @@ class FlAccessibilityHandlerTest : public ::testing::Test {
 
   FlMockBinaryMessenger* messenger = nullptr;
   FlEngine* engine = nullptr;
+  FlView* view = nullptr;
 };
 
 TEST_F(FlAccessibilityHandlerTest, Announce) {
-  FlView* view = fl_view_new_for_engine(engine);
-
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
@@ -132,8 +132,6 @@ TEST_F(FlAccessibilityHandlerTest, Announce) {
 }
 
 TEST_F(FlAccessibilityHandlerTest, AnnounceAssertive) {
-  FlView* view = fl_view_new_for_engine(engine);
-
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, TRUE);
 
@@ -167,8 +165,6 @@ TEST_F(FlAccessibilityHandlerTest, AnnounceAssertive) {
 }
 
 TEST_F(FlAccessibilityHandlerTest, AnnounceUnknownView) {
-  FlView* view = fl_view_new_for_engine(engine);
-
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
@@ -199,8 +195,6 @@ TEST_F(FlAccessibilityHandlerTest, AnnounceUnknownView) {
 }
 
 TEST_F(FlAccessibilityHandlerTest, UnknownType) {
-  FlView* view = fl_view_new_for_engine(engine);
-
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 

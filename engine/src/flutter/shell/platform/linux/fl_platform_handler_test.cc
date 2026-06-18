@@ -108,23 +108,22 @@ class FlPlatformHandlerTest : public ::testing::Test {
   void SetUp() override {
     loop = g_main_loop_new(nullptr, 0);
     messenger = fl_mock_binary_messenger_new();
+    handler = fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
   }
 
   ~FlPlatformHandlerTest() {
     fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+    g_clear_object(&handler);
     g_clear_object(&messenger);
     g_clear_pointer(&loop, g_main_loop_unref);
   }
 
   GMainLoop* loop = nullptr;
   FlMockBinaryMessenger* messenger = nullptr;
+  FlPlatformHandler* handler = nullptr;
 };
 
 TEST_F(FlPlatformHandlerTest, PlaySound) {
-  g_autoptr(FlPlatformHandler) handler =
-      fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
-  EXPECT_NE(handler, nullptr);
-
   gboolean called = FALSE;
   g_autoptr(FlValue) args = fl_value_new_string("SystemSoundType.alert");
   fl_mock_binary_messenger_invoke_json_method(
@@ -146,10 +145,6 @@ TEST_F(FlPlatformHandlerTest, PlaySound) {
 }
 
 TEST_F(FlPlatformHandlerTest, ExitApplication) {
-  g_autoptr(FlPlatformHandler) handler =
-      fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
-  EXPECT_NE(handler, nullptr);
-
   // Indicate that the binding is initialized.
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_json_method(
