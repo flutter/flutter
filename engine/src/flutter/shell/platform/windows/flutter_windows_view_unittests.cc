@@ -954,19 +954,21 @@ TEST(FlutterWindowsViewTest, NonZeroSemanticsRoot) {
 // node1 is located at 0,0 with size 250x500. It spans area A.
 // node2 is located at 250,0 with size 250x500. It spans areas B and C.
 // node3 is located at 250,250 with size 250x250. It spans area C.
-TEST_F(WindowsTest, AccessibilityHitTesting) {
+TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
   constexpr FlutterTransformation kIdentityTransform = {1, 0, 0,  //
                                                         0, 1, 0,  //
                                                         0, 0, 1};
 
-  auto& context = GetContext();
-  WindowsConfigBuilder builder(context);
-  ViewControllerPtr controller{builder.Run()};
-  ASSERT_NE(controller, nullptr);
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
 
-  auto view =
-      reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
-  ASSERT_NE(view, nullptr);
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
 
   // Enable semantics to instantiate accessibility bridge.
   view->OnUpdateSemanticsEnabled(true);
@@ -1031,31 +1033,21 @@ TEST_F(WindowsTest, AccessibilityHitTesting) {
   IAccessible* node0_accessible = node0_delegate->GetNativeViewAccessible();
   ASSERT_TRUE(node0_accessible != nullptr);
 
-  HWND hwnd = view->GetWindowHandle();
-  ASSERT_NE(hwnd, nullptr);
-
-  POINT pt1 = {150, 150};
-  ::ClientToScreen(hwnd, &pt1);
-  POINT pt2 = {450, 150};
-  ::ClientToScreen(hwnd, &pt2);
-  POINT pt3 = {450, 450};
-  ::ClientToScreen(hwnd, &pt3);
-
   // Perform a hit test that should hit node 1.
   VARIANT varchild{};
-  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(pt1.x, pt1.y, &varchild)));
+  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(150, 150, &varchild)));
   EXPECT_EQ(varchild.vt, VT_DISPATCH);
   EXPECT_EQ(varchild.pdispVal, node1_delegate->GetNativeViewAccessible());
 
   // Perform a hit test that should hit node 2.
   varchild = {};
-  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(pt2.x, pt2.y, &varchild)));
+  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(450, 150, &varchild)));
   EXPECT_EQ(varchild.vt, VT_DISPATCH);
   EXPECT_EQ(varchild.pdispVal, node2_delegate->GetNativeViewAccessible());
 
   // Perform a hit test that should hit node 3.
   varchild = {};
-  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(pt3.x, pt3.y, &varchild)));
+  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(450, 450, &varchild)));
   EXPECT_EQ(varchild.vt, VT_DISPATCH);
   EXPECT_EQ(varchild.pdispVal, node3_delegate->GetNativeViewAccessible());
 }
