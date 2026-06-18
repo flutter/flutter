@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -35,7 +35,7 @@ void main() {
     setState(() {
       style = const AnimationStyle(
         curve: Curves.bounceIn,
-        duration: Durations.extralong4,
+        duration: Duration(minutes: 2),
         reverseCurve: SawTooth(2),
         reverseDuration: Duration(days: 4),
       );
