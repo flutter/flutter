@@ -117,6 +117,10 @@ Future<TaskResult> run() async {
           final int exitCode = await process.exitCode;
           await subscription.cancel();
 
+          if (!completer.isCompleted) {
+            res = TaskResult.failure('Step 2 timed out waiting for VM service');
+            return;
+          }
           if (exitCode != 0) {
             res = TaskResult.failure('Flutter process 2 exited with non-zero exit code: $exitCode');
             return;
@@ -167,6 +171,10 @@ Future<TaskResult> run() async {
         final int exitCode = await process.exitCode;
         await subscription.cancel();
 
+        if (!completer.isCompleted) {
+          res = TaskResult.failure('Step 2 timed out waiting for VM service');
+          return;
+        }
         if (exitCode != 0) {
           res = TaskResult.failure('Flutter process 3 exited with non-zero exit code: $exitCode');
           return;
