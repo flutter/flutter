@@ -2,12 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io' as io;
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart' as tools_io;
+import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../devfs.dart';
@@ -408,6 +415,61 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final bool machine = outputMachineFormat || stringArg('reporter') == 'json';
+    final io.Stdout originalStdout = globals.stdio.stdout;
+    if (machine) {
+      final tools_io.Stdio redirectStdio = StderrRedirectingStdio(globals.stdio);
+      Logger redirectLogger;
+      final Logger currentLogger = globals.logger;
+      StdoutLogger? stdoutLogger;
+      try {
+        stdoutLogger = asLogger<StdoutLogger>(currentLogger);
+      } on StateError {
+        // No StdoutLogger in the delegate chain.
+      }
+
+      if (stdoutLogger != null) {
+        final StdoutLogger newStdoutLogger = globals.platform.isWindows
+            ? WindowsStdoutLogger(
+                terminal: globals.terminal,
+                stdio: redirectStdio,
+                outputPreferences: globals.outputPreferences,
+              )
+            : StdoutLogger(
+                terminal: globals.terminal,
+                stdio: redirectStdio,
+                outputPreferences: globals.outputPreferences,
+              );
+        if (currentLogger.isVerbose) {
+          redirectLogger = VerboseLogger(newStdoutLogger);
+        } else {
+          redirectLogger = newStdoutLogger;
+        }
+      } else {
+        redirectLogger = _RedirectingLogger(currentLogger);
+      }
+
+      try {
+        return await context.run<FlutterCommandResult>(
+          overrides: <Type, Generator>{
+            tools_io.Stdio: () => redirectStdio,
+            Logger: () => redirectLogger,
+          },
+          body: () => _runCommand(originalStdout),
+        );
+      } finally {
+        if (redirectLogger.hadErrorOutput) {
+          currentLogger.hadErrorOutput = true;
+        }
+        if (redirectLogger.hadWarningOutput) {
+          currentLogger.hadWarningOutput = true;
+        }
+      }
+    }
+    return _runCommand(originalStdout);
+  }
+
+  Future<FlutterCommandResult> _runCommand(io.Stdout originalStdout) async {
     if (!globals.fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -603,7 +665,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     TestWatcher? watcher;
     if (outputMachineFormat) {
-      watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
+      watcher = EventPrinter(parent: collector, out: originalStdout);
     } else if (collector != null) {
       watcher = collector;
     }
@@ -904,4 +966,182 @@ bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFile
     ' Use separate invocations of `flutter test` to run integration tests'
     ' and unit tests.',
   );
+}
+
+class _RedirectingStdout implements io.Stdout {
+  _RedirectingStdout(this._stdio);
+
+  final tools_io.Stdio _stdio;
+  io.IOSink get _sink => _stdio.stderr;
+
+  @override
+  Encoding get encoding => _sink.encoding;
+  @override
+  set encoding(Encoding value) => _sink.encoding = value;
+
+  @override
+  void add(List<int> data) => _sink.add(data);
+  @override
+  void write(Object? object) => _sink.write(object);
+  @override
+  void writeAll(Iterable<dynamic> objects, [String sep = '']) => _sink.writeAll(objects, sep);
+  @override
+  void writeCharCode(int charCode) => _sink.writeCharCode(charCode);
+  @override
+  void writeln([Object? object = '']) => _sink.writeln(object);
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) => _sink.addError(error, stackTrace);
+  @override
+  Future<void> addStream(Stream<List<int>> stream) => _sink.addStream(stream);
+  @override
+  Future<void> close() => _sink.close();
+  @override
+  Future<void> get done => _sink.done;
+  @override
+  Future<void> flush() => _sink.flush();
+
+  @override
+  bool get hasTerminal => _stdio.hasTerminal;
+  @override
+  int get terminalColumns => _stdio.terminalColumns ?? 80;
+  @override
+  int get terminalLines => _stdio.terminalLines ?? 24;
+  @override
+  bool get supportsAnsiEscapes => _stdio.supportsAnsiEscapes;
+  @override
+  io.IOSink get nonBlocking => _sink;
+  @override
+  String get lineTerminator => _stdio.stdout.lineTerminator;
+  @override
+  set lineTerminator(String value) => _stdio.stdout.lineTerminator = value;
+}
+
+class StderrRedirectingStdio extends tools_io.Stdio {
+  StderrRedirectingStdio(this._stdio);
+
+  final tools_io.Stdio _stdio;
+
+  late final io.Stdout _stdout = _RedirectingStdout(_stdio);
+
+  @override
+  Stream<List<int>> get stdin => _stdio.stdin;
+
+  @override
+  io.Stdout get stdout => _stdout;
+
+  @override
+  io.IOSink get stderr => _stdio.stderr;
+
+  @override
+  bool get hasTerminal => _stdio.hasTerminal;
+
+  @override
+  bool get stdinHasTerminal => _stdio.stdinHasTerminal;
+
+  @override
+  int? get terminalColumns => _stdio.terminalColumns;
+
+  @override
+  int? get terminalLines => _stdio.terminalLines;
+
+  @override
+  bool get supportsAnsiEscapes => _stdio.supportsAnsiEscapes;
+
+  @override
+  void stdoutWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    _stdio.stderrWrite(message, fallback: fallback);
+  }
+
+  @override
+  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    _stdio.stderrWrite(message, fallback: fallback);
+  }
+
+  @override
+  Future<void> addStdoutStream(Stream<List<int>> stream) => _stdio.addStderrStream(stream);
+
+  @override
+  Future<void> addStderrStream(Stream<List<int>> stream) => _stdio.addStderrStream(stream);
+}
+
+class _RedirectingLogger extends DelegatingLogger {
+  _RedirectingLogger(super.delegate);
+
+  bool _hadErrorOutput = false;
+
+  @override
+  bool get hadErrorOutput => _hadErrorOutput;
+
+  @override
+  set hadErrorOutput(bool value) {
+    _hadErrorOutput = value;
+    super.hadErrorOutput = value;
+  }
+
+  @override
+  void printStatus(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    bool? newline,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    final bool parentHadError = super.hadErrorOutput;
+    super.printError(
+      message,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+    super.hadErrorOutput = parentHadError;
+  }
+
+  @override
+  void printBox(String message, {String? title}) {
+    final bool parentHadError = super.hadErrorOutput;
+    if (title != null) {
+      super.printError('┌─ $title ─┐');
+    } else {
+      super.printError('┌──────────┐');
+    }
+    super.printError('│ $message │');
+    super.printError('└──────────┘');
+    super.hadErrorOutput = parentHadError;
+  }
+
+  @override
+  void printError(
+    String message, {
+    StackTrace? stackTrace,
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    _hadErrorOutput = true;
+    super.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  Status startProgress(
+    String message, {
+    String? progressId,
+    int progressIndicatorPadding = kDefaultStatusPadding,
+  }) {
+    printStatus(message);
+    return SilentStatus(stopwatch: const StopwatchFactory().createStopwatch())..start();
+  }
 }
