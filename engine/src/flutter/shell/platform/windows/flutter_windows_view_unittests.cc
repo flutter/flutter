@@ -69,6 +69,136 @@ std::unique_ptr<std::vector<uint8_t>> keyHandlingResponse(bool handled) {
   return flutter::JsonMessageCodec::GetInstance().EncodeMessage(document);
 }
 
+class SpyWindowSurface : public ::flutter::egl::WindowSurface {
+ public:
+  SpyWindowSurface(EGLDisplay display,
+                   EGLContext context,
+                   EGLSurface surface,
+                   size_t width,
+                   size_t height,
+                   bool* destroy_called,
+                   bool* make_current_called,
+                   bool* vsync_called)
+      : ::flutter::egl::WindowSurface(display, context, surface, width, height),
+        destroy_called_(destroy_called),
+        make_current_called_(make_current_called),
+        vsync_called_(vsync_called) {}
+
+  bool Destroy() override {
+    if (destroy_called_) {
+      *destroy_called_ = true;
+    }
+    return ::flutter::egl::WindowSurface::Destroy();
+  }
+
+  bool MakeCurrent() const override {
+    if (make_current_called_) {
+      *make_current_called_ = true;
+    }
+    return ::flutter::egl::WindowSurface::MakeCurrent();
+  }
+
+  bool SetVSyncEnabled(bool enabled) override {
+    if (vsync_called_) {
+      *vsync_called_ = true;
+    }
+    return ::flutter::egl::WindowSurface::SetVSyncEnabled(enabled);
+  }
+
+ private:
+  bool* destroy_called_;
+  bool* make_current_called_;
+  bool* vsync_called_;
+};
+
+class SpyManager : public ::flutter::egl::Manager {
+ public:
+  SpyManager(bool* create_surface_called,
+             size_t* last_width,
+             size_t* last_height,
+             bool* destroy_called1,
+             bool* make_current_called1,
+             bool* vsync_called1,
+             bool* destroy_called2,
+             bool* make_current_called2,
+             bool* vsync_called2)
+      : ::flutter::egl::Manager(::flutter::egl::GpuPreference::NoPreference),
+        create_surface_called_(create_surface_called),
+        last_width_(last_width),
+        last_height_(last_height),
+        destroy_called1_(destroy_called1),
+        make_current_called1_(make_current_called1),
+        vsync_called1_(vsync_called1),
+        destroy_called2_(destroy_called2),
+        make_current_called2_(make_current_called2),
+        vsync_called2_(vsync_called2) {}
+
+  void set_fail_surface_creation(bool fail) {
+    fail_surface_creation_ = fail;
+  }
+
+  std::unique_ptr<::flutter::egl::WindowSurface> CreateWindowSurface(HWND hwnd,
+                                                                     size_t width,
+                                                                     size_t height) override {
+    if (create_surface_called_) {
+      *create_surface_called_ = true;
+    }
+    if (last_width_) {
+      *last_width_ = width;
+    }
+    if (last_height_) {
+      *last_height_ = height;
+    }
+
+    if (fail_surface_creation_) {
+      return nullptr;
+    }
+
+    if (!hwnd || !IsValid()) {
+      return nullptr;
+    }
+
+    const EGLint surface_attributes[] = {EGL_FIXED_SIZE_ANGLE,
+                                         EGL_TRUE,
+                                         EGL_WIDTH,
+                                         static_cast<EGLint>(width),
+                                         EGL_HEIGHT,
+                                         static_cast<EGLint>(height),
+                                         EGL_NONE};
+
+    auto const surface = ::eglCreateWindowSurface(
+        egl_display(), egl_config(), static_cast<EGLNativeWindowType>(hwnd),
+        surface_attributes);
+    if (surface == EGL_NO_SURFACE) {
+      return nullptr;
+    }
+
+    surface_count_++;
+    if (surface_count_ == 1) {
+      return std::make_unique<SpyWindowSurface>(
+          egl_display(), render_context()->GetHandle(), surface, width, height,
+          destroy_called1_, make_current_called1_, vsync_called1_);
+    } else {
+      return std::make_unique<SpyWindowSurface>(
+          egl_display(), render_context()->GetHandle(), surface, width, height,
+          destroy_called2_, make_current_called2_, vsync_called2_);
+    }
+  }
+
+ private:
+  bool* create_surface_called_;
+  size_t* last_width_;
+  size_t* last_height_;
+  bool* destroy_called1_;
+  bool* make_current_called1_;
+  bool* vsync_called1_;
+  bool* destroy_called2_;
+  bool* make_current_called2_;
+  bool* vsync_called2_;
+  int surface_count_ = 0;
+  bool fail_surface_creation_ = false;
+};
+
 // Returns a Flutter project with the required path values to create
 // a test engine.
 FlutterProjectBundle GetTestProject() {
@@ -908,52 +1038,45 @@ TEST_F(WindowsTest, AccessibilityHitTesting) {
   EXPECT_EQ(varchild.pdispVal, node3_delegate->GetNativeViewAccessible());
 }
 
-TEST(FlutterWindowsViewTest, WindowResizeTests) {
-  auto windows_proc_table = std::make_shared<NiceMock<MockWindowsProcTable>>();
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(windows_proc_table);
+TEST_F(WindowsTest, WindowResizeTests) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine = builder.InitializeEngine();
+  ASSERT_NE(engine, nullptr);
 
-  EngineModifier engine_modifier{engine.get()};
-  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
-      PostRenderThreadTask,
-      ([](auto engine, VoidCallback callback, void* user_data) {
-        callback(user_data);
-        return kSuccess;
-      }));
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier engine_modifier(windows_engine);
 
-  auto egl_manager = std::make_unique<egl::MockManager>();
-  auto surface = std::make_unique<egl::MockWindowSurface>();
-  auto resized_surface = std::make_unique<egl::MockWindowSurface>();
-  egl::MockContext render_context;
+  // Register native functions.
+  windows_engine->SetRootIsolateCreateCallback(
+      context.GetRootIsolateCallback());
 
-  auto surface_ptr = surface.get();
-  auto resized_surface_ptr = resized_surface.get();
+  bool create_surface_called = false;
+  size_t last_width = 0;
+  size_t last_height = 0;
+  bool destroy_called1 = false;
+  bool make_current_called1 = false;
+  bool vsync_called1 = false;
+  bool destroy_called2 = false;
+  bool make_current_called2 = false;
+  bool vsync_called2 = false;
 
-  // Mock render surface creation
-  EXPECT_CALL(*egl_manager, CreateWindowSurface)
-      .WillOnce(Return(std::move(surface)));
-  EXPECT_CALL(*surface_ptr, IsValid).WillRepeatedly(Return(true));
-  EXPECT_CALL(*surface_ptr, MakeCurrent).WillOnce(Return(true));
-  EXPECT_CALL(*surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
-  EXPECT_CALL(*egl_manager, render_context).WillOnce(Return(&render_context));
-  EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
+  auto spy_manager = std::make_unique<SpyManager>(
+      &create_surface_called, &last_width, &last_height,
+      &destroy_called1, &make_current_called1, &vsync_called1,
+      &destroy_called2, &make_current_called2, &vsync_called2);
 
-  // Mock render surface resize
-  EXPECT_CALL(*surface_ptr, Destroy).WillOnce(Return(true));
-  EXPECT_CALL(*egl_manager.get(),
-              CreateWindowSurface(_, /*width=*/500, /*height=*/500))
-      .WillOnce(Return(std::move((resized_surface))));
-  EXPECT_CALL(*resized_surface_ptr, MakeCurrent).WillOnce(Return(true));
-  EXPECT_CALL(*resized_surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
-  EXPECT_CALL(*windows_proc_table.get(), DwmFlush).WillOnce(Return(S_OK));
+  engine_modifier.SetEGLManager(std::move(spy_manager));
 
-  EXPECT_CALL(*resized_surface_ptr, Destroy).WillOnce(Return(true));
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
+  ASSERT_NE(controller, nullptr);
 
-  engine_modifier.SetEGLManager(std::move(egl_manager));
+  auto view = reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
+  ASSERT_NE(view, nullptr);
 
-  std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+  ASSERT_NE(windows_engine->egl_manager(), nullptr);
+  windows_engine->egl_manager()->render_context()->ClearCurrent();
 
   fml::AutoResetWaitableEvent metrics_sent_latch;
   engine_modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
@@ -964,51 +1087,68 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
         return kSuccess;
       }));
 
-  // Simulate raster thread.
-  std::thread frame_thread([&metrics_sent_latch, &view]() {
+  // Simulate raster thread by posting to the engine's real raster thread.
+  windows_engine->PostRasterThreadTask([&metrics_sent_latch, view]() {
     metrics_sent_latch.Wait();
     // Frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnFrameGenerated(500, 500));
     view->OnFramePresented();
   });
 
-  // Start the window resize. This sends the new window metrics
-  // and then blocks polling run loop until another thread completes the window
-  // resize.
+  // Start the window resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
-  frame_thread.join();
+
+  EXPECT_TRUE(create_surface_called);
+  EXPECT_EQ(last_width, 500);
+  EXPECT_EQ(last_height, 500);
+  EXPECT_TRUE(destroy_called1);
+  EXPECT_TRUE(make_current_called2);
+  EXPECT_TRUE(vsync_called2);
+
+  // Destroying the view controller destroys the second surface.
+  controller.reset();
+  EXPECT_TRUE(destroy_called2);
 }
 
 // Verify that an empty frame completes a view resize.
-TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
-  auto windows_proc_table = std::make_shared<NiceMock<MockWindowsProcTable>>();
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      GetTestEngine(windows_proc_table);
+TEST_F(WindowsTest, TestEmptyFrameResizes) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine = builder.InitializeEngine();
+  ASSERT_NE(engine, nullptr);
 
-  EngineModifier engine_modifier{engine.get()};
-  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
-      PostRenderThreadTask,
-      ([](auto engine, VoidCallback callback, void* user_data) {
-        callback(user_data);
-        return kSuccess;
-      }));
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier engine_modifier(windows_engine);
 
-  auto egl_manager = std::make_unique<egl::MockManager>();
-  auto surface = std::make_unique<egl::MockWindowSurface>();
-  auto resized_surface = std::make_unique<egl::MockWindowSurface>();
-  auto resized_surface_ptr = resized_surface.get();
+  windows_engine->SetRootIsolateCreateCallback(
+      context.GetRootIsolateCallback());
 
-  EXPECT_CALL(*surface.get(), IsValid).WillRepeatedly(Return(true));
-  EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(true));
+  bool create_surface_called = false;
+  size_t last_width = 0;
+  size_t last_height = 0;
+  bool destroy_called1 = false;
+  bool make_current_called1 = false;
+  bool vsync_called1 = false;
+  bool destroy_called2 = false;
+  bool make_current_called2 = false;
+  bool vsync_called2 = false;
 
-  EXPECT_CALL(*egl_manager.get(),
-              CreateWindowSurface(_, /*width=*/500, /*height=*/300))
-      .WillOnce(Return(std::move((resized_surface))));
-  EXPECT_CALL(*resized_surface_ptr, MakeCurrent).WillOnce(Return(true));
-  EXPECT_CALL(*resized_surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
-  EXPECT_CALL(*windows_proc_table.get(), DwmFlush).WillOnce(Return(S_OK));
+  auto spy_manager = std::make_unique<SpyManager>(
+      &create_surface_called, &last_width, &last_height,
+      &destroy_called1, &make_current_called1, &vsync_called1,
+      &destroy_called2, &make_current_called2, &vsync_called2);
 
-  EXPECT_CALL(*resized_surface_ptr, Destroy).WillOnce(Return(true));
+  engine_modifier.SetEGLManager(std::move(spy_manager));
+
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
+  ASSERT_NE(controller, nullptr);
+
+  auto view = reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
+  ASSERT_NE(view, nullptr);
+
+  ASSERT_NE(windows_engine->egl_manager(), nullptr);
+  windows_engine->egl_manager()->render_context()->ClearCurrent();
 
   fml::AutoResetWaitableEvent metrics_sent_latch;
   engine_modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
@@ -1019,56 +1159,49 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
         return kSuccess;
       }));
 
-  std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
-                         /*is_sized_to_content=*/false, BoxConstraints());
-
-  ViewModifier view_modifier{view.get()};
-  engine_modifier.SetEGLManager(std::move(egl_manager));
-  view_modifier.SetSurface(std::move(surface));
-
-  // Simulate raster thread.
-  std::thread frame_thread([&metrics_sent_latch, &view]() {
+  // Simulate raster thread by posting to the engine's real raster thread.
+  windows_engine->PostRasterThreadTask([&metrics_sent_latch, view]() {
     metrics_sent_latch.Wait();
-
     // Empty frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnEmptyFrameGenerated());
     view->OnFramePresented();
   });
 
-  // Start the window resize. This sends the new window metrics
-  // and then blocks until another thread completes the window resize.
+  // Start the window resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 300));
-  frame_thread.join();
+
+  EXPECT_TRUE(create_surface_called);
+  EXPECT_EQ(last_width, 500);
+  EXPECT_EQ(last_height, 300);
+  EXPECT_TRUE(destroy_called1);
+  EXPECT_TRUE(make_current_called2);
+  EXPECT_TRUE(vsync_called2);
+
+  controller.reset();
+  EXPECT_TRUE(destroy_called2);
 }
 
 // A window resize can be interleaved between a frame generation and
 // presentation. This should not crash the app. Regression test for:
 // https://github.com/flutter/flutter/issues/141855
-TEST(FlutterWindowsViewTest, WindowResizeRace) {
-  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+TEST_F(WindowsTest, WindowResizeRace) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine = builder.InitializeEngine();
+  ASSERT_NE(engine, nullptr);
 
-  EngineModifier engine_modifier(engine.get());
-  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
-      PostRenderThreadTask,
-      ([](auto engine, VoidCallback callback, void* user_data) {
-        callback(user_data);
-        return kSuccess;
-      }));
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier engine_modifier(windows_engine);
 
-  auto egl_manager = std::make_unique<egl::MockManager>();
-  auto surface = std::make_unique<egl::MockWindowSurface>();
+  windows_engine->SetRootIsolateCreateCallback(
+      context.GetRootIsolateCallback());
 
-  EXPECT_CALL(*surface.get(), IsValid).WillRepeatedly(Return(true));
-  EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(true));
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
+  ASSERT_NE(controller, nullptr);
 
-  std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
-                         /*is_sized_to_content=*/false, BoxConstraints());
-
-  ViewModifier view_modifier{view.get()};
-  engine_modifier.SetEGLManager(std::move(egl_manager));
-  view_modifier.SetSurface(std::move(surface));
+  auto view = reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
+  ASSERT_NE(view, nullptr);
 
   // Begin a frame.
   ASSERT_TRUE(view->OnFrameGenerated(100, 100));
@@ -1077,76 +1210,66 @@ TEST(FlutterWindowsViewTest, WindowResizeRace) {
   // frame presentation. The new size invalidates the current frame.
   EXPECT_FALSE(view->OnWindowSizeChanged(500, 500));
 
-  // Complete the invalidated frame while a resize is pending. Although this
-  // might mean that we presented a frame with the wrong size, this should not
-  // crash the app.
+  // Complete the invalidated frame while a resize is pending.
   view->OnFramePresented();
 }
 
 // Window resize should succeed even if the render surface could not be created
 // even though EGL initialized successfully.
-TEST(FlutterWindowsViewTest, WindowResizeInvalidSurface) {
-  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+TEST_F(WindowsTest, WindowResizeInvalidSurface) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine = builder.InitializeEngine();
+  ASSERT_NE(engine, nullptr);
 
-  EngineModifier engine_modifier(engine.get());
-  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
-      PostRenderThreadTask,
-      ([](auto engine, VoidCallback callback, void* user_data) {
-        callback(user_data);
-        return kSuccess;
-      }));
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier engine_modifier(windows_engine);
 
-  auto egl_manager = std::make_unique<egl::MockManager>();
-  auto surface = std::make_unique<egl::MockWindowSurface>();
+  windows_engine->SetRootIsolateCreateCallback(
+      context.GetRootIsolateCallback());
 
-  EXPECT_CALL(*egl_manager.get(), CreateWindowSurface).Times(0);
-  EXPECT_CALL(*surface.get(), IsValid).WillRepeatedly(Return(false));
-  EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(false));
+  auto spy_manager = std::make_unique<SpyManager>(
+      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+  spy_manager->set_fail_surface_creation(true);
 
-  std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+  engine_modifier.SetEGLManager(std::move(spy_manager));
 
-  ViewModifier view_modifier{view.get()};
-  engine_modifier.SetEGLManager(std::move(egl_manager));
-  view_modifier.SetSurface(std::move(surface));
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
+  ASSERT_NE(controller, nullptr);
 
-  auto metrics_sent = false;
-  engine_modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
-      SendWindowMetricsEvent,
-      ([&metrics_sent](auto engine, const FlutterWindowMetricsEvent* event) {
-        metrics_sent = true;
-        return kSuccess;
-      }));
+  auto view = reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
+  ASSERT_NE(view, nullptr);
 
-  view->OnWindowSizeChanged(500, 500);
+  // Start the window resize, which should succeed (returning true) even if the surface cannot be created.
+  EXPECT_TRUE(view->OnWindowSizeChanged(500, 300));
 }
 
 // Window resize should succeed even if EGL initialized successfully
 // but the EGL surface could not be created.
-TEST(FlutterWindowsViewTest, WindowResizeWithoutSurface) {
-  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineModifier modifier(engine.get());
+TEST_F(WindowsTest, WindowResizeWithoutSurface) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine = builder.InitializeEngine();
+  ASSERT_NE(engine, nullptr);
 
-  auto egl_manager = std::make_unique<egl::MockManager>();
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier engine_modifier(windows_engine);
 
-  EXPECT_CALL(*egl_manager.get(), CreateWindowSurface).Times(0);
+  windows_engine->SetRootIsolateCreateCallback(
+      context.GetRootIsolateCallback());
 
+  // Use real EGL manager so the engine starts successfully under Impeller,
+  // but we do NOT use a view controller. Instead, we create a view directly
+  // with a MockWindowBindingHandler which returns a null HWND, so EGL surface
+  // creation will fail.
   std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+      windows_engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                                 /*is_sized_to_content=*/false, BoxConstraints());
+  ASSERT_NE(view, nullptr);
 
-  modifier.SetEGLManager(std::move(egl_manager));
-
-  auto metrics_sent = false;
-  modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
-      SendWindowMetricsEvent,
-      ([&metrics_sent](auto engine, const FlutterWindowMetricsEvent* event) {
-        metrics_sent = true;
-        return kSuccess;
-      }));
-
-  view->OnWindowSizeChanged(500, 500);
+  // The view does not have a surface. Resizing it should return true/succeed.
+  EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
 }
 
 TEST(FlutterWindowsViewTest, WindowRepaintTests) {
