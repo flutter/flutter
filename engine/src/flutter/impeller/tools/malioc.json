@@ -8752,7 +8752,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 35,
+          "fp16_arithmetic": 25,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -8760,9 +8760,9 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.421875,
+              0.390625,
               0.328125,
-              0.421875,
+              0.390625,
               0.0,
               0.0,
               0.25,
@@ -8794,9 +8794,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.546875,
+              0.484375,
               0.359375,
-              0.546875,
+              0.484375,
               0.0,
               0.0,
               0.25,
@@ -8806,7 +8806,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 20,
-          "work_registers_used": 22
+          "work_registers_used": 21
         }
       }
     },
@@ -8844,7 +8844,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              9.666666984558105,
+              9.333333015441895,
               1.0,
               1.0
             ]
@@ -12205,7 +12205,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 72,
+          "fp16_arithmetic": 36,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -12213,9 +12213,9 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.375,
+              0.328125,
               0.1875,
-              0.375,
+              0.328125,
               0.0625,
               0.0,
               0.25,
@@ -12247,9 +12247,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.4375,
+              0.390625,
               0.21875,
-              0.4375,
+              0.390625,
               0.0625,
               0.0,
               0.25,

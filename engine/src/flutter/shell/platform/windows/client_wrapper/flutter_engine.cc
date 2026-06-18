@@ -25,6 +25,8 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.accessibility_mode =
       static_cast<FlutterDesktopAccessibilityMode>(
           project.accessibility_mode());
+  c_engine_properties.impeller_switch =
+      static_cast<FlutterDesktopImpellerSwitch>(project.impeller_switch());
 
   const std::vector<std::string>& entrypoint_args =
       project.dart_entrypoint_arguments();
