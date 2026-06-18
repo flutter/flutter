@@ -749,8 +749,16 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
 
   if (!mergedPlatformUIThread) {
-    NSLog(@"Running with unmerged UI and platform thread. "
-           "This will be removed in a future release.");
+    NSLog(@"Warning: Merged threads is disabled. Running Flutter without merged threads is "
+           "deprecated and will be unsupported in a future release.\n"
+           "\n"
+           "To turn on merged threads, update your macos/Runner/Info.plist file:\n"
+           "\n"
+           "  <key>FLTEnableMergedPlatformUIThread</key>\n"
+           "  <true/>\n"
+           "\n"
+           "If you disabled merged threads to work around an issue, please report it here: "
+           "https://github.com/flutter/flutter/issues/150525.");
   }
 
   // The task description needs to be created separately for platform task
