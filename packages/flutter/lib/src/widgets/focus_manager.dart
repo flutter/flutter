@@ -2005,6 +2005,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       _dirtyNodes.addAll(previousPath.difference(nextPath));
 
       _primaryFocus = _markedForFocus;
+    }
+    if (_markedForFocus != null) {
       _markedForFocus = null;
     }
     assert(_markedForFocus == null);
