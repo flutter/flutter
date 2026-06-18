@@ -23,15 +23,29 @@ using ::flutter::testing::keycodes::kPhysicalKeyA;
 
 constexpr guint16 kKeyCodeKeyA = 0x26u;
 
-TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+class FlKeyboardHandlerTest : public ::testing::Test {
+ protected:
+  void StartEngine(FlEngine* engine) {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
 
+  void SetUp() override { loop = g_main_loop_new(nullptr, 0); }
+
+  ~FlKeyboardHandlerTest() { g_clear_pointer(&loop, g_main_loop_unref); }
+
+  GMainLoop* loop = nullptr;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+};
+
+TEST_F(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
 
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+  StartEngine(engine);
 
   g_autoptr(FlKeyboardHandler) handler =
       fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
@@ -53,7 +67,6 @@ TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
         callback(false, user_data);
         return kSuccess;
       }));
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   fl_keyboard_manager_handle_event(

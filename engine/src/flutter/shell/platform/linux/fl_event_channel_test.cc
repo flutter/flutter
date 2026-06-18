@@ -10,9 +10,17 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 
+class FlEventChannelTest : public ::testing::Test {
+ protected:
+  void SetUp() override { messenger = fl_mock_binary_messenger_new(); }
+
+  ~FlEventChannelTest() { g_clear_object(&messenger); }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+};
+
 // Checks we detect a listen event.
-TEST(FlEventChannelTest, Listen) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, Listen) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlEventChannel) channel = fl_event_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -43,8 +51,7 @@ TEST(FlEventChannelTest, Listen) {
 }
 
 // Checks we can generate a listen exception.
-TEST(FlEventChannelTest, ListenException) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, ListenException) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlEventChannel) channel = fl_event_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -77,8 +84,7 @@ TEST(FlEventChannelTest, ListenException) {
 }
 
 // Checks we detect a cancel event.
-TEST(FlEventChannelTest, Cancel) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, Cancel) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlEventChannel) channel = fl_event_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -114,8 +120,7 @@ TEST(FlEventChannelTest, Cancel) {
 }
 
 // Checks we can generate a cancel exception.
-TEST(FlEventChannelTest, CancelException) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, CancelException) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlEventChannel) channel = fl_event_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -153,8 +158,7 @@ TEST(FlEventChannelTest, CancelException) {
 }
 
 // Checks args are passed to listen/cancel.
-TEST(FlEventChannelTest, Args) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, Args) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlEventChannel) channel = fl_event_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -200,8 +204,7 @@ TEST(FlEventChannelTest, Args) {
 }
 
 // Checks can send events.
-TEST(FlEventChannelTest, SendEvents) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, SendEvents) {
   int event_count = 0;
   fl_mock_binary_messenger_set_standard_event_channel(
       messenger, "test",
@@ -251,8 +254,7 @@ TEST(FlEventChannelTest, SendEvents) {
 
 // Check can register an event channel with the same name as one previously
 // used.
-TEST(FlEventChannelTest, ReuseChannel) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, ReuseChannel) {
   int event_count = 0;
   fl_mock_binary_messenger_set_standard_event_channel(
       messenger, "test",
@@ -322,8 +324,7 @@ TEST(FlEventChannelTest, ReuseChannel) {
 }
 
 // Check can register an event channel replacing an existing one.
-TEST(FlEventChannelTest, ReplaceChannel) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlEventChannelTest, ReplaceChannel) {
   int event_count = 0;
   fl_mock_binary_messenger_set_standard_event_channel(
       messenger, "test",

@@ -19,9 +19,25 @@ static void first_frame_cb(FlView* view, gboolean* first_frame_emitted) {
 }
 #endif
 
-TEST(FlViewTest, GetEngine) {
-  flutter::testing::fl_ensure_gtk_init();
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+class FlViewTest : public ::testing::Test {
+ protected:
+  void StartEngine(FlEngine* engine) {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
+
+  void SetUp() override {
+    flutter::testing::fl_ensure_gtk_init();
+    project = fl_dart_project_new();
+  }
+
+  ~FlViewTest() { g_clear_object(&project); }
+
+  FlDartProject* project = nullptr;
+};
+
+TEST_F(FlViewTest, GetEngine) {
   FlView* view = fl_view_new(project);
 
   // Check the engine is immediately available (i.e. before the widget is
@@ -30,9 +46,7 @@ TEST(FlViewTest, GetEngine) {
   EXPECT_NE(engine, nullptr);
 }
 
-TEST(FlViewTest, StateUpdateDoesNotHappenInInit) {
-  flutter::testing::fl_ensure_gtk_init();
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {
   FlView* view = fl_view_new(project);
   // Check that creating a view doesn't try to query the window state in
   // initialization, causing a critical log to be issued.
@@ -48,10 +62,7 @@ TEST(FlViewTest, StateUpdateDoesNotHappenInInit) {
 // very difficult to mock. Following PRs will change this code so enable the
 // test again after that.
 #if 0
-TEST(FlViewTest, FirstFrameSignal) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, FirstFrameSignal) {
   FlView* view = fl_view_new(project);
   gboolean first_frame_emitted = FALSE;
   g_signal_connect(view, "first-frame", G_CALLBACK(first_frame_cb),
@@ -72,15 +83,11 @@ TEST(FlViewTest, FirstFrameSignal) {
 #endif
 
 // Check semantics update applied
-TEST(FlViewTest, SemanticsUpdate) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SemanticsUpdate) {
   FlView* view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(view);
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlutterSemanticsFlags flags = {};
   FlutterSemanticsNode2 root_node = {
@@ -98,15 +105,11 @@ TEST(FlViewTest, SemanticsUpdate) {
 }
 
 // Check semantics update ignored for other view
-TEST(FlViewTest, SemanticsUpdateOtherView) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SemanticsUpdateOtherView) {
   FlView* view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(view);
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlutterSemanticsFlags flags = {};
   FlutterSemanticsNode2 root_node = {
@@ -121,10 +124,7 @@ TEST(FlViewTest, SemanticsUpdateOtherView) {
 }
 
 // Check secondary view is registered with engine.
-TEST(FlViewTest, SecondaryView) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SecondaryView) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -141,18 +141,14 @@ TEST(FlViewTest, SecondaryView) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
   EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
 }
 
 // Check secondary view that fails registration.
-TEST(FlViewTest, SecondaryViewError) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SecondaryViewError) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -164,18 +160,14 @@ TEST(FlViewTest, SecondaryViewError) {
         return kInvalidArguments;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
   EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
 }
 
 // Check views are deregistered on destruction.
-TEST(FlViewTest, ViewDestroy) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, ViewDestroy) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -188,8 +180,7 @@ TEST(FlViewTest, ViewDestroy) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
 
@@ -207,10 +198,7 @@ TEST(FlViewTest, ViewDestroy) {
 }
 
 // Check views deregistered with errors works.
-TEST(FlViewTest, ViewDestroyError) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, ViewDestroyError) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -220,8 +208,7 @@ TEST(FlViewTest, ViewDestroyError) {
         return kInvalidArguments;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
 
@@ -230,10 +217,7 @@ TEST(FlViewTest, ViewDestroyError) {
 }
 
 // Check can create a view that is sized to the content.
-TEST(FlViewTest, SizedToContent) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SizedToContent) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -243,8 +227,7 @@ TEST(FlViewTest, SizedToContent) {
         return kInvalidArguments;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_sized_to_content(engine);
 

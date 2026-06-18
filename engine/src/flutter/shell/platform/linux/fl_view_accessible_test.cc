@@ -9,9 +9,19 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/testing/mock_signal_handler.h"
 
-TEST(FlViewAccessibleTest, BuildTree) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+class FlViewAccessibleTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlViewAccessibleTest() { g_clear_object(&engine); }
+
+  FlEngine* engine = nullptr;
+};
+
+TEST_F(FlViewAccessibleTest, BuildTree) {
   g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
 
   int32_t children[] = {111, 222};
@@ -49,9 +59,7 @@ TEST(FlViewAccessibleTest, BuildTree) {
   EXPECT_EQ(atk_object_get_n_accessible_children(child2_object), 0);
 }
 
-TEST(FlViewAccessibleTest, AddRemoveChildren) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlViewAccessibleTest, AddRemoveChildren) {
   g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
 
   FlutterSemanticsFlags flags = {};

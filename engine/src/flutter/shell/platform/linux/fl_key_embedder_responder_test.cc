@@ -102,11 +102,27 @@ static void invoke_record_callback(FlKeyEmbedderCallRecord* record,
   record->callback(expected_handled, record->user_data);
 }
 
+class FlKeyEmbedderResponderTest : public ::testing::Test {
+ protected:
+  void StartEngine(FlEngine* engine) {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
+
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlKeyEmbedderResponderTest() { g_clear_object(&engine); }
+
+  FlEngine* engine = nullptr;
+};
+
 // Basic key presses
-TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, SendKeyEvent) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -250,10 +266,8 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
 }
 
 // Basic key presses, but uses the specified logical key if it is not 0.
-TEST(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -303,10 +317,8 @@ TEST(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
 }
 
 // Press Shift, key A, then release Shift, key A.
-TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -445,10 +457,8 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
 // This also tests the result of Numpad keys across NumLock taps, which is
 // test-worthy because the keyval for the numpad key will change before and
 // after the NumLock tap, which should not alter the resulting logical key.
-TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -695,10 +705,8 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
 //
 // GTK will change the virtual key during a key tap, and the embedder
 // should regularize it.
-TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -837,10 +845,8 @@ TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
 //
 // This tests interaction between lock keys and non-lock keys in cases that do
 // not have events missed.
-TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1087,10 +1093,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
 // a platform with reversed logic.
 //
 // This happens when using a Chrome remote desktop on MacOS.
-TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1333,10 +1337,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   g_main_loop_run(loop8);
 }
 
-TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1429,10 +1431,8 @@ TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   g_main_loop_run(loop3);
 }
 
-TEST(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1480,10 +1480,9 @@ TEST(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
 
 // Test if missed modifier keys can be detected and synthesized with state
 // information upon events that are for this modifier key.
-TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest,
+       SynthesizeForDesyncPressingStateOnSelfEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1668,11 +1667,9 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
 
 // Test if missed modifier keys can be detected and synthesized with state
 // information upon events that are not for this modifier key.
-TEST(FlKeyEmbedderResponderTest,
-     SynthesizeForDesyncPressingStateOnNonSelfEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest,
+       SynthesizeForDesyncPressingStateOnNonSelfEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1846,11 +1843,9 @@ TEST(FlKeyEmbedderResponderTest,
 
 // Test if missed modifier keys can be detected and synthesized with state
 // information upon events that do not have the standard key mapping.
-TEST(FlKeyEmbedderResponderTest,
-     SynthesizeForDesyncPressingStateOnRemappedEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest,
+       SynthesizeForDesyncPressingStateOnRemappedEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1942,10 +1937,8 @@ TEST(FlKeyEmbedderResponderTest,
 
 // Test if missed lock keys can be detected and synthesized with state
 // information upon events that are not for this modifier key.
-TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2088,10 +2081,8 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
 
 // Test if missed lock keys can be detected and synthesized with state
 // information upon events that are for this modifier key.
-TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2214,10 +2205,8 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
 
 // Ensures that even if the primary event is ignored (due to duplicate
 // key up or down events), key synthesization is still performed.
-TEST(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2283,10 +2272,8 @@ TEST(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
 // The resulting event sequence is not perfectly ideal: it had to synthesize
 // AltLeft down because the physical AltRight key corresponds to logical
 // MetaRight at the moment.
-TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2410,10 +2397,8 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
 // this case (Shift + AltLeft) a correction is needed otherwise the physical
 // key won't be the MetaLeft one.
 // Regression test for https://github.com/flutter/flutter/issues/96082
-TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+TEST_F(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
+  StartEngine(engine);
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);

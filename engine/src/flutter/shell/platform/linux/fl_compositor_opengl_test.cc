@@ -19,10 +19,20 @@
 
 #include <epoxy/egl.h>
 
-TEST(FlCompositorOpenGLTest, Render) {
+class FlCompositorOpenGLTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlCompositorOpenGLTest() { g_clear_object(&engine); }
+
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlEngine* engine = nullptr;
+};
+
+TEST_F(FlCompositorOpenGLTest, Render) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
@@ -66,10 +76,7 @@ TEST(FlCompositorOpenGLTest, Render) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, Resize) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorOpenGLTest, Resize) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
@@ -128,10 +135,7 @@ TEST(FlCompositorOpenGLTest, Resize) {
   latch.Wait();
 }
 
-TEST(FlCompositorOpenGLTest, RestoresGLState) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
@@ -188,10 +192,7 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   EXPECT_EQ(glIsEnabled(GL_SCISSOR_TEST), GL_TRUE);
 }
 
-TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
@@ -238,10 +239,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
@@ -293,10 +291,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
@@ -341,10 +336,7 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
@@ -390,10 +382,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, RenderResizeCrash) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
   g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 

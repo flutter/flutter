@@ -12,13 +12,26 @@
 
 #include "gtest/gtest.h"
 
-TEST(FlScrollingManagerTest, DiscreteDirectional) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+class FlScrollingManagerTest : public ::testing::Test {
+ protected:
+  void StartEngine(FlEngine* engine) {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlScrollingManagerTest() { g_clear_object(&engine); }
+
+  FlEngine* engine = nullptr;
+};
+
+TEST_F(FlScrollingManagerTest, DiscreteDirectional) {
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -85,13 +98,8 @@ TEST(FlScrollingManagerTest, DiscreteDirectional) {
   EXPECT_EQ(pointer_events[3].scroll_delta_y, 0);
 }
 
-TEST(FlScrollingManagerTest, DiscreteScrolling) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlScrollingManagerTest, DiscreteScrolling) {
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -130,13 +138,8 @@ TEST(FlScrollingManagerTest, DiscreteScrolling) {
   EXPECT_EQ(pointer_events[0].scroll_delta_y, 53 * 2.0);
 }
 
-TEST(FlScrollingManagerTest, Panning) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlScrollingManagerTest, Panning) {
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -201,13 +204,8 @@ TEST(FlScrollingManagerTest, Panning) {
   EXPECT_EQ(pointer_events[3].phase, kPanZoomEnd);
 }
 
-TEST(FlScrollingManagerTest, Zooming) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlScrollingManagerTest, Zooming) {
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -248,13 +246,8 @@ TEST(FlScrollingManagerTest, Zooming) {
   EXPECT_GE(pointer_events[2].timestamp, pointer_events[1].timestamp);
 }
 
-TEST(FlScrollingManagerTest, Rotating) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlScrollingManagerTest, Rotating) {
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -295,13 +288,8 @@ TEST(FlScrollingManagerTest, Rotating) {
   EXPECT_GE(pointer_events[2].timestamp, pointer_events[1].timestamp);
 }
 
-TEST(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -359,13 +347,8 @@ TEST(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
 
 // Make sure that zoom and rotate sequences which don't end at the same time
 // don't cause any problems.
-TEST(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(

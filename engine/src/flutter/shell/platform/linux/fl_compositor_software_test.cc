@@ -13,9 +13,19 @@
 
 #include <gdk/gdkwayland.h>
 
-TEST(FlCompositorSoftwareTest, Render) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+class FlCompositorSoftwareTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlCompositorSoftwareTest() { g_clear_object(&engine); }
+
+  FlEngine* engine = nullptr;
+};
+
+TEST_F(FlCompositorSoftwareTest, Render) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
 
   g_autoptr(FlCompositorSoftware) compositor =
@@ -58,9 +68,7 @@ TEST(FlCompositorSoftwareTest, Render) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorSoftwareTest, Resize) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlCompositorSoftwareTest, Resize) {
   g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
 
   g_autoptr(FlCompositorSoftware) compositor =

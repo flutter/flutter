@@ -15,16 +15,32 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 
+class FlBinaryMessengerTest : public ::testing::Test {
+ protected:
+  void StartEngine(FlEngine* engine) {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
+
+  void SetUp() override {
+    loop = g_main_loop_new(nullptr, 0);
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlBinaryMessengerTest() {
+    g_clear_object(&engine);
+    g_clear_pointer(&loop, g_main_loop_unref);
+  }
+
+  GMainLoop* loop = nullptr;
+  FlEngine* engine = nullptr;
+};
+
 // Checks can send a message.
-TEST(FlBinaryMessengerTest, Send) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, Send) {
+  StartEngine(engine);
 
   FlutterDataCallback response_callback;
   void* response_callback_user_data;
@@ -80,13 +96,8 @@ TEST(FlBinaryMessengerTest, Send) {
 }
 
 // Checks sending nullptr for a message works.
-TEST(FlBinaryMessengerTest, SendNullptr) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, SendNullptr) {
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
@@ -109,13 +120,8 @@ TEST(FlBinaryMessengerTest, SendNullptr) {
 }
 
 // Checks sending a zero length message works.
-TEST(FlBinaryMessengerTest, SendEmpty) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, SendEmpty) {
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
@@ -136,15 +142,8 @@ TEST(FlBinaryMessengerTest, SendEmpty) {
 }
 
 // Checks the engine returning a nullptr message work.
-TEST(FlBinaryMessengerTest, NullptrResponse) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, NullptrResponse) {
+  StartEngine(engine);
 
   FlutterDataCallback response_callback;
   void* response_callback_user_data;
@@ -195,15 +194,8 @@ TEST(FlBinaryMessengerTest, NullptrResponse) {
 }
 
 // Checks the engine reporting a send failure is handled.
-TEST(FlBinaryMessengerTest, SendFailure) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, SendFailure) {
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendPlatformMessage =
       MOCK_ENGINE_PROC(SendPlatformMessage,
@@ -231,13 +223,8 @@ TEST(FlBinaryMessengerTest, SendFailure) {
 }
 
 // Checks can receive a message.
-TEST(FlBinaryMessengerTest, Receive) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, Receive) {
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
@@ -293,22 +280,15 @@ TEST(FlBinaryMessengerTest, Receive) {
 }
 
 // Checks receieved messages can be responded to on a thread.
-TEST(FlBinaryMessengerTest, ReceiveRespondThread) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, ReceiveRespondThread) {
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
       MOCK_ENGINE_PROC(
           SendPlatformMessageResponse,
-          ([&loop](auto engine,
-                   const FlutterPlatformMessageResponseHandle* handle,
-                   const uint8_t* data, size_t data_length) {
+          ([this](auto engine,
+                  const FlutterPlatformMessageResponseHandle* handle,
+                  const uint8_t* data, size_t data_length) {
             int fake_handle = *reinterpret_cast<const int*>(handle);
             EXPECT_EQ(fake_handle, 42);
 
@@ -381,10 +361,7 @@ TEST(FlBinaryMessengerTest, ReceiveRespondThread) {
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 // Checks if the 'resize' command is sent and is well-formed.
-TEST(FlBinaryMessengerTest, ResizeChannel) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlBinaryMessengerTest, ResizeChannel) {
   bool called = false;
 
   FlutterEngineSendPlatformMessageFnPtr old_handler =
@@ -417,9 +394,7 @@ TEST(FlBinaryMessengerTest, ResizeChannel) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_resize_channel(messenger, "flutter/test", 3);
@@ -428,10 +403,7 @@ TEST(FlBinaryMessengerTest, ResizeChannel) {
 }
 
 // Checks if the 'overflow' command is sent and is well-formed.
-TEST(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
   bool called = false;
 
   FlutterEngineSendPlatformMessageFnPtr old_handler =
@@ -463,9 +435,7 @@ TEST(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_set_warns_on_channel_overflow(messenger, "flutter/test",
@@ -476,15 +446,8 @@ TEST(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
 
 // Checks if error returned when invoking a command on the control channel
 // are handled.
-TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, ControlChannelErrorResponse) {
+  StartEngine(engine);
 
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   bool called = false;
@@ -492,7 +455,7 @@ TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
       fl_engine_get_embedder_api(engine)->SendPlatformMessage;
   fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
       SendPlatformMessage,
-      ([&called, old_handler, loop](auto engine,
+      ([&called, old_handler, this](auto engine,
                                     const FlutterPlatformMessage* message) {
         // Expect to receive a message on the "control" channel.
         if (strcmp(message->channel, "dev.flutter/channel-buffers") != 0) {
@@ -524,13 +487,8 @@ TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
-TEST(FlBinaryMessengerTest, DeletingEngineClearsHandlers) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlBinaryMessengerTest, DeletingEngineClearsHandlers) {
+  StartEngine(engine);
 
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
 

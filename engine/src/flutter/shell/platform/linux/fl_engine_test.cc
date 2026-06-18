@@ -15,14 +15,33 @@
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
+class FlEngineTest : public ::testing::Test {
+ protected:
+  void StartEngine(FlEngine* engine) {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
+
+  void SetUp() override {
+    loop = g_main_loop_new(nullptr, 0);
+    project = fl_dart_project_new();
+  }
+
+  ~FlEngineTest() {
+    g_clear_object(&project);
+    g_clear_pointer(&loop, g_main_loop_unref);
+  }
+
+  GMainLoop* loop = nullptr;
+  FlDartProject* project = nullptr;
+};
+
 // Checks notifying display updates works.
-TEST(FlEngineTest, NotifyDisplayUpdate) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, NotifyDisplayUpdate) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate = MOCK_ENGINE_PROC(
@@ -73,13 +92,10 @@ TEST(FlEngineTest, NotifyDisplayUpdate) {
 }
 
 // Checks sending window metrics events works.
-TEST(FlEngineTest, WindowMetrics) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, WindowMetrics) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendWindowMetricsEvent = MOCK_ENGINE_PROC(
@@ -106,8 +122,7 @@ TEST(FlEngineTest, WindowMetrics) {
 }
 
 // Checks sending mouse pointer events works.
-TEST(FlEngineTest, MousePointer) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, MousePointer) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -132,9 +147,7 @@ TEST(FlEngineTest, MousePointer) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   fl_engine_send_mouse_pointer_event(engine, 1, kDown, 1234567890, 800, 600,
                                      kFlutterPointerDeviceKindMouse, 1.2, -3.4,
                                      kFlutterPointerButtonMouseSecondary);
@@ -143,8 +156,7 @@ TEST(FlEngineTest, MousePointer) {
 }
 
 // Checks sending pan/zoom events works.
-TEST(FlEngineTest, PointerPanZoom) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, PointerPanZoom) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -171,9 +183,7 @@ TEST(FlEngineTest, PointerPanZoom) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   fl_engine_send_pointer_pan_zoom_event(engine, 1, 1234567890, 800, 600,
                                         kPanZoomUpdate, 1.5, 2.5, 3.5, 4.5);
 
@@ -181,8 +191,7 @@ TEST(FlEngineTest, PointerPanZoom) {
 }
 
 // Checks dispatching a semantics action works.
-TEST(FlEngineTest, DispatchSemanticsAction) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, DispatchSemanticsAction) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -202,9 +211,7 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   g_autoptr(GBytes) data = g_bytes_new_static("test", 4);
   fl_engine_dispatch_semantics_action(engine, 456, 42,
                                       kFlutterSemanticsActionTap, data);
@@ -213,8 +220,7 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
 }
 
 // Checks sending platform messages works.
-TEST(FlEngineTest, PlatformMessage) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, PlatformMessage) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -239,9 +245,7 @@ TEST(FlEngineTest, PlatformMessage) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   g_autoptr(GBytes) message = g_bytes_new_static("test", 4);
   fl_engine_send_platform_message(engine, "test", message, nullptr, nullptr,
                                   nullptr);
@@ -250,8 +254,7 @@ TEST(FlEngineTest, PlatformMessage) {
 }
 
 // Checks sending platform message responses works.
-TEST(FlEngineTest, PlatformMessageResponse) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, PlatformMessageResponse) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -277,8 +280,7 @@ TEST(FlEngineTest, PlatformMessageResponse) {
           }));
 
   g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   g_autoptr(GBytes) response = g_bytes_new_static("test", 4);
   EXPECT_TRUE(fl_engine_send_platform_message_response(
       engine, reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(42),
@@ -289,8 +291,7 @@ TEST(FlEngineTest, PlatformMessageResponse) {
 }
 
 // Checks settings handler sends settings on startup.
-TEST(FlEngineTest, SettingsHandler) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, SettingsHandler) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -329,9 +330,7 @@ TEST(FlEngineTest, SettingsHandler) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   EXPECT_TRUE(called);
 }
@@ -342,8 +341,7 @@ void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
 }
 
 // Checks restarting the engine invokes the correct callback.
-TEST(FlEngineTest, OnPreEngineRestart) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, OnPreEngineRestart) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   OnPreEngineRestartCallback callback;
@@ -364,9 +362,7 @@ TEST(FlEngineTest, OnPreEngineRestart) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   EXPECT_TRUE(called);
   EXPECT_NE(callback, nullptr);
@@ -387,7 +383,7 @@ TEST(FlEngineTest, OnPreEngineRestart) {
   EXPECT_EQ(count, 1);
 }
 
-TEST(FlEngineTest, DartEntrypointArgs) {
+TEST_F(FlEngineTest, DartEntrypointArgs) {
   GPtrArray* args_array = g_ptr_array_new();
   g_ptr_array_add(args_array, const_cast<char*>("arg_one"));
   g_ptr_array_add(args_array, const_cast<char*>("arg_two"));
@@ -395,7 +391,6 @@ TEST(FlEngineTest, DartEntrypointArgs) {
   g_ptr_array_add(args_array, nullptr);
   gchar** args = reinterpret_cast<gchar**>(g_ptr_array_free(args_array, false));
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, args);
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
@@ -414,15 +409,12 @@ TEST(FlEngineTest, DartEntrypointArgs) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   EXPECT_TRUE(called);
 }
 
-TEST(FlEngineTest, EngineId) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, EngineId) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
   int64_t engine_id;
   fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
@@ -436,16 +428,13 @@ TEST(FlEngineTest, EngineId) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   EXPECT_TRUE(engine_id != 0);
 
   EXPECT_EQ(fl_engine_for_id(engine_id), engine);
 }
 
-TEST(FlEngineTest, UIIsolateDefaultThreadPolicy) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, UIIsolateDefaultThreadPolicy) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
   fl_dart_project_set_ui_thread_policy(project, FL_UI_THREAD_POLICY_DEFAULT);
 
@@ -463,14 +452,11 @@ TEST(FlEngineTest, UIIsolateDefaultThreadPolicy) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   EXPECT_TRUE(same_task_runner);
 }
 
-TEST(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
   fl_dart_project_set_ui_thread_policy(
       project, FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD);
@@ -489,14 +475,11 @@ TEST(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   EXPECT_TRUE(same_task_runner);
 }
 
-TEST(FlEngineTest, UIIsolateOnSeparateThread) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, UIIsolateOnSeparateThread) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
   fl_dart_project_set_ui_thread_policy(
       project, FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD);
@@ -514,17 +497,13 @@ TEST(FlEngineTest, UIIsolateOnSeparateThread) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   EXPECT_TRUE(separate_thread);
 }
 
-TEST(FlEngineTest, Locales) {
+TEST_F(FlEngineTest, Locales) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "de:en_US", TRUE);
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -558,9 +537,7 @@ TEST(FlEngineTest, Locales) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   EXPECT_TRUE(called);
 
@@ -571,11 +548,9 @@ TEST(FlEngineTest, Locales) {
   }
 }
 
-TEST(FlEngineTest, CLocale) {
+TEST_F(FlEngineTest, CLocale) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "C", TRUE);
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -594,9 +569,7 @@ TEST(FlEngineTest, CLocale) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   EXPECT_TRUE(called);
 
@@ -607,11 +580,9 @@ TEST(FlEngineTest, CLocale) {
   }
 }
 
-TEST(FlEngineTest, DuplicateLocale) {
+TEST_F(FlEngineTest, DuplicateLocale) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "en:en", TRUE);
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -635,9 +606,7 @@ TEST(FlEngineTest, DuplicateLocale) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   EXPECT_TRUE(called);
 
@@ -648,11 +617,9 @@ TEST(FlEngineTest, DuplicateLocale) {
   }
 }
 
-TEST(FlEngineTest, EmptyLocales) {
+TEST_F(FlEngineTest, EmptyLocales) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "de:: :en_US", TRUE);
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -686,9 +653,7 @@ TEST(FlEngineTest, EmptyLocales) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   EXPECT_TRUE(called);
 
@@ -710,10 +675,7 @@ static void add_view_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-TEST(FlEngineTest, AddView) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, AddView) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -760,10 +722,7 @@ static void add_view_error_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-TEST(FlEngineTest, AddViewError) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, AddViewError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
@@ -798,10 +757,7 @@ static void add_view_engine_error_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-TEST(FlEngineTest, AddViewEngineError) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, AddViewEngineError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
@@ -830,10 +786,7 @@ static void remove_view_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-TEST(FlEngineTest, RemoveView) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, RemoveView) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
@@ -869,10 +822,7 @@ static void remove_view_error_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-TEST(FlEngineTest, RemoveViewError) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, RemoveViewError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
@@ -903,10 +853,7 @@ static void remove_view_engine_error_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-TEST(FlEngineTest, RemoveViewEngineError) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, RemoveViewEngineError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
@@ -921,15 +868,10 @@ TEST(FlEngineTest, RemoveViewEngineError) {
   g_main_loop_run(loop);
 }
 
-TEST(FlEngineTest, SendKeyEvent) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, SendKeyEvent) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   bool called;
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -972,15 +914,10 @@ TEST(FlEngineTest, SendKeyEvent) {
   EXPECT_TRUE(called);
 }
 
-TEST(FlEngineTest, SendKeyEventNotHandled) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, SendKeyEventNotHandled) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   bool called;
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -1017,16 +954,12 @@ TEST(FlEngineTest, SendKeyEventNotHandled) {
   EXPECT_TRUE(called);
 }
 
-TEST(FlEngineTest, SendKeyEventError) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, SendKeyEventError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   g_autoptr(GError) error = nullptr;
   // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
 
   bool called;
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -1062,8 +995,7 @@ TEST(FlEngineTest, SendKeyEventError) {
   EXPECT_TRUE(called);
 }
 
-TEST(FlEngineTest, EnableImpeller) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, EnableImpeller) {
   fl_dart_project_set_enable_impeller(project, TRUE);
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
@@ -1086,14 +1018,11 @@ TEST(FlEngineTest, EnableImpeller) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine(engine);
   EXPECT_TRUE(called);
 }
 
-TEST(FlEngineTest, ChildObjects) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlEngineTest, ChildObjects) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   // Check objects exist before engine started.
