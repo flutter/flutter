@@ -1184,25 +1184,30 @@ TEST_F(WindowsTest, TestEmptyFrameResizes) {
 // A window resize can be interleaved between a frame generation and
 // presentation. This should not crash the app. Regression test for:
 // https://github.com/flutter/flutter/issues/141855
-TEST_F(WindowsTest, WindowResizeRace) {
-  auto& context = GetContext();
-  WindowsConfigBuilder builder(context);
-  EnginePtr engine = builder.InitializeEngine();
-  ASSERT_NE(engine, nullptr);
+TEST(FlutterWindowsViewTest, WindowResizeRace) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
 
-  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
-  EngineModifier engine_modifier(windows_engine);
+  EngineModifier engine_modifier(engine.get());
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
-  windows_engine->SetRootIsolateCreateCallback(
-      context.GetRootIsolateCallback());
+  auto egl_manager = std::make_unique<egl::MockManager>();
+  auto surface = std::make_unique<egl::MockWindowSurface>();
 
-  ViewControllerPtr controller{
-      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
-  ASSERT_NE(controller, nullptr);
+  EXPECT_CALL(*surface.get(), IsValid).WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(true));
 
-  auto view =
-      reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
-  ASSERT_NE(view, nullptr);
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
+
+  ViewModifier view_modifier{view.get()};
+  engine_modifier.SetEGLManager(std::move(egl_manager));
+  view_modifier.SetSurface(std::move(surface));
 
   // Begin a frame.
   ASSERT_TRUE(view->OnFrameGenerated(100, 100));
