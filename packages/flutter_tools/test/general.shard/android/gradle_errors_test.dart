@@ -1660,7 +1660,10 @@ An exception occurred applying plugin request [id: 'kotlin-android']
       );
       expect(testLogger.statusText, contains('applying the kotlin-android plugin'));
       expect(testLogger.statusText, contains('For instructions on how to migrate, see:'));
-      expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
+      expect(
+        testLogger.statusText.replaceAll('│', '').replaceAll(RegExp(r'\s+'), ''),
+        contains(kMigrateToBuiltInKotlinDocsUrl),
+      );
     },
     overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),

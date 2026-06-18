@@ -663,7 +663,7 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
 
 /// The URL for documentation on migrating to built-in Kotlin.
 const String kMigrateToBuiltInKotlinDocsUrl =
-    'https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin';
+    'https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors';
 
 /// The URL for documentation on opting out of the new AGP DSL.
 const String kOptOutOfNewDslDocsUrl =
