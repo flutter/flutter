@@ -24,23 +24,30 @@ class FlCompositorOpenGLTest : public ::testing::Test {
   void SetUp() override {
     g_autoptr(FlDartProject) project = fl_dart_project_new();
     engine = fl_engine_new(project);
+    task_runner = fl_task_runner_new(engine);
+    opengl_manager = fl_opengl_manager_new();
+    renderable = fl_mock_renderable_new();
+    compositor = fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
+    fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   }
 
-  ~FlCompositorOpenGLTest() { g_clear_object(&engine); }
+  ~FlCompositorOpenGLTest() {
+    g_clear_object(&compositor);
+    g_clear_object(&renderable);
+    g_clear_object(&opengl_manager);
+    g_clear_object(&task_runner);
+    g_clear_object(&engine);
+  }
 
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   FlEngine* engine = nullptr;
+  FlTaskRunner* task_runner = nullptr;
+  FlOpenGLManager* opengl_manager = nullptr;
+  FlMockRenderable* renderable = nullptr;
+  FlCompositorOpenGL* compositor = nullptr;
 };
 
 TEST_F(FlCompositorOpenGLTest, Render) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
   // Present layer from a thread.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
@@ -77,14 +84,6 @@ TEST_F(FlCompositorOpenGLTest, Render) {
 }
 
 TEST_F(FlCompositorOpenGLTest, Resize) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
   // Present a layer that is the old size.
   constexpr size_t width1 = 90;
   constexpr size_t height1 = 90;
@@ -136,9 +135,6 @@ TEST_F(FlCompositorOpenGLTest, Resize) {
 }
 
 TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -148,11 +144,6 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -193,9 +184,6 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
 }
 
 TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -207,11 +195,6 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -240,9 +223,6 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
 }
 
 TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -259,11 +239,6 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
       .WillRepeatedly(::testing::Return(true));
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -292,9 +267,6 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 }
 
 TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -304,11 +276,6 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -337,9 +304,6 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
 }
 
 TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -350,11 +314,6 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("NVIDIA")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -383,14 +342,6 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 }
 
 TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
   // Present layer of size 100x100.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
