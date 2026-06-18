@@ -117,6 +117,19 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     };
   }
 
+  @override
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    double targetWidth = 0.0,
+  ]) {
+    final Offset anchor = getHandleAnchor(type, textLineHeight);
+    return switch (type) {
+      TextSelectionHandleType.collapsed => anchor - Offset(targetWidth / 2.0, 0.0),
+      TextSelectionHandleType.left || TextSelectionHandleType.right => anchor,
+    };
+  }
+
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v3.3.0-0.5.pre.',

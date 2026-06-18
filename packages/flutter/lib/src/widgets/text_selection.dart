@@ -116,6 +116,18 @@ abstract class TextSelectionControls {
   /// often visually "points to" that location.
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
 
+  /// Returns the anchor point of the handle relative to itself, taking the target
+  /// width (e.g., the caret width) into account.
+  ///
+  /// By default, this returns `getHandleAnchor(type, textLineHeight)`.
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    double targetWidth = 0.0,
+  ]) {
+    return getHandleAnchor(type, textLineHeight);
+  }
+
   /// Builds a toolbar near a text selection.
   ///
   /// Typically displays buttons for copying and pasting text.
@@ -361,12 +373,14 @@ class TextSelectionOverlay {
       startHandleType: TextSelectionHandleType.collapsed,
       startHandlesVisible: _effectiveStartHandleVisibility,
       lineHeightAtStart: 0.0,
+      startHandleTargetWidth: renderObject.cursorWidth,
       onStartHandleDragStart: _handleSelectionStartHandleDragStart,
       onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
       onEndHandleDragEnd: _handleAnyDragEnd,
       endHandleType: TextSelectionHandleType.collapsed,
       endHandlesVisible: _effectiveEndHandleVisibility,
       lineHeightAtEnd: 0.0,
+      endHandleTargetWidth: renderObject.cursorWidth,
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       onStartHandleDragEnd: _handleAnyDragEnd,
@@ -556,12 +570,14 @@ class TextSelectionOverlay {
         TextSelectionHandleType.right,
       )
       ..lineHeightAtStart = _getStartGlyphHeight()
+      ..startHandleTargetWidth = renderObject.cursorWidth
       ..endHandleType = _chooseType(
         renderObject.textDirection,
         TextSelectionHandleType.right,
         TextSelectionHandleType.left,
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
+      ..endHandleTargetWidth = renderObject.cursorWidth
       // Update selection toolbar metrics.
       ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
@@ -1061,12 +1077,14 @@ class SelectionOverlay {
     this.debugRequiredFor,
     required TextSelectionHandleType startHandleType,
     required double lineHeightAtStart,
+    double startHandleTargetWidth = 0.0,
     this.startHandlesVisible,
     this.onStartHandleDragStart,
     this.onStartHandleDragUpdate,
     this.onStartHandleDragEnd,
     required TextSelectionHandleType endHandleType,
     required double lineHeightAtEnd,
+    double endHandleTargetWidth = 0.0,
     this.endHandlesVisible,
     this.onEndHandleDragStart,
     this.onEndHandleDragUpdate,
@@ -1093,8 +1111,10 @@ class SelectionOverlay {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
+       _startHandleTargetWidth = startHandleTargetWidth,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
+       _endHandleTargetWidth = endHandleTargetWidth,
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
        assert(debugCheckHasOverlay(context)) {
@@ -1232,6 +1252,21 @@ class SelectionOverlay {
     markNeedsBuild();
   }
 
+  /// The target width (e.g. caret width) of the start handle.
+  ///
+  /// This value is used for calculating the offset of the start selection handle.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  double get startHandleTargetWidth => _startHandleTargetWidth;
+  double _startHandleTargetWidth;
+  set startHandleTargetWidth(double value) {
+    if (_startHandleTargetWidth == value) {
+      return;
+    }
+    _startHandleTargetWidth = value;
+    markNeedsBuild();
+  }
+
   // Whether a drag is in progress on the start handle. This differs from
   // `_isDraggingStartHandle` in that it is not blocked by `_canDragStartHandle`.
   bool _startHandleDragInProgress = false;
@@ -1350,6 +1385,21 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtEnd = value;
+    markNeedsBuild();
+  }
+
+  /// The target width (e.g. caret width) of the end handle.
+  ///
+  /// This value is used for calculating the offset of the end selection handle.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  double get endHandleTargetWidth => _endHandleTargetWidth;
+  double _endHandleTargetWidth;
+  set endHandleTargetWidth(double value) {
+    if (_endHandleTargetWidth == value) {
+      return;
+    }
+    _endHandleTargetWidth = value;
     markNeedsBuild();
   }
 
@@ -1783,6 +1833,7 @@ class SelectionOverlay {
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
         dragStartBehavior: dragStartBehavior,
+        targetWidth: startHandleTargetWidth,
       );
     }
     return TapRegion(
@@ -1814,6 +1865,7 @@ class SelectionOverlay {
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,
         dragStartBehavior: dragStartBehavior,
+        targetWidth: endHandleTargetWidth,
       );
     }
     return TapRegion(
@@ -1994,6 +2046,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.targetWidth = 0.0,
   });
 
   final LayerLink handleLayerLink;
@@ -2006,6 +2059,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final double preferredLineHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
+  final double targetWidth;
 
   @override
   State<_SelectionHandleOverlay> createState() => _SelectionHandleOverlayState();
@@ -2080,9 +2134,10 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
             math.max((interactiveRect.height - handleRect.height) / 2, 0),
           );
 
-    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+    final Offset handleAnchor = widget.selectionControls.calculateHandleAnchor(
       widget.type,
       widget.preferredLineHeight,
+      widget.targetWidth,
     );
 
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
