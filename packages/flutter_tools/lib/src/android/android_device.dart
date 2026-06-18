@@ -355,13 +355,29 @@ class AndroidDevice extends Device {
     }
   }
 
-  String _getDeviceSha1Path(AndroidApk apk) {
-    return '/data/local/tmp/sky.${apk.id}.sha1';
+  // Returns the app-specific storage directory on the device where we store the APK SHA-1 hash.
+  // We use the app-specific storage directory because Android automatically deletes it when
+  // the app is uninstalled, updated, or cleared by the user. This prevents staleness issues
+  // (e.g. tool incorrectly skipping installation of modified/uninstalled apps) that happened
+  // when we stored the SHA-1 in a shared directory like /data/local/tmp.
+  String _getDeviceSha1Directory(AndroidApk apk, {String? userIdentifier}) {
+    if (userIdentifier != null) {
+      return '/storage/emulated/$userIdentifier/Android/data/${apk.id}';
+    }
+    return '/sdcard/Android/data/${apk.id}';
   }
 
-  Future<String> _getDeviceApkSha1(AndroidApk apk) async {
+  String _getDeviceSha1Path(AndroidApk apk, {String? userIdentifier}) {
+    return '${_getDeviceSha1Directory(apk, userIdentifier: userIdentifier)}/sky.sha1';
+  }
+
+  Future<String> _getDeviceApkSha1(AndroidApk apk, {String? userIdentifier}) async {
     final RunResult result = await _processUtils.run(
-      adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(apk)]),
+      adbCommandForDevice(<String>[
+        'shell',
+        'cat',
+        _getDeviceSha1Path(apk, userIdentifier: userIdentifier),
+      ]),
     );
     return result.stdout;
   }
@@ -397,8 +413,8 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant AndroidApk app) async {
-    final String installedSha1 = await _getDeviceApkSha1(app);
+  Future<bool> isLatestBuildInstalled(covariant AndroidApk app, {String? userIdentifier}) async {
+    final String installedSha1 = await _getDeviceApkSha1(app, userIdentifier: userIdentifier);
     return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
@@ -468,17 +484,25 @@ class AndroidDevice extends Device {
       return false;
     }
     try {
+      // Create the app-specific storage directory if it doesn't exist.
+      await runAdbCheckedAsync(<String>[
+        'shell',
+        'mkdir',
+        '-p',
+        _getDeviceSha1Directory(app, userIdentifier: userIdentifier),
+      ]);
+      // Cache the SHA-1 of the installed APK.
       await runAdbCheckedAsync(<String>[
         'shell',
         'echo',
         '-n',
         _getSourceSha1(app),
         '>',
-        _getDeviceSha1Path(app),
+        _getDeviceSha1Path(app, userIdentifier: userIdentifier),
       ]);
     } on ProcessException catch (error) {
+      // If caching the SHA-1 fails, log a warning but still succeed the installation.
       _logger.printError('adb shell failed to write the SHA hash: $error.');
-      return false;
     }
     return true;
   }

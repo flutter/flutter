@@ -23,6 +23,10 @@ const kAdbVersionCommand = FakeCommand(
 
 const kStartServer = FakeCommand(command: <String>['adb', 'start-server']);
 
+const kMkdirCommand = FakeCommand(
+  command: <String>['adb', '-s', '1234', 'shell', 'mkdir', '-p', '/sdcard/Android/data/FlutterApp'],
+);
+
 const kShaCommand = FakeCommand(
   command: <String>[
     'adb',
@@ -33,7 +37,33 @@ const kShaCommand = FakeCommand(
     '-n',
     '',
     '>',
-    '/data/local/tmp/sky.FlutterApp.sha1',
+    '/sdcard/Android/data/FlutterApp/sky.sha1',
+  ],
+);
+
+const kMkdirCommandUser10 = FakeCommand(
+  command: <String>[
+    'adb',
+    '-s',
+    '1234',
+    'shell',
+    'mkdir',
+    '-p',
+    '/storage/emulated/10/Android/data/FlutterApp',
+  ],
+);
+
+const kShaCommandUser10 = FakeCommand(
+  command: <String>[
+    'adb',
+    '-s',
+    '1234',
+    'shell',
+    'echo',
+    '-n',
+    '',
+    '>',
+    '/storage/emulated/10/Android/data/FlutterApp/sky.sha1',
   ],
 );
 
@@ -92,6 +122,7 @@ void main() {
           command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
         ),
       );
+      processManager.addCommand(kMkdirCommand);
       processManager.addCommand(kShaCommand);
       processManager.addCommand(
         const FakeCommand(
@@ -163,6 +194,7 @@ void main() {
           command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
         ),
       );
+      processManager.addCommand(kMkdirCommand);
       processManager.addCommand(kShaCommand);
       processManager.addCommand(
         const FakeCommand(
@@ -340,7 +372,8 @@ void main() {
         stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
       ),
     );
-    processManager.addCommand(kShaCommand);
+    processManager.addCommand(kMkdirCommandUser10);
+    processManager.addCommand(kShaCommandUser10);
     processManager.addCommand(
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
