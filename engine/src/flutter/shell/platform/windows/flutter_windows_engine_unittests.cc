@@ -411,6 +411,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEOnImpellerFailsToStart) {
 
 TEST_F(FlutterWindowsEngineTest, RunWithDefaultEnablesImpeller) {
   FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(DefaultImpeller);
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
   EngineModifier modifier(engine.get());
 
