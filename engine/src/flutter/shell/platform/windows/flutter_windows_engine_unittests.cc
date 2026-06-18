@@ -321,8 +321,9 @@ TEST_F(FlutterWindowsEngineTest, ConfiguresFrameVsync) {
   EXPECT_TRUE(on_vsync_called);
 }
 
-TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEUsesSoftware) {
+TEST_F(FlutterWindowsEngineTest, RunSkiaWithoutANGLEUsesSoftware) {
   FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(DisabledImpeller);
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
   EngineModifier modifier(engine.get());
 
