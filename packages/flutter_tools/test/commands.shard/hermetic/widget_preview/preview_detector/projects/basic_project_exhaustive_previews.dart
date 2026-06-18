@@ -107,12 +107,16 @@ Widget testWrapper(Widget child) {
   return child;
 }
 
-PreviewThemeData theming() => PreviewThemeData(
-  materialLight: ThemeData(colorScheme: ColorScheme.light(primary: Colors.red)),
-  materialDark: ThemeData(colorScheme: ColorScheme.dark(primary: Colors.blue)),
-  cupertinoLight: CupertinoThemeData(primaryColor: Colors.yellow),
-  cupertinoDark: CupertinoThemeData(primaryColor: Colors.purple),
-);
+PreviewThemeData theming() => MultiPreviewThemeData([
+  MaterialPreviewThemeData(
+    light: ThemeData(colorScheme: ColorScheme.light(primary: Colors.red)),
+    dark: ThemeData(colorScheme: ColorScheme.dark(primary: Colors.blue)),
+  ),
+  CupertinoPreviewThemeData(
+    light: CupertinoThemeData(primaryColor: Colors.yellow),
+    dark: CupertinoThemeData(primaryColor: Colors.purple),
+  ),
+]);
 
 PreviewLocalizationsData localizations() {
   return PreviewLocalizationsData(

@@ -53,6 +53,7 @@ export 'src/cupertino/menu_anchor.dart';
 export 'src/cupertino/nav_bar.dart';
 export 'src/cupertino/page_scaffold.dart';
 export 'src/cupertino/picker.dart';
+export 'src/cupertino/preview_theme.dart';
 export 'src/cupertino/radio.dart';
 export 'src/cupertino/refresh.dart';
 export 'src/cupertino/route.dart';

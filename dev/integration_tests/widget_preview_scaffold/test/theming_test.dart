@@ -63,18 +63,26 @@ WidgetPreviewerWidgetScaffolding previewForBrightness({
   );
 }
 
-final PreviewThemeData previewThemeData = PreviewThemeData(
-  materialLight: ThemeData.light().copyWith(primaryColor: Colors.red),
-  materialDark: ThemeData.dark().copyWith(primaryColor: Colors.blue),
-  cupertinoLight: CupertinoThemeData(
+final MaterialPreviewThemeData materialPreviewTheme = MaterialPreviewThemeData(
+  light: ThemeData.light().copyWith(primaryColor: Colors.red),
+  dark: ThemeData.dark().copyWith(primaryColor: Colors.blue),
+);
+
+final CupertinoPreviewThemeData cupertinoPreviewTheme = CupertinoPreviewThemeData(
+  light: CupertinoThemeData(
     brightness: Brightness.light,
     primaryColor: Colors.yellow,
   ),
-  cupertinoDark: CupertinoThemeData(
+  dark: CupertinoThemeData(
     brightness: Brightness.dark,
     primaryColor: Colors.green,
   ),
 );
+
+final PreviewThemeData previewThemeData = MultiPreviewThemeData([
+  materialPreviewTheme,
+  cupertinoPreviewTheme,
+]);
 
 void main() {
   testWidgets('Theming is correctly propagated down to the previewed widget', (
@@ -92,8 +100,8 @@ void main() {
 
     expectTheme(
       context: key.currentContext!,
-      materialTheme: previewThemeData.materialLight!,
-      cupertinoTheme: previewThemeData.cupertinoLight!,
+      materialTheme: materialPreviewTheme.light!,
+      cupertinoTheme: cupertinoPreviewTheme.light!,
     );
 
     // Check that both Material and Cupertino dark themes are available to the previewed widget.
@@ -106,8 +114,8 @@ void main() {
 
     expectTheme(
       context: key.currentContext!,
-      materialTheme: previewThemeData.materialDark!,
-      cupertinoTheme: previewThemeData.cupertinoDark!,
+      materialTheme: materialPreviewTheme.dark!,
+      cupertinoTheme: cupertinoPreviewTheme.dark!,
     );
   });
 
@@ -161,8 +169,8 @@ void main() {
 
     expectTheme(
       context: key.currentContext!,
-      materialTheme: previewThemeData.materialLight!,
-      cupertinoTheme: previewThemeData.cupertinoLight!,
+      materialTheme: materialPreviewTheme.light!,
+      cupertinoTheme: cupertinoPreviewTheme.light!,
     );
 
     // Toggle to dark mode.
@@ -176,8 +184,8 @@ void main() {
     // Check that both Material and Cupertino dark themes are available to the previewed widget.
     expectTheme(
       context: key.currentContext!,
-      materialTheme: previewThemeData.materialDark!,
-      cupertinoTheme: previewThemeData.cupertinoDark!,
+      materialTheme: materialPreviewTheme.dark!,
+      cupertinoTheme: cupertinoPreviewTheme.dark!,
     );
   });
 
@@ -205,8 +213,8 @@ void main() {
 
         expectTheme(
           context: key.currentContext!,
-          materialTheme: previewThemeData.materialLight!,
-          cupertinoTheme: previewThemeData.cupertinoLight!,
+          materialTheme: materialPreviewTheme.light!,
+          cupertinoTheme: cupertinoPreviewTheme.light!,
         );
       }
 
@@ -218,8 +226,8 @@ void main() {
 
         expectTheme(
           context: key.currentContext!,
-          materialTheme: previewThemeData.materialDark!,
-          cupertinoTheme: previewThemeData.cupertinoDark!,
+          materialTheme: materialPreviewTheme.dark!,
+          cupertinoTheme: cupertinoPreviewTheme.dark!,
         );
       }
 
