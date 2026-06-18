@@ -131,8 +131,8 @@ static void setup_shader(FlCompositorOpenGLShader* self) {
   // a--b
   // |  |
   // c--d
-  GLfloat vertex_data[] = {-1, -1, 0, 0, 1, 1,  1, 1, -1, 1, 0, 1,
-                           -1, -1, 0, 0, 1, -1, 1, 0, 1,  1, 1, 1};
+  GLfloat const vertex_data[] = {-1, -1, 0, 0, 1, 1,  1, 1, -1, 1, 0, 1,
+                                 -1, -1, 0, 0, 1, -1, 1, 0, 1,  1, 1, 1};
 
   glGenBuffers(1, &self->vertex_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
