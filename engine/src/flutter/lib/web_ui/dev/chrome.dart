@@ -110,6 +110,7 @@ class Chrome extends Browser {
           '--no-default-browser-check',
           '--disable-default-apps',
           '--disable-translate',
+          '--disable-dev-shm-usage',
           '--password-store=basic',
           '--use-mock-keychain',
           '--remote-debugging-port=$kDevtoolsPort',

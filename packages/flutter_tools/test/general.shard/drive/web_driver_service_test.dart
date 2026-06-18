@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -25,7 +26,7 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const kChromeArgs = <String>[
+final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
   '--disable-default-apps',
@@ -35,8 +36,9 @@ const kChromeArgs = <String>[
   '--no-default-browser-check',
   '--no-sandbox',
   '--no-first-run',
+  '--disable-dev-shm-usage',
   '--password-store=basic',
-  '--use-mock-keychain',
+  if (io.Platform.isMacOS) '--use-mock-keychain',
 ];
 
 void main() {

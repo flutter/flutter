@@ -76,7 +76,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-browser-flag=--headless=new',
           '--web-browser-flag=--no-sandbox',
           '--web-browser-flag=--password-store=basic',
-          '--web-browser-flag=--use-mock-keychain',
+          if (io.Platform.isMacOS) '--web-browser-flag=--use-mock-keychain',
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
           if (benchmarkOptions.withHotReload)
             '--web-experimental-hot-reload'
