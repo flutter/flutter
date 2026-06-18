@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/testing/windows_test_context.h"
 
 #include "flutter/fml/platform/win/wstring_conversion.h"
+#include "flutter/testing/test_swiftshader_utils.h"
 
 namespace flutter {
 namespace testing {
@@ -12,6 +13,7 @@ namespace testing {
 WindowsTestContext::WindowsTestContext(std::string_view assets_path)
     : assets_path_(fml::Utf8ToWideString(assets_path)),
       native_resolver_(std::make_shared<TestDartNativeResolver>()) {
+  flutter::testing::SetupSwiftshaderOnce(true);
   isolate_create_callbacks_.push_back(
       [weak_resolver =
            std::weak_ptr<TestDartNativeResolver>{native_resolver_}]() {
