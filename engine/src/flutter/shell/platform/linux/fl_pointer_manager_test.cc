@@ -10,7 +10,7 @@
 
 class FlPointerManagerTest : public ::testing::Test {
  protected:
-  void StartEngine(FlEngine* engine) {
+  void StartEngine() {
     g_autoptr(GError) error = nullptr;
     EXPECT_TRUE(fl_engine_start(engine, &error));
     EXPECT_EQ(error, nullptr);
@@ -27,7 +27,7 @@ class FlPointerManagerTest : public ::testing::Test {
 };
 
 TEST_F(FlPointerManagerTest, EnterLeave) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -65,7 +65,7 @@ TEST_F(FlPointerManagerTest, EnterLeave) {
 }
 
 TEST_F(FlPointerManagerTest, EnterEnter) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -97,7 +97,7 @@ TEST_F(FlPointerManagerTest, EnterEnter) {
 }
 
 TEST_F(FlPointerManagerTest, EnterLeaveLeave) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -138,7 +138,7 @@ TEST_F(FlPointerManagerTest, EnterLeaveLeave) {
 }
 
 TEST_F(FlPointerManagerTest, EnterButtonPress) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -177,7 +177,7 @@ TEST_F(FlPointerManagerTest, EnterButtonPress) {
 }
 
 TEST_F(FlPointerManagerTest, NoEnterButtonPress) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -215,7 +215,7 @@ TEST_F(FlPointerManagerTest, NoEnterButtonPress) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleasePrimary) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -255,7 +255,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleasePrimary) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseSecondary) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -295,7 +295,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseSecondary) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseMiddle) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -335,7 +335,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseMiddle) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseBack) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -374,7 +374,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseBack) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseForward) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -413,7 +413,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseForward) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -482,7 +482,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -526,7 +526,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -570,7 +570,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {
 }
 
 TEST_F(FlPointerManagerTest, NoButtonPressButtonRelease) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -594,7 +594,7 @@ TEST_F(FlPointerManagerTest, NoButtonPressButtonRelease) {
 }
 
 TEST_F(FlPointerManagerTest, Motion) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -640,7 +640,7 @@ TEST_F(FlPointerManagerTest, Motion) {
 }
 
 TEST_F(FlPointerManagerTest, Drag) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -699,7 +699,7 @@ TEST_F(FlPointerManagerTest, Drag) {
 }
 
 TEST_F(FlPointerManagerTest, DeviceKind) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(

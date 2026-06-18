@@ -104,7 +104,7 @@ static void invoke_record_callback(FlKeyEmbedderCallRecord* record,
 
 class FlKeyEmbedderResponderTest : public ::testing::Test {
  protected:
-  void StartEngine(FlEngine* engine) {
+  void StartEngine() {
     g_autoptr(GError) error = nullptr;
     EXPECT_TRUE(fl_engine_start(engine, &error));
     EXPECT_EQ(error, nullptr);
@@ -122,7 +122,7 @@ class FlKeyEmbedderResponderTest : public ::testing::Test {
 
 // Basic key presses
 TEST_F(FlKeyEmbedderResponderTest, SendKeyEvent) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -267,7 +267,7 @@ TEST_F(FlKeyEmbedderResponderTest, SendKeyEvent) {
 
 // Basic key presses, but uses the specified logical key if it is not 0.
 TEST_F(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -318,7 +318,7 @@ TEST_F(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
 
 // Press Shift, key A, then release Shift, key A.
 TEST_F(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -458,7 +458,7 @@ TEST_F(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
 // test-worthy because the keyval for the numpad key will change before and
 // after the NumLock tap, which should not alter the resulting logical key.
 TEST_F(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -706,7 +706,7 @@ TEST_F(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
 // GTK will change the virtual key during a key tap, and the embedder
 // should regularize it.
 TEST_F(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -846,7 +846,7 @@ TEST_F(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
 // This tests interaction between lock keys and non-lock keys in cases that do
 // not have events missed.
 TEST_F(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1094,7 +1094,7 @@ TEST_F(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
 //
 // This happens when using a Chrome remote desktop on MacOS.
 TEST_F(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1338,7 +1338,7 @@ TEST_F(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
 }
 
 TEST_F(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1432,7 +1432,7 @@ TEST_F(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
 }
 
 TEST_F(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1482,7 +1482,7 @@ TEST_F(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
 // information upon events that are for this modifier key.
 TEST_F(FlKeyEmbedderResponderTest,
        SynthesizeForDesyncPressingStateOnSelfEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1669,7 +1669,7 @@ TEST_F(FlKeyEmbedderResponderTest,
 // information upon events that are not for this modifier key.
 TEST_F(FlKeyEmbedderResponderTest,
        SynthesizeForDesyncPressingStateOnNonSelfEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1845,7 +1845,7 @@ TEST_F(FlKeyEmbedderResponderTest,
 // information upon events that do not have the standard key mapping.
 TEST_F(FlKeyEmbedderResponderTest,
        SynthesizeForDesyncPressingStateOnRemappedEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -1938,7 +1938,7 @@ TEST_F(FlKeyEmbedderResponderTest,
 // Test if missed lock keys can be detected and synthesized with state
 // information upon events that are not for this modifier key.
 TEST_F(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2082,7 +2082,7 @@ TEST_F(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
 // Test if missed lock keys can be detected and synthesized with state
 // information upon events that are for this modifier key.
 TEST_F(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2206,7 +2206,7 @@ TEST_F(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
 // Ensures that even if the primary event is ignored (due to duplicate
 // key up or down events), key synthesization is still performed.
 TEST_F(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2273,7 +2273,7 @@ TEST_F(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
 // AltLeft down because the physical AltRight key corresponds to logical
 // MetaRight at the moment.
 TEST_F(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
@@ -2398,7 +2398,7 @@ TEST_F(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
 // key won't be the MetaLeft one.
 // Regression test for https://github.com/flutter/flutter/issues/96082
 TEST_F(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
-  StartEngine(engine);
+  StartEngine();
 
   g_autoptr(FlKeyEmbedderResponder) responder =
       fl_key_embedder_responder_new(engine);
