@@ -64,10 +64,12 @@ struct PlaygroundImplGLES::ShareableContext final {
  public:
   ShareableContext(UniqueHandle window,
                    std::shared_ptr<ReactorWorker> worker,
-                   std::shared_ptr<ContextGLES> context)
+                   std::shared_ptr<ContextGLES> context,
+                   PlaygroundSwitches switches)
       : window(std::move(window)),
         worker(std::move(worker)),
-        context(std::move(context)) {}
+        context(std::move(context)),
+        switches(switches) {}
 
   ~ShareableContext() {
     if (window) {
@@ -87,6 +89,7 @@ struct PlaygroundImplGLES::ShareableContext final {
 
   std::shared_ptr<ReactorWorker> worker;
   std::shared_ptr<ContextGLES> context;
+  PlaygroundSwitches switches;
 };
 
 void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
@@ -110,6 +113,18 @@ PlaygroundImplGLES::PlaygroundImplGLES(
     angle_glesv2_ = dlopen("libGLESv2.dylib", RTLD_LAZY);
 #endif
     FML_CHECK(angle_glesv2_ != nullptr);
+  }
+
+  // If the existing shared context was created with different switches, reset
+  // it so a new one is created.
+  if (shared_context &&
+      (shared_context->switches.use_angle != switches_.use_angle ||
+       shared_context->switches.enable_wide_gamut !=
+           switches_.enable_wide_gamut ||
+       shared_context->switches.flags.antialiased_lines !=
+           switches_.flags.antialiased_lines ||
+       shared_context->switches.flags.use_sdfs != switches_.flags.use_sdfs)) {
+    shared_context.reset();
   }
 
   if (!shared_context) {
@@ -218,7 +233,7 @@ PlaygroundImplGLES::MakeShareableContext(const PlaygroundSwitches& switches) {
   }
 
   return std::make_shared<ShareableContext>(std::move(window), worker,
-                                            context_gles);
+                                            context_gles, switches);
 }
 
 PlaygroundImplGLES::~PlaygroundImplGLES() {

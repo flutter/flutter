@@ -26,9 +26,6 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
 
-  static std::shared_ptr<ShareableContext> MakeShareableContext(
-      const PlaygroundSwitches& switches);
-
  private:
   class ReactorWorker;
 
@@ -59,6 +56,9 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
 
   static GLFWwindow* CreateGLWindow(const PlaygroundSwitches& switches,
                                     GLFWwindow* share_window);
+
+  static std::shared_ptr<ShareableContext> MakeShareableContext(
+      const PlaygroundSwitches& switches);
 
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 
