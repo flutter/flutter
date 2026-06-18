@@ -1124,33 +1124,35 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
 }
 
 // Verify that an empty frame completes a view resize.
-TEST_F(WindowsTest, TestEmptyFrameResizes) {
-  auto& context = GetContext();
-  WindowsConfigBuilder builder(context);
-  EnginePtr engine = builder.InitializeEngine();
-  ASSERT_NE(engine, nullptr);
+TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
+  auto windows_proc_table = std::make_shared<NiceMock<MockWindowsProcTable>>();
+  std::unique_ptr<FlutterWindowsEngine> engine =
+      GetTestEngine(windows_proc_table);
 
-  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
-  EngineModifier engine_modifier(windows_engine);
+  EngineModifier engine_modifier{engine.get()};
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
-  windows_engine->SetRootIsolateCreateCallback(
-      context.GetRootIsolateCallback());
+  auto egl_manager = std::make_unique<egl::MockManager>();
+  auto surface = std::make_unique<egl::MockWindowSurface>();
+  auto resized_surface = std::make_unique<egl::MockWindowSurface>();
+  auto resized_surface_ptr = resized_surface.get();
 
-  auto state = std::make_shared<SpyState>();
-  auto spy_manager = std::make_unique<SpyManager>(state);
+  EXPECT_CALL(*surface.get(), IsValid).WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(true));
 
-  engine_modifier.SetEGLManager(std::move(spy_manager));
+  EXPECT_CALL(*egl_manager.get(),
+              CreateWindowSurface(_, /*width=*/500, /*height=*/300))
+      .WillOnce(Return(std::move((resized_surface))));
+  EXPECT_CALL(*resized_surface_ptr, MakeCurrent).WillOnce(Return(true));
+  EXPECT_CALL(*resized_surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
+  EXPECT_CALL(*windows_proc_table.get(), DwmFlush).WillOnce(Return(S_OK));
 
-  ViewControllerPtr controller{
-      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
-  ASSERT_NE(controller, nullptr);
-
-  auto view =
-      reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
-  ASSERT_NE(view, nullptr);
-
-  ASSERT_NE(windows_engine->egl_manager(), nullptr);
-  windows_engine->egl_manager()->render_context()->ClearCurrent();
+  EXPECT_CALL(*resized_surface_ptr, Destroy).WillOnce(Return(true));
 
   fml::AutoResetWaitableEvent metrics_sent_latch;
   engine_modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
@@ -1161,26 +1163,27 @@ TEST_F(WindowsTest, TestEmptyFrameResizes) {
         return kSuccess;
       }));
 
-  // Simulate raster thread by posting to the engine's real raster thread.
-  windows_engine->PostRasterThreadTask([&metrics_sent_latch, view]() {
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
+
+  ViewModifier view_modifier{view.get()};
+  engine_modifier.SetEGLManager(std::move(egl_manager));
+  view_modifier.SetSurface(std::move(surface));
+
+  // Simulate raster thread.
+  std::thread frame_thread([&metrics_sent_latch, &view]() {
     metrics_sent_latch.Wait();
+
     // Empty frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnEmptyFrameGenerated());
     view->OnFramePresented();
   });
 
-  // Start the window resize.
+  // Start the window resize. This sends the new window metrics
+  // and then blocks until another thread completes the window resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 300));
-
-  EXPECT_TRUE(state->surfaces[1]->created);
-  EXPECT_EQ(state->surfaces[1]->width, 500);
-  EXPECT_EQ(state->surfaces[1]->height, 300);
-  EXPECT_TRUE(state->surfaces[0]->destroy_called);
-  EXPECT_TRUE(state->surfaces[1]->make_current_called);
-  EXPECT_TRUE(state->surfaces[1]->vsync_called);
-
-  controller.reset();
-  EXPECT_TRUE(state->surfaces[1]->destroy_called);
+  frame_thread.join();
 }
 
 // A window resize can be interleaved between a frame generation and
@@ -1218,7 +1221,9 @@ TEST(FlutterWindowsViewTest, WindowResizeRace) {
   // frame presentation. The new size invalidates the current frame.
   EXPECT_FALSE(view->OnWindowSizeChanged(500, 500));
 
-  // Complete the invalidated frame while a resize is pending.
+  // Complete the invalidated frame while a resize is pending. Although this
+  // might mean that we presented a frame with the wrong size, this should not
+  // crash the app.
   view->OnFramePresented();
 }
 
