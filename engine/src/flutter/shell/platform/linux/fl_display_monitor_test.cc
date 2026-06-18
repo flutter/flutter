@@ -8,13 +8,26 @@
 
 #include "gtest/gtest.h"
 
-TEST(FlDisplayMonitorTest, Test) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+class FlDisplayMonitorTest : public ::testing::Test {
+ protected:
+  void StartEngine() {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlDisplayMonitorTest() { g_clear_object(&engine); }
+
+  FlEngine* engine = nullptr;
+};
+
+TEST_F(FlDisplayMonitorTest, Test) {
+  StartEngine();
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate = MOCK_ENGINE_PROC(
