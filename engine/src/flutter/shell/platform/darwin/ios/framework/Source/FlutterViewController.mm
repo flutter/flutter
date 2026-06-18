@@ -682,6 +682,17 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
                             : [self isSceneStateMatching:UISceneActivationStateBackground];
 }
 
+- (BOOL)shouldHandleSceneNotification:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (notification.object == nil) {
+    return YES;
+  }
+  UIWindowScene* scene = self.flutterWindowSceneIfViewLoaded;
+  if (scene == nil) {
+    return YES;
+  }
+  return notification.object == scene;
+}
+
 - (BOOL)isApplicationStateMatching:(UIApplicationState)match
                    withApplication:(UIApplication*)application {
   switch (application.applicationState) {
@@ -978,25 +989,40 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Scene lifecycle notifications
 
 - (void)sceneBecameActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneBecameActive");
   [self appOrSceneBecameActive];
 }
 
 - (void)sceneWillResignActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneWillResignActive");
   [self appOrSceneWillResignActive];
 }
 
 - (void)sceneWillDisconnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self appOrSceneWillTerminate];
 }
 
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneDidEnterBackground");
   [self appOrSceneDidEnterBackground];
 }
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneWillEnterForeground");
   [self appOrSceneWillEnterForeground];
 }

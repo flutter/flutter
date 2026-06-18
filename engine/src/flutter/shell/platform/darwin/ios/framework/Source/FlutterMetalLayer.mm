@@ -11,13 +11,9 @@
 
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 FLUTTER_ASSERT_ARC
-
-@interface FlutterDisplayLinkManager : NSObject
-@property(class, nonatomic, readonly) BOOL maxRefreshRateEnabledOnIPhone;
-+ (double)displayRefreshRate;
-@end
 
 @class FlutterTexture;
 @class FlutterDrawable;

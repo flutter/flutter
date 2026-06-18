@@ -283,6 +283,24 @@ void main() {
   });
 
   _TestWidgetInspectorService.runTests();
+
+  testWidgets('WidgetInspector does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: WidgetInspector(
+            tapBehaviorButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            child: Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(WidgetInspector)), Size.zero);
+  });
 }
 
 class _TestWidgetInspectorService extends TestWidgetInspectorService {
@@ -3210,6 +3228,202 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         selection.currentElement = elementA;
         expect(count, equals(5));
       });
+
+      testWidgets('clearCandidates preserves current selection', (
+        WidgetTester tester,
+      ) async {
+        await pumpWidgetTreeWithABC(tester);
+        final selection = InspectorSelection();
+        addTearDown(selection.dispose);
+        final RenderParagraph renderObjectA = tester.renderObject<RenderParagraph>(
+          find.text('a'),
+        );
+        final RenderParagraph renderObjectB = tester.renderObject<RenderParagraph>(
+          find.text('b'),
+        );
+
+        selection.candidates = <RenderObject>[renderObjectA, renderObjectB];
+        expect(selection.current, renderObjectA);
+
+        selection.clearCandidates();
+        expect(selection.candidates, isEmpty);
+        expect(selection.current, renderObjectA);
+      });
+    });
+
+    testWidgets('inspector selection candidates are scoped to the active modal route', (
+      WidgetTester tester,
+    ) async {
+      WidgetInspectorService.instance.selection.clear();
+
+      final GlobalKey behindKey = GlobalKey();
+      final GlobalKey sheetTextKey = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetInspector(
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext context, Animation<double> a, Animation<double> b) {
+                    return Column(
+                      children: <Widget>[
+                        Text('behind', key: behindKey, textDirection: TextDirection.ltr),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push<void>(
+                              PageRouteBuilder<void>(
+                                pageBuilder:
+                                    (
+                                      BuildContext context,
+                                      Animation<double> a,
+                                      Animation<double> b,
+                                    ) {
+                                      return Center(
+                                        child: Text(
+                                          'in sheet',
+                                          key: sheetTextKey,
+                                          textDirection: TextDirection.ltr,
+                                        ),
+                                      );
+                                    },
+                              ),
+                            );
+                          },
+                          child: const Text('open sheet', textDirection: TextDirection.ltr),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final RenderObject behindRender = tester.renderObject<RenderObject>(find.byKey(behindKey));
+
+      await tester.tap(find.text('open sheet'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      WidgetInspectorService.instance.isSelectMode = true;
+      await tester.tap(find.byKey(sheetTextKey), warnIfMissed: false);
+      await tester.pump();
+      final List<RenderObject> candidates = WidgetInspectorService.instance.selection.candidates;
+      expect(candidates, isNot(contains(behindRender)));
+
+      final RenderObject sheetRender = tester.renderObject<RenderObject>(
+        find.byKey(sheetTextKey),
+      );
+      expect(candidates, contains(sheetRender));
+    });
+
+    testWidgets('inspector selection scopes to nested navigator inside overlay route', (
+      WidgetTester tester,
+    ) async {
+      WidgetInspectorService.instance.selection.clear();
+
+      final GlobalKey innerTextKey = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetInspector(
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext context, Animation<double> a, Animation<double> b) {
+                    return Column(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push<void>(
+                              PageRouteBuilder<void>(
+                                pageBuilder:
+                                    (
+                                      BuildContext overlayContext,
+                                      Animation<double> a,
+                                      Animation<double> b,
+                                    ) {
+                                      return SizedBox(
+                                        width: 300,
+                                        height: 300,
+                                        child: Navigator(
+                                          onGenerateRoute: (RouteSettings settings) {
+                                            return PageRouteBuilder<void>(
+                                              settings: settings,
+                                              pageBuilder:
+                                                  (
+                                                    BuildContext navContext,
+                                                    Animation<double> a,
+                                                    Animation<double> b,
+                                                  ) {
+                                                    return Center(
+                                                      child: Text(
+                                                        'nested inner',
+                                                        key: innerTextKey,
+                                                        textDirection: TextDirection.ltr,
+                                                      ),
+                                                    );
+                                                  },
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                              ),
+                            );
+                          },
+                          child: const Text('open overlay', textDirection: TextDirection.ltr),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open overlay'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      WidgetInspectorService.instance.isSelectMode = true;
+      await tester.tap(find.byKey(innerTextKey), warnIfMissed: false);
+      await tester.pump();
+
+      final RenderObject innerRender = tester.renderObject<RenderObject>(
+        find.byKey(innerTextKey),
+      );
+      final List<RenderObject> candidates =
+          WidgetInspectorService.instance.selection.candidates;
+      expect(candidates, contains(innerRender));
+    });
+
+    testWidgets('setSelection clears stale overlay candidates', (WidgetTester tester) async {
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementA = findElementABC('a');
+      final Element elementB = findElementABC('b');
+      WidgetInspectorService.instance.selection.candidates = <RenderObject>[
+        elementA.renderObject!,
+        elementB.renderObject!,
+      ];
+      expect(WidgetInspectorService.instance.selection.candidates.length, 2);
+
+      WidgetInspectorService.instance.setSelection(elementA);
+      expect(WidgetInspectorService.instance.selection.candidates, isEmpty);
+      expect(WidgetInspectorService.instance.selection.currentElement, elementA);
     });
 
     test('ext.flutter.inspector.disposeGroup', () async {
