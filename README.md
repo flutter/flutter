@@ -79,8 +79,6 @@ for desktop devices.
 
 <p align="center"><img src="https://github.com/flutter/website/blob/main/sites/docs/web/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
 
-https://github.com/flutter/website/blob/main/sites/docs/web/assets/images/docs/homepage/dart-diagram-small.png
-
 ### Productive development
 
 Flutter offers [stateful hot reload][Hot reload], allowing you to make changes to your code
