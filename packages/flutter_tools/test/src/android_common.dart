@@ -4,17 +4,18 @@
 
 import 'dart:io';
 
-import 'package:flutter_tools/src/android/android_builder.dart';
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as file_system;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:test/fake.dart';
 
 import '../integration.shard/test_utils.dart';
 import 'common.dart';
 
-/// A fake implementation of [AndroidBuilder].
-class FakeAndroidBuilder implements AndroidBuilder {
+/// A fake implementation of [AndroidGradleBuilder].
+class FakeAndroidBuilder extends Fake implements AndroidGradleBuilder {
   @override
   Future<void> buildAar({
     required FlutterProject project,

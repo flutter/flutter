@@ -24,10 +24,10 @@ import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
-import 'android_builder.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
+import 'gradle.dart';
 import 'gradle_utils.dart' as gradle_utils;
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.

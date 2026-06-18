@@ -15,6 +15,7 @@ import 'package:xml/xml.dart';
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -31,7 +32,6 @@ import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
@@ -155,8 +155,12 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
 // The maximum time to wait before the tool retries a Gradle build.
 const kMaxRetryTime = Duration(seconds: 10);
 
-/// An implementation of the [AndroidBuilder] that delegates to gradle.
-class AndroidGradleBuilder implements AndroidBuilder {
+AndroidGradleBuilder? get androidBuilder {
+  return context.get<AndroidGradleBuilder>();
+}
+
+/// An implementation that delegates to gradle.
+class AndroidGradleBuilder {
   AndroidGradleBuilder({
     required Java? java,
     required Logger logger,
@@ -188,7 +192,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final AndroidStudio? _androidStudio;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
-  @override
   Future<void> buildAar({
     required FlutterProject project,
     required Set<AndroidBuildInfo> androidBuildInfo,
@@ -228,7 +231,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
   }
 
   /// Builds the APK.
-  @override
   Future<void> buildApk({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -247,7 +249,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
   }
 
   /// Builds the App Bundle.
-  @override
   Future<void> buildAab({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -902,7 +903,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     );
   }
 
-  @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {
     late Stopwatch sw;
     var exitCode = 1;
@@ -945,7 +945,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     return results;
   }
 
-  @override
   Future<String> outputsAppLinkSettings(
     String buildVariant, {
     required FlutterProject project,

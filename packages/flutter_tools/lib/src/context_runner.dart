@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import 'android/android_builder.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -90,7 +89,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         clientIde: globals.platform.environment['FLUTTER_HOST'],
         config: globals.config,
       ),
-      AndroidBuilder: () => AndroidGradleBuilder(
+      AndroidGradleBuilder: () => AndroidGradleBuilder(
         java: globals.java,
         logger: globals.logger,
         processManager: globals.processManager,

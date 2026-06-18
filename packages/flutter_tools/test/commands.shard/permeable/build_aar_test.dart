@@ -4,9 +4,9 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -94,7 +94,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        AndroidGradleBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
       },
     );
@@ -124,7 +124,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        AndroidGradleBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
       },
     );
@@ -147,7 +147,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        AndroidGradleBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
         Pub: FakePub.new,
       },
@@ -175,7 +175,7 @@ void main() {
         expect(successEvent, isNotEmpty, reason: 'Tool should send create success event');
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        AndroidGradleBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
       },
     );
@@ -235,7 +235,7 @@ void main() {
         buildModes,
         containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]),
       );
-    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+    }, overrides: <Type, Generator>{AndroidGradleBuilder: () => fakeAndroidBuilder});
 
     testUsingContext('parses flags', () async {
       final String projectPath = await createProject(
@@ -281,7 +281,7 @@ void main() {
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
-    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+    }, overrides: <Type, Generator>{AndroidGradleBuilder: () => fakeAndroidBuilder});
   });
 
   group('Gradle', () {
@@ -469,7 +469,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
-          AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+          AndroidGradleBuilder: () => _CapturingFakeAndroidBuilder(),
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
@@ -503,7 +503,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
-          AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+          AndroidGradleBuilder: () => _CapturingFakeAndroidBuilder(),
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
@@ -537,7 +537,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
-          AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+          AndroidGradleBuilder: () => _CapturingFakeAndroidBuilder(),
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
@@ -545,10 +545,10 @@ void main() {
   });
 }
 
-/// A fake implementation of [AndroidBuilder] that allows [buildAar] calls.
+/// A fake implementation of [AndroidGradleBuilder] that allows [buildAar] calls.
 ///
 /// Calls to [buildAar] are stored as [capturedBuildAarCalls], other calls are rejected.
-final class _CapturingFakeAndroidBuilder extends Fake implements AndroidBuilder {
+final class _CapturingFakeAndroidBuilder extends Fake implements AndroidGradleBuilder {
   final capturedBuildAarCalls = <Invocation>[];
 
   @override

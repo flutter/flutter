@@ -4,9 +4,9 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show templateAndroidGradlePluginVersion;
 import 'package:flutter_tools/src/android/java.dart';
@@ -133,7 +133,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -235,7 +235,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -263,7 +263,7 @@ void main() {
         )).eventData['buildApkSplitPerAbi'],
         isFalse,
       );
-    }, overrides: <Type, Generator>{AndroidBuilder: () => FakeAndroidBuilder()});
+    }, overrides: <Type, Generator>{AndroidGradleBuilder: () => FakeAndroidBuilder()});
 
     testUsingContext(
       'build type',
@@ -306,7 +306,7 @@ void main() {
         await runBuildApkCommand(projectPath, arguments: <String>['--profile']);
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -330,7 +330,7 @@ void main() {
         expect(successEvent, isNotEmpty, reason: 'Tool should send create success event');
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -386,7 +386,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
-          AndroidBuilder: () => FakeAndroidBuilder(),
+          AndroidGradleBuilder: () => FakeAndroidBuilder(),
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
@@ -416,7 +416,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
-          AndroidBuilder: () => FakeAndroidBuilder(),
+          AndroidGradleBuilder: () => FakeAndroidBuilder(),
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
@@ -446,7 +446,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
-          AndroidBuilder: () => FakeAndroidBuilder(),
+          AndroidGradleBuilder: () => FakeAndroidBuilder(),
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );

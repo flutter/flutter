@@ -4,8 +4,8 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
+import '../android/gradle.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
