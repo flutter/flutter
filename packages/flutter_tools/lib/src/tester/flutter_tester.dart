@@ -102,11 +102,7 @@ class FlutterTesterDevice extends Device {
   final _logReader = DesktopLogReader();
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-    bool adbLogFiltering = true,
-  }) {
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     return _logReader;
   }
 

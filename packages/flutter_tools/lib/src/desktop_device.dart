@@ -86,11 +86,7 @@ abstract class DesktopDevice extends Device {
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-    bool adbLogFiltering = true,
-  }) {
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     assert(!includePastLogs, 'Past log reading not supported on desktop.');
     return _deviceLogReader;
   }

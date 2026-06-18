@@ -277,7 +277,6 @@ class ProxiedDevice extends Device {
   FutureOr<DeviceLogReader> getLogReader({
     covariant PrebuiltApplicationPackage? app,
     bool includePastLogs = false,
-    bool adbLogFiltering = true,
   }) => _ProxiedLogReader(connection, this, app);
 
   ProxiedPortForwarder? _proxiedPortForwarder;

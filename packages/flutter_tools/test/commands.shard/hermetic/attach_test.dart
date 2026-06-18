@@ -1984,7 +1984,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     IOSApp? app,
     bool includePastLogs = false,
     bool usingCISystem = false,
-    bool adbLogFiltering = true,
   }) {
     if (onGetLogReader == null) {
       throw UnimplementedError(

@@ -60,7 +60,7 @@ void main() {
     testUsingContext(
       'logs command parses --no-adb-log-filtering and disables filtering on device',
       () async {
-        final fakeDevice = FakeDevice('phone', deviceId);
+        final fakeDevice = FakeAndroidDevice('phone', deviceId);
         deviceManager.attachedDevices.add(fakeDevice);
 
         expect(fakeDevice.lastPassedAdbLogFiltering, isNull);
@@ -82,7 +82,7 @@ void main() {
     );
 
     testUsingContext('logs command defaults to filtering enabled on device', () async {
-      final fakeDevice = FakeDevice('phone', deviceId);
+      final fakeDevice = FakeAndroidDevice('phone', deviceId);
       deviceManager.attachedDevices.add(fakeDevice);
 
       expect(fakeDevice.lastPassedAdbLogFiltering, isNull);

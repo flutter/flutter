@@ -495,7 +495,6 @@ class FakeDevice extends Fake implements Device {
   Future<DeviceLogReader> getLogReader({
     ApplicationPackage? app,
     bool includePastLogs = false,
-    bool adbLogFiltering = true,
   }) async => NoOpDeviceLogReader('test');
 
   @override

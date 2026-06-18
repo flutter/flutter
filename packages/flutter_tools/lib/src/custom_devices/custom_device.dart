@@ -621,7 +621,6 @@ class CustomDevice extends Device {
   FutureOr<DeviceLogReader> getLogReader({
     ApplicationPackage? app,
     bool includePastLogs = false,
-    bool adbLogFiltering = true,
   }) async {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;

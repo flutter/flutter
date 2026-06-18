@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
@@ -65,10 +66,12 @@ class LogsCommand extends FlutterCommand {
 
     final bool filtering =
         argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering');
-    final DeviceLogReader logReader = await cachedDevice.getLogReader(
-      app: app,
-      adbLogFiltering: filtering,
-    );
+    final DeviceLogReader logReader;
+    if (cachedDevice is AndroidDevice) {
+      logReader = await cachedDevice.getLogReader(app: app, adbLogFiltering: filtering);
+    } else {
+      logReader = await cachedDevice.getLogReader(app: app);
+    }
 
     globals.printStatus('Showing $logReader logs:');
 
