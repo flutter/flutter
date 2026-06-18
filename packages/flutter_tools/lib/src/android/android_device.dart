@@ -605,7 +605,7 @@ class AndroidDevice extends Device {
         // Avoid using getLogReader, which returns a singleton instance, because the
         // VM Service discovery will dispose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
-        await AdbLogReader.createLogReader(this, _processManager, _logger),
+        await AdbLogReader.createLogReader(this, _processManager, _logger, app: builtPackage),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -801,16 +801,21 @@ class AndroidDevice extends Device {
     ApplicationPackage? app,
     bool includePastLogs = false,
   }) async {
-    // The Android log reader isn't app-specific. The `app` parameter isn't used.
     if (includePastLogs) {
       return _pastLogReader ??= await AdbLogReader.createLogReader(
         this,
         _processManager,
         _logger,
         includePastLogs: true,
+        app: app,
       );
     } else {
-      return _logReader ??= await AdbLogReader.createLogReader(this, _processManager, _logger);
+      return _logReader ??= await AdbLogReader.createLogReader(
+        this,
+        _processManager,
+        _logger,
+        app: app,
+      );
     }
   }
 
@@ -1059,10 +1064,15 @@ class AndroidMemoryInfo extends MemoryInfo {
 
 /// A log reader that logs from `adb logcat`.
 class AdbLogReader extends DeviceLogReader {
-  AdbLogReader._(this._adbProcess, this.name, this._logger);
+  AdbLogReader._(this._adbProcess, this.name, this._logger, {this.app});
 
   @visibleForTesting
-  factory AdbLogReader.test(Process adbProcess, String name, Logger logger) = AdbLogReader._;
+  factory AdbLogReader.test(
+    Process adbProcess,
+    String name,
+    Logger logger, {
+    ApplicationPackage? app,
+  }) = AdbLogReader._;
 
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
@@ -1070,6 +1080,7 @@ class AdbLogReader extends DeviceLogReader {
     ProcessManager processManager,
     Logger logger, {
     bool includePastLogs = false,
+    ApplicationPackage? app,
   }) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const kLollipopVersionCode = 21;
@@ -1097,8 +1108,16 @@ class AdbLogReader extends DeviceLogReader {
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
-    return AdbLogReader._(process, device.displayName, logger);
+    return AdbLogReader._(process, device.displayName, logger, app: app);
   }
+
+  final ApplicationPackage? app;
+
+  Timer? _crashTimer;
+
+  late final RegExp? _crashRegExp = app == null
+      ? null
+      : RegExp('Process: ${RegExp.escape(app!.id)}\\b');
 
   int? _appPid;
 
@@ -1219,7 +1238,20 @@ class AdbLogReader extends DeviceLogReader {
     if (logMatch != null) {
       var acceptLine = false;
 
-      if (_fatalCrash) {
+      if (app != null &&
+          logMatch.group(0)!.contains('/AndroidRuntime') &&
+          _crashRegExp!.hasMatch(line)) {
+        _appPid = int.tryParse(logMatch.group(1)!);
+        acceptLine = true;
+        // If the application crashed on startup, close the log reader stream after
+        // a short delay to allow the crash log/stacktrace to be flushed and printed,
+        // while preventing the runner from waiting indefinitely for a VM Service port.
+        _crashTimer ??= Timer(const Duration(milliseconds: 100), () {
+          if (!_linesController.isClosed) {
+            _linesController.close();
+          }
+        });
+      } else if (_fatalCrash) {
         // While a fatal crash is going on, only accept lines from the crash
         // Otherwise the crash log in the console may get interrupted
 
@@ -1267,6 +1299,7 @@ class AdbLogReader extends DeviceLogReader {
   }
 
   void _stop() {
+    _crashTimer?.cancel();
     _linesController.close();
     _adbProcess.kill();
   }
