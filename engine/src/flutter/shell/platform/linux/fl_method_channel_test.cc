@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
@@ -10,19 +11,12 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 
-class FlMethodChannelTest : public ::testing::Test {
+class FlMethodChannelTest : public flutter::testing::LinuxTest {
  protected:
-  void SetUp() override {
-    loop = g_main_loop_new(nullptr, 0);
-    messenger = fl_mock_binary_messenger_new();
-  }
+  void SetUp() override { messenger = fl_mock_binary_messenger_new(); }
 
-  ~FlMethodChannelTest() {
-    g_clear_object(&messenger);
-    g_clear_pointer(&loop, g_main_loop_unref);
-  }
+  ~FlMethodChannelTest() { g_clear_object(&messenger); }
 
-  GMainLoop* loop = nullptr;
   FlMockBinaryMessenger* messenger = nullptr;
 };
 

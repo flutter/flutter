@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture_registrar.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include <epoxy/gl.h>
@@ -66,7 +67,7 @@ static FlTestPixelBufferTexture* fl_test_pixel_buffer_texture_new() {
       g_object_new(fl_test_pixel_buffer_texture_get_type(), nullptr));
 }
 
-class FlPixelBufferTextureTest : public ::testing::Test {
+class FlPixelBufferTextureTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     texture = FL_PIXEL_BUFFER_TEXTURE(fl_test_pixel_buffer_texture_new());

@@ -8,16 +8,10 @@
 
 #include <cstdlib>
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-class FlDartProjectTest : public ::testing::Test {
- protected:
-  void SetUp() override { project = fl_dart_project_new(); }
-
-  ~FlDartProjectTest() { g_clear_object(&project); }
-
-  FlDartProject* project = nullptr;
-};
+class FlDartProjectTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlDartProjectTest, GetPaths) {
   g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", nullptr);

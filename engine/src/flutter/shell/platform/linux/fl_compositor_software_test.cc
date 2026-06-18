@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <thread>
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/common/constants.h"
@@ -13,11 +14,9 @@
 
 #include <gdk/gdkwayland.h>
 
-class FlCompositorSoftwareTest : public ::testing::Test {
+class FlCompositorSoftwareTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
     task_runner = fl_task_runner_new(engine);
     compositor = fl_compositor_software_new(task_runner);
   }
@@ -25,10 +24,8 @@ class FlCompositorSoftwareTest : public ::testing::Test {
   ~FlCompositorSoftwareTest() {
     g_clear_object(&compositor);
     g_clear_object(&task_runner);
-    g_clear_object(&engine);
   }
 
-  FlEngine* engine = nullptr;
   FlTaskRunner* task_runner = nullptr;
   FlCompositorSoftware* compositor = nullptr;
 };

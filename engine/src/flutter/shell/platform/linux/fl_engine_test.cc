@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
@@ -15,32 +16,10 @@
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
-class FlEngineTest : public ::testing::Test {
- protected:
-  void StartEngine(FlEngine* engine) {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
-  void SetUp() override {
-    loop = g_main_loop_new(nullptr, 0);
-    project = fl_dart_project_new();
-  }
-
-  ~FlEngineTest() {
-    g_clear_object(&project);
-    g_clear_pointer(&loop, g_main_loop_unref);
-  }
-
-  GMainLoop* loop = nullptr;
-  FlDartProject* project = nullptr;
-};
+class FlEngineTest : public flutter::testing::LinuxTest {};
 
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   StartEngine(engine);
 
   bool called = false;
@@ -93,8 +72,6 @@ TEST_F(FlEngineTest, NotifyDisplayUpdate) {
 
 // Checks sending window metrics events works.
 TEST_F(FlEngineTest, WindowMetrics) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   StartEngine(engine);
 
   bool called = false;
@@ -123,8 +100,6 @@ TEST_F(FlEngineTest, WindowMetrics) {
 
 // Checks sending mouse pointer events works.
 TEST_F(FlEngineTest, MousePointer) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
       SendPointerEvent,
@@ -157,8 +132,6 @@ TEST_F(FlEngineTest, MousePointer) {
 
 // Checks sending pan/zoom events works.
 TEST_F(FlEngineTest, PointerPanZoom) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
       SendPointerEvent,
@@ -192,8 +165,6 @@ TEST_F(FlEngineTest, PointerPanZoom) {
 
 // Checks dispatching a semantics action works.
 TEST_F(FlEngineTest, DispatchSemanticsAction) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -221,8 +192,6 @@ TEST_F(FlEngineTest, DispatchSemanticsAction) {
 
 // Checks sending platform messages works.
 TEST_F(FlEngineTest, PlatformMessage) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   FlutterEngineSendPlatformMessageFnPtr old_handler =
       fl_engine_get_embedder_api(engine)->SendPlatformMessage;
@@ -255,8 +224,6 @@ TEST_F(FlEngineTest, PlatformMessage) {
 
 // Checks sending platform message responses works.
 TEST_F(FlEngineTest, PlatformMessageResponse) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
       MOCK_ENGINE_PROC(
@@ -292,8 +259,6 @@ TEST_F(FlEngineTest, PlatformMessageResponse) {
 
 // Checks settings handler sends settings on startup.
 TEST_F(FlEngineTest, SettingsHandler) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
       SendPlatformMessage,
@@ -342,8 +307,6 @@ void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
 
 // Checks restarting the engine invokes the correct callback.
 TEST_F(FlEngineTest, OnPreEngineRestart) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   OnPreEngineRestartCallback callback;
   void* callback_user_data;
 
@@ -392,7 +355,6 @@ TEST_F(FlEngineTest, DartEntrypointArgs) {
   gchar** args = reinterpret_cast<gchar**>(g_ptr_array_free(args_array, false));
 
   fl_dart_project_set_dart_entrypoint_arguments(project, args);
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
@@ -415,7 +377,6 @@ TEST_F(FlEngineTest, DartEntrypointArgs) {
 }
 
 TEST_F(FlEngineTest, EngineId) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
   int64_t engine_id;
   fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
       Initialize,
@@ -435,7 +396,6 @@ TEST_F(FlEngineTest, EngineId) {
 }
 
 TEST_F(FlEngineTest, UIIsolateDefaultThreadPolicy) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
   fl_dart_project_set_ui_thread_policy(project, FL_UI_THREAD_POLICY_DEFAULT);
 
   bool same_task_runner = false;
@@ -457,7 +417,6 @@ TEST_F(FlEngineTest, UIIsolateDefaultThreadPolicy) {
 }
 
 TEST_F(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
   fl_dart_project_set_ui_thread_policy(
       project, FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD);
 
@@ -480,7 +439,6 @@ TEST_F(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
 }
 
 TEST_F(FlEngineTest, UIIsolateOnSeparateThread) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
   fl_dart_project_set_ui_thread_policy(
       project, FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD);
 
@@ -504,7 +462,6 @@ TEST_F(FlEngineTest, UIIsolateOnSeparateThread) {
 TEST_F(FlEngineTest, Locales) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "de:en_US", TRUE);
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
@@ -551,7 +508,6 @@ TEST_F(FlEngineTest, Locales) {
 TEST_F(FlEngineTest, CLocale) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "C", TRUE);
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
@@ -583,7 +539,6 @@ TEST_F(FlEngineTest, CLocale) {
 TEST_F(FlEngineTest, DuplicateLocale) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "en:en", TRUE);
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
@@ -620,7 +575,6 @@ TEST_F(FlEngineTest, DuplicateLocale) {
 TEST_F(FlEngineTest, EmptyLocales) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "de:: :en_US", TRUE);
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
@@ -676,8 +630,6 @@ static void add_view_cb(GObject* object,
 }
 
 TEST_F(FlEngineTest, AddView) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
       AddView, ([&called](auto engine, const FlutterAddViewInfo* info) {
@@ -723,8 +675,6 @@ static void add_view_error_cb(GObject* object,
 }
 
 TEST_F(FlEngineTest, AddViewError) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
       AddView, ([](auto engine, const FlutterAddViewInfo* info) {
         FlutterAddViewResult result;
@@ -758,8 +708,6 @@ static void add_view_engine_error_cb(GObject* object,
 }
 
 TEST_F(FlEngineTest, AddViewEngineError) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
       AddView, ([](auto engine, const FlutterAddViewInfo* info) {
         return kInvalidArguments;
@@ -787,8 +735,6 @@ static void remove_view_cb(GObject* object,
 }
 
 TEST_F(FlEngineTest, RemoveView) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   bool called = false;
   fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
       RemoveView, ([&called](auto engine, const FlutterRemoveViewInfo* info) {
@@ -823,8 +769,6 @@ static void remove_view_error_cb(GObject* object,
 }
 
 TEST_F(FlEngineTest, RemoveViewError) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
       RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
         FlutterRemoveViewResult result;
@@ -854,8 +798,6 @@ static void remove_view_engine_error_cb(GObject* object,
 }
 
 TEST_F(FlEngineTest, RemoveViewEngineError) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
       RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
         return kInvalidArguments;
@@ -869,8 +811,6 @@ TEST_F(FlEngineTest, RemoveViewEngineError) {
 }
 
 TEST_F(FlEngineTest, SendKeyEvent) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   StartEngine(engine);
 
   bool called;
@@ -915,8 +855,6 @@ TEST_F(FlEngineTest, SendKeyEvent) {
 }
 
 TEST_F(FlEngineTest, SendKeyEventNotHandled) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   StartEngine(engine);
 
   bool called;
@@ -955,8 +893,6 @@ TEST_F(FlEngineTest, SendKeyEventNotHandled) {
 }
 
 TEST_F(FlEngineTest, SendKeyEventError) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   g_autoptr(GError) error = nullptr;
   // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   StartEngine(engine);
@@ -997,7 +933,6 @@ TEST_F(FlEngineTest, SendKeyEventError) {
 
 TEST_F(FlEngineTest, EnableImpeller) {
   fl_dart_project_set_enable_impeller(project, TRUE);
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
@@ -1023,8 +958,6 @@ TEST_F(FlEngineTest, EnableImpeller) {
 }
 
 TEST_F(FlEngineTest, ChildObjects) {
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
   // Check objects exist before engine started.
   EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);
   EXPECT_NE(fl_engine_get_display_monitor(engine), nullptr);

@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -103,10 +104,9 @@ FlTestApplication* fl_test_application_new(gboolean* dispose_called) {
   return self;
 }
 
-class FlPlatformHandlerTest : public ::testing::Test {
+class FlPlatformHandlerTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
-    loop = g_main_loop_new(nullptr, 0);
     messenger = fl_mock_binary_messenger_new();
     handler = fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
   }
@@ -115,10 +115,8 @@ class FlPlatformHandlerTest : public ::testing::Test {
     fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
     g_clear_object(&handler);
     g_clear_object(&messenger);
-    g_clear_pointer(&loop, g_main_loop_unref);
   }
 
-  GMainLoop* loop = nullptr;
   FlMockBinaryMessenger* messenger = nullptr;
   FlPlatformHandler* handler = nullptr;
 };

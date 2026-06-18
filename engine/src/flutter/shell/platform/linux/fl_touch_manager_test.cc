@@ -10,28 +10,13 @@
 #include <cstring>
 #include <vector>
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-class FlTouchManagerTest : public ::testing::Test {
- protected:
-  void StartEngine() {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
-  void SetUp() override {
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
-  }
-
-  ~FlTouchManagerTest() { g_clear_object(&engine); }
-
-  FlEngine* engine = nullptr;
-};
+class FlTouchManagerTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlTouchManagerTest, TouchEvents) {
-  StartEngine();
+  StartEngine(engine);
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(

@@ -4,9 +4,10 @@
 
 #include "flutter/shell/platform/linux/fl_keyboard_layout.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-class FlKeyboardLayoutTest : public ::testing::Test {
+class FlKeyboardLayoutTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override { layout = fl_keyboard_layout_new(); }
 

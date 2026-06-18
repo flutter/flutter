@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 // FIXME(robert-ancell): Disabled, see below.
@@ -19,23 +20,7 @@ static void first_frame_cb(FlView* view, gboolean* first_frame_emitted) {
 }
 #endif
 
-class FlViewTest : public ::testing::Test {
- protected:
-  void StartEngine(FlEngine* engine) {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
-  void SetUp() override {
-    flutter::testing::fl_ensure_gtk_init();
-    project = fl_dart_project_new();
-  }
-
-  ~FlViewTest() { g_clear_object(&project); }
-
-  FlDartProject* project = nullptr;
-};
+class FlViewTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlViewTest, GetEngine) {
   FlView* view = fl_view_new(project);

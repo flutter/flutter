@@ -8,10 +8,11 @@
 
 #include <glib.h>
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-class FlSettingsPortalTest : public ::testing::Test {
+class FlSettingsPortalTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     settings = g_variant_dict_new(nullptr);

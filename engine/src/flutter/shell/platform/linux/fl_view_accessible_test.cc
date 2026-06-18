@@ -3,23 +3,14 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/testing/mock_signal_handler.h"
 
-class FlViewAccessibleTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
-  }
-
-  ~FlViewAccessibleTest() { g_clear_object(&engine); }
-
-  FlEngine* engine = nullptr;
-};
+class FlViewAccessibleTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlViewAccessibleTest, BuildTree) {
   g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);

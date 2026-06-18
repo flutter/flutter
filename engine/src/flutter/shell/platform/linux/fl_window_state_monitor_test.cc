@@ -8,9 +8,10 @@
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-class FlWindowStateMonitorTest : public ::testing::Test {
+class FlWindowStateMonitorTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     gtk_init(0, nullptr);

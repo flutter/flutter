@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_event_channel.h"
@@ -10,7 +11,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 
-class FlEventChannelTest : public ::testing::Test {
+class FlEventChannelTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override { messenger = fl_mock_binary_messenger_new(); }
 

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
 
-class FlFramebufferTest : public ::testing::Test {
+class FlFramebufferTest : public flutter::testing::LinuxTest {
  protected:
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 };

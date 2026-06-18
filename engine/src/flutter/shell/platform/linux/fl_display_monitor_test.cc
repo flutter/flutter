@@ -6,28 +6,13 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-class FlDisplayMonitorTest : public ::testing::Test {
- protected:
-  void StartEngine() {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
-  void SetUp() override {
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
-  }
-
-  ~FlDisplayMonitorTest() { g_clear_object(&engine); }
-
-  FlEngine* engine = nullptr;
-};
+class FlDisplayMonitorTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlDisplayMonitorTest, Test) {
-  StartEngine();
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate = MOCK_ENGINE_PROC(

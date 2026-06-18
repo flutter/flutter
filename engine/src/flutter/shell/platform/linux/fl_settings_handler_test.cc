@@ -11,19 +11,15 @@
 #include "flutter/shell/platform/linux/testing/mock_settings.h"
 #include "flutter/testing/testing.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-class FlSettingsHandlerTest : public ::testing::Test {
+class FlSettingsHandlerTest : public flutter::testing::LinuxTest {
  protected:
-  void StartEngine() {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
   void SetUp() override {
     messenger = fl_mock_binary_messenger_new();
+    g_clear_object(&engine);
     engine =
         fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
     handler = fl_settings_handler_new(engine);
@@ -32,12 +28,10 @@ class FlSettingsHandlerTest : public ::testing::Test {
   ~FlSettingsHandlerTest() {
     fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
     g_clear_object(&handler);
-    g_clear_object(&engine);
     g_clear_object(&messenger);
   }
 
   FlMockBinaryMessenger* messenger = nullptr;
-  FlEngine* engine = nullptr;
   FlSettingsHandler* handler = nullptr;
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
 };
@@ -188,7 +182,7 @@ TEST_F(FlSettingsHandlerTest, TextScaleFactor) {
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 TEST_F(FlSettingsHandlerTest, AccessibilityFeatures) {
-  StartEngine();
+  StartEngine(engine);
 
   std::vector<FlutterAccessibilityFeature> calls;
   fl_engine_get_embedder_api(engine)->UpdateAccessibilityFeatures =

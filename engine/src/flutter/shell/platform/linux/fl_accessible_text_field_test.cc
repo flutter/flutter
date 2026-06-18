@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
@@ -21,23 +22,7 @@ static FlValue* decode_semantic_data(const uint8_t* data, size_t data_length) {
                                          nullptr);
 }
 
-class FlAccessibleTextFieldTest : public ::testing::Test {
- protected:
-  void StartEngine() {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
-  void SetUp() override {
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
-  }
-
-  ~FlAccessibleTextFieldTest() { g_clear_object(&engine); }
-
-  FlEngine* engine = nullptr;
-};
+class FlAccessibleTextFieldTest : public flutter::testing::LinuxTest {};
 
 // Tests that semantic node value updates from Flutter emit AtkText::text-insert
 // and AtkText::text-remove signals as expected.
@@ -160,7 +145,7 @@ TEST_F(FlAccessibleTextFieldTest, PerformAction) {
   g_autoptr(GPtrArray) action_datas = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(fl_value_unref));
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -240,7 +225,7 @@ TEST_F(FlAccessibleTextFieldTest, SetCaretOffset) {
   int base = -1;
   int extent = -1;
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -314,7 +299,7 @@ TEST_F(FlAccessibleTextFieldTest, AddSelection) {
   int base = -1;
   int extent = -1;
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -349,7 +334,7 @@ TEST_F(FlAccessibleTextFieldTest, RemoveSelection) {
   int base = -1;
   int extent = -1;
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -390,7 +375,7 @@ TEST_F(FlAccessibleTextFieldTest, SetSelection) {
   int base = -1;
   int extent = -1;
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -426,7 +411,7 @@ TEST_F(FlAccessibleTextFieldTest, SetSelection) {
 TEST_F(FlAccessibleTextFieldTest, SetTextContents) {
   g_autofree gchar* text = nullptr;
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -452,7 +437,7 @@ TEST_F(FlAccessibleTextFieldTest, InsertDeleteText) {
   int base = -1;
   int extent = -1;
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -500,7 +485,7 @@ TEST_F(FlAccessibleTextFieldTest, CopyCutPasteText) {
   int extent = -1;
   FlutterSemanticsAction act = kFlutterSemanticsActionCustomAction;
 
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,

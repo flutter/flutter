@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
@@ -38,10 +39,9 @@ static void set_key_event_channel(FlMockBinaryMessenger* messenger,
       data);
 }
 
-class FlKeyChannelResponderTest : public ::testing::Test {
+class FlKeyChannelResponderTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
-    loop = g_main_loop_new(nullptr, 0);
     messenger = fl_mock_binary_messenger_new();
     responder = fl_key_channel_responder_new(FL_BINARY_MESSENGER(messenger));
   }
@@ -50,14 +50,12 @@ class FlKeyChannelResponderTest : public ::testing::Test {
     fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
     g_clear_object(&responder);
     g_clear_object(&messenger);
-    g_clear_pointer(&loop, g_main_loop_unref);
   }
 
   void TestLockEvent(guint key_code,
                      const char* down_expected,
                      const char* up_expected);
 
-  GMainLoop* loop = nullptr;
   FlMockBinaryMessenger* messenger = nullptr;
   FlKeyChannelResponder* responder = nullptr;
 };

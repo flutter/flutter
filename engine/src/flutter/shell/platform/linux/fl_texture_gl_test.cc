@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture_registrar.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include <epoxy/gl.h>
@@ -58,7 +59,7 @@ static FlTestTexture* fl_test_texture_new() {
   return FL_TEST_TEXTURE(g_object_new(fl_test_texture_get_type(), nullptr));
 }
 
-class FlTextureGLTest : public ::testing::Test {
+class FlTextureGLTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override { texture = FL_TEXTURE_GL(fl_test_texture_new()); }
 

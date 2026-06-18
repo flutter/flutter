@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 #include "flutter/testing/testing.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -150,7 +151,7 @@ static void send_key_event(FlTextInputHandler* handler,
   fl_text_input_handler_filter_keypress(handler, key_event);
 }
 
-class FlTextInputHandlerTest : public ::testing::Test {
+class FlTextInputHandlerTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     messenger = fl_mock_binary_messenger_new();

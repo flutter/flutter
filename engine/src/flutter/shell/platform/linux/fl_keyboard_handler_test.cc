@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -23,35 +24,25 @@ using ::flutter::testing::keycodes::kPhysicalKeyA;
 
 constexpr guint16 kKeyCodeKeyA = 0x26u;
 
-class FlKeyboardHandlerTest : public ::testing::Test {
+class FlKeyboardHandlerTest : public flutter::testing::LinuxTest {
  protected:
-  void StartEngine() {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
   void SetUp() override {
-    loop = g_main_loop_new(nullptr, 0);
     messenger = fl_mock_binary_messenger_new();
+    g_clear_object(&engine);
     engine =
         fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
     manager = fl_keyboard_manager_new(engine);
-    StartEngine();
+    StartEngine(engine);
     handler = fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
   }
 
   ~FlKeyboardHandlerTest() {
     g_clear_object(&handler);
     g_clear_object(&manager);
-    g_clear_object(&engine);
     g_clear_object(&messenger);
-    g_clear_pointer(&loop, g_main_loop_unref);
   }
 
-  GMainLoop* loop = nullptr;
   FlMockBinaryMessenger* messenger = nullptr;
-  FlEngine* engine = nullptr;
   FlKeyboardManager* manager = nullptr;
   FlKeyboardHandler* handler = nullptr;
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;

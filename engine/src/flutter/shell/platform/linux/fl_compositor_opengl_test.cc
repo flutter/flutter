@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <thread>
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/common/constants.h"
@@ -19,11 +20,9 @@
 
 #include <epoxy/egl.h>
 
-class FlCompositorOpenGLTest : public ::testing::Test {
+class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
     task_runner = fl_task_runner_new(engine);
     opengl_manager = fl_opengl_manager_new();
     renderable = fl_mock_renderable_new();
@@ -36,11 +35,9 @@ class FlCompositorOpenGLTest : public ::testing::Test {
     g_clear_object(&renderable);
     g_clear_object(&opengl_manager);
     g_clear_object(&task_runner);
-    g_clear_object(&engine);
   }
 
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  FlEngine* engine = nullptr;
   FlTaskRunner* task_runner = nullptr;
   FlOpenGLManager* opengl_manager = nullptr;
   FlMockRenderable* renderable = nullptr;

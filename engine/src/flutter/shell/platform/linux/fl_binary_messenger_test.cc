@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include <pthread.h>
@@ -15,32 +16,11 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 
-class FlBinaryMessengerTest : public ::testing::Test {
- protected:
-  void StartEngine() {
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_engine_start(engine, &error));
-    EXPECT_EQ(error, nullptr);
-  }
-
-  void SetUp() override {
-    loop = g_main_loop_new(nullptr, 0);
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
-  }
-
-  ~FlBinaryMessengerTest() {
-    g_clear_object(&engine);
-    g_clear_pointer(&loop, g_main_loop_unref);
-  }
-
-  GMainLoop* loop = nullptr;
-  FlEngine* engine = nullptr;
-};
+class FlBinaryMessengerTest : public flutter::testing::LinuxTest {};
 
 // Checks can send a message.
 TEST_F(FlBinaryMessengerTest, Send) {
-  StartEngine();
+  StartEngine(engine);
 
   FlutterDataCallback response_callback;
   void* response_callback_user_data;
@@ -97,7 +77,7 @@ TEST_F(FlBinaryMessengerTest, Send) {
 
 // Checks sending nullptr for a message works.
 TEST_F(FlBinaryMessengerTest, SendNullptr) {
-  StartEngine();
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
@@ -121,7 +101,7 @@ TEST_F(FlBinaryMessengerTest, SendNullptr) {
 
 // Checks sending a zero length message works.
 TEST_F(FlBinaryMessengerTest, SendEmpty) {
-  StartEngine();
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
@@ -143,7 +123,7 @@ TEST_F(FlBinaryMessengerTest, SendEmpty) {
 
 // Checks the engine returning a nullptr message work.
 TEST_F(FlBinaryMessengerTest, NullptrResponse) {
-  StartEngine();
+  StartEngine(engine);
 
   FlutterDataCallback response_callback;
   void* response_callback_user_data;
@@ -195,7 +175,7 @@ TEST_F(FlBinaryMessengerTest, NullptrResponse) {
 
 // Checks the engine reporting a send failure is handled.
 TEST_F(FlBinaryMessengerTest, SendFailure) {
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendPlatformMessage =
       MOCK_ENGINE_PROC(SendPlatformMessage,
@@ -224,7 +204,7 @@ TEST_F(FlBinaryMessengerTest, SendFailure) {
 
 // Checks can receive a message.
 TEST_F(FlBinaryMessengerTest, Receive) {
-  StartEngine();
+  StartEngine(engine);
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
@@ -281,7 +261,7 @@ TEST_F(FlBinaryMessengerTest, Receive) {
 
 // Checks receieved messages can be responded to on a thread.
 TEST_F(FlBinaryMessengerTest, ReceiveRespondThread) {
-  StartEngine();
+  StartEngine(engine);
 
   fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
       MOCK_ENGINE_PROC(
@@ -394,7 +374,7 @@ TEST_F(FlBinaryMessengerTest, ResizeChannel) {
         return kSuccess;
       }));
 
-  StartEngine();
+  StartEngine(engine);
 
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_resize_channel(messenger, "flutter/test", 3);
@@ -435,7 +415,7 @@ TEST_F(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
         return kSuccess;
       }));
 
-  StartEngine();
+  StartEngine(engine);
 
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_set_warns_on_channel_overflow(messenger, "flutter/test",
@@ -447,7 +427,7 @@ TEST_F(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
 // Checks if error returned when invoking a command on the control channel
 // are handled.
 TEST_F(FlBinaryMessengerTest, ControlChannelErrorResponse) {
-  StartEngine();
+  StartEngine(engine);
 
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   bool called = false;
@@ -488,7 +468,7 @@ TEST_F(FlBinaryMessengerTest, ControlChannelErrorResponse) {
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
 TEST_F(FlBinaryMessengerTest, DeletingEngineClearsHandlers) {
-  StartEngine();
+  StartEngine(engine);
 
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
 

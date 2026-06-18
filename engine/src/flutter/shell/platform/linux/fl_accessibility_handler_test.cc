@@ -16,6 +16,7 @@ extern "C" {
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/testing/testing.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -80,11 +81,12 @@ static void subscribe_signal(FlViewAccessible* accessible,
   }
 }
 
-class FlAccessibilityHandlerTest : public ::testing::Test {
+class FlAccessibilityHandlerTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     flutter::testing::fl_ensure_gtk_init();
     messenger = fl_mock_binary_messenger_new();
+    g_clear_object(&engine);
     engine =
         fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
     view = fl_view_new_for_engine(engine);
@@ -92,12 +94,10 @@ class FlAccessibilityHandlerTest : public ::testing::Test {
 
   ~FlAccessibilityHandlerTest() {
     fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
-    g_clear_object(&engine);
     g_clear_object(&messenger);
   }
 
   FlMockBinaryMessenger* messenger = nullptr;
-  FlEngine* engine = nullptr;
   FlView* view = nullptr;
 };
 
