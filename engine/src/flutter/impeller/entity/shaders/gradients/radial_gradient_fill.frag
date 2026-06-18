@@ -15,7 +15,6 @@ uniform FragInfo {
   float radius;
   float tile_mode;
   vec4 decal_border_color;
-  float texture_sampler_y_coord_scale;
   float alpha;
   vec2 half_texel;
 }
@@ -28,12 +27,10 @@ out vec4 frag_color;
 void main() {
   float len = length(v_position - frag_info.center);
   float t = len / frag_info.radius;
-  frag_color =
-      IPSampleLinearWithTileMode(texture_sampler,                          //
-                                 vec2(t, 0.5),                             //
-                                 frag_info.texture_sampler_y_coord_scale,  //
-                                 frag_info.half_texel,                     //
-                                 frag_info.tile_mode,                      //
-                                 frag_info.decal_border_color);
+  frag_color = IPSampleLinearWithTileMode(texture_sampler,       //
+                                          vec2(t, 0.5),          //
+                                          frag_info.half_texel,  //
+                                          frag_info.tile_mode,   //
+                                          frag_info.decal_border_color);
   frag_color = IPPremultiply(frag_color) * frag_info.alpha;
 }
