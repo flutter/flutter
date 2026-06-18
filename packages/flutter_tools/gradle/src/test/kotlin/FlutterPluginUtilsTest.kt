@@ -425,6 +425,97 @@ class FlutterPluginUtilsTest {
         assertEquals("lib/main.dart", result)
     }
 
+    @Test
+    fun `getFlutterTarget returns target from flavor when it exists`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET) } returns false
+
+        val flavor = mockk<com.android.builder.model.ProductFlavor>(
+            moreInterfaces = arrayOf(org.gradle.api.plugins.ExtensionAware::class),
+            relaxed = true
+        )
+        val flavorExtension = FlutterExtension().apply { target = "lib/flavor.dart" }
+        every { (flavor as org.gradle.api.plugins.ExtensionAware).extensions.findByType(FlutterExtension::class.java) } returns flavorExtension
+
+        val variant = mockk<com.android.build.gradle.api.ApplicationVariant>(relaxed = true)
+        every { variant.productFlavors } returns listOf(flavor)
+
+        val result = FlutterPluginUtils.getFlutterTarget(project, variant)
+        assertEquals("lib/flavor.dart", result)
+    }
+
+    @Test
+    fun `getFlutterTarget falls back to project-level target when flavor does not specify one`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET) } returns false
+
+        val projectExtension = FlutterExtension().apply { target = "lib/project_fallback.dart" }
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns projectExtension
+
+        val flavor = mockk<com.android.builder.model.ProductFlavor>(
+            moreInterfaces = arrayOf(org.gradle.api.plugins.ExtensionAware::class),
+            relaxed = true
+        )
+        every { (flavor as org.gradle.api.plugins.ExtensionAware).extensions.findByType(FlutterExtension::class.java) } returns null
+
+        val variant = mockk<com.android.build.gradle.api.ApplicationVariant>(relaxed = true)
+        every { variant.productFlavors } returns listOf(flavor)
+
+        val result = FlutterPluginUtils.getFlutterTarget(project, variant)
+        assertEquals("lib/project_fallback.dart", result)
+    }
+
+    @Test
+    fun `getFlutterTarget resolves to second flavor target when first flavor has no target`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET) } returns false
+
+        val flavor1 = mockk<com.android.builder.model.ProductFlavor>(
+            moreInterfaces = arrayOf(org.gradle.api.plugins.ExtensionAware::class),
+            relaxed = true
+        )
+        every { (flavor1 as org.gradle.api.plugins.ExtensionAware).extensions.findByType(FlutterExtension::class.java) } returns null
+
+        val flavor2 = mockk<com.android.builder.model.ProductFlavor>(
+            moreInterfaces = arrayOf(org.gradle.api.plugins.ExtensionAware::class),
+            relaxed = true
+        )
+        val flavorExtension2 = FlutterExtension().apply { target = "lib/flavor2.dart" }
+        every { (flavor2 as org.gradle.api.plugins.ExtensionAware).extensions.findByType(FlutterExtension::class.java) } returns flavorExtension2
+
+        val variant = mockk<com.android.build.gradle.api.ApplicationVariant>(relaxed = true)
+        every { variant.productFlavors } returns listOf(flavor1, flavor2)
+
+        val result = FlutterPluginUtils.getFlutterTarget(project, variant)
+        assertEquals("lib/flavor2.dart", result)
+    }
+
+    @Test
+    fun `getFlutterTarget resolves to first flavor target when both flavors define targets`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET) } returns false
+
+        val flavor1 = mockk<com.android.builder.model.ProductFlavor>(
+            moreInterfaces = arrayOf(org.gradle.api.plugins.ExtensionAware::class),
+            relaxed = true
+        )
+        val flavorExtension1 = FlutterExtension().apply { target = "lib/flavor1.dart" }
+        every { (flavor1 as org.gradle.api.plugins.ExtensionAware).extensions.findByType(FlutterExtension::class.java) } returns flavorExtension1
+
+        val flavor2 = mockk<com.android.builder.model.ProductFlavor>(
+            moreInterfaces = arrayOf(org.gradle.api.plugins.ExtensionAware::class),
+            relaxed = true
+        )
+        val flavorExtension2 = FlutterExtension().apply { target = "lib/flavor2.dart" }
+        every { (flavor2 as org.gradle.api.plugins.ExtensionAware).extensions.findByType(FlutterExtension::class.java) } returns flavorExtension2
+
+        val variant = mockk<com.android.build.gradle.api.ApplicationVariant>(relaxed = true)
+        every { variant.productFlavors } returns listOf(flavor1, flavor2)
+
+        val result = FlutterPluginUtils.getFlutterTarget(project, variant)
+        assertEquals("lib/flavor1.dart", result)
+    }
+
     // isBuiltAsApp skipped as it is a wrapper for a single getter
 
     // addApiDependencies
@@ -578,7 +669,9 @@ class FlutterPluginUtilsTest {
     @Test
     fun `getCompileSdkFromProject returns the compileSdk from the project`() {
         val project = mockk<Project>()
-        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        val mockExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockExtension
+        every { mockExtension.compileSdkVersion } returns "android-35"
         val result = FlutterPluginUtils.getCompileSdkFromProject(project)
         assertEquals("35", result)
     }
@@ -1544,12 +1637,10 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
-        every {
-            project.extensions
-                .findByType(BaseExtension::class.java)!!
-                .externalNativeBuild.cmake
-        } returns mockCmakeOptions
-        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+        val mockExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockExtension
+        every { mockExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockExtension.defaultConfig } returns mockDefaultConfig
 
         every { mockCmakeOptions.path } returns fakeCmakeFile
 
@@ -1569,12 +1660,10 @@ class FlutterPluginUtilsTest {
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
-        every {
-            project.extensions
-                .findByType(BaseExtension::class.java)!!
-                .externalNativeBuild.cmake
-        } returns mockCmakeOptions
-        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+        val mockExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockExtension
+        every { mockExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockExtension.defaultConfig } returns mockDefaultConfig
 
         val basePath = "/base/path"
         val fakeBuildPath = "/randomapp/build/app/"
@@ -1584,15 +1673,13 @@ class FlutterPluginUtilsTest {
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
-        every { mockDirectory.asFile.path } returns fakeBuildPath
+        val mockFile = File(fakeBuildPath)
+        every { mockDirectory.getAsFile() } returns mockFile
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
-        every {
-            project.extensions
-                .findByType(BaseExtension::class.java)!!
-                .buildTypes
-                .iterator()
-        } returns mutableListOf(mockBuildType).iterator()
+        val mockBuildTypesContainer = mockk<org.gradle.api.NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        every { mockExtension.buildTypes } returns mockBuildTypesContainer
+        every { mockBuildTypesContainer.iterator() } returns mutableListOf(mockBuildType).iterator()
         every { mockBuildType.name } returns "Debug"
         every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
 
