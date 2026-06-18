@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
@@ -39,7 +41,7 @@ Future<void> testMain() async {
     paragraph.paint(canvas, const Offset(0, 100));
     canvas.drawRect(const Rect.fromLTWH(250, 0, 100, 200), redPaint);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_ltr_1.png', region: region);
+    await matchGoldenFile('web_paragraph.ltr_1.png', region: region);
   });
 
   test('Draw WebParagraph LTR text with multiple lines', () async {
@@ -61,7 +63,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 500));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
+    await matchGoldenFile('web_paragraph.multiline_ltr.png', region: region);
   });
 
   test('Draw WebParagraph RTL text 1 line', () async {
@@ -82,7 +84,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_1_rtl.png', region: region);
+    await matchGoldenFile('web_paragraph.rtl_1.png', region: region);
   });
 
   // Small line breaking difference with Chrome
@@ -104,7 +106,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
+    await matchGoldenFile('web_paragraph.multiline_rtl.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL 1 Line in ltr', () async {
@@ -125,96 +127,59 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_mix_1_ltr.png', region: region);
+    await matchGoldenFile('web_paragraph.mix_1_ltr.png', region: region);
   });
 
-  test('Draw WebParagraph LTR/RTL 1 Line', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder, region);
+  for (final dir in <String>['ltr', 'rtl']) {
+    test('Draw mixed WebParagraph multi Line with `$dir` default', () async {
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder, region);
+      canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final arialStyle = WebParagraphStyle(
-      fontFamily: 'Arial',
-      fontSize: 50,
-      color: const Color(0xFF000000),
-    );
-    final builder = WebParagraphBuilder(arialStyle);
-    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-    builder.addText('ABC لم def');
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paint(canvas, Offset.zero);
-    await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_mix1_multilined_ltr.png', region: region);
-  });
+      final arialStyle = WebParagraphStyle(
+        fontFamily: 'Arial',
+        fontSize: 50,
+        textDirection: TextDirection.values.byName(dir),
+      );
+      final builder = WebParagraphBuilder(arialStyle);
+      builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+      builder.addText('لABC لم def لل لم ghi');
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 300));
+      paragraph.paint(canvas, Offset.zero);
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+      await matchGoldenFile('web_paragraph.mix_multiline_$dir.png', region: region);
+    });
 
-  test('Draw WebParagraph LTR/RTL multi Line with RTL default left aligned', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder, region);
-    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+    for (final align in <String>['left', 'right']) {
+      test('Draw mixed WebParagraph multi Line with `$dir` default $align aligned', () async {
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder, region);
+        canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final arialStyle = WebParagraphStyle(
-      fontFamily: 'Arial',
-      fontSize: 50,
-      textDirection: TextDirection.rtl,
-    );
-    final builder = WebParagraphBuilder(arialStyle);
-    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-    builder.addText('لABC لم def لل لم ghi');
-    //لABC لم def لل لم ghi
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paint(canvas, Offset.zero);
-    await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_mix1_multilined_rtl.png', region: region);
-  });
-
-  test('Draw WebParagraph LTR/RTL multi Line with LTR left aligned', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder, region);
-    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    final arialStyle = WebParagraphStyle(
-      textDirection: TextDirection.ltr,
-      textAlign: TextAlign.left,
-      fontFamily: 'Arial',
-      fontSize: 50,
-      color: const Color(0xFF000000),
-    );
-    final builder = WebParagraphBuilder(arialStyle);
-    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-    builder.addText(
-      'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
-    );
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paint(canvas, Offset.zero);
-    await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_mix_multilined_ltr.png', region: region);
-  });
-
-  test('Draw WebParagraph LTR/RTL multi Line with RTL right aligned', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder, region);
-    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    final arialStyle = WebParagraphStyle(
-      textDirection: TextDirection.rtl,
-      textAlign: TextAlign.right,
-      fontFamily: 'Arial',
-      fontSize: 50,
-      color: const Color(0xFF000000),
-    );
-    final builder = WebParagraphBuilder(arialStyle);
-    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-    builder.addText(
-      'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
-    );
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paint(canvas, Offset.zero);
-    await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_mix_multilined_rtl.png', region: region);
-  });
+        final arialStyle = WebParagraphStyle(
+          textDirection: TextDirection.values.byName(dir),
+          textAlign: TextAlign.values.byName(align),
+          fontFamily: 'Arial',
+          fontSize: 50,
+          color: const Color(0xFF000000),
+        );
+        final builder = WebParagraphBuilder(arialStyle);
+        builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+        builder.addText(
+          'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
+        );
+        final WebParagraph paragraph = builder.build();
+        paragraph.layout(const ParagraphConstraints(width: 300));
+        paragraph.paint(canvas, Offset.zero);
+        await drawPictureUsingCurrentRenderer(recorder.endRecording());
+        await matchGoldenFile(
+          'web_paragraph.mix_multiline_${dir}_align_$align.png',
+          region: region,
+        );
+      });
+    }
+  }
 
   test('Draw WebParagraph multicolored text', () async {
     final recorder = PictureRecorder();
@@ -256,7 +221,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_multicolored.png', region: region);
+    await matchGoldenFile('web_paragraph.multicolor.png', region: region);
   });
 
   test('Draw WebParagraph multicolored background text', () async {
@@ -317,7 +282,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_multicolored_background.png', region: region);
+    await matchGoldenFile('web_paragraph.multicolor_background.png', region: region);
   });
 
   test('Draw WebParagraph multiple font styles text', () async {
@@ -371,7 +336,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
+    await matchGoldenFile('web_paragraph.multifontstyle.png', region: region);
   });
 
   test('Draw WebParagraph multiple shadows text', () async {
@@ -388,15 +353,15 @@ Future<void> testMain() async {
       fontSize: 40,
       shadows: const [
         Shadow(color: Color(0xFF00FF00), offset: Offset(0, -10), blurRadius: 2.0),
-        Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0),
-        Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0),
-        Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 10), blurRadius: 2.0),
+        Shadow(color: Color(0xFFFF0000), offset: Offset(-15, 0), blurRadius: 2.0),
+        Shadow(color: Color(0xFF0000FF), offset: Offset(20, 0), blurRadius: 2.0),
+        Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 25), blurRadius: 2.0),
       ],
     );
     final leftShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
-      shadows: const [Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0)],
+      shadows: const [Shadow(color: Color(0xFFFF0000), offset: Offset(-15, 0), blurRadius: 2.0)],
     );
     final topShadow = WebTextStyle(
       fontFamily: 'Roboto',
@@ -406,13 +371,20 @@ Future<void> testMain() async {
     final rightShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
-      shadows: const [Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0)],
+      shadows: const [Shadow(color: Color(0xFF0000FF), offset: Offset(20, 0), blurRadius: 2.0)],
     );
     final bottomShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
-      shadows: const [Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 10), blurRadius: 2.0)],
+      shadows: const [Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 25), blurRadius: 2.0)],
     );
+
+    final goodShadow = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      shadows: const [Shadow(color: Color(0xFF444444), offset: Offset(5, 5), blurRadius: 5.0)],
+    );
+
     final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
@@ -423,26 +395,30 @@ Future<void> testMain() async {
     builder.addText('Text without shadows. ');
 
     builder.pushStyle(leftShadow);
-    builder.addText('Left Shadow. ');
+    builder.addText('Left Shadow. -15, 0. ');
     builder.pop();
 
     builder.pushStyle(topShadow);
-    builder.addText('Top Shadow. ');
+    builder.addText('Top Shadow. 0, -10. ');
     builder.pop();
 
     builder.pushStyle(rightShadow);
-    builder.addText('Right Shadow. ');
+    builder.addText('Right Shadow. 20, 0. ');
     builder.pop();
 
     builder.pushStyle(bottomShadow);
-    builder.addText('Bottom Shadow. ');
+    builder.addText('Bottom Shadow. 0, 25. ');
+    builder.pop();
+
+    builder.pushStyle(goodShadow);
+    builder.addText('Good Shadow. 5, 5. ');
     builder.pop();
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 400));
     paragraph.paint(canvas, const Offset(50, 50));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_multishadows.png', region: region);
+    await matchGoldenFile('web_paragraph.multishadows.png', region: region);
   });
 
   test('Draw WebParagraph multiple decorations on text', () async {
@@ -522,7 +498,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 400));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_multidecorated.png', region: region);
+    await matchGoldenFile('web_paragraph.multidecoration.png', region: region);
   });
 
   test('Draw WebParagraph multiple fonts text', () async {
@@ -581,7 +557,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_multiplefont.png', region: region);
+    await matchGoldenFile('web_paragraph.multifont.png', region: region);
   });
 
   test('Draw WebParagraph letter/word spacing text', () async {
@@ -616,7 +592,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_letter_word_spacing.png', region: region);
+    await matchGoldenFile('web_paragraph.letter_word_spacing.png', region: region);
   });
 
   test('Query WebParagraph.GetBoxesForRange LTR text 1 line', () async {
@@ -693,7 +669,7 @@ Future<void> testMain() async {
     }
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_query_boxes_ltr_1.png', region: region);
+    await matchGoldenFile('web_paragraph.query_boxes_ltr_1.png', region: region);
   });
 
   test('Query WebParagraph.Placeholders', () async {
@@ -801,7 +777,7 @@ Future<void> testMain() async {
     }
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_placeholders_1_line.png', region: region);
+    await matchGoldenFile('web_paragraph.placeholders_1_line.png', region: region);
   });
 
   test('Draw WebParagraph with fontFeatures', () async {
@@ -842,7 +818,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_font_features.png', region: region);
+    await matchGoldenFile('web_paragraph.font_features.png', region: region);
   });
 
   test('Draw WebParagraph with fontVariations', () async {
@@ -888,11 +864,11 @@ Future<void> testMain() async {
     builder.pop();
     builder.addText('Italic.\n');
 
-    //final WebParagraph paragraph = builder.build();
-    //paragraph.layout(const ParagraphConstraints(width: 250));
-    //paragraph.paintOnCanvasKit(canvas, const Offset(0, 0));
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_font_variations.png', region: region);
+    await matchGoldenFile('web_paragraph.font_variations.png', region: region);
   });
 
   test('Draw WebParagraph multicolored background text', () async {
@@ -928,7 +904,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_black_and_white_background.png', region: region);
+    await matchGoldenFile('web_paragraph.black_and_white_background.png', region: region);
   });
 
   test('Pixels', () async {
@@ -962,7 +938,7 @@ Future<void> testMain() async {
       paragraph.paint(canvas, const Offset(100, 100));
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('pixels.png', region: region);
+    await matchGoldenFile('web_paragraph.pixels.png', region: region);
   });
 
   test('Ellipsis LTR', () async {
@@ -980,24 +956,21 @@ Future<void> testMain() async {
       ellipsis: '...',
       maxLines: 1,
     );
-    final style30 = WebTextStyle(
-      foreground: blackPaint,
-      background: whitePaint,
-      fontSize: 30,
-      fontFamily: 'Roboto',
-    );
+    final style30 = WebTextStyle(foreground: blackPaint, background: whitePaint, fontSize: 40);
 
-    {
-      final builder = WebParagraphBuilder(paragraphStyle);
-      builder.pushStyle(style30);
-      builder.addText('This is a long text that should be ellipsized at the end');
-      builder.pop();
-      final WebParagraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 300));
-      paragraph.paint(canvas, const Offset(100, 100));
-    }
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style30);
+    builder.addText('This is a long text that should be ellipsized at the end');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 350));
+    paragraph.paint(canvas, const Offset(20, 20));
+
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('ellipsisLTR.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.ellipsis_ltr.png',
+      region: const Rect.fromLTWH(0, 0, 500, 200),
+    );
   });
 
   test('Ellipsis RTL', () async {
@@ -1016,25 +989,22 @@ Future<void> testMain() async {
       maxLines: 1,
       textDirection: TextDirection.rtl,
     );
-    final style30 = WebTextStyle(
-      foreground: blackPaint,
-      background: whitePaint,
-      fontSize: 30,
-      fontFamily: 'Roboto',
-    );
+    final style30 = WebTextStyle(foreground: blackPaint, background: whitePaint, fontSize: 40);
 
-    {
-      final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
 
-      builder.pushStyle(style30);
-      builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
-      builder.pop();
-      final WebParagraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 300));
-      paragraph.paint(canvas, const Offset(100, 100));
-    }
+    builder.pushStyle(style30);
+    builder.addText('إن السيطرة على العالم عبارة قبيحة للغاية - أفضل أن أسميها تحسين العالم');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 350));
+    paragraph.paint(canvas, const Offset(20, 20));
+
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('ellipsisRTL.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.ellipsis_rtl.png',
+      region: const Rect.fromLTWH(0, 0, 500, 200),
+    );
   });
 
   test('MaxLines, no ellipsis', () async {
@@ -1071,6 +1041,269 @@ Future<void> testMain() async {
       paragraph.paint(canvas, const Offset(100, 100));
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('maxLines2.png', region: region);
+    await matchGoldenFile('web_paragraph.max_lines_2.png', region: region);
+  });
+
+  test('Paragraph with different locales for the same language', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 400);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 40);
+    final noLocaleStyle = WebTextStyle();
+    final localeStyles = [
+      WebTextStyle(locale: const Locale('zh', 'CN')),
+      WebTextStyle(locale: const Locale('zh', 'TW')),
+      WebTextStyle(locale: const Locale('zh', 'HK')),
+      WebTextStyle(locale: const Locale('ja', 'JP')),
+    ];
+    const text = 'Command 刃';
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(noLocaleStyle);
+    builder.addText('$text with no specified locale.\n');
+    builder.pop();
+    for (final style in localeStyles) {
+      builder.pushStyle(style);
+      builder.addText('$text in ${style.locale?.languageCode}-${style.locale?.countryCode}.\n');
+      builder.pop();
+    }
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    final double fullWidth = paragraph.maxIntrinsicWidth;
+    paragraph.layout(ParagraphConstraints(width: fullWidth));
+    const offset = Offset(20, 20);
+    paragraph.paint(canvas, offset);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile(
+      'web_paragraph.locales.png',
+      region: Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height).inflate(20.0),
+    );
+  });
+
+  test('NoHeightMultiplier', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'sans-serif',
+      height: 1.0,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    //printParagraphMetrics(paragraph);
+    canvas.drawParagraph(paragraph, Offset.zero);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.no_height_multiplier.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('HeightMultiplier143', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'Arial',
+      height: 1.43,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    //printParagraphMetrics(paragraph);
+    canvas.drawParagraph(paragraph, Offset.zero);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.height_multiplier_143.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('Zoom2', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'Arial',
+      height: 1.43,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    canvas.drawParagraph(paragraph, Offset.zero);
+    //printParagraphMetrics(paragraph);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.zoom_2.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('Zoom05', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(0.5);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'Arial',
+      height: 1.43,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    //printParagraphMetrics(paragraph);
+    canvas.drawParagraph(paragraph, Offset.zero);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.zoom_05.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('paint overflows', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+
+    // canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final lightbluePaint = Paint()..color = const Color(0xFFDDEEFF);
+    final redPaint = Paint()..color = const Color(0xFFFF0000);
+    final bluePaint = Paint()..color = const Color(0xFF0000FF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: lightbluePaint,
+      fontSize: 60,
+      fontFamily: 'sans-serif',
+      fontStyle: FontStyle.italic,
+    );
+
+    Paragraph drawParagraph(String text, Offset offset) {
+      final builder = ParagraphBuilder(paragraphStyle);
+      builder.pushStyle(style);
+      builder.addText(text);
+      builder.pop();
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: double.infinity));
+      final double fullWidth = paragraph.maxIntrinsicWidth;
+      paragraph.layout(ParagraphConstraints(width: fullWidth));
+      canvas.drawParagraph(paragraph, offset);
+
+      final paragraphRect = Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height);
+      canvas.drawRect(paragraphRect, redPaint..style = PaintingStyle.stroke);
+
+      final Rect paintRect = (paragraph as WebParagraph).paintBounds.shift(offset);
+      canvas.drawRect(paintRect, bluePaint..style = PaintingStyle.stroke);
+
+      return paragraph;
+    }
+
+    var offset = const Offset(20, 20);
+    final Paragraph paragraph1 = drawParagraph('Top shelf', offset);
+    offset = offset.translate(0.0, paragraph1.height + 20.0);
+    final Paragraph paragraph2 = drawParagraph('no descent', offset);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile(
+      'web_paragraph.paint_overflows.png',
+      region: Rect.fromLTWH(
+        0,
+        0,
+        offset.dx + math.max(paragraph1.maxIntrinsicWidth, paragraph2.maxIntrinsicWidth) + 20.0,
+        offset.dy + paragraph2.height + 20.0,
+      ),
+    );
+  });
+
+  test('fallback fonts', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 800, 200);
+    final canvas = Canvas(recorder, region);
+
+    const colorText = 'Arial | Γειά σου Κόσμε';
+    const monoText = 'Times New Roman | Γειά σου Κόσμε';
+
+    final colorBuilder = ParagraphBuilder(ParagraphStyle(fontSize: 30));
+    colorBuilder.pushStyle(
+      TextStyle(
+        fontFamily: 'Non-existing Font',
+        fontFamilyFallback: const ['Arial', 'sans-serif'],
+        color: const Color(0xFF000000),
+      ),
+    );
+    colorBuilder.addText(colorText);
+    final Paragraph colorParagraph = colorBuilder.build();
+    colorParagraph.layout(const ParagraphConstraints(width: 800));
+    canvas.drawParagraph(colorParagraph, const Offset(20, 50));
+
+    final monoBuilder = ParagraphBuilder(ParagraphStyle(fontSize: 30));
+    monoBuilder.pushStyle(
+      TextStyle(
+        fontFamily: 'Non-existing Font',
+        fontFamilyFallback: const ['Times New Roman', 'serif'],
+        color: const Color(0xFF000000),
+      ),
+    );
+    monoBuilder.addText(monoText);
+    final Paragraph monoParagraph = monoBuilder.build();
+    monoParagraph.layout(const ParagraphConstraints(width: 800));
+    canvas.drawParagraph(monoParagraph, const Offset(20, 100));
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.fallback_fonts.png', region: region);
   });
 }

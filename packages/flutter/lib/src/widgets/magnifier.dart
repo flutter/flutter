@@ -231,6 +231,7 @@ class MagnifierController {
   /// If the magnifier already exists (i.e. [overlayEntry] != null), then [show]
   /// will replace the old overlay without playing an exit animation. Consider
   /// awaiting [hide] first, to animate from the old magnifier to the new one.
+  @awaitNotRequired
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -275,6 +276,7 @@ class MagnifierController {
   ///
   ///  * [removeFromOverlay] which removes the [OverlayEntry] from the [Overlay]
   ///    synchronously.
+  @awaitNotRequired
   Future<void> hide({bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;

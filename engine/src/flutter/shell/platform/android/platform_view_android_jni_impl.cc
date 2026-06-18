@@ -365,19 +365,25 @@ static void SetViewportMetrics(JNIEnv* env,
   // javaDisplayFeaturesState cannot be null
   jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
   std::vector<int> boundsIntVector(rectSize);
-  env->GetIntArrayRegion(javaDisplayFeaturesBounds, 0, rectSize,
-                         &boundsIntVector[0]);
+  if (rectSize > 0) {
+    env->GetIntArrayRegion(javaDisplayFeaturesBounds, 0, rectSize,
+                           &boundsIntVector[0]);
+  }
   std::vector<double> displayFeaturesBounds(boundsIntVector.begin(),
                                             boundsIntVector.end());
   jsize typeSize = env->GetArrayLength(javaDisplayFeaturesType);
   std::vector<int> displayFeaturesType(typeSize);
-  env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize,
-                         &displayFeaturesType[0]);
+  if (typeSize > 0) {
+    env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize,
+                           &displayFeaturesType[0]);
+  }
 
   jsize stateSize = env->GetArrayLength(javaDisplayFeaturesState);
   std::vector<int> displayFeaturesState(stateSize);
-  env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
-                         &displayFeaturesState[0]);
+  if (stateSize > 0) {
+    env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
+                           &displayFeaturesState[0]);
+  }
 
   const flutter::ViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
@@ -1697,7 +1703,9 @@ JavaLocalRef PlatformViewAndroidJNIImpl::ImageGetHardwareBuffer(
   JavaLocalRef r = JavaLocalRef(
       env,
       env->CallObjectMethod(image.obj(), g_image_get_hardware_buffer_method));
-  FML_CHECK(fml::jni::CheckException(env));
+  if (fml::jni::ClearException(env, false)) {
+    return JavaLocalRef();
+  }
   return r;
 }
 

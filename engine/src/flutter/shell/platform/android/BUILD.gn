@@ -48,6 +48,7 @@ executable("flutter_shell_native_unittests") {
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
     "image_lru_unittests.cc",
+    "platform_view_android_jni_impl_unittests.cc",
     "platform_view_android_unittests.cc",
   ]
   if (!slimpeller) {
@@ -58,6 +59,7 @@ executable("flutter_shell_native_unittests") {
     ":flutter_shell_native_src",
     "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
+    "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]
@@ -377,9 +379,16 @@ android_java_sources = [
   "io/flutter/util/TraceSection.java",
   "io/flutter/util/ViewUtils.java",
   "io/flutter/view/AccessibilityBridge.java",
+  "io/flutter/view/AccessibilityNodeConfigurator.java",
   "io/flutter/view/AccessibilityStringBuilder.java",
   "io/flutter/view/AccessibilityViewEmbedder.java",
+  "io/flutter/view/BaseRoleConfigurator.java",
+  "io/flutter/view/ClassNameRoleConfigurator.java",
+  "io/flutter/view/ComboBoxRoleConfigurator.java",
   "io/flutter/view/FlutterCallbackInformation.java",
+  "io/flutter/view/MenuRoleConfigurator.java",
+  "io/flutter/view/ProgressBarRoleConfigurator.java",
+  "io/flutter/view/RoleConfiguratorFactory.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]

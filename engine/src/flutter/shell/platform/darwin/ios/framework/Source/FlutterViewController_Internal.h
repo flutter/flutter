@@ -7,9 +7,9 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
-#include "flutter/fml/time/time_point.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
@@ -40,13 +40,14 @@ typedef NS_ENUM(NSInteger, FlutterKeyboardMode) {
   // NOLINTEND(readability-identifier-naming)
 };
 
-typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
+typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval);
 
 @interface FlutterViewController () <FlutterViewResponder>
 
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 @property(nonatomic, readonly) BOOL isVoiceOverRunning;
 @property(nonatomic, strong) FlutterKeyboardManager* keyboardManager;
+@property(nonatomic, strong) FlutterKeyboardInsetManager* keyboardInsetManager;
 @property(nonatomic, readwrite) NSString* applicationLocale;
 
 /**
@@ -75,6 +76,20 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 - (BOOL)supportsShowingSystemContextMenu;
 - (BOOL)stateIsActive;
 - (BOOL)stateIsBackground;
+
+/**
+ * Determines whether a UIScene notification should be handled by this view controller.
+ *
+ * In multi-scene environments (such as iPadOS split view, macOS Catalyst multi-window, or App
+ * Extensions), multiple UIWindowScene instances can exist in the same process space. Because the
+ * scene observers register to listen for all targets, they may receive lifecycle notifications
+ * from unrelated auxiliary or secondary scenes.
+ *
+ * @param notification The UIScene notification containing the transitioning UIScene in its object.
+ * @return YES if the notification matches this view controller's scene context.
+ *         NO if it originates from an unrelated scene and should be ignored.
+ */
+- (BOOL)shouldHandleSceneNotification:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_

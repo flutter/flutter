@@ -54,12 +54,14 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. Wrapping a widget subtree
-/// with a [SelectableRegion] widget enables selection within that subtree (for
-/// example, [Text] widgets automatically look for selectable regions to enable
-/// selection). The wrapped subtree can be selected by users using mouse or
-/// touch gestures, e.g. users can select widgets by holding the mouse
-/// left-click and dragging across widgets, or they can use long press gestures
-/// to select words on touch devices.
+/// with a [SelectableRegion] widget enables selection for widgets in the
+/// subtree that participate in selection. For example, [Text] widgets
+/// automatically look for selectable regions to enable selection, while widgets
+/// such as [RichText] must be configured with a [SelectionRegistrar] and
+/// [RichText.selectionColor]. The wrapped subtree can be selected by users
+/// using mouse or touch gestures, e.g. users can select widgets by holding the
+/// mouse left-click and dragging across widgets, or they can use long press
+/// gestures to select words on touch devices.
 ///
 /// A [SelectableRegion] widget requires configuration; in particular specific
 /// [selectionControls] must be provided.
@@ -94,8 +96,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 ///
 /// Both [SelectionContainer]s and the leaf [Selectable]s need to register
 /// themselves to the [SelectionRegistrar] from the
-/// [SelectionContainer.maybeOf] if they want to participate in the
-/// selection.
+/// [SelectionContainer.maybeOf] if they want to participate in the selection.
+/// The [BuildContext] used with [SelectionContainer.maybeOf] must be below the
+/// [SelectionContainer], [SelectableRegion], or [SelectionArea] that provides
+/// the registrar in the widget tree.
 ///
 /// An example selection tree will look like:
 ///
@@ -296,10 +300,10 @@ class SelectableRegion extends StatefulWidget {
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   static List<ContextMenuButtonItem> getSelectableButtonItems({
-    required final SelectionGeometry selectionGeometry,
-    required final VoidCallback onCopy,
-    required final VoidCallback onSelectAll,
-    required final VoidCallback? onShare,
+    required SelectionGeometry selectionGeometry,
+    required VoidCallback onCopy,
+    required VoidCallback onSelectAll,
+    required VoidCallback? onShare,
   }) {
     final canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
@@ -1022,10 +1026,10 @@ class SelectableRegionState extends State<SelectableRegion>
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _finalizeSelectableRegionStatus();
-    _showToolbar();
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
+    _showToolbar();
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
@@ -1845,8 +1849,8 @@ class SelectableRegionState extends State<SelectableRegion>
     clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
-      _showToolbar();
       _showHandles();
+      _showToolbar();
     }
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
@@ -3256,11 +3260,24 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     var newIndex = -1;
     var hasFoundEdgeIndex = false;
     SelectionResult? result;
-    for (var index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
+    bool? forward;
+    // If we already have an opposite edge initialized, start our sweep from there
+    // to ensure all items between the two edges are properly visited.
+    final int oppositeEdgeIndex = isEnd ? currentSelectionStartIndex : currentSelectionEndIndex;
+    int index = max(oppositeEdgeIndex, 0);
+
+    while (index >= 0 && index < selectables.length) {
       final Selectable child = selectables[index];
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
         case SelectionResult.next:
+          if (forward == false) {
+            hasFoundEdgeIndex = true;
+            result = SelectionResult.end;
+          } else {
+            forward = true;
+            newIndex = index;
+          }
         case SelectionResult.none:
           newIndex = index;
         case SelectionResult.end:
@@ -3268,17 +3285,28 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           result = SelectionResult.end;
           hasFoundEdgeIndex = true;
         case SelectionResult.previous:
-          hasFoundEdgeIndex = true;
           if (index == 0) {
+            hasFoundEdgeIndex = true;
             newIndex = 0;
             result = SelectionResult.previous;
+            break;
           }
-          result ??= SelectionResult.end;
+          if (forward ?? false) {
+            hasFoundEdgeIndex = true;
+            result = SelectionResult.end;
+          } else {
+            forward = false;
+            newIndex = index;
+          }
         case SelectionResult.pending:
           newIndex = index;
           result = SelectionResult.pending;
           hasFoundEdgeIndex = true;
       }
+      if (hasFoundEdgeIndex) {
+        break;
+      }
+      index += (forward ?? true) ? 1 : -1;
     }
 
     if (newIndex == -1) {

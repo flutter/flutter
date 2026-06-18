@@ -67,7 +67,9 @@ declare_args() {
   ios_swift_lib_paths = []
 
   # Version of iOS that we're targeting for tests.
-  ios_testing_deployment_target = "13.0"
+  # iOS 15.0 is the earliest version that allows swift testing tests to be loaded
+  # from dylibs without crashing.
+  ios_testing_deployment_target = "15.0"
 }
 
 if (target_os == "ios" || target_os == "macos") {

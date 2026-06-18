@@ -53,7 +53,6 @@ class MainWidgetState extends State<MainWidget> {
         padding: const EdgeInsets.all(20),
         content: const Text('Hello, I am a Material Banner'),
         leading: const Icon(Icons.agriculture_outlined),
-        backgroundColor: Colors.yellowAccent,
         actions: <Widget>[
           TextButton(
             focusNode: dismissButtonFocusNode,
@@ -69,10 +68,7 @@ class MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Center(
         child: ElevatedButton(
           focusNode: showButtonFocusNode,

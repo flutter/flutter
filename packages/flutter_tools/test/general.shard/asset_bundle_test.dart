@@ -629,6 +629,7 @@ flutter:
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+        bundle.entries['my-asset.txt']!.content.markClean();
 
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',

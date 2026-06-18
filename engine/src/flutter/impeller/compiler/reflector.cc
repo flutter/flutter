@@ -556,6 +556,8 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
       uniform_struct_field.element_size_in_bytes = struct_member.size;
       uniform_struct_field.total_size_in_bytes = struct_member.byte_length;
       uniform_struct_field.array_elements = struct_member.array_elements;
+      uniform_struct_field.vec_size = struct_member.vec_size;
+      uniform_struct_field.columns = struct_member.columns;
       uniform_struct.fields.push_back(uniform_struct_field);
     }
     uniform_struct.size_in_bytes = size_in_bytes;
@@ -937,6 +939,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_array_elements=*/count,
           /*p_element_padding=*/8,
           /*p_float_type=*/"ShaderFloatType::kMat2",
+          /*p_vec_size=*/2,
+          /*p_columns=*/2,
       });
       current_byte_offset += total_length;
       continue;
@@ -961,6 +965,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_array_elements=*/count,
           /*p_element_padding=*/4,
           /*p_float_type=*/"ShaderFloatType::kMat3",
+          /*p_vec_size=*/3,
+          /*p_columns=*/3,
       });
       current_byte_offset += total_length;
       continue;
@@ -985,6 +991,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
           /*p_float_type=*/"ShaderFloatType::kMat4",
+          /*p_vec_size=*/4,
+          /*p_columns=*/4,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1008,6 +1016,9 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/std::nullopt,
+          /*p_vec_size=*/2,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1031,6 +1042,9 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/std::nullopt,
+          /*p_vec_size=*/2,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1054,6 +1068,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
           /*p_float_type=*/"ShaderFloatType::kVec2",
+          /*p_vec_size=*/2,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1077,6 +1093,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
           /*p_float_type=*/"ShaderFloatType::kVec3",
+          /*p_vec_size=*/3,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1100,6 +1118,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
           /*p_float_type=*/"ShaderFloatType::kVec4",
+          /*p_vec_size=*/4,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1123,6 +1143,9 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/std::nullopt,
+          /*p_vec_size=*/2,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1146,6 +1169,9 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/std::nullopt,
+          /*p_vec_size=*/3,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1169,6 +1195,9 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/std::nullopt,
+          /*p_vec_size=*/4,
+          /*p_columns=*/1,
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1202,6 +1231,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
             /*p_array_elements=*/array_elements,
             /*p_element_padding=*/element_padding,
             /*p_float_type=*/float_type,
+            /*p_vec_size=*/1,
+            /*p_columns=*/1,
         });
         current_byte_offset += stride * array_elements.value_or(1);
         continue;
