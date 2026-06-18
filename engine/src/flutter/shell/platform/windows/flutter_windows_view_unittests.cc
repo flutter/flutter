@@ -9,7 +9,6 @@
 #include <comutil.h>
 #include <oleacc.h>
 
-#include <array>
 #include <future>
 #include <vector>
 
@@ -29,8 +28,6 @@
 #include "flutter/shell/platform/windows/testing/mock_windows_proc_table.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
 #include "flutter/shell/platform/windows/testing/view_modifier.h"
-#include "flutter/shell/platform/windows/testing/windows_test.h"
-#include "flutter/shell/platform/windows/testing/windows_test_config_builder.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -78,7 +75,7 @@ FlutterProjectBundle GetTestProject() {
   properties.assets_path = L"C:\\foo\\flutter_assets";
   properties.icu_data_path = L"C:\\foo\\icudtl.dat";
   properties.aot_library_path = L"C:\\foo\\aot.so";
-  properties.impeller_switch = EnabledImpeller;
+  properties.impeller_switch = DefaultImpeller;
 
   return FlutterProjectBundle{properties};
 }
