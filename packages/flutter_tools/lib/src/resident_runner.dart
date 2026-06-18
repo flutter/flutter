@@ -250,20 +250,26 @@ class FlutterDevice {
         // shuts down, including after an error. If `done` completes before `connectToVmService`,
         // something went wrong that caused DDS to shutdown early.
         try {
-          service = await Future.any<dynamic>(<Future<dynamic>>[
-            connectToVmService(
-              debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri!) : vmServiceUri!,
-              reloadSources: reloadSources,
-              restart: restart,
-              compileExpression: compileExpression,
-              flutterProject: FlutterProject.current(),
-              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-              device: device,
-              logger: globals.logger,
-            ),
-            if (!existingDds)
-              device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
-          ]) as FlutterVmService?;
+          service =
+              await Future.any<dynamic>(<Future<dynamic>>[
+                    connectToVmService(
+                      debuggingOptions.enableDds
+                          ? (device!.dds.uri ?? vmServiceUri!)
+                          : vmServiceUri!,
+                      reloadSources: reloadSources,
+                      restart: restart,
+                      compileExpression: compileExpression,
+                      flutterProject: FlutterProject.current(),
+                      printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+                      device: device,
+                      logger: globals.logger,
+                    ),
+                    if (!existingDds)
+                      device!.dds.done.whenComplete(
+                        () => throw Exception('DDS shut down too early'),
+                      ),
+                  ])
+                  as FlutterVmService?;
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
@@ -349,9 +355,20 @@ class FlutterDevice {
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
+    final String? filterString = debuggingOptions.logFilter;
+    RegExp? filter;
+    if (filterString != null && filterString.isNotEmpty) {
+      try {
+        filter = RegExp(filterString);
+      } on FormatException catch (e) {
+        globals.printError('Invalid log filter pattern "$filterString": $e');
+      }
+    }
     _loggingSubscription = logStream.listen((String line) {
       if (!line.contains(globals.kVMServiceMessageRegExp)) {
-        globals.printStatus(line, wrap: false);
+        if (filter == null || filter.hasMatch(line)) {
+          globals.printStatus(line, wrap: false);
+        }
       }
     });
   }

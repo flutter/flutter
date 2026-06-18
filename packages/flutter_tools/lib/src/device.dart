@@ -994,6 +994,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.logFilter,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1027,6 +1028,7 @@ class DebuggingOptions {
     this.webDevServerConfig,
     this.testFlag = false,
     this.traceSystrace = false,
+    this.logFilter,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1114,6 +1116,7 @@ class DebuggingOptions {
     required this.google3WorkspaceRoot,
     required this.printDtd,
     this.webDevServerConfig,
+    required this.logFilter,
   }) : testFlag = false;
 
   final bool debuggingEnabled;
@@ -1161,6 +1164,7 @@ class DebuggingOptions {
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
   final bool testFlag;
+  final String? logFilter;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1319,6 +1323,7 @@ class DebuggingOptions {
     'ipv6': ipv6,
     'google3WorkspaceRoot': google3WorkspaceRoot,
     'printDtd': printDtd,
+    'logFilter': logFilter,
     // TODO(jsimmons): This field is required for backward compatibility with
     // the flutter_tools binary that is currently checked into Google3.
     // Remove this when that binary has been updated.
@@ -1393,6 +1398,7 @@ class DebuggingOptions {
           https: HttpsConfig.parse(json['tlsCertPath'], json['tlsCertKeyPath']),
           headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         ),
+        logFilter: json['logFilter'] as String?,
       );
 }
 
