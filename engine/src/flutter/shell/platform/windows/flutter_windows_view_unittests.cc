@@ -1052,34 +1052,52 @@ TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
   EXPECT_EQ(varchild.pdispVal, node3_delegate->GetNativeViewAccessible());
 }
 
-TEST_F(WindowsTest, WindowResizeTests) {
-  auto& context = GetContext();
-  WindowsConfigBuilder builder(context);
-  EnginePtr engine = builder.InitializeEngine();
-  ASSERT_NE(engine, nullptr);
+TEST(FlutterWindowsViewTest, WindowResizeTests) {
+  auto windows_proc_table = std::make_shared<NiceMock<MockWindowsProcTable>>();
+  std::unique_ptr<FlutterWindowsEngine> engine =
+      GetTestEngine(windows_proc_table);
 
-  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
-  EngineModifier engine_modifier(windows_engine);
+  EngineModifier engine_modifier{engine.get()};
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
-  // Register native functions.
-  windows_engine->SetRootIsolateCreateCallback(
-      context.GetRootIsolateCallback());
+  auto egl_manager = std::make_unique<egl::MockManager>();
+  auto surface = std::make_unique<egl::MockWindowSurface>();
+  auto resized_surface = std::make_unique<egl::MockWindowSurface>();
+  egl::MockContext render_context;
 
-  auto state = std::make_shared<SpyState>();
-  auto spy_manager = std::make_unique<SpyManager>(state);
+  auto surface_ptr = surface.get();
+  auto resized_surface_ptr = resized_surface.get();
 
-  engine_modifier.SetEGLManager(std::move(spy_manager));
+  // Mock render surface creation
+  EXPECT_CALL(*egl_manager, CreateWindowSurface)
+      .WillOnce(Return(std::move(surface)));
+  EXPECT_CALL(*surface_ptr, IsValid).WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface_ptr, MakeCurrent).WillOnce(Return(true));
+  EXPECT_CALL(*surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
+  EXPECT_CALL(*egl_manager, render_context).WillOnce(Return(&render_context));
+  EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
 
-  ViewControllerPtr controller{
-      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
-  ASSERT_NE(controller, nullptr);
+  // Mock render surface resize
+  EXPECT_CALL(*surface_ptr, Destroy).WillOnce(Return(true));
+  EXPECT_CALL(*egl_manager.get(),
+              CreateWindowSurface(_, /*width=*/500, /*height=*/500))
+      .WillOnce(Return(std::move((resized_surface))));
+  EXPECT_CALL(*resized_surface_ptr, MakeCurrent).WillOnce(Return(true));
+  EXPECT_CALL(*resized_surface_ptr, SetVSyncEnabled).WillOnce(Return(true));
+  EXPECT_CALL(*windows_proc_table.get(), DwmFlush).WillOnce(Return(S_OK));
 
-  auto view =
-      reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
-  ASSERT_NE(view, nullptr);
+  EXPECT_CALL(*resized_surface_ptr, Destroy).WillOnce(Return(true));
 
-  ASSERT_NE(windows_engine->egl_manager(), nullptr);
-  windows_engine->egl_manager()->render_context()->ClearCurrent();
+  engine_modifier.SetEGLManager(std::move(egl_manager));
+
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
 
   fml::AutoResetWaitableEvent metrics_sent_latch;
   engine_modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
@@ -1090,27 +1108,19 @@ TEST_F(WindowsTest, WindowResizeTests) {
         return kSuccess;
       }));
 
-  // Simulate raster thread by posting to the engine's real raster thread.
-  windows_engine->PostRasterThreadTask([&metrics_sent_latch, view]() {
+  // Simulate raster thread.
+  std::thread frame_thread([&metrics_sent_latch, &view]() {
     metrics_sent_latch.Wait();
     // Frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnFrameGenerated(500, 500));
     view->OnFramePresented();
   });
 
-  // Start the window resize.
+  // Start the window resize. This sends the new window metrics
+  // and then blocks polling run loop until another thread completes the window
+  // resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
-
-  EXPECT_TRUE(state->surfaces[1]->created);
-  EXPECT_EQ(state->surfaces[1]->width, 500);
-  EXPECT_EQ(state->surfaces[1]->height, 500);
-  EXPECT_TRUE(state->surfaces[0]->destroy_called);
-  EXPECT_TRUE(state->surfaces[1]->make_current_called);
-  EXPECT_TRUE(state->surfaces[1]->vsync_called);
-
-  // Destroying the view controller destroys the second surface.
-  controller.reset();
-  EXPECT_TRUE(state->surfaces[1]->destroy_called);
+  frame_thread.join();
 }
 
 // Verify that an empty frame completes a view resize.
