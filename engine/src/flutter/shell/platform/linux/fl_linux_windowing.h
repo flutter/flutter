@@ -18,6 +18,8 @@ typedef struct {
   gint64 view_id;
 } FlLinuxWindowingWindow;
 
+gint fl_linux_windowing_get_gtk_major_version(void);
+
 FlLinuxWindowingWindow* fl_linux_windowing_create_regular_window(
     FlEngine* engine,
     gboolean has_preferred_size,

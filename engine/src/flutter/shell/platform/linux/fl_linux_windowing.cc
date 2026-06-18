@@ -93,6 +93,14 @@ static FlLinuxWindowingWindow* create_window(FlEngine* engine,
   return windowing_window_new(window, view);
 }
 
+G_MODULE_EXPORT gint fl_linux_windowing_get_gtk_major_version(void) {
+#if FLUTTER_LINUX_GTK4
+  return 4;
+#else
+  return 3;
+#endif
+}
+
 G_MODULE_EXPORT FlLinuxWindowingWindow*
 fl_linux_windowing_create_regular_window(FlEngine* engine,
                                          gboolean has_preferred_size,

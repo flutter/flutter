@@ -140,6 +140,10 @@ class WindowingOwnerLinux extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
+    if (_LinuxWindowing.gtkMajorVersion >= 4) {
+      throw UnimplementedError('Tooltip windows are not yet implemented for GTK4.');
+    }
+
     final controller = TooltipWindowControllerLinux(
       owner: this,
       delegate: delegate,
@@ -162,6 +166,10 @@ class WindowingOwnerLinux extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
+    if (_LinuxWindowing.gtkMajorVersion >= 4) {
+      throw UnimplementedError('Popup windows are not yet implemented for GTK4.');
+    }
+
     final controller = PopupWindowControllerLinux(
       owner: this,
       delegate: delegate,
@@ -985,6 +993,8 @@ final class _LinuxWindowingWindow {
 }
 
 class _LinuxWindowing {
+  static int get gtkMajorVersion => _getGtkMajorVersion();
+
   static _LinuxWindowingWindow createRegularWindow(
     _FlEngine engine, {
     Size? preferredSize,
@@ -1131,6 +1141,9 @@ class _LinuxWindowing {
     ffi.Pointer<ffi.Uint8> title,
     bool decorated,
   );
+
+  @ffi.Native<ffi.Int Function()>(symbol: 'fl_linux_windowing_get_gtk_major_version')
+  external static int _getGtkMajorVersion();
 }
 
 // The following classes are thin wrappers around the corresponding GTK/GDK
