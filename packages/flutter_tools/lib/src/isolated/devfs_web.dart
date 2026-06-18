@@ -45,11 +45,12 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
-typedef VmServiceFactory = Future<vm_service.VmService> Function(
-  Uri, {
-  CompressionOptions compression,
-  required Logger logger,
-});
+typedef VmServiceFactory =
+    Future<vm_service.VmService> Function(
+      Uri, {
+      CompressionOptions compression,
+      required Logger logger,
+    });
 
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
@@ -407,7 +408,7 @@ class WebDevFS implements DevFS {
     // mapping the file name, this is done via an additional file root and
     // special hard-coded scheme.
     final CompilerOutput? compilerOutput = await generator.recompile(
-      Uri(scheme: 'org-dartlang-app', path: '/${mainUri.pathSegments.last}'),
+      Uri(scheme: 'org-dartlang-app', host: '', path: '/${mainUri.pathSegments.last}'),
       invalidatedFiles,
       outputPath: dillOutputPath,
       packageConfig: packageConfig,

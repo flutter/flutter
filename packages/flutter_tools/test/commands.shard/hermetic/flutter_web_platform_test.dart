@@ -67,53 +67,6 @@ void main() {
   });
 
   testUsingContext(
-    'FlutterWebPlatform serves the correct dart_sdk.js (amd module system) for the passed web renderer',
-    () async {
-      final chromiumLauncher = ChromiumLauncher(
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
-        logger: logger,
-      );
-      final server = FakeServer();
-      final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
-        'ProjectRoot',
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
-        buildInfo: BuildInfo.debug,
-        webMemoryFS: WebMemoryFS(),
-        fileSystem: fileSystem,
-        buildDirectory: fileSystem.directory('build'),
-        logger: logger,
-        chromiumLauncher: chromiumLauncher,
-        flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        artifacts: artifacts,
-        processManager: processManager,
-        webRenderer: WebRendererMode.canvaskit,
-        useWasm: false,
-        serverFactory: () async => server,
-        testPackageUri: Uri.parse('test'),
-        crossOriginIsolation: false,
-      );
-      final shelf.Handler? handler = server.mountedHandler;
-      expect(handler, isNotNull);
-      handler!;
-      final shelf.Response response = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
-      );
-      final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledAmdCanvaskitSdk.name);
-      await webPlatform.close();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Logger: () => logger,
-    },
-  );
-
-  testUsingContext(
     'FlutterWebPlatform serves the correct dart_sdk.js (ddc library bundle module system) for the passed web renderer',
     () async {
       final chromiumLauncher = ChromiumLauncher(
@@ -158,6 +111,79 @@ void main() {
       );
       final String contents = await response.readAsString();
       expect(contents, HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk.name);
+      await webPlatform.close();
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Logger: () => logger,
+    },
+  );
+  testUsingContext(
+    'FlutterWebPlatform serves the correct bootstrap files (ddc library bundle module system)',
+    () async {
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+        logger: logger,
+      );
+      final server = FakeServer();
+      final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+        'ProjectRoot',
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          '',
+          packageConfigPath: '.dart_tool/package_config.json',
+          treeShakeIcons: false,
+          extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
+          webEnableHotReload: true,
+        ),
+        webMemoryFS: WebMemoryFS(),
+        fileSystem: fileSystem,
+        buildDirectory: fileSystem.directory('build'),
+        logger: logger,
+        chromiumLauncher: chromiumLauncher,
+        flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
+        artifacts: artifacts,
+        processManager: processManager,
+        webRenderer: WebRendererMode.canvaskit,
+        useWasm: false,
+        serverFactory: () async => server,
+        testPackageUri: Uri.parse('test'),
+        crossOriginIsolation: false,
+      );
+      final shelf.Handler? handler = server.mountedHandler;
+      expect(handler, isNotNull);
+      handler!;
+
+      // 1. main.dart.browser_test.dart.js
+      final shelf.Response responseBootstrap = await handler(
+        shelf.Request('GET', Uri.parse('http://localhost/main.dart.browser_test.dart.js')),
+      );
+      final String contentsBootstrap = await responseBootstrap.readAsString();
+      expect(contentsBootstrap, contains('ddc_module_loader.js'));
+      expect(contentsBootstrap, contains('dart_stack_trace_mapper.js'));
+      expect(contentsBootstrap, contains('main_module.bootstrap.js'));
+
+      // 2. main_module.bootstrap.js
+      final shelf.Response responseMainModule = await handler(
+        shelf.Request('GET', Uri.parse('http://localhost/main_module.bootstrap.js')),
+      );
+      final String contentsMainModule = await responseMainModule.readAsString();
+      expect(contentsMainModule, contains('on_load_end_bootstrap.js'));
+      expect(contentsMainModule, contains('org-dartlang-app:/main.dart'));
+
+      // 3. on_load_end_bootstrap.js
+      final shelf.Response responseOnLoadEnd = await handler(
+        shelf.Request('GET', Uri.parse('http://localhost/on_load_end_bootstrap.js')),
+      );
+      final String contentsOnLoadEnd = await responseOnLoadEnd.readAsString();
+      expect(contentsOnLoadEnd, contains(r'window.$onLoadEndCallback();'));
+
       await webPlatform.close();
     },
     overrides: <Type, Generator>{

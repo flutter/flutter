@@ -464,7 +464,7 @@ String generateDDCLibraryBundleMainModule({
 /* ENTRYPOINT_EXTENTION_MARKER */
 
 (function() {
-  const appName = "org-dartlang-app:/$entrypoint";
+  const appName = "org-dartlang-app:///$entrypoint";
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 
