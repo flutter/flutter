@@ -18,19 +18,22 @@ class FlCompositorSoftwareTest : public ::testing::Test {
   void SetUp() override {
     g_autoptr(FlDartProject) project = fl_dart_project_new();
     engine = fl_engine_new(project);
+    task_runner = fl_task_runner_new(engine);
+    compositor = fl_compositor_software_new(task_runner);
   }
 
-  ~FlCompositorSoftwareTest() { g_clear_object(&engine); }
+  ~FlCompositorSoftwareTest() {
+    g_clear_object(&compositor);
+    g_clear_object(&task_runner);
+    g_clear_object(&engine);
+  }
 
   FlEngine* engine = nullptr;
+  FlTaskRunner* task_runner = nullptr;
+  FlCompositorSoftware* compositor = nullptr;
 };
 
 TEST_F(FlCompositorSoftwareTest, Render) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-
-  g_autoptr(FlCompositorSoftware) compositor =
-      fl_compositor_software_new(task_runner);
-
   // Present layer from a thread.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
@@ -69,11 +72,6 @@ TEST_F(FlCompositorSoftwareTest, Render) {
 }
 
 TEST_F(FlCompositorSoftwareTest, Resize) {
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-
-  g_autoptr(FlCompositorSoftware) compositor =
-      fl_compositor_software_new(task_runner);
-
   // Present a layer that is the old size.
   constexpr size_t width1 = 90;
   constexpr size_t height1 = 90;
