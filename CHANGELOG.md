@@ -34,7 +34,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.44.3](https://github.com/flutter/flutter/releases/tag/3.44.3)
 - [flutter/186738](https://github.com/flutter/flutter/issues/186738) Demote flavor/platform asset skipping messages from warning to trace level to reduce build log noise.
-- [flutter/186899](https://github.com/flutter/flutter/issues/186899) Ensures a GLES fence sync object held by a texture will be deleted if the texture is destructed before the fence was used.
+- [flutter/186899](https://github.com/flutter/flutter/issues/186899) On Android, destroying a texture before the GLES fence that it holds was used may cause a crash.
 - [flutter/186953](https://github.com/flutter/flutter/issues/186953) When building concurrently with SwiftPM [on macOS/iOS], fix crashes caused by concurrent directory/file/symlink creation.
 - [flutter/183179](https://github.com/flutter/flutter/issues/183179) Fixes an issue that can cause crashes when rendering animated PNG images.
 
