@@ -472,6 +472,11 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   // effect when using traditional navigation.
   bool _isEditingInDirectionalMode = false;
 
+  // Cached here so build() doesn't have to read it (and re-pick a shortcut map)
+  // every pass. didChangeDependencies is the right place to depend on the
+  // MediaQuery.
+  NavigationMode _navigationMode = NavigationMode.traditional;
+
   // Keyboard mapping for a focused range slider.
   static const Map<ShortcutActivator, Intent> _traditionalNavShortcutMap =
       <ShortcutActivator, Intent>{
@@ -585,6 +590,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       vsync: this,
       value: _unlerp(widget.values.end),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _navigationMode = MediaQuery.navigationModeOf(context);
   }
 
   @override
@@ -876,9 +887,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       result = Padding(padding: padding, child: result);
     }
 
-    final Map<ShortcutActivator, Intent> shortcutMap = switch (MediaQuery.navigationModeOf(
-      context,
-    )) {
+    final Map<ShortcutActivator, Intent> shortcutMap = switch (_navigationMode) {
       NavigationMode.directional =>
         _isEditingInDirectionalMode
             ? _directionalNavEditingShortcutMap
