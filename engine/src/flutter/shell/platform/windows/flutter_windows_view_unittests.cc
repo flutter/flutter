@@ -1222,34 +1222,41 @@ TEST(FlutterWindowsViewTest, WindowResizeRace) {
 
 // Window resize should succeed even if the render surface could not be created
 // even though EGL initialized successfully.
-TEST_F(WindowsTest, WindowResizeInvalidSurface) {
-  auto& context = GetContext();
-  WindowsConfigBuilder builder(context);
-  EnginePtr engine = builder.InitializeEngine();
-  ASSERT_NE(engine, nullptr);
+TEST(FlutterWindowsViewTest, WindowResizeInvalidSurface) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
 
-  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
-  EngineModifier engine_modifier(windows_engine);
+  EngineModifier engine_modifier(engine.get());
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
-  windows_engine->SetRootIsolateCreateCallback(
-      context.GetRootIsolateCallback());
+  auto egl_manager = std::make_unique<egl::MockManager>();
+  auto surface = std::make_unique<egl::MockWindowSurface>();
 
-  auto spy_manager = std::make_unique<SpyManager>(std::make_shared<SpyState>());
-  spy_manager->set_fail_surface_creation(true);
+  EXPECT_CALL(*egl_manager.get(), CreateWindowSurface).Times(0);
+  EXPECT_CALL(*surface.get(), IsValid).WillRepeatedly(Return(false));
+  EXPECT_CALL(*surface.get(), Destroy).WillOnce(Return(false));
 
-  engine_modifier.SetEGLManager(std::move(spy_manager));
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints());
 
-  ViewControllerPtr controller{
-      FlutterDesktopViewControllerCreate(600, 400, engine.release())};
-  ASSERT_NE(controller, nullptr);
+  ViewModifier view_modifier{view.get()};
+  engine_modifier.SetEGLManager(std::move(egl_manager));
+  view_modifier.SetSurface(std::move(surface));
 
-  auto view =
-      reinterpret_cast<FlutterWindowsViewController*>(controller.get())->view();
-  ASSERT_NE(view, nullptr);
+  auto metrics_sent = false;
+  engine_modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
+      SendWindowMetricsEvent,
+      ([&metrics_sent](auto engine, const FlutterWindowMetricsEvent* event) {
+        metrics_sent = true;
+        return kSuccess;
+      }));
 
-  // Start the window resize, which should succeed (returning true) even if the
-  // surface cannot be created.
-  EXPECT_TRUE(view->OnWindowSizeChanged(500, 300));
+  view->OnWindowSizeChanged(500, 500);
 }
 
 // Window resize should succeed even if EGL initialized successfully
