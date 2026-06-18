@@ -373,6 +373,85 @@ let package = Package(
 ''');
           });
 
+          testWithoutContext(
+            'generate with plugin whose directory name differs from package name',
+            () async {
+              final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              // Create a plugin whose directory name does not match its Dart
+              // package name. This simulates a path dependency whose repo
+              // folder has a different name than the Dart package name
+              // declared in pubspec.yaml and Package.swift.
+              final mismatchedPlugin = FakePlugin(
+                name: 'my_plugin',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+                overridePath: '/local/path/to/plugins/MyOrg_MyPlugin_Repo',
+              );
+              fs
+                  .file(
+                    '${mismatchedPlugin.path}/${platform.name}/${mismatchedPlugin.name}/Package.swift',
+                  )
+                  .createSync(recursive: true);
+
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
+              );
+              await spm.generatePluginsSwiftPackage(<Plugin>[mismatchedPlugin], platform, project);
+
+              final supportedPlatform = platform == FlutterDarwinPlatform.ios
+                  ? '.iOS("13.0")'
+                  : '.macOS("10.15")';
+              expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+              // The symlink name must be based on the plugin's Dart package
+              // name ("my_plugin"), NOT the directory basename
+              // ("MyOrg_MyPlugin_Repo"). This ensures SPM derives the correct
+              // identity that matches the Package.swift name field.
+              expect(project.relativeSwiftPackagesDirectory.childLink('my_plugin'), exists);
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('my_plugin').targetSync(),
+                '${mismatchedPlugin.path}/${platform.name}/my_plugin',
+              );
+              expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        $supportedPlatform
+    ],
+    products: [
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+    ],
+    dependencies: [
+        .package(name: "my_plugin", path: "../.packages/my_plugin"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
+    ],
+    targets: [
+        .target(
+            name: "FlutterGeneratedPluginSwiftPackage",
+            dependencies: [
+                .product(name: "my-plugin", package: "my_plugin"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
+            ]
+        )
+    ]
+)
+''');
+            },
+          );
+
           testWithoutContext('generate with plugin with dependency on plugin', () async {
             final fs = MemoryFileSystem();
             final logger = BufferLogger.test();
@@ -787,8 +866,12 @@ class FakeXcodeProject extends Fake implements IosProject {
 }
 
 class FakePlugin extends Fake implements Plugin {
-  FakePlugin({required this.name, required this.platforms, this.hasSwiftPackage = true})
-    : path = '/local/path/to/plugins/$name-1.0.0';
+  FakePlugin({
+    required this.name,
+    required this.platforms,
+    this.hasSwiftPackage = true,
+    String? overridePath,
+  }) : path = overridePath ?? '/local/path/to/plugins/$name-1.0.0';
 
   @override
   final String name;

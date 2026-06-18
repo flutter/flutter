@@ -150,10 +150,23 @@ class SwiftPackageManager {
         continue;
       }
 
-      // Use the plugin basename as the symlink plugin directory name since the basename has the
-      // version number in it. This will make the symlink name change when the plugin version
-      // changes, which forces Xcode to re-process the package manifest.
-      final String basename = _fileSystem.directory(plugin.path).basename;
+      // Build the symlink name using the plugin's Dart package name as the
+      // base. This is critical because Swift Package Manager derives a
+      // package's identity from its directory name (lowercased), and it must
+      // match the `name:` field in the plugin's Package.swift.
+      //
+      // When the plugin's root directory name differs from its Dart package
+      // name (e.g. a path dependency whose repo folder is
+      // "MyOrg_MyPlugin_Repo" but whose package name is
+      // "my_plugin"), using the directory basename would cause an
+      // identity mismatch error from SPM.
+      //
+      // A version suffix from the directory basename (e.g. "-1.0.0" from
+      // "my_plugin-1.0.0") is preserved so that the symlink name changes
+      // when the plugin version changes, forcing Xcode to re-process the
+      // package manifest.
+      final String dirBasename = _fileSystem.directory(plugin.path).basename;
+      final String basename = _symlinkNameForPlugin(plugin.name, dirBasename);
 
       // Check if the plugin has a dependency on another Flutter plugin.
       // If the plugin has a dependency on another plugin, copy the plugin to the SourcePackages
@@ -289,7 +302,9 @@ class SwiftPackageManager {
         if (pluginDependency == null) {
           continue;
         }
-        final newPath = '"../${_fileSystem.directory(pluginDependency.path).basename}"';
+        final String depDirBasename = _fileSystem.directory(pluginDependency.path).basename;
+        final String depSymlinkName = _symlinkNameForPlugin(pluginDependency.name, depDirBasename);
+        final newPath = '"../$depSymlinkName"';
         if (path == newPath) {
           continue;
         }
@@ -297,6 +312,32 @@ class SwiftPackageManager {
       }
     }
     return pluginDependencies;
+  }
+
+  /// Computes the symlink directory name for a plugin.
+  ///
+  /// Uses the plugin's [name] (Dart package name) as the base to ensure the
+  /// directory name matches the `name:` field in Package.swift, which is how
+  /// SPM derives the package identity.
+  ///
+  /// If the [dirBasename] contains a version suffix (e.g.
+  /// "my_plugin-1.0.0"), that suffix is appended to the name so that
+  /// symlinks change on version upgrades, forcing Xcode to re-process the
+  /// package manifest.
+  static String _symlinkNameForPlugin(String name, String dirBasename) {
+    // Try to extract a version suffix from the directory basename.
+    // Pub cache directories follow the pattern "package_name-version".
+    final int dashIndex = dirBasename.lastIndexOf('-');
+    if (dashIndex != -1) {
+      final String possibleVersion = dirBasename.substring(dashIndex + 1);
+      // Validate it looks like a version (starts with a digit).
+      if (possibleVersion.isNotEmpty &&
+          possibleVersion.codeUnitAt(0) >= 0x30 &&
+          possibleVersion.codeUnitAt(0) <= 0x39) {
+        return '$name-$possibleVersion';
+      }
+    }
+    return name;
   }
 
   /// Copy the [plugin] to the build directory and update the manifest to use the versioned path.
