@@ -37,7 +37,7 @@ void main() {
         curve: Curves.bounceIn,
         duration: Durations.extralong4,
         reverseCurve: SawTooth(2),
-        reverseDuration: Duration(days: DateTime.thursday),
+        reverseDuration: Duration(days: 4),
       );
     });
     await tester.pump();
