@@ -102,6 +102,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      resizable: resizable,
     );
     _windows[controller.rootView.viewId] = controller._window;
     _views[controller.rootView.viewId] = controller._view;
@@ -125,6 +126,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredConstraints: preferredConstraints,
       parent: parent,
       title: title,
+      resizable: resizable,
     );
     _windows[controller.rootView.viewId] = controller._window;
     _views[controller.rootView.viewId] = controller._view;
@@ -255,6 +257,7 @@ class RegularWindowControllerLinux extends RegularWindowController
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
+    required bool resizable,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
@@ -268,6 +271,7 @@ class RegularWindowControllerLinux extends RegularWindowController
       preferredConstraints: preferredConstraints,
       title: title,
       decorated: decorated,
+      resizable: resizable,
     );
     _window = createdWindow.window;
     _view = createdWindow.view;
@@ -451,6 +455,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
     BaseWindowController? parent,
     String? title,
     bool decorated = true,
+    required bool resizable,
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
@@ -474,6 +479,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
       preferredConstraints: preferredConstraints,
       title: title,
       decorated: decorated,
+      resizable: resizable,
     );
     _window = createdWindow.window;
     _view = createdWindow.view;
@@ -1001,6 +1007,7 @@ class _LinuxWindowing {
     BoxConstraints? preferredConstraints,
     String? title,
     required bool decorated,
+    required bool resizable,
   }) {
     final ffi.Pointer<ffi.Uint8> titleBuffer = title != null ? _stringToNative(title) : ffi.nullptr;
     try {
@@ -1021,6 +1028,7 @@ class _LinuxWindowing {
               : preferredConstraints!.maxHeight.toInt(),
           titleBuffer,
           decorated,
+          resizable,
         ),
       );
     } finally {
@@ -1037,6 +1045,7 @@ class _LinuxWindowing {
     BoxConstraints? preferredConstraints,
     String? title,
     required bool decorated,
+    required bool resizable,
   }) {
     final ffi.Pointer<ffi.Uint8> titleBuffer = title != null ? _stringToNative(title) : ffi.nullptr;
     try {
@@ -1058,6 +1067,7 @@ class _LinuxWindowing {
               : preferredConstraints!.maxHeight.toInt(),
           titleBuffer,
           decorated,
+          resizable,
         ),
       );
     } finally {
@@ -1095,6 +1105,7 @@ class _LinuxWindowing {
       ffi.Int,
       ffi.Pointer<ffi.Uint8>,
       ffi.Bool,
+      ffi.Bool,
     )
   >(symbol: 'fl_linux_windowing_create_regular_window')
   external static ffi.Pointer<_LinuxWindowingWindowResult> _createRegularWindow(
@@ -1109,6 +1120,7 @@ class _LinuxWindowing {
     int maxHeight,
     ffi.Pointer<ffi.Uint8> title,
     bool decorated,
+    bool resizable,
   );
 
   @ffi.Native<
@@ -1125,6 +1137,7 @@ class _LinuxWindowing {
       ffi.Int,
       ffi.Pointer<ffi.Uint8>,
       ffi.Bool,
+      ffi.Bool,
     )
   >(symbol: 'fl_linux_windowing_create_dialog_window')
   external static ffi.Pointer<_LinuxWindowingWindowResult> _createDialogWindow(
@@ -1140,6 +1153,7 @@ class _LinuxWindowing {
     int maxHeight,
     ffi.Pointer<ffi.Uint8> title,
     bool decorated,
+    bool resizable,
   );
 
   @ffi.Native<ffi.Int Function()>(symbol: 'fl_linux_windowing_get_gtk_major_version')

@@ -31,7 +31,8 @@ FlLinuxWindowingWindow* fl_linux_windowing_create_regular_window(
     gint max_width,
     gint max_height,
     const gchar* title,
-    gboolean decorated);
+    gboolean decorated,
+    gboolean resizable);
 
 FlLinuxWindowingWindow* fl_linux_windowing_create_dialog_window(
     FlEngine* engine,
@@ -45,7 +46,8 @@ FlLinuxWindowingWindow* fl_linux_windowing_create_dialog_window(
     gint max_width,
     gint max_height,
     const gchar* title,
-    gboolean decorated);
+    gboolean decorated,
+    gboolean resizable);
 
 G_END_DECLS
 

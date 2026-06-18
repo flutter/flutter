@@ -15,7 +15,6 @@ static void set_geometry_hints(GtkWindow* window,
   }
 
 #if FLUTTER_LINUX_GTK4
-  gtk_window_set_resizable(window, TRUE);
   gtk_widget_set_size_request(GTK_WIDGET(window), min_width, min_height);
 #else
   GdkGeometry geometry = {};
@@ -51,7 +50,8 @@ static FlLinuxWindowingWindow* create_window(FlEngine* engine,
                                              gint max_width,
                                              gint max_height,
                                              const gchar* title,
-                                             gboolean decorated) {
+                                             gboolean decorated,
+                                             gboolean resizable) {
 #if FLUTTER_LINUX_GTK4
   GtkWindow* window = GTK_WINDOW(gtk_window_new());
 #else
@@ -67,6 +67,7 @@ static FlLinuxWindowingWindow* create_window(FlEngine* engine,
     gtk_window_set_title(window, title);
   }
   gtk_window_set_decorated(window, decorated);
+  gtk_window_set_resizable(window, resizable);
 
   if (is_dialog && parent != nullptr) {
 #if !FLUTTER_LINUX_GTK4
@@ -112,12 +113,13 @@ fl_linux_windowing_create_regular_window(FlEngine* engine,
                                          gint max_width,
                                          gint max_height,
                                          const gchar* title,
-                                         gboolean decorated) {
+                                         gboolean decorated,
+                                         gboolean resizable) {
   g_return_val_if_fail(FL_IS_ENGINE(engine), nullptr);
   return create_window(engine, nullptr, FALSE, has_preferred_size,
                        preferred_width, preferred_height,
                        has_preferred_constraints, min_width, min_height,
-                       max_width, max_height, title, decorated);
+                       max_width, max_height, title, decorated, resizable);
 }
 
 G_MODULE_EXPORT FlLinuxWindowingWindow* fl_linux_windowing_create_dialog_window(
@@ -132,10 +134,11 @@ G_MODULE_EXPORT FlLinuxWindowingWindow* fl_linux_windowing_create_dialog_window(
     gint max_width,
     gint max_height,
     const gchar* title,
-    gboolean decorated) {
+    gboolean decorated,
+    gboolean resizable) {
   g_return_val_if_fail(FL_IS_ENGINE(engine), nullptr);
   return create_window(engine, parent, TRUE, has_preferred_size,
                        preferred_width, preferred_height,
                        has_preferred_constraints, min_width, min_height,
-                       max_width, max_height, title, decorated);
+                       max_width, max_height, title, decorated, resizable);
 }
