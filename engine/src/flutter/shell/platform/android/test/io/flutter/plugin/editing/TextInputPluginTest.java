@@ -1144,6 +1144,68 @@ public class TextInputPluginTest {
   }
 
   @Test
+  public void setTextInputEditingState_doesNotRestartIMEDueToOutofOrderFrameworkUpdates() {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(ctx);
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+
+    // Flush the initial pending restart.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+    assertEquals(1, testImm.getRestartCount(testView));
+
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+
+    // 1. IME starts composing text.
+    connection.setComposingText("a", 1);
+
+    // 2. IME commits composing text.
+    connection.finishComposingText();
+
+    // 3. Framework sends back the state from step 1 (composing "a").
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("a", 1, 1, 0, 1));
+    // Since before (step 2 state) has no composing, it does not restart.
+    assertEquals(1, testImm.getRestartCount(testView));
+
+    // 4. Framework sends back the state from step 2 (no composing).
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("a", 1, 1, -1, -1));
+    // Since before (step 3 state) has composing, composingChanged returns true.
+    // This triggers an unnecessary restart!
+    assertEquals(1, testImm.getRestartCount(testView));
+  }
+
+  @Test
   public void TextEditState_throwsOnInvalidStatesReceived() {
     // Index OOB:
     assertThrows(IndexOutOfBoundsException.class, () -> new TextEditState("", 0, -9, -1, -1));

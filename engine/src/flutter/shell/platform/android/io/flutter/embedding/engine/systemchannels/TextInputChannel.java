@@ -851,6 +851,28 @@ public class TextInputChannel {
       this.composingEnd = composingEnd;
     }
 
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof TextEditState)) {
+        return false;
+      }
+      TextEditState that = (TextEditState) o;
+      return selectionStart == that.selectionStart
+          && selectionEnd == that.selectionEnd
+          && composingStart == that.composingStart
+          && composingEnd == that.composingEnd
+          && text.equals(that.text);
+    }
+
+    @Override
+    public int hashCode() {
+      return java.util.Objects.hash(
+          text, selectionStart, selectionEnd, composingStart, composingEnd);
+    }
+
     public boolean hasSelection() {
       // When selectionStart == -1, it's guaranteed that selectionEnd will also
       // be -1.
