@@ -16,6 +16,10 @@ enum SwipeEdge {
 
   /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
+
+  /// Indicates that the back gesture was triggered without a swipe direction,
+  /// such as in 3-button navigation mode.
+  none,
 }
 
 /// Object used to report back gesture progress in Android.
@@ -80,13 +84,17 @@ final class PredictiveBackEvent {
   ///
   /// Returns false for a predictive back gesture.
   bool get isButtonEvent =>
+      // SwipeEdge.none is used for 3-button navigation in Android 16+, which
+      // should be treated as an animating predictive back gesture (and therefore
+      // is not a button event).
+      swipeEdge != SwipeEdge.none &&
       // The Android documentation for BackEvent
       // (https://developer.android.com/reference/android/window/BackEvent#getTouchX())
       // says that getTouchX and getTouchY should return NaN when the system
       // back button is pressed, but in practice it seems to return 0.0, hence
       // the check for Offset.zero here. This was tested directly in the engine
       // on Android emulator running API 34.
-      touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero);
+      (touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero));
 
   @override
   bool operator ==(Object other) {
