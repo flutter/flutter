@@ -1013,6 +1013,7 @@ class DebuggingOptions {
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.traceAllowlist,
+    this.traceSystrace = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,

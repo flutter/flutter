@@ -318,6 +318,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
+        traceSystrace: boolArg('trace-systrace'),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
