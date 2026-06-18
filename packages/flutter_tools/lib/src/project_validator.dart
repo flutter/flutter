@@ -206,3 +206,110 @@ class GeneralInfoProjectValidator extends ProjectValidator {
   @override
   String get title => 'General Info';
 }
+
+class AndroidProjectGradlePluginValidator extends ProjectValidator {
+  @override
+  bool supportsProject(FlutterProject project) {
+    return project.android.existsSync();
+  }
+
+  @override
+  String get title => 'Android Gradle plugins';
+
+  @override
+  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+    final Directory hostAppGradleRoot = project.android.hostAppGradleRoot;
+    if (!hostAppGradleRoot.existsSync()) {
+      return <ProjectValidatorResult>[];
+    }
+    final List<File> files = _findGradleFiles(hostAppGradleRoot, project.directory.fileSystem);
+    final results = <ProjectValidatorResult>[];
+
+    for (final file in files) {
+      final String relativePath = project.directory.fileSystem.path.relative(
+        file.path,
+        from: hostAppGradleRoot.path,
+      );
+      final String basename = project.directory.fileSystem.path.basename(file.path);
+      final bool isSettings = basename == 'settings.gradle' || basename == 'settings.gradle.kts';
+      final incorrectPlugin = isSettings
+          ? 'dev.flutter.flutter-plugin-loader'
+          : 'dev.flutter.flutter-gradle-plugin';
+
+      final String content;
+      try {
+        content = file.readAsStringSync();
+      } on FileSystemException catch (_) {
+        continue;
+      }
+      final String noBlockComments = content.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
+      final List<String> lines = noBlockComments.split('\n');
+
+      var hasIncorrectPlugin = false;
+      for (final line in lines) {
+        final String trimmed = line.trim();
+        if (trimmed.startsWith('//')) {
+          continue;
+        }
+        if (trimmed.contains(incorrectPlugin)) {
+          hasIncorrectPlugin = true;
+          break;
+        }
+      }
+
+      if (hasIncorrectPlugin) {
+        final String warningPath = relativePath.endsWith('.kts')
+            ? relativePath.substring(0, relativePath.length - 4)
+            : relativePath;
+        final warning = isSettings
+            ? 'The dev.flutter.flutter-plugin-loader plugin should be applied in build.gradle, not settings.gradle. Use dev.flutter.flutter-gradle-plugin instead.'
+            : 'The dev.flutter.flutter-gradle-plugin plugin should be applied in settings.gradle, not $warningPath. Use dev.flutter.flutter-plugin-loader instead.';
+        results.add(
+          ProjectValidatorResult(
+            name: relativePath,
+            value: '$incorrectPlugin applied in $relativePath',
+            status: StatusProjectValidator.error,
+            warning: warning,
+          ),
+        );
+      }
+    }
+
+    if (results.isEmpty) {
+      results.add(
+        const ProjectValidatorResult(
+          name: 'Gradle plugins check',
+          value: 'Correct plugins applied',
+          status: StatusProjectValidator.success,
+        ),
+      );
+    }
+    return results;
+  }
+
+  List<File> _findGradleFiles(Directory dir, FileSystem fileSystem) {
+    final results = <File>[];
+    try {
+      for (final FileSystemEntity entity in dir.listSync(followLinks: false)) {
+        if (entity is Directory) {
+          final String name = fileSystem.path.basename(entity.path);
+          if (name == 'build' || name == '.gradle' || name == '.git') {
+            continue;
+          }
+          results.addAll(_findGradleFiles(entity, fileSystem));
+        } else if (entity is File) {
+          final String name = fileSystem.path.basename(entity.path);
+          if (name == 'settings.gradle' ||
+              name == 'settings.gradle.kts' ||
+              name == 'build.gradle' ||
+              name == 'build.gradle.kts') {
+            results.add(entity);
+          }
+        }
+      }
+    } on Exception catch (_) {
+      // Safely ignore directory listing errors
+    }
+    return results;
+  }
+}
