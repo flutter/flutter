@@ -25,32 +25,39 @@ constexpr guint16 kKeyCodeKeyA = 0x26u;
 
 class FlKeyboardHandlerTest : public ::testing::Test {
  protected:
-  void StartEngine(FlEngine* engine) {
+  void StartEngine() {
     g_autoptr(GError) error = nullptr;
     EXPECT_TRUE(fl_engine_start(engine, &error));
     EXPECT_EQ(error, nullptr);
   }
 
-  void SetUp() override { loop = g_main_loop_new(nullptr, 0); }
+  void SetUp() override {
+    loop = g_main_loop_new(nullptr, 0);
+    messenger = fl_mock_binary_messenger_new();
+    engine =
+        fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+    manager = fl_keyboard_manager_new(engine);
+    StartEngine();
+    handler = fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
+  }
 
-  ~FlKeyboardHandlerTest() { g_clear_pointer(&loop, g_main_loop_unref); }
+  ~FlKeyboardHandlerTest() {
+    g_clear_object(&handler);
+    g_clear_object(&manager);
+    g_clear_object(&engine);
+    g_clear_object(&messenger);
+    g_clear_pointer(&loop, g_main_loop_unref);
+  }
 
   GMainLoop* loop = nullptr;
+  FlMockBinaryMessenger* messenger = nullptr;
+  FlEngine* engine = nullptr;
+  FlKeyboardManager* manager = nullptr;
+  FlKeyboardHandler* handler = nullptr;
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 };
 
 TEST_F(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  StartEngine(engine);
-
-  g_autoptr(FlKeyboardHandler) handler =
-      fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
-  EXPECT_NE(handler, nullptr);
-
   // Send key event to set pressed state.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
