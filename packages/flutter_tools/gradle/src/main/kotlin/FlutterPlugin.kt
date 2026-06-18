@@ -92,7 +92,7 @@ class FlutterPlugin : Plugin<Project> {
                 ?: FlutterPluginConstants.DEFAULT_MAVEN_HOST
         val repository: String? =
             if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
-                project.property(PROP_LOCAL_ENGINE_REPO) as String?
+                FlutterPluginUtils.getLocalEngineProperty(project, PROP_LOCAL_ENGINE_REPO)
             } else {
                 "$hostedRepository/${engineRealm}download.flutter.io"
             }
@@ -120,14 +120,7 @@ class FlutterPlugin : Plugin<Project> {
         val flutterExtension: FlutterExtension =
             project.extensions.create("flutter", FlutterExtension::class.java)
 
-        // TODO(gmackall): is this actually a different properties file than the previous one?
-        val rootProjectLocalProperties = Properties()
-        val rootProjectLocalPropertiesFile = rootProject.file("local.properties")
-        if (rootProjectLocalPropertiesFile.exists()) {
-            rootProjectLocalPropertiesFile.reader(StandardCharsets.UTF_8).use { reader ->
-                rootProjectLocalProperties.load(reader)
-            }
-        }
+        val rootProjectLocalProperties = FlutterPluginUtils.getLocalProperties(project)
         flutterExtension.flutterVersionCode =
             rootProjectLocalProperties.getProperty("flutter.versionCode", "1")
         flutterExtension.flutterVersionName =
@@ -229,18 +222,34 @@ class FlutterPlugin : Plugin<Project> {
 
         if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
             // This is required to pass the local engine to flutter build aot.
-            val engineOutPath: String = project.properties["local-engine-out"] as String
+            val engineOutPath: String = FlutterPluginUtils.getLocalEngineProperty(project, "local-engine-out")
+                ?: throw GradleException(
+                    "local-engine-out must be set when using a local engine. " +
+                    "Define it in your local.properties file (e.g., local-engine-out=/path/to/engine/src/out/android_debug_unopt) " +
+                    "or pass it as a project property via the CLI (e.g., -Plocal-engine-out=...)."
+                )
             val engineOut: File = project.file(engineOutPath)
             if (!engineOut.isDirectory) {
-                throw GradleException("local-engine-out must point to a local engine build")
+                throw GradleException(
+                    "local-engine-out must point to a local engine build directory. " +
+                    "Ensure the path '$engineOutPath' exists and is a valid directory."
+                )
             }
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
 
-            val engineHostOutPath: String = project.properties["local-engine-host-out"] as String
+            val engineHostOutPath: String = FlutterPluginUtils.getLocalEngineProperty(project, "local-engine-host-out")
+                ?: throw GradleException(
+                    "local-engine-host-out must be set when using a local engine. " +
+                    "Define it in your local.properties file (e.g., local-engine-host-out=/path/to/engine/src/out/host_debug_unopt) " +
+                    "or pass it as a project property via the CLI (e.g., -Plocal-engine-host-out=...)."
+                )
             val engineHostOut: File = project.file(engineHostOutPath)
             if (!engineHostOut.isDirectory) {
-                throw GradleException("local-engine-host-out must point to a local engine host build")
+                throw GradleException(
+                    "local-engine-host-out must point to a local engine host build directory. " +
+                    "Ensure the path '$engineHostOutPath' exists and is a valid directory."
+                )
             }
             localEngineHost = engineHostOut.name
         }
@@ -264,8 +273,7 @@ class FlutterPlugin : Plugin<Project> {
     private fun resolveFlutterSdkProperty(defaultValue: String?): String? {
         val propertyName = "flutter.sdk"
         if (localProperties == null) {
-            localProperties =
-                readPropertiesIfExist(File(project!!.projectDir.parentFile, "local.properties"))
+            localProperties = FlutterPluginUtils.getLocalProperties(project!!)
         }
         return project?.findProperty(propertyName) as? String ?: localProperties!!.getProperty(
             propertyName,

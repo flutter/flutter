@@ -20,6 +20,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
+import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.kotlin.dsl.register
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -203,6 +204,60 @@ object FlutterPluginUtils {
         return result
     }
 
+    /**
+     * Reads the `local.properties` file from the root project and caches the parsed [Properties] object
+     * inside the Gradle project's extra properties to avoid duplicate disk reads across multiple project evaluations.
+     */
+    @JvmStatic
+    @JvmName("getLocalProperties")
+    internal fun getLocalProperties(project: Project): Properties {
+        try {
+            val rootProject = project.rootProject
+            val extraProperties = rootProject.extensions.getByType(ExtraPropertiesExtension::class.java)
+            val cacheKey = "flutter.localProperties"
+            if (extraProperties.has(cacheKey)) {
+                return extraProperties.get(cacheKey) as Properties
+            }
+            val localPropertiesFile = rootProject.file("local.properties")
+            val properties = readPropertiesIfExist(localPropertiesFile)
+            extraProperties.set(cacheKey, properties)
+            return properties
+        } catch (e: Throwable) {
+            // Fallback for tests or environments where ExtraPropertiesExtension or rootProject are not available or mocked.
+            try {
+                val localPropertiesFile = project.rootProject.file("local.properties")
+                return readPropertiesIfExist(localPropertiesFile)
+            } catch (e2: Throwable) {
+                return Properties()
+            }
+        }
+    }
+
+    /**
+     * Retrieves a local engine property (such as `local-engine-out`, `local-engine-host-out`, or `local-engine-repo`).
+     * It checks project properties first, falling back to reading from `local.properties` if not set.
+     * This fallback is critical to support running with local engines from within IDEs, where
+     * command-line `-P` options are not passed to Gradle.
+     */
+    @JvmStatic
+    @JvmName("getLocalEngineProperty")
+    internal fun getLocalEngineProperty(project: Project, propertyName: String): String? {
+        val projectVal = try {
+            project.findProperty(propertyName) as? String
+        } catch (e: Throwable) {
+            null
+        }
+        if (projectVal != null) {
+            return projectVal
+        }
+        val localProperties = try {
+            getLocalProperties(project)
+        } catch (e: Throwable) {
+            null
+        }
+        return localProperties?.getProperty(propertyName)
+    }
+
     // ----------------- Methods that interact primarily with the Gradle project. -----------------
 
     @JvmStatic
@@ -278,7 +333,8 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("shouldProjectUseLocalEngine")
-    internal fun shouldProjectUseLocalEngine(project: Project): Boolean = project.hasProperty(PROP_LOCAL_ENGINE_REPO)
+    internal fun shouldProjectUseLocalEngine(project: Project): Boolean =
+        getLocalEngineProperty(project, PROP_LOCAL_ENGINE_REPO) != null
 
     @JvmStatic
     @JvmName("isProjectVerbose")
@@ -465,10 +521,15 @@ object FlutterPluginUtils {
         if (!shouldProjectUseLocalEngine(project)) {
             return true
         }
-        check(project.hasProperty(PROP_LOCAL_ENGINE_BUILD_MODE)) { "Project must have property '$PROP_LOCAL_ENGINE_BUILD_MODE'" }
+        val buildMode = getLocalEngineProperty(project, PROP_LOCAL_ENGINE_BUILD_MODE)
+            ?: throw GradleException(
+                "local-engine-build-mode must be set when using a local engine. " +
+                "Define it in your local.properties file (e.g., local-engine-build-mode=debug) " +
+                "or pass it as a project property via the CLI (e.g., -Plocal-engine-build-mode=debug)."
+            )
         // Don't configure dependencies for a build mode that the local engine
         // doesn't support.
-        return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
+        return buildMode == flutterBuildMode
     }
 
     /**
@@ -519,10 +580,10 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("getTargetPlatforms")
     internal fun getTargetPlatforms(project: Project): List<String> {
-        if (!project.hasProperty(PROP_TARGET_PLATFORM)) {
+        val platformsString = getLocalEngineProperty(project, PROP_TARGET_PLATFORM)
+        if (platformsString == null) {
             return FlutterPluginConstants.DEFAULT_PLATFORMS
         }
-        val platformsString = project.property(PROP_TARGET_PLATFORM) as String
         return platformsString.split(",").map { platform ->
             if (!FlutterPluginConstants.PLATFORM_ARCH_MAP.containsKey(platform)) {
                 throw GradleException("Invalid platform: $platform")
