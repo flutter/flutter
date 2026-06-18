@@ -553,6 +553,26 @@ void main() {
     expect(find.text('/second'), findsOneWidget);
   });
 
+  testWidgets('pushNamed can handle non-Object type argument', (WidgetTester tester) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+
+    final NavigatorState navigator = Navigator.of(tester.element(find.text('/')));
+    final Future<bool?> result = navigator.pushNamed<bool>('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+
+    navigator.pop<bool>(true);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
+  });
+
   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
     final log = <String>[];
     final routes = <String, WidgetBuilder>{
