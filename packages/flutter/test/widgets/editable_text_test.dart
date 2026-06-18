@@ -18804,7 +18804,7 @@ void main() {
   );
 
   testWidgets(
-    'default selection width style uses tight on Android',
+    'default selection width style uses max on Android',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MediaQuery(
@@ -18823,7 +18823,7 @@ void main() {
       );
 
       final EditableTextState state = tester.state(find.byType(EditableText));
-      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
