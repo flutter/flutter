@@ -185,8 +185,8 @@ void main(List<String> arguments) {
       continue;
     }
 
-    if (!androidDirectory.parent.childDirectory('lib').childFile('main.dart').existsSync()) {
-      print('${rootBuildGradle.path} no main.dart under lib - skipping');
+    if (!hasDartSources(androidDirectory.parent)) {
+      print('${rootBuildGradle.path} no Dart files under lib - skipping');
       continue;
     }
 
@@ -459,4 +459,15 @@ Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {
       )
       // ... where the directory ultimately is named "android".
       .where((FileSystemEntity entity) => entity.basename == 'android');
+}
+
+bool hasDartSources(Directory projectDirectory) {
+  final Directory libDirectory = projectDirectory.childDirectory('lib');
+  if (!libDirectory.existsSync()) {
+    return false;
+  }
+  return libDirectory
+      .listSync(recursive: true)
+      .whereType<File>()
+      .any((FileSystemEntity entity) => entity.path.endsWith('.dart'));
 }
