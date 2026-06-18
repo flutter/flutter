@@ -12,13 +12,26 @@
 
 #include "gtest/gtest.h"
 
-TEST(FlTouchManagerTest, TouchEvents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+class FlTouchManagerTest : public ::testing::Test {
+ protected:
+  void StartEngine() {
+    g_autoptr(GError) error = nullptr;
+    EXPECT_TRUE(fl_engine_start(engine, &error));
+    EXPECT_EQ(error, nullptr);
+  }
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
+
+  ~FlTouchManagerTest() { g_clear_object(&engine); }
+
+  FlEngine* engine = nullptr;
+};
+
+TEST_F(FlTouchManagerTest, TouchEvents) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
