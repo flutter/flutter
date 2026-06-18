@@ -37,12 +37,8 @@ export const createWasmInstantiator = (url, filename) => {
       return new Response(fileBlob, {
         headers: { 'Content-Type': 'application/wasm' },
       });
-    } catch (err) {
-      if (err.name === 'NotAllowedError') {
-        console.warn(`Not allowed to retrieve ${filename} (hash: ${hash}).`);
-      } else if (err.name !== 'NotFoundError') {
-        console.warn(`Unexpected error during retrieval of ${filename} (hash: ${hash}).`, err);
-      }
+    } catch {
+      // Any error (not found, not allowed, …) — fall through to network fetch.
     }
   }
 
