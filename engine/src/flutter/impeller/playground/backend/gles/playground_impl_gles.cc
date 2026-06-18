@@ -115,12 +115,10 @@ PlaygroundImplGLES::PlaygroundImplGLES(
     FML_CHECK(angle_glesv2_ != nullptr);
   }
 
-  // If the existing shared context was created with different switches, reset
-  // it so a new one is created.
+  // If the existing shared context was created with switches that result in an
+  // incompatible GLES context, reset the shared context to create a new one.
   if (shared_context &&
       (shared_context->switches.use_angle != switches_.use_angle ||
-       shared_context->switches.enable_wide_gamut !=
-           switches_.enable_wide_gamut ||
        shared_context->switches.flags.antialiased_lines !=
            switches_.flags.antialiased_lines ||
        shared_context->switches.flags.use_sdfs != switches_.flags.use_sdfs)) {
