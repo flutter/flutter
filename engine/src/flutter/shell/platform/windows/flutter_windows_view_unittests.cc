@@ -10,8 +10,10 @@
 #include <oleacc.h>
 
 #include <future>
+#include <array>
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
@@ -69,16 +71,19 @@ std::unique_ptr<std::vector<uint8_t>> keyHandlingResponse(bool handled) {
   return flutter::JsonMessageCodec::GetInstance().EncodeMessage(document);
 }
 
+struct SurfaceSpyState {
+  bool created = false;
+  size_t width = 0;
+  size_t height = 0;
+  bool destroy_called = false;
+  bool make_current_called = false;
+  bool vsync_called = false;
+};
+
 struct SpyState {
-  bool create_surface_called = false;
-  size_t last_width = 0;
-  size_t last_height = 0;
-  bool destroy_called1 = false;
-  bool make_current_called1 = false;
-  bool vsync_called1 = false;
-  bool destroy_called2 = false;
-  bool make_current_called2 = false;
-  bool vsync_called2 = false;
+  std::array<std::shared_ptr<SurfaceSpyState>, 2> surfaces = {
+      std::make_shared<SurfaceSpyState>(),
+      std::make_shared<SurfaceSpyState>()};
 };
 
 class SpyWindowSurface : public ::flutter::egl::WindowSurface {
@@ -88,55 +93,38 @@ class SpyWindowSurface : public ::flutter::egl::WindowSurface {
                    EGLSurface surface,
                    size_t width,
                    size_t height,
-                   std::shared_ptr<SpyState> state,
-                   int surface_index)
+                   std::shared_ptr<SurfaceSpyState> state)
       : ::flutter::egl::WindowSurface(display, context, surface, width, height),
-        state_(std::move(state)),
-        surface_index_(surface_index) {}
+        state_(std::move(state)) {
+    FML_DCHECK(state_ != nullptr);
+  }
 
   bool Destroy() override {
-    if (state_) {
-      if (surface_index_ == 1) {
-        state_->destroy_called1 = true;
-      } else {
-        state_->destroy_called2 = true;
-      }
-    }
+    state_->destroy_called = true;
     return ::flutter::egl::WindowSurface::Destroy();
   }
 
   bool MakeCurrent() const override {
-    if (state_) {
-      if (surface_index_ == 1) {
-        state_->make_current_called1 = true;
-      } else {
-        state_->make_current_called2 = true;
-      }
-    }
+    state_->make_current_called = true;
     return ::flutter::egl::WindowSurface::MakeCurrent();
   }
 
   bool SetVSyncEnabled(bool enabled) override {
-    if (state_) {
-      if (surface_index_ == 1) {
-        state_->vsync_called1 = true;
-      } else {
-        state_->vsync_called2 = true;
-      }
-    }
+    state_->vsync_called = true;
     return ::flutter::egl::WindowSurface::SetVSyncEnabled(enabled);
   }
 
  private:
-  std::shared_ptr<SpyState> state_;
-  int surface_index_;
+  std::shared_ptr<SurfaceSpyState> state_;
 };
 
 class SpyManager : public ::flutter::egl::Manager {
  public:
   explicit SpyManager(std::shared_ptr<SpyState> state)
       : ::flutter::egl::Manager(::flutter::egl::GpuPreference::NoPreference),
-        state_(std::move(state)) {}
+        state_(std::move(state)) {
+    FML_DCHECK(state_ != nullptr);
+  }
 
   void set_fail_surface_creation(bool fail) {
     fail_surface_creation_ = fail;
@@ -145,12 +133,6 @@ class SpyManager : public ::flutter::egl::Manager {
   std::unique_ptr<::flutter::egl::WindowSurface> CreateWindowSurface(HWND hwnd,
                                                                      size_t width,
                                                                      size_t height) override {
-    if (state_) {
-      state_->create_surface_called = true;
-      state_->last_width = width;
-      state_->last_height = height;
-    }
-
     if (fail_surface_creation_) {
       return nullptr;
     }
@@ -175,9 +157,16 @@ class SpyManager : public ::flutter::egl::Manager {
     }
 
     surface_count_++;
+    FML_DCHECK(static_cast<size_t>(surface_count_) <= state_->surfaces.size());
+    std::shared_ptr<SurfaceSpyState> surface_state =
+        state_->surfaces[surface_count_ - 1];
+    surface_state->created = true;
+    surface_state->width = width;
+    surface_state->height = height;
+
     return std::make_unique<SpyWindowSurface>(
         egl_display(), render_context()->GetHandle(), surface, width, height,
-        state_, surface_count_);
+        std::move(surface_state));
   }
 
  private:
@@ -1073,16 +1062,16 @@ TEST_F(WindowsTest, WindowResizeTests) {
   // Start the window resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
 
-  EXPECT_TRUE(state->create_surface_called);
-  EXPECT_EQ(state->last_width, 500);
-  EXPECT_EQ(state->last_height, 500);
-  EXPECT_TRUE(state->destroy_called1);
-  EXPECT_TRUE(state->make_current_called2);
-  EXPECT_TRUE(state->vsync_called2);
+  EXPECT_TRUE(state->surfaces[1]->created);
+  EXPECT_EQ(state->surfaces[1]->width, 500);
+  EXPECT_EQ(state->surfaces[1]->height, 500);
+  EXPECT_TRUE(state->surfaces[0]->destroy_called);
+  EXPECT_TRUE(state->surfaces[1]->make_current_called);
+  EXPECT_TRUE(state->surfaces[1]->vsync_called);
 
   // Destroying the view controller destroys the second surface.
   controller.reset();
-  EXPECT_TRUE(state->destroy_called2);
+  EXPECT_TRUE(state->surfaces[1]->destroy_called);
 }
 
 // Verify that an empty frame completes a view resize.
@@ -1133,15 +1122,15 @@ TEST_F(WindowsTest, TestEmptyFrameResizes) {
   // Start the window resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 300));
 
-  EXPECT_TRUE(state->create_surface_called);
-  EXPECT_EQ(state->last_width, 500);
-  EXPECT_EQ(state->last_height, 300);
-  EXPECT_TRUE(state->destroy_called1);
-  EXPECT_TRUE(state->make_current_called2);
-  EXPECT_TRUE(state->vsync_called2);
+  EXPECT_TRUE(state->surfaces[1]->created);
+  EXPECT_EQ(state->surfaces[1]->width, 500);
+  EXPECT_EQ(state->surfaces[1]->height, 300);
+  EXPECT_TRUE(state->surfaces[0]->destroy_called);
+  EXPECT_TRUE(state->surfaces[1]->make_current_called);
+  EXPECT_TRUE(state->surfaces[1]->vsync_called);
 
   controller.reset();
-  EXPECT_TRUE(state->destroy_called2);
+  EXPECT_TRUE(state->surfaces[1]->destroy_called);
 }
 
 // A window resize can be interleaved between a frame generation and
@@ -1191,7 +1180,7 @@ TEST_F(WindowsTest, WindowResizeInvalidSurface) {
   windows_engine->SetRootIsolateCreateCallback(
       context.GetRootIsolateCallback());
 
-  auto spy_manager = std::make_unique<SpyManager>(nullptr);
+  auto spy_manager = std::make_unique<SpyManager>(std::make_shared<SpyState>());
   spy_manager->set_fail_surface_creation(true);
 
   engine_modifier.SetEGLManager(std::move(spy_manager));
