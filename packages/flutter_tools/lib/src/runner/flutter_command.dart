@@ -1497,17 +1497,7 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
-    if (globals.platform.environment[kAppFlavor] != null) {
-      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
-    }
-    if (dartDefines.any(
-      (String define) => define == kAppFlavor || define.startsWith('$kAppFlavor='),
-    )) {
-      throwToolExit(
-        '$kAppFlavor is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-      );
-    }
+    _ensureReservedDartDefineIsUnset(kAppFlavor, dartDefines);
     if (flavor != null) {
       dartDefines.add('$kAppFlavor=$flavor');
     }
@@ -1515,15 +1505,7 @@ abstract class FlutterCommand extends Command<void> {
       (kAppBuildName, buildName ?? project.manifest.buildName),
       (kAppBuildNumber, buildNumber ?? project.manifest.buildNumber),
     ]) {
-      if (globals.platform.environment[define] != null) {
-        throwToolExit('$define is used by the framework and cannot be set in the environment.');
-      }
-      if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
-        throwToolExit(
-          '$define is used by the framework and cannot be '
-          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-        );
-      }
+      _ensureReservedDartDefineIsUnset(define, dartDefines);
       if (value != null) {
         dartDefines.add('$define=$value');
       }
@@ -1567,6 +1549,21 @@ abstract class FlutterCommand extends Command<void> {
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: webEnableHotReload,
     );
+  }
+
+  /// Throws a [ToolExit] if [define], a dart-define key reserved by the
+  /// framework, has been set either in the environment or through
+  /// `--${FlutterOptions.kDartDefinesOption}` / `--${FlutterOptions.kDartDefineFromFileOption}`.
+  void _ensureReservedDartDefineIsUnset(String define, List<String> dartDefines) {
+    if (globals.platform.environment[define] != null) {
+      throwToolExit('$define is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
+      throwToolExit(
+        '$define is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
   }
 
   // This adds the Dart defines used to access various Flutter version information at runtime.
