@@ -76,7 +76,8 @@ class FlutterEngine : public PluginRegistry {
 
   // Returns the plugin registrar for the given plugin name.
   //
-  // The pointer will remain valid for the lifetime of the engine.
+  // This requires a running engine. The pointer will remain valid for the
+  // lifetime of the engine.
   PluginRegistrarWindows* GetPluginRegistrar(const std::string& plugin_name);
 
   // Returns the messenger to use for creating channels to communicate with the

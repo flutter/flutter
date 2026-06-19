@@ -70,7 +70,15 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  texture_registrar_ = flutter_controller_->engine()->GetPluginRegistrar("TextureTestPlugin")->texture_registrar();
+  flutter::PluginRegistrarWindows* registrar =
+      flutter_controller_->engine()->GetPluginRegistrar("TextureTestPlugin");
+  if (!registrar) {
+    return false;
+  }
+  texture_registrar_ = registrar->texture_registrar();
+  if (!texture_registrar_) {
+    return false;
+  }
 
   // Set up texture registration method channel
   flutter::BinaryMessenger* messenger = flutter_controller_->engine()->messenger();

@@ -99,6 +99,20 @@ FlutterDesktopPluginRegistrarRef FlutterEngine::GetRegistrarForPlugin(
   return FlutterDesktopEngineGetPluginRegistrar(engine_, plugin_name.c_str());
 }
 
+PluginRegistrarWindows* FlutterEngine::GetPluginRegistrar(
+    const std::string& plugin_name) {
+  if (!engine_) {
+    std::cerr << "Cannot get plugin registrar on an engine that isn't running; "
+                 "call Run first."
+              << std::endl;
+    return nullptr;
+  }
+
+  return PluginRegistrarManager::GetInstance()
+      ->GetRegistrar<PluginRegistrarWindows>(
+          GetRegistrarForPlugin(plugin_name));
+}
+
 void FlutterEngine::SetNextFrameCallback(std::function<void()> callback) {
   next_frame_callback_ = std::move(callback);
   FlutterDesktopEngineSetNextFrameCallback(
@@ -122,13 +136,6 @@ std::optional<LRESULT> FlutterEngine::ProcessExternalWindowMessage(
     return result;
   }
   return std::nullopt;
-}
-
-PluginRegistrarWindows* FlutterEngine::GetPluginRegistrar(
-    const std::string& plugin_name) {
-  return PluginRegistrarManager::GetInstance()
-      ->GetRegistrar<PluginRegistrarWindows>(
-          GetRegistrarForPlugin(plugin_name));
 }
 
 FlutterDesktopEngineRef FlutterEngine::RelinquishEngine() {
