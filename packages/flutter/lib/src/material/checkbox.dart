@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'checkbox_theme.dart';
 import 'color_scheme.dart';
@@ -403,6 +404,7 @@ class Checkbox extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticLabel;
 
+  /// {@template flutter.material.checkbox.padding}
   /// The padding around the check mark when the checkbox is checked or
   /// in its indeterminate (tristate) state.
   ///
@@ -413,11 +415,16 @@ class Checkbox extends StatefulWidget {
   /// Resolved against the ambient [Directionality], so [EdgeInsetsDirectional]
   /// values are supported.
   ///
+  /// On iOS and macOS, when using [Checkbox.adaptive], this property has no
+  /// effect, because the checkbox delegates to [CupertinoCheckbox], which does
+  /// not support padding.
+  ///
   /// Must be non-negative. Padding larger than the box collapses the check
   /// mark to nothing.
   ///
-  /// Defaults to [EdgeInsets.zero], which renders the check mark at its full
-  /// size (the same as before this property existed).
+  /// If null, [CheckboxThemeData.padding] is used. If that is also null,
+  /// it defaults to [EdgeInsets.zero] and the check mark renders at full size.
+  /// {@endtemplate}
   final EdgeInsetsGeometry? padding;
 
   /// The width of a checkbox widget.
@@ -427,6 +434,12 @@ class Checkbox extends StatefulWidget {
 
   @override
   State<Checkbox> createState() => _CheckboxState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+  }
 }
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, ToggleableStateMixin {
@@ -631,9 +644,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final double effectiveSplashRadius =
         widget.splashRadius ?? checkboxTheme.splashRadius ?? defaults.splashRadius!;
 
-    final EdgeInsets resolvedPadding = (widget.padding ?? EdgeInsets.zero).resolve(
-      Directionality.maybeOf(context),
-    );
+    final EdgeInsets resolvedPadding = (widget.padding ?? checkboxTheme.padding ?? EdgeInsets.zero)
+        .resolve(Directionality.maybeOf(context));
+
     assert(resolvedPadding.isNonNegative, 'Checkbox.padding cannot be negative.');
 
     return Semantics(
