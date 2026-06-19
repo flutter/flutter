@@ -90,7 +90,7 @@ Future<TaskResult> _validateWorkflow({
   Pattern expectedLog;
   Pattern unexpectedLog;
   const Pattern xcodeExpectedLog = 'Action result status: not yet started';
-  final Pattern lldbExpectedLog = RegExp(r'Process .* resuming');
+  final Pattern lldbExpectedLog = RegExp(r'location added to breakpoint');
   switch (workflow) {
     case IosDebugWorkflow.xcode:
       expectedLog = xcodeExpectedLog;

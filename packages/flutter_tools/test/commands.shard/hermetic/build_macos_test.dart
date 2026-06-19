@@ -34,7 +34,11 @@ import '../../src/throwing_pub.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    XcodeBasedProject xcodeProject, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>[
       'Runner',
     ], BufferLogger.test());
@@ -47,7 +51,11 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   final Map<String, String> overrides;
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    XcodeBasedProject xcodeProject, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
       'Runner',
     ], BufferLogger.test());
@@ -55,7 +63,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -194,6 +202,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createCoreMockProjectFiles();
 
@@ -230,6 +244,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       fileSystem
@@ -277,6 +297,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
@@ -310,6 +336,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
@@ -346,6 +378,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -394,6 +432,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -429,6 +473,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -462,6 +512,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -496,6 +552,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -530,6 +592,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -563,6 +631,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
       fileSystem.file('lib/other.dart').createSync(recursive: true);
@@ -676,6 +750,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(
@@ -710,6 +790,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -739,36 +825,38 @@ STDERR STUFF
     },
   );
 
-  testUsingContext(
-    'Refuses to build for macOS when feature is disabled',
-    () {
-      final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fileSystem,
-          logger: logger,
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-        ),
-      );
+  testUsingContext('Refuses to build for macOS when feature is disabled', () {
+    final CommandRunner<void> runner = createTestCommandRunner(
+      BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      ),
+    );
 
-      final bool supported = BuildMacosCommand(
-        logger: BufferLogger.test(),
-        verboseHelp: false,
-      ).supported;
-      expect(
-        () => runner.run(<String>['build', 'macos', '--no-pub']),
-        supported ? throwsToolExit() : throwsA(isA<UsageException>()),
-      );
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+    final bool supported = BuildMacosCommand(
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+    ).supported;
+    expect(
+      () => runner.run(<String>['build', 'macos', '--no-pub']),
+      supported ? throwsToolExit() : throwsA(isA<UsageException>()),
+    );
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext(
     'hidden when not enabled on macOS host',
@@ -807,6 +895,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -858,6 +952,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -925,6 +1025,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -999,6 +1105,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -1075,6 +1187,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(
@@ -1110,6 +1228,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(
@@ -1146,6 +1270,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
@@ -1191,6 +1321,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(
@@ -1241,6 +1377,12 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(

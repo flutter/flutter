@@ -27,7 +27,7 @@ void testMain() {
 
   test('toImage succeeds', () async {
     final ui.Image image = await _createImage();
-    expect(image.runtimeType.toString(), equals('CkImage'));
+    expect(image, isA<CkImage>());
     image.dispose();
   });
 
@@ -68,14 +68,10 @@ void testMain() {
       await createImageBitmap(createBlankDomImageData(4, 4)),
     );
 
-    final SkImage skImage1 = canvasKit.MakeAnimatedImageFromEncoded(
-      k4x4PngImage,
-    )!.makeImageAtCurrentFrame();
+    final SkImage skImage1 = (await createImageFromBytes(k4x4PngImage)).skImage;
     final image1 = CkImage(skImage1, imageSource: imageSource);
 
-    final SkImage skImage2 = canvasKit.MakeAnimatedImageFromEncoded(
-      k4x4PngImage,
-    )!.makeImageAtCurrentFrame();
+    final SkImage skImage2 = (await createImageFromBytes(k4x4PngImage)).skImage;
     final image2 = CkImage(skImage2, imageSource: imageSource);
 
     final CkImage image3 = image1.clone();
@@ -90,6 +86,16 @@ void testMain() {
 
     image3.dispose();
     expect(imageSource.debugIsClosed, isTrue);
+  });
+
+  test('ImageElementImageSource clears src on closure', () async {
+    final DomHTMLImageElement imageElement = createDomHTMLImageElement();
+    imageElement.src = 'sample_image1.png';
+    final ImageSource imageSource = ImageElementImageSource(imageElement);
+
+    expect(imageElement.src, contains('sample_image1.png'));
+    imageSource.close();
+    expect(imageElement.src, isNot(contains('sample_image1.png')));
   });
 }
 

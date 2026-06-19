@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
+    // ignore: deprecated_web_configuration
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -214,9 +215,7 @@ abstract class Renderer {
   void clearFragmentProgramCache();
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey);
 
-  ui.Path createPath();
-  ui.Path copyPath(ui.Path src);
-  ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2);
+  BackendPathConstructors get pathConstructors;
 
   ui.LineMetrics createLineMetrics({
     required bool hardBreak,
@@ -282,6 +281,8 @@ abstract class Renderer {
   });
 
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
+
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph);
 
   /// Map from view id to the associated [ViewRasterizer] for that view.
   final Map<int, ViewRasterizer> rasterizers = <int, ViewRasterizer>{};

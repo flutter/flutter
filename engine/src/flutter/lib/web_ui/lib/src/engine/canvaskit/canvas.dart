@@ -44,9 +44,11 @@ class CkCanvas implements LayerCanvas {
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
-    skCanvas.clipPath(skPath, _clipOpIntersect, doAntiAlias);
-    skPath.delete();
+    skCanvas.clipPath(
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
+      _clipOpIntersect,
+      doAntiAlias,
+    );
   }
 
   @override
@@ -59,11 +61,11 @@ class CkCanvas implements LayerCanvas {
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-
-    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
-    skCanvas.clipPath(skPath, _clipOpIntersect, doAntiAlias);
-    skPath.delete();
-
+    skCanvas.clipPath(
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
+      _clipOpIntersect,
+      doAntiAlias,
+    );
     translate(-offset.dx, -offset.dy);
   }
 
@@ -146,6 +148,7 @@ class CkCanvas implements LayerCanvas {
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
+
     final ui.FilterQuality filterQuality = paint.filterQuality;
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
     if (filterQuality == ui.FilterQuality.high) {
@@ -224,9 +227,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     final SkPaint skPaint = (paint as CkPaint).toSkPaint();
-    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
-    skCanvas.drawPath(skPath, skPaint);
-    skPath.delete();
+    skCanvas.drawPath(((path as EnginePath).backendPath as CkPath).skiaObject, skPaint);
     skPaint.delete();
   }
 
@@ -268,11 +269,7 @@ class CkCanvas implements LayerCanvas {
     final SkPaint skPaint = (paint as CkPaint).toSkPaint();
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-
-    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
-    skCanvas.drawPath(skPath, skPaint);
-    skPath.delete();
-
+    skCanvas.drawPath(((path as EnginePath).backendPath as CkPath).skiaObject, skPaint);
     translate(-offset.dx, -offset.dy);
     skPaint.delete();
   }
@@ -289,7 +286,7 @@ class CkCanvas implements LayerCanvas {
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
     drawSkShadow(
       skCanvas,
-      (path as LazyPath).builtPath as CkPath,
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
       color,
       elevation,
       transparentOccluder,

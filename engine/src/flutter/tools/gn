@@ -138,8 +138,8 @@ def get_host_os():
   return 'linux'
 
 
-# Runs true if the currently executing python interpreter is running under
-# Rosetta. I.e., python3 is an x64 executable and we're on an arm64 Mac.
+# Returns true if the currently executing Python interpreter is running under
+# Rosetta. i.e., python3 is an x64 executable and we're on an arm64 Mac.
 def is_rosetta():
   if platform.system() == 'Darwin':
     proc = subprocess.Popen(['sysctl', '-in', 'sysctl.proc_translated'],
@@ -590,11 +590,6 @@ def to_gn_args(args):
     gn_args['dart_runtime_mode'] = runtime_mode
 
   gn_args['concurrent_toolchain_jobs'] = get_concurrent_jobs('1GB', '100MB')
-
-  # Hardcoding this avoids invoking a relatively expensive python script from
-  # GN, but removes the ability to use git-worktrees in the Dart checkout from
-  # within the Engine repo, but it's unlikely anyone is using that.
-  gn_args['default_git_folder'] = os.path.join(get_dart_path(), '.git')
 
   # By default, the Dart GN build will invoke a relatively expensive python
   # script to calculate an SDK "hash" that ensures compatibility between the

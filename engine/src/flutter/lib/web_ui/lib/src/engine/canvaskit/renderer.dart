@@ -11,8 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-bool get isExperimentalWebParagraph =>
-    configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
+bool get isWebParagraphEnabled => configuration.preferWebParagraph && browserSupportsWebParagraph;
 
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
@@ -26,7 +25,7 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
-  late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
+  late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
       ? WebFontCollection()
       : SkiaFontCollection();
 
@@ -306,17 +305,8 @@ class CanvasKitRenderer extends Renderer {
     ui.FilterQuality? filterQuality,
   ) => CkImageShader(image, tmx, tmy, matrix4, filterQuality);
 
+  @override
   CkPathConstructors pathConstructors = CkPathConstructors();
-
-  @override
-  ui.Path createPath() => LazyPath(pathConstructors);
-
-  @override
-  ui.Path copyPath(ui.Path src) => LazyPath.fromLazyPath(src as LazyPath);
-
-  @override
-  ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) =>
-      LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
 
   @override
   ui.TextStyle createTextStyle({
@@ -341,7 +331,7 @@ class CanvasKitRenderer extends Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebTextStyle(
           color: color,
           decoration: decoration,
@@ -403,7 +393,7 @@ class CanvasKitRenderer extends Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebParagraphStyle(
           textAlign: textAlign,
           textDirection: textDirection,
@@ -444,7 +434,7 @@ class CanvasKitRenderer extends Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebStrutStyle(
           fontFamily: fontFamily,
           fontFamilyFallback: fontFamilyFallback,
@@ -470,7 +460,11 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+      isWebParagraphEnabled ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+
+  @override
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>
+      CanvasKitPainter(paragraph);
 
   @override
   void clearFragmentProgramCache() {

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -37,6 +39,8 @@ import 'gradle_utils.dart' as gradle;
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
+import 'migrations/disable_built_in_kotlin_migration.dart';
+import 'migrations/disable_new_dsl_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/multidex_removal_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
@@ -298,16 +302,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
           settings: 'androidGradlePluginVersion: $agpVersion',
         ),
       );
-
-      _logger.printStatus(
-        "${_logger.terminal.warningMark} Your app isn't using AndroidX.",
-        emphasis: true,
-      );
-      _logger.printStatus(
-        'To avoid potential build failures, you can quickly migrate your app '
-        'by following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration .',
-        indent: 4,
-      );
     }
 
     GradleHandledError? detectedGradleError;
@@ -382,7 +376,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
           case GradleBuildStatus.retry:
             // Use binary exponential backoff before retriggering the build.
             // The expected wait times are: 100ms, 200ms, 400ms, and so on...
-            final int waitTime = min(pow(2, retry).toInt() * 100, kMaxRetryTime.inMicroseconds);
+            final int waitTime = min(
+              pow(2, min(retry, 7)).toInt() * 100,
+              kMaxRetryTime.inMilliseconds,
+            );
             retry += 1;
             _logger.printStatus('Retrying Gradle Build: #$retry, wait time: ${waitTime}ms');
             await Future<void>.delayed(Duration(milliseconds: waitTime));
@@ -460,6 +457,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       MinSdkVersionMigration(project.android, _logger),
       MultidexRemovalMigration(project.android, _logger),
       CmakeAndroid16kPagesMigration(project.android, _logger),
+      DisableBuiltInKotlinMigration(project.android, _logger),
+      DisableNewDslMigration(project.android, _logger),
     ];
 
     final migration = ProjectMigration(migrators);
@@ -641,7 +640,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final String filename = apkFile.basename;
       _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
-      apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+      apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
       final appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
@@ -1051,17 +1050,26 @@ void printHowToConsumeAar({
   logger.printStatus('To learn more, visit https://flutter.dev/to/integrate-android-archive');
 }
 
-String _hex(List<int> bytes) {
-  final result = StringBuffer();
-  for (final part in bytes) {
-    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+/// Calculates the SHA-1 hash of the given [file] using chunked reading.
+@visibleForTesting
+String calculateSha(File file) {
+  final RandomAccessFile openedFile = file.openSync();
+  try {
+    final sink = AccumulatorSink<Digest>();
+    final ByteConversionSink sha1Sink = sha1.startChunkedConversion(sink);
+    final buffer = Uint8List(64 * 1024);
+    while (true) {
+      final int bytesRead = openedFile.readIntoSync(buffer);
+      if (bytesRead == 0) {
+        break;
+      }
+      sha1Sink.add(Uint8List.sublistView(buffer, 0, bytesRead));
+    }
+    sha1Sink.close();
+    return sink.events.single.toString();
+  } finally {
+    openedFile.closeSync();
   }
-  return result.toString();
-}
-
-String _calculateSha(File file) {
-  final List<int> bytes = file.readAsBytesSync();
-  return _hex(sha1.convert(bytes).bytes);
 }
 
 void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) {

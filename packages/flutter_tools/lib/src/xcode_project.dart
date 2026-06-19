@@ -5,11 +5,16 @@
 /// @docImport 'ios/mac.dart';
 library;
 
+import 'dart:async';
+
 import 'package:yaml/yaml.dart' as yaml;
 
+import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/process.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
@@ -17,6 +22,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
@@ -72,6 +78,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   Directory get hostAppRoot;
 
+  FlutterDarwinPlatform get darwinPlatform;
+
+  /// Cached list of [Plugin]s for the [FlutterProject].
+  List<Plugin>? _plugins;
+
+  /// Returns the list of [Plugin]s for the [FlutterProject].
+  ///
+  /// On the first call, this will find plugins in the project.
+  /// On subsequent calls, this will return the cached list of plugins.
+  Future<List<Plugin>> getPlugins() async {
+    _plugins ??= await findPlugins(parent);
+    return _plugins!;
+  }
+
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist =>
       hostAppRoot.childDirectory(_defaultHostAppName).childFile('Info.plist');
@@ -113,6 +133,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// LOCAL_ENGINE, and other Flutter variables available to any flutter
   /// tooling (`flutter build`, etc) to convert into flags.
   File get generatedEnvironmentVariableExportScript;
+
+  /// This file contains the environment variables needed for Flutter tools.
+  /// It contains the same variables as [generatedEnvironmentVariableExportScript] but without the
+  /// 'export' commands. This file is used in SwiftPM Add to App.
+  File get generatedNativeIntegrationEnvironmentFile =>
+      ephemeralDirectory.childFile('flutter_native_integration.env');
 
   /// The CocoaPods 'Podfile'.
   File get podfile => hostAppRoot.childFile('Podfile');
@@ -218,7 +244,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
+      this,
+      buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
+    );
   }
 
   XcodeProjectInfo? _projectInfo;
@@ -315,7 +344,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
 
     final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
-      xcodeProject.path,
+      this,
       buildContext: buildContext,
     );
     if (buildSettings.isNotEmpty) {
@@ -360,6 +389,67 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
     return flavor;
   }
+
+  /// The process used to fetch Swift packages.
+  Process? _swiftPackageFetchProcess;
+
+  /// The stdout subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
+
+  /// The stderr subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
+
+  /// Prefetches Swift packages for the Xcode project if the project has migrated to SwiftPM.
+  Future<void> prefetchSwiftPackages({
+    required List<String> xcodebuildProjectCommandArguments,
+    required ProcessUtils processUtils,
+    required Logger logger,
+  }) async {
+    // If the project has not migrated to SwiftPM, we don't need to prefetch Swift packages.
+    if (!usesSwiftPackageManager || !flutterPluginSwiftPackageInProjectSettings) {
+      return;
+    }
+
+    Status? status;
+    try {
+      final command = <String>[...xcodebuildProjectCommandArguments, '-resolvePackageDependencies'];
+      if (_swiftPackageFetchProcess != null) {
+        return;
+      }
+      final Process process = await processUtils.start(command, workingDirectory: hostAppRoot.path);
+      _swiftPackageFetchProcess = process;
+      var printFetchWarnings = false;
+      _swiftPackageFetchStdoutSubscription ??= process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            if (line.startsWith('Fetching')) {
+              status?.cancel();
+              if (!printFetchWarnings) {
+                logger.printStatus(
+                  'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
+                );
+                printFetchWarnings = true;
+              }
+              status = logger.startProgress('  $line...');
+            }
+          });
+      final stderrBuffer = StringBuffer();
+      _swiftPackageFetchStderrSubscription ??= process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .listen(stderrBuffer.write);
+
+      final int exitCode = await process.exitCode.whenComplete(() async {
+        await _swiftPackageFetchStdoutSubscription?.cancel();
+        await _swiftPackageFetchStderrSubscription?.cancel();
+      });
+      if (exitCode != 0) {
+        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
+      }
+    } finally {
+      status?.cancel();
+    }
+  }
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -374,6 +464,9 @@ class IosProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
 
   // build setting keys
   static const kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
@@ -545,15 +638,14 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       }
     }
 
-    return !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
+    return !buildSettings.contains(RegExp(r'EXCLUDED_ARCHS.*\barm64\b'));
   }
 
   /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
   Future<List<({String target, String? plugin})>> _targetsExcludingArm(String buildSettings) async {
     final Map<String, List<String>> cocoapodsDependencyGraph = _cocoapodsDependencyGraph();
-    final List<Plugin> allPlugins = await findPlugins(parent);
     final pluginNames = <String>{
-      for (final Plugin plugin in allPlugins)
+      for (final Plugin plugin in await getPlugins())
         if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
     };
     final targetHeaderPattern = RegExp(
@@ -1127,6 +1219,9 @@ class MacOSProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => MacOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   bool existsSync() => hostAppRoot.existsSync();

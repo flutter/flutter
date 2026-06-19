@@ -17,7 +17,7 @@ jobs:
       # defaults to `fetch-depth:1` which only checks out the current branch
       # since the action runs on master, it will only checkout master.
       - name: Setup Repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           repository: flutteractionsbot/flutter
           token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
@@ -66,12 +66,11 @@ jobs:
         if: steps.prepare_pr_branch.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_BRANCH_NAME: ${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
         run: |
-          PR_HEAD_BRANCH=${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
-
           gh pr create \
             --base master \
-            --head flutteractionsbot:$PR_HEAD_BRANCH \
+            --head flutteractionsbot:$PR_BRANCH_NAME \
             --repo flutter/flutter \
             --title "Sync CHANGELOG.md from stable" \
             --body "This PR automates the synchronization of \`CHANGELOG.md\` from the \`stable\` branch to the \`master\` branch." \

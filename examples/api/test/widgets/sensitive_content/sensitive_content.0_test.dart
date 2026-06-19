@@ -86,4 +86,27 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
+
+  testWidgets(
+    'Account details widget is scrollable when vertical space is constrained',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800.0, 450.0);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(const example.SensitiveContentApp());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0.0, -120.0),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

@@ -68,8 +68,8 @@ You can enable HCPP using one of the following methods:
 
 ### Limitations and Known Issues
 The following is a list of limitations and known issues. If you encounter an issue not listed below, please file an issue!
-- **SurfaceView Compatibility**: Opting in is currently not recommended if your application contains a platform view which is or contains a native [`SurfaceView`](https://developer.android.com/reference/android/view/SurfaceView) (often used by video players or map plugins), due to clipping issues. This is tracked in https://github.com/flutter/flutter/issues/175546.
 - **Complex Overlay Stacking**: Transparent platform views will not display correctly in layout stacks structured as: Flutter canvas -> Platform View -> Overlay -> Transparent Platform View, when all four of these layers intersect.
+- **Android Text Magnifier (Loupe)**: When using a platform view with a transparent background (such as a native `EditText` with no background), the Android text magnifier does not display the Flutter-rendered content behind it. The magnifier only samples the native platform view's surface rather than the final composited scene. This is a bug in the Android OS text magnifier's interaction with SurfaceControl hierarchies; it only has access to the specific native surface it is attached to, without visibility into the underlying Flutter-composited surfaces. Because this is an underlying Android platform bug, it cannot be resolved by the Flutter framework or engine (see [Flutter Issue #187659](https://github.com/flutter/flutter/issues/187659) and [Android Issue Tracker #494307996](https://issuetracker.google.com/issues/494307996)).
 
 ## Virtual Display
 

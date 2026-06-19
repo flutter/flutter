@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -14,6 +15,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../base/version_range.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
@@ -544,6 +546,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
         );
         pubContext = PubContext.createPackage;
     }
+
+    _generatePubspecLock(relativeDir);
 
     if (shouldCallPubGet) {
       final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
@@ -1350,4 +1354,96 @@ List<String>? _getBuildGradleConfigurationFilePaths(
       return null;
   }
   return buildGradleConfigurationFilePaths;
+}
+
+/// Generate a pubspec.lock file that locks the versions of all dependencies to
+/// the exact versions the Flutter SDK is tested with.
+///
+/// This ensures that a breaking change accidentally published to one of these
+/// packages that the Flutter SDK depends on cannot break the `flutter create`
+/// command.
+void _generatePubspecLock(Directory directory) {
+  final FileSystem fs = directory.fileSystem;
+  final String flutterRoot = Cache.flutterRoot!;
+  final flutterPubspecLock =
+      loadYaml(fs.file(fs.path.join(flutterRoot, 'pubspec.lock')).readAsStringSync()) as YamlMap;
+
+  final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
+
+  final packages = <String, Object?>{
+    for (final package in gatherSdkPackageDependencies(directory))
+      package: flutterPackages[package],
+  };
+
+  /// We are writing json which is valid yaml. Pub will rewrite this file as pretty yaml after resolution.
+  directory
+      .childFile('pubspec.lock')
+      .writeAsStringSync(const JsonEncoder.withIndent('  ').convert({'packages': packages}));
+}
+
+/// Find the package names of external dependencies from the SDK packages that
+/// the package in [directory] depends on.
+List<String> gatherSdkPackageDependencies(Directory directory) {
+  final sdkPackages = <String>[];
+  final FileSystem fs = directory.fileSystem;
+  final pubspecYaml = loadYaml(directory.childFile('pubspec.yaml').readAsStringSync()) as YamlMap;
+
+  for (final MapEntry<dynamic, dynamic> dependency
+      in (pubspecYaml['dependencies'] as YamlMap).entries) {
+    final descriptor = dependency.value as Object?;
+    if (descriptor is YamlMap && descriptor['sdk'] == 'flutter') {
+      // a flutter dependency.
+      final name = dependency.key as String;
+      sdkPackages.add(name);
+    }
+  }
+
+  final result = <String>{};
+  // Initialized by FlutterCommandRunner on startup.
+  // So it is safe to access it here.
+  final String flutterRoot = Cache.flutterRoot!;
+  for (final sdkPackage in sdkPackages) {
+    final Directory? packageDir = _resolveSdkPackageDir(fs, flutterRoot, sdkPackage);
+    if (packageDir == null) {
+      // This resolves the same locations as pub's FlutterSdk.packagePath, so a
+      // package we cannot find here is one pub cannot find either, and the
+      // `pub get` that runs next reports it. Skipping avoids turning that case
+      // (such as a mistyped SDK dependency) into an unhandled crash here.
+      continue;
+    }
+    final pubspecYaml =
+        loadYaml(packageDir.childFile('pubspec.yaml').readAsStringSync()) as YamlMap;
+    for (final MapEntry<dynamic, dynamic> dependency
+        in (pubspecYaml['dependencies'] as YamlMap).entries) {
+      final descriptor = dependency.value as Object?;
+      if (descriptor is String) {
+        // a hosted dependency.
+        final name = dependency.key as String;
+        result.add(name);
+      }
+    }
+  }
+  return result.toList();
+}
+
+/// Returns the directory of the `sdk: flutter` package [packageName], or null
+/// if it is not present under [flutterRoot].
+///
+/// Such packages live in one of two locations, searched here in the same order
+/// as pub's `FlutterSdk.packagePath`
+/// (third_party/pkg/pub/lib/src/sdk/flutter.dart), the source of truth for how
+/// `sdk: flutter` dependencies are resolved: in-tree under
+/// `<flutter_root>/packages`, or shipped with the engine artifact under
+/// `<flutter_root>/bin/cache/pkg` (for example, `flutter_gpu`).
+Directory? _resolveSdkPackageDir(FileSystem fs, String flutterRoot, String packageName) {
+  final candidates = <Directory>[
+    fs.directory(fs.path.join(flutterRoot, 'packages', packageName)),
+    fs.directory(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', packageName)),
+  ];
+  for (final candidate in candidates) {
+    if (candidate.childFile('pubspec.yaml').existsSync()) {
+      return candidate;
+    }
+  }
+  return null;
 }

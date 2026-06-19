@@ -27,7 +27,7 @@ void main() {
       paints
         // Scrollbar thumb background fill.
         ..rrect(
-          rrect: RRect.fromLTRBR(
+          rrect: .fromLTRBR(
             785.0,
             0.0,
             800.0,

@@ -18,7 +18,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
@@ -35,7 +34,6 @@ import 'globals.dart' as globals;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
-import 'mdns_device_discovery.dart';
 import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
@@ -207,6 +205,9 @@ class FlutterDevice {
               await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
                 vmServiceUri!,
                 debuggingOptions: debuggingOptions,
+                appName:
+                    'Kind: Flutter - Device: ${device!.displayName} - '
+                    'Package: ${FlutterProject.current().manifest.appName}',
               );
               break;
             } on DartDevelopmentServiceException catch (e, st) {
@@ -249,26 +250,20 @@ class FlutterDevice {
         // shuts down, including after an error. If `done` completes before `connectToVmService`,
         // something went wrong that caused DDS to shutdown early.
         try {
-          service =
-              await Future.any<dynamic>(<Future<dynamic>>[
-                    connectToVmService(
-                      debuggingOptions.enableDds
-                          ? (device!.dds.uri ?? vmServiceUri!)
-                          : vmServiceUri!,
-                      reloadSources: reloadSources,
-                      restart: restart,
-                      compileExpression: compileExpression,
-                      flutterProject: FlutterProject.current(),
-                      printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-                      device: device,
-                      logger: globals.logger,
-                    ),
-                    if (!existingDds)
-                      device!.dds.done.whenComplete(
-                        () => throw Exception('DDS shut down too early'),
-                      ),
-                  ])
-                  as FlutterVmService?;
+          service = await Future.any<dynamic>(<Future<dynamic>>[
+            connectToVmService(
+              debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri!) : vmServiceUri!,
+              reloadSources: reloadSources,
+              restart: restart,
+              compileExpression: compileExpression,
+              flutterProject: FlutterProject.current(),
+              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+              device: device,
+              logger: globals.logger,
+            ),
+            if (!existingDds)
+              device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+          ]) as FlutterVmService?;
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
@@ -300,7 +295,6 @@ class FlutterDevice {
         }
 
         await (await device!.getLogReader(app: package)).provideVmService(vmService!);
-
         completer.complete();
         await subscription.cancel();
       },
@@ -576,6 +570,12 @@ abstract class ResidentHandlers {
   /// Whether an application can be detached without being stopped.
   bool get supportsDetach;
 
+  /// Whether a hot reload should be treated as a hot restart.
+  ///
+  /// This is used by platforms like web where hot reload must always perform
+  /// a full restart instead of updating code in-place.
+  bool get reloadIsRestart;
+
   @protected
   Logger get logger;
 
@@ -813,8 +813,13 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
-    final String from = await flutterDevices.first!.vmService!.flutterPlatformOverride(
+    final FlutterVmService? vmService = flutterDevices.firstOrNull?.vmService;
+    if (vmService == null) {
+      logger.printStatus('Platform toggle is not supported for this device.', emphasis: true);
+      return false;
+    }
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final String from = await vmService.flutterPlatformOverride(
       isolateId: views.first.uiIsolate!.id!,
     );
     final String to = nextPlatform(from);
@@ -953,7 +958,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     CommandHelp? commandHelp,
     this.dartBuilder,
-    ShutdownHooks? shutdownHooks,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -969,12 +973,10 @@ abstract class ResidentRunner extends ResidentHandlers {
              terminal: globals.terminal,
              platform: globals.platform,
              outputPreferences: globals.outputPreferences,
-           ),
-       shutdownHooks = shutdownHooks ?? globals.shutdownHooks {
+           ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
-    this.shutdownHooks.addShutdownHook(cleanupAtFinish);
   }
 
   @override
@@ -1002,7 +1004,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   final CommandHelp commandHelp;
   final bool machine;
-  final ShutdownHooks shutdownHooks;
 
   var _exited = false;
   var _finished = Completer<int>();
@@ -1105,6 +1106,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get canHotReload => hotMode;
 
   /// Whether the hot reload support is implemented as hot restart.
+  @override
   bool get reloadIsRestart => false;
 
   /// Start the app and keep the process running during its lifetime.
@@ -1205,12 +1207,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
+      final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
+      final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
         fileSystem: globals.fs,
+        targetModel: targetModel,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
@@ -1260,7 +1265,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
-    final String appName = FlutterProject.current().manifest.appName;
     for (final FlutterDevice? device in flutterDevices) {
       await device!.connect(
         debuggingOptions: debuggingOptions,
@@ -1271,25 +1275,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         printStructuredErrorLogMethod: printStructuredErrorLog,
       );
       await device.vmService!.getFlutterViews();
-
-      // Start mDNS service
-      if (debuggingOptions.enableLocalDiscovery) {
-        final mdnsDeviceDiscovery = MDNSDeviceDiscovery(
-          device: device.device!,
-          vmService: device.vmService!.service,
-          debuggingOptions: debuggingOptions,
-          logger: globals.logger,
-          platform: globals.platform,
-          flutterVersion: globals.flutterVersion,
-          systemClock: globals.systemClock,
-          botDetector: globals.botDetector,
-        );
-        _mdnsDiscoveries.add(mdnsDeviceDiscovery);
-        await mdnsDeviceDiscovery.advertise(
-          appName: appName,
-          vmServiceUri: device.vmService!.httpAddress,
-        );
-      }
 
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
@@ -1338,19 +1323,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
-  final _mdnsDiscoveries = <MDNSDeviceDiscovery>[];
-
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
     await cleanupAtFinish();
     return exitCode;
-  }
-
-  @mustCallSuper
-  Future<void> cleanupAtFinish() async {
-    final discoveries = List<MDNSDeviceDiscovery>.of(_mdnsDiscoveries);
-    _mdnsDiscoveries.clear();
-    await discoveries.map((MDNSDeviceDiscovery discovery) => discovery.stop()).wait;
   }
 
   @mustCallSuper
@@ -1483,8 +1459,95 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  /// Configures the asset directory path on the target device's VM Service.
+  ///
+  /// This is called during hot reload to ensure the Flutter engine is pointing
+  /// at the correct synced asset bundle directory inside the local DevFS before
+  /// assets are evicted and reloaded.
+  ///
+  /// Native runners (like 'HotRunner') override this to invoke the
+  /// `setAssetDirectory` VM Service extension. Web runners (like 'ResidentWebRunner')
+  /// keep this as a no-op because asset paths are already resolved relative
+  /// to the web server base URI.
+  @protected
+  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {}
+
+  @internal
+  Future<void> evictDirtyAssets() async {
+    final futures = <Future<void>>[];
+    for (final FlutterDevice device in flutterDevices) {
+      final DevFS? devFS = device.devFS;
+      if (devFS == null) {
+        continue;
+      }
+      if (devFS.assetPathsToEvict.isEmpty && devFS.shaderPathsToEvict.isEmpty) {
+        continue;
+      }
+      final FlutterVmService vmService = device.vmService!;
+      final List<FlutterView> views = await vmService.getFlutterViews();
+
+      final FlutterView? firstViewWithIsolate = views
+          .where((FlutterView v) => v.uiIsolate != null)
+          .firstOrNull;
+      final vm_service.IsolateRef? firstUiIsolate = firstViewWithIsolate?.uiIsolate;
+      if (firstUiIsolate == null) {
+        continue;
+      }
+
+      // 1. Delegate platform-specific asset directory setup to the subclass.
+      await confirmAssetDirectory(device, views);
+
+      // 2. Perform font manifest reloading if it was updated.
+      if (devFS.didUpdateFontManifest) {
+        futures.add(
+          vmService.reloadAssetFonts(
+            isolateId: firstUiIsolate.id!,
+            viewId: firstViewWithIsolate!.id,
+          ),
+        );
+      }
+
+      // 3. Perform the standard, cross-platform eviction calls.
+      final supportsShaderReload = device.targetPlatform != TargetPlatform.web_javascript;
+      for (final String assetPath in devFS.assetPathsToEvict) {
+        // Flutter GPU shader bundles reload the compiled ShaderLibrary in place
+        // via the `ext.ui.gpu.reinitializeShaderLibrary` extension. It is
+        // registered lazily on the first `ShaderLibrary.fromAsset` and the engine
+        // no-ops if nothing is registered at the asset key, so dispatch is gated
+        // only by the `.shaderbundle` suffix. The extension is unavailable on the
+        // web engine, where the bundle falls back to the generic asset eviction.
+        if (supportsShaderReload && assetPath.endsWith('.shaderbundle')) {
+          futures.add(
+            vmService.flutterReinitializeShaderLibrary(assetPath, isolateId: firstUiIsolate.id!),
+          );
+        } else {
+          futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        }
+      }
+      // Shaders are not supported during hot reload on the web yet. Attempting
+      // to evict shaders will call the `ext.ui.window.reinitializeShader` service
+      // extension which is not registered/supported by the Web engine. On web clients,
+      // this throws an internal RPCError (-32603) instead of a standard MethodNotFound
+      // error, which would break the hot reload.
+      // See https://github.com/flutter/flutter/issues/137265
+      if (device.targetPlatform != TargetPlatform.web_javascript) {
+        for (final String assetPath in devFS.shaderPathsToEvict) {
+          futures.add(vmService.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
+        }
+      }
+
+      devFS.assetPathsToEvict.clear();
+      devFS.shaderPathsToEvict.clear();
+      devFS.didUpdateFontManifest = false;
+    }
+    await Future.wait<void>(futures);
+  }
+
   @override
   Future<void> cleanupAfterSignal();
+
+  /// Called right before we exit.
+  Future<void> cleanupAtFinish();
 }
 
 class OperationResult {
@@ -1759,7 +1822,10 @@ class TerminalHandler {
         await residentRunner.exit();
         return true;
       case 'r':
-        if (!residentRunner.canHotReload) {
+        // Allow hot reload if enabled. Also allow it if reloadIsRestart is true
+        // (e.g., web with --no-hot), since in that case the reload will be
+        // converted to a restart internally.
+        if (!(residentRunner.canHotReload || residentRunner.reloadIsRestart)) {
           return false;
         }
         final OperationResult result = await residentRunner.restart();

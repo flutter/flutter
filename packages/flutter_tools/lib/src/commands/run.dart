@@ -224,12 +224,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
-      )
-      ..addFlag(
-        RunCommand.kEnableLocalDiscovery,
-        help:
-            'Whether to advertise the application on the local network (via mDNS) '
-            'for discovery by "flutter running-apps".',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -249,9 +243,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
     addEnableHcppFlag(verboseHelp: verboseHelp);
+    addTestFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
+  bool get traceSystrace => boolArg('trace-systrace');
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
@@ -266,7 +262,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
   bool get enableHcpp => boolArg('enable-hcpp');
-  bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
+  bool get testFlag => boolArg('test-flag');
 
   @override
   bool get refreshWirelessDevices => true;
@@ -332,7 +328,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
-        enableLocalDiscovery: enableLocalDiscovery,
+        testFlag: testFlag,
+        traceSystrace: traceSystrace,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -396,8 +393,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         enableHcpp: enableHcpp,
-        enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
+        testFlag: testFlag,
       );
     }
   }
@@ -452,7 +449,6 @@ class RunCommand extends RunCommandBase {
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
     addMachineOutputFlag(verboseHelp: verboseHelp);
-
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -520,8 +516,6 @@ class RunCommand extends RunCommandBase {
   @override
   final name = 'run';
 
-  static const String kEnableLocalDiscovery = 'enable-local-discovery';
-
   @override
   DeprecationBehavior get deprecationBehavior =>
       boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : _deviceDeprecationBehavior;
@@ -563,7 +557,7 @@ class RunCommand extends RunCommandBase {
     if (devices!.length > 1) {
       return '$command/all';
     }
-    return '$command/${getNameForTargetPlatform(await devices![0].targetPlatform)}';
+    return '$command/${(await devices![0].targetPlatform).getName()}';
   }
 
   @override
@@ -583,6 +577,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: record.runEnableImpeller,
       runIOSInterfaceType: record.runIOSInterfaceType,
       runIsTest: record.runIsTest,
+      runEnableHcpp: record.runEnableHcpp,
     );
   }
 
@@ -605,7 +600,7 @@ class RunCommand extends RunCommandBase {
       if (device is IOSDevice && device.isWirelesslyConnected) {
         anyWirelessIOSDevices = true;
       }
-      deviceType = getNameForTargetPlatform(platform);
+      deviceType = platform.getName();
       deviceOsVersion = await device.sdkNameAndVersion;
       isEmulator = await device.isLocalEmulator;
     } else {
@@ -663,6 +658,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
+      runEnableHcpp: enableHcpp,
     );
   })();
 
@@ -920,9 +916,9 @@ class RunCommand extends RunCommandBase {
     final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
+    // This callback can't throw.
     unawaited(
-      // This callback is executed once the application has successfully started.
-      appStartedTimeRecorder.future.then<void>((_) async {
+      appStartedTimeRecorder.future.then<void>((_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
           handler =
@@ -970,10 +966,7 @@ class RunCommand extends RunCommandBase {
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
         getBuildMode().cliName,
-        if (devices!.length == 1)
-          getNameForTargetPlatform(await devices![0].targetPlatform)
-        else
-          'multiple',
+        if (devices!.length == 1) (await devices![0].targetPlatform).getName() else 'multiple',
         if (devices!.length == 1 && await devices![0].isLocalEmulator) 'emulator' else null,
       ],
       endTimeOverride: appStartedTime,
@@ -993,4 +986,5 @@ typedef AnalyticsUsageValuesRecord = ({
   bool runProjectModule,
   String runTargetName,
   String runTargetOsVersion,
+  bool? runEnableHcpp,
 });

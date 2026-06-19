@@ -249,8 +249,8 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     List<ImageProvider> images,
     ColorScheme colorScheme,
   ) {
-    final double windowHeight = MediaQuery.of(context).size.height;
-    final double windowWidth = MediaQuery.of(context).size.width;
+    final double windowHeight = MediaQuery.heightOf(context);
+    final double windowWidth = MediaQuery.widthOf(context);
     return Padding(
       padding: const .all(8.0),
       child: LayoutBuilder(

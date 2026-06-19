@@ -498,6 +498,7 @@ class AndroidDevice extends Device {
           app.id,
         ]),
         throwOnError: true,
+        timeout: const Duration(seconds: 30),
       );
       uninstallOut = uninstallResult.stdout;
     } on Exception catch (error) {
@@ -671,6 +672,11 @@ class AndroidDevice extends Device {
         'enable-vulkan-validation',
         'true',
       ],
+      if (debuggingOptions.enableHcpp) ...<String>[
+        '--ez',
+        'enable-hcpp-and-surface-control',
+        'true',
+      ],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
@@ -687,13 +693,9 @@ class AndroidDevice extends Device {
           'dart-flags',
           debuggingOptions.dartFlags,
         ],
-        if (debuggingOptions.enableHcpp) ...<String>[
-          '--ez',
-          'enable-hcpp-and-surface-control',
-          'true',
-        ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
+        if (debuggingOptions.testFlag) ...<String>['--ez', 'test-flag', 'true'],
         if (userIdentifier != null) ...<String>['--user', userIdentifier],
       ],
       builtPackage.launchActivity,
@@ -752,11 +754,17 @@ class AndroidDevice extends Device {
       if (userIdentifier != null) ...<String>['--user', userIdentifier],
       app.id,
     ]);
-    return _processUtils
-        .stream(command)
-        .then<bool>(
-          (int exitCode) => exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform),
-        );
+    try {
+      final RunResult result = await _processUtils.run(
+        command,
+        timeout: const Duration(seconds: 30),
+      );
+      final int exitCode = result.exitCode;
+      return exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform);
+    } on Exception catch (error) {
+      _logger.printError('adb shell am force-stop failed: $error');
+      return false;
+    }
   }
 
   @override
@@ -1166,6 +1174,9 @@ class AdbLogReader extends DeviceLogReader {
     // It is not an actual error and causes no problems for the application.
     // See https://github.com/flutter/flutter/issues/104268
     RegExp(r'^E/FrameEvents\(\s*\d+\): updateAcquireFence: Did not find frame\.$'),
+    // This warning is spammy on some devices and does not affect functionality.
+    // See https://github.com/flutter/flutter/issues/174783
+    RegExp(r'^W/MotionEvent-JNI\(\s*\d+\): android_view_MotionEvent_nativeGetPointerCount: -1$'),
     // See https://github.com/flutter/flutter/issues/160598
     RegExp(r'ViewPostIme pointer'),
     RegExp(r'mali.instrumentation.graph.work'),

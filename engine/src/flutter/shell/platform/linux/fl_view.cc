@@ -34,6 +34,12 @@ struct _FlView {
   // Event box the render area goes inside.
   GtkWidget* event_box;
 
+  // Handle zoom gestures.
+  GtkGesture* zoom_gesture;
+
+  // Handle rotation gestures.
+  GtkGesture* rotate_gesture;
+
   // The widget rendering the Flutter view.
   GtkDrawingArea* render_area;
 
@@ -104,7 +110,7 @@ G_DEFINE_TYPE_WITH_CODE(
 
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
+  g_autoptr(FlView) self = FL_VIEW(user_data);
 
   if (!self->have_first_frame) {
     self->have_first_frame = TRUE;
@@ -159,8 +165,12 @@ static void init_touch(FlView* self) {
   self->touch_manager = fl_touch_manager_new(self->engine, self->view_id);
 }
 
-static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
+static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   GdkDevice* device = gdk_event_get_source_device(event);
+  if (device == nullptr) {
+    return kFlutterPointerDeviceKindMouse;
+  }
+
   GdkInputSource source = gdk_device_get_source(device);
   switch (source) {
     case GDK_SOURCE_PEN:
@@ -286,7 +296,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
   // Perform the redraw in the GTK thead.
-  g_idle_add(redraw_cb, self);
+  g_idle_add(redraw_cb, g_object_ref(self));
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -346,8 +356,9 @@ static gboolean button_press_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_press(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor, button);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      button);
 }
 
 // Signal handler for GtkWidget::button-release-event
@@ -366,8 +377,9 @@ static gboolean button_release_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_release(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor, button);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      button);
 }
 
 // Signal handler for GtkWidget::scroll-event
@@ -405,8 +417,8 @@ static gboolean motion_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_motion(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::enter-notify-event
@@ -417,8 +429,8 @@ static gboolean enter_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_enter(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::leave-notify-event
@@ -433,8 +445,8 @@ static gboolean leave_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_leave(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 static void gesture_rotation_begin_cb(FlView* self) {
@@ -588,6 +600,8 @@ static void fl_view_dispose(GObject* object) {
 
   g_cancellable_cancel(self->cancellable);
 
+  g_clear_object(&self->zoom_gesture);
+  g_clear_object(&self->rotate_gesture);
   if (self->engine != nullptr) {
     FlMouseCursorHandler* handler =
         fl_engine_get_mouse_cursor_handler(self->engine);
@@ -766,19 +780,20 @@ static void fl_view_init(FlView* self) {
                            G_CALLBACK(enter_notify_event_cb), self);
   g_signal_connect_swapped(self->event_box, "leave-notify-event",
                            G_CALLBACK(leave_notify_event_cb), self);
-  GtkGesture* zoom = gtk_gesture_zoom_new(self->event_box);
-  g_signal_connect_swapped(zoom, "begin", G_CALLBACK(gesture_zoom_begin_cb),
-                           self);
-  g_signal_connect_swapped(zoom, "scale-changed",
+  self->zoom_gesture = gtk_gesture_zoom_new(self->event_box);
+  g_signal_connect_swapped(self->zoom_gesture, "begin",
+                           G_CALLBACK(gesture_zoom_begin_cb), self);
+  g_signal_connect_swapped(self->zoom_gesture, "scale-changed",
                            G_CALLBACK(gesture_zoom_update_cb), self);
-  g_signal_connect_swapped(zoom, "end", G_CALLBACK(gesture_zoom_end_cb), self);
-  GtkGesture* rotate = gtk_gesture_rotate_new(self->event_box);
-  g_signal_connect_swapped(rotate, "begin",
+  g_signal_connect_swapped(self->zoom_gesture, "end",
+                           G_CALLBACK(gesture_zoom_end_cb), self);
+  self->rotate_gesture = gtk_gesture_rotate_new(self->event_box);
+  g_signal_connect_swapped(self->rotate_gesture, "begin",
                            G_CALLBACK(gesture_rotation_begin_cb), self);
-  g_signal_connect_swapped(rotate, "angle-changed",
+  g_signal_connect_swapped(self->rotate_gesture, "angle-changed",
                            G_CALLBACK(gesture_rotation_update_cb), self);
-  g_signal_connect_swapped(rotate, "end", G_CALLBACK(gesture_rotation_end_cb),
-                           self);
+  g_signal_connect_swapped(self->rotate_gesture, "end",
+                           G_CALLBACK(gesture_rotation_end_cb), self);
   g_signal_connect_swapped(self->event_box, "touch-event",
                            G_CALLBACK(touch_event_cb), self);
 
@@ -830,7 +845,8 @@ G_MODULE_EXPORT FlView* fl_view_new_sized_to_content(FlEngine* engine) {
   self->engine = FL_ENGINE(g_object_ref(engine));
 
   self->sized_to_content = TRUE;
-  size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
+  size_t min_width = 1, min_height = 1, max_width = G_MAXSIZE,
+         max_height = G_MAXSIZE;
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(
       engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,

@@ -129,6 +129,7 @@ class DraggableScrollableController extends ChangeNotifier {
   /// When calling [animateTo] in widget tests, `await`ing the returned
   /// [Future] may cause the test to hang and timeout. Instead, use
   /// [WidgetTester.pumpAndSettle].
+  @awaitNotRequired
   Future<void> animateTo(double size, {required Duration duration, required Curve curve}) async {
     _assertAttached();
     assert(size >= 0 && size <= 1);
