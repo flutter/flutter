@@ -2005,6 +2005,9 @@ void main() {
                 controller: controller,
                 focusNode: focusNode,
                 selectionControls: customControls,
+                // Web CI defaults EditableText.selectAllOnFocus to true, which
+                // selects all text on focus and can prevent handle rebuilds.
+                selectAllOnFocus: false,
               ),
             ),
           ),
@@ -2056,6 +2059,9 @@ void main() {
               controller: controller,
               focusNode: focusNode,
               selectionControls: customControls,
+              // Web CI defaults EditableText.selectAllOnFocus to true, which
+              // selects all text on focus and can prevent handle rebuilds.
+              selectAllOnFocus: false,
             ),
           ),
         ),

@@ -39,9 +39,7 @@ class TestTextField extends StatefulWidget {
     this.style,
     this.controller,
     this.onSubmitted,
-    // Keep test behavior consistent across platforms, including web CI where
-    // EditableText otherwise defaults selectAllOnFocus to true.
-    this.selectAllOnFocus = false,
+    this.selectAllOnFocus,
   });
 
   final Iterable<String>? autofillHints;
@@ -61,7 +59,9 @@ class TestTextField extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
 
   /// Controls whether all text is selected when the field receives focus.
-  final bool selectAllOnFocus;
+  ///
+  /// When null, [EditableText] platform defaults apply.
+  final bool? selectAllOnFocus;
 
   @override
   State<TestTextField> createState() => _TestTextFieldState();
