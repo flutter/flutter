@@ -133,9 +133,9 @@ static gchar* get_line_at_offset(FlAccessibleTextField* self,
   g_autoptr(PangoLayout) layout = create_pango_layout(self);
   const gchar* text = gtk_entry_buffer_get_text(self->buffer);
 
-  GSList* lines = pango_layout_get_lines_readonly(layout);
-  while (lines != nullptr) {
-    PangoLayoutLine* line = static_cast<PangoLayoutLine*>(lines->data);
+  for (GSList* node = pango_layout_get_lines_readonly(layout); node != nullptr;
+       node = node->next) {
+    PangoLayoutLine* line = static_cast<PangoLayoutLine*>(node->data);
     // PangoLayoutLine uses byte indices, but ATK offsets are character
     // offsets, so convert before comparing.
     gint line_start = g_utf8_pointer_to_offset(text, text + line->start_index);
@@ -150,7 +150,6 @@ static gchar* get_line_at_offset(FlAccessibleTextField* self,
       }
       return get_substring(self, line_start, line_end);
     }
-    lines = lines->next;
   }
 
   return nullptr;
