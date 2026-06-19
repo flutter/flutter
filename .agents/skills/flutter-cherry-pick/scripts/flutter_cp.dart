@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_print, prefer_final_locals, omit_obvious_local_variable_types, specify_nonobvious_local_variable_types, unnecessary_await_in_return, always_put_control_body_on_new_line, prefer_foreach, inference_failure_on_instance_creation, sort_constructors_first
-
 import 'dart:convert';
 import 'dart:io';
 
 /// A helper class to orchestrate the Flutter cherry-pick (CP) process.
 class CherryPickHelper {
+  /// Creates a new [CherryPickHelper] instance.
+  CherryPickHelper({required this.pr, required this.channel, required this.repoPath});
+
   /// The original PR number on the master branch.
   final int pr;
 
@@ -21,19 +22,20 @@ class CherryPickHelper {
   /// Detailed data about the original PR, fetched from GitHub.
   Map<String, Object?>? originalPrData;
 
-  /// Creates a new [CherryPickHelper] instance.
-  CherryPickHelper({required this.pr, required this.channel, required this.repoPath});
-
   /// Helper to execute shell commands in the Flutter repository directory.
   ///
   /// Throws an error and exits with code 1 if the command fails, unless
   /// [allowFailure] is set to true.
   Future<ProcessResult> runCmd(List<String> cmd, {bool allowFailure = false}) async {
-    final result = await Process.run(cmd[0], cmd.sublist(1), workingDirectory: repoPath);
+    final ProcessResult result = await Process.run(
+      cmd[0],
+      cmd.sublist(1),
+      workingDirectory: repoPath,
+    );
     if (result.exitCode != 0 && !allowFailure) {
-      print('Command failed: ${cmd.join(' ')}');
-      print('Stdout: ${result.stdout}');
-      print('Stderr: ${result.stderr}');
+      _error('Command failed: ${cmd.join(' ')}');
+      _error('Stdout: ${result.stdout}');
+      _error('Stderr: ${result.stderr}');
       exit(1);
     }
     return result;
@@ -43,8 +45,8 @@ class CherryPickHelper {
   ///
   /// Verifies that the PR is in the `MERGED` state.
   Future<Map<String, Object?>> getOriginalPrDetails() async {
-    print('Fetching details for original PR #$pr...');
-    final result = await runCmd([
+    _info('Fetching details for original PR #$pr...');
+    final ProcessResult result = await runCmd([
       'gh',
       'pr',
       'view',
@@ -54,22 +56,22 @@ class CherryPickHelper {
     ]);
 
     final Object? decoded = jsonDecode(result.stdout as String);
-    if (decoded case Map<String, Object?> prMap) {
+    if (decoded case final Map<String, Object?> prMap) {
       originalPrData = prMap;
       if (prMap['state'] != 'MERGED') {
-        print('Error: PR #$pr is not merged (State: ${prMap['state']}).');
+        _error('Error: PR #$pr is not merged (State: ${prMap['state']}).');
         exit(1);
       }
       return prMap;
     } else {
-      print('Error: Failed to parse PR details as a JSON map.');
+      _error('Error: Failed to parse PR details as a JSON map.');
       exit(1);
     }
   }
 
   /// Adds the cherry-pick label (`cp: stable` or `cp: beta`) to the original PR.
   Future<void> addLabel() async {
-    print('Adding "cp: $channel" label to PR #$pr...');
+    _info('Adding "cp: $channel" label to PR #$pr...');
     await runCmd([
       'gh',
       'api',
@@ -87,24 +89,28 @@ class CherryPickHelper {
   /// the remote branch (or falls back to local branch).
   /// Parses the owner from a GitHub git/https URL.
   String? parseOwner(String url) {
-    final RegExp regExp = RegExp(r'(?:github\.com[:/])([^/]+)/');
+    final regExp = RegExp(r'(?:github\.com[:/])([^/]+)/');
     final Match? match = regExp.firstMatch(url);
     return match?.group(1);
   }
 
   /// Detects the upstream and fork remotes, and the fork owner.
   Future<Map<String, String>> detectRemotes() async {
-    final result = await runCmd(['git', 'remote', '-v']);
-    final String output = result.stdout as String;
+    final ProcessResult result = await runCmd(['git', 'remote', '-v']);
+    final output = result.stdout as String;
 
     String? upstream;
     String? fork;
     String? forkOwner;
 
     for (final String line in output.split('\n')) {
-      if (line.trim().isEmpty) continue;
+      if (line.trim().isEmpty) {
+        continue;
+      }
       final List<String> parts = line.split('\t');
-      if (parts.length < 2) continue;
+      if (parts.length < 2) {
+        continue;
+      }
       final String name = parts[0];
       final String urlAndType = parts[1];
       final String url = urlAndType.split(' ')[0];
@@ -128,16 +134,16 @@ class CherryPickHelper {
   /// Reads the version file `bin/internal/release-candidate-branch.version` from
   /// the remote branch (or falls back to local branch).
   Future<String> getCandidateBranch() async {
-    final remotes = await detectRemotes();
+    final Map<String, String> remotes = await detectRemotes();
     final String upstream = remotes['upstream']!;
-    print('Locating candidate branch for $channel using remote $upstream...');
-    var result = await runCmd([
+    _info('Locating candidate branch for $channel using remote $upstream...');
+    ProcessResult result = await runCmd([
       'git',
       'show',
       '$upstream/$channel:bin/internal/release-candidate-branch.version',
     ], allowFailure: true);
     if (result.exitCode != 0) {
-      print(
+      _error(
         'Warning: Could not read candidate branch from $upstream/$channel. Trying to read locally...',
       );
       result = await runCmd([
@@ -146,12 +152,12 @@ class CherryPickHelper {
         '$channel:bin/internal/release-candidate-branch.version',
       ], allowFailure: true);
       if (result.exitCode != 0) {
-        print('Error: Failed to locate candidate branch version file.');
+        _error('Error: Failed to locate candidate branch version file.');
         exit(1);
       }
     }
     final String branch = (result.stdout as String).trim();
-    print('Found candidate branch: $branch');
+    _info('Found candidate branch: $branch');
     return branch;
   }
 
@@ -160,12 +166,12 @@ class CherryPickHelper {
   /// Looks for an open PR targeting [candidateBranch] that references
   /// the original PR number or title in its title.
   Future<int?> pollForPr(String candidateBranch) async {
-    print('Polling for automated cherry-pick PR targeting $candidateBranch...');
-    const int attempts = 8;
-    for (int i = 0; i < attempts; i++) {
-      await Future.delayed(const Duration(seconds: 15));
-      print('Polling attempt ${i + 1}/$attempts...');
-      final result = await runCmd([
+    _info('Polling for automated cherry-pick PR targeting $candidateBranch...');
+    const attempts = 8;
+    for (var i = 0; i < attempts; i++) {
+      await Future<void>.delayed(const Duration(seconds: 15));
+      _info('Polling attempt ${i + 1}/$attempts...');
+      final ProcessResult result = await runCmd([
         'gh',
         'pr',
         'list',
@@ -178,10 +184,10 @@ class CherryPickHelper {
       ]);
 
       final Object? decoded = jsonDecode(result.stdout as String);
-      if (decoded case List<Object?> prs) {
-        for (final Object? prData in prs) {
-          if (prData case {'number': int number, 'title': String title}) {
-            final String? originalTitle = originalPrData?['title'] as String?;
+      if (decoded case final List<Object?> prs) {
+        for (final prData in prs) {
+          if (prData case {'number': final int number, 'title': final String title}) {
+            final originalTitle = originalPrData?['title'] as String?;
             if (title.contains(pr.toString()) ||
                 (originalTitle != null && title.contains(originalTitle))) {
               return number;
@@ -199,33 +205,33 @@ class CherryPickHelper {
   /// attempts to cherry-pick the original merge commit. If conflicts occur,
   /// it prints the conflicted files and exits with code 2.
   Future<int> startManualCp(String candidateBranch) async {
-    final remotes = await detectRemotes();
+    final Map<String, String> remotes = await detectRemotes();
     final String upstream = remotes['upstream']!;
-    print('Starting manual cherry-pick fallback...');
+    _info('Starting manual cherry-pick fallback...');
     await runCmd(['git', 'fetch', upstream, candidateBranch]);
 
-    final String branchName = 'cherry-pick-$pr-to-$channel';
-    print('Creating local branch $branchName from $upstream/$candidateBranch...');
+    final branchName = 'cherry-pick-$pr-to-$channel';
+    _info('Creating local branch $branchName from $upstream/$candidateBranch...');
     await runCmd(['git', 'checkout', '-B', branchName, '$upstream/$candidateBranch']);
 
     final String sha = switch (originalPrData) {
-      {'mergeCommit': {'oid': String oid}} => oid,
+      {'mergeCommit': {'oid': final String oid}} => oid,
       _ => throw StateError('Could not find merge commit SHA in PR data'),
     };
 
-    print('Attempting to cherry-pick commit $sha...');
-    final result = await runCmd(['git', 'cherry-pick', sha], allowFailure: true);
+    _info('Attempting to cherry-pick commit $sha...');
+    final ProcessResult result = await runCmd(['git', 'cherry-pick', sha], allowFailure: true);
 
     if (result.exitCode == 0) {
-      print('Cherry-pick succeeded without conflicts.');
-      return await pushAndCreatePr(candidateBranch);
+      _info('Cherry-pick succeeded without conflicts.');
+      return pushAndCreatePr(candidateBranch);
     } else {
-      print('Cherry-pick encountered conflicts!');
-      print(result.stderr);
+      _error('Cherry-pick encountered conflicts!');
+      _error(result.stderr);
 
-      final statusResult = await runCmd(['git', 'status', '--porcelain']);
-      final String statusOutput = statusResult.stdout as String;
-      final List<String> conflictedFiles = <String>[];
+      final ProcessResult statusResult = await runCmd(['git', 'status', '--porcelain']);
+      final statusOutput = statusResult.stdout as String;
+      final conflictedFiles = <String>[];
 
       for (final String line in statusOutput.split('\n')) {
         if (line.length > 3) {
@@ -237,64 +243,62 @@ class CherryPickHelper {
         }
       }
 
-      print('\n=== CONFLICTED FILES ===');
-      for (final String f in conflictedFiles) {
-        print(f);
-      }
-      print('========================\n');
-      print('Please resolve these conflicts in your editor, then run the continue action.');
+      _info('\n=== CONFLICTED FILES ===');
+      conflictedFiles.forEach(_info);
+      _info('========================\n');
+      _info('Please resolve these conflicts in your editor, then run the continue action.');
       exit(2);
     }
   }
 
   /// Continues the manual cherry-pick after conflicts have been resolved by the user.
   Future<int> continueManualCp(String candidateBranch) async {
-    print('Continuing manual cherry-pick...');
-    final statusResult = await runCmd(['git', 'status', '--porcelain']);
-    final String statusOutput = statusResult.stdout as String;
+    _info('Continuing manual cherry-pick...');
+    final ProcessResult statusResult = await runCmd(['git', 'status', '--porcelain']);
+    final statusOutput = statusResult.stdout as String;
     if (statusOutput.contains('UU') || statusOutput.startsWith('U')) {
-      print('Error: There are still unresolved conflicts.');
+      _error('Error: There are still unresolved conflicts.');
       exit(1);
     }
 
     try {
-      final result = await Process.run(
+      final ProcessResult result = await Process.run(
         'git',
         ['cherry-pick', '--continue'],
         workingDirectory: repoPath,
         environment: <String, String>{'GIT_EDITOR': 'true'},
       );
       if (result.exitCode != 0) {
-        print('Failed to continue cherry-pick.');
-        print('Stdout: ${result.stdout}');
-        print('Stderr: ${result.stderr}');
+        _error('Failed to continue cherry-pick.');
+        _error('Stdout: ${result.stdout}');
+        _error('Stderr: ${result.stderr}');
         exit(1);
       }
     } catch (e) {
-      print('Failed to continue cherry-pick: $e');
+      _error('Failed to continue cherry-pick: $e');
       exit(1);
     }
 
-    return await pushAndCreatePr(candidateBranch);
+    return pushAndCreatePr(candidateBranch);
   }
 
   /// Pushes the local cherry-pick branch and creates a pull request targeting [candidateBranch].
   Future<int> pushAndCreatePr(String candidateBranch) async {
-    final remotes = await detectRemotes();
+    final Map<String, String> remotes = await detectRemotes();
     final String fork = remotes['fork']!;
     final String forkOwner = remotes['forkOwner']!;
     final String upstream = remotes['upstream']!;
 
-    final String branchName = 'cherry-pick-$pr-to-$channel';
-    print('Pushing branch $branchName to $fork...');
+    final branchName = 'cherry-pick-$pr-to-$channel';
+    _info('Pushing branch $branchName to $fork...');
     await runCmd(['git', 'push', '-u', fork, 'HEAD', '--force']);
 
     final String originalTitle = originalPrData?['title'] as String? ?? '';
-    final String title = '[$channel] $originalTitle';
-    final String body = 'Cherry-pick of #$pr to $channel';
-    print('Creating pull request: $title...');
+    final title = '[$channel] $originalTitle';
+    final body = 'Cherry-pick of #$pr to $channel';
+    _info('Creating pull request: $title...');
 
-    final List<String> createCmd = [
+    final createCmd = <String>[
       'gh',
       'pr',
       'create',
@@ -310,18 +314,18 @@ class CherryPickHelper {
       createCmd.addAll(['--head', '$forkOwner:$branchName']);
     }
 
-    final result = await runCmd(createCmd);
+    final ProcessResult result = await runCmd(createCmd);
 
     final String prUrl = (result.stdout as String).trim();
     final String prNumberStr = prUrl.split('/').last;
     final int? prNumber = int.tryParse(prNumberStr);
     if (prNumber == null) {
-      print('Error: Could not parse PR number from URL: $prUrl');
+      _error('Error: Could not parse PR number from URL: $prUrl');
       exit(1);
     }
-    print('Created PR #$prNumber: $prUrl');
+    _info('Created PR #$prNumber: $prUrl');
 
-    print('Adding "cp: review" label to PR #$prNumber...');
+    _info('Adding "cp: review" label to PR #$prNumber...');
     await runCmd([
       'gh',
       'api',
@@ -340,9 +344,9 @@ void main(List<String> arguments) async {
   int? pr;
   String? channel;
   String? action;
-  String repoPath = '.';
+  var repoPath = '.';
 
-  for (int i = 0; i < arguments.length; i++) {
+  for (var i = 0; i < arguments.length; i++) {
     final String arg = arguments[i];
     if (arg == '--pr' && i + 1 < arguments.length) {
       pr = int.tryParse(arguments[++i]);
@@ -356,33 +360,41 @@ void main(List<String> arguments) async {
   }
 
   if (pr == null || channel == null || action == null) {
-    print(
+    _error(
       'Usage: dart flutter_cp.dart --pr <pr> --channel <stable|beta> --action <start|continue> [--repo-path <path>]',
     );
     exit(1);
   }
 
-  final CherryPickHelper helper = CherryPickHelper(pr: pr, channel: channel, repoPath: repoPath);
+  final helper = CherryPickHelper(pr: pr, channel: channel, repoPath: repoPath);
   await helper.getOriginalPrDetails();
   final String candidateBranch = await helper.getCandidateBranch();
 
   if (action == 'start') {
     await helper.addLabel();
     // Wait a bit before polling to let GitHub Actions trigger
-    await Future.delayed(const Duration(seconds: 5));
+    await Future<void>.delayed(const Duration(seconds: 5));
     final int? cpPr = await helper.pollForPr(candidateBranch);
     if (cpPr != null) {
-      print('SUCCESS:AUTOMATED:$cpPr');
+      _info('SUCCESS:AUTOMATED:$cpPr');
       exit(0);
     } else {
-      print('Automated cherry-pick did not create a PR. Falling back to manual...');
+      _info('Automated cherry-pick did not create a PR. Falling back to manual...');
       final int manualPr = await helper.startManualCp(candidateBranch);
-      print('SUCCESS:MANUAL:$manualPr');
+      _info('SUCCESS:MANUAL:$manualPr');
       exit(0);
     }
   } else if (action == 'continue') {
     final int manualPr = await helper.continueManualCp(candidateBranch);
-    print('SUCCESS:MANUAL:$manualPr');
+    _info('SUCCESS:MANUAL:$manualPr');
     exit(0);
   }
+}
+
+void _info(Object? message) {
+  stdout.writeln(message);
+}
+
+void _error(Object? message) {
+  stderr.writeln(message);
 }
