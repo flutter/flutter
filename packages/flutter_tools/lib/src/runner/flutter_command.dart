@@ -242,7 +242,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
-  bool get outputMachineFormat => boolArg('machine');
+  bool get outputMachineFormat =>
+      argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
+      boolArg(FlutterGlobalOptions.kMachineFlag);
 
   bool get shouldUpdateCache => true;
 
@@ -2040,9 +2042,11 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>?> findAllTargetDevices({
+    bool? canPrompt,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     return _targetDevices.findAllTargetDevices(
+      canPrompt: canPrompt ?? !outputMachineFormat,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
