@@ -116,15 +116,17 @@ void FlutterEngine::PostPlatformThreadTask(std::function<void()> callback) {
   }
   FlutterDesktopEnginePostPlatformThreadTask(
       engine_,
+      /*callback=*/
       [](void* user_data) {
         std::unique_ptr<std::function<void()>> cb{
             static_cast<std::function<void()>*>(user_data)};
         (*cb)();
       },
+      /*on_cancel=*/
       [](void* user_data) {
         delete static_cast<std::function<void()>*>(user_data);
       },
-      new std::function<void()>(std::move(callback)));
+      /*user_data=*/new std::function<void()>(std::move(callback)));
 }
 
 std::optional<LRESULT> FlutterEngine::ProcessExternalWindowMessage(
