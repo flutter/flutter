@@ -36,7 +36,6 @@ class Context {
       'Your Xcode project is incompatible with this version of Flutter. '
       'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
 
-
   // "build-add-to-app" uses its own xcconfig
   static const Set<String> _commandsRequiringGeneratedSettings = <String>{
     'build',
@@ -82,9 +81,6 @@ class Context {
   /// build configurations are not correctly including the generated xcconfig,
   /// and the build would otherwise continue in a broken state (no app version,
   /// dropped dart-defines, wrong target, etc).
-  ///
-  /// Keep this list consistent with the settings generated in
-  /// packages/flutter_tools/lib/src/ios/xcode_build_settings.dart.
   static const List<String> requiredGeneratedBuildSettings = <String>[
     'FLUTTER_ROOT',
     'FLUTTER_BUILD_DIR',
@@ -99,26 +95,14 @@ class Context {
     if (missingSettings.isEmpty) {
       return;
     }
-    final String generatedXcconfig;
-    final String includeInstructions;
-    if (platform == TargetPlatform.macos) {
-      generatedXcconfig = 'macos/Flutter/ephemeral/Flutter-Generated.xcconfig';
-      includeInstructions =
-          'macos/Flutter/Flutter-Debug.xcconfig and macos/Flutter/Flutter-Release.xcconfig contain #include "ephemeral/Flutter-Generated.xcconfig"';
-    } else {
-      generatedXcconfig = 'ios/Flutter/Generated.xcconfig';
-      includeInstructions =
-          'ios/Flutter/Debug.xcconfig and ios/Flutter/Release.xcconfig contain #include "Generated.xcconfig"';
-    }
+    final String includeDirective = platform == TargetPlatform.macos
+        ? '#include "ephemeral/Flutter-Generated.xcconfig"'
+        : '#include "Generated.xcconfig"';
     echoXcodeError(
-      'Missing Flutter build settings: ${missingSettings.join(', ')}. '
-      'These build settings are set by the Flutter tool in $generatedXcconfig, '
-      'which is not being included by this build configuration. In Xcode, view '
-      'the configurations of the project: each configuration must use a base '
-      'configuration that includes the Flutter-generated xcconfig. For the '
-      'default Flutter project, $includeInstructions. Do not set the base '
-      'configuration directly to a CocoaPods Pods-Runner xcconfig. See '
-      'https://docs.flutter.dev/deployment/flavors-ios#configure-xcode-schemes '
+      'Missing Flutter generated build settings. Please verify the current build '
+      'configuration contains $includeDirective. '
+      'Missing settings: ${missingSettings.join(', ')}. '
+      'See https://docs.flutter.dev/deployment/flavors-ios#configure-xcode-schemes '
       'for an example of correctly configured build configurations.',
     );
     exitApp(-1);

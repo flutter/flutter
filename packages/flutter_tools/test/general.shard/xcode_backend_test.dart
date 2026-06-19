@@ -1365,19 +1365,21 @@ void main() {
           fileSystem: fileSystem,
         );
         expect(() => context.run(), throwsException);
+        // The actionable fix leads the message, since Xcode only shows the
+        // first line of an error by default.
         expect(
           context.stderr,
           contains(
-            'error: Missing Flutter build settings: FLUTTER_ROOT, FLUTTER_BUILD_DIR, '
-            'FLUTTER_BUILD_NAME, FLUTTER_BUILD_NUMBER.',
+            'error: Missing Flutter generated build settings. Please verify the '
+            'current build configuration contains '
+            '${platform == TargetPlatform.macos ? '#include "ephemeral/Flutter-Generated.xcconfig"' : '#include "Generated.xcconfig"'}.',
           ),
         );
         expect(
           context.stderr,
           contains(
-            platform == TargetPlatform.macos
-                ? 'macos/Flutter/ephemeral/Flutter-Generated.xcconfig'
-                : 'ios/Flutter/Generated.xcconfig',
+            'Missing settings: FLUTTER_ROOT, FLUTTER_BUILD_DIR, '
+            'FLUTTER_BUILD_NAME, FLUTTER_BUILD_NUMBER.',
           ),
         );
       });
@@ -1394,7 +1396,7 @@ void main() {
       expect(
         context.stderr,
         contains(
-          'error: Missing Flutter build settings: FLUTTER_BUILD_NAME, FLUTTER_BUILD_NUMBER.',
+          'Missing settings: FLUTTER_BUILD_NAME, FLUTTER_BUILD_NUMBER.',
         ),
       );
     });
