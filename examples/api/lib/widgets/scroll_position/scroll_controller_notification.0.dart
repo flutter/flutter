@@ -22,14 +22,14 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
 
   // This method handles the notification from the ScrollController.
   void _handleControllerNotification() {
-    print('Notified through the scroll controller.');
+    debugPrint('Notified through the scroll controller.');
     // Access the position directly through the controller for details on the
     // scroll position.
   }
 
   // This method handles the notification from the NotificationListener.
   bool _handleScrollNotification(ScrollNotification notification) {
-    print('Notified through scroll notification.');
+    debugPrint('Notified through scroll notification.');
     // The position can still be accessed through the scroll controller, but
     // the notification object provides more details about the activity that is
     // occurring.
