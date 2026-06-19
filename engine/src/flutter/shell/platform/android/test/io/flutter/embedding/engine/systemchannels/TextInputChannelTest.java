@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import static io.flutter.Build.API_LEVELS;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -74,7 +75,7 @@ public class TextInputChannelTest {
         TextInputChannel.Configuration.fromJson(
             createConfigurationJsonWithAutofillHint("emailOTPCode"));
 
-    assertEquals(configuration.autofill.hints, new String[] {"emailOTPCode"});
+    assertArrayEquals(new String[] {"emailOTPCode"}, configuration.autofill.hints);
   }
 
   @Test
@@ -86,7 +87,7 @@ public class TextInputChannelTest {
         TextInputChannel.Configuration.fromJson(
             createConfigurationJsonWithAutofillHint("oneTimeCode"));
 
-    assertEquals(configuration.autofill.hints, new String[] {"smsOTPCode"});
+    assertArrayEquals(new String[] {"smsOTPCode"}, configuration.autofill.hints);
   }
 
   private JSONObject createConfigurationJsonWithAutofillHint(String hint) throws JSONException {

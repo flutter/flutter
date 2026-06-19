@@ -1071,7 +1071,7 @@ void main() {
         expect(tester.testTextInput.editingState!['text'], equals('test'));
         expect(
           (tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'],
-          equals('TextInputType.number'),
+          equals('TextInputType.text'),
         );
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
