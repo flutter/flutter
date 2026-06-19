@@ -2484,6 +2484,67 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Checkbox.padding defaults to null', (WidgetTester tester) async {
+    await tester.pumpWidget(_padFrame(true));
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).padding, isNull);
+  });
+
+  testWidgets('Checkbox with no padding paints the check at full stroke width', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_padFrame(true));
+    await tester.pumpAndSettle();
+    // default: scale == 1.0, so strokeWidth stays at _kStrokeWidth (2.0)
+    expect(_checkboxRenderer(tester), paints..path(strokeWidth: 2.0));
+  });
+
+  testWidgets('Checkbox.padding shrinks the check mark and its stroke', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_padFrame(true, padding: const EdgeInsets.all(4.5)));
+    await tester.pumpAndSettle();
+    // inner = 18 - 9 = 9, scale = 9/18 = 0.5, strokeWidth = 2.0 * 0.5 = 1.0
+    expect(_checkboxRenderer(tester), paints..path(strokeWidth: 1.0));
+  });
+
+  testWidgets('Checkbox.padding shrinks the indeterminate dash too', (WidgetTester tester) async {
+    await tester.pumpWidget(_padFrame(null, tristate: true, padding: const EdgeInsets.all(4.5)));
+    await tester.pumpAndSettle();
+    expect(_checkboxRenderer(tester), paints..line(strokeWidth: 1.0));
+  });
+
+  testWidgets('Checkbox.padding larger than the box collapses the mark without crashing', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_padFrame(true, padding: const EdgeInsets.all(9.0)));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull); // no exception thrown
+    expect(_checkboxRenderer(tester), isNot(paints..path())); // mark collapsed away
+  });
+
+  testWidgets('Checkbox asserts when padding is negative', (WidgetTester tester) async {
+    await tester.pumpWidget(_padFrame(true, padding: const EdgeInsets.all(-1.0)));
+    expect(tester.takeException(), isAssertionError);
+  });
+}
+
+RenderBox _checkboxRenderer(WidgetTester tester) =>
+    tester.renderObject<RenderBox>(find.byType(Checkbox));
+
+Widget _padFrame(bool? value, {EdgeInsetsGeometry? padding, bool tristate = false}) {
+  return MaterialApp(
+    home: Material(
+      child: Center(
+        child: Checkbox(
+          value: value,
+          tristate: tristate,
+          padding: padding,
+          onChanged: (bool? v) {},
+        ),
+      ),
+    ),
+  );
 }
 
 class _SelectedGrabMouseCursor extends WidgetStateMouseCursor {

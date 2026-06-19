@@ -101,6 +101,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
+    this.padding,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null);
 
@@ -141,6 +142,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
+    this.padding,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null);
 
@@ -401,6 +403,23 @@ class Checkbox extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticLabel;
 
+  /// The padding around the check mark when the checkbox is checked or
+  /// in its indeterminate (tristate) state.
+  ///
+  /// This insets the check mark inward; the size of the checkbox box itself
+  /// is not affected. The check mark and its stroke shrink to fit the
+  /// remaining space, so the mark stays proportional.
+  ///
+  /// Resolved against the ambient [Directionality], so [EdgeInsetsDirectional]
+  /// values are supported.
+  ///
+  /// Must be non-negative. Padding larger than the box collapses the check
+  /// mark to nothing.
+  ///
+  /// Defaults to [EdgeInsets.zero], which renders the check mark at its full
+  /// size (the same as before this property existed).
+  final EdgeInsetsGeometry? padding;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -612,6 +631,11 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final double effectiveSplashRadius =
         widget.splashRadius ?? checkboxTheme.splashRadius ?? defaults.splashRadius!;
 
+    final EdgeInsets resolvedPadding = (widget.padding ?? EdgeInsets.zero).resolve(
+      Directionality.maybeOf(context),
+    );
+    assert(resolvedPadding.isNonNegative, 'Checkbox.padding cannot be negative.');
+
     return Semantics(
       label: widget.semanticLabel,
       checked: widget.value ?? false,
@@ -641,6 +665,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..previousValue = _previousValue
           ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..activeSide = activeSide
+          ..padding = resolvedPadding
           ..inactiveSide = inactiveSide,
       ),
     );
@@ -689,6 +714,16 @@ class _CheckboxPainter extends ToggleablePainter {
     }
     _shape = value;
     notifyListeners();
+  }
+
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding = EdgeInsets.zero;
+  set padding(EdgeInsets value) {
+    if (_padding == value) {
+      return;
+    }
+    _padding = value;
+    notifyListeners(); // triggers repaint when it changes
   }
 
   BorderSide get activeSide => _activeSide!;
@@ -752,9 +787,20 @@ class _CheckboxPainter extends ToggleablePainter {
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final path = Path();
-    const start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-    const mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-    const end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    final double innerW = (_kEdgeSize - _padding.horizontal).clamp(0.0, _kEdgeSize);
+    final double innerH = (_kEdgeSize - _padding.vertical).clamp(0.0, _kEdgeSize);
+    if (innerW <= 0 || innerH <= 0) {
+      return;
+    } // no room — paint nothing
+
+    // Shrink the stroke proportionally so a smaller mark doesn't look chunky.
+    final double scale = (innerW < innerH ? innerW : innerH) / _kEdgeSize;
+    paint.strokeWidth = _kStrokeWidth * scale;
+
+    final start = Offset(_padding.left + innerW * 0.15, _padding.top + innerH * 0.45);
+    final mid = Offset(_padding.left + innerW * 0.40, _padding.top + innerH * 0.70);
+    final end = Offset(_padding.left + innerW * 0.85, _padding.top + innerH * 0.25);
+
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
@@ -774,9 +820,19 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    const start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
-    const mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    const end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    final double innerW = (_kEdgeSize - _padding.horizontal).clamp(0.0, _kEdgeSize);
+    final double innerH = (_kEdgeSize - _padding.vertical).clamp(0.0, _kEdgeSize);
+    if (innerW <= 0 || innerH <= 0) {
+      return;
+    } // nothing to draw
+
+    final double scale = (innerW < innerH ? innerW : innerH) / _kEdgeSize;
+    paint.strokeWidth = _kStrokeWidth * scale; // shrink stroke too
+
+    final start = Offset(_padding.left + innerW * 0.2, _padding.top + innerH * 0.5);
+    final mid = Offset(_padding.left + innerW * 0.5, _padding.top + innerH * 0.5);
+    final end = Offset(_padding.left + innerW * 0.8, _padding.top + innerH * 0.5);
+
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
     final Offset drawEnd = Offset.lerp(mid, end, t)!;
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
