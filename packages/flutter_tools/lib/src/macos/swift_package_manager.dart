@@ -327,9 +327,8 @@ class SwiftPackageManager {
   static String _symlinkNameForPlugin(String name, String dirBasename) {
     // Try to extract a version suffix from the directory basename.
     // Pub cache directories follow the pattern "package_name-version".
-    final int dashIndex = dirBasename.lastIndexOf('-');
-    if (dashIndex != -1) {
-      final String possibleVersion = dirBasename.substring(dashIndex + 1);
+    if (dirBasename.startsWith('$name-')) {
+      final String possibleVersion = dirBasename.substring(name.length + 1);
       // Validate it looks like a version (starts with a digit).
       if (possibleVersion.isNotEmpty &&
           possibleVersion.codeUnitAt(0) >= 0x30 &&
