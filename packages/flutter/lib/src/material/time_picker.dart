@@ -1843,9 +1843,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     // Supports 0 - 59.
-    final numbers = <String, int>{
-      for (int i = 0; i < 60; i++) localizations.formatDecimal(i): i,
-    };
+    final numbers = <String, int>{for (int i = 0; i < 60; i++) localizations.formatDecimal(i): i};
 
     return numbers;
   }
