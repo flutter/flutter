@@ -111,6 +111,9 @@ void FlutterEngine::SetNextFrameCallback(std::function<void()> callback) {
 }
 
 void FlutterEngine::PostPlatformThreadTask(std::function<void()> callback) {
+  if (!callback) {
+    return;
+  }
   FlutterDesktopEnginePostPlatformThreadTask(
       engine_,
       [](void* user_data) {

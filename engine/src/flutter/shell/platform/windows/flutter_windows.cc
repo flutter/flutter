@@ -254,6 +254,7 @@ void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
                                                 VoidCallback callback,
                                                 VoidCallback on_cancel,
                                                 void* user_data) {
+  FML_DCHECK(callback) << "Callback must not be null";
   struct Context {
     VoidCallback callback;
     VoidCallback on_cancel;
