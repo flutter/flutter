@@ -272,7 +272,11 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String deviceHubPath = _fileSystem.path.join(selectPath, 'Applications', 'DeviceHub.app');
+    final String deviceHubPath = _fileSystem.path.join(
+      _fileSystem.path.dirname(selectPath),
+      'Applications',
+      'DeviceHub.app',
+    );
     if (_fileSystem.directory(deviceHubPath).existsSync()) {
       return deviceHubPath;
     }
