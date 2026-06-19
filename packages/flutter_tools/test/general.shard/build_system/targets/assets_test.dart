@@ -1024,8 +1024,8 @@ flutter:
       markTransformDone.complete();
       await waitFor;
 
-      expect(inputFilePaths.toSet(), hasLength(5));
-      expect(outputFilePaths.toSet(), hasLength(5));
+      expect(inputFilePaths, hasLength(5));
+      expect(outputFilePaths, hasLength(5));
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
