@@ -75,10 +75,8 @@ bool FlutterWindow::OnCreate() {
   if (!registrar) {
     return false;
   }
+
   texture_registrar_ = registrar->texture_registrar();
-  if (!texture_registrar_) {
-    return false;
-  }
 
   // Set up texture registration method channel
   flutter::BinaryMessenger* messenger = flutter_controller_->engine()->messenger();
