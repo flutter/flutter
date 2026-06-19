@@ -235,7 +235,6 @@ class CheckboxThemeData with Diagnosticable {
     );
     properties.add(DiagnosticsProperty<OutlinedBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 
