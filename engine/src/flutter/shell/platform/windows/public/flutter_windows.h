@@ -270,15 +270,19 @@ FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
     VoidCallback callback,
     void* user_data);
 
+// Returns true if the current thread is the platform thread.
+// This can be called on any thread.
+FLUTTER_EXPORT bool FlutterDesktopEngineIsPlatformThread(
+    FlutterDesktopEngineRef engine);
+
 // Schedule a callback to be called on the platform thread.
 //
 // This can be called on any thread. The callback is executed only
 // once on the platform thread.
 //
 // If the task is discarded without being executed (e.g. during engine
-// shutdown), |on_cancel| is called with |user_data| so the caller can release
-// any associated resources. |on_cancel| can be nullptr if no cleanup is
-// needed.
+// shutdown), |on_cancel| is called on the platform thread so the caller can
+// cleanup allocations. |on_cancel| can be nullptr if no cleanup is needed.
 FLUTTER_EXPORT void FlutterDesktopEnginePostPlatformThreadTask(
     FlutterDesktopEngineRef engine,
     VoidCallback callback,

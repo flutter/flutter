@@ -70,6 +70,9 @@ class StubFlutterWindowsApi {
   virtual void EngineSetNextFrameCallback(VoidCallback callback,
                                           void* user_data) {}
 
+  // Called for FlutterDesktopEngineIsPlatformThread.
+  virtual bool EngineIsPlatformThread() { return false; }
+
   // Called for FlutterDesktopEnginePostPlatformThreadTask.
   virtual void EnginePostPlatformThreadTask(VoidCallback callback,
                                             VoidCallback on_cancel,

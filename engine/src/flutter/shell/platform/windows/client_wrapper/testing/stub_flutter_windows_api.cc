@@ -129,6 +129,13 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
   }
 }
 
+bool FlutterDesktopEngineIsPlatformThread(FlutterDesktopEngineRef engine) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->EngineIsPlatformThread();
+  }
+  return false;
+}
+
 void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
                                                 VoidCallback callback,
                                                 VoidCallback on_cancel,

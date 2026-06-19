@@ -110,6 +110,16 @@ void FlutterEngine::SetNextFrameCallback(std::function<void()> callback) {
       this);
 }
 
+bool FlutterEngine::IsPlatformThread() const {
+  if (!engine_) {
+    std::cerr
+        << "Cannot check platform thread on an engine that failed creation."
+        << std::endl;
+    return false;
+  }
+  return FlutterDesktopEngineIsPlatformThread(engine_);
+}
+
 void FlutterEngine::PostPlatformThreadTask(std::function<void()> callback) {
   if (!callback) {
     return;

@@ -85,6 +85,9 @@ class FlutterEngine : public PluginRegistry {
   // once on the platform thread.
   void SetNextFrameCallback(std::function<void()> callback);
 
+  // Returns true if the current thread is the platform thread.
+  bool IsPlatformThread() const;
+
   // Schedule a callback to be called on the platform thread.
   //
   // This can be called on any thread. The callback is executed only

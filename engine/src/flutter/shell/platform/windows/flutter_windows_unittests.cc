@@ -407,6 +407,33 @@ TEST_F(WindowsTest, PresentHeadless) {
   }
 }
 
+// Verify IsPlatformThread returns true on the platform thread.
+TEST_F(WindowsTest, IsPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  EXPECT_TRUE(FlutterDesktopEngineIsPlatformThread(engine.get()));
+}
+
+// Verify IsPlatformThread returns false on a background thread.
+TEST_F(WindowsTest, IsNotPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  bool result = true;
+  std::thread background(
+      [&]() { result = FlutterDesktopEngineIsPlatformThread(engine.get()); });
+  background.join();
+
+  EXPECT_FALSE(result);
+}
+
 // Verify a task can be posted to the platform thread while on the platform
 // thread.
 TEST_F(WindowsTest, PostPlatformThreadTaskFromPlatformThread) {
