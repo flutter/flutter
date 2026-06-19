@@ -605,93 +605,57 @@ void main() {
         });
 
         group('getSimulatorPath', () {
+          const xcodePath = '/Applications/Xcode.app/Contents/Developer';
+          const xcodeContentsPath = '/Applications/Xcode.app/Contents';
           late MemoryFileSystem fileSystem;
+          late Xcode xcodeWithFs;
 
           setUp(() {
             fileSystem = MemoryFileSystem.test();
-          });
-
-          testWithoutContext('returns Simulator.app path on Xcode < 27', () {
-            const xcodePath = '/Applications/Xcode.app/Contents/Developer';
             fakeProcessManager.addCommand(
               const FakeCommand(
                 command: <String>['/usr/bin/xcode-select', '--print-path'],
                 stdout: xcodePath,
               ),
             );
-            xcodeProjectInterpreter.version = Version(26, 0, 0);
-            final xcodeWithFs = Xcode.test(
+            xcodeWithFs = Xcode.test(
               processManager: fakeProcessManager,
               xcodeProjectInterpreter: xcodeProjectInterpreter,
               fileSystem: fileSystem,
             );
+          });
+
+          testWithoutContext('returns DeviceHub.app when it exists', () {
+            fileSystem
+                .directory('$xcodeContentsPath/Applications/DeviceHub.app')
+                .createSync(recursive: true);
+            expect(xcodeWithFs.getSimulatorPath(), '$xcodeContentsPath/Applications/DeviceHub.app');
+          });
+
+          testWithoutContext('falls back to Simulator.app when DeviceHub does not exist', () {
             fileSystem
                 .directory('$xcodePath/Applications/Simulator.app')
                 .createSync(recursive: true);
-
-            expect(
-              xcodeWithFs.getSimulatorPath(),
-              '$xcodePath/Applications/Simulator.app',
-            );
+            expect(xcodeWithFs.getSimulatorPath(), '$xcodePath/Applications/Simulator.app');
           });
 
-          testWithoutContext('returns DeviceHub.app path on Xcode >= 27', () {
-            const xcodePath = '/Applications/Xcode.app/Contents/Developer';
-            fakeProcessManager.addCommand(
-              const FakeCommand(
-                command: <String>['/usr/bin/xcode-select', '--print-path'],
-                stdout: xcodePath,
-              ),
-            );
-            xcodeProjectInterpreter.version = Version(27, 0, 0);
-            final xcodeWithFs = Xcode.test(
-              processManager: fakeProcessManager,
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-              fileSystem: fileSystem,
-            );
-            fileSystem
-                .directory('$xcodePath/Applications/DeviceHub.app')
-                .createSync(recursive: true);
-
-            expect(
-              xcodeWithFs.getSimulatorPath(),
-              '$xcodePath/Applications/DeviceHub.app',
-            );
-          });
-
-          testWithoutContext('returns null when app directory does not exist', () {
-            const xcodePath = '/Applications/Xcode.app/Contents/Developer';
-            fakeProcessManager.addCommand(
-              const FakeCommand(
-                command: <String>['/usr/bin/xcode-select', '--print-path'],
-                stdout: xcodePath,
-              ),
-            );
-            xcodeProjectInterpreter.version = Version(15, 0, 0);
-            final xcodeWithFs = Xcode.test(
-              processManager: fakeProcessManager,
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-              fileSystem: fileSystem,
-            );
-
+          testWithoutContext('returns null when neither app directory exists', () {
             expect(xcodeWithFs.getSimulatorPath(), isNull);
           });
 
           testWithoutContext('returns null when xcode-select path is unavailable', () {
-            fakeProcessManager.addCommand(
-              const FakeCommand(
-                command: <String>['/usr/bin/xcode-select', '--print-path'],
-                exception: ProcessException('/usr/bin/xcode-select', <String>['--print-path']),
-              ),
-            );
-            xcodeProjectInterpreter.version = Version(27, 0, 0);
-            final xcodeWithFs = Xcode.test(
-              processManager: fakeProcessManager,
+            // Uses a separate process manager so setUp's success command is not consumed.
+            final xcodeNoSelect = Xcode.test(
+              processManager: FakeProcessManager.list(<FakeCommand>[
+                const FakeCommand(
+                  command: <String>['/usr/bin/xcode-select', '--print-path'],
+                  exception: ProcessException('/usr/bin/xcode-select', <String>['--print-path']),
+                ),
+              ]),
               xcodeProjectInterpreter: xcodeProjectInterpreter,
               fileSystem: fileSystem,
             );
-
-            expect(xcodeWithFs.getSimulatorPath(), isNull);
+            expect(xcodeNoSelect.getSimulatorPath(), isNull);
           });
         });
       });
