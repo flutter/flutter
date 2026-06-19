@@ -693,13 +693,7 @@ class ThousandsSeparatorTextInputFormatter extends TextInputFormatter {
 
     // Strip any existing grouping separators so the value can be regrouped from
     // scratch. Everything that is not a [separator] is preserved verbatim.
-    final valueBuffer = StringBuffer();
-    for (var i = 0; i < newText.length; i += 1) {
-      if (newText[i] != separator) {
-        valueBuffer.write(newText[i]);
-      }
-    }
-    final value = valueBuffer.toString();
+    final String value = newText.replaceAll(separator, '');
 
     // Split off the fractional part, if any, so only the integer part is
     // grouped.
@@ -713,30 +707,39 @@ class ThousandsSeparatorTextInputFormatter extends TextInputFormatter {
       return newValue;
     }
 
-    // Keep the caret next to the same value character by counting non-separator
-    // characters on each side of the original selection and mapping that count
-    // back onto the regrouped string.
+    // Keep the caret next to the same value character by counting the
+    // non-separator characters before each end of the original selection and
+    // mapping that count back onto the regrouped string. Both ends are mapped
+    // so a non-empty selection (and its direction) is preserved rather than
+    // collapsed to a single caret.
     final TextSelection selection = newValue.selection;
-    final int newOffset = selection.isValid
-        ? _offsetForValueCount(formatted, _valueCharsBefore(newText, selection.end))
-        : formatted.length;
+    final TextSelection newSelection;
+    if (!selection.isValid) {
+      newSelection = TextSelection.collapsed(offset: formatted.length);
+    } else if (selection.isCollapsed) {
+      newSelection = TextSelection.collapsed(
+        offset: _offsetForValueCount(formatted, _valueCharsBefore(newText, selection.extentOffset)),
+      );
+    } else {
+      newSelection = selection.copyWith(
+        baseOffset: _offsetForValueCount(
+          formatted,
+          _valueCharsBefore(newText, selection.baseOffset),
+        ),
+        extentOffset: _offsetForValueCount(
+          formatted,
+          _valueCharsBefore(newText, selection.extentOffset),
+        ),
+      );
+    }
 
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: newOffset),
-    );
+    return TextEditingValue(text: formatted, selection: newSelection);
   }
 
   // Counts the value (non-separator) characters before [offset] in [text].
   int _valueCharsBefore(String text, int offset) {
     final int end = math.min(offset, text.length);
-    var count = 0;
-    for (var i = 0; i < end; i += 1) {
-      if (text[i] != separator) {
-        count += 1;
-      }
-    }
-    return count;
+    return text.substring(0, end).replaceAll(separator, '').length;
   }
 
   // Returns the offset in [formatted] that sits just after [valueCount] value

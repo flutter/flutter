@@ -969,6 +969,35 @@ void main() {
       expect(format(formatter, '').text, '');
     });
 
+    test('preserves a non-collapsed selection and its direction', () {
+      const formatter = ThousandsSeparatorTextInputFormatter();
+      // Select the trailing "000" of "1[000]" and let it regroup to "1,000".
+      // Each end is mapped past the same number of value characters, so the
+      // selection still covers those three digits as "1[,000]".
+      final TextEditingValue result = formatter.formatEditUpdate(
+        TextEditingValue.empty,
+        const TextEditingValue(
+          text: '1000',
+          selection: TextSelection(baseOffset: 1, extentOffset: 4),
+        ),
+      );
+      expect(result.text, '1,000');
+      expect(result.selection.baseOffset, 1);
+      expect(result.selection.extentOffset, 5);
+      // The selection is not collapsed.
+      expect(result.selection.isCollapsed, isFalse);
+      // Direction (base > extent) is retained when the selection is reversed.
+      final TextEditingValue reversed = formatter.formatEditUpdate(
+        TextEditingValue.empty,
+        const TextEditingValue(
+          text: '1000',
+          selection: TextSelection(baseOffset: 4, extentOffset: 1),
+        ),
+      );
+      expect(reversed.selection.baseOffset, 5);
+      expect(reversed.selection.extentOffset, 1);
+    });
+
     test('does not reformat during composition', () {
       const formatter = ThousandsSeparatorTextInputFormatter();
       const composing = TextEditingValue(
