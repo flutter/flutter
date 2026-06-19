@@ -2414,6 +2414,62 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [mockBundle stopMocking];
 }
 
+/**
+ * Verifies that scene lifecycle notifications (specifically UISceneDidEnterBackgroundNotification)
+ * originating from a different scene (e.g. out-of-process system keyboard scene on iOS 27 Beta)
+ * are ignored, while notifications for the matching scene hosting the view controller are
+ * processed.
+ *
+ * Prevents regressions where global scene notifications trigger pausing the app's rendering.
+ * See: https://github.com/flutter/flutter/issues/187844
+ */
+- (void)
+    testLifeCycleNotificationSceneDidEnterBackgroundIgnoresOtherScenes API_AVAILABLE(ios(13.0)) {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  id mockVC = OCMPartialMock(flutterViewController);
+
+  // Mock the active window scene that hosts the FlutterViewController.
+  id flutterWindowScene = OCMClassMock([UIWindowScene class]);
+  OCMStub([mockVC flutterWindowSceneIfViewLoaded]).andReturn(flutterWindowScene);
+
+  // Create an auxiliary scene (e.g. the system keyboard) unrelated to the Flutter window.
+  id auxiliaryScene = OCMClassMock([UIWindowScene class]);
+
+  // Post a notification from the auxiliary (non-Flutter) scene and ensure it is ignored.
+  // It should not trigger surface update removal or affect keyboard transitioning state.
+  NSNotification* auxiliarySceneNotification =
+      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                    object:auxiliaryScene
+                                  userInfo:nil];
+  [NSNotificationCenter.defaultCenter postNotification:auxiliarySceneNotification];
+  OCMVerify(never(), [mockVC surfaceUpdated:[OCMArg any]]);
+  OCMVerify(never(), [mockVC goToApplicationLifecycle:@"AppLifecycleState.paused"]);
+  XCTAssertFalse(
+      flutterViewController.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground);
+
+  // Post a notification from the Flutter scene and assert it is processed.
+  // It should trigger surface update removal and transition lifecycle state to paused.
+  NSNotification* flutterSceneNotification =
+      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                    object:flutterWindowScene
+                                  userInfo:nil];
+  [NSNotificationCenter.defaultCenter postNotification:flutterSceneNotification];
+  OCMVerify([mockVC surfaceUpdated:NO]);
+  OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.paused"]);
+  XCTAssertTrue(
+      flutterViewController.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground);
+
+  [flutterViewController deregisterNotifications];
+  [mockBundle stopMocking];
+}
+
 - (void)testLifeCycleNotificationApplicationWillEnterForeground {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];

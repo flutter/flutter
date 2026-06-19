@@ -65,8 +65,8 @@ copy("canvaskit_chromium_group") {
   ]
 }
 
-# This toolchain is only to be used by canvaskit_experimental_webparagraph_group below.
-wasm_toolchain("canvaskit_experimental_webparagraph") {
+# This toolchain is only to be used by canvaskit_webparagraph_group below.
+wasm_toolchain("canvaskit_webparagraph") {
   extra_toolchain_args = {
     # In Chromium browsers, we can use the browser's APIs to get the necessary
     # ICU data.
@@ -99,18 +99,16 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
   }
 }
 
-copy("canvaskit_experimental_webparagraph_group") {
+copy("canvaskit_webparagraph_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [
-    "//flutter/skia/modules/canvaskit(:canvaskit_experimental_webparagraph)",
-  ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_webparagraph)" ]
 
   sources = [
-    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js",
-    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js.symbols",
-    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.wasm",
+    "$root_out_dir/canvaskit_webparagraph/canvaskit.js",
+    "$root_out_dir/canvaskit_webparagraph/canvaskit.js.symbols",
+    "$root_out_dir/canvaskit_webparagraph/canvaskit.wasm",
   ]
-  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/{{source_file_part}}" ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/{{source_file_part}}" ]
 }
 
 # This toolchain is only to be used by skwasm_group below.
