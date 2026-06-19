@@ -14,6 +14,7 @@
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
 #include "flutter/fml/build_config.h"
+#include "flutter/testing/testing.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles/modern_shaders_gles.h"
@@ -28,6 +29,27 @@
 #include "impeller/playground/imgui/gles3/imgui_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/surface_gles.h"
+
+namespace {
+
+class GLESPlaygroundEnvironment : public ::testing::Environment {
+ public:
+  std::unique_ptr<impeller::PlaygroundImplGLES::ShareableContext>
+      shared_context;
+  std::unique_ptr<impeller::PlaygroundImplGLES::ShareableContext>
+      shared_context_sdf;
+
+  void TearDown() override {
+    shared_context.reset();
+    shared_context_sdf.reset();
+  }
+};
+
+GLESPlaygroundEnvironment* const kGlesPlaygroundEnv =
+    static_cast<GLESPlaygroundEnvironment*>(
+        ::testing::AddGlobalTestEnvironment(new GLESPlaygroundEnvironment()));
+
+}  // namespace
 
 namespace impeller {
 
@@ -102,9 +124,7 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
 static std::vector<std::shared_ptr<fml::Mapping>>
 ShaderLibraryMappingsForPlayground(bool is_gles3);
 
-PlaygroundImplGLES::PlaygroundImplGLES(
-    PlaygroundSwitches switches,
-    std::shared_ptr<ShareableContext>& shared_context)
+PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
       use_angle_(switches.use_angle) {
@@ -115,13 +135,16 @@ PlaygroundImplGLES::PlaygroundImplGLES(
     FML_CHECK(angle_glesv2_ != nullptr);
   }
 
-  // If the existing shared context was created with switches that result in an
-  // incompatible GLES context, reset the shared context to create a new one.
+  auto& shared_context = switches.flags.use_sdfs
+                             ? kGlesPlaygroundEnv->shared_context_sdf
+                             : kGlesPlaygroundEnv->shared_context;
+
+  // If the switches have values that result in a different GLES context than
+  // the existing shared context, reset the shared context to create a new one.
   if (shared_context &&
       (shared_context->switches.use_angle != switches_.use_angle ||
        shared_context->switches.flags.antialiased_lines !=
-           switches_.flags.antialiased_lines ||
-       shared_context->switches.flags.use_sdfs != switches_.flags.use_sdfs)) {
+           switches_.flags.antialiased_lines)) {
     shared_context.reset();
   }
 
@@ -176,7 +199,7 @@ GLFWwindow* PlaygroundImplGLES::CreateGLWindow(
   return window;
 }
 
-std::shared_ptr<PlaygroundImplGLES::ShareableContext>
+std::unique_ptr<PlaygroundImplGLES::ShareableContext>
 PlaygroundImplGLES::MakeShareableContext(const PlaygroundSwitches& switches) {
   auto window =
       UniqueHandle(CreateGLWindow(switches, nullptr), &DestroyWindowHandle);
@@ -230,7 +253,7 @@ PlaygroundImplGLES::MakeShareableContext(const PlaygroundSwitches& switches) {
     return nullptr;
   }
 
-  return std::make_shared<ShareableContext>(std::move(window), worker,
+  return std::make_unique<ShareableContext>(std::move(window), worker,
                                             context_gles, switches);
 }
 

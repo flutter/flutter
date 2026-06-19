@@ -20,26 +20,6 @@
 #include "impeller/playground/backend/vulkan/playground_impl_vk.h"
 #endif  // IMPELLER_ENABLE_VULKAN
 
-#if IMPELLER_ENABLE_OPENGLES
-namespace {
-static std::shared_ptr<impeller::PlaygroundImplGLES::ShareableContext>
-    g_shared_context_gles;
-static std::shared_ptr<impeller::PlaygroundImplGLES::ShareableContext>
-    g_shared_context_gles_sdf;
-
-class PlaygroundEnvironment : public ::testing::Environment {
- public:
-  void TearDown() override {
-    g_shared_context_gles.reset();
-    g_shared_context_gles_sdf.reset();
-  }
-};
-
-[[maybe_unused]] ::testing::Environment* const kGlesPlaygroundEnv =
-    ::testing::AddGlobalTestEnvironment(new PlaygroundEnvironment());
-}  // namespace
-#endif  // IMPELLER_ENABLE_OPENGLES
-
 namespace impeller {
 
 std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
@@ -54,15 +34,11 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
       return std::make_unique<PlaygroundImplMTL>(switches);
 #endif  // IMPELLER_ENABLE_METAL
 #if IMPELLER_ENABLE_OPENGLES
-    case PlaygroundBackend::kOpenGLES: {
-      return std::make_unique<PlaygroundImplGLES>(switches,
-                                                  g_shared_context_gles);
-    }
-    case PlaygroundBackend::kOpenGLESSDF: {
+    case PlaygroundBackend::kOpenGLES:
+      return std::make_unique<PlaygroundImplGLES>(switches);
+    case PlaygroundBackend::kOpenGLESSDF:
       switches.flags.use_sdfs = true;
-      return std::make_unique<PlaygroundImplGLES>(switches,
-                                                  g_shared_context_gles_sdf);
-    }
+      return std::make_unique<PlaygroundImplGLES>(switches);
 #endif  // IMPELLER_ENABLE_OPENGLES
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:

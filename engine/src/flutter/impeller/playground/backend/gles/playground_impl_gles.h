@@ -17,9 +17,7 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
  public:
   struct ShareableContext;
 
-  explicit PlaygroundImplGLES(
-      PlaygroundSwitches switches,
-      std::shared_ptr<ShareableContext>& shared_context);
+  explicit PlaygroundImplGLES(PlaygroundSwitches switches);
 
   ~PlaygroundImplGLES();
 
@@ -57,7 +55,7 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   static GLFWwindow* CreateGLWindow(const PlaygroundSwitches& switches,
                                     GLFWwindow* share_window);
 
-  static std::shared_ptr<ShareableContext> MakeShareableContext(
+  static std::unique_ptr<ShareableContext> MakeShareableContext(
       const PlaygroundSwitches& switches);
 
   RuntimeStageBackend GetRuntimeStageBackend() const override;
