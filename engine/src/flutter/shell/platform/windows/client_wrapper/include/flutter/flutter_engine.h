@@ -15,6 +15,7 @@
 #include "binary_messenger.h"
 #include "dart_project.h"
 #include "plugin_registrar.h"
+#include "plugin_registrar_windows.h"
 #include "plugin_registry.h"
 
 namespace flutter {
@@ -72,6 +73,11 @@ class FlutterEngine : public PluginRegistry {
   // flutter::PluginRegistry:
   FlutterDesktopPluginRegistrarRef GetRegistrarForPlugin(
       const std::string& plugin_name) override;
+
+  // Returns the plugin registrar for the given plugin name.
+  //
+  // The pointer will remain valid for the lifetime of the engine.
+  PluginRegistrarWindows* GetPluginRegistrar(const std::string& plugin_name);
 
   // Returns the messenger to use for creating channels to communicate with the
   // Flutter engine.

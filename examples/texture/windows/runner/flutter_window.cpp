@@ -5,7 +5,6 @@
 #include "flutter_window.h"
 
 #include <optional>
-#include <mutex>
 #include <vector>
 
 #include "flutter/generated_plugin_registrant.h"
@@ -48,12 +47,6 @@ class MyTexture {
   FlutterDesktopPixelBuffer pixel_buffer_;
 };
 
-static const FlutterDesktopPixelBuffer* CopyPixelBufferCallback(
-    size_t width, size_t height, void* user_data) {
-  auto* my_texture = static_cast<MyTexture*>(user_data);
-  return my_texture->CopyPixelBuffer(width, height);
-}
-
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
@@ -76,6 +69,8 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+
+  texture_registrar_ = flutter_controller_->engine()->GetPluginRegistrar("TextureTestPlugin")->texture_registrar();
 
   // Set up texture registration method channel
   flutter::BinaryMessenger* messenger = flutter_controller_->engine()->messenger();
@@ -119,20 +114,13 @@ bool FlutterWindow::OnCreate() {
             return;
           }
 
-          FlutterDesktopPluginRegistrarRef registrar_ref =
-              flutter_controller_->engine()->GetRegistrarForPlugin("TextureTestPlugin");
-          FlutterDesktopTextureRegistrarRef texture_registrar_ref =
-              FlutterDesktopRegistrarGetTextureRegistrar(registrar_ref);
-
           my_texture_ = std::make_unique<MyTexture>(width, height, static_cast<uint8_t>(0x05), static_cast<uint8_t>(0x53), static_cast<uint8_t>(0xb1));
 
-          FlutterDesktopTextureInfo info = {};
-          info.type = kFlutterDesktopPixelBufferTexture;
-          info.pixel_buffer_config.user_data = my_texture_.get();
-          info.pixel_buffer_config.callback = CopyPixelBufferCallback;
-
-          texture_id_ = FlutterDesktopTextureRegistrarRegisterExternalTexture(
-              texture_registrar_ref, &info);
+          pixel_buffer_texture_ = std::make_unique<flutter::TextureVariant>(
+              flutter::PixelBufferTexture([this](size_t width, size_t height) {
+                return my_texture_->CopyPixelBuffer(width, height);
+              }));
+          texture_id_ = texture_registrar_->RegisterTexture(pixel_buffer_texture_.get());
           result->Success(flutter::EncodableValue(texture_id_));
 
         } else if (method == "setColor") {
@@ -168,13 +156,7 @@ bool FlutterWindow::OnCreate() {
 
           my_texture_->SetColor(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b));
 
-          FlutterDesktopPluginRegistrarRef registrar_ref =
-              flutter_controller_->engine()->GetRegistrarForPlugin("TextureTestPlugin");
-          FlutterDesktopTextureRegistrarRef texture_registrar_ref =
-              FlutterDesktopRegistrarGetTextureRegistrar(registrar_ref);
-
-          FlutterDesktopTextureRegistrarMarkExternalTextureFrameAvailable(
-              texture_registrar_ref, texture_id_);
+          texture_registrar_->MarkTextureFrameAvailable(texture_id_);
           result->Success();
         } else {
           result->NotImplemented();
@@ -195,12 +177,8 @@ bool FlutterWindow::OnCreate() {
 
 void FlutterWindow::OnDestroy() {
   if (my_texture_) {
-    FlutterDesktopPluginRegistrarRef registrar_ref =
-        flutter_controller_->engine()->GetRegistrarForPlugin("TextureTestPlugin");
-    FlutterDesktopTextureRegistrarRef texture_registrar_ref =
-        FlutterDesktopRegistrarGetTextureRegistrar(registrar_ref);
-    FlutterDesktopTextureRegistrarUnregisterExternalTexture(
-        texture_registrar_ref, texture_id_, nullptr, nullptr);
+    texture_registrar_->UnregisterTexture(texture_id_, nullptr);
+    pixel_buffer_texture_ = nullptr;
     my_texture_ = nullptr;
   }
 

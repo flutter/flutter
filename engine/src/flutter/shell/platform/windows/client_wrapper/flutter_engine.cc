@@ -9,6 +9,7 @@
 
 #include "binary_messenger_impl.h"
 #include "flutter_windows.h"
+#include "include/flutter/plugin_registrar_windows.h"
 
 namespace flutter {
 
@@ -121,6 +122,13 @@ std::optional<LRESULT> FlutterEngine::ProcessExternalWindowMessage(
     return result;
   }
   return std::nullopt;
+}
+
+PluginRegistrarWindows* FlutterEngine::GetPluginRegistrar(
+    const std::string& plugin_name) {
+  return PluginRegistrarManager::GetInstance()
+      ->GetRegistrar<PluginRegistrarWindows>(
+          GetRegistrarForPlugin(plugin_name));
 }
 
 FlutterDesktopEngineRef FlutterEngine::RelinquishEngine() {
