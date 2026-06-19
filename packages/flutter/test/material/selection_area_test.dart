@@ -698,7 +698,7 @@ void main() {
       expect(paragraph98.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
       expect(paragraph97.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
       expect(paragraph96.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-      await gesture.up();
+      // The release path opens the toolbar and is covered by the following tests.
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
