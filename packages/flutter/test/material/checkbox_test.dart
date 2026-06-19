@@ -2527,6 +2527,40 @@ void main() {
     await tester.pumpWidget(_padFrame(true, padding: const EdgeInsets.all(-1.0)));
     expect(tester.takeException(), isAssertionError);
   });
+
+  testWidgets('Checkbox.padding falls back to CheckboxThemeData.padding', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(checkboxTheme: const CheckboxThemeData(padding: EdgeInsets.all(4.5))),
+        home: Material(
+          child: Center(child: Checkbox(value: true, onChanged: (bool? v) {})),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(_checkboxRenderer(tester), paints..path(strokeWidth: 1.0)); // theme padding applied
+  });
+
+  testWidgets('Checkbox.padding overrides CheckboxThemeData.padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(checkboxTheme: const CheckboxThemeData(padding: EdgeInsets.zero)),
+        home: Material(
+          child: Center(
+            child: Checkbox(
+              value: true,
+              onChanged: (bool? v) {},
+              padding: const EdgeInsets.all(4.5),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(_checkboxRenderer(tester), paints..path(strokeWidth: 1.0)); // widget value wins
+  });
 }
 
 RenderBox _checkboxRenderer(WidgetTester tester) =>
