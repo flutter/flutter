@@ -201,7 +201,7 @@ dependency_overrides:
   fixnum:
     path: ./third_party/dart/third_party/pkg/core/pkgs/fixnum
   frontend_server_client:
-    path: ./third_party/dart/third_party/pkg/webdev/frontend_server_client
+    path: ./third_party/dart/pkg/frontend_server_client
   gcloud:
     path: ./third_party/pkg/gcloud
   glob:

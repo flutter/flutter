@@ -430,7 +430,16 @@ class FlutterProject {
     ]);
     await migration.run();
 
-    if (isPlugin) {
+    // When no platforms are enabled, nothing reads the plugin list or the
+    // injected per-platform files.
+    final bool anyPlatformEnabled =
+        androidPlatform ||
+        iosPlatform ||
+        linuxPlatform ||
+        macOSPlatform ||
+        windowsPlatform ||
+        webPlatform;
+    if (isPlugin || !anyPlatformEnabled) {
       return;
     }
     await refreshPluginsList(
