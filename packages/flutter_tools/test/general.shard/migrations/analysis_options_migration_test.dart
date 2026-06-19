@@ -188,6 +188,28 @@ analyzer:
       expect(migratedContents, contains('- foo/**'));
       expect(migratedContents, contains('- build/**'));
     });
+
+    testWithoutContext('migrates and merges excludes when list is in flow style', () async {
+      const analysisOptionsContents = '''
+analyzer:
+  exclude: [foo/**, build/**]
+''';
+
+      analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+      final migration = AnalysisOptionsMigration(mockProject, testLogger);
+      await migration.migrate();
+
+      final String migratedContents = analysisOptionsFile.readAsStringSync();
+      expect(migratedContents, contains('foo/**'));
+      expect(migratedContents, contains('build/**'));
+      expect(migratedContents, contains('android/**'));
+      expect(migratedContents, contains('ios/**'));
+      expect(migratedContents, contains('web/**'));
+      expect(migratedContents, contains('windows/**'));
+      expect(migratedContents, contains('macos/**'));
+      expect(migratedContents, contains('linux/**'));
+    });
   });
 }
 
