@@ -185,7 +185,10 @@ final class AssetTransformer {
       if (depfile.existsSync()) {
         try {
           final depfileService = DepfileService(logger: logger, fileSystem: _fileSystem);
-          final Depfile parsedDepfile = depfileService.parse(depfile);
+          final Depfile parsedDepfile = depfileService.parse(
+            depfile,
+            _fileSystem.directory(workingDirectory),
+          );
           dependencies = parsedDepfile.inputs;
         } on Exception catch (e) {
           logger.printTrace('Failed to parse depfile: $e');
