@@ -123,10 +123,17 @@ class DevelopmentShaderCompiler {
       return false;
     }
     for (final File dep in deps) {
-      if (!dep.existsSync()) {
-        return true;
-      }
-      if (dep.statSync().modified.isAfter(lastCompiled)) {
+      try {
+        if (!dep.existsSync()) {
+          return true;
+        }
+        if (dep.statSync().modified.isAfter(lastCompiled)) {
+          return true;
+        }
+      } on FileSystemException catch (e) {
+        _logger.printTrace(
+          'Error checking shader dependency modification time for ${dep.path}: $e',
+        );
         return true;
       }
     }
