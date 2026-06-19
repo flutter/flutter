@@ -27,12 +27,9 @@ Future<TaskResult> run() async {
     await inDirectory(appDir, () async {
       await flutter('packages', options: <String>['get']);
 
-      // Step 1: Test using command line flag.
+      // Step 1: Test using default (should be enabled).
       {
-        final Process process = await startFlutter(
-          'run',
-          options: <String>['--enable-impeller', '-d', 'windows'],
-        );
+        final Process process = await startFlutter('run', options: <String>['-d', 'windows']);
 
         final completer = Completer<void>();
         var sawImpellerBackendMessage = false;
@@ -68,7 +65,7 @@ Future<TaskResult> run() async {
         }
       }
 
-      // Step 2: Test using project flag.
+      // Step 2: Test disabling using project flag.
       {
         if (!mainCppFile.existsSync()) {
           res = TaskResult.failure('main.cpp not found at $mainCppPath');
@@ -78,16 +75,72 @@ Future<TaskResult> run() async {
         final String originalContent = mainCppFile.readAsStringSync();
         final String modifiedContent = originalContent.replaceFirst(
           'flutter::DartProject project(L"data");',
-          'flutter::DartProject project(L"data");\n  project.set_impeller_switch(flutter::ImpellerSwitch::Enabled);',
+          'flutter::DartProject project(L"data");\n  project.set_impeller_switch(flutter::ImpellerSwitch::Disabled);',
         );
         if (modifiedContent == originalContent) {
           res = TaskResult.failure('Failed to modify main.cpp');
           return;
         }
-        mainCppFile.writeAsStringSync(modifiedContent);
 
-        // Run 'flutter run' without command-line flag --enable-impeller.
-        final Process process = await startFlutter('run', options: <String>['-d', 'windows']);
+        try {
+          mainCppFile.writeAsStringSync(modifiedContent);
+
+          // Run 'flutter run' without command-line flag.
+          final Process process = await startFlutter('run', options: <String>['-d', 'windows']);
+
+          final completer = Completer<void>();
+          var sawImpellerBackendMessage = false;
+
+          final StreamSubscription<String> subscription = process.stdout
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())
+              .listen((String line) {
+                print('[STDOUT 2]: $line');
+                if (line.contains(impellerBackendMessage)) {
+                  sawImpellerBackendMessage = true;
+                }
+                // Stop when VM service is listening.
+                if (line.contains('The Dart VM service is listening on') ||
+                    line.contains('A Dart VM Service')) {
+                  if (!completer.isCompleted) {
+                    completer.complete();
+                  }
+                }
+              });
+
+          await Future.any(<Future<void>>[
+            completer.future,
+            Future<void>.delayed(const Duration(minutes: 2)),
+          ]);
+
+          process.stdin.writeln('q');
+          final int exitCode = await process.exitCode;
+          await subscription.cancel();
+
+          if (!completer.isCompleted) {
+            res = TaskResult.failure('Step 2 timed out waiting for VM service');
+            return;
+          }
+          if (exitCode != 0) {
+            res = TaskResult.failure('Flutter process 2 exited with non-zero exit code: $exitCode');
+            return;
+          } else if (sawImpellerBackendMessage) {
+            res = TaskResult.failure(
+              'Saw "$impellerBackendMessage" in output but Impeller should be disabled (Step 2)',
+            );
+            return;
+          }
+        } finally {
+          mainCppFile.writeAsStringSync(originalContent);
+        }
+      }
+
+      // Step 3: Test disabling using command line flag.
+      {
+        final Process process = await startFlutter(
+          'run',
+          options: <String>['--no-enable-impeller', '-d', 'windows'],
+        );
 
         final completer = Completer<void>();
         var sawImpellerBackendMessage = false;
@@ -96,9 +149,13 @@ Future<TaskResult> run() async {
             .transform(utf8.decoder)
             .transform(const LineSplitter())
             .listen((String line) {
-              print('[STDOUT 2]: $line');
+              print('[STDOUT 3]: $line');
               if (line.contains(impellerBackendMessage)) {
                 sawImpellerBackendMessage = true;
+              }
+              // Stop when VM service is listening.
+              if (line.contains('The Dart VM service is listening on') ||
+                  line.contains('A Dart VM Service')) {
                 if (!completer.isCompleted) {
                   completer.complete();
                 }
@@ -114,11 +171,17 @@ Future<TaskResult> run() async {
         final int exitCode = await process.exitCode;
         await subscription.cancel();
 
-        if (exitCode != 0) {
-          res = TaskResult.failure('Flutter process 2 exited with non-zero exit code: $exitCode');
+        if (!completer.isCompleted) {
+          res = TaskResult.failure('Step 2 timed out waiting for VM service');
           return;
-        } else if (!sawImpellerBackendMessage) {
-          res = TaskResult.failure('Did not see "$impellerBackendMessage" in output (Step 2)');
+        }
+        if (exitCode != 0) {
+          res = TaskResult.failure('Flutter process 3 exited with non-zero exit code: $exitCode');
+          return;
+        } else if (sawImpellerBackendMessage) {
+          res = TaskResult.failure(
+            'Saw "$impellerBackendMessage" in output but Impeller should be disabled (Step 3)',
+          );
           return;
         }
       }
