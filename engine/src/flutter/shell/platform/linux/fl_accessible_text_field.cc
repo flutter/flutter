@@ -39,10 +39,13 @@ static gchar* get_substring(FlAccessibleTextField* self,
                             glong start,
                             glong end) {
   const gchar* value = gtk_entry_buffer_get_text(self->buffer);
+  glong length = g_utf8_strlen(value, -1);
   if (end == -1) {
     // g_utf8_substring() accepts -1 since 2.72
-    end = g_utf8_strlen(value, -1);
+    end = length;
   }
+  start = CLAMP(start, 0, length);
+  end = CLAMP(end, start, length);
   return g_utf8_substring(value, start, end);
 }
 
@@ -76,15 +79,19 @@ static gchar* get_string_at_offset(FlAccessibleTextField* self,
   const PangoLogAttr* attrs =
       pango_layout_get_log_attrs_readonly(layout, &n_attrs);
 
+  start = CLAMP(start, 0, MAX(n_attrs - 1, 0));
+  end = CLAMP(end, 0, MAX(n_attrs - 1, 0));
+
   while (start > 0 && !is_start(&attrs[start])) {
     --start;
-  }
-  if (start_offset != nullptr) {
-    *start_offset = start;
   }
 
   while (end < n_attrs && !is_end(&attrs[end])) {
     ++end;
+  }
+
+  if (start_offset != nullptr) {
+    *start_offset = start;
   }
   if (end_offset != nullptr) {
     *end_offset = end;
