@@ -110,9 +110,9 @@ void FlutterEngine::SetNextFrameCallback(std::function<void()> callback) {
       this);
 }
 
-void FlutterEngine::RunNowOrPostPlatformThreadTask(
+void FlutterEngine::PostPlatformThreadTask(
     std::function<void()> callback) {
-  FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+  FlutterDesktopEnginePostPlatformThreadTask(
       engine_,
       [](void* user_data) {
         std::unique_ptr<std::function<void()>> cb{

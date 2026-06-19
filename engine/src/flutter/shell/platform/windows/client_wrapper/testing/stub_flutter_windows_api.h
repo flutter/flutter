@@ -70,8 +70,8 @@ class StubFlutterWindowsApi {
   virtual void EngineSetNextFrameCallback(VoidCallback callback,
                                           void* user_data) {}
 
-  // Called for FlutterDesktopEngineRunNowOrPostPlatformThreadTask.
-  virtual void EngineRunNowOrPostPlatformThreadTask(VoidCallback callback,
+  // Called for FlutterDesktopEnginePostPlatformThreadTask.
+  virtual void EnginePostPlatformThreadTask(VoidCallback callback,
                                                     void* user_data) {}
 
   // Called for FlutterDesktopEngineReloadSystemFonts.

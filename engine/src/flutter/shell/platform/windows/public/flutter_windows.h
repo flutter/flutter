@@ -273,9 +273,8 @@ FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
 // Schedule a callback to be called on the platform thread.
 //
 // This can be called on any thread. The callback is executed only
-// once on the platform thread. If this is called from the platform thread,
-// the callback will be executed before this method returns.
-FLUTTER_EXPORT void FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+// once on the platform thread.
+FLUTTER_EXPORT void FlutterDesktopEnginePostPlatformThreadTask(
     FlutterDesktopEngineRef engine,
     VoidCallback callback,
     void* user_data);

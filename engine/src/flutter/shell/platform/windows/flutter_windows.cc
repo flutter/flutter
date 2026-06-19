@@ -250,11 +250,11 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
       [callback, user_data]() { callback(user_data); });
 }
 
-void FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+void FlutterDesktopEnginePostPlatformThreadTask(
     FlutterDesktopEngineRef engine,
     VoidCallback callback,
     void* user_data) {
-  EngineFromHandle(engine)->task_runner()->RunNowOrPostTask(
+  EngineFromHandle(engine)->task_runner()->PostTask(
       [callback, user_data]() { callback(user_data); });
 }
 

@@ -409,7 +409,7 @@ TEST_F(WindowsTest, PresentHeadless) {
 
 // Verify a task can be posted to the platform thread while on the platform
 // thread.
-TEST_F(WindowsTest, RunNowOrPostPlatformThreadTaskFromPlatformThread) {
+TEST_F(WindowsTest, PostPlatformThreadTaskFromPlatformThread) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
 
@@ -421,7 +421,7 @@ TEST_F(WindowsTest, RunNowOrPostPlatformThreadTaskFromPlatformThread) {
     bool done = false;
   } captures;
 
-  FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+  FlutterDesktopEnginePostPlatformThreadTask(
       engine.get(),
       [](void* user_data) {
         auto captures = static_cast<Captures*>(user_data);
@@ -430,13 +430,16 @@ TEST_F(WindowsTest, RunNowOrPostPlatformThreadTaskFromPlatformThread) {
       },
       &captures);
 
-  EXPECT_TRUE(captures.done);
+  while (!captures.done) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(captures.thread_id, std::this_thread::get_id());
 }
 
 // Verify a task can be posted to the platform thread while on a background
 // thread.
-TEST_F(WindowsTest, RunNowOrPostPlatformThreadTaskFromBackgroundThread) {
+TEST_F(WindowsTest, PostPlatformThreadTaskFromBackgroundThread) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
 
@@ -456,7 +459,7 @@ TEST_F(WindowsTest, RunNowOrPostPlatformThreadTaskFromBackgroundThread) {
       captures.background_thread_id = std::this_thread::get_id();
     }
 
-    FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+    FlutterDesktopEnginePostPlatformThreadTask(
         engine.get(),
         [](void* user_data) {
           auto captures = static_cast<Captures*>(user_data);
