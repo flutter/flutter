@@ -38,11 +38,6 @@ class GLESPlaygroundEnvironment : public ::testing::Environment {
       shared_context;
   std::unique_ptr<impeller::PlaygroundImplGLES::ShareableContext>
       shared_context_sdf;
-
-  void TearDown() override {
-    shared_context.reset();
-    shared_context_sdf.reset();
-  }
 };
 
 GLESPlaygroundEnvironment* const kGlesPlaygroundEnv =
