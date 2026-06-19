@@ -428,7 +428,7 @@ TEST_F(WindowsTest, PostPlatformThreadTaskFromPlatformThread) {
         captures->thread_id = std::this_thread::get_id();
         captures->done = true;
       },
-      &captures);
+      /*on_cancel=*/nullptr, &captures);
 
   while (!captures.done) {
     PumpMessage();
@@ -466,7 +466,7 @@ TEST_F(WindowsTest, PostPlatformThreadTaskFromBackgroundThread) {
           captures->platform_thread_id = std::this_thread::get_id();
           captures->done = true;
         },
-        &captures);
+        /*on_cancel=*/nullptr, &captures);
   });
   background.join();
 
@@ -478,6 +478,38 @@ TEST_F(WindowsTest, PostPlatformThreadTaskFromBackgroundThread) {
   EXPECT_NE(captures.background_thread_id, std::thread::id{});
   EXPECT_NE(captures.background_thread_id, captures.platform_thread_id);
   EXPECT_EQ(captures.platform_thread_id, std::this_thread::get_id());
+}
+
+// Verify that destroying the engine after posting a task invokes the cancel
+// callback instead of the task callback.
+TEST_F(WindowsTest, PostPlatformThreadTaskCancelledOnEngineDestroy) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    bool callback_called = false;
+    bool cancel_called = false;
+  } captures;
+
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->callback_called = true;
+      },
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->cancel_called = true;
+      },
+      &captures);
+
+  // Destroy the engine before the task has a chance to run. The cancel
+  // callback should be called and the task callback should not.
+  engine.reset();
+
+  EXPECT_FALSE(captures.callback_called);
+  EXPECT_TRUE(captures.cancel_called);
 }
 
 // Implicit view has the implicit view ID.

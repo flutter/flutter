@@ -72,7 +72,8 @@ class StubFlutterWindowsApi {
 
   // Called for FlutterDesktopEnginePostPlatformThreadTask.
   virtual void EnginePostPlatformThreadTask(VoidCallback callback,
-                                                    void* user_data) {}
+                                            VoidCallback on_cancel,
+                                            void* user_data) {}
 
   // Called for FlutterDesktopEngineReloadSystemFonts.
   virtual void EngineReloadSystemFonts() {}

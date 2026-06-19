@@ -129,13 +129,13 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
   }
 }
 
-void FlutterDesktopEnginePostPlatformThreadTask(
-    FlutterDesktopEngineRef engine,
-    VoidCallback callback,
-    void* user_data) {
+void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
+                                                VoidCallback callback,
+                                                VoidCallback on_cancel,
+                                                void* user_data) {
   if (s_stub_implementation) {
-    s_stub_implementation->EnginePostPlatformThreadTask(callback,
-                                                                user_data);
+    s_stub_implementation->EnginePostPlatformThreadTask(callback, on_cancel,
+                                                        user_data);
   }
 }
 
