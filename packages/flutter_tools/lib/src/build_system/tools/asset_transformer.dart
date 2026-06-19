@@ -30,7 +30,6 @@ final class AssetTransformer {
        _buildMode = buildMode;
 
   static const buildModeEnvVar = 'FLUTTER_BUILD_MODE';
-  static const depfileEnvVar = 'FLUTTER_ASSET_TRANSFORMER_DEPFILE';
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
@@ -120,85 +119,65 @@ final class AssetTransformer {
     required String workingDirectory,
     required Logger logger,
   }) async {
-    final Directory depfileDirectory = _fileSystem.systemTempDirectory.createTempSync(
-      'flutter_tools_asset_transformer_depfile.',
+    final command = <String>[
+      _dartBinaryPath,
+      'run',
+      transformer.package,
+      '--input=${asset.path}',
+      '--output=${output.path}',
+      ...transformer.args,
+    ];
+
+    final ProcessResult result = await _processManager.run(
+      command,
+      workingDirectory: workingDirectory,
+      environment: <String, String>{buildModeEnvVar: _buildMode.cliName},
     );
-    try {
-      final File depfile = depfileDirectory.childFile('depfile');
 
-      final transformerArguments = <String>[
-        '--input=${asset.absolute.path}',
-        '--output=${output.absolute.path}',
-        ...transformer.args,
-      ];
+    final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
 
-      final command = <String>[
-        _dartBinaryPath,
-        'run',
-        transformer.package,
-        ...transformerArguments,
-      ];
-
-      // Delete the output file if it already exists for whatever reason.
-      // With this, we can check for the existence of the file after transformation
-      // to make sure the transformer produced an output file.
-      ErrorHandlingFileSystem.deleteIfExists(output);
-
-      logger.printTrace("Transforming asset using command '${command.join(' ')}'");
-      final ProcessResult result = await _processManager.run(
-        command,
-        workingDirectory: workingDirectory,
-        environment: <String, String>{
-          AssetTransformer.buildModeEnvVar: _buildMode.cliName,
-          AssetTransformer.depfileEnvVar: depfile.absolute.path,
-        },
+    if (result.exitCode != 0) {
+      return AssetTransformationResult(
+        failure: AssetTransformationFailure(
+          'Transformer process terminated with non-zero exit code: ${result.exitCode}\n'
+          'Transformer package: ${transformer.package}\n'
+          'Full command: ${command.join(' ')}\n'
+          'stdout:\n$stdout\n'
+          'stderr:\n$stderr',
+        ),
       );
-      final stdout = result.stdout as String;
-      final stderr = result.stderr as String;
-
-      if (result.exitCode != 0) {
-        return AssetTransformationResult(
-          failure: AssetTransformationFailure(
-            'Transformer process terminated with non-zero exit code: ${result.exitCode}\n'
-            'Transformer package: ${transformer.package}\n'
-            'Full command: ${command.join(' ')}\n'
-            'stdout:\n$stdout\n'
-            'stderr:\n$stderr',
-          ),
-        );
-      }
-
-      if (!_fileSystem.file(output).existsSync()) {
-        return AssetTransformationResult(
-          failure: AssetTransformationFailure(
-            'Asset transformer ${transformer.package} did not produce an output file.\n'
-            'Input file provided to transformer: "${asset.path}"\n'
-            'Expected output file at: "${output.absolute.path}"\n'
-            'Full command: ${command.join(' ')}\n'
-            'stdout:\n$stdout\n'
-            'stderr:\n$stderr',
-          ),
-        );
-      }
-
-      var dependencies = <File>[];
-      if (depfile.existsSync()) {
-        try {
-          final depfileService = DepfileService(logger: logger, fileSystem: _fileSystem);
-          final Depfile parsedDepfile = depfileService.parse(
-            depfile,
-            _fileSystem.directory(workingDirectory),
-          );
-          dependencies = parsedDepfile.inputs;
-        } on Exception catch (e) {
-          logger.printTrace('Failed to parse depfile: $e');
-        }
-      }
-
-      return AssetTransformationResult(dependencies: dependencies);
-    } finally {
-      ErrorHandlingFileSystem.deleteIfExists(depfileDirectory, recursive: true);
     }
+
+    if (!_fileSystem.file(output).existsSync()) {
+      return AssetTransformationResult(
+        failure: AssetTransformationFailure(
+          'Asset transformer ${transformer.package} did not produce an output file.\n'
+          'Input file provided to transformer: "${asset.path}"\n'
+          'Expected output file at: "${output.absolute.path}"\n'
+          'Full command: ${command.join(' ')}\n'
+          'stdout:\n$stdout\n'
+          'stderr:\n$stderr',
+        ),
+      );
+    }
+
+    var dependencies = <File>[];
+    final File depfile = _fileSystem.file('${output.path}.d');
+    if (depfile.existsSync()) {
+      try {
+        final depfileService = DepfileService(logger: logger, fileSystem: _fileSystem);
+        final Depfile parsedDepfile = depfileService.parse(
+          depfile,
+          _fileSystem.directory(workingDirectory),
+        );
+        dependencies = parsedDepfile.inputs;
+      } on Exception catch (e) {
+        logger.printTrace('Failed to parse depfile: $e');
+      }
+    }
+
+    return AssetTransformationResult(dependencies: dependencies);
   }
 }
 

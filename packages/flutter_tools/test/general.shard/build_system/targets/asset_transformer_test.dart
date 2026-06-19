@@ -361,11 +361,7 @@ void main() {
             // Do nothing.
           },
           stderr: 'Transformation failed, but I forgot to exit with a non-zero code.',
-          environment: const <String, String>{
-            'FLUTTER_BUILD_MODE': 'debug',
-            'FLUTTER_ASSET_TRANSFORMER_DEPFILE':
-                '/.tmp_rand0/flutter_tools_asset_transformer_depfile.rand0/depfile',
-          },
+          environment: const <String, String>{'FLUTTER_BUILD_MODE': 'debug'},
         ),
       ]);
 
@@ -442,15 +438,7 @@ void main() {
           final String inputPath = inputArg.substring('--input='.length);
           final String outputPath = outputArg.substring('--output='.length);
 
-          // Find the depfile in the temp directory.
-          final Directory tempDir = fileSystem.systemTempDirectory
-              .listSync()
-              .whereType<Directory>()
-              .firstWhere(
-                (Directory dir) =>
-                    dir.basename.startsWith('flutter_tools_asset_transformer_depfile.'),
-              );
-          final File depfile = tempDir.childFile('depfile');
+          final File depfile = fileSystem.file('$outputPath.d');
 
           fileSystem.file(inputPath).copySync(outputPath);
           depfile.writeAsStringSync(
