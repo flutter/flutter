@@ -1,0 +1,47 @@
+{
+    // Linux GUI: pass host Wayland (GDK + Flutter Linux use EGL on Wayland). Requires
+    // host session env (e.g. WAYLAND_DISPLAY=wayland-0, XDG_RUNTIME_DIR=/run/user/1000).
+    // If XDG_RUNTIME_DIR is unset in the environment that launches VS Code, set it in
+    // your shell profile or use "Remote Env" in VS Code so the bind mount resolves.
+    "name": "flutter",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "remoteUser": "dev",
+    "runArgs": [
+        "--user", "1000",
+        "-v", "${localEnv:SSH_AUTH_SOCK}:/ssh-agent",
+        "--net=host",
+        "--device=/dev/dri:/dev/dri",
+        "--env=DISPLAY",
+        "--env=WAYLAND_DISPLAY",
+        "--env=XDG_RUNTIME_DIR",
+        "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
+        "--mount=type=bind,source=${localEnv:XDG_RUNTIME_DIR},target=${localEnv:XDG_RUNTIME_DIR}"
+    ],
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,consistency=cached"
+    ],
+    "remoteEnv": {
+        "SSH_AUTH_SOCK": "/ssh-agent",
+        "GDK_BACKEND": "wayland",
+        "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+        "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}"
+    },
+    "updateRemoteUserUID": true,
+    "workspaceMount": "source=${localWorkspaceFolder},target=/builds/flutter,type=bind",
+    "workspaceFolder": "/builds/flutter",
+    "postCreateCommand": "chmod +x /builds/flutter/.devcontainer/*.sh && . /builds/flutter/.devcontainer/prepare_source.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dart-code.flutter",
+                "GitLab.gitlab-workflow",
+                "devantler.gitlab-extension-pack",
+                "ms-python.python",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    }
+}
