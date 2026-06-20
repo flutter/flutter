@@ -19434,7 +19434,7 @@ void main() {
                 controller: controller,
                 maxLines: null,
                 style: const TextStyle(color: Colors.black, fontSize: 24),
-                dragStartBehavior: DragStartBehavior.down,
+                dragStartBehavior: .down,
               ),
             ),
           ),

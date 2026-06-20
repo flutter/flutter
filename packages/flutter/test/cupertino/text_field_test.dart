@@ -10961,7 +10961,7 @@ void main() {
                 controller: controller,
                 maxLines: null,
                 style: const TextStyle(color: CupertinoColors.black, fontSize: 24),
-                dragStartBehavior: DragStartBehavior.down,
+                dragStartBehavior: .down,
               ),
             ),
           ),
