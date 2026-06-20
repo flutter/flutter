@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Workaround missing C code compatibility in ATK header.
-// Fixed in https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
-extern "C" {
-#include <atk/atk.h>
-}
-
+#include "flutter/shell/platform/linux/fl_atk_compat.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_accessible_text_field.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
