@@ -4108,9 +4108,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // The scroll offset remains stationary during a drag because automated
-    // scrolling is disabled. This prevents the viewport from snapping to
-    // the selection extent.
+    // The scroll offset updates to follow the dragged handle upwards
+    // instead of locking up or snapping to the opposite end.
     expect(
       scrollable.position.pixels,
       0.0,
