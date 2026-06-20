@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.dart;
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -85,5 +86,65 @@ public class DartExecutorTest {
     DartEntrypoint entrypoint = DartEntrypoint.createDefault();
     assertEquals(entrypoint.pathToBundle, "my/custom/path");
     assertEquals(entrypoint.dartEntrypointFunctionName, "main");
+  }
+
+  // ===========================================================================
+  // REPRODUCTION TESTS: Make DartEntrypoint only optionally take a bundle path.
+  // ===========================================================================
+
+  @Test
+  public void dartEntrypointCanBeConstructedWithoutBundlePath() {
+    DartEntrypoint entrypoint = new DartEntrypoint("customMain");
+    assertEquals(null, entrypoint.pathToBundle);
+    assertEquals("customMain", entrypoint.dartEntrypointFunctionName);
+    assertEquals(null, entrypoint.dartEntrypointLibrary);
+  }
+
+  @Test
+  public void dartEntrypointWithLibraryCanBeConstructedWithoutBundlePath() {
+    // Use the 3-arg constructor with null pathToBundle to avoid signature clash
+    DartEntrypoint entrypoint = new DartEntrypoint(null, "customLibrary", "customMain");
+    assertEquals(null, entrypoint.pathToBundle);
+    assertEquals("customLibrary", entrypoint.dartEntrypointLibrary);
+    assertEquals("customMain", entrypoint.dartEntrypointFunctionName);
+  }
+
+  @Test
+  public void executeDartEntrypointResolvesBundlePathFromInjector() {
+    when(mockFlutterLoader.initialized()).thenReturn(true);
+    when(mockFlutterLoader.findAppBundlePath()).thenReturn("injector/resolved/path");
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    DartExecutor executor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+
+    DartEntrypoint entrypoint = new DartEntrypoint("customMain");
+    executor.executeDartEntrypoint(entrypoint);
+
+    verify(mockFlutterJNI, times(1))
+        .runBundleAndSnapshotFromLibrary(
+            eq("injector/resolved/path"),
+            eq("customMain"),
+            eq(null),
+            any(AssetManager.class),
+            eq(null),
+            eq(0L));
+  }
+
+  @Test
+  public void executeDartEntrypointWithoutBundlePathThrowsWhenLoaderUninitialized() {
+    when(mockFlutterLoader.initialized()).thenReturn(false);
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
+
+    DartEntrypoint entrypoint = new DartEntrypoint("customMain");
+    DartExecutor executor = new DartExecutor(mock(FlutterJNI.class), mock(AssetManager.class));
+
+    assertThrows(
+        AssertionError.class,
+        () -> {
+          executor.executeDartEntrypoint(entrypoint);
+        });
   }
 }
