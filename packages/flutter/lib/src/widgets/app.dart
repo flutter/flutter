@@ -1769,6 +1769,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
+    if (isWindowingEnabled) {
+      result = WindowManager(child: result);
+    }
+
     // TODO(victorsanni): https://github.com/flutter/flutter/issues/180319
     // Use actions and shortcuts to dismiss tooltips when esc is pressed instead
     // of using a Focus widget.
