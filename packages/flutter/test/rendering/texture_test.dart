@@ -9,6 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 int _nextViewId = 1;
 
+extension on PipelineOwner {
+  // ignore: invalid_use_of_protected_member
+  bool get needsPaint => nodesNeedingPaint.isNotEmpty;
+}
+
 void main() {
   final RendererBinding binding = RenderingFlutterBinding.ensureInitialized();
 
@@ -107,16 +112,16 @@ void main() {
     tearDownScene(scene.renderView);
   });
 
-  test('addTextureFrameAvailableHandler / removeTextureFrameAvailableHandler', () {
+  test('addTextureFrameAvailableCallback / removeTextureFrameAvailableCallback', () {
     final received = <int>[];
     void handler(int id) => received.add(id);
 
-    binding.addTextureFrameAvailableHandler(handler);
+    binding.addTextureFrameAvailableCallback(handler);
     binding.handleTextureFrameAvailable(7);
     binding.handleTextureFrameAvailable(11);
     expect(received, <int>[7, 11]);
 
-    binding.removeTextureFrameAvailableHandler(handler);
+    binding.removeTextureFrameAvailableCallback(handler);
     binding.handleTextureFrameAvailable(13);
     expect(received, <int>[7, 11]);
   });
