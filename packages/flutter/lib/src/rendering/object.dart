@@ -1029,6 +1029,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsOwnerCreated,
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
+    this.onFlushPaint,
   }) {
     assert(debugMaybeDispatchCreated('rendering', 'PipelineOwner', this));
   }
@@ -1062,6 +1063,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   ///
   /// Typical implementations will tear down the semantics tree.
   final VoidCallback? onSemanticsOwnerDisposed;
+
+  /// Called whenever this pipeline owner flushes paint.
+  ///
+  /// [isDirty] is true if the pipeline owner has dirty render objects that need to be painted.
+  final void Function(bool isDirty)? onFlushPaint;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
@@ -1276,12 +1282,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   @nonVirtual
   Iterable<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
-  /// Returns true if there are any nodes that need to be painted.
-  ///
-  /// This is used by [RendererBinding.drawFrame] to determine which views
-  /// need to be composited.
-  bool get needsPaint => _nodesNeedingPaint.isNotEmpty;
-
   /// Whether this pipeline is currently in the paint phase.
   ///
   /// Specifically, whether [flushPaint] is currently running.
@@ -1321,9 +1321,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         return true;
       }());
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
-      if (dirtyNodes.isNotEmpty && rootNode is RenderView) {
-        (rootNode! as RenderView).markNeedsCompositeFrame();
-      }
+      onFlushPaint?.call(dirtyNodes.isNotEmpty);
       _nodesNeedingPaint = <RenderObject>[];
 
       // Sort the dirty nodes in reverse order (deepest first).
