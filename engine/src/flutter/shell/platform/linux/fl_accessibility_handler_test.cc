@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/linux/fl_atk_compat.h"
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
+#include "flutter/shell/platform/linux/fl_atk_compat.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
