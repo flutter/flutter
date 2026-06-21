@@ -361,7 +361,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// the [configuration] must be set to a non-null value, and the
   /// [prepareInitialFrame] method must have been called.
   void compositeFrame() {
-    if (!kReleaseMode && _needsCompositeFrame) {
+    assert(_needsCompositeFrame, 'compositeFrame should only be called when the view needs to be composited');
+    if (!kReleaseMode) {
       FlutterTimeline.startSync('COMPOSITING');
     }
     try {
@@ -385,7 +386,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         return true;
       }());
     } finally {
-      if (!kReleaseMode && _needsCompositeFrame) {
+      if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
       _needsCompositeFrame = false;

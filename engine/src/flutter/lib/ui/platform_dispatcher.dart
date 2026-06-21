@@ -672,7 +672,7 @@ class PlatformDispatcher {
     _invoke1<int>(onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
   }
 
-  /// Called from the engine to force repaint of all views on the next frame.
+  /// A callback that is invoked when the application should re-render.
   MarkAllViewsDirtyCallback? get onMarkAllViewsDirty => _onMarkAllViewsDirty;
   MarkAllViewsDirtyCallback? _onMarkAllViewsDirty;
   Zone _onMarkAllViewsDirtyZone = Zone.root;
