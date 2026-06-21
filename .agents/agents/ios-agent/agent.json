@@ -1,0 +1,7 @@
+{
+  "name": "ios-agent",
+  "description": "A specialized agent to help Flutter contributors to handle various iOS specific tasks, such as generating Swift or Objective-C code.",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}
