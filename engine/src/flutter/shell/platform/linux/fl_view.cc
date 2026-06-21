@@ -56,6 +56,8 @@ static void handle_geometry_changed_with_size(FlView* self,
                                               int height);
 #if FLUTTER_LINUX_GTK4
 static gboolean retry_native_texture_cb(gpointer user_data);
+static void fl_view_gtk4_update_accessible_name(FlView* self);
+static void fl_view_gtk4_update_accessible_tree(FlView* self);
 #endif
 
 G_DEFINE_TYPE_WITH_CODE(
@@ -65,6 +67,29 @@ G_DEFINE_TYPE_WITH_CODE(
     G_IMPLEMENT_INTERFACE(fl_renderable_get_type(), fl_renderable_iface_init)
         G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                               fl_view_plugin_registry_iface_init))
+
+#if FLUTTER_LINUX_GTK4
+static void fl_view_gtk4_update_accessible_name(FlView* self) {
+  GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
+  GtkAccessibleProperty properties[] = {property};
+  GValue value = G_VALUE_INIT;
+  gtk_accessible_property_init_value(property, &value);
+  g_value_set_string(&value, "Flutter view");
+  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
+                                       &value);
+  g_value_unset(&value);
+}
+
+static void fl_view_gtk4_update_accessible_tree(FlView* self) {
+#if GTK_CHECK_VERSION(4, 10, 0)
+  // Keep the render surface attached to the view in the accessibility tree.
+  gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(self->render_area),
+                                       GTK_ACCESSIBLE(self), nullptr);
+#else
+  (void)self;
+#endif
+}
+#endif
 
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
@@ -77,12 +102,23 @@ static gboolean redraw_cb(gpointer user_data) {
 
   // If Flutter is controlling the window size, then resize the view if
   // necessary.
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(GTK_WIDGET(self->render_area), &allocation);
   gint scale_factor =
       gtk_widget_get_scale_factor(GTK_WIDGET(self->render_area));
-  size_t width = allocation.width * scale_factor;
-  size_t height = allocation.height * scale_factor;
+  size_t width;
+  size_t height;
+#if FLUTTER_LINUX_GTK4
+  width =
+      static_cast<size_t>(gtk_widget_get_width(GTK_WIDGET(self->render_area))) *
+      scale_factor;
+  height = static_cast<size_t>(
+               gtk_widget_get_height(GTK_WIDGET(self->render_area))) *
+           scale_factor;
+#else
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(GTK_WIDGET(self->render_area), &allocation);
+  width = allocation.width * scale_factor;
+  height = allocation.height * scale_factor;
+#endif
   size_t frame_width, frame_height;
   fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
   gboolean frame_size_matches = width == frame_width && height == frame_height;
@@ -644,6 +680,10 @@ static void fl_view_class_init(FlViewClass* klass) {
   widget_class->focus_in_event = fl_view_focus_in_event;
   widget_class->key_press_event = fl_view_key_press_event;
   widget_class->key_release_event = fl_view_key_release_event;
+#else
+#if GTK_CHECK_VERSION(4, 0, 0)
+  gtk_widget_class_set_accessible_role(widget_class, GTK_ACCESSIBLE_ROLE_GROUP);
+#endif
 #endif
 
   fl_view_signals[SIGNAL_FIRST_FRAME] =
@@ -690,6 +730,7 @@ static void fl_view_init(FlView* self) {
 
 #if FLUTTER_LINUX_GTK4
   self->render_area = fl_render_texture_gtk4_new();
+  fl_view_gtk4_update_accessible_name(self);
 #else
   self->render_area = GTK_WIDGET(gtk_drawing_area_new());
 #endif
@@ -697,10 +738,15 @@ static void fl_view_init(FlView* self) {
   gtk_widget_set_vexpand(GTK_WIDGET(self->render_area), TRUE);
 #if FLUTTER_LINUX_GTK4
   fl_view_gtk4_setup(self);
+  fl_view_gtk4_update_accessible_tree(self);
 #else
   fl_view_gtk3_setup(self);
 #endif
+#if FLUTTER_LINUX_GTK4
+  gtk_widget_set_visible(GTK_WIDGET(self->render_area), TRUE);
+#else
   gtk_widget_show(GTK_WIDGET(self->render_area));
+#endif
   g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
                            self);
 #if FLUTTER_LINUX_GTK4
