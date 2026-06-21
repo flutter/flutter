@@ -460,6 +460,7 @@ class _RawViewElement extends RenderTreeRootElement {
     onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
     onSemanticsUpdate: _handleSemanticsUpdate,
     onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
+    onFlushPaint: _handleFlushPaint,
   );
 
   PipelineOwner get _effectivePipelineOwner =>
@@ -475,6 +476,12 @@ class _RawViewElement extends RenderTreeRootElement {
 
   void _handleSemanticsUpdate(SemanticsUpdate update) {
     (widget as _RawViewInternal).view.updateSemantics(update);
+  }
+
+  void _handleFlushPaint(bool isDirty) {
+    if (isDirty) {
+      (_effectivePipelineOwner.rootNode as RenderView?)?.markNeedsCompositeFrame();
+    }
   }
 
   @override
