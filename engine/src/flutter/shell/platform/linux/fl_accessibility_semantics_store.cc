@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
+#include "flutter/shell/platform/linux/fl_glib_compat.h"
 
 #include <cstring>
 
@@ -48,8 +49,8 @@ static FlAccessibilitySemanticsNode* fl_accessibility_semantics_node_new(
   if (semantics->child_count > 0 &&
       semantics->children_in_traversal_order != nullptr) {
     node->children_in_traversal_order = static_cast<int32_t*>(
-        g_memdup(semantics->children_in_traversal_order,
-                 sizeof(int32_t) * semantics->child_count));
+        g_memdup2(semantics->children_in_traversal_order,
+                  sizeof(int32_t) * semantics->child_count));
   }
 
   return node;
