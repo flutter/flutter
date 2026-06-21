@@ -12,6 +12,9 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
+#if FLUTTER_LINUX_GTK4 && GTK_CHECK_VERSION(4, 12, 0)
+#include <gdk/gdkgltexturebuilder.h>
+#endif
 
 // Vertex shader to draw Flutter window contents.
 static const char* vertex_shader_src =
@@ -318,11 +321,24 @@ static GdkTexture* acquire_shareable_texture(FlFramebuffer* framebuffer,
 
   Gtk4NativeTextureData* data = g_new0(Gtk4NativeTextureData, 1);
   data->framebuffer = FL_FRAMEBUFFER(g_object_ref(sibling));
+#if GTK_CHECK_VERSION(4, 12, 0)
+  g_autoptr(GdkGLTextureBuilder) builder = gdk_gl_texture_builder_new();
+  gdk_gl_texture_builder_set_context(builder, context);
+  gdk_gl_texture_builder_set_id(builder,
+                                fl_framebuffer_get_texture_id(sibling));
+  gdk_gl_texture_builder_set_width(
+      builder, static_cast<int>(fl_framebuffer_get_width(framebuffer)));
+  gdk_gl_texture_builder_set_height(
+      builder, static_cast<int>(fl_framebuffer_get_height(framebuffer)));
+  return gdk_gl_texture_builder_build(builder, release_native_texture_data,
+                                      data);
+#else
   return gdk_gl_texture_new(
       context, fl_framebuffer_get_texture_id(sibling),
       static_cast<int>(fl_framebuffer_get_width(framebuffer)),
       static_cast<int>(fl_framebuffer_get_height(framebuffer)),
       release_native_texture_data, data);
+#endif
 }
 
 static GdkTexture* acquire_memory_texture(FlCompositorOpenGL* self,
