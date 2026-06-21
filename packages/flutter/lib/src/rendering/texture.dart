@@ -60,12 +60,12 @@ class TextureBox extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    RendererBinding.instance.addTextureFrameAvailableHandler(_handleTextureFrameAvailable);
+    RendererBinding.instance.addTextureFrameAvailableCallback(_handleTextureFrameAvailable);
   }
 
   @override
   void detach() {
-    RendererBinding.instance.removeTextureFrameAvailableHandler(_handleTextureFrameAvailable);
+    RendererBinding.instance.removeTextureFrameAvailableCallback(_handleTextureFrameAvailable);
     super.detach();
   }
 

@@ -30,10 +30,10 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 // late BuildContext context;
 
 /// Signature for callbacks passed to
-/// [RendererBinding.addTextureFrameAvailableHandler].
+/// [RendererBinding.addTextureFrameAvailableCallback].
 ///
 /// Called with the ID of the texture that has a new frame available.
-typedef TextureFrameAvailableHandler = void Function(int textureId);
+typedef TextureFrameAvailableCallback = void Function(int textureId);
 
 /// The glue between the render trees and the Flutter engine.
 ///
@@ -75,8 +75,8 @@ mixin RendererBinding
     rootPipelineOwner.attach(_manifold);
   }
 
-  final List<TextureFrameAvailableHandler> _textureFrameAvailableHandlers =
-      <TextureFrameAvailableHandler>[];
+  final List<TextureFrameAvailableCallback> _textureFrameAvailableCallbacks =
+      <TextureFrameAvailableCallback>[];
 
   /// Registers a [handler] to be notified when any texture has a new frame
   /// available from the engine.
@@ -84,18 +84,18 @@ mixin RendererBinding
   /// The handler receives the ID of the texture that has a new frame and is
   /// responsible for checking whether that ID matches the texture it cares
   /// about.
-  void addTextureFrameAvailableHandler(TextureFrameAvailableHandler handler) {
-    _textureFrameAvailableHandlers.add(handler);
+  void addTextureFrameAvailableCallback(TextureFrameAvailableCallback handler) {
+    _textureFrameAvailableCallbacks.add(handler);
   }
 
   /// Unregisters a handler previously added with
-  /// [addTextureFrameAvailableHandler].
-  void removeTextureFrameAvailableHandler(TextureFrameAvailableHandler handler) {
-    _textureFrameAvailableHandlers.remove(handler);
+  /// [addTextureFrameAvailableCallback].
+  void removeTextureFrameAvailableCallback(TextureFrameAvailableCallback handler) {
+    _textureFrameAvailableCallbacks.remove(handler);
   }
 
   /// Dispatches a texture-frame-available notification to every registered
-  /// [TextureFrameAvailableHandler].
+  /// [TextureFrameAvailableCallback].
   ///
   /// This is invoked automatically by the binding when the engine reports a
   /// new texture frame. It is also exposed so tests can simulate that
@@ -106,8 +106,10 @@ mixin RendererBinding
   @visibleForTesting
   void handleTextureFrameAvailable(int textureId) {
     // Iterate a copy so handlers may add/remove themselves mid-dispatch.
-    for (final handler in List<TextureFrameAvailableHandler>.of(_textureFrameAvailableHandlers)) {
-      handler(textureId);
+    for (final callback in List<TextureFrameAvailableCallback>.of(
+      _textureFrameAvailableCallbacks,
+    )) {
+      callback(textureId);
     }
   }
 

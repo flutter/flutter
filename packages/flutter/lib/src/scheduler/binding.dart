@@ -997,7 +997,7 @@ mixin SchedulerBinding on BindingBase {
 
   /// Whether the scheduler is currently producing a warm-up frame.
   ///
-  /// A warm-up frame is scheduled by [scheduleWarmUpFrame] and may not
+  /// A warm-up frame is scheduled by [scheduleWarmUpFrame] and might not
   /// produce visible output on screen (e.g., if the rendering surface is
   /// not yet available).
   @protected
