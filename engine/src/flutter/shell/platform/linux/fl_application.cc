@@ -86,10 +86,11 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
 #endif
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
-    gtk_widget_show(GTK_WIDGET(header_bar));
 #if FLUTTER_LINUX_GTK4
+    gtk_widget_set_visible(GTK_WIDGET(header_bar), TRUE);
     gtk_header_bar_set_show_title_buttons(header_bar, TRUE);
 #else
+    gtk_widget_show(GTK_WIDGET(header_bar));
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
 #endif
     gtk_window_set_titlebar(GTK_WINDOW(window), GTK_WIDGET(header_bar));
@@ -117,7 +118,11 @@ static void fl_application_activate(GApplication* application) {
   FlView* view = fl_view_new(project);
   g_signal_connect_swapped(view, "first-frame", G_CALLBACK(first_frame_cb),
                            self);
+#if FLUTTER_LINUX_GTK4
+  gtk_widget_set_visible(GTK_WIDGET(view), TRUE);
+#else
   gtk_widget_show(GTK_WIDGET(view));
+#endif
 
   GtkWindow* window;
   g_signal_emit(self, fl_application_signals[SIGNAL_CREATE_WINDOW], 0, view,

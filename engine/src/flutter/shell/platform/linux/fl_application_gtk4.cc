@@ -24,7 +24,7 @@ GtkWindow* fl_application_gtk4_create_window(FlApplication* self,
       GTK_APPLICATION_WINDOW(gtk_application_window_new(GTK_APPLICATION(self)));
 
   GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
-  gtk_widget_show(GTK_WIDGET(header_bar));
+  gtk_widget_set_visible(GTK_WIDGET(header_bar), TRUE);
   gtk_header_bar_set_show_title_buttons(header_bar, TRUE);
   gtk_window_set_titlebar(GTK_WINDOW(window), GTK_WIDGET(header_bar));
 
