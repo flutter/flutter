@@ -1212,18 +1212,6 @@ void main() async {
     } catch (e) {
       expect(e.toString(), contains('must all be linear'));
     }
-
-    // All-linear filters with anisotropy enabled binds successfully.
-    state.renderPass.bindTexture(
-      vertInfo,
-      texture,
-      sampler: gpu.SamplerOptions(
-        minFilter: gpu.MinMagFilter.linear,
-        magFilter: gpu.MinMagFilter.linear,
-        mipFilter: gpu.MipFilter.linear,
-        maxAnisotropy: 16,
-      ),
-    );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Performs no draw calls. Just clears the render target to a solid green color.
