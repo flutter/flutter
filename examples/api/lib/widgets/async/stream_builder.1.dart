@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 /// state is recreated when the stream changes, resetting its data immediately
 /// rather than retaining the previous stream's snapshot.
 
-void main() => runApp(StreamBuilderExampleApp());
+void main() => runApp(const StreamBuilderExampleApp());
 
 class StreamBuilderExampleApp extends StatelessWidget {
   const StreamBuilderExampleApp({super.key});
