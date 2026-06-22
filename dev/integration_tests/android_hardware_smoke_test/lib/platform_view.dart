@@ -36,9 +36,7 @@ class AndroidPlatformView extends StatelessWidget {
       PlatformViewMode.hybridComposition => 'HC',
       PlatformViewMode.hybridCompositionPlusPlus => 'HCPP',
     };
-    final Map<String, dynamic> creationParams = <String, dynamic>{
-      'text': 'Native ($modeLabel)\n🐞 View 🪲\nContent ',
-    };
+    final creationParams = <String, dynamic>{'text': 'Native ($modeLabel)\n🐞 View 🪲\nContent '};
 
     return Stack(
       children: <Widget>[
@@ -47,35 +45,31 @@ class AndroidPlatformView extends StatelessWidget {
             // Prevent hangs when switching between PlatformViewModes in subsequent test cases.
             key: ValueKey<PlatformViewMode>(mode),
             viewType: viewType,
-            surfaceFactory:
-                (BuildContext context, PlatformViewController controller) {
-                  return AndroidViewSurface(
-                    controller: controller as AndroidViewController,
-                    gestureRecognizers:
-                        const <Factory<OneSequenceGestureRecognizer>>{},
-                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-                  );
-                },
+            surfaceFactory: (BuildContext context, PlatformViewController controller) {
+              return AndroidViewSurface(
+                controller: controller as AndroidViewController,
+                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+              );
+            },
             onCreatePlatformView: (PlatformViewCreationParams params) {
               final AndroidViewController controller = switch (mode) {
-                PlatformViewMode.textureLayer =>
-                  PlatformViewsService.initSurfaceAndroidView(
-                    id: params.id,
-                    viewType: viewType,
-                    layoutDirection: TextDirection.ltr,
-                    creationParams: creationParams,
-                    creationParamsCodec: const StandardMessageCodec(),
-                    onFocus: () => params.onFocusChanged(true),
-                  ),
-                PlatformViewMode.hybridComposition =>
-                  PlatformViewsService.initExpensiveAndroidView(
-                    id: params.id,
-                    viewType: viewType,
-                    layoutDirection: TextDirection.ltr,
-                    creationParams: creationParams,
-                    creationParamsCodec: const StandardMessageCodec(),
-                    onFocus: () => params.onFocusChanged(true),
-                  ),
+                PlatformViewMode.textureLayer => PlatformViewsService.initSurfaceAndroidView(
+                  id: params.id,
+                  viewType: viewType,
+                  layoutDirection: TextDirection.ltr,
+                  creationParams: creationParams,
+                  creationParamsCodec: const StandardMessageCodec(),
+                  onFocus: () => params.onFocusChanged(true),
+                ),
+                PlatformViewMode.hybridComposition => PlatformViewsService.initExpensiveAndroidView(
+                  id: params.id,
+                  viewType: viewType,
+                  layoutDirection: TextDirection.ltr,
+                  creationParams: creationParams,
+                  creationParamsCodec: const StandardMessageCodec(),
+                  onFocus: () => params.onFocusChanged(true),
+                ),
                 PlatformViewMode.hybridCompositionPlusPlus =>
                   PlatformViewsService.initHybridAndroidView(
                     id: params.id,
@@ -100,9 +94,7 @@ class AndroidPlatformView extends StatelessWidget {
             width: 120,
             height: 90,
             decoration: BoxDecoration(
-              color: Colors.red.withValues(
-                alpha: 0.6,
-              ), // Semi-transparent overlay
+              color: Colors.red.withValues(alpha: 0.6), // Semi-transparent overlay
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 3.0),
             ),
