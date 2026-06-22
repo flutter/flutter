@@ -21,11 +21,6 @@ import javax.inject.Inject
  * Stages the native libraries produced by the Flutter build (`libapp.so` and any bundled native
  * assets) into a dedicated [destinationDir], laid out as `<abi>/lib*.so`.
  *
- * The output is wired onto the Android variant via
- * `variant.sources.jniLibs.addGeneratedSourceDirectory(...)`, so that AGP owns the task dependency,
- * resolves the output path lazily, and strips/extracts debug symbols from the result like any other
- * native library.
- *
  * It deliberately writes to its own output directory rather than into the Flutter task's output
  * directory. Two earlier approaches dropped `libapp.so` from the APK/app bundle: nesting this output
  * inside the Flutter task's output directory created overlapping task outputs that broke Gradle's
