@@ -194,7 +194,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 
   // Check for impeller support.
   auto& switches = project_->GetSwitches();
-  bool enable_impeller = false;
+  bool enable_impeller = true;
   if (project_->impeller_switch() == FlutterImpellerSwitch::Enabled) {
     enable_impeller = true;
   } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
