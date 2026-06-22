@@ -38,6 +38,8 @@ struct _FlCompositorClass {
   GdkTexture* (*acquire_texture)(FlCompositor* compositor,
                                  FlGdkSurface* surface,
                                  GdkGLContext* context,
+                                 size_t width,
+                                 size_t height,
                                  gboolean wait_for_frame);
 #endif
 };
@@ -97,6 +99,8 @@ gboolean fl_compositor_render(FlCompositor* compositor,
  * @compositor: an #FlCompositor.
  * @surface: surface being rendered into.
  * @context: (nullable): GTK render context owning the resulting texture.
+ * @width: expected frame width in physical pixels.
+ * @height: expected frame height in physical pixels.
  * @wait_for_frame: if the available frame is not the size of the window block
  * until a new frame is received.
  *
@@ -108,6 +112,8 @@ gboolean fl_compositor_render(FlCompositor* compositor,
 GdkTexture* fl_compositor_acquire_texture(FlCompositor* compositor,
                                           FlGdkSurface* surface,
                                           GdkGLContext* context,
+                                          size_t width,
+                                          size_t height,
                                           gboolean wait_for_frame);
 #endif
 

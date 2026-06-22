@@ -366,8 +366,11 @@ static GdkTexture* fl_compositor_opengl_acquire_texture(
     FlCompositor* compositor,
     FlGdkSurface* surface,
     GdkGLContext* context,
+    size_t width,
+    size_t height,
     gboolean wait_for_frame) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+  (void)surface;
 
   g_mutex_lock(&self->frame_mutex);
   if (self->framebuffer == nullptr) {
@@ -375,14 +378,9 @@ static GdkTexture* fl_compositor_opengl_acquire_texture(
     return nullptr;
   }
 
-  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
-  size_t width;
-  size_t height;
   gint64 expiry_time =
       g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
   while (true) {
-    width = fl_gtk_surface_get_width(surface) * scale_factor;
-    height = fl_gtk_surface_get_height(surface) * scale_factor;
     if (!wait_for_frame) {
       break;
     }

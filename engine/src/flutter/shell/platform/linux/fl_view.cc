@@ -156,6 +156,15 @@ static gboolean redraw_cb(gpointer user_data) {
 #endif
 
 #if FLUTTER_LINUX_GTK4
+  if (width == 0 || height == 0) {
+    if (self->native_texture_retry_source_id == 0) {
+      self->native_texture_retry_source_id =
+          g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
+                             g_object_ref(self), g_object_unref);
+    }
+    return G_SOURCE_REMOVE;
+  }
+
   g_autoptr(GdkTexture) texture = nullptr;
   FlGdkSurface* surface =
       fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
@@ -166,7 +175,7 @@ static gboolean redraw_cb(gpointer user_data) {
     }
 
     texture = fl_compositor_acquire_texture(
-        self->compositor, surface, self->render_context,
+        self->compositor, surface, self->render_context, width, height,
         !self->sized_to_content || !self->native_texture_ready);
 
     if (gdk_gl_context_get_current() != old_gl_context) {

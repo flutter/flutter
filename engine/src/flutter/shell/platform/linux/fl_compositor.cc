@@ -40,6 +40,8 @@ gboolean fl_compositor_render(FlCompositor* self,
 GdkTexture* fl_compositor_acquire_texture(FlCompositor* self,
                                           FlGdkSurface* surface,
                                           GdkGLContext* context,
+                                          size_t width,
+                                          size_t height,
                                           gboolean wait_for_frame) {
   g_return_val_if_fail(FL_IS_COMPOSITOR(self), nullptr);
   g_return_val_if_fail(surface != nullptr, nullptr);
@@ -49,6 +51,7 @@ GdkTexture* fl_compositor_acquire_texture(FlCompositor* self,
     return nullptr;
   }
 
-  return klass->acquire_texture(self, surface, context, wait_for_frame);
+  return klass->acquire_texture(self, surface, context, width, height,
+                                wait_for_frame);
 }
 #endif

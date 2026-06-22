@@ -147,9 +147,13 @@ static GdkTexture* fl_compositor_software_acquire_texture(
     FlCompositor* compositor,
     FlGdkSurface* surface,
     GdkGLContext* context,
+    size_t width,
+    size_t height,
     gboolean wait_for_frame) {
   (void)surface;
   (void)context;
+  (void)width;
+  (void)height;
   (void)wait_for_frame;
 
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
