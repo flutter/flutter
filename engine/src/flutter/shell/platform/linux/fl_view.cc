@@ -530,8 +530,9 @@ static void realize_cb(FlView* self) {
                                   GTK_WINDOW(toplevel_window));
 
   // Handle requests by the user to close the application.
-  g_signal_connect_swapped(toplevel_window, "delete-event",
-                           G_CALLBACK(window_delete_event_cb), self);
+  g_signal_connect_object(toplevel_window, "delete-event",
+                          G_CALLBACK(window_delete_event_cb), self,
+                          G_CONNECT_SWAPPED);
 
   // Flutter engine will need to make the context current from raster thread
   // during initialization.
