@@ -67,6 +67,17 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsFramebufferRenderMipmap();
   }
 
+  /// Whether a texture whose mip levels were uploaded by hand with
+  /// [Texture.overwrite] (rather than generated with
+  /// [CommandBuffer.generateMipmap]) samples with correct per-level selection.
+  /// True on Metal and Vulkan; on OpenGL ES 2.0 devices without the
+  /// GL_APPLE_texture_max_level extension this is false, and sampling such a
+  /// texture reads as black. Check this before relying on hand-built mip
+  /// chains (for example, prefiltered environment maps).
+  bool get doesSupportManuallyMippedTextures {
+    return _getSupportsManuallyMippedTextures();
+  }
+
   /// Whether this device supports the given family of block-compressed
   /// texture formats. Hardware support is granted on a per-family basis.
   ///
@@ -220,6 +231,26 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return result;
   }
 
+  /// Creates an image surface for rendering content that Flutter draws as a
+  /// [ui.Image].
+  ///
+  /// A [GpuImageSurface] owns the final color textures that are converted into
+  /// [ui.Image] handles and drawn by Flutter. Use it for animated or frequently
+  /// updated render targets where the app should not have to guess how many
+  /// textures are needed to avoid overwriting a frame Flutter may still be
+  /// sampling.
+  ///
+  /// The surface manages only the final presentable color texture. Renderers
+  /// should continue to create ordinary [Texture] objects for depth, stencil,
+  /// multisample, and intermediate color attachments.
+  GpuImageSurface createImageSurface(
+    int width,
+    int height, {
+    PixelFormat? format,
+  }) {
+    return GpuImageSurface._(this, width, height, format ?? defaultColorFormat);
+  }
+
   /// Create a new command buffer that can be used to submit GPU commands.
   CommandBuffer createCommandBuffer() {
     return CommandBuffer._(this);
@@ -273,6 +304,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap',
   )
   external bool _getSupportsFramebufferRenderMipmap();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures',
+  )
+  external bool _getSupportsManuallyMippedTextures();
 
   @Native<Bool Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',
