@@ -1361,11 +1361,15 @@ public class FlutterRenderer implements TextureRegistry {
 
   @VisibleForTesting
   /* package */ void scheduleEngineFrame() {
-    flutterJNI.scheduleFrame();
+    if (flutterJNI.isAttached()) {
+      flutterJNI.scheduleFrame();
+    }
   }
 
   private void unregisterTexture(long textureId) {
-    flutterJNI.unregisterTexture(textureId);
+    if (flutterJNI.isAttached()) {
+      flutterJNI.unregisterTexture(textureId);
+    }
   }
 
   public boolean isSoftwareRenderingEnabled() {
