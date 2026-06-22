@@ -72,6 +72,9 @@ Future<void> main() async {
   });
 
   test('shared.bat writes a revision-bearing flutter tool stamp', () async {
+    if (flutterToolStamp.existsSync()) {
+      flutterToolStamp.deleteSync();
+    }
     final ProcessResult result = await processManager.run(<String>[flutterBatch.path, '--version']);
     expect(
       result,
