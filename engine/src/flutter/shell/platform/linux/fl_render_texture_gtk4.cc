@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
-#include "flutter/shell/platform/linux/fl_gtk_runtime_api.h"
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_linux_debug.h"
 
 struct _FlRenderTextureGtk4 {

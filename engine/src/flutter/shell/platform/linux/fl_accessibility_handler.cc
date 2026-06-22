@@ -6,7 +6,10 @@
 
 #include "flutter/shell/platform/linux/fl_accessibility_channel.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#if !FLUTTER_LINUX_GTK4
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
+#else
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #endif
 
@@ -25,12 +28,25 @@ static void send_announcement(int64_t view_id,
                               FlAssertiveness assertiveness,
                               gpointer user_data) {
 #if FLUTTER_LINUX_GTK4
-  (void)view_id;
-  (void)message;
+  FlAccessibilityHandler* self = FL_ACCESSIBILITY_HANDLER(user_data);
+  FlAccessibilityHandlerPrivate* priv =
+      reinterpret_cast<FlAccessibilityHandlerPrivate*>(
+          fl_accessibility_handler_get_instance_private(self));
+
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+  if (engine == nullptr) {
+    return;
+  }
+
+  FlRenderable* renderable = fl_engine_get_renderable(engine, view_id);
+  if (renderable == nullptr || !FL_IS_VIEW(renderable)) {
+    return;
+  }
+
+  fl_gtk_runtime_accessible_announce(
+      GTK_ACCESSIBLE(renderable), message,
+      assertiveness == FL_ASSERTIVENESS_ASSERTIVE ? 1 : 0);
   (void)text_direction;
-  (void)assertiveness;
-  (void)user_data;
-  return;
 #else
   FlAccessibilityHandler* self = FL_ACCESSIBILITY_HANDLER(user_data);
   FlAccessibilityHandlerPrivate* priv =

@@ -29,7 +29,7 @@
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #if FLUTTER_LINUX_GTK4
-#include "flutter/shell/platform/linux/fl_gtk_runtime_api.h"
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #endif
 #include "flutter/shell/platform/linux/fl_touch_manager.h"

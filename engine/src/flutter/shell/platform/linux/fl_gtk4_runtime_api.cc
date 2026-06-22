@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/linux/fl_gtk_runtime_api.h"
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 
 #if FLUTTER_LINUX_GTK4
 
@@ -64,6 +64,9 @@ const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
   api.gtk_accessible_relation_init_value =
       lookup_symbol<decltype(api.gtk_accessible_relation_init_value)>(
           "gtk_accessible_relation_init_value");
+  api.gtk_accessible_announce =
+      lookup_symbol<decltype(api.gtk_accessible_announce)>(
+          "gtk_accessible_announce");
 
   return &api;
 }
@@ -172,6 +175,21 @@ void fl_gtk_runtime_accessible_relation_init_value(
   }
 #endif
   gtk_accessible_relation_init_value(relation, value);
+}
+
+void fl_gtk_runtime_accessible_announce(GtkAccessible* self,
+                                        const char* message,
+                                        gint priority) {
+#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
+  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
+  if (api->gtk_at_least_4_14 && api->gtk_accessible_announce != nullptr) {
+    api->gtk_accessible_announce(self, message, priority);
+    return;
+  }
+#endif
+  (void)self;
+  (void)message;
+  (void)priority;
 }
 
 #endif  // FLUTTER_LINUX_GTK4
