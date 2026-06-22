@@ -6,9 +6,8 @@
 library;
 
 import '../src/common.dart';
+import 'test_data/hot_action_outside_lib_chrome_test_common.dart';
 
-import 'test_data/hot_restart_web_test_common.dart';
-
-void main() async {
-  await testAll(useDDCLibraryBundleFormat: false);
+void main() {
+  testHotActionOutsideLib(HotAction.restart);
 }
