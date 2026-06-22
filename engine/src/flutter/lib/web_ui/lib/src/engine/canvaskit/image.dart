@@ -304,42 +304,46 @@ bool validUpscale(
 /// If either targetWidth or targetHeight is less than or equal to zero, it
 /// will be treated as if it is null.
 EngineImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
-  assert(targetWidth != null || targetHeight != null);
-  final int width = image.width().toInt();
-  final int height = image.height().toInt();
-
-  if (targetWidth != null && targetWidth <= 0) {
-    targetWidth = null;
-  }
-  if (targetHeight != null && targetHeight <= 0) {
-    targetHeight = null;
-  }
-
-  final int finalTargetWidth = targetWidth ?? (targetHeight! * width ~/ height);
-  final int finalTargetHeight = targetHeight ?? (targetWidth! * height ~/ width);
-
-  final recorder = CkPictureRecorder();
-  final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
-
-  final paint = CkPaint();
-  final temporaryImage = EngineImage(CkImageDelegate(image), width, height);
-
+  final temporaryImage = EngineImage(
+    CkImageDelegate(image),
+    image.width().toInt(),
+    image.height().toInt(),
+  );
   try {
+    assert(targetWidth != null || targetHeight != null);
+    final int width = temporaryImage.width;
+    final int height = temporaryImage.height;
+
+    var adjustedWidth = targetWidth;
+    var adjustedHeight = targetHeight;
+    if (adjustedWidth != null && adjustedWidth <= 0) {
+      adjustedWidth = null;
+    }
+    if (adjustedHeight != null && adjustedHeight <= 0) {
+      adjustedHeight = null;
+    }
+
+    final int finalTargetWidth = adjustedWidth ?? (adjustedHeight! * width / height).round();
+    final int finalTargetHeight = adjustedHeight ?? (adjustedWidth! * height / width).round();
+
+    final recorder = CkPictureRecorder();
+    final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+
+    final paint = CkPaint();
     canvas.drawImageRect(
       temporaryImage,
       ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
       ui.Rect.fromLTWH(0, 0, finalTargetWidth.toDouble(), finalTargetHeight.toDouble()),
       paint,
     );
+
+    final CkPicture picture = recorder.endRecording();
+    final ui.Image finalImage = picture.toImageSync(finalTargetWidth, finalTargetHeight);
+
+    return finalImage as EngineImage;
   } finally {
     temporaryImage.dispose();
   }
-
-  final CkPicture picture = recorder.endRecording();
-  final ui.Image finalImage = picture.toImageSync(finalTargetWidth, finalTargetHeight);
-
-  final ckImage = finalImage as EngineImage;
-  return ckImage;
 }
 
 const String _kNetworkImageMessage = 'Failed to load network image.';

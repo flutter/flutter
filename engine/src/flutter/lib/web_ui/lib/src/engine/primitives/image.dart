@@ -133,6 +133,9 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
   @override
   Future<ByteData?> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
+    if (_disposed) {
+      throw StateError('Cannot call toByteData on a disposed image.');
+    }
     assert(!_disposed, 'Cannot call toByteData on a disposed image.');
 
     // Clone the image to prevent use-after-free vulnerabilities.

@@ -50,20 +50,21 @@ EngineImage createSkwasmImageFromPixels(
   int? rowBytes,
 }) {
   final SkDataHandle dataHandle = skDataCreate(pixels.length);
-  final int dataAddress = skDataGetPointer(dataHandle).cast<Uint8>().address;
+  try {
+    final int dataAddress = skDataGetPointer(dataHandle).cast<Uint8>().address;
 
-  final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
-  wasmMemory.set(pixels.toJS, dataAddress);
+    final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
+    wasmMemory.set(pixels.toJS, dataAddress);
 
-  final ImageHandle imageHandle = imageCreateFromPixels(
-    dataHandle,
-    width,
-    height,
-    format.index,
-    rowBytes ?? 4 * width,
-  );
-
-  skDataDispose(dataHandle);
-
-  return EngineImage(SkwasmImage(imageHandle), width, height);
+    final ImageHandle imageHandle = imageCreateFromPixels(
+      dataHandle,
+      width,
+      height,
+      format.index,
+      rowBytes ?? 4 * width,
+    );
+    return EngineImage(SkwasmImage(imageHandle), width, height);
+  } finally {
+    skDataDispose(dataHandle);
+  }
 }

@@ -60,16 +60,17 @@ class SkwasmDomImageDecoder extends HtmlBlobCodec {
 class SkwasmAnimatedImageDecoder implements ui.Codec {
   factory SkwasmAnimatedImageDecoder(Uint8List imageData, [int? width, int? height]) {
     final SkDataHandle data = skDataCreate(imageData.length);
-    final int dataAddress = skDataGetPointer(data).cast<Int8>().address;
+    try {
+      final int dataAddress = skDataGetPointer(data).cast<Int8>().address;
 
-    final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
-    wasmMemory.set(imageData.toJS, dataAddress);
+      final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
+      wasmMemory.set(imageData.toJS, dataAddress);
 
-    final AnimatedImageHandle handle = animatedImageCreate(data, width ?? 0, height ?? 0);
-
-    skDataDispose(data);
-
-    return SkwasmAnimatedImageDecoder._(handle);
+      final AnimatedImageHandle handle = animatedImageCreate(data, width ?? 0, height ?? 0);
+      return SkwasmAnimatedImageDecoder._(handle);
+    } finally {
+      skDataDispose(data);
+    }
   }
 
   SkwasmAnimatedImageDecoder._(this.handle);

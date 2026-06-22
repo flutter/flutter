@@ -225,18 +225,23 @@ class SkwasmCanvas implements LayerCanvas {
     paintDispose(paintHandle);
   }
 
-  @override
-  void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
+  ImageHandle _getImageHandle(ui.Image image) {
     assert(
       image is EngineImage && image.backendImage is SkwasmImage,
       'The image being drawn must be a Skwasm image.',
     );
+    return ((image as EngineImage).backendImage as SkwasmImage).handle;
+  }
+
+  @override
+  void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
+    final ImageHandle imageHandle = _getImageHandle(image);
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
     canvasDrawImage(
       _handle,
-      ((image as EngineImage).backendImage as SkwasmImage).handle,
+      imageHandle,
       offset.dx,
       offset.dy,
       paintHandle,
@@ -247,10 +252,7 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    assert(
-      image is EngineImage && image.backendImage is SkwasmImage,
-      'The image being drawn must be a Skwasm image.',
-    );
+    final ImageHandle imageHandle = _getImageHandle(image);
     withStackScope((StackScope scope) {
       final Pointer<Float> sourceRect = scope.convertRectToNative(src);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -259,7 +261,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageRect(
         _handle,
-        ((image as EngineImage).backendImage as SkwasmImage).handle,
+        imageHandle,
         sourceRect,
         destRect,
         paintHandle,
@@ -271,10 +273,7 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageNine(ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
-    assert(
-      image is EngineImage && image.backendImage is SkwasmImage,
-      'The image being drawn must be a Skwasm image.',
-    );
+    final ImageHandle imageHandle = _getImageHandle(image);
     withStackScope((StackScope scope) {
       final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -283,7 +282,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageNine(
         _handle,
-        ((image as EngineImage).backendImage as SkwasmImage).handle,
+        imageHandle,
         centerRect,
         destRect,
         paintHandle,
@@ -338,10 +337,7 @@ class SkwasmCanvas implements LayerCanvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
-    assert(
-      atlas is EngineImage && atlas.backendImage is SkwasmImage,
-      'The atlas image must be a Skwasm image.',
-    );
+    final ImageHandle atlasHandle = _getImageHandle(atlas);
     withStackScope((StackScope scope) {
       final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
       final RawRect rawRects = scope.convertRectsToNative(rects);
@@ -356,7 +352,7 @@ class SkwasmCanvas implements LayerCanvas {
 
       canvasDrawAtlas(
         _handle,
-        ((atlas as EngineImage).backendImage as SkwasmImage).handle,
+        atlasHandle,
         rawTransforms,
         rawRects,
         rawColors,
@@ -380,10 +376,7 @@ class SkwasmCanvas implements LayerCanvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
-    assert(
-      atlas is EngineImage && atlas.backendImage is SkwasmImage,
-      'The atlas image must be a Skwasm image.',
-    );
+    final ImageHandle atlasHandle = _getImageHandle(atlas);
     withStackScope((StackScope scope) {
       final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
       final RawRect rawRects = scope.convertDoublesToNative(rects);
@@ -398,7 +391,7 @@ class SkwasmCanvas implements LayerCanvas {
 
       canvasDrawAtlas(
         _handle,
-        ((atlas as EngineImage).backendImage as SkwasmImage).handle,
+        atlasHandle,
         rawTransforms,
         rawRects,
         rawColors,
