@@ -29,6 +29,7 @@
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_gtk_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #endif
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
@@ -81,12 +82,22 @@ static void fl_view_gtk4_update_accessible_name(FlView* self) {
 }
 
 static void fl_view_gtk4_update_accessible_tree(FlView* self) {
+#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
+  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
+  if (api->gtk_at_least_4_10 &&
+      api->gtk_accessible_set_accessible_parent != nullptr) {
+    // Keep the render surface attached to the view in the accessibility tree.
+    api->gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(self->render_area),
+                                              GTK_ACCESSIBLE(self), nullptr);
+  }
+#else
 #if GTK_CHECK_VERSION(4, 10, 0)
   // Keep the render surface attached to the view in the accessibility tree.
   gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(self->render_area),
                                        GTK_ACCESSIBLE(self), nullptr);
 #else
   (void)self;
+#endif
 #endif
 }
 #endif

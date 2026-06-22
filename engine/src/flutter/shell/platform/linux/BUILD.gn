@@ -92,6 +92,7 @@ source_set("flutter_linux_sources_gtk3") {
              "fl_gdk_platform.h",
              "fl_gtk.h",
              "fl_gtk_a11y_compat.h",
+             "fl_gtk_runtime_api.h",
              "fl_key_channel_responder.h",
              "fl_key_embedder_responder.h",
              "fl_key_event.h",
@@ -216,6 +217,7 @@ source_set("flutter_linux_sources_gtk4") {
              "fl_gdk_platform.h",
              "fl_gtk.h",
              "fl_gtk_a11y_compat.h",
+             "fl_gtk_runtime_api.h",
              "fl_key_channel_responder.h",
              "fl_key_embedder_responder.h",
              "fl_key_event.h",
@@ -261,6 +263,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_event_channel.cc",
     "fl_framebuffer.cc",
     "fl_gnome_settings.cc",
+    "fl_gtk_runtime_api.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
     "fl_key_channel_responder.cc",
@@ -319,6 +322,7 @@ source_set("flutter_linux_sources_gtk4") {
     "FLUTTER_LINUX_COMPILATION",
     "FLUTTER_ENGINE_NO_PROTOTYPES",
     "FLUTTER_LINUX_GTK4",
+    "FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT",
   ]
 
   deps = [
