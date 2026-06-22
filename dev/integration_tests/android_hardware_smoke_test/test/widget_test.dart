@@ -34,8 +34,9 @@ void main() {
       },
     );
 
-    // Mock the built-in system platform views channel to allow mocking HCPP support checks
+    // Mock the built-in system platform views channel.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      // Note: `platform_views_2` not `platform_views` because that's where `isSurfaceControlEnabled` is supported.
       const MethodChannel('flutter/platform_views_2'),
       (MethodCall methodCall) async {
         if (methodCall.method == 'isSurfaceControlEnabled') {
