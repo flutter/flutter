@@ -2165,17 +2165,19 @@ Future<void> testMain() async {
 
       MethodCall setStyle;
 
+      // Some browsers add spaces after commas in the DOM element's style object.
+      // We remove them to match `canonicalizeFontFamily` which doesn't use spaces.
       setStyle = configureSetStyleMethodCall(12, 'sans-serif', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
-      expect(input.style.fontFamily, canonicalizeFontFamily('sans-serif'));
+      expect(input.style.fontFamily.replaceAll(', ', ','), canonicalizeFontFamily('sans-serif'));
 
       setStyle = configureSetStyleMethodCall(12, '.SF Pro Text', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
-      expect(input.style.fontFamily, canonicalizeFontFamily('.SF Pro Text'));
+      expect(input.style.fontFamily.replaceAll(', ', ','), canonicalizeFontFamily('.SF Pro Text'));
 
       setStyle = configureSetStyleMethodCall(12, 'foo bar baz', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
-      expect(input.style.fontFamily, canonicalizeFontFamily('foo bar baz'));
+      expect(input.style.fontFamily.replaceAll(', ', ','), canonicalizeFontFamily('foo bar baz'));
 
       hideKeyboard();
     });
