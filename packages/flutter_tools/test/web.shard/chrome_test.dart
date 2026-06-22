@@ -439,6 +439,7 @@ void main() {
             '--no-sandbox',
             '--headless',
             '--window-size=1024,1024',
+            '--enable-unsafe-swiftshader',
             'example_url',
           ],
           stderr: kDevtoolsStderr,
@@ -573,6 +574,7 @@ void main() {
           '--no-sandbox',
           '--headless',
           '--window-size=1024,1024',
+          '--enable-unsafe-swiftshader',
           'example_url',
         ],
         stderr: kDevtoolsStderr,
@@ -658,6 +660,7 @@ void main() {
       '--no-sandbox',
       '--headless',
       '--window-size=1024,1024',
+      '--enable-unsafe-swiftshader',
       'example_url',
     ];
 
@@ -691,6 +694,7 @@ void main() {
       '--no-sandbox',
       '--headless',
       '--window-size=1024,1024',
+      '--enable-unsafe-swiftshader',
       'example_url',
     ];
 
@@ -728,6 +732,7 @@ void main() {
             '--no-sandbox',
             '--headless',
             '--window-size=1024,1024',
+            '--enable-unsafe-swiftshader',
             'example_url',
           ],
           stderr: 'nothing in the std error indicating glibc error',

@@ -77,7 +77,7 @@ class WebDriverService extends DriverService {
       device,
       target: mainPath,
       buildInfo: buildInfo,
-      platform: globals.platform,
+      platform: _platform,
     );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
@@ -202,6 +202,7 @@ class WebDriverService extends DriverService {
         desired: getDesiredCapabilities(
           browser,
           headless,
+          platform: _platform,
           webBrowserFlags: webBrowserFlags,
           chromeBinary: chromeBinary,
           mobileEmulation: mobileEmulation,
@@ -321,6 +322,7 @@ enum Browser implements CliEnum {
 Map<String, dynamic> getDesiredCapabilities(
   Browser browser,
   bool? headless, {
+  Platform platform = const LocalPlatform(),
   List<String> webBrowserFlags = const <String>[],
   String? chromeBinary,
   Map<String, dynamic>? mobileEmulation,
@@ -345,9 +347,9 @@ Map<String, dynamic> getDesiredCapabilities(
         '--no-sandbox',
         '--no-first-run',
         '--password-store=basic',
-        if (globals.platform.isMacOS) '--use-mock-keychain',
+        if (platform.isMacOS) '--use-mock-keychain',
         '--disable-search-engine-choice-screen',
-        if (headless!) '--headless',
+        if (headless!) ...<String>['--headless', '--enable-unsafe-swiftshader'],
         ...webBrowserFlags,
       ],
       'perfLoggingPrefs': <String, String>{
