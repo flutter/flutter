@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
+#include "flutter/shell/platform/linux/fl_gtk_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_linux_debug.h"
 
 struct _FlRenderTextureGtk4 {
@@ -28,10 +29,10 @@ static void fl_render_texture_gtk4_update_accessible_name(
   GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
   GtkAccessibleProperty properties[] = {property};
   GValue value = G_VALUE_INIT;
-  gtk_accessible_property_init_value(property, &value);
+  fl_gtk_runtime_accessible_property_init_value(property, &value);
   g_value_set_string(&value, label);
-  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
-                                       &value);
+  fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self), 1,
+                                                  properties, &value);
   g_value_unset(&value);
 #else
   (void)self;

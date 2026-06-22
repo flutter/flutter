@@ -74,31 +74,17 @@ static void fl_view_gtk4_update_accessible_name(FlView* self) {
   GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
   GtkAccessibleProperty properties[] = {property};
   GValue value = G_VALUE_INIT;
-  gtk_accessible_property_init_value(property, &value);
+  fl_gtk_runtime_accessible_property_init_value(property, &value);
   g_value_set_string(&value, "Flutter view");
-  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
-                                       &value);
+  fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self), 1,
+                                                  properties, &value);
   g_value_unset(&value);
 }
 
 static void fl_view_gtk4_update_accessible_tree(FlView* self) {
-#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
-  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
-  if (api->gtk_at_least_4_10 &&
-      api->gtk_accessible_set_accessible_parent != nullptr) {
-    // Keep the render surface attached to the view in the accessibility tree.
-    api->gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(self->render_area),
-                                              GTK_ACCESSIBLE(self), nullptr);
-  }
-#else
-#if GTK_CHECK_VERSION(4, 10, 0)
   // Keep the render surface attached to the view in the accessibility tree.
-  gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(self->render_area),
-                                       GTK_ACCESSIBLE(self), nullptr);
-#else
-  (void)self;
-#endif
-#endif
+  fl_gtk_runtime_accessible_set_accessible_parent(
+      GTK_ACCESSIBLE(self->render_area), GTK_ACCESSIBLE(self), nullptr);
 }
 #endif
 
