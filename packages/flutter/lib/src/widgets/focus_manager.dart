@@ -1189,7 +1189,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _setAsFocusedChildForScope();
-    _maybeInvalidatePolicyData();
+    propogateFocusRequest(this);
     if (hasPrimaryFocus &&
         (_manager!._markedForFocus == null || _manager!._markedForFocus == this)) {
       return;
@@ -1241,24 +1241,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  /// Invalidates cached traversal policy data across all enclosing scopes if
-  /// focus shifted outside of an active traversal action.
+  /// Notifies the node and its ancestors that a focus request has occurred
+  /// within its subtree.
   ///
-  /// For instance, if focus moves via a direct tap, then stale traversal
-  /// history is cleared.
-  void _maybeInvalidatePolicyData() {
-    FocusNode? current = this;
-    while (current != null) {
-      final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOfNode(current);
-      if (policy != null && !FocusTraversalGroup.underTraversal(current)) {
-        FocusScopeNode? scope = current.nearestScope;
-        while (scope != null) {
-          policy.invalidateScopeData(scope);
-          scope = scope.enclosingScope;
-        }
-      }
-      current = current.parent;
-    }
+  /// This is called on the newly focused node and all of its ancestors.
+  ///
+  /// Subclasses can override this to respond to focus change requests within
+  /// their subtree.
+  @protected
+  @mustCallSuper
+  void propogateFocusRequest(FocusNode descendant) {
+    _parent?.propogateFocusRequest(descendant);
   }
 
   /// Request to move the focus to the next focus node, by calling the

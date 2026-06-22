@@ -2119,16 +2119,6 @@ class FocusTraversalGroup extends StatefulWidget {
     return _getGroupNode(node)?.policy;
   }
 
-  /// Returns whether the nearest enclosing [FocusTraversalGroup] ancestor of
-  /// the given [FocusNode] is currently executing a directional focus
-  /// traversal.
-  ///
-  /// This is used to determine if focus shifts occurred as a result of active
-  /// traversal or external events (such as direct taps).
-  static bool underTraversal(FocusNode node) {
-    return _getGroupNode(node)?.isTraversing ?? false;
-  }
-
   static _FocusTraversalGroupNode? _getGroupNode(FocusNode node) {
     while (node.parent != null) {
       if (node.context == null) {
@@ -2238,6 +2228,18 @@ class _FocusTraversalGroupNode extends FocusNode {
   ///
   /// It is set to true during [FocusTraversalPolicy.inDirection].
   bool isTraversing = false;
+
+  @override
+  void propogateFocusRequest(FocusNode descendant) {
+    if (!isTraversing) {
+      FocusScopeNode? scope = descendant.nearestScope;
+      while (scope != null) {
+        policy.invalidateScopeData(scope);
+        scope = scope.enclosingScope;
+      }
+    }
+    super.propogateFocusRequest(descendant);
+  }
 }
 
 class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
