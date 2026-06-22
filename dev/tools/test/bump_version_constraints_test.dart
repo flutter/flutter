@@ -74,8 +74,18 @@ environment:
     );
 
     expect(exitCode, isNull);
-    expect(pubspec1.readAsStringSync(), contains('  sdk: ^3.13.0-0\n'));
-    expect(pubspec2.readAsStringSync(), contains('  sdk: ^3.13.0-0\n'));
+    expect(pubspec1.readAsStringSync(), '''
+name: flutter
+environment:
+  sdk: ^3.13.0-0
+dependencies:
+  meta: any
+''');
+    expect(pubspec2.readAsStringSync(), '''
+name: flutter_tools
+environment:
+  sdk: ^3.13.0-0
+''');
     expect(stdout.toString(), contains('Updated packages/flutter/pubspec.yaml'));
     expect(stdout.toString(), contains('Updated packages/flutter_tools/pubspec.yaml'));
     expect(stdout.toString(), contains('Done. Updated 2 pubspec.yaml files.'));
@@ -101,7 +111,11 @@ environment:
     );
 
     expect(exitCode, isNull);
-    expect(pubspec.readAsStringSync(), contains('  sdk: ^3.13.0-0\n'));
+    expect(pubspec.readAsStringSync(), '''
+name: flutter
+environment:
+  sdk: ^3.13.0-0
+''');
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
     expect(stderr.toString(), isEmpty);
   });
@@ -125,7 +139,11 @@ environment:
     );
 
     expect(exitCode, isNull);
-    expect(pubspec.readAsStringSync(), contains('environment:\n  foo: bar'));
+    expect(pubspec.readAsStringSync(), '''
+name: flutter
+environment:
+  foo: bar
+''');
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
     expect(stderr.toString(), isEmpty);
   });
@@ -136,6 +154,15 @@ environment:
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: hidden
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+''');
+
+    // Outside flutterRoot
+    final File pubspecOutside = fileSystem.file('/bar/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: outside
 environment:
   sdk: '>=3.0.0 <4.0.0'
 ''');
@@ -151,6 +178,7 @@ environment:
 
     expect(exitCode, isNull);
     expect(pubspecHidden.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
+    expect(pubspecOutside.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
   });
 
@@ -267,6 +295,27 @@ class FaultyFile extends ForwardingFileSystemEntity<File, io.File> with Forwardi
       throw const FileSystemException('Simulated read failure');
     }
     return delegate.readAsLinesSync(encoding: encoding);
+  }
+
+  @override
+  String readAsStringSync({Encoding encoding = utf8}) {
+    if (path.contains('bad')) {
+      throw const FileSystemException('Simulated read failure');
+    }
+    return delegate.readAsStringSync(encoding: encoding);
+  }
+
+  @override
+  void writeAsStringSync(
+    String content, {
+    FileMode mode = FileMode.write,
+    Encoding encoding = utf8,
+    bool flush = false,
+  }) {
+    if (path.contains('bad')) {
+      throw const FileSystemException('Simulated write failure');
+    }
+    delegate.writeAsStringSync(content, mode: mode, encoding: encoding, flush: flush);
   }
 }
 

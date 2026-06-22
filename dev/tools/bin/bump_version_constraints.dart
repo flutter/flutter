@@ -8,6 +8,8 @@ import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 void main(List<String> arguments) {
   const FileSystem fileSystem = LocalFileSystem();
@@ -59,37 +61,34 @@ void run(
   for (final file in pubspecs) {
     final String relativePath = path.relative(file.path, from: flutterRoot.path);
     try {
-      final List<String> lines = file.readAsLinesSync();
-      var inEnvironment = false;
+      final String content = file.readAsStringSync();
+      final yamlEditor = YamlEditor(content);
+
+      final YamlNode doc = loadYamlNode(content);
+      if (doc is! YamlMap) {
+        stderr.writeln('Error: $relativePath is not a valid YAML map.');
+        errorCount++;
+        continue;
+      }
+
       var fileUpdated = false;
-
-      for (var i = 0; i < lines.length; i++) {
-        final String line = lines[i];
-        final String trimmed = line.trim();
-
-        if (trimmed.startsWith('environment:')) {
-          inEnvironment = true;
-          continue;
-        }
-
-        if (inEnvironment) {
-          if (line.isNotEmpty && !line.startsWith(' ') && !line.startsWith('#')) {
-            inEnvironment = false;
-          } else if (trimmed.startsWith('sdk:')) {
-            final int sdkIndex = line.indexOf('sdk:');
-            final String indentation = line.substring(0, sdkIndex);
-            final newLine = '${indentation}sdk: $newVersion';
-            if (line != newLine) {
-              lines[i] = newLine;
-              fileUpdated = true;
-            }
-            inEnvironment = false;
+      if (doc.containsKey('environment')) {
+        final Object? env = doc['environment'];
+        if (env is YamlMap && env.containsKey('sdk')) {
+          final Object? currentSdk = env['sdk'];
+          if (currentSdk != newVersion) {
+            yamlEditor.update(<String>['environment', 'sdk'], newVersion);
+            fileUpdated = true;
           }
         }
       }
 
       if (fileUpdated) {
-        file.writeAsStringSync('${lines.join('\n')}\n');
+        var newContent = yamlEditor.toString();
+        if (!newContent.endsWith('\n')) {
+          newContent += '\n';
+        }
+        file.writeAsStringSync(newContent);
         stdout.writeln('Updated $relativePath');
         updatedCount++;
       }
