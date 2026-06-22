@@ -323,8 +323,12 @@ EngineImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
       adjustedHeight = null;
     }
 
-    final int finalTargetWidth = adjustedWidth ?? (adjustedHeight! * width / height).round();
-    final int finalTargetHeight = adjustedHeight ?? (adjustedWidth! * height / width).round();
+    final int finalTargetWidth =
+        adjustedWidth ??
+        (adjustedHeight != null ? (adjustedHeight * width / height).round() : width);
+    final int finalTargetHeight =
+        adjustedHeight ??
+        (adjustedWidth != null ? (adjustedWidth * height / width).round() : height);
 
     final recorder = CkPictureRecorder();
     final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
