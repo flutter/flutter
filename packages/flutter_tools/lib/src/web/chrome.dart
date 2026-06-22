@@ -257,7 +257,7 @@ class ChromiumLauncher {
       // GPU rendering with this flag.
       if (_isMacosArm && headless) '--use-angle=metal',
 
-      if (headless) ...<String>['--no-sandbox', '--headless', '--window-size=2400,1800'],
+      if (headless) ...<String>['--no-sandbox', '--headless', '--window-size=1024,1024'],
       ...webBrowserFlags,
       url,
     ];

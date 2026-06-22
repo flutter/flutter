@@ -437,7 +437,7 @@ void main() {
             '--use-angle=metal',
             '--no-sandbox',
             '--headless',
-            '--window-size=2400,1800',
+            '--window-size=1024,1024',
             'example_url',
           ],
           stderr: kDevtoolsStderr,
@@ -571,7 +571,7 @@ void main() {
           ...kChromeArgs,
           '--no-sandbox',
           '--headless',
-          '--window-size=2400,1800',
+          '--window-size=1024,1024',
           'example_url',
         ],
         stderr: kDevtoolsStderr,
@@ -656,7 +656,7 @@ void main() {
       ...kChromeArgs,
       '--no-sandbox',
       '--headless',
-      '--window-size=2400,1800',
+      '--window-size=1024,1024',
       'example_url',
     ];
 
@@ -689,7 +689,7 @@ void main() {
       ...kChromeArgs,
       '--no-sandbox',
       '--headless',
-      '--window-size=2400,1800',
+      '--window-size=1024,1024',
       'example_url',
     ];
 
@@ -726,7 +726,7 @@ void main() {
             ...kChromeArgs,
             '--no-sandbox',
             '--headless',
-            '--window-size=2400,1800',
+            '--window-size=1024,1024',
             'example_url',
           ],
           stderr: 'nothing in the std error indicating glibc error',
