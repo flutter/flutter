@@ -7,7 +7,6 @@ import 'dart:io' as io show Platform, exit, stderr, stdout;
 import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
@@ -59,7 +58,7 @@ void run(
   final List<File> pubspecs = _findPubspecs(flutterRoot, stderr);
 
   for (final file in pubspecs) {
-    final String relativePath = path.relative(file.path, from: flutterRoot.path);
+    final String relativePath = fileSystem.path.relative(file.path, from: flutterRoot.path);
     try {
       final String content = file.readAsStringSync();
       final yamlEditor = YamlEditor(content);
@@ -105,18 +104,19 @@ void run(
 }
 
 List<File> _findPubspecs(Directory dir, StringSink stderr) {
+  final FileSystem fileSystem = dir.fileSystem;
   final result = <File>[];
   void search(Directory currentDir) {
     try {
       for (final FileSystemEntity entity in currentDir.listSync(followLinks: false)) {
         if (entity is Directory) {
-          final String name = path.basename(entity.path);
+          final String name = fileSystem.path.basename(entity.path);
           if (name.startsWith('.') || name == 'build') {
             continue;
           }
           search(entity);
         } else if (entity is File) {
-          if (path.basename(entity.path) == 'pubspec.yaml') {
+          if (fileSystem.path.basename(entity.path) == 'pubspec.yaml') {
             result.add(entity);
           }
         }
