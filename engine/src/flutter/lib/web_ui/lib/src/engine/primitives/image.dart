@@ -182,7 +182,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       }
 
       // Asynchronous, non-blocking PNG encoding fallback using OffscreenCanvas.
-      if (format == ui.ImageByteFormat.png) {
+      //
+      // Extracting raw pixels from a GPU-backed image (where imageSource is null)
+      // requires a synchronous readPixels call, which causes a severe WebGL GPU
+      // stall and blocks the browser main thread. Thus, we only use this fallback
+      // for CPU-backed images (where imageSource is not null).
+      if (format == ui.ImageByteFormat.png && cloneImage.imageSource != null) {
         final ByteData? rawData = await renderer.pictureToImageSurface.rasterizeImage(
           cloneImage,
           ui.ImageByteFormat.rawStraightRgba,
