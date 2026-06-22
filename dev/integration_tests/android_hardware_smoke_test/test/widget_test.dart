@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:android_hardware_smoke_test/image_drawing_canvas.dart';
 import 'package:android_hardware_smoke_test/main.dart';
+import 'package:android_hardware_smoke_test/platform_view.dart';
 import 'package:android_hardware_smoke_test/text_drawing_canvas.dart';
 import 'package:android_hardware_smoke_test/vector_drawings_canvas.dart';
 import 'package:flutter/material.dart';
@@ -225,5 +226,38 @@ void main() {
 
     // Verify BackdropFilter widget is present in the tree
     expect(find.byType(BackdropFilter), findsOneWidget);
+  });
+
+  testWidgets('platformViewTest message channel handler - success behavior', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+
+    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
+      'testName': 'platformViewTest',
+      'performAppSideGoldenCompare': false,
+      'captureScreenshot': false,
+    })!;
+
+    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
+        .instance
+        .defaultBinaryMessenger
+        .handlePlatformMessage(
+          'com.example.android_hardware_smoke_test/test_channel',
+          encodedMessage,
+          null,
+        );
+
+    await tester.pump();
+    await tester.pump();
+
+    final ByteData? responseBytes = await responseFuture;
+    expect(responseBytes, isNotNull);
+    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
+    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
+    expect(replyMap['message'], equals('Rendered platformViewTest'));
+
+    // Verify AndroidPlatformView widget is present in the tree
+    expect(find.byType(AndroidPlatformView), findsOneWidget);
   });
 }
