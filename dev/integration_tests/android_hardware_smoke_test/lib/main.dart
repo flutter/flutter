@@ -194,31 +194,25 @@ class _MyState extends State<MyWidget> {
 
   @override
   Widget build(BuildContext context) {
+    void onPlatformViewCreated() {
+      if (_platformViewCreatedCompleter?.isCompleted == false) {
+        _platformViewCreatedCompleter?.complete();
+      }
+    }
+
     final Widget testContent = switch (_message) {
       'backdropFilterBlurTest' => const BackdropFilterBlur(),
       'platformViewTextureLayerTest' => AndroidPlatformView(
         mode: PlatformViewMode.textureLayer,
-        onCreated: () {
-          if (_platformViewCreatedCompleter?.isCompleted == false) {
-            _platformViewCreatedCompleter?.complete();
-          }
-        },
+        onCreated: onPlatformViewCreated,
       ),
       'platformViewHybridCompositionTest' => AndroidPlatformView(
         mode: PlatformViewMode.hybridComposition,
-        onCreated: () {
-          if (_platformViewCreatedCompleter?.isCompleted == false) {
-            _platformViewCreatedCompleter?.complete();
-          }
-        },
+        onCreated: onPlatformViewCreated,
       ),
       'platformViewHybridCompositionPlusPlusTest' => AndroidPlatformView(
         mode: PlatformViewMode.hybridCompositionPlusPlus,
-        onCreated: () {
-          if (_platformViewCreatedCompleter?.isCompleted == false) {
-            _platformViewCreatedCompleter?.complete();
-          }
-        },
+        onCreated: onPlatformViewCreated,
       ),
       'textTest' => const TextDrawingCanvas(),
       'imageTest' => ImageDrawingCanvas(image: _loadedImage),
