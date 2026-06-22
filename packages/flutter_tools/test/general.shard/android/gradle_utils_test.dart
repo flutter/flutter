@@ -1900,6 +1900,34 @@ allprojects {
       );
     });
   });
+
+  group('Gradle / KGP / AGP compatibility suggestion helpers', () {
+    testWithoutContext('getCompatibleGradleRangeForKgp', () {
+      expect(getCompatibleGradleRangeForKgp('2.1.10'), '>= 7.6.3 and < 8.11');
+      expect(getCompatibleGradleRangeForKgp('2.0.20'), '>= 6.8.3 and < 8.9');
+      expect(getCompatibleGradleRangeForKgp('0.1.0'), isNull);
+      expect(getCompatibleGradleRangeForKgp('3.0.0'), isNull);
+    });
+
+    testWithoutContext('getCompatibleKgpRangeForGradle', () {
+      expect(getCompatibleKgpRangeForGradle('8.11'), '>= 2.1.20 and <= 2.3.29');
+      expect(getCompatibleKgpRangeForGradle('8.4'), '>= 2.0 and <= 2.3.29');
+      expect(getCompatibleKgpRangeForGradle('4.0'), isNull);
+      expect(getCompatibleKgpRangeForGradle('10.0'), isNull);
+    });
+
+    testWithoutContext('getCompatibleAgpRangeForKgp', () {
+      expect(getCompatibleAgpRangeForKgp('2.1.10'), '>= 7.3.1 and <= 8.7.2');
+      expect(getCompatibleAgpRangeForKgp('2.0.20'), '>= 7.1.3 and < 8.6');
+      expect(getCompatibleAgpRangeForKgp('1.0.0'), isNull);
+    });
+
+    testWithoutContext('getCompatibleKgpRangeForAgp', () {
+      expect(getCompatibleKgpRangeForAgp('8.7.2'), '>= 2.1.0 and <= 2.3.29');
+      expect(getCompatibleKgpRangeForAgp('8.5'), '>= 2.0.20 and <= 2.3.29');
+      expect(getCompatibleKgpRangeForAgp('3.0.0'), isNull);
+    });
+  });
 }
 
 class GradleAgpTestData {

@@ -582,66 +582,20 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
   // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  // Documented max is 2.3.10, using 2.3.29 covers patch versions.
-  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.29')) {
-    // Documented max is 9.5.0, using 9.5.99 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.5.99', inclusiveMax: false);
-  }
-  // Documented max is 2.2.21, using 2.3.0 covers patch versions.
-  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0')) {
-    // Documented max is 8.14, using 8.14.99 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.14.99', inclusiveMax: false);
-  }
-  if (isWithinVersionRange(kgpV, min: '2.2.0', max: '2.2.10')) {
-    // Documented max is 8.14, using 8.14.99 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.14.99', inclusiveMax: false);
-  }
-  if (isWithinVersionRange(kgpV, min: '2.1.20', max: '2.1.21')) {
-    // Documented max is 8.12.1, using 8.12.99 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.12.99', inclusiveMax: false);
-  }
-  if (isWithinVersionRange(kgpV, min: '2.1.0', max: '2.1.10')) {
-    // Documented max is 8.10, using 8.11 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.11', inclusiveMax: false);
-  }
-  // Documented max is 2.0.21.
-  if (isWithinVersionRange(kgpV, min: '2.0.20', max: '2.1', inclusiveMax: false)) {
-    // Documented max is 8.5, using 8.9 non inclusive covers patch versions.
-    // Kotlin Multiplatform can throw warnings on 8.8.
-    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.9', inclusiveMax: false);
-  }
-  if (isWithinVersionRange(kgpV, min: '2.0', max: '2.0.20', inclusiveMax: false)) {
-    // Documented max is 8.5, using 8.6 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.6', inclusiveMax: false);
-  }
-  // Documented max is 1.9.25.
-  if (isWithinVersionRange(kgpV, min: '1.9.20', max: '2.0', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.1.1');
-  }
-  // Documented max is 1.9.10.
-  if (isWithinVersionRange(kgpV, min: '1.8.20', max: '1.9.20', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV, min: '6.8.3', max: '7.6.0');
-  }
-  // Documented max is 1.8.11.
-  if (isWithinVersionRange(kgpV, min: '1.8.0', max: '1.8.20', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV, min: '6.8.3', max: '7.3.3');
-  }
-  // Documented max is 1.7.22.
-  if (isWithinVersionRange(kgpV, min: '1.7.20', max: '1.8.0', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV, min: '6.7.1', max: '7.1.1');
-  }
-  // Documented max is 1.7.10.
-  if (isWithinVersionRange(kgpV, min: '1.7.0', max: '1.7.20', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV, min: '6.7.1', max: '7.0.2');
-  }
-  // Documented max is 1.6.21.
-  if (isWithinVersionRange(
-    kgpV,
-    min: oldestDocumentedKgpCompatabilityVersion,
-    max: '1.7.0',
-    inclusiveMax: false,
-  )) {
-    return isWithinVersionRange(gradleV, min: '6.1.1', max: '7.0.2');
+  for (final KgpGradleCompat data in _kgpGradleCompatList) {
+    if (isWithinVersionRange(
+      kgpV,
+      min: data.kgpMin,
+      max: data.kgpMax,
+      inclusiveMax: data.inclusiveMaxKgp,
+    )) {
+      return isWithinVersionRange(
+        gradleV,
+        min: data.gradleMin,
+        max: data.gradleMax,
+        inclusiveMax: data.inclusiveMaxGradle,
+      );
+    }
   }
 
   logger.printTrace('Unknown KGP-Gradle compatibility, KGP: $kgpV, Gradle: $gradleV');
@@ -696,67 +650,106 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  // Documented max is 2.3.10
-  if (isWithinVersionRange(kgpV, min: '2.3.10', max: '2.3.29')) {
-    // Documented max is 9.2.0
-    return isWithinVersionRange(agpV, min: '8.2.2', max: '9.2.99', inclusiveMax: false);
-  }
-  // Documented max is 2.3.0
-  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.10', inclusiveMax: false)) {
-    // Documented max is 8.13.0
-    return isWithinVersionRange(agpV, min: '8.2.2', max: '8.14', inclusiveMax: false);
-  }
-  // Documented max is 2.2.20
-  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0', inclusiveMax: false)) {
-    // Documented max is 8.11.1
-    return isWithinVersionRange(agpV, min: '7.3.1', max: '8.12', inclusiveMax: false);
-  }
-  // Documented max is 2.2.10
-  if (isWithinVersionRange(kgpV, min: '2.2.0', max: '2.2.19')) {
-    // Documented max is 8.10.0
-    return isWithinVersionRange(agpV, min: '7.3.1', max: '8.11', inclusiveMax: false);
-  }
-  // Documented max is 2.1.21
-  if (isWithinVersionRange(kgpV, min: '2.1.0', max: '2.1.21')) {
-    return isWithinVersionRange(agpV, min: '7.3.1', max: '8.7.2');
-  }
-  // Documented max is 2.0.21
-  if (isWithinVersionRange(kgpV, min: '2.0.20', max: '2.1.0', inclusiveMax: false)) {
-    // Documented max is 8.5.
-    return isWithinVersionRange(agpV, min: '7.1.3', max: '8.6', inclusiveMax: false);
-  }
-  // Documented max is 2.0.0.
-  if (isWithinVersionRange(kgpV, min: '2.0.0', max: '2.0.20', inclusiveMax: false)) {
-    return isWithinVersionRange(agpV, min: '7.1.3', max: '8.3.1');
-  }
-  // Documented max is 1.9.25
-  if (isWithinVersionRange(kgpV, min: '1.9.20', max: '2.0.0', inclusiveMax: false)) {
-    return isWithinVersionRange(agpV, min: '4.2.2', max: '8.1.0');
-  }
-  // Documented max is 1.9.10
-  if (isWithinVersionRange(kgpV, min: '1.9.0', max: '1.9.20', inclusiveMax: false)) {
-    return isWithinVersionRange(agpV, min: '4.2.2', max: '7.4.0');
-  }
-  // Documented max is 1.8.22
-  if (isWithinVersionRange(kgpV, min: '1.8.20', max: '1.9', inclusiveMax: false)) {
-    return isWithinVersionRange(agpV, min: '4.1.3', max: '7.4.0');
-  }
-  // Documented max is 1.8.11
-  if (isWithinVersionRange(kgpV, min: '1.8.0', max: '1.8.20', inclusiveMax: false)) {
-    return isWithinVersionRange(agpV, min: '4.1.3', max: '7.2.1');
-  }
-  // Documented max is 1.7.22
-  if (isWithinVersionRange(kgpV, min: '1.7.20', max: '1.8.0', inclusiveMax: false)) {
-    return isWithinVersionRange(agpV, min: '3.6.4', max: '7.0.4');
-  }
-  // Documented max is 1.7.10
-  // Documented gap between 1.6.21 and 1.7.0.
-  if (isWithinVersionRange(kgpV, min: '1.6.20', max: '1.7.20', inclusiveMax: false)) {
-    return isWithinVersionRange(agpV, min: '3.4.3', max: '7.0.2');
+  for (final AgpKgpCompat data in _agpKgpCompatList) {
+    if (isWithinVersionRange(
+      kgpV,
+      min: data.kgpMin,
+      max: data.kgpMax,
+      inclusiveMax: data.inclusiveMaxKgp,
+    )) {
+      return isWithinVersionRange(
+        agpV,
+        min: data.agpMin,
+        max: data.agpMax,
+        inclusiveMax: data.inclusiveMaxAgp,
+      );
+    }
   }
 
-  logger.printTrace('Unknown KGP-Gradle compatibility, KGP: $kgpV, AGP: $agpV');
+  logger.printTrace('Unknown KGP-AGP compatibility, KGP: $kgpV, AGP: $agpV');
   return false;
+}
+
+/// Returns the compatible Gradle version range for a given Kotlin Gradle Plugin (KGP) version.
+String? getCompatibleGradleRangeForKgp(String kgpV) {
+  for (final KgpGradleCompat data in _kgpGradleCompatList) {
+    if (isWithinVersionRange(
+      kgpV,
+      min: data.kgpMin,
+      max: data.kgpMax,
+      inclusiveMax: data.inclusiveMaxKgp,
+    )) {
+      final minPart = '>= ${data.gradleMin}';
+      final op = data.inclusiveMaxGradle ? '<=' : '<';
+      return '$minPart and $op ${data.gradleMax}';
+    }
+  }
+  return null;
+}
+
+/// Returns the compatible Kotlin Gradle Plugin (KGP) version range for a given Gradle version.
+String? getCompatibleKgpRangeForGradle(String gradleV) {
+  KgpGradleCompat? firstMatch;
+  KgpGradleCompat? lastMatch;
+  for (final KgpGradleCompat data in _kgpGradleCompatList) {
+    final bool compatible = isWithinVersionRange(
+      gradleV,
+      min: data.gradleMin,
+      max: data.gradleMax,
+      inclusiveMax: data.inclusiveMaxGradle,
+    );
+    if (compatible) {
+      firstMatch ??= data;
+      lastMatch = data;
+    }
+  }
+  if (firstMatch == null || lastMatch == null) {
+    return null;
+  }
+  final minPart = '>= ${lastMatch.kgpMin}';
+  final op = firstMatch.inclusiveMaxKgp ? '<=' : '<';
+  return '$minPart and $op ${firstMatch.kgpMax}';
+}
+
+/// Returns the compatible Android Gradle Plugin (AGP) version range for a given Kotlin Gradle Plugin (KGP) version.
+String? getCompatibleAgpRangeForKgp(String kgpV) {
+  for (final AgpKgpCompat data in _agpKgpCompatList) {
+    if (isWithinVersionRange(
+      kgpV,
+      min: data.kgpMin,
+      max: data.kgpMax,
+      inclusiveMax: data.inclusiveMaxKgp,
+    )) {
+      final minPart = '>= ${data.agpMin}';
+      final op = data.inclusiveMaxAgp ? '<=' : '<';
+      return '$minPart and $op ${data.agpMax}';
+    }
+  }
+  return null;
+}
+
+/// Returns the compatible Kotlin Gradle Plugin (KGP) version range for a given Android Gradle Plugin (AGP) version.
+String? getCompatibleKgpRangeForAgp(String agpV) {
+  AgpKgpCompat? firstMatch;
+  AgpKgpCompat? lastMatch;
+  for (final AgpKgpCompat data in _agpKgpCompatList) {
+    final bool compatible = isWithinVersionRange(
+      agpV,
+      min: data.agpMin,
+      max: data.agpMax,
+      inclusiveMax: data.inclusiveMaxAgp,
+    );
+    if (compatible) {
+      firstMatch ??= data;
+      lastMatch = data;
+    }
+  }
+  if (firstMatch == null || lastMatch == null) {
+    return null;
+  }
+  final minPart = '>= ${lastMatch.kgpMin}';
+  final op = firstMatch.inclusiveMaxKgp ? '<=' : '<';
+  return '$minPart and $op ${firstMatch.kgpMax}';
 }
 
 // Validate that Gradle version and AGP are compatible with each other.
@@ -1400,5 +1393,257 @@ var _javaAgpCompatList = const <JavaAgpCompat>[
     javaDefault: '1.8',
     agpMin: '4.2',
     agpMax: '4.2',
+  ),
+];
+
+@immutable
+class KgpGradleCompat {
+  const KgpGradleCompat({
+    required this.kgpMin,
+    required this.kgpMax,
+    required this.gradleMin,
+    required this.gradleMax,
+    this.inclusiveMaxKgp = true,
+    this.inclusiveMaxGradle = true,
+  });
+
+  final String kgpMin;
+  final String kgpMax;
+  final String gradleMin;
+  final String gradleMax;
+  final bool inclusiveMaxKgp;
+  final bool inclusiveMaxGradle;
+
+  @override
+  bool operator ==(Object other) =>
+      other is KgpGradleCompat &&
+      other.kgpMin == kgpMin &&
+      other.kgpMax == kgpMax &&
+      other.gradleMin == gradleMin &&
+      other.gradleMax == gradleMax &&
+      other.inclusiveMaxKgp == inclusiveMaxKgp &&
+      other.inclusiveMaxGradle == inclusiveMaxGradle;
+
+  @override
+  int get hashCode =>
+      Object.hash(kgpMin, kgpMax, gradleMin, gradleMax, inclusiveMaxKgp, inclusiveMaxGradle);
+}
+
+@immutable
+class AgpKgpCompat {
+  const AgpKgpCompat({
+    required this.kgpMin,
+    required this.kgpMax,
+    required this.agpMin,
+    required this.agpMax,
+    this.inclusiveMaxKgp = true,
+    this.inclusiveMaxAgp = true,
+  });
+
+  final String kgpMin;
+  final String kgpMax;
+  final String agpMin;
+  final String agpMax;
+  final bool inclusiveMaxKgp;
+  final bool inclusiveMaxAgp;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AgpKgpCompat &&
+      other.kgpMin == kgpMin &&
+      other.kgpMax == kgpMax &&
+      other.agpMin == agpMin &&
+      other.agpMax == agpMax &&
+      other.inclusiveMaxKgp == inclusiveMaxKgp &&
+      other.inclusiveMaxAgp == inclusiveMaxAgp;
+
+  @override
+  int get hashCode => Object.hash(kgpMin, kgpMax, agpMin, agpMax, inclusiveMaxKgp, inclusiveMaxAgp);
+}
+
+const _kgpGradleCompatList = <KgpGradleCompat>[
+  KgpGradleCompat(
+    kgpMin: '2.3.0',
+    kgpMax: '2.3.29',
+    gradleMin: '7.6.3',
+    gradleMax: '9.5.99',
+    inclusiveMaxGradle: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '2.2.20',
+    kgpMax: '2.3.0',
+    gradleMin: '7.6.3',
+    gradleMax: '8.14.99',
+    inclusiveMaxGradle: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '2.2.0',
+    kgpMax: '2.2.10',
+    gradleMin: '7.6.3',
+    gradleMax: '8.14.99',
+    inclusiveMaxGradle: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '2.1.20',
+    kgpMax: '2.1.21',
+    gradleMin: '7.6.3',
+    gradleMax: '8.12.99',
+    inclusiveMaxGradle: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '2.1.0',
+    kgpMax: '2.1.10',
+    gradleMin: '7.6.3',
+    gradleMax: '8.11',
+    inclusiveMaxGradle: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '2.0.20',
+    kgpMax: '2.1',
+    gradleMin: '6.8.3',
+    gradleMax: '8.9',
+    inclusiveMaxKgp: false,
+    inclusiveMaxGradle: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '2.0',
+    kgpMax: '2.0.20',
+    gradleMin: '6.8.3',
+    gradleMax: '8.6',
+    inclusiveMaxKgp: false,
+    inclusiveMaxGradle: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '1.9.20',
+    kgpMax: '2.0',
+    gradleMin: '6.8.3',
+    gradleMax: '8.1.1',
+    inclusiveMaxKgp: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '1.8.20',
+    kgpMax: '1.9.20',
+    gradleMin: '6.8.3',
+    gradleMax: '7.6.0',
+    inclusiveMaxKgp: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '1.8.0',
+    kgpMax: '1.8.20',
+    gradleMin: '6.8.3',
+    gradleMax: '7.3.3',
+    inclusiveMaxKgp: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '1.7.20',
+    kgpMax: '1.8.0',
+    gradleMin: '6.7.1',
+    gradleMax: '7.1.1',
+    inclusiveMaxKgp: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '1.7.0',
+    kgpMax: '1.7.20',
+    gradleMin: '6.7.1',
+    gradleMax: '7.0.2',
+    inclusiveMaxKgp: false,
+  ),
+  KgpGradleCompat(
+    kgpMin: '1.6.20',
+    kgpMax: '1.7.0',
+    gradleMin: '6.1.1',
+    gradleMax: '7.0.2',
+    inclusiveMaxKgp: false,
+  ),
+];
+
+const _agpKgpCompatList = <AgpKgpCompat>[
+  AgpKgpCompat(
+    kgpMin: '2.3.10',
+    kgpMax: '2.3.29',
+    agpMin: '8.2.2',
+    agpMax: '9.2.99',
+    inclusiveMaxAgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '2.3.0',
+    kgpMax: '2.3.10',
+    agpMin: '8.2.2',
+    agpMax: '8.14',
+    inclusiveMaxKgp: false,
+    inclusiveMaxAgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '2.2.20',
+    kgpMax: '2.3.0',
+    agpMin: '7.3.1',
+    agpMax: '8.12',
+    inclusiveMaxKgp: false,
+    inclusiveMaxAgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '2.2.0',
+    kgpMax: '2.2.19',
+    agpMin: '7.3.1',
+    agpMax: '8.11',
+    inclusiveMaxAgp: false,
+  ),
+  AgpKgpCompat(kgpMin: '2.1.0', kgpMax: '2.1.21', agpMin: '7.3.1', agpMax: '8.7.2'),
+  AgpKgpCompat(
+    kgpMin: '2.0.20',
+    kgpMax: '2.1.0',
+    agpMin: '7.1.3',
+    agpMax: '8.6',
+    inclusiveMaxKgp: false,
+    inclusiveMaxAgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '2.0.0',
+    kgpMax: '2.0.20',
+    agpMin: '7.1.3',
+    agpMax: '8.3.1',
+    inclusiveMaxKgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '1.9.20',
+    kgpMax: '2.0.0',
+    agpMin: '4.2.2',
+    agpMax: '8.1.0',
+    inclusiveMaxKgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '1.9.0',
+    kgpMax: '1.9.20',
+    agpMin: '4.2.2',
+    agpMax: '7.4.0',
+    inclusiveMaxKgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '1.8.20',
+    kgpMax: '1.9',
+    agpMin: '4.1.3',
+    agpMax: '7.4.0',
+    inclusiveMaxKgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '1.8.0',
+    kgpMax: '1.8.20',
+    agpMin: '4.1.3',
+    agpMax: '7.2.1',
+    inclusiveMaxKgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '1.7.20',
+    kgpMax: '1.8.0',
+    agpMin: '3.6.4',
+    agpMax: '7.0.4',
+    inclusiveMaxKgp: false,
+  ),
+  AgpKgpCompat(
+    kgpMin: '1.6.20',
+    kgpMax: '1.7.20',
+    agpMin: '3.4.3',
+    agpMax: '7.0.2',
+    inclusiveMaxKgp: false,
   ),
 ];

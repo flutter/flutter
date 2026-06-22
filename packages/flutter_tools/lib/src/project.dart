@@ -833,51 +833,89 @@ class AndroidProject extends FlutterProjectPlatform {
       kgpV: kgpVersion,
     );
 
-    // Begin description formatting.
+    final errors = <String>[];
+
     if (!compatibleGradleAgp) {
       final gradleDescription = agpVersion != null
           ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
           : '';
-      description =
-          '''
-Incompatible Gradle/AGP versions. \n
+      final suggestionText = gradleDescription.isNotEmpty ? '$gradleDescription\n' : '';
+      errors.add('''
+Incompatible Gradle/AGP versions.
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
-$gradleDescription\n
+$suggestionText
 See the link below for more information:
-$gradleAgpCompatUrl
-''';
+$gradleAgpCompatUrl''');
     }
     if (!compatibleJavaGradle) {
-      // Should contain the agp error (if present) but not the valid String.
-      description =
-          '''
-${compatibleGradleAgp ? '' : description}
+      final suggestions = <String>[];
+      if (javaVersion != null) {
+        final gradle.JavaGradleCompat? compat = gradle.getValidGradleVersionRangeForJavaVersion(
+          globals.logger,
+          javaV: javaVersion,
+        );
+        if (compat != null) {
+          final maxPart = compat.gradleMax != null ? ' and <= ${compat.gradleMax}' : '';
+          suggestions.add('Compatible Gradle version range: >= ${compat.gradleMin}$maxPart');
+        }
+      }
+      final suggestionText = suggestions.isNotEmpty ? '${suggestions.join('\n')}\n' : '';
+      errors.add('''
 Incompatible Java/Gradle versions.
-Java Version: $javaVersion, Gradle Version: $gradleVersion\n
+Java Version: $javaVersion, Gradle Version: $gradleVersion
+$suggestionText
 See the link below for more information:
-$javaGradleCompatUrl
-''';
+$javaGradleCompatUrl''');
     }
     if (!compatibleKgpGradle) {
-      description =
-          '''
-${compatibleGradleAgp ? '' : description}
+      final suggestions = <String>[];
+      final String? gradleRange = kgpVersion != null
+          ? gradle.getCompatibleGradleRangeForKgp(kgpVersion)
+          : null;
+      final String? kgpRange = gradleVersion != null
+          ? gradle.getCompatibleKgpRangeForGradle(gradleVersion)
+          : null;
+      if (kgpVersion != null && gradleRange != null) {
+        suggestions.add('Compatible Gradle version range for Kotlin $kgpVersion: $gradleRange');
+      }
+      if (gradleVersion != null && kgpRange != null) {
+        suggestions.add('Compatible KGP version range for Gradle $gradleVersion: $kgpRange');
+      }
+      final suggestionText = suggestions.isNotEmpty ? '${suggestions.join('\n')}\n' : '';
+      errors.add('''
 Incompatible KGP/Gradle versions.
-Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
+Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion
+$suggestionText
 See the link below for more information:
-  $kgpCompatUrl
-''';
+  $kgpCompatUrl''');
     }
     if (!compatibleAgpKgp) {
-      description =
-          '''
-${compatibleGradleAgp ? '' : description}
+      final suggestions = <String>[];
+      final String? agpRange = kgpVersion != null
+          ? gradle.getCompatibleAgpRangeForKgp(kgpVersion)
+          : null;
+      final String? kgpRange = agpVersion != null
+          ? gradle.getCompatibleKgpRangeForAgp(agpVersion)
+          : null;
+      if (kgpVersion != null && agpRange != null) {
+        suggestions.add('Compatible AGP version range for Kotlin $kgpVersion: $agpRange');
+      }
+      if (agpVersion != null && kgpRange != null) {
+        suggestions.add('Compatible KGP version range for AGP $agpVersion: $kgpRange');
+      }
+      final suggestionText = suggestions.isNotEmpty ? '${suggestions.join('\n')}\n' : '';
+      errors.add('''
 Incompatible AGP/KGP versions.
-AGP Version: $agpVersion, KGP Version: $kgpVersion\n
+AGP Version: $agpVersion, KGP Version: $kgpVersion
+$suggestionText
 See the link below for more information:
-  $kgpCompatUrl
-''';
+  $kgpCompatUrl''');
     }
+
+    if (errors.isNotEmpty) {
+      description = errors.join('\n\n');
+    }
+
     return CompatibilityResult(
       compatibleJavaGradle && compatibleGradleAgp && compatibleKgpGradle && compatibleAgpKgp,
       description,
