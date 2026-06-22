@@ -111,7 +111,7 @@ List<File> _findPubspecs(Directory dir, StringSink stderr) {
       for (final FileSystemEntity entity in currentDir.listSync(followLinks: false)) {
         if (entity is Directory) {
           final String name = path.basename(entity.path);
-          if (name.startsWith('.')) {
+          if (name.startsWith('.') || name == 'build') {
             continue;
           }
           search(entity);

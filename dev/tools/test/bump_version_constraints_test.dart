@@ -167,6 +167,15 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 ''');
 
+    // Inside a build directory
+    final File pubspecBuild = fileSystem.file('/flutter/build/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: build_package
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+''');
+
     bump.run(
       <String>['^3.13.0-0'],
       fileSystem: fileSystem,
@@ -179,6 +188,7 @@ environment:
     expect(exitCode, isNull);
     expect(pubspecHidden.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
     expect(pubspecOutside.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
+    expect(pubspecBuild.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
   });
 
