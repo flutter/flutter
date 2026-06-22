@@ -1065,7 +1065,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// Called whenever this pipeline owner flushes paint.
   ///
-  /// [isDirty] is true if the pipeline owner has dirty render objects that need to be painted.
+  /// isDirty is true if the pipeline owner has dirty render objects that need to be painted.
   final void Function(bool isDirty)? onFlushPaint;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
