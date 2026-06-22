@@ -86,12 +86,16 @@ if (enable_unittests && !is_fuchsia) {
   executable("gpu_unittests") {
     testonly = true
 
-    sources = [ "command_buffer_unittests.cc" ]
+    sources = [
+      "command_buffer_unittests.cc",
+      "shader_library_unittests.cc",
+    ]
 
     deps = [
       ":gpu",
       ":gpu_unittests_fixtures",
       "//flutter/impeller/renderer/testing:mocks",
+      "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
       "//flutter/testing",
       "//flutter/testing:dart",
       "//third_party/googletest:gmock",
