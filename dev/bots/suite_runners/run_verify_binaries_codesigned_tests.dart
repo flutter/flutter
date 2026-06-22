@@ -54,7 +54,10 @@ const List<String> expectedEntitlements = <String>[
 /// Binaries that are expected to be codesigned and have entitlements.
 ///
 /// This list should be kept in sync with the actual contents of Flutter's
-/// cache.
+/// cache. You may also need to update the
+/// `//flutter/build/archives:artifacts_entitlement_config`
+/// `//flutter/build/archives:dart_sdk_entitlement_config`
+/// gn targets which populate the entitlement files.
 List<String> binariesWithEntitlements(String flutterRoot) {
   final List<String> binaries = <String>[
     'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',

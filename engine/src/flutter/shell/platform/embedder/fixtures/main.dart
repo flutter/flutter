@@ -1454,6 +1454,20 @@ void pointer_data_packet() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void pointer_data_packet_stylus_buttons() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
+    signalNativeCount(packet.data.length);
+
+    for (final PointerData pointerData in packet.data) {
+      signalNativeMessage('buttons: ${pointerData.buttons}');
+    }
+  };
+
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 void pointer_data_packet_view_id() {
   PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
     assert(packet.data.length == 1);
