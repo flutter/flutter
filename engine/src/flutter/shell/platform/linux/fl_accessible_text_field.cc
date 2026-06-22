@@ -126,6 +126,9 @@ static gchar* get_sentence_at_offset(FlAccessibleTextField* self,
       start_offset, end_offset);
 }
 
+// Returns the line containing @offset, along with its start and end character
+// offsets. The line excludes the trailing line break. Returns nullptr if
+// @offset does not fall within any line.
 static gchar* get_line_at_offset(FlAccessibleTextField* self,
                                  gint offset,
                                  gint* start_offset,
@@ -155,6 +158,10 @@ static gchar* get_line_at_offset(FlAccessibleTextField* self,
   return nullptr;
 }
 
+// Returns the paragraph containing @offset, along with its start and end
+// character offsets. A paragraph may span multiple wrapped lines and extends
+// from one paragraph start up to the following paragraph start. Returns nullptr
+// if @offset does not fall within any paragraph.
 static gchar* get_paragraph_at_offset(FlAccessibleTextField* self,
                                       gint offset,
                                       gint* start_offset,
