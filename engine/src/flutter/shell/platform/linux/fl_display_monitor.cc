@@ -18,6 +18,11 @@ struct _FlDisplayMonitor {
   // Mapping of GdkMonitor to display IDs.
   GHashTable* display_ids_by_monitor;
 
+#if FLUTTER_LINUX_GTK4
+  // Model of monitors being observed.
+  GListModel* monitors;
+#endif
+
   // Next ID to assign to a new monitor.
   FlutterEngineDisplayId next_display_id;
 };
@@ -32,9 +37,7 @@ static void notify_display_update(FlDisplayMonitor* self) {
   }
 
 #if FLUTTER_LINUX_GTK4
-  g_autoptr(GListModel) monitors =
-      fl_display_monitor_gtk4_get_monitors(self->display);
-  guint n_monitors = g_list_model_get_n_items(monitors);
+  guint n_monitors = g_list_model_get_n_items(self->monitors);
 #else
   int n_monitors = gdk_display_get_n_monitors(self->display);
 #endif
@@ -44,7 +47,7 @@ static void notify_display_update(FlDisplayMonitor* self) {
     FlutterEngineDisplay* display = &displays[i];
 
 #if FLUTTER_LINUX_GTK4
-    GdkMonitor* monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
+    GdkMonitor* monitor = GDK_MONITOR(g_list_model_get_item(self->monitors, i));
 #else
     GdkMonitor* monitor = gdk_display_get_monitor(self->display, i);
 #endif
@@ -75,6 +78,7 @@ static void notify_display_update(FlDisplayMonitor* self) {
   fl_engine_notify_display_update(engine, displays, n_monitors);
 }
 
+#if !FLUTTER_LINUX_GTK4
 static void monitor_added_cb(FlDisplayMonitor* self, GdkMonitor* monitor) {
   notify_display_update(self);
 }
@@ -83,11 +87,32 @@ static void monitor_removed_cb(FlDisplayMonitor* self, GdkMonitor* monitor) {
   g_hash_table_remove(self->display_ids_by_monitor, monitor);
   notify_display_update(self);
 }
+#endif
+
+#if FLUTTER_LINUX_GTK4
+static void monitors_changed_cb(FlDisplayMonitor* self,
+                                guint position,
+                                guint removed,
+                                guint added,
+                                GListModel* monitors) {
+  (void)position;
+  (void)removed;
+  (void)added;
+  (void)monitors;
+
+  g_hash_table_remove_all(self->display_ids_by_monitor);
+  self->next_display_id = 1;
+  notify_display_update(self);
+}
+#endif
 
 static void fl_display_monitor_dispose(GObject* object) {
   FlDisplayMonitor* self = FL_DISPLAY_MONITOR(object);
 
   g_weak_ref_clear(&self->engine);
+#if FLUTTER_LINUX_GTK4
+  g_clear_object(&self->monitors);
+#endif
   g_clear_object(&self->display);
   g_clear_pointer(&self->display_ids_by_monitor, g_hash_table_unref);
 
@@ -117,12 +142,19 @@ FlDisplayMonitor* fl_display_monitor_new(FlEngine* engine,
 void fl_display_monitor_start(FlDisplayMonitor* self) {
   g_return_if_fail(FL_IS_DISPLAY_MONITOR(self));
 
+#if FLUTTER_LINUX_GTK4
+  self->monitors = fl_display_monitor_gtk4_get_monitors(self->display);
+  g_signal_connect_object(self->monitors, "items-changed",
+                          G_CALLBACK(monitors_changed_cb), self,
+                          G_CONNECT_SWAPPED);
+#else
   g_signal_connect_object(self->display, "monitor-added",
                           G_CALLBACK(monitor_added_cb), self,
                           G_CONNECT_SWAPPED);
   g_signal_connect_object(self->display, "monitor-removed",
                           G_CALLBACK(monitor_removed_cb), self,
                           G_CONNECT_SWAPPED);
+#endif
   notify_display_update(self);
 }
 

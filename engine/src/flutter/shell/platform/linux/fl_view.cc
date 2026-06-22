@@ -216,7 +216,7 @@ static gboolean retry_native_texture_cb(gpointer user_data) {
 }
 #endif
 
-// Signal handler for GtkWidget::delete-event
+// Signal handler for GtkWidget::delete-event / GtkWindow::close-request.
 static gboolean window_delete_event_cb(FlView* self) {
   fl_engine_request_app_exit(self->engine);
   // Stop the event from propagating.
@@ -463,9 +463,15 @@ static void realize_cb(FlView* self) {
       fl_window_state_monitor_new(fl_engine_get_binary_messenger(self->engine),
                                   GTK_WINDOW(toplevel_window));
 
+#if FLUTTER_LINUX_GTK4
+  // Handle requests by the user to close the application.
+  g_signal_connect_swapped(toplevel_window, "close-request",
+                           G_CALLBACK(window_delete_event_cb), self);
+#else
   // Handle requests by the user to close the application.
   g_signal_connect_swapped(toplevel_window, "delete-event",
                            G_CALLBACK(window_delete_event_cb), self);
+#endif
 
   // Flutter engine will need to make the context current from raster thread
   // during initialization.
