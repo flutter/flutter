@@ -70,6 +70,19 @@ Future<void> main() async {
     result = await processManager.run(<String>[flutterBatch.path, '--version']);
     expect(result.stderr, isNot(contains('Building flutter tool...')));
   });
+
+  test('shared.bat writes a revision-bearing flutter tool stamp', () async {
+    final ProcessResult result = await processManager.run(<String>[flutterBatch.path, '--version']);
+    expect(
+      result,
+      const ProcessResultMatcher(stdoutPattern: 'Flutter'),
+    );
+
+    expect(flutterToolStamp.existsSync(), true);
+    final String stamp = flutterToolStamp.readAsStringSync().trim();
+    expect(stamp, isNot('":"'));
+    expect(stamp, matches(RegExp(r'^"[a-f0-9]{40}:.*"$')));
+  });
 }
 
 Future<String> runDartBatch() async {
@@ -120,5 +133,14 @@ File get dartSdkStamp {
       .childDirectory('bin')
       .childDirectory('cache')
       .childFile('engine-dart-sdk.stamp')
+      .absolute;
+}
+
+// The Flutter tool's stamp file.
+File get flutterToolStamp {
+  return flutterRoot
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childFile('flutter_tools.stamp')
       .absolute;
 }
