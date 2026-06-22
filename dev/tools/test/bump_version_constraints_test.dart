@@ -86,8 +86,14 @@ name: flutter_tools
 environment:
   sdk: ^3.13.0-0
 ''');
-    expect(stdout.toString(), contains('Updated packages/flutter/pubspec.yaml'));
-    expect(stdout.toString(), contains('Updated packages/flutter_tools/pubspec.yaml'));
+    expect(
+      stdout.toString(),
+      contains('Updated ${fileSystem.path.join('packages', 'flutter', 'pubspec.yaml')}'),
+    );
+    expect(
+      stdout.toString(),
+      contains('Updated ${fileSystem.path.join('packages', 'flutter_tools', 'pubspec.yaml')}'),
+    );
     expect(stdout.toString(), contains('Done. Updated 2 pubspec.yaml files.'));
     expect(stderr.toString(), isEmpty);
   });
@@ -262,9 +268,15 @@ environment:
 
     expect(exitCode, 1);
     expect(pubspecGood.readAsStringSync(), contains('  sdk: ^3.13.0-0\n'));
-    expect(stdout.toString(), contains('Updated packages/good/pubspec.yaml'));
+    expect(
+      stdout.toString(),
+      contains('Updated ${fileSystem.path.join('packages', 'good', 'pubspec.yaml')}'),
+    );
     expect(stdout.toString(), contains('Done. Updated 1 pubspec.yaml file.'));
-    expect(stderr.toString(), contains('Error updating packages/bad/pubspec.yaml:'));
+    expect(
+      stderr.toString(),
+      contains('Error updating ${fileSystem.path.join('packages', 'bad', 'pubspec.yaml')}:'),
+    );
   });
 }
 
