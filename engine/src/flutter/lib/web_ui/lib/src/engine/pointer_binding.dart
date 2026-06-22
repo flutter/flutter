@@ -252,7 +252,9 @@ class ClickDebouncer {
   /// If currently debouncing events (see [isDebouncing]), adds the event to
   /// the debounce queue, unless the target of the event is different from the
   /// target that initiated the debouncing process, in which case stops
-  /// debouncing and flushes pointer events to the framework.
+  /// debouncing and flushes pointer events to the framework. Wheel events are
+  /// never debounced because scroll handling needs a synchronous framework
+  /// response before the browser's default action is allowed or prevented.
   ///
   /// If the event is a `pointerdown` and the target is `flt-tappable`, begins
   /// debouncing events.
@@ -260,6 +262,11 @@ class ClickDebouncer {
   /// In all other situations forwards the event to the framework.
   void onPointerData(DomEvent event, List<ui.PointerData> data) {
     if (!EnginePlatformDispatcher.instance.semanticsEnabled) {
+      _sendToFramework(event, data);
+      return;
+    }
+
+    if (event.type == 'wheel') {
       _sendToFramework(event, data);
       return;
     }

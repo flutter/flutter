@@ -2847,6 +2847,30 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
   });
 
+  testWithSemantics('Forwards wheel events while debouncing', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, isTrue);
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+    await nextEventLoop();
+    expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(PointerBinding.clickDebouncer.debugState, isNotNull);
+    expect(PointerBinding.clickDebouncer.debugState!.started, isTrue);
+    pointerPackets.clear();
+
+    testElement.dispatchEvent(
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 0, deltaY: 120),
+    );
+
+    expect(pointerPackets, isNotEmpty);
+    expect(pointerPackets, everyElement(ui.PointerChange.hover));
+    expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(1));
+  });
+
   testWithSemantics('Does not throw when multiple events in the same event loop', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, isTrue);
     expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
