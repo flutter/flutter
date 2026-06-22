@@ -197,7 +197,6 @@ Future<T?> showCupertinoSheet<T>({
   );
 
   final WidgetBuilder? effectiveBuilder = builder ?? pageBuilder;
-  final nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
     final PageRoute<T> route = CupertinoSheetRoute<T>(
       builder: effectiveBuilder,
@@ -210,32 +209,26 @@ Future<T?> showCupertinoSheet<T>({
     return Navigator.of(context, rootNavigator: true).push<T>(route);
   } else {
     Widget nestedNavigationContent(WidgetBuilder builder) {
-      return NavigatorPopHandler(
-        onPopWithResult: (T? result) {
-          nestedNavigatorKey.currentState!.maybePop();
+      return Navigator(
+        initialRoute: '/',
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
+          return <Route<void>>[
+            CupertinoPageRoute<void>(
+              builder: (BuildContext context) {
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (didPop) {
+                      return;
+                    }
+                    Navigator.of(context, rootNavigator: true).pop(result);
+                  },
+                  child: builder(context),
+                );
+              },
+            ),
+          ];
         },
-        child: Navigator(
-          key: nestedNavigatorKey,
-          initialRoute: '/',
-          onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
-            return <Route<void>>[
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return PopScope(
-                    canPop: false,
-                    onPopInvokedWithResult: (bool didPop, Object? result) {
-                      if (didPop) {
-                        return;
-                      }
-                      Navigator.of(context, rootNavigator: true).pop(result);
-                    },
-                    child: builder(context),
-                  );
-                },
-              ),
-            ];
-          },
-        ),
       );
     }
 
