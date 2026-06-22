@@ -36,9 +36,9 @@ final kChromeArgs = <String>[
   '--no-default-browser-check',
   '--no-sandbox',
   '--no-first-run',
-  '--disable-dev-shm-usage',
   '--password-store=basic',
   if (io.Platform.isMacOS) '--use-mock-keychain',
+  '--disable-search-engine-choice-screen',
 ];
 
 void main() {

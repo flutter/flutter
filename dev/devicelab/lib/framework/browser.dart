@@ -111,7 +111,6 @@ class Chrome {
       '--window-size=${options.windowWidth},${options.windowHeight}',
       '--disable-extensions',
       '--disable-popup-blocking',
-      '--disable-dev-shm-usage',
       // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
       '--bwsi',
       '--no-first-run',
@@ -119,6 +118,7 @@ class Chrome {
       '--disable-default-apps',
       '--disable-translate',
       '--password-store=basic',
+      '--disable-search-engine-choice-screen',
       if (io.Platform.isMacOS) '--use-mock-keychain',
       if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
     ];
