@@ -2230,7 +2230,7 @@ class _FocusTraversalGroupNode extends FocusNode {
   bool isTraversing = false;
 
   @override
-  void propogateFocusRequest(FocusNode descendant) {
+  void propagateFocusRequest(FocusNode descendant) {
     if (!isTraversing) {
       FocusScopeNode? scope = descendant.nearestScope;
       while (scope != null) {
@@ -2238,7 +2238,7 @@ class _FocusTraversalGroupNode extends FocusNode {
         scope = scope.enclosingScope;
       }
     }
-    super.propogateFocusRequest(descendant);
+    super.propagateFocusRequest(descendant);
   }
 }
 

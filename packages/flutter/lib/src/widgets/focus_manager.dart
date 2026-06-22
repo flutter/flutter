@@ -1189,7 +1189,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _setAsFocusedChildForScope();
-    propogateFocusRequest(this);
+    propagateFocusRequest(this);
     if (hasPrimaryFocus &&
         (_manager!._markedForFocus == null || _manager!._markedForFocus == this)) {
       return;
@@ -1250,8 +1250,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// their subtree.
   @protected
   @mustCallSuper
-  void propogateFocusRequest(FocusNode descendant) {
-    _parent?.propogateFocusRequest(descendant);
+  void propagateFocusRequest(FocusNode descendant) {
+    _parent?.propagateFocusRequest(descendant);
   }
 
   /// Request to move the focus to the next focus node, by calling the
