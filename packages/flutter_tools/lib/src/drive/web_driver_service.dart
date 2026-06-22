@@ -345,7 +345,7 @@ Map<String, dynamic> getDesiredCapabilities(
         '--no-sandbox',
         '--no-first-run',
         '--password-store=basic',
-        if (const LocalPlatform().isMacOS) '--use-mock-keychain',
+        if (globals.platform.isMacOS) '--use-mock-keychain',
         '--disable-search-engine-choice-screen',
         if (headless!) '--headless',
         ...webBrowserFlags,

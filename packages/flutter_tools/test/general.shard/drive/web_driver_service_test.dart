@@ -44,7 +44,7 @@ final kChromeArgs = <String>[
 void main() {
   late FakeWebRunnerFactory fakeWebRunnerFactory;
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
+  testUsingContext('getDesiredCapabilities Chrome with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
@@ -67,7 +67,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.chrome, true), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless off', () {
+  testUsingContext('getDesiredCapabilities Chrome with headless off', () {
     const chromeBinary = 'random-binary';
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -92,7 +92,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary: chromeBinary), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
+  testUsingContext('getDesiredCapabilities Chrome with browser flags', () {
     const webBrowserFlags = <String>[
       '--autoplay-policy=no-user-gesture-required',
       '--incognito',
@@ -128,7 +128,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
+  testUsingContext('getDesiredCapabilities Firefox with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -151,7 +151,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.firefox, true), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless off', () {
+  testUsingContext('getDesiredCapabilities Firefox with headless off', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -174,7 +174,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.firefox, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
+  testUsingContext('getDesiredCapabilities Firefox with browser flags', () {
     const webBrowserFlags = <String>['-url=https://example.com', '-private'];
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -201,19 +201,19 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Edge', () {
+  testUsingContext('getDesiredCapabilities Edge', () {
     final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
     expect(getDesiredCapabilities(Browser.edge, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities macOS Safari', () {
+  testUsingContext('getDesiredCapabilities macOS Safari', () {
     final expected = <String, dynamic>{'browserName': 'safari'};
 
     expect(getDesiredCapabilities(Browser.safari, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities iOS Safari', () {
+  testUsingContext('getDesiredCapabilities iOS Safari', () {
     final expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
@@ -223,7 +223,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities android chrome', () {
+  testUsingContext('getDesiredCapabilities android chrome', () {
     const webBrowserFlags = <String>['--autoplay-policy=no-user-gesture-required', '--incognito'];
     final expected = <String, dynamic>{
       'browserName': 'chrome',
