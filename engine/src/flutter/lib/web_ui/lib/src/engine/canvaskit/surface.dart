@@ -337,6 +337,18 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   }
 
   @override
+  void setIsOverlay(bool isOverlay) {
+    final DomCSSStyleDeclaration style = (canvas as DomHTMLCanvasElement).style;
+    if (isOverlay) {
+      if (style.position != 'absolute') {
+        style.position = 'absolute';
+      }
+    } else if (style.position == 'absolute') {
+      style.removeProperty('position');
+    }
+  }
+
+  @override
   Future<void> triggerContextLoss() async {
     _handledContextLostEvent = Completer<void>();
     final WebGLContext gl = (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);

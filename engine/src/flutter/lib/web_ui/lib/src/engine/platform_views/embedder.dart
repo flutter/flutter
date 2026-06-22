@@ -454,6 +454,9 @@ class PlatformViewEmbedder {
       // The composition has not changed, so no DOM manipulation is needed.
       return;
     }
+    final bool hasPlatformViews = composition.entities.any(
+      (CompositionEntity entity) => entity is CompositionPlatformView,
+    );
     final List<int> indexMap = _getIndexMapFromPreviousComposition(_activeComposition, composition);
     final List<int> existingIndexMap = indexMap.where((int index) => index != -1).toList();
 
@@ -501,6 +504,7 @@ class PlatformViewEmbedder {
         // canvas needs a display canvas.
         canvas.displayCanvas = rasterizer.getOverlay();
       }
+      canvas.displayCanvas!.setIsOverlay(hasPlatformViews);
     }
 
     // At this point, the DOM contains the static elements and the elements from
