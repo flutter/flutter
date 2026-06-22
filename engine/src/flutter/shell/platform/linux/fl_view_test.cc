@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
+
+#include <memory>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
@@ -114,10 +117,10 @@ TEST_F(FlViewTest, SecondaryView) {
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
 
-  FlutterViewId view_id = -1;
+  auto view_id = std::make_shared<FlutterViewId>(-1);
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
-      AddView, ([&view_id](auto engine, const FlutterAddViewInfo* info) {
-        view_id = info->view_id;
+      AddView, ([view_id](auto engine, const FlutterAddViewInfo* info) {
+        *view_id = info->view_id;
         FlutterAddViewResult result = {
             .struct_size = sizeof(FlutterAddViewResult),
             .added = true,
@@ -129,7 +132,7 @@ TEST_F(FlViewTest, SecondaryView) {
   StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
-  EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
+  EXPECT_EQ(*view_id, fl_view_get_id(secondary_view));
 }
 
 // Check secondary view that fails registration.
@@ -138,17 +141,17 @@ TEST_F(FlViewTest, SecondaryViewError) {
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
 
-  FlutterViewId view_id = -1;
+  auto view_id = std::make_shared<FlutterViewId>(-1);
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
-      AddView, ([&view_id](auto engine, const FlutterAddViewInfo* info) {
-        view_id = info->view_id;
+      AddView, ([view_id](auto engine, const FlutterAddViewInfo* info) {
+        *view_id = info->view_id;
         return kInvalidArguments;
       }));
 
   StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
-  EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
+  EXPECT_EQ(*view_id, fl_view_get_id(secondary_view));
 }
 
 // Check views are deregistered on destruction.
