@@ -62,4 +62,45 @@ void main() {
       );
     },
   );
+
+  testWithoutContext('printNdkVersion prints the configured app ndkVersion', () async {
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      tempDir.path,
+      '--project-name=testapp',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+
+    final File appBuildFile = tempDir
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle.kts');
+    appBuildFile.writeAsStringSync(
+      appBuildFile.readAsStringSync().replaceFirst(
+        'ndkVersion = flutter.ndkVersion',
+        'ndkVersion = "27.3.13750724"',
+      ),
+    );
+
+    result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--config-only',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+
+    final Directory androidApp = tempDir.childDirectory('android');
+    result = await processManager.run(<String>[
+      '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+      ...getLocalEngineArguments(),
+      '-q',
+      'printNdkVersion',
+    ], workingDirectory: androidApp.path);
+    expect(result.exitCode, 0);
+
+    final List<String> actualLines = LineSplitter.split(result.stdout.toString()).toList();
+    expect(actualLines, contains('NdkVersion: 27.3.13750724'));
+  });
 }

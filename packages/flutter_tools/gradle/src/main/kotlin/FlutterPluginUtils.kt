@@ -710,28 +710,40 @@ object FlutterPluginUtils {
 
         val toolNdkProvisioningProperties = getToolNdkProvisioningProperties(gradleProject)
         if (toolNdkProvisioningProperties != null) {
-            val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
-            if (
-                !configuredNdkVersion.isNullOrBlank() &&
-                toolNdkProvisioningProperties.installedNdkVersions.contains(configuredNdkVersion)
-            ) {
-                return
-            }
-            if (toolNdkProvisioningProperties.sdkManagerPath == null) {
+            val androidComponents =
+                gradleProject.extensions.findByType(AndroidComponentsExtension::class.java)
+            if (androidComponents == null) {
                 configureSyntheticExternalNativeBuildFallback(
                     gradleProject = gradleProject,
                     flutterSdkRootPath = flutterSdkRootPath
                 )
                 return
             }
-            if (gradleProject.gradle.startParameter.isOffline) {
-                configureSyntheticExternalNativeBuildFallback(
-                    gradleProject = gradleProject,
-                    flutterSdkRootPath = flutterSdkRootPath
-                )
-                return
-            }
-            gradleProject.afterEvaluate {
+
+            androidComponents.finalizeDsl { _ ->
+                if (gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null) {
+                    return@finalizeDsl
+                }
+
+                val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+                if (
+                    !configuredNdkVersion.isNullOrBlank() &&
+                    toolNdkProvisioningProperties.installedNdkVersions.contains(
+                        configuredNdkVersion
+                    )
+                ) {
+                    return@finalizeDsl
+                }
+                if (
+                    toolNdkProvisioningProperties.sdkManagerPath == null ||
+                    gradleProject.gradle.startParameter.isOffline
+                ) {
+                    configureSyntheticExternalNativeBuildFallback(
+                        gradleProject = gradleProject,
+                        flutterSdkRootPath = flutterSdkRootPath
+                    )
+                    return@finalizeDsl
+                }
                 val handledByToolProvisioning =
                     maybeHandleToolNdkProvisioning(
                         gradleProject = gradleProject,
