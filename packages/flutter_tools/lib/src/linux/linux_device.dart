@@ -69,7 +69,7 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
-    return package.executable(buildInfo.mode);
+    return package.executable(buildInfo);
   }
 }
 

@@ -396,8 +396,9 @@ static bool flag_changed(bool old_flag, bool new_flag) {
 }
 
 // Implements FlAccessibleNode::set_flags.
-static void fl_accessible_node_set_flags_impl(FlAccessibleNode* self,
-                                              FlutterSemanticsFlags* flags) {
+static void fl_accessible_node_set_flags_impl(
+    FlAccessibleNode* self,
+    const FlutterSemanticsFlags* flags) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
 
   FlutterSemanticsFlags old_flags = priv->flags;
@@ -622,7 +623,7 @@ void fl_accessible_node_set_extents(FlAccessibleNode* self,
 }
 
 void fl_accessible_node_set_flags(FlAccessibleNode* self,
-                                  FlutterSemanticsFlags* flags) {
+                                  const FlutterSemanticsFlags* flags) {
   g_return_if_fail(FL_IS_ACCESSIBLE_NODE(self));
 
   return FL_ACCESSIBLE_NODE_GET_CLASS(self)->set_flags(self, flags);

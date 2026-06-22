@@ -5,10 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_ACCESSIBLE_NODE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_ACCESSIBLE_NODE_H_
 
-#include <atk/atk.h>
 #include <gio/gio.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_atk_compat.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
@@ -40,7 +40,7 @@ struct _FlAccessibleNodeClass {
                       gint y,
                       gint width,
                       gint height);
-  void (*set_flags)(FlAccessibleNode* node, FlutterSemanticsFlags* flags);
+  void (*set_flags)(FlAccessibleNode* node, const FlutterSemanticsFlags* flags);
   void (*set_actions)(FlAccessibleNode* node, FlutterSemanticsAction actions);
   void (*set_value)(FlAccessibleNode* node, const gchar* value);
   void (*set_text_selection)(FlAccessibleNode* node, gint base, gint extent);
@@ -122,7 +122,7 @@ void fl_accessible_node_set_extents(FlAccessibleNode* node,
  * Sets the flags for this node.
  */
 void fl_accessible_node_set_flags(FlAccessibleNode* node,
-                                  FlutterSemanticsFlags* flags);
+                                  const FlutterSemanticsFlags* flags);
 
 /**
  * fl_accessible_node_set_actions:

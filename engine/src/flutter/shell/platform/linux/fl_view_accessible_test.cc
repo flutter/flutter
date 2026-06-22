@@ -91,6 +91,14 @@ TEST(FlViewAccessibleTest, AddRemoveChildren) {
   EXPECT_EQ(atk_object_get_index_in_parent(child1_object), 0);
   EXPECT_EQ(atk_object_get_n_accessible_children(child1_object), 0);
 
+  gboolean child1_finalized = FALSE;
+  g_object_weak_ref(
+      G_OBJECT(child1_object),
+      [](gpointer data, GObject*) { *static_cast<gboolean*>(data) = TRUE; },
+      &child1_finalized);
+  g_clear_object(&child1_object);
+  EXPECT_TRUE(child1_finalized);
+
   // add child2
   AtkObject* child2_object = nullptr;
   FlutterSemanticsNode2 child2_node = {

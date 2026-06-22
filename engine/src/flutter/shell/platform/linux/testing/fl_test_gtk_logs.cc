@@ -35,7 +35,11 @@ GLogWriterOutput log_writer(GLogLevelFlags log_level,
 
 void fl_ensure_gtk_init(GLogWriterFunc writer) {
   if (!gtk_initialized) {
+#if defined(FLUTTER_LINUX_GTK4)
+    gtk_init();
+#else
     gtk_init(0, nullptr);
+#endif
     g_log_set_writer_func(log_writer, nullptr, nullptr);
     gtk_initialized = true;
   }

@@ -111,9 +111,13 @@ struct _FlKeyboardManager {
   std::unique_ptr<std::map<uint64_t, const LayoutGoal*>>
       logical_to_mandatory_goals;
 
+#if FLUTTER_LINUX_GTK4
+  GdkDisplay* display;
+#else
   GdkKeymap* keymap;
   gulong keymap_keys_changed_cb_id;  // Signal connection ID for
                                      // keymap-keys-changed
+#endif
 
   GCancellable* cancellable;
 };
@@ -139,10 +143,12 @@ static gboolean event_is_redispatched(FlKeyboardManager* self,
   return FALSE;
 }
 
+#if !FLUTTER_LINUX_GTK4
 static void keymap_keys_changed_cb(FlKeyboardManager* self) {
   g_clear_object(&self->derived_layout);
   self->derived_layout = fl_keyboard_layout_new();
 }
+#endif
 
 static void complete_handle_event(FlKeyboardManager* self, GTask* task) {
   HandleEventData* data =
@@ -219,7 +225,19 @@ static uint16_t convert_key_to_char(FlKeyboardManager* self,
   if (self->lookup_key_handler != nullptr) {
     origin = self->lookup_key_handler(&key, self->lookup_key_handler_user_data);
   } else {
+#if FLUTTER_LINUX_GTK4
+    GdkModifierType state =
+        level == 0 ? static_cast<GdkModifierType>(0) : GDK_SHIFT_MASK;
+    guint keyval = 0;
+    if (gdk_display_translate_key(self->display, keycode, state, group, &keyval,
+                                  nullptr, nullptr, nullptr)) {
+      origin = keyval;
+    } else {
+      origin = 0;
+    }
+#else
     origin = gdk_keymap_lookup_key(self->keymap, &key);
+#endif
   }
   return origin < kBmpMax ? origin : 0xFFFF;
 }
@@ -318,10 +336,14 @@ static void fl_keyboard_manager_dispose(GObject* object) {
   g_clear_object(&self->key_embedder_responder);
   g_clear_object(&self->key_channel_responder);
   g_clear_object(&self->derived_layout);
+#if FLUTTER_LINUX_GTK4
+  g_clear_object(&self->display);
+#else
   if (self->keymap_keys_changed_cb_id != 0) {
     g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
     self->keymap_keys_changed_cb_id = 0;
   }
+#endif
   g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_keyboard_manager_parent_class)->dispose(object);
@@ -347,9 +369,13 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
     }
   }
 
+#if FLUTTER_LINUX_GTK4
+  self->display = GDK_DISPLAY(g_object_ref(gdk_display_get_default()));
+#else
   self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
   self->keymap_keys_changed_cb_id = g_signal_connect_swapped(
       self->keymap, "keys-changed", G_CALLBACK(keymap_keys_changed_cb), self);
+#endif
   self->cancellable = g_cancellable_new();
 }
 

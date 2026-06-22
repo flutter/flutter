@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
@@ -115,6 +116,22 @@ void main() {
       expect(getBuildDirectory(), 'foo');
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+
+    final Config config = Config.test(name: Config.kFlutterSettings);
+
+    testUsingContext(
+      'Can set linux-gtk-default',
+      () async {
+        final configCommand = ConfigCommand();
+        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+        await commandRunner.run(<String>['config', '--linux-gtk-default=gtk4']);
+
+        expect(config.getValue('linux-gtk-default'), 'gtk4');
+        expect(fakeAnalytics.sentEvents, isEmpty);
+      },
+      overrides: <Type, Generator>{Analytics: () => fakeAnalytics, Config: () => config},
+    );
 
     testUsingContext(
       'throws error on absolute path to build-dir',

@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Workaround missing C code compatibility in ATK header.
-// Fixed in https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
-extern "C" {
-#include <atk/atk.h>
-}
-
+#include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_accessible_text_field.h"
-#include "flutter/shell/platform/linux/fl_view_accessible.h"
+#include "flutter/shell/platform/linux/fl_atk_compat.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
@@ -159,11 +154,14 @@ void fl_view_accessible_handle_update_semantics(
     const FlutterSemanticsUpdate2* update) {
   g_return_if_fail(FL_IS_VIEW_ACCESSIBLE(self));
 
+  g_autoptr(GHashTable) seen_nodes_by_id =
+      g_hash_table_new(g_direct_hash, g_direct_equal);
   g_autoptr(GHashTable) pending_children =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                             reinterpret_cast<GDestroyNotify>(fl_value_unref));
   for (size_t i = 0; i < update->node_count; i++) {
     FlutterSemanticsNode2* node = update->nodes[i];
+    g_hash_table_add(seen_nodes_by_id, GINT_TO_POINTER(node->id));
     FlAccessibleNode* atk_node = get_node(self, node);
 
     fl_accessible_node_set_flags(atk_node, node->flags2);
@@ -209,6 +207,14 @@ void fl_view_accessible_handle_update_semantics(
         return TRUE;
       },
       self);
+
+  g_hash_table_foreach_remove(
+      self->semantics_nodes_by_id,
+      [](gpointer key, gpointer value, gpointer user_data) -> gboolean {
+        GHashTable* seen_nodes_by_id = static_cast<GHashTable*>(user_data);
+        return !g_hash_table_contains(seen_nodes_by_id, key);
+      },
+      seen_nodes_by_id);
 }
 
 void fl_view_accessible_send_announcement(FlViewAccessible* self,

@@ -36,7 +36,11 @@ FlTouchManager* fl_touch_manager_new(FlEngine* engine, FlutterViewId view_id);
  * @scale_factor: the GTK scaling factor of the window.
  */
 void fl_touch_manager_handle_touch_event(FlTouchManager* manager,
+#if FLUTTER_LINUX_GTK4
+                                         GdkEvent* event,
+#else
                                          GdkEventTouch* event,
+#endif
                                          gint scale_factor);
 
 G_END_DECLS

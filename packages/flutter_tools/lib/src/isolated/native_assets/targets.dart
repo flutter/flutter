@@ -73,11 +73,11 @@ sealed class AssetBuildTarget {
       case TargetPlatform.windows_x64:
         return _windowsTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_x64:
-        return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
+        return _linuxTarget(supportedAssetTypes, Architecture.x64, buildDirectory);
       case TargetPlatform.linux_arm64:
-        return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildMode, buildDirectory);
+        return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildDirectory);
       case TargetPlatform.linux_riscv64:
-        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
+        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildDirectory);
       case TargetPlatform.windows_arm64:
         return _windowsTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.darwin:
@@ -103,22 +103,13 @@ sealed class AssetBuildTarget {
   static List<AssetBuildTarget> _linuxTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
     Architecture architecture,
-    BuildMode buildMode,
     Directory? buildDirectory,
   ) {
-    Directory? cmakeBuildDirectory;
-    if (buildDirectory != null) {
-      cmakeBuildDirectory = buildDirectory
-          .childDirectory('linux')
-          .childDirectory(architecture.name)
-          .childDirectory(buildMode.cliName);
-    }
-
     return <AssetBuildTarget>[
       LinuxAssetTarget(
         architecture: architecture,
         supportedAssetTypes: supportedAssetTypes,
-        cmakeBuildDirectory: cmakeBuildDirectory,
+        cmakeBuildDirectory: buildDirectory,
       ),
     ];
   }

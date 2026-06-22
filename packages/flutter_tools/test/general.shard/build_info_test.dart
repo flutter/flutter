@@ -236,6 +236,7 @@ void main() {
       fileSystemScheme: 'scheme',
       buildName: '122',
       buildNumber: '22',
+      linuxGtkVersion: 'gtk4',
     );
 
     expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
@@ -253,6 +254,7 @@ void main() {
       'FileSystemScheme': 'scheme',
       'BuildName': '122',
       'BuildNumber': '22',
+      'FLUTTER_LINUX_GTK': 'gtk4',
     });
   });
 
@@ -272,6 +274,7 @@ void main() {
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz'],
+      linuxGtkVersion: 'gtk3',
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -286,6 +289,7 @@ void main() {
       'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
       'FLAVOR': 'strawberry',
+      'FLUTTER_LINUX_GTK': 'gtk3',
     });
   });
 
@@ -383,4 +387,17 @@ void main() {
       }
     }
   });
+
+  testUsingContext(
+    'Linux GTK4 builds use a separate output directory',
+    () {
+      expect(getLinuxBuildDirectory(TargetPlatform.linux_x64), 'build/linux/x64');
+      expect(getLinuxBuildDirectory(TargetPlatform.linux_x64, 'gtk3'), 'build/linux/x64');
+      expect(getLinuxBuildDirectory(TargetPlatform.linux_x64, 'gtk4'), 'build/linux-gtk4/x64');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }

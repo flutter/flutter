@@ -11,6 +11,10 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
+#if FLUTTER_LINUX_GTK4 && GTK_CHECK_VERSION(4, 12, 0)
+#include <gdk/gdkgltexturebuilder.h>
+#endif
 
 // Vertex shader to draw Flutter window contents.
 static const char* vertex_shader_src =
@@ -56,6 +60,12 @@ struct _FlCompositorOpenGL {
   // Last rendered frame pixels (only set if shareable is TRUE).
   uint8_t* pixels;
 
+  // Size of the allocated pixel buffer.
+  size_t pixels_length;
+
+  // TRUE when self->pixels are in Cairo/GDK default BGRA byte order.
+  gboolean pixels_are_bgra;
+
   // whether the renderer waits for frame render
   bool blocking_main_thread;
 
@@ -82,6 +92,43 @@ struct _FlCompositorOpenGL {
 G_DEFINE_TYPE(FlCompositorOpenGL,
               fl_compositor_opengl,
               fl_compositor_get_type())
+
+static bool ensure_pixel_buffer(FlCompositorOpenGL* self,
+                                size_t width,
+                                size_t height) {
+  const size_t data_length = width * height * 4;
+  if (self->pixels_length >= data_length) {
+    return true;
+  }
+
+  uint8_t* pixels =
+      static_cast<uint8_t*>(g_try_realloc(self->pixels, data_length));
+  if (pixels == nullptr) {
+    return false;
+  }
+
+  self->pixels = pixels;
+  self->pixels_length = data_length;
+  return true;
+}
+
+#if FLUTTER_LINUX_GTK4
+static gboolean gtk4_readback_disabled() {
+  return g_strcmp0(g_getenv("FLUTTER_GTK4_DISABLE_READBACK"), "1") == 0;
+}
+
+// Used only by the GTK4 readback/memory-texture fallback. The native
+// GdkGLTexture path keeps the frame on the GPU and does not swizzle pixels.
+static void swizzle_rgba_to_bgra(uint8_t* pixels, size_t width, size_t height) {
+  const size_t pixel_count = width * height;
+  for (size_t i = 0; i < pixel_count; ++i) {
+    const size_t offset = i * 4;
+    const uint8_t red = pixels[offset];
+    pixels[offset] = pixels[offset + 2];
+    pixels[offset + 2] = red;
+  }
+}
+#endif
 
 // Returns the log for the given OpenGL shader. Must be freed by the caller.
 static gchar* get_shader_log(GLuint shader) {
@@ -203,6 +250,178 @@ static void composite_layer(FlCompositorOpenGL* self,
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+static void draw_texture_to_cairo(cairo_t* cr,
+                                  FlGdkSurface* surface,
+                                  GLuint texture_id,
+                                  gint scale_factor,
+                                  size_t width,
+                                  size_t height) {
+#if FLUTTER_LINUX_GTK4
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
+  gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
+                         0, width, height);
+#if FLUTTER_LINUX_GTK4
+  G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
+}
+
+static void paint_shareable_framebuffer(FlFramebuffer* framebuffer,
+                                        cairo_t* cr,
+                                        FlGdkSurface* surface,
+                                        gint scale_factor,
+                                        size_t width,
+                                        size_t height) {
+  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
+  draw_texture_to_cairo(cr, surface, fl_framebuffer_get_texture_id(sibling),
+                        scale_factor, width, height);
+}
+
+static void paint_readback_framebuffer(FlCompositorOpenGL* self,
+                                       cairo_t* cr,
+                                       FlGdkSurface* surface,
+                                       gint scale_factor,
+                                       size_t width,
+                                       size_t height) {
+  GLint saved_texture_binding;
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
+
+  GLuint texture_id;
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, self->pixels);
+
+  draw_texture_to_cairo(cr, surface, texture_id, scale_factor, width, height);
+
+  glDeleteTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+}
+
+#if FLUTTER_LINUX_GTK4
+struct Gtk4NativeTextureData {
+  FlFramebuffer* framebuffer;
+};
+
+static void release_native_texture_data(gpointer user_data) {
+  Gtk4NativeTextureData* data = static_cast<Gtk4NativeTextureData*>(user_data);
+  g_clear_object(&data->framebuffer);
+  g_free(data);
+}
+
+static GdkTexture* acquire_shareable_texture(FlFramebuffer* framebuffer,
+                                             GdkGLContext* context) {
+  g_return_val_if_fail(framebuffer != nullptr, nullptr);
+  g_return_val_if_fail(context != nullptr, nullptr);
+
+  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
+  if (sibling == nullptr) {
+    return nullptr;
+  }
+
+  Gtk4NativeTextureData* data = g_new0(Gtk4NativeTextureData, 1);
+  data->framebuffer = FL_FRAMEBUFFER(g_object_ref(sibling));
+#if GTK_CHECK_VERSION(4, 12, 0)
+  g_autoptr(GdkGLTextureBuilder) builder = gdk_gl_texture_builder_new();
+  gdk_gl_texture_builder_set_context(builder, context);
+  gdk_gl_texture_builder_set_id(builder,
+                                fl_framebuffer_get_texture_id(sibling));
+  gdk_gl_texture_builder_set_width(
+      builder, static_cast<int>(fl_framebuffer_get_width(framebuffer)));
+  gdk_gl_texture_builder_set_height(
+      builder, static_cast<int>(fl_framebuffer_get_height(framebuffer)));
+  return gdk_gl_texture_builder_build(builder, release_native_texture_data,
+                                      data);
+#else
+  return gdk_gl_texture_new(
+      context, fl_framebuffer_get_texture_id(sibling),
+      static_cast<int>(fl_framebuffer_get_width(framebuffer)),
+      static_cast<int>(fl_framebuffer_get_height(framebuffer)),
+      release_native_texture_data, data);
+#endif
+}
+
+static GdkTexture* acquire_memory_texture(FlCompositorOpenGL* self,
+                                          FlFramebuffer* framebuffer) {
+  g_return_val_if_fail(framebuffer != nullptr, nullptr);
+  g_return_val_if_fail(self->pixels != nullptr, nullptr);
+
+  const int width = static_cast<int>(fl_framebuffer_get_width(framebuffer));
+  const int height = static_cast<int>(fl_framebuffer_get_height(framebuffer));
+  if (!self->pixels_are_bgra) {
+    // glReadPixels populates RGBA bytes. GDK_MEMORY_DEFAULT matches Cairo's
+    // native-endian ARGB32 memory layout, which is BGRA on little-endian hosts.
+    swizzle_rgba_to_bgra(self->pixels, width, height);
+    self->pixels_are_bgra = TRUE;
+  }
+
+  const gsize stride =
+      cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+  g_autoptr(GBytes) bytes = g_bytes_new(self->pixels, stride * height);
+  return gdk_memory_texture_new(width, height, GDK_MEMORY_DEFAULT, bytes,
+                                stride);
+}
+
+static GdkTexture* fl_compositor_opengl_acquire_texture(
+    FlCompositor* compositor,
+    FlGdkSurface* surface,
+    GdkGLContext* context,
+    size_t width,
+    size_t height,
+    gboolean wait_for_frame) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+  (void)surface;
+
+  g_mutex_lock(&self->frame_mutex);
+  if (self->framebuffer == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
+    return nullptr;
+  }
+
+  gint64 expiry_time =
+      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
+  while (true) {
+    if (!wait_for_frame) {
+      break;
+    }
+
+    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
+    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
+    if (framebuffer_width == width && framebuffer_height == height) {
+      break;
+    }
+
+    if (g_get_monotonic_time() > expiry_time) {
+      g_warning(
+          "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
+          width, height, framebuffer_width, framebuffer_height);
+      break;
+    }
+
+    g_mutex_unlock(&self->frame_mutex);
+    fl_task_runner_wait(self->task_runner, expiry_time);
+    g_mutex_lock(&self->frame_mutex);
+  }
+
+  GdkTexture* texture = nullptr;
+  if (fl_framebuffer_get_shareable(self->framebuffer)) {
+    texture = acquire_shareable_texture(self->framebuffer, context);
+  } else {
+    if (gtk4_readback_disabled()) {
+      g_warning(
+          "GTK4 OpenGL compositor readback disabled, but native texture "
+          "sharing is unavailable");
+      g_mutex_unlock(&self->frame_mutex);
+      return nullptr;
+    }
+    texture = acquire_memory_texture(self, self->framebuffer);
+  }
+
+  g_mutex_unlock(&self->frame_mutex);
+  return texture;
+}
+#endif
+
 static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
                                                     const FlutterLayer** layers,
                                                     size_t layers_count) {
@@ -215,9 +434,11 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   }
 
   GLint general_format = GL_RGBA;
+#if !FLUTTER_LINUX_GTK4
   if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
     general_format = GL_BGRA_EXT;
   }
+#endif
 
   // Save bindings that are set by this function.  All bindings must be restored
   // to their original values because Skia expects that its bindings have not
@@ -257,9 +478,11 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
 
     // If not shareable make buffer to copy frame pixels into.
     if (!self->shareable) {
-      size_t data_length = width * height * 4;
-      self->pixels =
-          static_cast<uint8_t*>(g_realloc(self->pixels, data_length));
+      if (!ensure_pixel_buffer(self, width, height)) {
+        g_warning("Failed to allocate OpenGL compositor pixel buffer");
+        g_mutex_unlock(&self->frame_mutex);
+        return FALSE;
+      }
     }
   }
 
@@ -351,6 +574,7 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     glBindFramebuffer(GL_READ_FRAMEBUFFER,
                       fl_framebuffer_get_id(self->framebuffer));
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
+    self->pixels_are_bgra = FALSE;
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
   glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
@@ -383,7 +607,7 @@ static void fl_compositor_opengl_get_frame_size(FlCompositor* compositor,
 
 static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
-                                            GdkWindow* window,
+                                            FlGdkSurface* surface,
                                             gboolean wait_for_frame) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
@@ -394,13 +618,13 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
   size_t width, height;
   gint64 expiry_time =
       g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
   while (true) {
-    width = gdk_window_get_width(window) * scale_factor;
-    height = gdk_window_get_height(window) * scale_factor;
+    width = fl_gtk_surface_get_width(surface) * scale_factor;
+    height = fl_gtk_surface_get_height(surface) * scale_factor;
     if (!wait_for_frame) {
       break;
     }
@@ -424,34 +648,10 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
-    g_autoptr(FlFramebuffer) sibling =
-        fl_framebuffer_create_sibling(self->framebuffer);
-    gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
-                           GL_TEXTURE, scale_factor, 0, 0, width, height);
+    paint_shareable_framebuffer(self->framebuffer, cr, surface, scale_factor,
+                                width, height);
   } else {
-    GLint saved_texture_binding;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
-
-    GLuint texture_id;
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    GLsizei fb_width = 0;
-    GLsizei fb_height = 0;
-    if (self->framebuffer != nullptr) {
-      fb_width =
-          static_cast<GLsizei>(fl_framebuffer_get_width(self->framebuffer));
-      fb_height =
-          static_cast<GLsizei>(fl_framebuffer_get_height(self->framebuffer));
-    }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fb_width, fb_height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, self->pixels);
-
-    gdk_cairo_draw_from_gl(cr, window, texture_id, GL_TEXTURE, scale_factor, 0,
-                           0, width, height);
-
-    glDeleteTextures(1, &texture_id);
-
-    glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+    paint_readback_framebuffer(self, cr, surface, scale_factor, width, height);
   }
 
   glFlush();
@@ -481,6 +681,10 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->get_frame_size =
       fl_compositor_opengl_get_frame_size;
   FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_opengl_render;
+#if FLUTTER_LINUX_GTK4
+  FL_COMPOSITOR_CLASS(klass)->acquire_texture =
+      fl_compositor_opengl_acquire_texture;
+#endif
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
 }

@@ -29,9 +29,29 @@ void fl_compositor_get_frame_size(FlCompositor* self,
 
 gboolean fl_compositor_render(FlCompositor* self,
                               cairo_t* cr,
-                              GdkWindow* window,
+                              FlGdkSurface* surface,
                               gboolean wait_for_frame) {
   g_return_val_if_fail(FL_IS_COMPOSITOR(self), FALSE);
-  return FL_COMPOSITOR_GET_CLASS(self)->render(self, cr, window,
+  return FL_COMPOSITOR_GET_CLASS(self)->render(self, cr, surface,
                                                wait_for_frame);
 }
+
+#if FLUTTER_LINUX_GTK4
+GdkTexture* fl_compositor_acquire_texture(FlCompositor* self,
+                                          FlGdkSurface* surface,
+                                          GdkGLContext* context,
+                                          size_t width,
+                                          size_t height,
+                                          gboolean wait_for_frame) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR(self), nullptr);
+  g_return_val_if_fail(surface != nullptr, nullptr);
+
+  FlCompositorClass* klass = FL_COMPOSITOR_GET_CLASS(self);
+  if (klass->acquire_texture == nullptr) {
+    return nullptr;
+  }
+
+  return klass->acquire_texture(self, surface, context, width, height,
+                                wait_for_frame);
+}
+#endif

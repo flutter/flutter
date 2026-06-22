@@ -25,7 +25,7 @@ import os
 import shutil
 import subprocess
 import sys
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
 VALID_ARCHS = ("amd64", "i386", "armhf", "arm64", "mipsel", "mips64el",
@@ -132,7 +132,8 @@ def InstallSysroot(sysroots_json_path, target_platform, target_arch):
     sys.stderr.flush()
     for _ in range(3):
         try:
-            response = urlopen(url)
+            request = Request(url, headers={"User-Agent": "flutter-sysroot-installer"})
+            response = urlopen(request)
             with open(tarball, "wb") as f:
                 f.write(response.read())
             break

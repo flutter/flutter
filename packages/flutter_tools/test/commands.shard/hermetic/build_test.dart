@@ -4,10 +4,13 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -72,6 +75,111 @@ void main() {
             '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
             'combination with "--${FlutterOptions.kSplitDebugInfoOption}"',
       ),
+    );
+  });
+
+  testUsingContext('linux-gtk adds matching Dart define', () async {
+    final command = FakeBuildInfoCommand(addLinuxGtkOption: true);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>['fake', '--linux-gtk=gtk4']);
+
+    expect(command.buildInfo?.linuxGtkVersion, 'gtk4');
+    expect(command.buildInfo?.dartDefines, contains('$kLinuxGtkDartDefine=gtk4'));
+  });
+
+  final MemoryFileSystem projectFileSystem = MemoryFileSystem.test();
+
+  testUsingContext(
+    'linux-gtk reads project default from manifest',
+    () async {
+      projectFileSystem.file('/package/pubspec.yaml').createSync(recursive: true);
+      projectFileSystem.file('/package/pubspec.yaml').writeAsStringSync('''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  config:
+    linux-gtk-default: gtk4
+''');
+      projectFileSystem.currentDirectory = '/package';
+
+      final command = FakeBuildInfoCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+      await commandRunner.run(<String>['fake']);
+
+      expect(command.buildInfo?.linuxGtkVersion, 'gtk4');
+      expect(command.buildInfo?.dartDefines, contains('$kLinuxGtkDartDefine=gtk4'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => projectFileSystem,
+      ProcessManager: () => FakeProcessManager.empty(),
+    },
+  );
+
+  final MemoryFileSystem globalConfigFileSystem = MemoryFileSystem.test();
+  final Config globalConfig = Config.test(
+    name: Config.kFlutterSettings,
+    directory: globalConfigFileSystem.directory('/'),
+  );
+  globalConfigFileSystem.file('/package/pubspec.yaml').createSync(recursive: true);
+  globalConfigFileSystem.file('/package/pubspec.yaml').writeAsStringSync('''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+''');
+  globalConfigFileSystem.currentDirectory = '/package';
+  globalConfig.setValue('linux-gtk-default', 'gtk4');
+
+  testUsingContext(
+    'linux-gtk reads global config default when project does not declare one',
+    () async {
+      final command = FakeBuildInfoCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+      await commandRunner.run(<String>['fake']);
+
+      expect(command.buildInfo?.linuxGtkVersion, 'gtk4');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => globalConfigFileSystem,
+      Config: () => globalConfig,
+      ProcessManager: () => FakeProcessManager.empty(),
+    },
+  );
+
+  testUsingContext('linux-gtk accepts matching explicit Dart define', () async {
+    final command = FakeBuildInfoCommand(addLinuxGtkOption: true);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>[
+      'fake',
+      '--linux-gtk=gtk4',
+      '--dart-define=$kLinuxGtkDartDefine=gtk4',
+    ]);
+
+    expect(
+      command.buildInfo?.dartDefines.where(
+        (String define) => define == '$kLinuxGtkDartDefine=gtk4',
+      ),
+      hasLength(1),
+    );
+  });
+
+  testUsingContext('linux-gtk rejects conflicting explicit Dart define', () {
+    final command = FakeBuildInfoCommand(addLinuxGtkOption: true);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    expect(
+      () => commandRunner.run(<String>[
+        'fake',
+        '--linux-gtk=gtk4',
+        '--dart-define=$kLinuxGtkDartDefine=gtk3',
+      ]),
+      throwsToolExit(message: '$kLinuxGtkDartDefine=gtk3 conflicts with --linux-gtk=gtk4'),
     );
   });
 
@@ -230,10 +338,16 @@ void main() {
 }
 
 class FakeBuildInfoCommand extends FlutterCommand {
-  FakeBuildInfoCommand() : super() {
+  FakeBuildInfoCommand({bool addLinuxGtkOption = false}) : super() {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
+    usesDartDefineOption();
+    if (addLinuxGtkOption) {
+      argParser.addOption('linux-gtk', allowed: <String>['gtk3', 'gtk4']);
+    }
   }
+
+  BuildInfo? buildInfo;
 
   @override
   String get description => '';
@@ -243,7 +357,7 @@ class FakeBuildInfoCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await getBuildInfo();
+    buildInfo = await getBuildInfo();
     return FlutterCommandResult.success();
   }
 }

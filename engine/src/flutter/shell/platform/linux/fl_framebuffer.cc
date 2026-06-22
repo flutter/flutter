@@ -56,6 +56,14 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
                                   gboolean shareable) {
   FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
+  GLint internal_format = format;
+  if (format == GL_RGBA) {
+    internal_format = GL_RGBA8;
+#ifdef GL_BGRA8_EXT
+  } else if (format == GL_BGRA_EXT) {
+    internal_format = GL_BGRA8_EXT;
+#endif
+  }
 
   self->width = width;
   self->height = height;
@@ -70,7 +78,7 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
+  glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format,
                GL_UNSIGNED_BYTE, NULL);
   glBindTexture(GL_TEXTURE_2D, 0);
 
