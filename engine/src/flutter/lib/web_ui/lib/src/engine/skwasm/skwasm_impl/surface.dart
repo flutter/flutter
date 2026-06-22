@@ -168,10 +168,7 @@ class SkwasmSurface implements OffscreenSurface {
     final int byteCount = skDataGetSize(dataHandle);
     final Pointer<Uint8> dataPointer = skDataGetConstPointer(dataHandle).cast<Uint8>();
 
-    final output = Uint8List(byteCount);
-    for (var i = 0; i < byteCount; i++) {
-      output[i] = dataPointer[i];
-    }
+    final output = Uint8List.fromList(dataPointer.asTypedList(byteCount));
 
     if (format == ui.ImageByteFormat.rawStraightRgba) {
       unpremultiplyRawRgba(output);

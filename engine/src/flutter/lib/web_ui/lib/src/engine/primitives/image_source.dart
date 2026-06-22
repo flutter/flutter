@@ -250,6 +250,7 @@ void _bgrToRawRgba(ByteBuffer pixels) {
 /// Mutates the [pixels] in-place, converting them from premultiplied alpha
 /// RGBA layout to straight/unpremultiplied RGBA layout.
 void unpremultiplyRawRgba(Uint8List pixels) {
+  assert(pixels.length % 4 == 0, 'Pixel buffer length must be a multiple of 4.');
   for (var i = 0; i < pixels.length; i += 4) {
     final int a = pixels[i + 3];
     if (a == 0) {
