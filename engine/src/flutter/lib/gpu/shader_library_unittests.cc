@@ -104,7 +104,7 @@ TEST(FlutterGpuShaderLibraryTest,
   auto library = ShaderLibrary::MakeFromFlatbuffer(
       impeller::Context::BackendType::kMetal, std::move(mapping),
       "test_bundle");
-  EXPECT_EQ(library, nullptr);
+  EXPECT_FALSE(library);
 }
 
 // A truncated buffer (shorter than a FlatBuffer header) with the identifier
@@ -121,7 +121,7 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferRejectsTruncatedBuffer) {
   auto library = ShaderLibrary::MakeFromFlatbuffer(
       impeller::Context::BackendType::kMetal,
       CreateMappingFromVector(std::move(data)), "test_bundle");
-  EXPECT_EQ(library, nullptr);
+  EXPECT_FALSE(library);
 }
 
 // A buffer without the "IPSB" identifier is rejected at the identifier check
@@ -132,14 +132,14 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferRejectsMissingIdentifier) {
   auto library = ShaderLibrary::MakeFromFlatbuffer(
       impeller::Context::BackendType::kMetal,
       CreateMappingFromVector(std::move(data)), "test_bundle");
-  EXPECT_EQ(library, nullptr);
+  EXPECT_FALSE(library);
 }
 
 // A null payload must be handled gracefully.
 TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferRejectsNullPayload) {
   auto library = ShaderLibrary::MakeFromFlatbuffer(
       impeller::Context::BackendType::kMetal, nullptr, "test_bundle");
-  EXPECT_EQ(library, nullptr);
+  EXPECT_FALSE(library);
 }
 
 // A structurally-valid bundle that simply contains no shaders parses to an
@@ -160,7 +160,7 @@ TEST(FlutterGpuShaderLibraryTest,
   auto library = ShaderLibrary::MakeFromFlatbuffer(
       impeller::Context::BackendType::kMetal,
       CreateMappingFromVector(std::move(valid)), "test_bundle");
-  EXPECT_EQ(library, nullptr);
+  EXPECT_FALSE(library);
 }
 
 }  // namespace testing
