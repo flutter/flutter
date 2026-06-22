@@ -306,18 +306,17 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
-        val androidComponents = projectToAddTasksTo.extensions.findByType(AndroidComponentsExtension::class.java)
+        // The Android Gradle Plugin is always applied to Flutter Android projects, so its components
+        // extension is expected to be present. Use getByType (not findByType) so a misconfiguration
+        // fails loudly rather than silently skipping libapp.so registration.
+        val androidComponents = projectToAddTasksTo.extensions.getByType(AndroidComponentsExtension::class.java)
         val targetPlatformsList = targetPlatforms
-        androidComponents?.onVariants { variant ->
+        androidComponents.onVariants { variant ->
             val capitalizeVariantName = FlutterPluginUtils.capitalize(variant.name)
-            val compileTaskName =
-                FlutterPluginUtils.toCamelCase(
-                    listOf(
-                        "compile",
-                        FLUTTER_BUILD_PREFIX,
-                        variant.name
-                    )
-                )
+            // Reference the Flutter compile task by name rather than by provider: this variant API
+            // callback runs before the legacy `applicationVariants` callback in addFlutterDeps that
+            // registers the task, so its provider does not exist yet here.
+            val compileTaskName = flutterCompileTaskName(variant.name)
             val copyJniLibsTaskProvider: TaskProvider<CopyFlutterJniLibsTask> =
                 projectToAddTasksTo.tasks.register(
                     "copyJniLibs${FLUTTER_BUILD_PREFIX}$capitalizeVariantName",
@@ -525,6 +524,16 @@ class FlutterPlugin : Plugin<Project> {
         private const val FLUTTER_BUILD_PREFIX: String = "flutterBuild"
 
         /**
+         * The name of the [FlutterTask] (the `flutter assemble` invocation) for [variantName].
+         *
+         * Built identically by [addFlutterDeps], which registers the task, and by the variant API
+         * callback in [addFlutterTasks], which references it by name (because that callback runs
+         * before the task is registered).
+         */
+        private fun flutterCompileTaskName(variantName: String): String =
+            FlutterPluginUtils.toCamelCase(listOf("compile", FLUTTER_BUILD_PREFIX, variantName))
+
+        /**
          * Configures flutter default abi support respecting flutter command line flags.
          */
         private fun configureAbis(
@@ -682,14 +691,7 @@ class FlutterPlugin : Plugin<Project> {
 
             val variantBuildMode: String = FlutterPluginUtils.buildModeFor(variant.buildType)
             val flavorValue: String = variant.flavorName
-            val taskName: String =
-                FlutterPluginUtils.toCamelCase(
-                    listOf(
-                        "compile",
-                        FLUTTER_BUILD_PREFIX,
-                        variant.name
-                    )
-                )
+            val taskName: String = flutterCompileTaskName(variant.name)
             // The task provider below will shadow a lot of the variable names, so provide this reference
             // to access them within that scope.
 
@@ -733,12 +735,6 @@ class FlutterPlugin : Plugin<Project> {
                     flavor = flavorValue
                 }
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
-            // Kept a sibling of the Flutter task's `intermediates/flutter/<variant>` output
-            // directory (not nested inside it) to avoid overlapping task outputs, and matched to the
-            // lazily-registered source set `srcDir` above. See the `sourceSets.all` block and
-            // https://github.com/flutter/flutter/issues/186810 /
-            // https://github.com/flutter/flutter/issues/187388.
-
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
                 project.tasks.register(
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
