@@ -31,10 +31,11 @@ raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
   }
   // Clamp to the device limit before keying the cache so that all values
   // beyond the limit share one sampler. The limit is 1 (disabled) when the
-  // samplerAnisotropy feature is unavailable.
+  // samplerAnisotropy feature is unavailable. The upper bound is floored at 1
+  // so std::clamp never sees an inverted range if a driver reports below 1.
   desc_copy.max_anisotropy = static_cast<uint8_t>(
       std::clamp(static_cast<float>(desc_copy.max_anisotropy), 1.0f,
-                 max_sampler_anisotropy_));
+                 std::max(1.0f, max_sampler_anisotropy_)));
 
   uint64_t p_key = SamplerDescriptor::ToKey(desc_copy);
   for (const auto& [key, value] : samplers_) {
