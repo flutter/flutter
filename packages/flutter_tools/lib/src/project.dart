@@ -249,10 +249,7 @@ class FlutterProject {
 
   /// The location of the generated scaffolding project for hosting widget
   /// previews from this project.
-  // TODO(bkonyi): don't create this project in $TMP.
-  // See https://github.com/flutter/flutter/issues/179036
-  late final Directory widgetPreviewScaffold = directory.fileSystem.systemTempDirectory
-      .createTempSync('widget_preview_scaffold');
+  late final Directory widgetPreviewScaffold = directory.childDirectory('.widget_preview');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory.absolute
@@ -422,7 +419,16 @@ class FlutterProject {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) async {
-    if (!directory.existsSync() || isPlugin) {
+    // When no platforms are enabled, nothing reads the plugin list or the
+    // injected per-platform files.
+    final bool anyPlatformEnabled =
+        androidPlatform ||
+        iosPlatform ||
+        linuxPlatform ||
+        macOSPlatform ||
+        windowsPlatform ||
+        webPlatform;
+    if (!directory.existsSync() || isPlugin || !anyPlatformEnabled) {
       return;
     }
     await refreshPluginsList(

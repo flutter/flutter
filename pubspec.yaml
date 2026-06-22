@@ -20,6 +20,7 @@ workspace:
   - dev/devicelab
   - dev/forbidden_from_release_tests
   - dev/integration_tests/android_engine_test
+  - dev/integration_tests/android_hardware_smoke_test
   - dev/integration_tests/android_semantics_testing
   - dev/integration_tests/android_verified_input
   - dev/integration_tests/android_views
@@ -97,10 +98,10 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: ^1.1.2
-  code_assets: 1.0.0
+  code_assets: 1.2.1
   collection: ^1.19.1
   convert: 3.1.2
-  coverage: 1.15.0
+  coverage: 1.15.1
   crypto: 3.0.7
   csslib: 1.0.2
   cupertino_icons: 1.0.9
@@ -120,9 +121,9 @@ dependencies:
   google_identity_services_web: 0.3.3+1
   google_mobile_ads: 8.0.0
   googleapis: 14.0.0
-  googleapis_auth: 2.3.1
-  hooks: 1.0.3
-  data_assets: 0.19.6
+  googleapis_auth: 2.3.2
+  hooks: 2.0.2
+  data_assets: 0.20.0
   record_use: 0.6.0
   html: 0.15.6
   http: 1.6.0
@@ -139,10 +140,10 @@ dependencies:
   logging: 1.3.0
   matcher: 0.12.20
   material_color_utilities: 0.13.0
-  meta: ^1.18.2
+  meta: ^1.18.3
   metrics_center: 1.0.15
   mime: 2.0.0
-  native_toolchain_c: 0.17.6
+  native_toolchain_c: 0.19.1
   nested: 1.0.0
   node_preamble: 2.0.2
   package_config: 2.2.0
@@ -174,7 +175,7 @@ dependencies:
   source_maps: 0.10.13
   source_span: 1.10.2
   stack_trace: ^1.12.1
-  standard_message_codec: 0.0.1+4
+  standard_message_codec: 0.0.1+5
   stream_channel: ^2.1.4
   string_scanner: 1.4.1
   sync_http: 0.3.1
@@ -184,17 +185,17 @@ dependencies:
   test_core: 0.6.18
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.29
+  url_launcher_android: 6.3.32
   url_launcher_ios: 6.4.1
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
   url_launcher_platform_interface: 2.3.2
   url_launcher_web: 2.4.3
   url_launcher_windows: 3.1.5
-  vector_math: ^2.3.0
+  vector_math: ^2.4.0
   video_player: 2.11.1
-  video_player_android: 2.9.5
-  video_player_avfoundation: 2.9.6
+  video_player_android: 2.9.6
+  video_player_avfoundation: 2.9.7
   video_player_platform_interface: 6.7.0
   video_player_web: 2.4.0
   vm_service: 15.2.0
@@ -206,9 +207,9 @@ dependencies:
   webdriver: 3.1.0
   webkit_inspection_protocol: 1.2.1
   webview_flutter: 4.13.1
-  webview_flutter_android: 4.12.0
+  webview_flutter_android: 4.13.0
   webview_flutter_platform_interface: 2.15.1
-  webview_flutter_wkwebview: 3.25.1
+  webview_flutter_wkwebview: 3.26.0
   xdg_directories: 1.1.0
   xml: 6.6.1
   yaml: 3.1.3
@@ -224,4 +225,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: f49okb
+# PUBSPEC CHECKSUM: j1vj9g

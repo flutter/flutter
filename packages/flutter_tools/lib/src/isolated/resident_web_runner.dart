@@ -32,7 +32,6 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../vmservice.dart';
@@ -55,6 +54,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required bool stayResident,
     required FlutterProject flutterProject,
     required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     required Logger logger,
     required Terminal terminal,
@@ -71,6 +71,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       target: target,
       flutterProject: flutterProject,
       debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
@@ -102,6 +103,7 @@ class ResidentWebRunner extends ResidentRunner {
     super.projectRootPath,
     required this.flutterProject,
     required super.debuggingOptions,
+    this.platformArgs = const <String, Object?>{},
     required FileSystem fileSystem,
     required Logger logger,
     required Terminal terminal,
@@ -137,6 +139,7 @@ class ResidentWebRunner extends ResidentRunner {
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
   final Map<String, String> _webDefines;
+  final Map<String, Object?> platformArgs;
 
   @override
   Logger get logger => _logger;
@@ -289,6 +292,8 @@ class ResidentWebRunner extends ResidentRunner {
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: _fileSystem)
             : null;
 
+        flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
+
         flutterDevice!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
@@ -364,7 +369,7 @@ class ResidentWebRunner extends ResidentRunner {
           package,
           mainPath: target,
           debuggingOptions: debuggingOptions,
-          platformArgs: <String, Object>{'uri': url.toString()},
+          platformArgs: <String, Object?>{...platformArgs, 'uri': url.toString()},
         );
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
@@ -392,6 +397,13 @@ class ResidentWebRunner extends ResidentRunner {
       appFailedToStart();
       _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
+    } on TimeoutException catch (error, stackTrace) {
+      appFailedToStart();
+      _logger.printError(
+        'Failed to establish connection with the web debug service: $error',
+        stackTrace: stackTrace,
+      );
+      throwToolExit('Failed to connect to the web debug service.');
     } on DartDevelopmentServiceException catch (error) {
       // The application may have started shutting down before DDS was able to finish establishing
       // its connection to DWDS. Don't treat this as an unhandled exception.
@@ -449,7 +461,7 @@ class ResidentWebRunner extends ResidentRunner {
       status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
-    final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
+    final String targetPlatform = TargetPlatform.web_javascript.getName();
     final String sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
     // Will be null if there is no report.
@@ -467,13 +479,6 @@ class ResidentWebRunner extends ResidentRunner {
         if (report.hotReloadRejected) {
           // We cannot capture the reason why the reload was rejected as it may
           // contain user information.
-          HotEvent(
-            'reload-reject',
-            targetPlatform: targetPlatform,
-            sdkName: sdkName,
-            emulator: false,
-            fullRestart: fullRestart,
-          ).send();
           _analytics.send(
             Event.hotRunnerInfo(
               label: 'reload-reject',
@@ -586,6 +591,7 @@ class ResidentWebRunner extends ResidentRunner {
             }
             return OperationResult(1, reloadFailedMessage);
           }
+          await evictDirtyAssets();
           String? failedReassemble;
           final DateTime reassembleStart = _systemClock.now();
           await _vmService
@@ -635,21 +641,6 @@ class ResidentWebRunner extends ResidentRunner {
             elapsedMilliseconds: elapsed.inMilliseconds,
           ),
         );
-        HotEvent(
-          'restart',
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: false,
-          fullRestart: true,
-          reason: reason,
-          overallTimeInMs: elapsed.inMilliseconds,
-          syncedBytes: report?.syncedBytes,
-          invalidatedSourcesCount: report?.invalidatedSourcesCount,
-          transferTimeInMs: report?.transferDuration.inMilliseconds,
-          compileTimeInMs: report?.compileDuration.inMilliseconds,
-          findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
-          scannedSourcesCount: report?.scannedSourcesCount,
-        ).send();
         _analytics.send(
           Event.hotRunnerInfo(
             label: 'restart',
@@ -675,23 +666,6 @@ class ResidentWebRunner extends ResidentRunner {
             elapsedMilliseconds: elapsed.inMilliseconds,
           ),
         );
-        HotEvent(
-          'reload',
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: false,
-          fullRestart: false,
-          reason: reason,
-          overallTimeInMs: elapsed.inMilliseconds,
-          syncedBytes: report?.syncedBytes,
-          invalidatedSourcesCount: report?.invalidatedSourcesCount,
-          transferTimeInMs: report?.transferDuration.inMilliseconds,
-          compileTimeInMs: report?.compileDuration.inMilliseconds,
-          findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
-          scannedSourcesCount: report?.scannedSourcesCount,
-          reassembleTimeInMs: reassembleDuration?.inMilliseconds,
-          reloadVMTimeInMs: reloadDuration?.inMilliseconds,
-        ).send();
         _analytics.send(
           Event.hotRunnerInfo(
             label: 'reload',
