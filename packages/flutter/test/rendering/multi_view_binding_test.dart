@@ -109,8 +109,20 @@ void main() {
     final flutterView2 = FakeFlutterView(viewId: 2);
     final renderView1 = RenderView(view: flutterView1);
     final renderView2 = RenderView(view: flutterView2);
-    final owner1 = PipelineOwner()..rootNode = renderView1;
-    final owner2 = PipelineOwner()..rootNode = renderView2;
+    final owner1 = PipelineOwner(
+      onFlushPaint: (bool isDirty) {
+        if (isDirty) {
+          renderView1.markNeedsCompositeFrame();
+        }
+      },
+    )..rootNode = renderView1;
+    final owner2 = PipelineOwner(
+      onFlushPaint: (bool isDirty) {
+        if (isDirty) {
+          renderView2.markNeedsCompositeFrame();
+        }
+      },
+    )..rootNode = renderView2;
     binding.rootPipelineOwner.adoptChild(owner1);
     binding.rootPipelineOwner.adoptChild(owner2);
     binding.addRenderView(renderView1);
@@ -150,8 +162,20 @@ void main() {
     final flutterView2 = FakeFlutterView(viewId: 2);
     final renderView1 = RenderView(view: flutterView1);
     final renderView2 = RenderView(view: flutterView2);
-    final owner1 = PipelineOwner()..rootNode = renderView1;
-    final owner2 = PipelineOwner()..rootNode = renderView2;
+    final owner1 = PipelineOwner(
+      onFlushPaint: (bool isDirty) {
+        if (isDirty) {
+          renderView1.markNeedsCompositeFrame();
+        }
+      },
+    )..rootNode = renderView1;
+    final owner2 = PipelineOwner(
+      onFlushPaint: (bool isDirty) {
+        if (isDirty) {
+          renderView2.markNeedsCompositeFrame();
+        }
+      },
+    )..rootNode = renderView2;
     binding.rootPipelineOwner.adoptChild(owner1);
     binding.rootPipelineOwner.adoptChild(owner2);
     binding.addRenderView(renderView1);
