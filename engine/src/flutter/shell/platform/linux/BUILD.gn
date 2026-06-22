@@ -263,7 +263,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_event_channel.cc",
     "fl_framebuffer.cc",
     "fl_gnome_settings.cc",
-    "fl_gtk_runtime_api.cc",
+    "fl_gtk4_runtime_api.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
     "fl_key_channel_responder.cc",
