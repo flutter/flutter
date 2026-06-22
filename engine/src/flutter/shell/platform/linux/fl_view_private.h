@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 
+#include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
 #include "flutter/shell/platform/linux/fl_compositor.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
@@ -43,6 +44,7 @@ struct _FlView {
 #if FLUTTER_LINUX_GTK4
   gboolean native_texture_ready;
   guint native_texture_retry_source_id;
+  FlAccessibilitySemanticsStore* accessibility_semantics_store;
 #endif
   GCancellable* cancellable;
 };

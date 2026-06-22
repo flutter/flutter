@@ -29,6 +29,7 @@
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #endif
@@ -71,11 +72,21 @@ G_DEFINE_TYPE_WITH_CODE(
 
 #if FLUTTER_LINUX_GTK4
 static void fl_view_gtk4_update_accessible_name(FlView* self) {
+  const gchar* label = "Flutter view";
+  if (self->accessibility_semantics_store != nullptr) {
+    const FlAccessibilitySemanticsNode* root =
+        fl_accessibility_semantics_store_lookup_node(
+            self->accessibility_semantics_store, 0);
+    if (root != nullptr && root->label != nullptr && root->label[0] != '\0') {
+      label = root->label;
+    }
+  }
+
   GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
   GtkAccessibleProperty properties[] = {property};
   GValue value = G_VALUE_INIT;
   fl_gtk_runtime_accessible_property_init_value(property, &value);
-  g_value_set_string(&value, "Flutter view");
+  g_value_set_string(&value, label);
   fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self), 1,
                                                   properties, &value);
   g_value_unset(&value);
@@ -353,8 +364,11 @@ static void update_semantics_cb(FlView* self,
 #if !FLUTTER_LINUX_GTK4
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 #else
-  (void)self;
-  (void)update;
+  if (self->accessibility_semantics_store != nullptr) {
+    fl_accessibility_semantics_store_handle_update(
+        self->accessibility_semantics_store, update);
+    fl_view_gtk4_update_accessible_name(self);
+  }
 #endif
 }
 
@@ -705,6 +719,9 @@ static void setup_engine(FlView* self) {
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+#else
+  self->accessibility_semantics_store =
+      fl_accessibility_semantics_store_new(self->view_id);
 #endif
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
