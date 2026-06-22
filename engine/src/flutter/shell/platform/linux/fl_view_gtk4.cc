@@ -76,6 +76,43 @@ void fl_view_gtk4_set_cursor(FlView* view, const gchar* cursor_name) {
   fl_gtk_surface_set_cursor(surface, cursor);
 }
 
+static gboolean get_event_position(FlView* view,
+                                   GdkEvent* event,
+                                   gdouble* x,
+                                   gdouble* y) {
+  gdouble event_x = 0.0;
+  gdouble event_y = 0.0;
+  if (!gdk_event_get_position(event, &event_x, &event_y)) {
+    return FALSE;
+  }
+
+  GtkWidget* render_area = GTK_WIDGET(view->render_area);
+  GtkNative* native = gtk_widget_get_native(render_area);
+  if (native == nullptr) {
+    *x = event_x;
+    *y = event_y;
+    return TRUE;
+  }
+
+  gdouble native_x = 0.0;
+  gdouble native_y = 0.0;
+  gtk_native_get_surface_transform(native, &native_x, &native_y);
+
+  graphene_point_t event_point = {
+      static_cast<float>(event_x - native_x),
+      static_cast<float>(event_y - native_y),
+  };
+  graphene_point_t point;
+  if (!gtk_widget_compute_point(GTK_WIDGET(native), render_area, &event_point,
+                                &point)) {
+    return FALSE;
+  }
+
+  *x = point.x;
+  *y = point.y;
+  return TRUE;
+}
+
 gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
   GdkEventType event_type = gdk_event_get_event_type(event);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
@@ -86,7 +123,9 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
       guint button = gdk_button_event_get_button(event);
 
       gdouble x = 0.0, y = 0.0;
-      gdk_event_get_position(event, &x, &y);
+      if (!get_event_position(view, event, &x, &y)) {
+        return FALSE;
+      }
 
       fl_scrolling_manager_set_last_mouse_position(
           view->scrolling_manager, x * scale_factor, y * scale_factor);
@@ -114,7 +153,9 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
           fl_engine_get_keyboard_manager(view->engine),
           gdk_event_get_modifier_state(event), gdk_event_get_time(event));
       gdouble x = 0.0, y = 0.0;
-      gdk_event_get_position(event, &x, &y);
+      if (!get_event_position(view, event, &x, &y)) {
+        return FALSE;
+      }
       return fl_pointer_manager_handle_motion(
           view->pointer_manager, gdk_event_get_time(event),
           get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
@@ -127,7 +168,9 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
       }
 
       gdouble x = 0.0, y = 0.0;
-      gdk_event_get_position(event, &x, &y);
+      if (!get_event_position(view, event, &x, &y)) {
+        return FALSE;
+      }
       if (event_type == GDK_ENTER_NOTIFY) {
         return fl_pointer_manager_handle_enter(
             view->pointer_manager, gdk_event_get_time(event),
