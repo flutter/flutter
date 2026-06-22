@@ -2930,6 +2930,7 @@ void main() {
 
     expect(position.pixels, 0.0);
   });
+
   group('CarouselView autoPlay', () {
     testWidgets('autoPlay triggers scroll after interval', (WidgetTester tester) async {
       final controller = CarouselController();
@@ -2952,12 +2953,12 @@ void main() {
 
       expect(controller.leadingItem, 0);
 
-      // Wait for the interval (2 seconds)
+      // Wait for the interval.
       await tester.pump(const Duration(seconds: 2));
-      // Pump the animation frames
+      // Pump the animation frames.
       await tester.pumpAndSettle();
 
-      // Should have scrolled to the next item
+      // Should have scrolled to the next item.
       expect(controller.leadingItem, 1);
     });
 
@@ -2988,15 +2989,15 @@ void main() {
 
       expect(controller.leadingItem, 0);
 
-      // Wait for interval
+      // Wait for the interval.
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(controller.leadingItem, 1);
 
-      // Wait for interval again
+      // Wait for the interval again.
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
-      // Should rewind back to the first item
+      // Should rewind back to the first item.
       expect(controller.leadingItem, 0);
     });
 
@@ -3019,28 +3020,28 @@ void main() {
         ),
       );
 
-      // Start dragging to pause interaction
+      // Start dragging to pause interaction.
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(find.byType(CarouselView)),
       );
-      await gesture.moveBy(const Offset(-50, 0)); // Slight move to trigger scroll start
+      await gesture.moveBy(const Offset(-50, 0)); // Slight move to trigger scroll start.
 
-      // Wait for what would be the interval
+      // Wait for what would be the interval.
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
 
-      // Should not have auto-scrolled because we are interacting
+      // Should not have auto-scrolled because we are interacting.
       expect(controller.leadingItem, 0);
 
-      // Release the interaction
+      // Release the interaction.
       await gesture.up();
       await tester.pumpAndSettle();
 
-      // Wait for interval again after releasing
+      // Wait for the interval again after releasing.
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
 
-      // Now it should auto-scroll
+      // Now it should auto-scroll.
       expect(controller.leadingItem, 1);
     });
 
@@ -3068,22 +3069,22 @@ void main() {
 
       expect(controller.leadingItem, 0);
 
-      // Wait for the interval (to item 1)
+      // Wait for the interval (to item 1).
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(controller.leadingItem, 1);
 
-      // Wait for the interval (to item 2)
+      // Wait for the interval (to item 2).
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(controller.leadingItem, 2);
 
-      // Wait for the interval (wrap around to item 0 conceptually, index 0 but visually continuous)
+      // Wait for the interval (wrap around to item 0 conceptually, index 0 but visually continuous).
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(controller.leadingItem, 0);
 
-      // Wait for the interval (to item 1 again)
+      // Wait for the interval (to item 1 again).
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(controller.leadingItem, 1);
@@ -3108,22 +3109,22 @@ void main() {
         ),
       );
 
-      // Initial item is 0
+      // Initial item is 0.
       expect(controller.leadingItem, 0);
 
-      // Wait for the interval (to item 1)
+      // Wait for the interval (to item 1).
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(
         controller.leadingItem,
         0,
-      ); // Still 0 because of leadingItem calculation with consumeMaxWeight
+      ); // Still 0 because of leadingItem calculation with consumeMaxWeight.
 
       // Verify it actually moved!
       final double offset1 = controller.offset;
       expect(offset1, greaterThan(0));
 
-      // Wait for the interval (to item 2)
+      // Wait for the interval (to item 2).
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
 
