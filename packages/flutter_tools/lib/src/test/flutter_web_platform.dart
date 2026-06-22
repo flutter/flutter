@@ -654,6 +654,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       hostUrl,
       completer.future,
       headless: !_config.pauseAfterLoad,
+      logger: _logger,
     );
   }
 
@@ -715,7 +716,18 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket) {
+  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, Logger logger) {
+    unawaited(
+      _browser.onExit.then((int exitCode) {
+        if (!_closed) {
+          logger.printError(
+            '[CHROME_DIAGNOSTIC] Chrome browser process (PID: ${_browser.pid}) '
+            'exited unexpectedly with code $exitCode during test execution.',
+          );
+        }
+      }),
+    );
+
     // The duration should be short enough that the debugging console is open as
     // soon as the user is done setting breakpoints, but long enough that a test
     // doing a lot of synchronous work doesn't trigger a false positive.
@@ -814,6 +826,7 @@ class BrowserManager {
     bool debug = false,
     bool headless = true,
     List<String> webBrowserFlags = const <String>[],
+    required Logger logger,
   }) async {
     final Chromium chrome = await chromiumLauncher.launch(
       url.toString(),
@@ -822,14 +835,51 @@ class BrowserManager {
     );
     final completer = Completer<BrowserManager>();
 
+    final diagnosticTimer = Timer.periodic(const Duration(seconds: 5), (Timer timer) async {
+      var exitCode = -1;
+      try {
+        exitCode = await chrome.onExit.timeout(Duration.zero, onTimeout: () => -1);
+      } on Object catch (_) {
+        // Ignored
+      }
+      final isRunning = exitCode == -1;
+
+      logger.printStatus(
+        '[CHROME_DIAGNOSTIC] Waiting for WebSocket connection. '
+        'Chrome PID: ${chrome.pid}. Running: $isRunning.',
+      );
+
+      if (isRunning) {
+        try {
+          final List<dynamic> tabs = await chrome.chromeConnection.getTabs();
+          logger.printStatus('[CHROME_DIAGNOSTIC] DevTools is responsive. Tabs: $tabs');
+        } on Object catch (e) {
+          logger.printStatus('[CHROME_DIAGNOSTIC] DevTools is UNRESPONSIVE: $e');
+        }
+      } else {
+        logger.printStatus(
+          '[CHROME_DIAGNOSTIC] Chrome process has already exited with code $exitCode.',
+        );
+        timer.cancel();
+      }
+    });
+
+    unawaited(
+      completer.future.whenComplete(() {
+        diagnosticTimer.cancel();
+      }),
+    );
+
     unawaited(
       chrome.onExit
           .then<Object?>((int? browserExitCode) {
+            diagnosticTimer.cancel();
             throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
           })
           .then(
             (Object? obj) => obj,
             onError: (Object error, StackTrace stackTrace) {
+              diagnosticTimer.cancel();
               if (!completer.isCompleted) {
                 completer.completeError(error, stackTrace);
               }
@@ -843,10 +893,11 @@ class BrowserManager {
           if (completer.isCompleted) {
             return;
           }
-          completer.complete(BrowserManager._(chrome, runtime, webSocket));
+          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger));
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();
+          diagnosticTimer.cancel();
           if (!completer.isCompleted) {
             completer.completeError(error, stackTrace);
           }

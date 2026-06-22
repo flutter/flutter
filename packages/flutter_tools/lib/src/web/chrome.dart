@@ -262,7 +262,8 @@ class ChromiumLauncher {
       url,
     ];
 
-    final Process process = await _spawnChromiumProcess(args, chromeExecutable);
+    final _SpawnResult spawnResult = await _spawnChromiumProcess(args, chromeExecutable);
+    final Process process = spawnResult.process;
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
@@ -286,12 +287,13 @@ class ChromiumLauncher {
         process: process,
         chromiumLauncher: this,
         logger: _logger,
+        logBuffer: spawnResult.logBuffer,
       ),
       skipCheck,
     );
   }
 
-  Future<Process> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
+  Future<_SpawnResult> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
     // Keep attempting to launch the browser until one of:
     // - Chrome launched successfully, in which case we just return from the loop.
     // - The tool reached the maximum retry count, in which case we throw ToolExit.
@@ -299,58 +301,80 @@ class ChromiumLauncher {
     var retry = 0;
     while (true) {
       final Process process = await _processManager.start(args);
+      final logBuffer = <String>[];
 
-      process.stdout.transform(utf8LineDecoder).listen((String line) {
+      void addLog(String type, String line) {
         _logger.printTrace('[CHROME]: $line');
-      });
+        final logLine = '[$type]: $line';
+        logBuffer.add(logLine);
+        if (logBuffer.length > 200) {
+          logBuffer.removeAt(0);
+        }
+      }
 
-      // Wait until the DevTools are listening before trying to connect. This is
-      // only required for flutter_test --platform=chrome and not flutter run.
+      final StreamSubscription<String> stdoutSub = process.stdout.transform(utf8LineDecoder).listen(
+        (String line) {
+          addLog('CHROME STDOUT', line);
+        },
+      );
+
+      final devToolsListening = Completer<void>();
       var hitGlibcBug = false;
       var shouldRetry = false;
-      final errors = <String>[];
-      await process.stderr
-          .transform(utf8LineDecoder)
-          .map((String line) {
-            _logger.printTrace('[CHROME]: $line');
-            errors.add('[CHROME]:$line');
-            if (line.contains(_kGlibcError)) {
-              hitGlibcBug = true;
-              shouldRetry = true;
+
+      final StreamSubscription<String> stderrSub = process.stderr.transform(utf8LineDecoder).listen(
+        (String line) {
+          addLog('CHROME STDERR', line);
+          if (line.contains(_kGlibcError)) {
+            hitGlibcBug = true;
+            shouldRetry = true;
+          }
+          if (line.startsWith('DevTools listening')) {
+            if (!devToolsListening.isCompleted) {
+              devToolsListening.complete();
             }
-            return line;
-          })
-          .firstWhere(
-            (String line) => line.startsWith('DevTools listening'),
-            orElse: () {
-              if (hitGlibcBug) {
-                _logger.printTrace(
-                  'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
-                  'Will try launching browser again.',
-                );
-                // Return value unused.
-                return '';
-              }
-              if (retry >= kMaxRetries) {
-                errors.forEach(_logger.printError);
-                _logger.printError(
-                  'Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}',
-                );
-                throwToolExit(
-                  'Failed to launch browser. Make sure you are using an up-to-date '
-                  'Chrome or Edge. Otherwise, consider using -d web-server instead '
-                  'and filing an issue at https://github.com/flutter/flutter/issues.',
-                );
-              }
-              shouldRetry = true;
-              return '';
-            },
+          }
+        },
+      );
+
+      // Handle premature process exit.
+      unawaited(
+        process.exitCode.then((int code) {
+          if (!devToolsListening.isCompleted) {
+            devToolsListening.completeError(
+              Exception('Chrome process exited with code $code before DevTools listening.'),
+            );
+          }
+        }),
+      );
+
+      try {
+        await devToolsListening.future;
+      } on Object catch (error) {
+        if (retry >= kMaxRetries) {
+          logBuffer.forEach(_logger.printError);
+          _logger.printError(
+            'Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}',
           );
+          throwToolExit(
+            'Failed to launch browser. Make sure you are using an up-to-date '
+            'Chrome or Edge. Otherwise, consider using -d web-server instead '
+            'and filing an issue at https://github.com/flutter/flutter/issues.\n'
+            'Error: $error',
+          );
+        }
+        shouldRetry = true;
+      }
 
       if (!hitGlibcBug && !shouldRetry) {
-        return process;
+        return _SpawnResult(process, logBuffer);
       }
+
       retry += 1;
+
+      // Clean up subscriptions.
+      await stdoutSub.cancel();
+      await stderrSub.cancel();
 
       // A precaution that avoids accumulating browser processes, in case the
       // glibc bug doesn't cause the browser to quit and we keep looping and
@@ -488,9 +512,23 @@ class Chromium {
     required Process process,
     required ChromiumLauncher chromiumLauncher,
     required Logger logger,
+    List<String> logBuffer = const <String>[],
   }) : _process = process,
        _chromiumLauncher = chromiumLauncher,
-       _logger = logger;
+       _logger = logger,
+       _logBuffer = logBuffer {
+    unawaited(
+      _process.exitCode.then((int code) {
+        if (!_didClose && code != 0) {
+          _logger.printError(
+            '[CHROME_DIAGNOSTIC] Chrome process PID $pid exited unexpectedly with code $code.\n'
+            'Last 200 lines of Chrome output:\n'
+            '${_logBuffer.join('\n')}',
+          );
+        }
+      }),
+    );
+  }
 
   final String? url;
   final int debugPort;
@@ -498,7 +536,9 @@ class Chromium {
   final ChromeConnection chromeConnection;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
+  final List<String> _logBuffer;
   var _hasValidChromeConnection = false;
+  var _didClose = false;
 
   /// Resolves to browser's main process' exit code, when the browser exits.
   Future<int> get onExit async => _process.exitCode;
@@ -508,6 +548,9 @@ class Chromium {
   /// Killing this process should result in the browser exiting.
   @visibleForTesting
   Process get process => _process;
+
+  /// The process ID of this Chromium instance.
+  int get pid => _process.pid;
 
   /// Gets the first Chrome tab in order to verify that the connection to
   /// the Chrome debug protocol is working properly.
@@ -549,6 +592,7 @@ class Chromium {
 
   /// Closes all connections to the browser and asks the browser to exit.
   Future<void> close() async {
+    _didClose = true;
     if (_logger.isVerbose) {
       _logger.printTrace('Shutting down Chromium.');
     }
@@ -643,4 +687,10 @@ Future<ChromeTab?> getChromeTabGuarded(
     }
     return null;
   }
+}
+
+class _SpawnResult {
+  _SpawnResult(this.process, this.logBuffer);
+  final Process process;
+  final List<String> logBuffer;
 }

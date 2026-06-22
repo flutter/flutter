@@ -128,7 +128,8 @@ void main() {
       'Using Chromium 115\n'
       '[CHROME]: \n'
       '[CHROME]: \n'
-      '[CHROME]: DevTools listening',
+      '[CHROME]: DevTools listening\n'
+      '[CHROME]:',
     );
   });
 
