@@ -40,7 +40,7 @@ class GLESPlaygroundEnvironment : public ::testing::Environment {
       shared_context_sdf;
 };
 
-GLESPlaygroundEnvironment* const kGlesPlaygroundEnv =
+GLESPlaygroundEnvironment* const g_gles_playground_env =
     static_cast<GLESPlaygroundEnvironment*>(
         ::testing::AddGlobalTestEnvironment(new GLESPlaygroundEnvironment()));
 
@@ -130,9 +130,9 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
     FML_CHECK(angle_glesv2_ != nullptr);
   }
 
-  auto& shared_context = switches.flags.use_sdfs
-                             ? kGlesPlaygroundEnv->shared_context_sdf
-                             : kGlesPlaygroundEnv->shared_context;
+  std::unique_ptr<PlaygroundImplGLES::ShareableContext>& shared_context =
+      switches.flags.use_sdfs ? g_gles_playground_env->shared_context_sdf
+                              : g_gles_playground_env->shared_context;
 
   // If the switches have values that result in a different GLES context than
   // the existing shared context, reset the shared context to create a new one.
