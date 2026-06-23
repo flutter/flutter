@@ -61,10 +61,11 @@ class FlutterPluginTest {
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        every { mockAndroidComponentsExtension.selector() } returns
-            mockk {
-                every { all() } returns mockk()
-            }
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        val mockSelector = mockk<com.android.build.api.variant.VariantSelector>(relaxed = true)
+        every { mockAndroidComponentsExtension.selector() } returns mockSelector
+        every { mockSelector.all() } returns mockSelector
+        every { mockSelector.withName(any<String>()) } returns mockSelector
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
@@ -159,10 +160,11 @@ class FlutterPluginTest {
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        every { mockAndroidComponentsExtension.selector() } returns
-            mockk {
-                every { all() } returns mockk()
-            }
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        val mockSelector = mockk<com.android.build.api.variant.VariantSelector>(relaxed = true)
+        every { mockAndroidComponentsExtension.selector() } returns mockSelector
+        every { mockSelector.all() } returns mockSelector
+        every { mockSelector.withName(any<String>()) } returns mockSelector
         every { project.projectDir } returns projectDir.toFile()
         every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
         every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
