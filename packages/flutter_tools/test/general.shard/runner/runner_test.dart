@@ -653,7 +653,13 @@ void main() {
         final stdio = FakeStdio();
         await runner.run(
           <String>['devices', '--machine'],
-          (ToolDependencies toolDependencies) => <FlutterCommand>[DevicesCommand()],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[
+            DevicesCommand(
+              deviceManager: toolDependencies.deviceManager,
+              doctor: toolDependencies.doctor,
+              toolContext: toolDependencies.toolContext,
+            ),
+          ],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
