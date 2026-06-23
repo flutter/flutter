@@ -62,6 +62,7 @@ Future<void> processPodsIfNeeded(
       templateRenderer: globals.templateRenderer,
       processUtils: globals.processUtils,
       config: globals.config,
+      logger: globals.logger,
     );
     final FlutterDarwinPlatform platform = xcodeProject is IosProject
         ? FlutterDarwinPlatform.ios

@@ -8,8 +8,10 @@ import '../base/common.dart';
 import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
+import '../base/terminal.dart';
 import '../base/version.dart';
 import '../darwin/darwin.dart';
 import '../plugins.dart';
@@ -43,15 +45,81 @@ class SwiftPackageManager {
     required TemplateRenderer templateRenderer,
     required ProcessUtils processUtils,
     required Config config,
+    Logger? logger,
   }) : _fileSystem = fileSystem,
        _templateRenderer = templateRenderer,
        _processUtils = processUtils,
-       _config = config;
+       _config = config,
+       _logger = logger;
 
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
   final ProcessUtils _processUtils;
   final Config _config;
+  final Logger? _logger;
+
+  Future<RandomAccessFile?> _acquireLock(XcodeBasedProject project) async {
+    final File lockFile = project.ephemeralDirectory.childFile('.swift_pm.lock');
+    var printed = false;
+    while (true) {
+      try {
+        lockFile.parent.createSync(recursive: true);
+        final RandomAccessFile openedFile = lockFile.openSync(mode: FileMode.write);
+        try {
+          openedFile.lockSync();
+          return openedFile;
+        } on FileSystemException {
+          // Lock failed (already locked by another process). Close and retry.
+          try {
+            openedFile.closeSync();
+          } on FileSystemException catch (_) {}
+          if (!printed) {
+            _logger?.printTrace(
+              'Waiting to be able to obtain lock of Swift Package Manager directory: ${lockFile.path}',
+            );
+            _logger?.printWarning(
+              'Waiting for another flutter command to release the Swift Package Manager lock...',
+              color: TerminalColor.grey,
+              fatal: false,
+            );
+            printed = true;
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        } on UnimplementedError {
+          _logger?.printTrace('Swift PM Locking not supported (UnimplementedError).');
+          return openedFile;
+        } on UnsupportedError {
+          _logger?.printTrace('Swift PM Locking not supported (UnsupportedError).');
+          return openedFile;
+        }
+      } on FileSystemException catch (e) {
+        // openSync or createSync failed (e.g. sharing violation). Retry.
+        if (!printed) {
+          _logger?.printTrace(
+            'Waiting to be able to obtain lock of Swift Package Manager directory: ${lockFile.path} (Error: $e)',
+          );
+          _logger?.printWarning(
+            'Waiting for another flutter command to release the Swift Package Manager lock...',
+            color: TerminalColor.grey,
+            fatal: false,
+          );
+          printed = true;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
+  }
+
+  void _releaseLock(RandomAccessFile? lock) {
+    if (lock == null) {
+      return;
+    }
+    try {
+      lock.closeSync();
+    } on FileSystemException {
+      // Ignore errors on close
+    }
+  }
 
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
   /// has dependencies on Flutter plugins that are compatible with Swift
@@ -62,69 +130,93 @@ class SwiftPackageManager {
     XcodeBasedProject project, {
     bool flutterAsADependency = true,
   }) async {
-    final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
-    ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
-    symlinkDirectory.createSync(recursive: true);
+    final RandomAccessFile? lock = await _acquireLock(project);
+    try {
+      final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
+      try {
+        symlinkDirectory.createSync(recursive: true);
+      } on FileSystemException catch (e) {
+        if (!_fileSystem.isDirectorySync(symlinkDirectory.path)) {
+          throwToolExit(
+            'Failed to create Swift Packages directory at "${symlinkDirectory.path}": $e',
+          );
+        }
+      }
 
-    final (
-      List<SwiftPackagePackageDependency> packageDependencies,
-      List<SwiftPackageTargetDependency> targetDependencies,
-    ) = _dependenciesForPlugins(
-      plugins: plugins,
-      platform: platform,
-      symlinkDirectory: symlinkDirectory,
-      pathRelativeTo: project.flutterPluginSwiftPackageDirectory.path,
-    );
-
-    // If there aren't any Swift Package plugins and the project hasn't been
-    // migrated yet, don't generate a Swift package or migrate the app since
-    // it's not needed. If the project has already been migrated, regenerate
-    // the Package.swift even if there are no dependencies in case there
-    // were dependencies previously.
-    if (packageDependencies.isEmpty && !project.flutterPluginSwiftPackageInProjectSettings) {
-      return;
-    }
-
-    // Add Flutter framework Swift package dependency
-    if (flutterAsADependency) {
       final (
-        SwiftPackagePackageDependency flutterFrameworkPackageDependency,
-        SwiftPackageTargetDependency flutterFrameworkTargetDependency,
-      ) = _dependencyForFlutterFramework(
-        pathRelativeTo: project.flutterPluginSwiftPackageDirectory.path,
+        List<SwiftPackagePackageDependency> packageDependencies,
+        List<SwiftPackageTargetDependency> targetDependencies,
+        Set<String> expectedBasenames,
+      ) = _dependenciesForPlugins(
+        plugins: plugins,
         platform: platform,
-        project: project,
+        symlinkDirectory: symlinkDirectory,
+        pathRelativeTo: project.flutterPluginSwiftPackageDirectory.path,
       );
-      packageDependencies.add(flutterFrameworkPackageDependency);
-      targetDependencies.add(flutterFrameworkTargetDependency);
+
+      // If there aren't any Swift Package plugins and the project hasn't been
+      // migrated yet, don't generate a Swift package or migrate the app since
+      // it's not needed. If the project has already been migrated, regenerate
+      // the Package.swift even if there are no dependencies in case there
+      // were dependencies previously.
+      if (packageDependencies.isEmpty && !project.flutterPluginSwiftPackageInProjectSettings) {
+        _cleanStaleSymlinks(
+          symlinkDirectory: symlinkDirectory,
+          expectedBasenames: expectedBasenames,
+          keepFlutterFramework: false,
+        );
+        return;
+      }
+
+      // Add Flutter framework Swift package dependency
+      if (flutterAsADependency) {
+        final (
+          SwiftPackagePackageDependency flutterFrameworkPackageDependency,
+          SwiftPackageTargetDependency flutterFrameworkTargetDependency,
+        ) = _dependencyForFlutterFramework(
+          pathRelativeTo: project.flutterPluginSwiftPackageDirectory.path,
+          platform: platform,
+          project: project,
+        );
+        packageDependencies.add(flutterFrameworkPackageDependency);
+        targetDependencies.add(flutterFrameworkTargetDependency);
+      }
+
+      // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
+      // any dynamic dependencies are linked to Runner and prevent undefined symbols.
+      final generatedProduct = SwiftPackageProduct.library(
+        name: kFlutterGeneratedPluginSwiftPackageName,
+        targets: <String>[kFlutterGeneratedPluginSwiftPackageName],
+        libraryType: SwiftPackageLibraryType.static,
+      );
+
+      final generatedTarget = SwiftPackageTarget.defaultTarget(
+        name: kFlutterGeneratedPluginSwiftPackageName,
+        dependencies: targetDependencies,
+      );
+
+      final pluginsPackage = SwiftPackage(
+        manifest: project.flutterPluginSwiftPackageManifest,
+        name: kFlutterGeneratedPluginSwiftPackageName,
+        platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
+        products: <SwiftPackageProduct>[generatedProduct],
+        dependencies: packageDependencies,
+        targets: <SwiftPackageTarget>[generatedTarget],
+        templateRenderer: _templateRenderer,
+      );
+      pluginsPackage.createSwiftPackage();
+
+      _cleanStaleSymlinks(
+        symlinkDirectory: symlinkDirectory,
+        expectedBasenames: expectedBasenames,
+        keepFlutterFramework: flutterAsADependency,
+      );
+    } finally {
+      _releaseLock(lock);
     }
-
-    // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
-    // any dynamic dependencies are linked to Runner and prevent undefined symbols.
-    final generatedProduct = SwiftPackageProduct.library(
-      name: kFlutterGeneratedPluginSwiftPackageName,
-      targets: <String>[kFlutterGeneratedPluginSwiftPackageName],
-      libraryType: SwiftPackageLibraryType.static,
-    );
-
-    final generatedTarget = SwiftPackageTarget.defaultTarget(
-      name: kFlutterGeneratedPluginSwiftPackageName,
-      dependencies: targetDependencies,
-    );
-
-    final pluginsPackage = SwiftPackage(
-      manifest: project.flutterPluginSwiftPackageManifest,
-      name: kFlutterGeneratedPluginSwiftPackageName,
-      platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
-      products: <SwiftPackageProduct>[generatedProduct],
-      dependencies: packageDependencies,
-      targets: <SwiftPackageTarget>[generatedTarget],
-      templateRenderer: _templateRenderer,
-    );
-    pluginsPackage.createSwiftPackage();
   }
 
-  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>)
+  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>, Set<String>)
   _dependenciesForPlugins({
     required List<Plugin> plugins,
     required FlutterDarwinPlatform platform,
@@ -133,6 +225,7 @@ class SwiftPackageManager {
   }) {
     final packageDependencies = <SwiftPackagePackageDependency>[];
     final targetDependencies = <SwiftPackageTargetDependency>[];
+    final expectedBasenames = <String>{};
 
     for (final plugin in plugins) {
       final String? pluginSwiftPackageManifestPath = plugin.pluginSwiftPackageManifestPath(
@@ -174,6 +267,7 @@ class SwiftPackageManager {
 
       final Link pluginSymlink = symlinkDirectory.childLink(basename);
       _createPluginSymlink(pluginSymlink: pluginSymlink, packagePath: packagePath);
+      expectedBasenames.add(basename);
 
       final String packageRelativePath = _fileSystem.path.relative(
         pluginSymlink.path,
@@ -195,7 +289,7 @@ class SwiftPackageManager {
         ),
       );
     }
-    return (packageDependencies, targetDependencies);
+    return (packageDependencies, targetDependencies, expectedBasenames);
   }
 
   /// Safely creates a symlink at [pluginSymlink] pointing to [packagePath].
@@ -453,5 +547,31 @@ class SwiftPackageManager {
     project.flutterPluginSwiftPackageManifest.writeAsStringSync(
       manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
     );
+  }
+
+  void _cleanStaleSymlinks({
+    required Directory symlinkDirectory,
+    required Set<String> expectedBasenames,
+    required bool keepFlutterFramework,
+  }) {
+    if (!symlinkDirectory.existsSync()) {
+      return;
+    }
+    try {
+      for (final FileSystemEntity entity in symlinkDirectory.listSync()) {
+        final String name = _fileSystem.path.basename(entity.path);
+        if (name == 'FlutterFramework') {
+          if (!keepFlutterFramework) {
+            ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
+          }
+          continue;
+        }
+        if (!expectedBasenames.contains(name)) {
+          ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
+        }
+      }
+    } on FileSystemException catch (_) {
+      // Ignore errors, as another process might be concurrently modifying the directory.
+    }
   }
 }

@@ -18,7 +18,10 @@ const _swiftPackageTemplate = '''
 
 import PackageDescription
 
-{{#hasSwiftCodeBefore}}\n{{swiftCodeBefore}}\n\n{{/hasSwiftCodeBefore}}
+{{#hasSwiftCodeBefore}}
+{{swiftCodeBefore}}
+
+{{/hasSwiftCodeBefore}}
 let package = Package(
     name: "{{packageName}}",
     {{#platforms}}
@@ -120,11 +123,22 @@ class SwiftPackage {
       final Directory targetDirectory = _manifest.parent
           .childDirectory('Sources')
           .childDirectory(target.name);
-      if (generateEmptySources &&
-          (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty)) {
+      if (generateEmptySources) {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
-        requiredSwiftFile.createSync(recursive: true);
-        requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+        var skipWriteSource = false;
+        if (requiredSwiftFile.existsSync()) {
+          try {
+            if (requiredSwiftFile.readAsStringSync() == _swiftPackageSourceTemplate) {
+              skipWriteSource = true;
+            }
+          } on FileSystemException {
+            // If reading fails, overwrite it.
+          }
+        }
+        if (!skipWriteSource) {
+          requiredSwiftFile.createSync(recursive: true);
+          requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+        }
       }
     }
 
@@ -132,8 +146,23 @@ class SwiftPackage {
       _swiftPackageTemplate,
       _templateContext,
     );
-    _manifest.createSync(recursive: true);
-    _manifest.writeAsStringSync(renderedTemplate);
+
+    var shouldWrite = true;
+    if (_manifest.existsSync()) {
+      try {
+        final String existingContent = _manifest.readAsStringSync();
+        if (existingContent == renderedTemplate) {
+          shouldWrite = false;
+        }
+      } on FileSystemException {
+        // If reading fails, write it anyway.
+      }
+    }
+
+    if (shouldWrite) {
+      _manifest.createSync(recursive: true);
+      _manifest.writeAsStringSync(renderedTemplate);
+    }
   }
 
   String? _formatPlatforms() {
