@@ -218,7 +218,12 @@ List<FlutterCommand> generateCommands({
     flutterVersion: globals.flutterVersion,
   ),
   ChannelCommand(verboseHelp: verboseHelp),
-  CleanCommand(verbose: verbose),
+  CleanCommand(
+    toolContext: toolDependencies.toolContext,
+    verbose: verbose,
+    xcode: toolDependencies.appleContext.xcode,
+    xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
+  ),
   ConfigCommand(verboseHelp: verboseHelp),
   CustomDevicesCommand(
     customDevicesConfig: globals.customDevicesConfig,

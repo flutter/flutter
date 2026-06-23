@@ -7,6 +7,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
@@ -14,11 +15,17 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
+import '../base/time.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
@@ -162,6 +169,19 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
+  // ignore: prefer_initializing_formals
+  FlutterCommand({ToolContext? toolContext}) : _toolContext = toolContext;
+
+  final ToolContext? _toolContext;
+
+  FileSystem get fileSystem => _toolContext?.fs ?? globals.fs;
+  Logger get logger => _toolContext?.logger ?? globals.logger;
+  Platform get platform => _toolContext?.platform ?? globals.platform;
+  ProcessManager get processManager => _toolContext?.processManager ?? globals.processManager;
+  ProcessUtils get processUtils => _toolContext?.processUtils ?? globals.processUtils;
+  UserMessages get userMessages => _toolContext?.userMessages ?? globals.userMessages;
+  SystemClock get systemClock => _toolContext?.systemClock ?? globals.systemClock;
+
   /// The currently executing command (or sub-command).
   ///
   /// Will be `null` until the top-most command has begun execution.
