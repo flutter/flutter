@@ -20,7 +20,13 @@ void main() {
   _TextureScene buildScene({required int textureId}) {
     final flutterView = FakeFlutterView(viewId: _nextViewId++);
     final renderView = RenderView(view: flutterView);
-    final owner = PipelineOwner()..rootNode = renderView;
+    final owner = PipelineOwner(
+      onFlushPaint: (bool isDirty) {
+        if (isDirty) {
+          renderView.markNeedsCompositeFrame();
+        }
+      },
+    )..rootNode = renderView;
     binding.rootPipelineOwner.adoptChild(owner);
     binding.addRenderView(renderView);
     renderView.prepareInitialFrame();
