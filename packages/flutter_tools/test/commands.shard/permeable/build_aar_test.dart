@@ -26,7 +26,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
-import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -375,14 +374,7 @@ void main() {
               '-PbuildNumber=1.0',
               '-q',
               '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
-              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
-                'FLUTTER_VERSION': '0.0.0', //
-                'FLUTTER_CHANNEL': 'master',
-                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
-                'FLUTTER_FRAMEWORK_REVISION': '11111',
-                'FLUTTER_ENGINE_REVISION': 'abcde',
-                'FLUTTER_DART_VERSION': '12',
-              })}',
+              dartDefinesFileArg(BuildMode.release),
               '-Pdart-obfuscation=false',
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
