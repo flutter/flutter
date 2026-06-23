@@ -703,17 +703,15 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.autoPlay) {
+    if (!widget.autoPlay || notification.depth != 0) {
       return false;
     }
     if (notification is ScrollStartNotification && notification.dragDetails != null) {
       _isInteractionPaused = true;
+      _stopAutoPlayTimer();
     } else if (notification is ScrollEndNotification) {
-      if (_isInteractionPaused) {
-        _isInteractionPaused = false;
-        // Restart timer to ensure a full interval waits after user stops interacting
-        _startAutoPlayTimer();
-      }
+      _isInteractionPaused = false;
+      _startAutoPlayTimer();
     }
     return false;
   }
