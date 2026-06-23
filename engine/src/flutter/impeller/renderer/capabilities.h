@@ -93,6 +93,13 @@ class Capabilities {
   ///        primitives.
   virtual bool Supports32BitPrimitiveIndices() const = 0;
 
+  /// @brief Whether a texture whose mip levels were uploaded by hand (rather
+  ///        than produced by `BlitPass::GenerateMipmap`) samples with correct
+  ///        per-level selection. True everywhere except OpenGL ES 2.0 without
+  ///        GL_APPLE_texture_max_level, where the sampled mip range cannot be
+  ///        bounded to the levels the texture declares.
+  virtual bool SupportsManuallyMippedTextures() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;
@@ -133,6 +140,12 @@ class Capabilities {
   ///        allocating a compressed texture.
   virtual bool SupportsTextureCompression(
       CompressedTextureFamily family) const = 0;
+
+  /// @brief Whether a non-zero mip level of a texture can be attached as a
+  ///        render target. Rendering into a cube map face or array layer is
+  ///        always supported. Metal and Vulkan support this; the GLES backend
+  ///        does not yet, so it returns false there.
+  virtual bool SupportsFramebufferRenderMipmap() const = 0;
 
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
