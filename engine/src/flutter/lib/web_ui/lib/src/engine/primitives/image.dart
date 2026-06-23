@@ -144,12 +144,11 @@ class EngineImage implements ui.Image, StackTraceDebugger {
     // pointers fully alive and valid until this method completes.
     final EngineImage cloneImage = clone();
     try {
+      final ImageSource? source = cloneImage.imageSource;
       final bool isSourceDetached =
-          cloneImage.imageSource == null ||
-          (cloneImage.imageSource is ImageBitmapImageSource &&
-              (cloneImage.imageSource! as ImageBitmapImageSource).imageBitmap.width == 0) ||
-          (cloneImage.imageSource is VideoFrameImageSource &&
-              (cloneImage.imageSource! as VideoFrameImageSource).videoFrame.displayWidth == 0);
+          source == null ||
+          (source is ImageBitmapImageSource && source.imageBitmap.width == 0) ||
+          (source is VideoFrameImageSource && source.videoFrame.displayWidth == 0);
 
       // Direct pixel extraction based on the type of ImageSource.
       switch (cloneImage.imageSource) {
@@ -182,9 +181,11 @@ class EngineImage implements ui.Image, StackTraceDebugger {
           if (videoFrame.displayWidth == 0) {
             break;
           }
-          if (videoFrame.format != 'I420' &&
-              videoFrame.format != 'I422' &&
-              videoFrame.format != 'I444') {
+          final String? formatStr = videoFrame.format;
+          if (formatStr == 'RGBA' ||
+              formatStr == 'RGBX' ||
+              formatStr == 'BGRA' ||
+              formatStr == 'BGRX') {
             return await readPixelsFromVideoFrame(videoFrame, format);
           }
         case null:
@@ -245,7 +246,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
         final recorder = ui.PictureRecorder();
         final canvas = ui.Canvas(recorder);
         canvas.drawImage(cloneImage, ui.Offset.zero, ui.Paint());
-        final picture = recorder.endRecording();
+        final ui.Picture picture = recorder.endRecording();
 
         await renderer.pictureToImageSurface.setSize(
           BitmapSize(cloneImage.width, cloneImage.height),

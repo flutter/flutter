@@ -71,21 +71,18 @@ class CkAnimatedImage implements ui.Codec {
     final SkImage image = animatedImage.makeImageAtCurrentFrame();
     final EngineImage ckImage = scaleImage(image, targetWidth, targetHeight);
     try {
-      assert(
-        ckImage.backendImage is CkImageDelegate,
-        'The resized image must be a CanvasKit image.',
-      );
-      final Uint8List? resizedBytes = (ckImage.backendImage as CkImageDelegate).skImage
-          .encodeToBytes();
-
-      if (resizedBytes == null) {
-        throw ImageCodecException('Failed to re-size image');
+      if (ckImage.backendImage case CkImageDelegate(:final skImage)) {
+        final Uint8List? resizedBytes = skImage.encodeToBytes();
+        if (resizedBytes == null) {
+          throw ImageCodecException('Failed to re-size image');
+        }
+        final SkAnimatedImage? resizedAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(
+          resizedBytes,
+        );
+        return resizedAnimatedImage;
+      } else {
+        throw StateError('The resized image must be a CanvasKit image.');
       }
-
-      final SkAnimatedImage? resizedAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(
-        resizedBytes,
-      );
-      return resizedAnimatedImage;
     } finally {
       ckImage.dispose();
     }

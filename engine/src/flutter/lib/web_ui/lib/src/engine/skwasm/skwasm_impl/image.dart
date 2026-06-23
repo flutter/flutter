@@ -53,6 +53,10 @@ EngineImage createSkwasmImageFromPixels(
   try {
     final int dataAddress = skDataGetPointer(dataHandle).cast<Uint8>().address;
 
+    // To avoid a slow element-by-element copy in Dart, we obtain the raw memory
+    // address of the WASM buffer, create a JSUint8Array view pointing directly
+    // to the Skwasm WASM linear memory heap, and perform a high-performance,
+    // browser-native bulk copy (memcpy) of the pixel bytes.
     final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
     wasmMemory.set(pixels.toJS, dataAddress);
 

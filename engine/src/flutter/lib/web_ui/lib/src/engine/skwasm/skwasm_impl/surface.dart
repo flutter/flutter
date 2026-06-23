@@ -151,12 +151,14 @@ class SkwasmSurface implements OffscreenSurface {
   Future<ByteData> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
     await initialized;
 
-    final engineImage = image as EngineImage;
-    assert(
-      engineImage.backendImage is SkwasmImage,
-      'The image being rasterized must be a Skwasm image.',
-    );
-    final skwasmImage = engineImage.backendImage as SkwasmImage;
+    final EngineImage engineImage;
+    final SkwasmImage skwasmImage;
+    if (image case EngineImage(backendImage: final SkwasmImage delegate)) {
+      engineImage = image;
+      skwasmImage = delegate;
+    } else {
+      throw ArgumentError('The image being rasterized must be a Skwasm image.');
+    }
 
     await setSize(BitmapSize(engineImage.width, engineImage.height));
 

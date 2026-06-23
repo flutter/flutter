@@ -221,16 +221,17 @@ class SkwasmCanvas implements LayerCanvas {
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPath(_handle, ((path as EnginePath).backendPath as SkwasmPath).handle, paintHandle);
+    final enginePath = path as EnginePath;
+    final skwasmPath = enginePath.backendPath as SkwasmPath;
+    canvasDrawPath(_handle, skwasmPath.handle, paintHandle);
     paintDispose(paintHandle);
   }
 
   ImageHandle _getImageHandle(ui.Image image) {
-    assert(
-      image is EngineImage && image.backendImage is SkwasmImage,
-      'The image being drawn must be a Skwasm image.',
-    );
-    return ((image as EngineImage).backendImage as SkwasmImage).handle;
+    if (image case EngineImage(backendImage: SkwasmImage(:final handle))) {
+      return handle;
+    }
+    throw ArgumentError('The image being drawn must be a Skwasm image.');
   }
 
   @override

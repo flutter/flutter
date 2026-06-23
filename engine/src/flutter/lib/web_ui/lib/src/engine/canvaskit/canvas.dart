@@ -118,11 +118,10 @@ class CkCanvas implements LayerCanvas {
   }
 
   SkImage _getSkImage(ui.Image image) {
-    assert(
-      image is EngineImage && image.backendImage is CkImageDelegate,
-      'The image being drawn must be a CanvasKit image.',
-    );
-    return ((image as EngineImage).backendImage as CkImageDelegate).skImage;
+    if (image case EngineImage(backendImage: CkImageDelegate(:final skImage))) {
+      return skImage;
+    }
+    throw ArgumentError('The image being drawn must be a CanvasKit image.');
   }
 
   @override

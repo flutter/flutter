@@ -234,6 +234,9 @@ int _premultiply(int value, int alpha) {
 /// Mutates the [pixels], converting them from BGRX/BGRA to RGBA with
 /// premultiplied alpha.
 void _bgrToRawRgba(ByteBuffer pixels) {
+  // Swaps the Red and Blue channels to convert the layout from BGRA to RGBA,
+  // while simultaneously premultiplying the color channels by the alpha channel
+  // (as required by the rawRgba image byte format).
   final Uint8List pixelBytes = pixels.asUint8List();
   for (var i = 0; i < pixelBytes.length; i += 4) {
     final int a = pixelBytes[i + 3];
@@ -258,6 +261,10 @@ void unpremultiplyRawRgba(Uint8List pixels) {
       pixels[i + 1] = 0;
       pixels[i + 2] = 0;
     } else if (a < 255) {
+      // Divide the color channel by the alpha value to unpremultiply it.
+      // Adding 'a ~/ 2' (half the divisor) before dividing by 'a' performs
+      // correct integer rounding to the nearest integer instead of truncating,
+      // which prevents color-channel drift and banding.
       pixels[i] = ((pixels[i] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
       pixels[i + 1] = ((pixels[i + 1] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
       pixels[i + 2] = ((pixels[i + 2] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
