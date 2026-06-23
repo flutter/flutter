@@ -658,7 +658,10 @@ static BOOL _preparedOnce = NO;
       // from the web view plugin level. Right now we only observe this issue for
       // FlutterPlatformViewGestureRecognizersBlockingPolicyEager, but we should try it if a similar
       // issue arises for the other policy.
-      if (@available(iOS 26.0, *)) {
+      if (@available(iOS 26.4, *)) {
+        // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+        // See: https://github.com/WebKit/WebKit/pull/57358.
+      } else if (@available(iOS 26.0, *)) {
         // This performs a nested DFS, with the outer one searching for any web view, and the inner
         // one searching for a TouchEventsGestureRecognizer inside the web view. Once found, disable
         // and immediately reenable it to reset its state.
