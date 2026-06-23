@@ -4,7 +4,6 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
@@ -14,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -179,6 +179,9 @@ abstract class FlutterCommand extends Command<void> {
 
   Config get config => _toolContext?.config ?? globals.config;
   FileSystem get fileSystem => _toolContext?.fs ?? globals.fs;
+  FileSystemUtils get fileSystemUtils => _toolContext != null
+      ? FileSystemUtils(fileSystem: fileSystem, platform: platform)
+      : globals.fsUtils;
   Git get git => _toolContext?.git ?? globals.git;
   FlutterVersion get flutterVersion => _toolContext?.flutterVersion ?? globals.flutterVersion;
   Logger get logger => _toolContext?.logger ?? globals.logger;

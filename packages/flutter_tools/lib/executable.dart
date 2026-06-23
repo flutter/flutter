@@ -273,7 +273,7 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(fs: globals.fs),
+  ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(),
   TestCommand(
     verboseHelp: verboseHelp,
