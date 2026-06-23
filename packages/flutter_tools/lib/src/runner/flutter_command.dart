@@ -12,6 +12,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
@@ -19,6 +20,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -175,6 +177,7 @@ abstract class FlutterCommand extends Command<void> {
 
   final ToolContext? _toolContext;
 
+  Config get config => _toolContext?.config ?? globals.config;
   FileSystem get fileSystem => _toolContext?.fs ?? globals.fs;
   Git get git => _toolContext?.git ?? globals.git;
   FlutterVersion get flutterVersion => _toolContext?.flutterVersion ?? globals.flutterVersion;
@@ -184,6 +187,7 @@ abstract class FlutterCommand extends Command<void> {
   ProcessUtils get processUtils => _toolContext?.processUtils ?? globals.processUtils;
   UserMessages get userMessages => _toolContext?.userMessages ?? globals.userMessages;
   SystemClock get systemClock => _toolContext?.systemClock ?? globals.systemClock;
+  Terminal get terminal => _toolContext?.terminal ?? globals.terminal;
 
   /// The currently executing command (or sub-command).
   ///
