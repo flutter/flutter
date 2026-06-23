@@ -10,6 +10,16 @@
 # packages, and plugins designed to encourage good coding practices.
 {{/withEmptyMain}}
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 {{^withEmptyMain}}
 
 linter:
