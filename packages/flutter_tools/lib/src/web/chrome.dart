@@ -261,6 +261,7 @@ class ChromiumLauncher {
         '--no-sandbox',
         '--headless',
         '--window-size=1024,1024',
+        if (_platform.isLinux) ...<String>['--use-gl=angle', '--use-angle=swiftshader'],
         '--enable-unsafe-swiftshader',
       ],
       ...webBrowserFlags,

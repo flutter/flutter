@@ -54,7 +54,12 @@ void main() {
       },
       'goog:chromeOptions': <String, dynamic>{
         'w3c': true,
-        'args': <String>[...kChromeArgs, '--headless'],
+        'args': <String>[
+          ...kChromeArgs,
+          '--headless',
+          if (io.Platform.isLinux) ...<String>['--use-gl=angle', '--use-angle=swiftshader'],
+          '--enable-unsafe-swiftshader',
+        ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
               'devtools.timeline,'

@@ -349,7 +349,11 @@ Map<String, dynamic> getDesiredCapabilities(
         '--password-store=basic',
         if (platform.isMacOS) '--use-mock-keychain',
         '--disable-search-engine-choice-screen',
-        if (headless!) ...<String>['--headless', '--enable-unsafe-swiftshader'],
+        if (headless!) ...<String>[
+          '--headless',
+          if (platform.isLinux) ...<String>['--use-gl=angle', '--use-angle=swiftshader'],
+          '--enable-unsafe-swiftshader',
+        ],
         ...webBrowserFlags,
       ],
       'perfLoggingPrefs': <String, String>{

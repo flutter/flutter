@@ -106,7 +106,11 @@ class Chrome {
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
       ?options.url,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
-      if (options.headless ?? false) '--headless',
+      if (options.headless ?? false) ...<String>[
+        '--headless',
+        if (io.Platform.isLinux) ...<String>['--use-gl=angle', '--use-angle=swiftshader'],
+        '--enable-unsafe-swiftshader',
+      ],
       if (withDebugging) '--remote-debugging-port=${options.debugPort}',
       '--window-size=${options.windowWidth},${options.windowHeight}',
       '--disable-extensions',
