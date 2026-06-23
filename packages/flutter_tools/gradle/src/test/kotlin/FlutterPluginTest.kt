@@ -25,6 +25,8 @@ import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
@@ -50,6 +52,7 @@ class FlutterPluginTest {
         val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
         fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
         val project = mockk<Project>(relaxed = true)
+        mockProjectProviders(project)
         val mockAbstractAppExtension =
             mockk<AbstractAppExtension>(
                 moreInterfaces = arrayOf(ApplicationExtension::class),
@@ -59,6 +62,7 @@ class FlutterPluginTest {
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
         every { mockAndroidComponentsExtension.selector() } returns
             mockk {
                 every { all() } returns mockk()
@@ -141,6 +145,7 @@ class FlutterPluginTest {
         val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
         fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
         val project = mockk<Project>(relaxed = true)
+        mockProjectProviders(project)
         val mockAbstractAppExtension =
             mockk<AbstractAppExtension>(
                 moreInterfaces = arrayOf(ApplicationExtension::class),
@@ -151,6 +156,7 @@ class FlutterPluginTest {
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
         every { mockAndroidComponentsExtension.selector() } returns
             mockk {
                 every { all() } returns mockk()
@@ -322,6 +328,14 @@ class FlutterPluginTest {
         } else {
             fail("FilePermissions configuration action was not captured")
         }
+    }
+
+    private fun mockProjectProviders(project: Project) {
+        val mockProvider = mockk<Provider<String>>()
+        every { mockProvider.orNull } returns null
+        val mockProviders = mockk<ProviderFactory>()
+        every { mockProviders.gradleProperty("android.builtInKotlin") } returns mockProvider
+        every { project.providers } returns mockProviders
     }
 
     companion object {
