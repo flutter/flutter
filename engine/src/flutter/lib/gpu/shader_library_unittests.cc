@@ -23,11 +23,11 @@ namespace testing {
 // for the lifetime of the mapping. Mirrors the helper pattern used by the
 // impeller runtime_stage / shader_archive verifier tests.
 static std::shared_ptr<fml::Mapping> CreateMappingFromVector(
-    std::shared_ptr<std::vector<uint8_t>> data) {
+    const std::shared_ptr<std::vector<uint8_t>>& data) {
   const uint8_t* ptr = data->data();
   const size_t size = data->size();
-  return std::make_shared<fml::NonOwnedMapping>(
-      ptr, size, [data](auto, auto) {});
+  return std::make_shared<fml::NonOwnedMapping>(ptr, size,
+                                                [data](auto, auto) {});
 }
 
 // Builds a structurally-valid, minimal shader bundle FlatBuffer with the
@@ -80,8 +80,7 @@ TEST(FlutterGpuShaderLibraryTest, VerifierAcceptsValidBundleRejectsCorrupt) {
       valid->data()));
   {
     flatbuffers::Verifier verifier(valid->data(), valid->size());
-    EXPECT_TRUE(
-        impeller::fb::shaderbundle::VerifyShaderBundleBuffer(verifier));
+    EXPECT_TRUE(impeller::fb::shaderbundle::VerifyShaderBundleBuffer(verifier));
   }
 
   auto corrupt = BuildCorruptBundle();
@@ -101,9 +100,9 @@ TEST(FlutterGpuShaderLibraryTest, VerifierAcceptsValidBundleRejectsCorrupt) {
 TEST(FlutterGpuShaderLibraryTest,
      MakeFromFlatbufferRejectsCorruptBufferWithValidIdentifier) {
   auto mapping = CreateMappingFromVector(BuildCorruptBundle());
-  auto library = ShaderLibrary::MakeFromFlatbuffer(
-      impeller::Context::BackendType::kMetal, std::move(mapping),
-      "test_bundle");
+  auto library =
+      ShaderLibrary::MakeFromFlatbuffer(impeller::Context::BackendType::kMetal,
+                                        std::move(mapping), "test_bundle");
   EXPECT_FALSE(library);
 }
 
