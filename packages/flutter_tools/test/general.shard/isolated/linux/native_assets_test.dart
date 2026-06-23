@@ -180,7 +180,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld
 # CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
 ''');
 
-      expect(cCompilerConfigLinux(cmakeDirectory: environment.buildDir), throwsA(isA<ToolExit>()));
+      expect(cCompilerConfigLinux(cmakeDirectory: environment.outputDir), throwsA(isA<ToolExit>()));
     },
   );
 
@@ -201,7 +201,7 @@ CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
 CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
 ''');
 
-      expect(cCompilerConfigLinux(cmakeDirectory: environment.buildDir), throwsA(isA<ToolExit>()));
+      expect(cCompilerConfigLinux(cmakeDirectory: environment.outputDir), throwsA(isA<ToolExit>()));
     },
   );
 
@@ -218,6 +218,75 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
 
       await fileSystem.file('/a/path/to/clang++').create(recursive: true);
       expect(cCompilerConfigLinux(), completes);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux missing CMakeCache and throwIfNotFound: false',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      final CCompilerConfig? result = await cCompilerConfigLinux(
+        cmakeDirectory: environment.buildDir,
+        throwIfNotFound: false,
+      );
+      expect(result, isNull);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux missing entry and throwIfNotFound: false',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+//CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+//CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+# CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      final CCompilerConfig? result = await cCompilerConfigLinux(
+        cmakeDirectory: environment.outputDir,
+        throwIfNotFound: false,
+      );
+      expect(result, isNull);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux invalid paths and throwIfNotFound: false',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      final CCompilerConfig? result = await cCompilerConfigLinux(
+        cmakeDirectory: environment.outputDir,
+        throwIfNotFound: false,
+      );
+      expect(result, isNull);
     },
   );
 }
