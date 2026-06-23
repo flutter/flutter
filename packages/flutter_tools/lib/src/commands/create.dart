@@ -1386,15 +1386,26 @@ void _generatePubspecLock(Directory directory) {
 List<String> gatherSdkPackageDependencies(Directory directory) {
   final sdkPackages = <String>[];
   final FileSystem fs = directory.fileSystem;
-  final pubspecYaml = loadYaml(directory.childFile('pubspec.yaml').readAsStringSync()) as YamlMap;
+  final File pubspecFile = directory.childFile('pubspec.yaml');
+  final Object? parsedPubspec = loadYaml(pubspecFile.readAsStringSync());
+  if (parsedPubspec is! YamlMap) {
+    throwToolExit(
+      'Failed to parse pubspec.yaml at ${pubspecFile.path}.\n'
+      'It may be empty or malformed. If you want to recreate it, '
+      're-run "flutter create" with the --overwrite flag.',
+    );
+  }
+  final YamlMap pubspecYaml = parsedPubspec;
 
-  for (final MapEntry<dynamic, dynamic> dependency
-      in (pubspecYaml['dependencies'] as YamlMap).entries) {
-    final descriptor = dependency.value as Object?;
-    if (descriptor is YamlMap && descriptor['sdk'] == 'flutter') {
-      // a flutter dependency.
-      final name = dependency.key as String;
-      sdkPackages.add(name);
+  final Object? dependencies = pubspecYaml['dependencies'];
+  if (dependencies is YamlMap) {
+    for (final MapEntry<dynamic, dynamic> dependency in dependencies.entries) {
+      final descriptor = dependency.value as Object?;
+      if (descriptor is YamlMap && descriptor['sdk'] == 'flutter') {
+        // a flutter dependency.
+        final name = dependency.key as String;
+        sdkPackages.add(name);
+      }
     }
   }
 
