@@ -3,7 +3,7 @@
 - Regressions should be [reverted first](../infra/Landing-Changes-With-Autosubmit.md) and questions asked later. Bringing the tree to green is higher priority.
 - A breaking change is one that breaks the tests in the flutter/tests repo, and those need a migration guide.
 - Expect that a new patch will be reviewed within two weeks, unless it is fixing a P0 bug in which case it should be reviewed the same day. If it has not been reviewed in that timeframe, reach out on [Chat](Chat.md). Remember that reviewers are human beings with additional professional and personal responsibilities.
-- Contributors without write access are limited to **2 concurrent open pull requests** (draft PRs are exempt). Focus on merging or closing existing PRs before opening new ones.
+- Contributors without write access are limited to **2 concurrent open pull requests** per repository (draft PRs are exempt). Focus on merging or closing existing PRs before opening new ones.
 
 ## Introduction
 
