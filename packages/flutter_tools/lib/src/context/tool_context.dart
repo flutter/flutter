@@ -21,6 +21,7 @@ import '../native_assets.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../runner/local_engine.dart';
+import '../version.dart';
 
 /// Holds core, platform-independent dependencies.
 class ToolContext {
@@ -29,6 +30,7 @@ class ToolContext {
     required this.cache,
     required this.config,
     required this.customDevicesConfig,
+    required this.flutterVersion,
     required this.fs,
     required this.git,
     required this.localEngineLocator,
@@ -58,6 +60,9 @@ class ToolContext {
 
   /// Manages user-configured custom device definitions stored on disk.
   final CustomDevicesConfig customDevicesConfig;
+
+  /// Provides current Flutter SDK version, channel, and git revision info.
+  final FlutterVersion flutterVersion;
 
   /// Provides mockable file system operations across host and virtual environments.
   final FileSystem fs;
