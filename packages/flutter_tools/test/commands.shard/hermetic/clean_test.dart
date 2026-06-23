@@ -1,3 +1,4 @@
+// ignore_for_file: unreachable_from_main
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -5,14 +6,20 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -58,7 +65,7 @@ void main() {
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(createCleanCommand());
           await runner.run(<String>['clean']);
 
           expect(buildDirectory, isNot(exists));
@@ -115,7 +122,7 @@ void main() {
 
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(createCleanCommand());
           await runner.run(<String>['clean']);
 
           expect(buildDirectory, isNot(exists));
@@ -158,7 +165,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(createCleanCommand());
           await runner.run(<String>['clean', '--include-example']);
 
           expect(buildDirectory, isNot(exists));
@@ -208,7 +215,7 @@ void main() {
 
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(createCleanCommand());
           await runner.run(<String>['clean', '--include-example']);
 
           expect(testLogger.statusText, contains('No example app found'));
@@ -229,7 +236,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final command = CleanCommand();
+          final CleanCommand command = createCleanCommand();
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean', '--scheme=custom-scheme']);
 
@@ -253,7 +260,7 @@ void main() {
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(createCleanCommand());
           await runner.run(<String>['clean']);
 
           expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[]);
@@ -274,7 +281,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final command = CleanCommand();
+          final CleanCommand command = createCleanCommand();
           expect(
             () => createTestCommandRunner(command).run(<String>['clean', '--scheme']),
             throwsUsageException(),
@@ -300,7 +307,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final command = CleanCommand(verbose: true);
+          final CleanCommand command = createCleanCommand(verbose: true);
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean']);
 
@@ -346,7 +353,7 @@ void main() {
             const FileSystemException('Deletion failed'),
           );
 
-          final command = CleanCommand();
+          final CleanCommand command = createCleanCommand();
           await command.deleteFile(file);
           expect(
             testLogger.errorText,
@@ -361,39 +368,35 @@ void main() {
         },
       );
 
-      testUsingContext(
-        '$CleanCommand handles missing delete permissions',
-        () async {
-          final handler = FileExceptionHandler();
+      testUsingContext('$CleanCommand handles missing delete permissions', () async {
+        final handler = FileExceptionHandler();
 
-          // Ensures we handle ErrorHandlingFileSystem appropriately in prod.
-          // See https://github.com/flutter/flutter/issues/108978.
-          final FileSystem fileSystem = ErrorHandlingFileSystem(
-            delegate: MemoryFileSystem.test(opHandle: handler.opHandle),
-            platform: windowsPlatform,
-          );
-          final File throwingFile = fileSystem.file('bad')..createSync();
-          handler.addError(
-            throwingFile,
-            FileSystemOp.delete,
-            const FileSystemException('OS error: Access Denied'),
-          );
+        // Ensures we handle ErrorHandlingFileSystem appropriately in prod.
+        // See https://github.com/flutter/flutter/issues/108978.
+        final FileSystem fileSystem = ErrorHandlingFileSystem(
+          delegate: MemoryFileSystem.test(opHandle: handler.opHandle),
+          platform: windowsPlatform,
+        );
+        final File throwingFile = fileSystem.file('bad')..createSync();
+        handler.addError(
+          throwingFile,
+          FileSystemOp.delete,
+          const FileSystemException('OS error: Access Denied'),
+        );
 
-          xcodeProjectInterpreter.isInstalled = false;
+        xcodeProjectInterpreter.isInstalled = false;
 
-          final command = CleanCommand();
-          await command.deleteFile(throwingFile);
+        final CleanCommand command = createCleanCommand();
+        await command.deleteFile(throwingFile);
 
-          expect(
-            testLogger.errorText,
-            contains(
-              'Failed to remove bad. A background process (e.g. Gradle daemon or Java) is locking files',
-            ),
-          );
-          expect(throwingFile, exists);
-        },
-        overrides: <Type, Generator>{Platform: () => windowsPlatform, Xcode: () => xcode},
-      );
+        expect(
+          testLogger.errorText,
+          contains(
+            'Failed to remove bad. A background process (e.g. Gradle daemon or Java) is locking files',
+          ),
+        );
+        expect(throwingFile, exists);
+      }, overrides: <Type, Generator>{Platform: () => windowsPlatform, Xcode: () => xcode});
 
       testUsingContext(
         '$CleanCommand invokes gradlew --stop and retries deletion when --stop-gradle flag is passed',
@@ -627,6 +630,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 @immutable
+@immutable
 class CleanWorkspaceCall {
   const CleanWorkspaceCall(this.workspacePath, this.scheme, this.verbose);
 
@@ -646,4 +650,58 @@ class CleanWorkspaceCall {
 
   @override
   String toString() => '{$workspacePath, $scheme, $verbose}';
+}
+
+CleanCommand createCleanCommand({bool verbose = false}) {
+  return CleanCommand(
+    toolContext: FakeToolContext(
+      fs: context.get<FileSystem>() ?? globals.fs,
+      logger: context.get<Logger>() ?? globals.logger,
+      platform: context.get<Platform>() ?? globals.platform,
+      processManager: context.get<ProcessManager>() ?? globals.processManager,
+      processUtils: context.get<ProcessUtils>() ?? globals.processUtils,
+      systemClock: context.get<SystemClock>() ?? globals.systemClock,
+      terminal: context.get<AnsiTerminal>() ?? globals.terminal,
+      userMessages: context.get<UserMessages>() ?? globals.userMessages,
+    ),
+    verbose: verbose,
+    xcode:
+        context.get<Xcode>() ??
+        globals.xcode ??
+        Xcode.test(processManager: FakeProcessManager.any()),
+    xcodeProjectInterpreter:
+        context.get<XcodeProjectInterpreter>() ??
+        globals.xcodeProjectInterpreter ??
+        FakeXcodeProjectInterpreter(),
+  );
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({
+    required this.fs,
+    required this.logger,
+    required this.platform,
+    required this.processManager,
+    required this.processUtils,
+    required this.systemClock,
+    required this.terminal,
+    required this.userMessages,
+  });
+
+  @override
+  final FileSystem fs;
+  @override
+  final Logger logger;
+  @override
+  final Platform platform;
+  @override
+  final ProcessManager processManager;
+  @override
+  final ProcessUtils processUtils;
+  @override
+  final SystemClock systemClock;
+  @override
+  final AnsiTerminal terminal;
+  @override
+  final UserMessages userMessages;
 }
