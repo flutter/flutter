@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/context.dart';
@@ -178,7 +179,9 @@ abstract class FlutterCommand extends Command<void> {
 
   final ToolContext? _toolContext;
 
+  Artifacts get artifacts => _toolContext?.artifacts ?? globals.artifacts!;
   Config get config => _toolContext?.config ?? globals.config;
+  DeviceManager get deviceManager => globals.deviceManager!;
   Doctor? get doctor => globals.doctor;
   FileSystem get fileSystem => _toolContext?.fs ?? globals.fs;
   FileSystemUtils get fileSystemUtils => _toolContext != null
@@ -187,6 +190,7 @@ abstract class FlutterCommand extends Command<void> {
   Git get git => _toolContext?.git ?? globals.git;
   FlutterVersion get flutterVersion => _toolContext?.flutterVersion ?? globals.flutterVersion;
   Logger get logger => _toolContext?.logger ?? globals.logger;
+  OperatingSystemUtils get os => _toolContext?.os ?? globals.os;
   Platform get platform => _toolContext?.platform ?? globals.platform;
   ProcessManager get processManager => _toolContext?.processManager ?? globals.processManager;
   ProcessUtils get processUtils => _toolContext?.processUtils ?? globals.processUtils;

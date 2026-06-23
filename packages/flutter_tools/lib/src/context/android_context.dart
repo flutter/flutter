@@ -4,6 +4,7 @@
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart';
 import '../android/java.dart';
 
@@ -12,6 +13,7 @@ class AndroidContext {
   AndroidContext({
     required this.androidSdk,
     required this.androidStudio,
+    required this.androidWorkflow,
     required this.gradleUtils,
     required this.java,
   });
@@ -19,5 +21,6 @@ class AndroidContext {
   final AndroidSdk? androidSdk;
   final AndroidStudio? androidStudio;
   final GradleUtils gradleUtils;
+  final AndroidWorkflow? androidWorkflow;
   final Java? java;
 }

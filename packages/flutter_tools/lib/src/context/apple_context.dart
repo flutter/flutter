@@ -26,8 +26,8 @@ class AppleContext {
 
   final CocoaPods cocoaPods;
   final CocoaPodsValidator cocoapodsValidator;
-  final IOSSimulatorUtils iosSimulatorUtils;
-  final IOSWorkflow iosWorkflow;
+  final IOSSimulatorUtils? iosSimulatorUtils;
+  final IOSWorkflow? iosWorkflow;
   final PlistParser plistParser;
   final XCDevice xcdevice;
   final Xcode xcode;
