@@ -583,6 +583,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (_logger.isVerbose) {
       _logger.printTrace('Loading test suite $relativePath.');
     }
+    _logger.printStatus('[CHROME_DIAGNOSTIC] Loading test suite $relativePath.');
 
     final PoolResource lockResource = await _suiteLock.request();
 
@@ -601,6 +602,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (_logger.isVerbose) {
       _logger.printTrace('Running test suite $relativePath.');
     }
+    _logger.printStatus('[CHROME_DIAGNOSTIC] Running test suite $relativePath.');
 
     final RunnerSuite suite = await _browserManager!.load(
       relativePath,
@@ -612,6 +614,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         if (_logger.isVerbose) {
           _logger.printTrace('Test suite $relativePath finished.');
         }
+        _logger.printStatus('[CHROME_DIAGNOSTIC] Test suite $relativePath finished.');
       },
     );
 
@@ -633,6 +636,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     final completer = Completer<WebSocketChannel>.sync();
     final String path = _webSocketHandler.create(
       webSocketHandler((WebSocketChannel webSocket, _) {
+        _logger.printStatus('[CHROME_DIAGNOSTIC] WebSocket connection established from Chrome.');
         completer.complete(webSocket);
       }),
     );
@@ -647,6 +651,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         );
 
     _logger.printTrace('Serving tests at $hostUrl');
+    _logger.printStatus('[CHROME_DIAGNOSTIC] Serving tests at $hostUrl');
 
     return BrowserManager.start(
       _chromiumLauncher,
@@ -660,18 +665,24 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   @override
   Future<void> closeEphemeral() async {
+    _logger.printStatus(
+      '[CHROME_DIAGNOSTIC] closeEphemeral called. _browserManager is null: ${_browserManager == null}',
+    );
     if (_browserManager != null) {
       await _browserManager!.close();
     }
+    _logger.printStatus('[CHROME_DIAGNOSTIC] closeEphemeral finished.');
   }
 
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
+    _logger.printStatus('[CHROME_DIAGNOSTIC] FlutterWebPlatform.close called.');
     await Future.wait<void>(<Future<dynamic>>[
-      ?_browserManager?.close(),
+      if (_browserManager != null) _browserManager!.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);
+    _logger.printStatus('[CHROME_DIAGNOSTIC] FlutterWebPlatform.close finished.');
   });
 }
 
@@ -716,11 +727,12 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, Logger logger) {
+  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger) {
+    _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager created for ${_runtime.name}.');
     unawaited(
       _browser.onExit.then((int exitCode) {
         if (!_closed) {
-          logger.printError(
+          _logger.printError(
             '[CHROME_DIAGNOSTIC] Chrome browser process (PID: ${_browser.pid}) '
             'exited unexpectedly with code $exitCode during test execution.',
           );
@@ -735,6 +747,10 @@ class BrowserManager {
     // Start this canceled because we don't want it to start ticking until we
     // get some response from the iframe.
     _timer = RestartableTimer(const Duration(seconds: 3), () {
+      _logger.printStatus(
+        '[CHROME_DIAGNOSTIC] No messages received from Chrome for 3 seconds. Browser may be deadlocked or doing heavy synchronous work. Disabling test timeouts.',
+      );
+      _isDebugging = true;
       for (final RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
       }
@@ -747,6 +763,12 @@ class BrowserManager {
         return stream.map((Object? message) {
           if (!_closed) {
             _timer.reset();
+          }
+          if (_isDebugging) {
+            _isDebugging = false;
+            _logger.printStatus(
+              '[CHROME_DIAGNOSTIC] Messages resumed from Chrome. Re-enabling test timeouts.',
+            );
           }
           for (final RunnerSuiteController controller in _controllers) {
             controller.setDebugging(false);
@@ -764,6 +786,7 @@ class BrowserManager {
   /// The browser instance that this is connected to via [_channel].
   final Chromium _browser;
   final Runtime _runtime;
+  final Logger _logger;
 
   /// The channel used to communicate with the browser.
   ///
@@ -778,6 +801,9 @@ class BrowserManager {
 
   /// Whether the channel to the browser has closed.
   var _closed = false;
+
+  /// Whether the browser has been marked as debugging due to timeout.
+  var _isDebugging = false;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
@@ -1032,6 +1058,7 @@ class BrowserManager {
   /// the browser.
   Future<dynamic> close() {
     return _closeMemoizer.runOnce(() {
+      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.close called.');
       _closed = true;
       _timer.cancel();
       if (_pauseCompleter != null) {
@@ -1039,7 +1066,22 @@ class BrowserManager {
       }
       _pauseCompleter = null;
       _controllers.clear();
-      return _browser.close();
+      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.close: closing browser.');
+      final Future<dynamic> closeFuture = _browser.close();
+      unawaited(
+        closeFuture
+            .then((_) {
+              _logger.printStatus(
+                '[CHROME_DIAGNOSTIC] BrowserManager.close: browser closed successfully.',
+              );
+            })
+            .catchError((Object error) {
+              _logger.printStatus(
+                '[CHROME_DIAGNOSTIC] BrowserManager.close: browser close error: $error',
+              );
+            }),
+      );
+      return closeFuture;
     });
   }
 }

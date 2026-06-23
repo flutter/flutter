@@ -201,6 +201,9 @@ class ChromiumLauncher {
         'Launching Chromium (url = $url, headless = $headless, skipCheck = $skipCheck, debugPort = $debugPort)',
       );
     }
+    _logger.printStatus(
+      '[CHROME_DIAGNOSTIC] Launching Chromium (url = $url, headless = $headless, skipCheck = $skipCheck, debugPort = $debugPort)',
+    );
 
     final String chromeExecutable = _browserFinder(_platform, _fileSystem);
 
@@ -216,6 +219,7 @@ class ChromiumLauncher {
         _logger.printTrace('Using ${versionResult.stdout}');
       }
     }
+    _logger.printStatus('[CHROME_DIAGNOSTIC] Will use Chromium executable at $chromeExecutable');
 
     final Directory userDataDir = _createUserDataDirectory(webBrowserFlags);
 
@@ -272,8 +276,10 @@ class ChromiumLauncher {
       url,
     ];
 
+    _logger.printStatus('[CHROME_DIAGNOSTIC] Chromium arguments: ${args.join(' ')}');
     final _SpawnResult spawnResult = await _spawnChromiumProcess(args, chromeExecutable);
     final Process process = spawnResult.process;
+    _logger.printStatus('[CHROME_DIAGNOSTIC] Chromium process started. PID: ${process.pid}');
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
@@ -608,6 +614,9 @@ class Chromium {
 
   /// Closes all connections to the browser and asks the browser to exit.
   Future<void> close() async {
+    _logger.printStatus(
+      '[CHROME_DIAGNOSTIC] Chromium.close called. PID: $pid. _hasValidChromeConnection: $_hasValidChromeConnection',
+    );
     _didClose = true;
     if (_logger.isVerbose) {
       _logger.printTrace('Shutting down Chromium.');
@@ -620,6 +629,9 @@ class Chromium {
     Duration sigtermDelay = Duration.zero;
     if (_hasValidChromeConnection) {
       try {
+        _logger.printStatus(
+          '[CHROME_DIAGNOSTIC] Chromium.close: Attempting to close cleanly via DevTools.',
+        );
         final ChromeTab? tab = await getChromeTabGuarded(
           chromeConnection,
           (_) => true,
@@ -630,10 +642,20 @@ class Chromium {
           await wipConnection.sendCommand('Browser.close');
           await wipConnection.close();
           sigtermDelay = const Duration(seconds: 1);
+          _logger.printStatus('[CHROME_DIAGNOSTIC] Chromium.close: DevTools Browser.close sent.');
+        } else {
+          _logger.printStatus(
+            '[CHROME_DIAGNOSTIC] Chromium.close: No tab found to send Browser.close.',
+          );
         }
-      } on IOException {
+      } on IOException catch (e) {
         // Chrome is not responding to the debug protocol and probably has
         // already been closed.
+        _logger.printStatus(
+          '[CHROME_DIAGNOSTIC] Chromium.close DevTools clean close IOException: $e',
+        );
+      } on Object catch (e) {
+        _logger.printStatus('[CHROME_DIAGNOSTIC] Chromium.close DevTools clean close error: $e');
       }
     }
     chromeConnection.close();
@@ -641,9 +663,15 @@ class Chromium {
 
     // If the browser close command did not shut down the process, then try to
     // exit Chromium using SIGTERM.
+    _logger.printStatus(
+      '[CHROME_DIAGNOSTIC] Chromium.close: Waiting for process to exit or sending SIGTERM. Delay: $sigtermDelay',
+    );
     await _process.exitCode.timeout(
       sigtermDelay,
       onTimeout: () {
+        _logger.printStatus(
+          '[CHROME_DIAGNOSTIC] Chromium.close: Process did not exit after delay. Sending SIGTERM to PID: $pid',
+        );
         ProcessSignal.sigterm.kill(_process);
         return 0;
       },
@@ -651,9 +679,15 @@ class Chromium {
     // If the process still has not ended, then use SIGKILL. Wait up to 5
     // seconds for Chromium to exit before falling back to SIGKILL and then to
     // a warning message.
+    _logger.printStatus(
+      '[CHROME_DIAGNOSTIC] Chromium.close: Waiting up to 5s for process to exit.',
+    );
     await _process.exitCode.timeout(
       const Duration(seconds: 5),
       onTimeout: () {
+        _logger.printStatus(
+          '[CHROME_DIAGNOSTIC] Chromium.close: Process did not exit after 5s SIGTERM. Sending SIGKILL to PID: $pid',
+        );
         _logger.printWarning(
           'Failed to exit Chromium (pid: ${_process.pid}) using SIGTERM. Will try '
           'sending SIGKILL instead.',
@@ -662,6 +696,9 @@ class Chromium {
         return _process.exitCode.timeout(
           const Duration(seconds: 5),
           onTimeout: () async {
+            _logger.printStatus(
+              '[CHROME_DIAGNOSTIC] Chromium.close: Process did not exit after 5s SIGKILL to PID: $pid. Giving up.',
+            );
             _logger.printWarning(
               'Failed to exit Chromium (pid: ${_process.pid}) using SIGKILL. Giving '
               'up. Will continue, assuming Chromium has exited successfully, but '
@@ -673,6 +710,7 @@ class Chromium {
         );
       },
     );
+    _logger.printStatus('[CHROME_DIAGNOSTIC] Chromium.close finished.');
   }
 }
 
