@@ -136,7 +136,6 @@ class EngineImage implements ui.Image, StackTraceDebugger {
     if (_disposed) {
       throw StateError('Cannot call toByteData on a disposed image.');
     }
-    assert(!_disposed, 'Cannot call toByteData on a disposed image.');
 
     // Clone the image to prevent use-after-free vulnerabilities.
     // If the image is disposed by the user during asynchronous bounds of this method,
