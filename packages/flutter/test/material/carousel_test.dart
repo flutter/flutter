@@ -2930,6 +2930,39 @@ void main() {
 
     expect(position.pixels, 0.0);
   });
+
+  testWidgets('CarouselView.weighted does not crash on manual scroll when children are few', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    // Set the exact viewport size that caused the crash: 750 main axis extent.
+    await tester.binding.setSurfaceSize(const Size(750, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            controller: controller,
+            flexWeights: const <int>[1, 7],
+            children: List<Widget>.generate(5, (index) => const FlutterLogo()),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+
+    // Jump exactly to the scroll offset from the crash log (461.5)
+    // to trigger the boundary geometry layout logic calculation.
+    controller.jumpTo(461.5);
+    await tester.pump();
+
+    // Verify no SliverGeometry exception was thrown.
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Finder getItem(int index) {
