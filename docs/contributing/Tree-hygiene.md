@@ -64,7 +64,7 @@ The general process for submitting code to a Flutter repository is as follows:
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
 
-   To ensure maintainers can provide timely and high-quality feedback, contributors without write access are limited to **2 concurrent open pull requests** across public Flutter repositories.
+   To ensure maintainers can provide timely and high-quality feedback, contributors without write access are limited to **2 concurrent open pull requests** per public Flutter repository.
    * **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
    * **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
 
