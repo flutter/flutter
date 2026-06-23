@@ -76,6 +76,7 @@ void main() {
       expect(dependencies.crashReporter, isNotNull);
       expect(dependencies.toolContext.cache, isNotNull);
       expect(dependencies.toolContext.config, isNotNull);
+      expect(dependencies.doctor, isNotNull);
       expect(dependencies.toolContext.git, isNotNull);
       expect(dependencies.toolContext.processUtils, isNotNull);
       expect(dependencies.toolContext.projectFactory, isNotNull);

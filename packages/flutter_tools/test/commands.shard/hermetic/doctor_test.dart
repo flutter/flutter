@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -13,10 +14,13 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test/fake.dart';
@@ -25,6 +29,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late BufferLogger logger;
@@ -817,7 +822,72 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
   });
+
+  group('DoctorCommand DI', () {
+    testUsingContext('resolves doctor from the injected Doctor rather than the Zone', () {
+      final mockDoctor = MockDoctor();
+      final command = DoctorCommand(doctor: mockDoctor, toolContext: FakeToolContext());
+
+      expect(command.doctor, same(mockDoctor));
+      expect(command.doctor, isNot(same(globals.doctor)));
+    }, overrides: <Type, Generator>{Doctor: () => MockDoctor()});
+
+    testUsingContext('runs diagnose on the injected Doctor', () async {
+      final mockDoctor = MockDoctor();
+      final command = DoctorCommand(doctor: mockDoctor, toolContext: FakeToolContext());
+
+      await createTestCommandRunner(command).run(<String>['doctor']);
+
+      expect(mockDoctor.diagnoseCalled, isTrue);
+    });
+
+    testUsingContext('runs checkRemoteArtifacts on the injected Doctor', () async {
+      final mockDoctor = MockDoctor();
+      final command = DoctorCommand(
+        doctor: mockDoctor,
+        toolContext: FakeToolContext(),
+        verbose: true,
+      );
+
+      await expectLater(
+        () => createTestCommandRunner(
+          command,
+        ).run(<String>['doctor', '--check-for-remote-artifacts=abcdef']),
+        throwsToolExit(
+          message: 'Artifacts for engine abcdef are missing or are not yet available.',
+        ),
+      );
+
+      expect(mockDoctor.checkRemoteArtifactsCalled, isTrue);
+    });
+  });
 }
+
+class MockDoctor extends Fake implements Doctor {
+  bool diagnoseCalled = false;
+  bool checkRemoteArtifactsCalled = false;
+
+  @override
+  Future<bool> diagnose({
+    AndroidLicenseValidator? androidLicenseValidator,
+    bool androidLicenses = false,
+    bool sendEvent = true,
+    bool showPii = true,
+    List<ValidatorTask>? startedValidatorTasks,
+    bool verbose = false,
+  }) async {
+    diagnoseCalled = true;
+    return true;
+  }
+
+  @override
+  Future<bool> checkRemoteArtifacts(String engineRevision) async {
+    checkRemoteArtifactsCalled = true;
+    return true;
+  }
+}
+
+class FakeToolContext extends Fake implements ToolContext {}
 
 class PassingValidator extends DoctorValidator {
   PassingValidator(super.title);

@@ -30,6 +30,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../doctor.dart';
 import '../flutter_cache.dart';
 import '../flutter_features.dart';
 import '../flutter_features_config.dart';
@@ -66,6 +67,7 @@ class ToolDependencies {
     required this.buildSystem,
     required this.buildTargets,
     required this.crashReporter,
+    required this.doctor,
     required this.toolContext,
   });
 
@@ -85,7 +87,8 @@ class ToolDependencies {
   final BuildTargets buildTargets;
 
   /// Captures and submits unhandled tool crash reports and stack traces.
-  final CrashReporter crashReporter;
+  /// Validates development environment configuration and diagnosis tools.
+  final Doctor doctor;
 
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
@@ -308,6 +311,8 @@ class ToolDependencies {
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
+    final finalDoctor = Doctor(logger: finalLogger, clock: finalSystemClock);
+
     // 11. AppleContext Dependencies
     final XcodeProjectInterpreter finalXcodeProjectInterpreter =
         xcodeProjectInterpreter ??
@@ -465,6 +470,7 @@ class ToolDependencies {
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
+      doctor: finalDoctor,
       toolContext: ToolContext(
         botDetector: finalBotDetector,
         cache: finalCache,
