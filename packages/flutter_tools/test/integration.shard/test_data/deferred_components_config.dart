@@ -132,8 +132,8 @@ class DeferredComponentModule {
 
         sourceSets {
             applicationVariants.all { variant ->
-                main.assets.srcDirs += "${project.layout.buildDirectory.get()}/intermediates/flutter/${variant.name}/deferred_assets"
-                main.jniLibs.srcDirs += "${project.layout.buildDirectory.get()}/intermediates/flutter/${variant.name}/deferred_libs"
+                main.assets.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets")
+                main.jniLibs.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs")
             }
         }
 

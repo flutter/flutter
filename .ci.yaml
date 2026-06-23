@@ -1776,6 +1776,33 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
 
+  - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_tests
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_vulkan_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+
+  - name: Linux_android_emu android_hardware_smoke_opengles_tests
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_opengles_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -6839,6 +6866,48 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_desktop_impeller
+
+  - name: Windows texture_impeller_windows
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: texture_impeller_windows
+
+  - name: Windows hello_world_windows_impeller
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: hello_world_windows_impeller
+
+  - name: Windows_arm64 hello_world_windows_impeller
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: hello_world_windows_impeller
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
