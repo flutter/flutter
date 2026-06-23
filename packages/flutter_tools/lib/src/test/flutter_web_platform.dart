@@ -333,16 +333,22 @@ class FlutterWebPlatform extends PlatformPlugin {
       );
     }
     if (request.url.path.endsWith('main_module.bootstrap.js')) {
-      final String directory = _fileSystem.path.dirname(request.url.path);
+      final String? mergedMetadata = webMemoryFS.mergedMetadata;
+      if (mergedMetadata == null) {
+        final error =
+            'Failed to generate ${request.url.path}. '
+            'Missing a merged metadata file needed to construct the scripts to load.';
+        _logger.printError(error);
+        return shelf.Response.internalServerError(body: error);
+      }
       final scripts = <Map<String, String>>[];
-      for (final String line in webMemoryFS.mergedMetadata!.split('\n')) {
+      for (final String line in mergedMetadata.split('\n')) {
         final metadataMap = jsonDecode(line) as Map<String, dynamic>;
         final srcUri = metadataMap['moduleUri'] as String;
-        final String relativeSrcUri = _fileSystem.path
-            .relative(srcUri, from: directory)
-            .replaceAll(r'\', '/');
+        // Strip the leading '/' from the paths. The requests will have it added
+        // when they are created in the browser.
+        final String relativeSrcUri = _fileSystem.path.relative(srcUri, from: '/');
         final id = metadataMap['name'] as String;
-
         scripts.add({'src': relativeSrcUri, 'id': id});
       }
 
@@ -370,16 +376,6 @@ window.\$dartLoader.loader.nextAttempt();
     if (request.url.path.endsWith('on_load_end_bootstrap.js')) {
       return shelf.Response.ok(
         generateDDCLibraryBundleOnLoadEndBootstrap(),
-        headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
-      );
-    }
-    if (request.url.path.endsWith('main.dart.bootstrap.js')) {
-      return shelf.Response.ok(
-        generateMainModule(
-          nativeNullAssertions: true,
-          bootstrapModule: 'main.dart.bootstrap',
-          entrypoint: '/main.dart.js',
-        ),
         headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
     }
@@ -556,7 +552,7 @@ window.\$dartLoader.loader.nextAttempt();
         {
           compileTarget: "dartdevc",
           renderer: "${webRenderer.name}",
-          mainJsPath: "main.dart.browser_test.dart.js",
+          mainJsPath: "/main.dart.browser_test.dart.js",
         }
 ''';
   }
@@ -576,7 +572,7 @@ window.\$dartLoader.loader.nextAttempt();
 <head>
   <meta charset="UTF-8">
   <title>${htmlEscape.convert(test)} Test</title>
-  <script src="flutter.js"></script>
+  <script src="/flutter.js"></script>
   <script>
     $bumpStackTraceLimit
     _flutter.buildConfig = {

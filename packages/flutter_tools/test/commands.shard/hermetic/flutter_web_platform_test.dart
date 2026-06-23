@@ -53,7 +53,6 @@ void main() {
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
     for (final artifact in <HostArtifact>[
-      HostArtifact.webPrecompiledAmdCanvaskitSdk,
       HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
     ]) {
       final artifactFile = artifacts.getHostArtifact(artifact) as File;
@@ -130,7 +129,20 @@ void main() {
         browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
         logger: logger,
       );
+      // Generating the bootstrap requires a merged metadata file written during
+      // the initial compile to build and inject the correct scripts object.
       final server = FakeServer();
+      final webMemoryFS = WebMemoryFS();
+      final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
+      final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');
+      final File metadata = fileSystem.file('metadata')
+        ..writeAsStringSync('{"moduleUri": "main.dart.lib.js", "name": "main"}');
+      final File manifest = fileSystem.file('manifest')
+        ..writeAsStringSync(
+          '{"main.dart.lib.js":{"code":[0,${source.lengthSync()}],"sourcemap":[0,${sourcemap.lengthSync()}],"metadata":[0,${metadata.lengthSync()}]}}',
+        );
+      webMemoryFS.write(source, manifest, sourcemap, metadata);
+
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
@@ -142,7 +154,7 @@ void main() {
           extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
           webEnableHotReload: true,
         ),
-        webMemoryFS: WebMemoryFS(),
+        webMemoryFS: webMemoryFS,
         fileSystem: fileSystem,
         buildDirectory: fileSystem.directory('build'),
         logger: logger,
@@ -160,7 +172,6 @@ void main() {
       expect(handler, isNotNull);
       handler!;
 
-      // 1. main.dart.browser_test.dart.js
       final shelf.Response responseBootstrap = await handler(
         shelf.Request('GET', Uri.parse('http://localhost/main.dart.browser_test.dart.js')),
       );
@@ -169,15 +180,13 @@ void main() {
       expect(contentsBootstrap, contains('dart_stack_trace_mapper.js'));
       expect(contentsBootstrap, contains('main_module.bootstrap.js'));
 
-      // 2. main_module.bootstrap.js
       final shelf.Response responseMainModule = await handler(
         shelf.Request('GET', Uri.parse('http://localhost/main_module.bootstrap.js')),
       );
       final String contentsMainModule = await responseMainModule.readAsString();
       expect(contentsMainModule, contains('on_load_end_bootstrap.js'));
-      expect(contentsMainModule, contains('org-dartlang-app:/main.dart'));
+      expect(contentsMainModule, contains('org-dartlang-app:///main.dart'));
 
-      // 3. on_load_end_bootstrap.js
       final shelf.Response responseOnLoadEnd = await handler(
         shelf.Request('GET', Uri.parse('http://localhost/on_load_end_bootstrap.js')),
       );
