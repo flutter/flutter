@@ -13,12 +13,22 @@ generated_file("artifacts_entitlement_config") {
   deps = [ "//flutter/lib/snapshot:generate_snapshot_bin" ]
   if (flutter_runtime_mode == "debug") {
     deps += [
-      "//flutter/flutter_frontend_server:frontend_server",
       "//flutter/impeller/compiler:impellerc",
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/shell/testing",
       "//flutter/tools/path_ops",
     ]
+  }
+}
+
+generated_file("artifacts_without_entitlement_config") {
+  outputs = [ "$target_gen_dir/without_entitlements.txt" ]
+
+  data_keys = [ "without_entitlement_file_path" ]
+
+  deps = []
+  if (flutter_runtime_mode == "debug") {
+    deps += [ "//flutter/flutter_frontend_server:frontend_server" ]
   }
 }
 
@@ -141,11 +151,18 @@ if (build_engine_artifacts) {
     # On macOS, add entitlements.txt, which contains filenames of binaries that
     # need to be code-signed by a later CI stage.
     if (host_os == "mac") {
-      deps += [ ":artifacts_entitlement_config" ]
+      deps += [
+        ":artifacts_entitlement_config",
+        ":artifacts_without_entitlement_config",
+      ]
       files += [
         {
           source = "$target_gen_dir/entitlements.txt"
           destination = "entitlements.txt"
+        },
+        {
+          source = "$target_gen_dir/without_entitlements.txt"
+          destination = "without_entitlements.txt"
         },
       ]
     }
@@ -194,6 +211,15 @@ generated_file("dart_sdk_entitlement_config") {
     "dart-sdk/bin/dartvm",
     "dart-sdk/bin/utils/gen_snapshot",
     "dart-sdk/bin/utils/wasm-opt",
+  ]
+
+  deps = []
+}
+
+generated_file("dart_sdk_without_entitlement_config") {
+  outputs = [ "$target_gen_dir/dart_sdk_without_entitlements.txt" ]
+
+  contents = [
     "dart-sdk/bin/snapshots/analysis_server_aot.dart.snapshot",
     "dart-sdk/bin/snapshots/dart2bytecode.dart.snapshot",
     "dart-sdk/bin/snapshots/dart2js_aot.dart.snapshot",
@@ -214,7 +240,10 @@ generated_file("dart_sdk_entitlement_config") {
 # the zip file we are just copying the original file to the artifacts location.
 if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
   zip_bundle("dart_sdk_archive") {
-    deps = [ ":dart_sdk_entitlement_config" ]
+    deps = [
+      ":dart_sdk_entitlement_config",
+      ":dart_sdk_without_entitlement_config",
+    ]
     if (dart_dynamic_modules) {
       output = "dart-sdk-$full_target_platform_name-ddm.zip"
     } else {
@@ -234,6 +263,10 @@ if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
         {
           source = "$target_gen_dir/dart_sdk_entitlements.txt"
           destination = "entitlements.txt"
+        },
+        {
+          source = "$target_gen_dir/dart_sdk_without_entitlements.txt"
+          destination = "without_entitlements.txt"
         },
       ]
     }
@@ -257,11 +290,18 @@ if (build_engine_artifacts && !flutter_prebuilt_dart_sdk) {
     ]
     if (is_mac) {
       output = "dart-sdk-darwin-$target_cpu.zip"
-      deps += [ ":dart_sdk_entitlement_config" ]
+      deps += [
+        ":dart_sdk_entitlement_config",
+        ":dart_sdk_without_entitlement_config",
+      ]
       files += [
         {
           source = "$target_gen_dir/dart_sdk_entitlements.txt"
           destination = "entitlements.txt"
+        },
+        {
+          source = "$target_gen_dir/dart_sdk_without_entitlements.txt"
+          destination = "without_entitlements.txt"
         },
       ]
     }
