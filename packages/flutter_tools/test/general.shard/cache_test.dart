@@ -1686,8 +1686,10 @@ void main() {
     late MemoryFileSystem fileSystem;
     late BufferLogger logger;
     late Cache cache;
+    String? originalFlutterRoot;
 
     setUp(() {
+      originalFlutterRoot = Cache.flutterRoot;
       fileSystem = MemoryFileSystem.test();
       logger = BufferLogger.test();
       Cache.flutterRoot = '/flutter';
@@ -1697,6 +1699,10 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
       fileSystem.directory(cache.getRoot().path).createSync(recursive: true);
+    });
+
+    tearDown(() {
+      Cache.flutterRoot = originalFlutterRoot;
     });
 
     void setupValidSdk() {
