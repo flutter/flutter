@@ -3,6 +3,7 @@
 - Regressions should be [reverted first](../infra/Landing-Changes-With-Autosubmit.md) and questions asked later. Bringing the tree to green is higher priority.
 - A breaking change is one that breaks the tests in the flutter/tests repo, and those need a migration guide.
 - Expect that a new patch will be reviewed within two weeks, unless it is fixing a P0 bug in which case it should be reviewed the same day. If it has not been reviewed in that timeframe, reach out on [Chat](Chat.md). Remember that reviewers are human beings with additional professional and personal responsibilities.
+- Contributors without write access are limited to **2 concurrent open pull requests** (draft PRs are exempt). Focus on merging or closing existing PRs before opening new ones.
 
 ## Introduction
 
@@ -62,6 +63,10 @@ The general process for submitting code to a Flutter repository is as follows:
 
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
+
+   To ensure maintainers can provide timely and high-quality feedback, contributors without write access are limited to **2 concurrent open pull requests** across public Flutter repositories.
+   * **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
+   * **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
 
    All submissions to Google Open Source projects need to follow
    [Google’s Contributor License Agreement (CLA)](https://cla.developers.google.com/),
