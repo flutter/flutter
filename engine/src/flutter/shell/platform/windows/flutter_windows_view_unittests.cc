@@ -74,6 +74,7 @@ FlutterProjectBundle GetTestProject() {
   properties.assets_path = L"C:\\foo\\flutter_assets";
   properties.icu_data_path = L"C:\\foo\\icudtl.dat";
   properties.aot_library_path = L"C:\\foo\\aot.so";
+  properties.impeller_switch = DisabledImpeller;
 
   return FlutterProjectBundle{properties};
 }
