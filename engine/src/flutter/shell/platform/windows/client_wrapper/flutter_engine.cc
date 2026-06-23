@@ -110,6 +110,35 @@ void FlutterEngine::SetNextFrameCallback(std::function<void()> callback) {
       this);
 }
 
+bool FlutterEngine::IsPlatformThread() const {
+  if (!engine_) {
+    std::cerr
+        << "Cannot check platform thread on an engine that failed creation."
+        << std::endl;
+    return false;
+  }
+  return FlutterDesktopEngineIsPlatformThread(engine_);
+}
+
+void FlutterEngine::PostPlatformThreadTask(std::function<void()> callback) {
+  if (!callback) {
+    return;
+  }
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine_,
+      /*callback=*/
+      [](void* user_data) {
+        std::unique_ptr<std::function<void()>> cb{
+            static_cast<std::function<void()>*>(user_data)};
+        (*cb)();
+      },
+      /*on_cancel=*/
+      [](void* user_data) {
+        delete static_cast<std::function<void()>*>(user_data);
+      },
+      /*user_data=*/new std::function<void()>(std::move(callback)));
+}
+
 std::optional<LRESULT> FlutterEngine::ProcessExternalWindowMessage(
     HWND hwnd,
     UINT message,

@@ -34,7 +34,7 @@ final Platform macPlatform = FakePlatform(
 
 const _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=13.0',
+  '-miphoneos-version-min=15.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -52,7 +52,7 @@ const _kSharedConfig = <String>[
 
 FakeCommand createPlutilFakeCommand(File infoPlist) {
   return FakeCommand(
-    command: <String>['plutil', '-replace', 'MinimumOSVersion', '-string', '13.0', infoPlist.path],
+    command: <String>['plutil', '-replace', 'MinimumOSVersion', '-string', '15.0', infoPlist.path],
   );
 }
 
@@ -113,7 +113,7 @@ void main() {
               fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
             ),
             '-dynamiclib',
-            '-miphonesimulator-version-min=13.0',
+            '-miphonesimulator-version-min=15.0',
             '-Xlinker',
             '-rpath',
             '-Xlinker',
@@ -252,7 +252,7 @@ void main() {
             '-replace',
             'MinimumOSVersion',
             '-string',
-            '13.0',
+            '15.0',
             infoPlist.path,
           ],
           exitCode: 1,
