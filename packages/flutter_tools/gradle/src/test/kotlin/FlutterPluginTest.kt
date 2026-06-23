@@ -16,7 +16,6 @@ import com.flutter.gradle.tasks.FlutterTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
@@ -27,27 +26,13 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
-import com.android.build.api.AndroidPluginVersion
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.io.path.writeText
 import kotlin.test.Test
 
 class FlutterPluginTest {
-    @BeforeEach
-    fun setUp() {
-        mockkObject(VersionFetcher)
-        every { VersionFetcher.getAGPVersion(any()) } returns AndroidPluginVersion(9, 0, 0)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkObject(VersionFetcher)
-    }
-
     @Test
     fun `FlutterPlugin apply() adds expected tasks`(
         @TempDir tempDir: Path
@@ -65,7 +50,6 @@ class FlutterPluginTest {
         val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
         fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
         val project = mockk<Project>(relaxed = true)
-        mockProjectProviders(project)
         val mockAbstractAppExtension =
             mockk<AbstractAppExtension>(
                 moreInterfaces = arrayOf(ApplicationExtension::class),
@@ -157,7 +141,6 @@ class FlutterPluginTest {
         val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
         fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
         val project = mockk<Project>(relaxed = true)
-        mockProjectProviders(project)
         val mockAbstractAppExtension =
             mockk<AbstractAppExtension>(
                 moreInterfaces = arrayOf(ApplicationExtension::class),
@@ -339,14 +322,6 @@ class FlutterPluginTest {
         } else {
             fail("FilePermissions configuration action was not captured")
         }
-    }
-
-    private fun mockProjectProviders(project: Project) {
-        val mockProvider = mockk<org.gradle.api.provider.Provider<String>>()
-        every { mockProvider.orNull } returns null
-        val mockProviders = mockk<org.gradle.api.provider.ProviderFactory>()
-        every { mockProviders.gradleProperty("android.builtInKotlin") } returns mockProvider
-        every { project.providers } returns mockProviders
     }
 
     companion object {
