@@ -275,7 +275,11 @@ List<FlutterCommand> generateCommands({
     artifacts: globals.artifacts!,
     processManager: globals.processManager,
   ),
-  InstallCommand(verboseHelp: verboseHelp),
+  InstallCommand(
+    deviceManager: toolDependencies.deviceManager,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
   PackagesCommand(),
   PrecacheCommand(
