@@ -67,6 +67,7 @@ TEST(WindowsNoFixtureTest, GetTextureRegistrar) {
   FlutterDesktopEngineProperties properties = {};
   properties.assets_path = L"";
   properties.icu_data_path = L"icudtl.dat";
+  properties.impeller_switch = DisabledImpeller;
   auto engine = FlutterDesktopEngineCreate(&properties);
   ASSERT_NE(engine, nullptr);
   auto texture_registrar = FlutterDesktopEngineGetTextureRegistrar(engine);
@@ -404,6 +405,138 @@ TEST_F(WindowsTest, PresentHeadless) {
   while (!done) {
     PumpMessage();
   }
+}
+
+// Verify IsPlatformThread returns true on the platform thread.
+TEST_F(WindowsTest, IsPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  EXPECT_TRUE(FlutterDesktopEngineIsPlatformThread(engine.get()));
+}
+
+// Verify IsPlatformThread returns false on a background thread.
+TEST_F(WindowsTest, IsNotPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  bool result = true;
+  std::thread background(
+      [&]() { result = FlutterDesktopEngineIsPlatformThread(engine.get()); });
+  background.join();
+
+  EXPECT_FALSE(result);
+}
+
+// Verify a task can be posted to the platform thread while on the platform
+// thread.
+TEST_F(WindowsTest, PostPlatformThreadTaskFromPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    std::thread::id thread_id;
+    bool done = false;
+  } captures;
+
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        auto captures = static_cast<Captures*>(user_data);
+        captures->thread_id = std::this_thread::get_id();
+        captures->done = true;
+      },
+      /*on_cancel=*/nullptr, &captures);
+
+  while (!captures.done) {
+    PumpMessage();
+  }
+
+  EXPECT_EQ(captures.thread_id, std::this_thread::get_id());
+}
+
+// Verify a task can be posted to the platform thread while on a background
+// thread.
+TEST_F(WindowsTest, PostPlatformThreadTaskFromBackgroundThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  std::mutex background_thread_id_mutex;
+  struct Captures {
+    std::thread::id background_thread_id;
+    std::thread::id platform_thread_id;
+    bool done = false;
+  } captures;
+
+  std::thread background([&]() {
+    {
+      std::scoped_lock lock{background_thread_id_mutex};
+      captures.background_thread_id = std::this_thread::get_id();
+    }
+
+    FlutterDesktopEnginePostPlatformThreadTask(
+        engine.get(),
+        [](void* user_data) {
+          auto captures = static_cast<Captures*>(user_data);
+          captures->platform_thread_id = std::this_thread::get_id();
+          captures->done = true;
+        },
+        /*on_cancel=*/nullptr, &captures);
+  });
+  background.join();
+
+  while (!captures.done) {
+    PumpMessage();
+  }
+
+  std::scoped_lock lock{background_thread_id_mutex};
+  EXPECT_NE(captures.background_thread_id, std::thread::id{});
+  EXPECT_NE(captures.background_thread_id, captures.platform_thread_id);
+  EXPECT_EQ(captures.platform_thread_id, std::this_thread::get_id());
+}
+
+// Verify that destroying the engine after posting a task invokes the cancel
+// callback instead of the task callback.
+TEST_F(WindowsTest, PostPlatformThreadTaskCancelledOnEngineDestroy) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    bool callback_called = false;
+    bool cancel_called = false;
+  } captures;
+
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->callback_called = true;
+      },
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->cancel_called = true;
+      },
+      &captures);
+
+  // Destroy the engine before the task has a chance to run. The cancel
+  // callback should be called and the task callback should not.
+  engine.reset();
+
+  EXPECT_FALSE(captures.callback_called);
+  EXPECT_TRUE(captures.cancel_called);
 }
 
 // Implicit view has the implicit view ID.
