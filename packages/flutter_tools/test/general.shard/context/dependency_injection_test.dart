@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
@@ -54,6 +55,8 @@ class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {}
 class FakeMacOSWorkflow extends Fake implements MacOSWorkflow {}
 
 class FakeDeviceManager extends Fake implements DeviceManager {}
+
+class FakeEmulatorManager extends Fake implements EmulatorManager {}
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
@@ -114,6 +117,7 @@ void main() {
       expect(dependencies.buildTargets, isNotNull);
       expect(dependencies.crashReporter, isNotNull);
       expect(dependencies.deviceManager, isNotNull);
+      expect(dependencies.emulatorManager, isNotNull);
       expect(dependencies.macOSWorkflow, isNotNull);
       expect(dependencies.toolContext.os, isNotNull);
       expect(dependencies.windowsWorkflow, isNotNull);
@@ -173,6 +177,7 @@ void main() {
       final mockWindowsWorkflow = FakeWindowsWorkflow();
       final mockMacOSWorkflow = FakeMacOSWorkflow();
       final mockDeviceManager = FakeDeviceManager();
+      final mockEmulatorManager = FakeEmulatorManager();
 
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
         os: mockOS,
@@ -183,6 +188,7 @@ void main() {
         windowsWorkflow: mockWindowsWorkflow,
         macOSWorkflow: mockMacOSWorkflow,
         deviceManager: mockDeviceManager,
+        emulatorManager: mockEmulatorManager,
         fs: fs,
         logger: logger,
         platform: platform,
@@ -197,6 +203,7 @@ void main() {
       expect(dependencies.windowsWorkflow, same(mockWindowsWorkflow));
       expect(dependencies.macOSWorkflow, same(mockMacOSWorkflow));
       expect(dependencies.deviceManager, same(mockDeviceManager));
+      expect(dependencies.emulatorManager, same(mockEmulatorManager));
     });
 
     testUsingContext('respects explicit overrides for Android SDK and Studio', () async {

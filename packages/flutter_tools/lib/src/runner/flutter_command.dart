@@ -34,6 +34,7 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../emulator.dart';
 import '../features.dart';
 import '../git.dart';
 import '../globals.dart' as globals;
@@ -183,6 +184,7 @@ abstract class FlutterCommand extends Command<void> {
   Config get config => _toolContext?.config ?? globals.config;
   DeviceManager get deviceManager => globals.deviceManager!;
   Doctor? get doctor => globals.doctor;
+  EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
   FileSystem get fileSystem => _toolContext?.fs ?? globals.fs;
   FileSystemUtils get fileSystemUtils => _toolContext != null
       ? FileSystemUtils(fileSystem: fileSystem, platform: platform)

@@ -33,6 +33,7 @@ import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../emulator.dart';
 import '../flutter_cache.dart';
 import '../flutter_device_manager.dart';
 import '../flutter_features.dart';
@@ -74,6 +75,7 @@ class ToolDependencies {
     required this.crashReporter,
     required this.deviceManager,
     required this.doctor,
+    required this.emulatorManager,
     required this.macOSWorkflow,
     required this.toolContext,
     required this.windowsWorkflow,
@@ -87,6 +89,7 @@ class ToolDependencies {
   final CrashReporter crashReporter;
   final DeviceManager deviceManager;
   final Doctor doctor;
+  final EmulatorManager emulatorManager;
   final MacOSWorkflow macOSWorkflow;
   final ToolContext toolContext;
   final WindowsWorkflow windowsWorkflow;
@@ -108,6 +111,7 @@ class ToolDependencies {
     CrashReporter? crashReporter,
     CustomDevicesConfig? customDevicesConfig,
     DeviceManager? deviceManager,
+    EmulatorManager? emulatorManager,
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
@@ -461,6 +465,17 @@ class ToolDependencies {
     final AndroidWorkflow finalAndroidWorkflow =
         androidWorkflow ?? AndroidWorkflow(androidSdk: finalAndroidSdk, featureFlags: featureFlags);
 
+    final EmulatorManager finalEmulatorManager =
+        emulatorManager ??
+        EmulatorManager(
+          java: finalJava,
+          androidSdk: finalAndroidSdk,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          fileSystem: finalFS,
+          androidWorkflow: finalAndroidWorkflow,
+        );
+
     final WindowsWorkflow finalWindowsWorkflow =
         windowsWorkflow ?? WindowsWorkflow(platform: finalPlatform, featureFlags: featureFlags);
 
@@ -514,6 +529,7 @@ class ToolDependencies {
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
+      emulatorManager: finalEmulatorManager,
       macOSWorkflow: finalMacOSWorkflow,
       toolContext: ToolContext(
         artifacts: finalArtifacts,
@@ -521,6 +537,7 @@ class ToolDependencies {
         cache: finalCache,
         config: finalConfig,
         customDevicesConfig: finalCustomDevicesConfig,
+
         flutterVersion: flutterVersion,
         fs: finalFS,
         git: finalGit,
