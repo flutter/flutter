@@ -27,9 +27,6 @@ import java.util.concurrent.TimeUnit
 class FlutterActivityTest {
     companion object {
         private const val TAG = "FlutterActivityTest"
-        private const val PLATFORM_VIEW_TEXTURE_LAYER_TEST_NAME = "platformViewTextureLayerTest"
-        private const val PLATFORM_VIEW_HYBRID_COMPOSITION_TEST_NAME = "platformViewHybridCompositionTest"
-        private const val PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST_NAME = "platformViewHybridCompositionPlusPlusTest"
         private const val SCREENSHOT_CAPTURE_DELAY_MS = 200L
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
@@ -56,11 +53,11 @@ class FlutterActivityTest {
             assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
 
             try {
-                val isPlatformView = testName.startsWith("platformView")
+                val isPlatformView = testName.startsWith(Constants.PLATFORM_VIEW_PREFIX)
                 val message =
                     JSONObject().apply {
-                        put("testName", testName)
-                        put("performAppSideGoldenCompare", !isPlatformView)
+                        put(Constants.KEY_TEST_NAME, testName)
+                        put(Constants.KEY_PERFORM_APP_SIDE_GOLDEN_COMPARE, !isPlatformView)
                     }
 
                 Log.d(TAG, "Sending '$message' on message channel")
@@ -70,16 +67,16 @@ class FlutterActivityTest {
                         val replyJson =
                             reply as? JSONObject
                                 ?: throw IllegalStateException("Expected JSONObject reply from Dart, but received: $reply")
-                        val replyMessage = replyJson.getString("message")
+                        val replyMessage = replyJson.getString(Constants.KEY_MESSAGE)
 
                         if (replyMessage == "Skipped") {
-                            val reason = replyJson.optString("reason", "Unsupported")
+                            val reason = replyJson.optString(Constants.KEY_REASON, "Unsupported")
                             future.complete("Skipped: $reason")
-                        } else if (isPlatformView && replyMessage.startsWith("Rendered platformView")) {
-                            val x = replyJson.getInt("x")
-                            val y = replyJson.getInt("y")
-                            val width = replyJson.getInt("width")
-                            val height = replyJson.getInt("height")
+                        } else if (isPlatformView && replyMessage.startsWith("Rendered ${Constants.PLATFORM_VIEW_PREFIX}")) {
+                            val x = replyJson.getInt(Constants.KEY_X)
+                            val y = replyJson.getInt(Constants.KEY_Y)
+                            val width = replyJson.getInt(Constants.KEY_WIDTH)
+                            val height = replyJson.getInt(Constants.KEY_HEIGHT)
 
                             captureAndSendScreenshot(x, y, width, height, testName, future)
                         } else {
@@ -127,7 +124,7 @@ class FlutterActivityTest {
             return
         }
 
-        if (testName.startsWith("platformView")) {
+        if (testName.startsWith(Constants.PLATFORM_VIEW_PREFIX)) {
             assertEquals("Comparison Success", reply)
         } else {
             assertEquals("Rendered $testName", reply)
@@ -182,9 +179,9 @@ class FlutterActivityTest {
 
                 val compareMsg =
                     JSONObject().apply {
-                        put("command", "compare_golden")
-                        put("testName", testName)
-                        put("imageBytes", base64Image)
+                        put(Constants.KEY_COMMAND, Constants.COMMAND_COMPARE_GOLDEN)
+                        put(Constants.KEY_TEST_NAME, testName)
+                        put(Constants.KEY_IMAGE_BYTES, base64Image)
                     }
 
                 Log.d(TAG, "Sending compare_golden request to Dart app")
@@ -197,7 +194,7 @@ class FlutterActivityTest {
                                     ?: throw IllegalStateException(
                                         "Expected JSONObject reply from compare_golden request, but received: $compareReply"
                                     )
-                            future.complete(compareReplyJson.getString("message"))
+                            future.complete(compareReplyJson.getString(Constants.KEY_MESSAGE))
                         } catch (e: Exception) {
                             future.completeExceptionally(e)
                         }
@@ -213,46 +210,46 @@ class FlutterActivityTest {
 
     @Test
     fun blueRectangleTest() {
-        templateTest("blueRectangleTest")
+        templateTest(Constants.BLUE_RECTANGLE_TEST)
     }
 
     @Test
     fun trianglePathTest() {
-        templateTest("trianglePathTest")
+        templateTest(Constants.TRIANGLE_PATH_TEST)
     }
 
     @Test
     fun textTest() {
-        templateTest("textTest")
+        templateTest(Constants.TEXT_TEST)
     }
 
     @Test
     fun imageTest() {
-        templateTest("imageTest")
+        templateTest(Constants.IMAGE_TEST)
     }
 
     @Test
     fun advancedBlendTest() {
-        templateTest("advancedBlendTest")
+        templateTest(Constants.ADVANCED_BLEND_TEST)
     }
 
     @Test
     fun backdropFilterBlurTest() {
-        templateTest("backdropFilterBlurTest")
+        templateTest(Constants.BACKDROP_FILTER_BLUR_TEST)
     }
 
     @Test
     fun platformViewTextureLayerTest() {
-        templateTest(PLATFORM_VIEW_TEXTURE_LAYER_TEST_NAME)
+        templateTest(Constants.PLATFORM_VIEW_TEXTURE_LAYER_TEST)
     }
 
     @Test
     fun platformViewHybridCompositionTest() {
-        templateTest(PLATFORM_VIEW_HYBRID_COMPOSITION_TEST_NAME)
+        templateTest(Constants.PLATFORM_VIEW_HYBRID_COMPOSITION_TEST)
     }
 
     @Test
     fun platformViewHybridCompositionPlusPlusTest() {
-        templateTest(PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST_NAME)
+        templateTest(Constants.PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST)
     }
 }
