@@ -4,6 +4,7 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
@@ -187,22 +188,16 @@ object FlutterPluginUtils {
     @JvmName("formatPlatformString")
     fun formatPlatformString(platform: String): String = FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]!!.replace("-", "_")
 
-    @JvmStatic
     @JvmName("readPropertiesIfExist")
     internal fun readPropertiesIfExist(propertiesFile: File): Properties {
         val result = Properties()
         if (propertiesFile.exists()) {
-            try {
-                propertiesFile
-                    .reader(StandardCharsets.UTF_8)
-                    .use { reader ->
-                        result.load(reader)
-                    }
-            } catch (e: IOException) {
-                // Return empty properties on I/O error, but don't fail the build
-            } catch (e: IllegalArgumentException) {
-                // Return empty properties on malformed properties file, but don't fail the build
-            }
+            propertiesFile
+                .reader(StandardCharsets.UTF_8)
+                .use { reader ->
+                    // Use Kotlin's reader with UTF-8 and 'use' for auto-closing
+                    result.load(reader)
+                }
         }
         return result
     }
@@ -536,7 +531,7 @@ object FlutterPluginUtils {
     }
 
     /**
-     * Checks if all subprojects within the root Android project have migrated away from the legacy
+     * Checks if all subprojects within the root project have migrated away from the legacy
      * Kotlin Gradle Plugin (KGP) to Built-in Kotlin.
      */
     @JvmStatic
@@ -557,53 +552,37 @@ object FlutterPluginUtils {
     }
 
     /**
-     * Safely retrieves the AGP version currently loaded in the classpath at runtime.
-     * Bypasses the Gradle lifecycle, making it available immediately during the apply phase.
+     * Determines if the Gradle property `android.builtInKotlin` is enabled globally across the multi-project Gradle build.
+     *
+     * This function supports evaluating `android.builtInKotlin` when the property is set using any standard [Gradle Build Environment Configuration](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties)
+     * method (such as `-Pandroid.builtInKotlin=false` via the command line).
+     * While Android recommends configuring this in the root `gradle.properties` (see [Android's Migration Guide](https://developer.android.com/build/migrate-to-built-in-kotlin#opt-out-of-built-in-kotlin)),
+     * any standard configuration method is fully supported.
+     *
+     * Defaults to `true` for AGP 9.0+ and `false` otherwise if the property is not explicitly set (see [Android's Migration Guide](https://developer.android.com/build/migrate-to-built-in-kotlin)).
      */
-    internal fun getRuntimeAGPVersion(): Version? {
-        val versionString = try {
-            val versionClass = Class.forName("com.android.builder.model.Version")
-            val versionField = versionClass.getField("ANDROID_GRADLE_PLUGIN_VERSION")
-            versionField.get(null) as? String
-        } catch (e: Exception) {
-            try {
-                val versionClass = Class.forName("com.android.Version")
-                val versionField = versionClass.getField("ANDROID_GRADLE_PLUGIN_VERSION")
-                versionField.get(null) as? String
-            } catch (e2: Exception) {
-                null
-            }
-        }
-        return versionString?.let { Version.fromString(it) }
-    }
+    @JvmStatic
+    @JvmName("isBuiltInKotlinEnabled")
+    internal fun isBuiltInKotlinEnabled(
+        project: Project,
+        agpVersion: AndroidPluginVersion?
+    ): Boolean =
+        project.providers
+            .gradleProperty("android.builtInKotlin")
+            .orNull
+            ?.toBoolean() ?: (agpVersion != null && agpVersion.major >= 9)
 
     /** Prints error message for usage of KGP. */
     @JvmStatic
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
-        var isBuiltInKotlinEnabledGlobally: Boolean? = null
-        // Check for the Android Application plugin
-        project.plugins.withId("com.android.application") {
-            val agpVersFromHook = VersionFetcher.getAGPVersion(project)
-            // AGP is applied; execute your custom build logic safely here
-            println("Android Application plugin version: ${agpVersFromHook?.major} detected on ${project.name}!")
-
-            // Supports global configuration via root project 'gradle.properties' or command line
-            // (e.g., -Pandroid.builtInKotlin=false). Built-in Kotlin is enabled by default in AGP 9.0+,
-            // so defaults to true if the property is not explicitly set.
-            isBuiltInKotlinEnabledGlobally =
-                project.rootProject
-                    .findProperty("android.builtInKotlin")
-                    ?.toString()
-                    ?.toBoolean() ?: (agpVersFromHook != null && agpVersFromHook.major >= 9)
-        }
-
         val pluginsWithKGPAppliedList = mutableListOf<String>()
-        if (isBuiltInKotlinEnabledGlobally == true && hasNoSubprojectsApplyingKgp(project)) {
-            println("safely enable bk")
+        val agpVersion = VersionFetcher.getAGPVersion(project)
+        val isBuiltInKotlinEnabled = isBuiltInKotlinEnabled(project, agpVersion)
+
+        if (isBuiltInKotlinEnabled && hasNoSubprojectsApplyingKgp(project)) {
             return
         }
-        println("bk is not enabled")
         var shouldLogForApp = false
         project.rootProject.subprojects {
             val pluginState = getSubprojectPluginState(this) ?: return@subprojects
@@ -612,10 +591,8 @@ object FlutterPluginUtils {
             if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
             if (!pluginState.hasKgpPlugin) {
-                println("KGP plugin does not exist ${project.name}!")
                 try {
                     pluginManager.apply("kotlin-android")
-                    println("KGP plugin applied on ${project.name}!")
                 } catch (_: Exception) {
                     logger.quiet(
                         """
@@ -639,8 +616,7 @@ object FlutterPluginUtils {
         }
 
         project.gradle.projectsEvaluated {
-            val agpVersion = VersionFetcher.getAGPVersion(project)
-            if (agpVersion == null || agpVersion.major != 9) {
+            if (agpVersion == null || agpVersion.major < 9) {
                 return@projectsEvaluated
             }
             if (shouldLogForApp) {
