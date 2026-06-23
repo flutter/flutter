@@ -87,6 +87,10 @@ extern bool InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap(
     flutter::gpu::Context* wrapper);
 
 FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_Context_SupportsTextureCompression(
     flutter::gpu::Context* wrapper,
     int family);

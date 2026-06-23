@@ -26,16 +26,16 @@ void instantiateDefaultContext() {
 }
 
 @pragma('vm:entry-point')
-void canCreateShaderLibrary() {
-  final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('playground');
+Future<void> canCreateShaderLibrary() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('playground');
   assert(library != null);
   final gpu.Shader? shader = library!['UnlitVertex'];
   assert(shader != null);
 }
 
 @pragma('vm:entry-point')
-void canReflectUniformStructs() {
-  final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+Future<void> canReflectUniformStructs() async {
+  final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
 
   final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
   assert(vertInfo.uniformName == 'VertInfo');
@@ -50,8 +50,8 @@ void canReflectUniformStructs() {
   assert(colorOffset! == 64);
 }
 
-gpu.RenderPipeline createUnlitRenderPipeline() {
-  final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('playground');
+Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('playground');
   assert(library != null);
   final gpu.Shader? vertex = library!['UnlitVertex'];
   assert(vertex != null);
@@ -65,7 +65,7 @@ ByteData float32(List<double> values) {
 }
 
 @pragma('vm:entry-point')
-void canCreateRenderPassAndSubmit(int width, int height) {
+Future<void> canCreateRenderPassAndSubmit(int width, int height) async {
   final gpu.Texture renderTexture = gpu.gpuContext.createTexture(
     gpu.StorageMode.devicePrivate,
     width,
@@ -77,7 +77,7 @@ void canCreateRenderPassAndSubmit(int width, int height) {
   final renderTarget = gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: renderTexture));
   final gpu.RenderPass encoder = commandBuffer.createRenderPass(renderTarget);
 
-  final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+  final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
   encoder.bindPipeline(pipeline);
 
   // Configure blending with defaults (just to test the bindings).

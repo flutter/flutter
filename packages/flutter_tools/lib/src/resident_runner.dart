@@ -1214,12 +1214,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
+      final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
+      final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
         fileSystem: globals.fs,
+        targetModel: targetModel,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);

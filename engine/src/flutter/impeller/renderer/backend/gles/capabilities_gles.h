@@ -85,6 +85,13 @@ class CapabilitiesGLES final
   /// on the GLES backend; see SupportsFramebufferRenderMipmap in the .cc file.
   bool SupportsFramebufferRenderMipmap() const override;
 
+  /// @brief Whether GL_TEXTURE_MAX_LEVEL can be set to bound a texture's
+  /// sampled
+  ///        mip range. Core on desktop GL and ES 3.0+; on ES 2.0 it requires
+  ///        the GL_APPLE_texture_max_level extension. Without it a partial mip
+  ///        chain cannot be made mipmap complete and samples as black.
+  bool SupportsTextureMaxLevel() const;
+
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
 
@@ -125,6 +132,9 @@ class CapabilitiesGLES final
   bool Supports32BitPrimitiveIndices() const override;
 
   // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|
@@ -159,6 +169,7 @@ class CapabilitiesGLES final
   bool supports_offscreen_msaa_ = false;
   bool supports_implicit_msaa_ = false;
   bool supports_32bit_primitive_indices_ = false;
+  bool supports_texture_max_level_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
   bool supports_texture_compression_bc_ = false;
