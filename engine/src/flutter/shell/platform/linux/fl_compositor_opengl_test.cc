@@ -59,11 +59,11 @@ TEST_F(FlCompositorOpenGLTest, Render) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_opengl_present_layers(compositor, layers, 1);
   }).join();
 
   size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor), &frame_width,
+  fl_compositor_opengl_get_frame_size(compositor, &frame_width,
                                &frame_height);
   EXPECT_EQ(frame_width, width);
   EXPECT_EQ(frame_height, height);
@@ -75,7 +75,7 @@ TEST_F(FlCompositorOpenGLTest, Render) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -95,7 +95,7 @@ TEST_F(FlCompositorOpenGLTest, Resize) {
                          .size = {width1, height1}};
   const FlutterLayer* layers1[1] = {&layer1};
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers1, 1);
+    fl_compositor_opengl_present_layers(compositor, layers1, 1);
   }).join();
 
   // Present layer in current size.
@@ -113,7 +113,7 @@ TEST_F(FlCompositorOpenGLTest, Resize) {
   const FlutterLayer* layers2[1] = {&layer2};
   fml::AutoResetWaitableEvent latch;
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers2, 1);
+    fl_compositor_opengl_present_layers(compositor, layers2, 1);
     latch.Signal();
   }).detach();
 
@@ -124,7 +124,7 @@ TEST_F(FlCompositorOpenGLTest, Resize) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width2, height2, stride2);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 
@@ -160,7 +160,7 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_opengl_present_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -168,7 +168,7 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 
@@ -206,7 +206,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_opengl_present_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -214,7 +214,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -250,7 +250,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_opengl_present_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -258,7 +258,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -287,7 +287,7 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_opengl_present_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -295,7 +295,7 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -325,7 +325,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_opengl_present_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -333,7 +333,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -353,7 +353,7 @@ TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_opengl_present_layers(compositor, layers, 1);
   }).join();
 
   // Mock window size to be larger (200x200).
@@ -375,7 +375,7 @@ TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
   cairo_t* cr = cairo_create(surface);
 
   // We expect this to not crash.
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, FALSE);
+  fl_compositor_opengl_render(compositor, cr, nullptr, FALSE);
 
   cairo_surface_destroy(surface);
   cairo_destroy(cr);

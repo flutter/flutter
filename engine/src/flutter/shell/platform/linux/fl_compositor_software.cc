@@ -4,8 +4,11 @@
 
 #include "fl_compositor_software.h"
 
+// Maximum time to wait for a frame to be ready before giving up and rendering.
+static constexpr gint64 kCompositorRenderTimeoutMicroseconds = 100000;  // 100ms
+
 struct _FlCompositorSoftware {
-  FlCompositor parent_instance;
+  GObject parent_instance;
 
   // Task runner to wait for frames on.
   FlTaskRunner* task_runner;
@@ -23,16 +26,40 @@ struct _FlCompositorSoftware {
   GMutex frame_mutex;
 };
 
-G_DEFINE_TYPE(FlCompositorSoftware,
-              fl_compositor_software,
-              fl_compositor_get_type())
+G_DEFINE_TYPE(FlCompositorSoftware, fl_compositor_software, G_TYPE_OBJECT)
 
-static gboolean fl_compositor_software_present_layers(
-    FlCompositor* compositor,
-    const FlutterLayer** layers,
-    size_t layers_count) {
-  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
+static void fl_compositor_software_dispose(GObject* object) {
+  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
 
+  g_clear_object(&self->task_runner);
+  if (self->surface != nullptr) {
+    g_free(cairo_image_surface_get_data(self->surface));
+  }
+  g_clear_pointer(&self->surface, cairo_surface_destroy);
+  g_mutex_clear(&self->frame_mutex);
+
+  G_OBJECT_CLASS(fl_compositor_software_parent_class)->dispose(object);
+}
+
+static void fl_compositor_software_class_init(
+    FlCompositorSoftwareClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = fl_compositor_software_dispose;
+}
+
+static void fl_compositor_software_init(FlCompositorSoftware* self) {
+  g_mutex_init(&self->frame_mutex);
+}
+
+FlCompositorSoftware* fl_compositor_software_new(FlTaskRunner* task_runner) {
+  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(
+      g_object_new(fl_compositor_software_get_type(), nullptr));
+  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
+  return self;
+}
+
+gboolean fl_compositor_software_present_layers(FlCompositorSoftware* self,
+                                               const FlutterLayer** layers,
+                                               size_t layers_count) {
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
   if (layers_count == 0) {
@@ -68,11 +95,9 @@ static gboolean fl_compositor_software_present_layers(
   return TRUE;
 }
 
-static void fl_compositor_software_get_frame_size(FlCompositor* compositor,
-                                                  size_t* width,
-                                                  size_t* height) {
-  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
-
+void fl_compositor_software_get_frame_size(FlCompositorSoftware* self,
+                                           size_t* width,
+                                           size_t* height) {
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
   if (width != nullptr) {
@@ -83,12 +108,10 @@ static void fl_compositor_software_get_frame_size(FlCompositor* compositor,
   }
 }
 
-static gboolean fl_compositor_software_render(FlCompositor* compositor,
-                                              cairo_t* cr,
-                                              GdkWindow* window,
-                                              gboolean wait_for_frame) {
-  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
-
+gboolean fl_compositor_software_render(FlCompositorSoftware* self,
+                                       cairo_t* cr,
+                                       GdkWindow* window,
+                                       gboolean wait_for_frame) {
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
   if (self->surface == nullptr) {
@@ -126,39 +149,4 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   cairo_paint(cr);
 
   return TRUE;
-}
-
-static void fl_compositor_software_dispose(GObject* object) {
-  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
-
-  g_clear_object(&self->task_runner);
-  if (self->surface != nullptr) {
-    g_free(cairo_image_surface_get_data(self->surface));
-  }
-  g_clear_pointer(&self->surface, cairo_surface_destroy);
-  g_mutex_clear(&self->frame_mutex);
-
-  G_OBJECT_CLASS(fl_compositor_software_parent_class)->dispose(object);
-}
-
-static void fl_compositor_software_class_init(
-    FlCompositorSoftwareClass* klass) {
-  FL_COMPOSITOR_CLASS(klass)->present_layers =
-      fl_compositor_software_present_layers;
-  FL_COMPOSITOR_CLASS(klass)->get_frame_size =
-      fl_compositor_software_get_frame_size;
-  FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_software_render;
-
-  G_OBJECT_CLASS(klass)->dispose = fl_compositor_software_dispose;
-}
-
-static void fl_compositor_software_init(FlCompositorSoftware* self) {
-  g_mutex_init(&self->frame_mutex);
-}
-
-FlCompositorSoftware* fl_compositor_software_new(FlTaskRunner* task_runner) {
-  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(
-      g_object_new(fl_compositor_software_get_type(), nullptr));
-  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
-  return self;
 }
