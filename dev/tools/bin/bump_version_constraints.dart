@@ -44,13 +44,16 @@ void run(
     return;
   }
 
-  if (options.rest.length != 1) {
-    stderr.writeln('ERROR: Expected exactly one argument specifying the new SDK constraint.');
+  if (options.rest.length != 2) {
+    stderr.writeln(
+      'ERROR: Expected exactly two arguments specifying the old SDK constraint and the new SDK constraint.',
+    );
     _usage(parser, stderr, exit);
     return;
   }
 
-  final String newVersion = options.rest.first;
+  final String oldVersion = options.rest[0];
+  final String newVersion = options.rest[1];
 
   var updatedCount = 0;
   var errorCount = 0;
@@ -75,9 +78,15 @@ void run(
         final Object? env = doc['environment'];
         if (env is YamlMap && env.containsKey('sdk')) {
           final Object? currentSdk = env['sdk'];
-          if (currentSdk != newVersion) {
+          if (currentSdk == newVersion) {
+            // Already updated.
+          } else if (currentSdk == oldVersion) {
             yamlEditor.update(<String>['environment', 'sdk'], newVersion);
             fileUpdated = true;
+          } else {
+            stdout.writeln(
+              'Skipping $relativePath: SDK constraint "$currentSdk" does not match expected "$oldVersion".',
+            );
           }
         }
       }
@@ -131,7 +140,9 @@ List<File> _findPubspecs(Directory dir, StringSink stderr) {
 }
 
 void _usage(ArgParser parser, StringSink stderr, void Function(int) exit) {
-  stderr.writeln('Usage: dart dev/tools/bin/bump_version_constraints.dart <new_sdk_constraint>');
-  stderr.writeln('Example: dart dev/tools/bin/bump_version_constraints.dart ^3.13.0-0');
+  stderr.writeln(
+    'Usage: dart dev/tools/bin/bump_version_constraints.dart <old_sdk_constraint> <new_sdk_constraint>',
+  );
+  stderr.writeln('Example: dart dev/tools/bin/bump_version_constraints.dart ^3.10.0-0 ^3.11.0-0');
   exit(1);
 }

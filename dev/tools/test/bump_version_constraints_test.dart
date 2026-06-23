@@ -32,7 +32,7 @@ void main() {
 
   test('succeeds with no pubspec files', () {
     bump.run(
-      <String>['^3.13.0-0'],
+      <String>['^3.10.0-0', '^3.13.0-0'],
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
       stdout: stdout,
@@ -45,13 +45,13 @@ void main() {
     expect(stderr.toString(), isEmpty);
   });
 
-  test('updates pubspec.yaml files with correct SDK constraints', () {
+  test('updates pubspec.yaml files with matching SDK constraints and skips deviators', () {
     final File pubspec1 = fileSystem.file('/flutter/packages/flutter/pubspec.yaml')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: flutter
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.10.0-0
 dependencies:
   meta: any
 ''');
@@ -61,11 +61,19 @@ dependencies:
       ..writeAsStringSync('''
 name: flutter_tools
 environment:
-  sdk: '>=3.10.0 <4.0.0'
+  sdk: ^3.10.0-0
+''');
+
+    final File pubspecDeviator = fileSystem.file('/flutter/packages/deviator/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: deviator
+environment:
+  sdk: ^3.12.0
 ''');
 
     bump.run(
-      <String>['^3.13.0-0'],
+      <String>['^3.10.0-0', '^3.13.0-0'],
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
       stdout: stdout,
@@ -86,6 +94,11 @@ name: flutter_tools
 environment:
   sdk: ^3.13.0-0
 ''');
+    expect(pubspecDeviator.readAsStringSync(), '''
+name: deviator
+environment:
+  sdk: ^3.12.0
+''');
     expect(
       stdout.toString(),
       contains('Updated ${fileSystem.path.join('packages', 'flutter', 'pubspec.yaml')}'),
@@ -93,6 +106,12 @@ environment:
     expect(
       stdout.toString(),
       contains('Updated ${fileSystem.path.join('packages', 'flutter_tools', 'pubspec.yaml')}'),
+    );
+    expect(
+      stdout.toString(),
+      contains(
+        'Skipping ${fileSystem.path.join('packages', 'deviator', 'pubspec.yaml')}: SDK constraint "^3.12.0" does not match expected "^3.10.0-0".',
+      ),
     );
     expect(stdout.toString(), contains('Done. Updated 2 pubspec.yaml files.'));
     expect(stderr.toString(), isEmpty);
@@ -108,7 +127,7 @@ environment:
 ''');
 
     bump.run(
-      <String>['^3.13.0-0'],
+      <String>['^3.10.0-0', '^3.13.0-0'],
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
       stdout: stdout,
@@ -136,7 +155,7 @@ environment:
 ''');
 
     bump.run(
-      <String>['^3.13.0-0'],
+      <String>['^3.10.0-0', '^3.13.0-0'],
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
       stdout: stdout,
@@ -161,7 +180,7 @@ environment:
       ..writeAsStringSync('''
 name: hidden
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.10.0-0
 ''');
 
     // Outside flutterRoot
@@ -170,7 +189,7 @@ environment:
       ..writeAsStringSync('''
 name: outside
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.10.0-0
 ''');
 
     // Inside a build directory
@@ -179,11 +198,11 @@ environment:
       ..writeAsStringSync('''
 name: build_package
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.10.0-0
 ''');
 
     bump.run(
-      <String>['^3.13.0-0'],
+      <String>['^3.10.0-0', '^3.13.0-0'],
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
       stdout: stdout,
@@ -192,9 +211,9 @@ environment:
     );
 
     expect(exitCode, isNull);
-    expect(pubspecHidden.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
-    expect(pubspecOutside.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
-    expect(pubspecBuild.readAsStringSync(), contains("  sdk: '>=3.0.0 <4.0.0'\n"));
+    expect(pubspecHidden.readAsStringSync(), contains('  sdk: ^3.10.0-0\n'));
+    expect(pubspecOutside.readAsStringSync(), contains('  sdk: ^3.10.0-0\n'));
+    expect(pubspecBuild.readAsStringSync(), contains('  sdk: ^3.10.0-0\n'));
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
   });
 
@@ -211,11 +230,15 @@ environment:
     expect(exitCode, 1);
     expect(
       stderr.toString(),
-      contains('ERROR: Expected exactly one argument specifying the new SDK constraint.'),
+      contains(
+        'ERROR: Expected exactly two arguments specifying the old SDK constraint and the new SDK constraint.',
+      ),
     );
     expect(
       stderr.toString(),
-      contains('Usage: dart dev/tools/bin/bump_version_constraints.dart <new_sdk_constraint>'),
+      contains(
+        'Usage: dart dev/tools/bin/bump_version_constraints.dart <old_sdk_constraint> <new_sdk_constraint>',
+      ),
     );
 
     stdout.clear();
@@ -223,7 +246,7 @@ environment:
     exitCode = null;
 
     bump.run(
-      <String>['^3.13.0-0', 'extra-arg'],
+      <String>['^3.10.0-0'],
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
       stdout: stdout,
@@ -234,7 +257,30 @@ environment:
     expect(exitCode, 1);
     expect(
       stderr.toString(),
-      contains('ERROR: Expected exactly one argument specifying the new SDK constraint.'),
+      contains(
+        'ERROR: Expected exactly two arguments specifying the old SDK constraint and the new SDK constraint.',
+      ),
+    );
+
+    stdout.clear();
+    stderr.clear();
+    exitCode = null;
+
+    bump.run(
+      <String>['^3.10.0-0', '^3.13.0-0', 'extra-arg'],
+      fileSystem: fileSystem,
+      flutterRoot: flutterRoot,
+      stdout: stdout,
+      stderr: stderr,
+      exit: mockExit,
+    );
+
+    expect(exitCode, 1);
+    expect(
+      stderr.toString(),
+      contains(
+        'ERROR: Expected exactly two arguments specifying the old SDK constraint and the new SDK constraint.',
+      ),
     );
   });
 
@@ -244,7 +290,7 @@ environment:
       ..writeAsStringSync('''
 name: good
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.10.0-0
 ''');
 
     fileSystem.file('/flutter/packages/bad/pubspec.yaml')
@@ -252,13 +298,13 @@ environment:
       ..writeAsStringSync('''
 name: bad
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.10.0-0
 ''');
 
     final FileSystem faultyFileSystem = FaultyFileSystem(fileSystem);
 
     bump.run(
-      <String>['^3.13.0-0'],
+      <String>['^3.10.0-0', '^3.13.0-0'],
       fileSystem: faultyFileSystem,
       flutterRoot: faultyFileSystem.directory('/flutter'),
       stdout: stdout,
