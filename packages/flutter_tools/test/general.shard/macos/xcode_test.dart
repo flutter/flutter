@@ -607,55 +607,69 @@ void main() {
         group('getSimulatorPath', () {
           const xcodePath = '/Applications/Xcode.app/Contents/Developer';
           const xcodeContentsPath = '/Applications/Xcode.app/Contents';
-          late MemoryFileSystem fileSystem;
-          late Xcode xcodeWithFs;
-
-          setUp(() {
-            fileSystem = MemoryFileSystem.test();
-            fakeProcessManager.addCommand(
-              const FakeCommand(
-                command: <String>['/usr/bin/xcode-select', '--print-path'],
-                stdout: xcodePath,
-              ),
-            );
-            xcodeWithFs = Xcode.test(
-              processManager: fakeProcessManager,
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-              fileSystem: fileSystem,
-            );
-          });
 
           testWithoutContext('returns DeviceHub.app when it exists', () {
+            final fileSystem = MemoryFileSystem.test();
+            final xcode = Xcode.test(
+              processManager: FakeProcessManager.list(<FakeCommand>[
+                const FakeCommand(
+                  command: <String>['/usr/bin/xcode-select', '--print-path'],
+                  stdout: xcodePath,
+                ),
+              ]),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              fileSystem: fileSystem,
+            );
             fileSystem
                 .directory('$xcodeContentsPath/Applications/DeviceHub.app')
                 .createSync(recursive: true);
-            expect(xcodeWithFs.getSimulatorPath(), '$xcodeContentsPath/Applications/DeviceHub.app');
+            expect(xcode.getSimulatorPath(), '$xcodeContentsPath/Applications/DeviceHub.app');
           });
 
           testWithoutContext('falls back to Simulator.app when DeviceHub does not exist', () {
+            final fileSystem = MemoryFileSystem.test();
+            final xcode = Xcode.test(
+              processManager: FakeProcessManager.list(<FakeCommand>[
+                const FakeCommand(
+                  command: <String>['/usr/bin/xcode-select', '--print-path'],
+                  stdout: xcodePath,
+                ),
+              ]),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              fileSystem: fileSystem,
+            );
             fileSystem
                 .directory('$xcodePath/Applications/Simulator.app')
                 .createSync(recursive: true);
-            expect(xcodeWithFs.getSimulatorPath(), '$xcodePath/Applications/Simulator.app');
+            expect(xcode.getSimulatorPath(), '$xcodePath/Applications/Simulator.app');
           });
 
           testWithoutContext('returns null when neither app directory exists', () {
-            expect(xcodeWithFs.getSimulatorPath(), isNull);
+            final xcode = Xcode.test(
+              processManager: FakeProcessManager.list(<FakeCommand>[
+                const FakeCommand(
+                  command: <String>['/usr/bin/xcode-select', '--print-path'],
+                  stdout: xcodePath,
+                ),
+              ]),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              fileSystem: MemoryFileSystem.test(),
+            );
+            expect(xcode.getSimulatorPath(), isNull);
           });
 
           testWithoutContext('returns null when xcode-select path is unavailable', () {
-            // Uses a separate process manager so setUp's success command is not consumed.
-            final xcodeNoSelect = Xcode.test(
+            final xcode = Xcode.test(
               processManager: FakeProcessManager.list(<FakeCommand>[
                 const FakeCommand(
                   command: <String>['/usr/bin/xcode-select', '--print-path'],
                   exception: ProcessException('/usr/bin/xcode-select', <String>['--print-path']),
                 ),
               ]),
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-              fileSystem: fileSystem,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              fileSystem: MemoryFileSystem.test(),
             );
-            expect(xcodeNoSelect.getSimulatorPath(), isNull);
+            expect(xcode.getSimulatorPath(), isNull);
           });
         });
       });
