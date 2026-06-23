@@ -134,6 +134,11 @@ class SwiftPackage {
           } on FileSystemException {
             // If reading fails, overwrite it.
           }
+        } else {
+          // If the required file doesn't exist, check if the directory already contains other source files.
+          if (targetDirectory.existsSync() && targetDirectory.listSync().isNotEmpty) {
+            skipWriteSource = true;
+          }
         }
         if (!skipWriteSource) {
           requiredSwiftFile.createSync(recursive: true);
