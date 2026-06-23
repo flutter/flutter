@@ -439,7 +439,6 @@ void main() {
             '--no-sandbox',
             '--headless',
             '--window-size=1024,1024',
-            '--enable-unsafe-swiftshader',
             'example_url',
           ],
           stderr: kDevtoolsStderr,
@@ -574,7 +573,6 @@ void main() {
           '--no-sandbox',
           '--headless',
           '--window-size=1024,1024',
-          '--enable-unsafe-swiftshader',
           'example_url',
         ],
         stderr: kDevtoolsStderr,
@@ -652,23 +650,37 @@ void main() {
   );
 
   testWithoutContext('can retry launch when glibc bug happens', () async {
-    const args = <String>[
+    final Platform linuxPlatform = FakePlatform(
+      environment: <String, String>{kChromeEnvironment: 'example_chrome'},
+    );
+    final linuxLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: linuxPlatform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+    final expectedArgs = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
-      ...kChromeArgs,
+      ...kChromeArgs.where((String arg) => arg != '--use-mock-keychain'),
       '--no-sandbox',
       '--headless',
       '--window-size=1024,1024',
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
       '--enable-unsafe-swiftshader',
+      '--disable-gpu-sandbox',
       'example_url',
     ];
 
     // Pretend to hit glibc bug 3 times.
     for (var i = 0; i < 3; i++) {
       processManager.addCommand(
-        const FakeCommand(
-          command: args,
+        FakeCommand(
+          command: expectedArgs,
           stderr:
               'Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: '
               '_dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen '
@@ -678,10 +690,10 @@ void main() {
     }
 
     // Succeed on the 4th try.
-    processManager.addCommand(const FakeCommand(command: args, stderr: kDevtoolsStderr));
+    processManager.addCommand(FakeCommand(command: expectedArgs, stderr: kDevtoolsStderr));
 
     await expectReturnsNormallyLater(
-      chromeLauncher.launch('example_url', skipCheck: true, headless: true),
+      linuxLauncher.launch('example_url', skipCheck: true, headless: true),
     );
   });
 
@@ -694,7 +706,6 @@ void main() {
       '--no-sandbox',
       '--headless',
       '--window-size=1024,1024',
-      '--enable-unsafe-swiftshader',
       'example_url',
     ];
 
@@ -732,7 +743,6 @@ void main() {
             '--no-sandbox',
             '--headless',
             '--window-size=1024,1024',
-            '--enable-unsafe-swiftshader',
             'example_url',
           ],
           stderr: 'nothing in the std error indicating glibc error',
