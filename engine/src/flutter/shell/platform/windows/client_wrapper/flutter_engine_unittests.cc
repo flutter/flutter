@@ -57,6 +57,17 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
   void EngineReloadSystemFonts() override { reload_fonts_called_ = true; }
 
   // |flutter::testing::StubFlutterWindowsApi|
+  void EnginePostPlatformThreadTask(VoidCallback callback,
+                                    VoidCallback on_cancel,
+                                    void* user_data) override {
+    post_task_called_ = true;
+    // Invoke callback immediately so callers can verify it ran.
+    if (callback) {
+      callback(user_data);
+    }
+  }
+
+  // |flutter::testing::StubFlutterWindowsApi|
   bool EngineProcessExternalWindowMessage(FlutterDesktopEngineRef engine,
                                           HWND hwnd,
                                           UINT message,
@@ -87,11 +98,14 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
 
   UINT last_external_message() { return last_external_message_; }
 
+  bool post_task_called() { return post_task_called_; }
+
  private:
   bool create_called_ = false;
   bool run_called_ = false;
   bool destroy_called_ = false;
   bool reload_fonts_called_ = false;
+  bool post_task_called_ = false;
   std::vector<std::string> dart_entrypoint_arguments_;
   VoidCallback next_frame_callback_ = nullptr;
   void* next_frame_user_data_ = nullptr;
@@ -225,6 +239,40 @@ TEST(FlutterEngineTest, ProcessExternalWindowMessage) {
   engine.ProcessExternalWindowMessage(reinterpret_cast<HWND>(1), 1234, 0, 0);
 
   EXPECT_EQ(test_api->last_external_message(), 1234);
+}
+
+TEST(FlutterEngineTest, PostPlatformThreadTaskForwardsToEngine) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+
+  bool callback_ran = false;
+  engine.PostPlatformThreadTask([&callback_ran]() { callback_ran = true; });
+
+  EXPECT_TRUE(test_api->post_task_called());
+  EXPECT_TRUE(callback_ran);
+}
+
+// Verify that PostPlatformThreadTask is a no-op (no crash, no allocation
+// forwarded) when engine_ is null — matching the guard already present in
+// IsPlatformThread.
+TEST(FlutterEngineTest, PostPlatformThreadTaskNoopOnNullEngine) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+  // ShutDown() sets engine_ to nullptr, matching the "failed creation" state
+  // that IsPlatformThread guards against.
+  engine.ShutDown();
+
+  bool callback_ran = false;
+  engine.PostPlatformThreadTask([&callback_ran]() { callback_ran = true; });
+
+  EXPECT_FALSE(test_api->post_task_called());
+  EXPECT_FALSE(callback_ran);
 }
 
 }  // namespace flutter

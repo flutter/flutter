@@ -124,6 +124,11 @@ void FlutterEngine::PostPlatformThreadTask(std::function<void()> callback) {
   if (!callback) {
     return;
   }
+  if (!engine_) {
+    std::cerr << "Cannot post task on an engine that failed creation."
+              << std::endl;
+    return;
+  }
   FlutterDesktopEnginePostPlatformThreadTask(
       engine_,
       /*callback=*/
