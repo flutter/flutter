@@ -25,6 +25,9 @@ abstract class CkSurface extends Surface {
 
   final CanvasProvider _canvasProvider;
 
+  @override
+  bool get supportsPngEncoding => true;
+
   BitmapSize _currentSize = const BitmapSize(1, 1);
 
   /// The underlying Skia surface object.

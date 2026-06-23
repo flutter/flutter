@@ -99,6 +99,9 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   final OffscreenCanvasProvider _canvasProvider;
+
+  @override
+  bool get supportsPngEncoding => false;
   late DomOffscreenCanvas _canvas;
   late SurfaceHandle handle;
   double _currentDevicePixelRatio = -1;
@@ -168,7 +171,10 @@ class SkwasmSurface implements OffscreenSurface {
     final int byteCount = skDataGetSize(dataHandle);
     final Pointer<Uint8> dataPointer = skDataGetConstPointer(dataHandle).cast<Uint8>();
 
-    final output = Uint8List.fromList(dataPointer.asTypedList(byteCount));
+    final output = Uint8List(byteCount);
+    for (var i = 0; i < byteCount; i++) {
+      output[i] = dataPointer[i];
+    }
 
     if (format == ui.ImageByteFormat.rawStraightRgba) {
       unpremultiplyRawRgba(output);

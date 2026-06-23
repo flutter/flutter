@@ -144,6 +144,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
     // pointers fully alive and valid until this method completes.
     final EngineImage cloneImage = clone();
     try {
+      final bool isSourceDetached = cloneImage.imageSource == null ||
+          (cloneImage.imageSource is ImageBitmapImageSource &&
+              (cloneImage.imageSource! as ImageBitmapImageSource).imageBitmap.width == 0) ||
+          (cloneImage.imageSource is VideoFrameImageSource &&
+              (cloneImage.imageSource! as VideoFrameImageSource).videoFrame.displayWidth == 0);
+
       // Direct pixel extraction based on the type of ImageSource.
       switch (cloneImage.imageSource) {
         case final ImageElementImageSource s:
@@ -190,7 +196,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       // requires a synchronous readPixels call, which causes a severe WebGL GPU
       // stall and blocks the browser main thread. Thus, we only use this fallback
       // for CPU-backed images (where imageSource is not null).
-      if (format == ui.ImageByteFormat.png && cloneImage.imageSource != null) {
+      if (format == ui.ImageByteFormat.png && !isSourceDetached) {
         final ByteData? rawData = await renderer.pictureToImageSurface.rasterizeImage(
           cloneImage,
           ui.ImageByteFormat.rawStraightRgba,
@@ -222,6 +228,43 @@ class EngineImage implements ui.Image, StackTraceDebugger {
         final arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;
 
         // Reclaim browser resources eagerly by zeroing the offscreen canvas.
+        offscreenCanvas.width = 0;
+        offscreenCanvas.height = 0;
+        return ByteData.view(arrayBuffer.toDart);
+      }
+
+      // On backends which do not support encoding to PNG directly from a surface,
+      // we draw the image to a picture, resize the offscreen surface, and
+      // rasterize the picture to a DomImageBitmap. The resulting bitmap is then
+      // transferred to an OffscreenCanvas and encoded to a PNG blob asynchronously,
+      // avoiding main-thread GPU stalls.
+      if (format == ui.ImageByteFormat.png &&
+          isSourceDetached &&
+          !renderer.pictureToImageSurface.supportsPngEncoding) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        canvas.drawImage(cloneImage, ui.Offset.zero, ui.Paint());
+        final picture = recorder.endRecording();
+
+        await renderer.pictureToImageSurface.setSize(
+          BitmapSize(cloneImage.width, cloneImage.height),
+        );
+
+        final List<DomImageBitmap> bitmaps = await (renderer.pictureToImageSurface as OffscreenSurface)
+            .rasterizeToImageBitmaps(<ui.Picture>[picture]);
+        final DomImageBitmap bitmap = bitmaps.single;
+
+        final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
+          bitmap.width,
+          bitmap.height,
+        );
+        final context = offscreenCanvas.getContext('bitmaprenderer')!
+            as DomImageBitmapRenderingContext;
+        context.transferFromImageBitmap(bitmap);
+        final DomBlob blob = await offscreenCanvas.convertToBlob();
+        final arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;
+
+        context.transferFromImageBitmap(null);
         offscreenCanvas.width = 0;
         offscreenCanvas.height = 0;
         return ByteData.view(arrayBuffer.toDart);
