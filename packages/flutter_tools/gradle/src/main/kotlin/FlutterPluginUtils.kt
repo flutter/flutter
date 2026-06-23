@@ -536,6 +536,7 @@ object FlutterPluginUtils {
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
+        val agpVersion = VersionFetcher.getAGPVersion(project)
 
         var shouldLogForApp = false
         project.rootProject.subprojects {
@@ -593,6 +594,9 @@ object FlutterPluginUtils {
         }
 
         project.gradle.projectsEvaluated {
+            if (agpVersion == null || agpVersion.major < 9) {
+                return@projectsEvaluated
+            }
             if (shouldLogForApp) {
                 project.logger.error(
                     """
