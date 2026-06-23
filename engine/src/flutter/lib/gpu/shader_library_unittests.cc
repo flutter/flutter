@@ -118,8 +118,8 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferRejectsTruncatedBuffer) {
   // Root offset points past the 8-byte buffer.
   (*data)[0] = 0x10;
   auto library = ShaderLibrary::MakeFromFlatbuffer(
-      impeller::Context::BackendType::kMetal,
-      CreateMappingFromVector(std::move(data)), "test_bundle");
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(data),
+      "test_bundle");
   EXPECT_FALSE(library);
 }
 
@@ -129,8 +129,8 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferRejectsMissingIdentifier) {
   auto data = std::make_shared<std::vector<uint8_t>>(32, 0);
   // No identifier bytes set.
   auto library = ShaderLibrary::MakeFromFlatbuffer(
-      impeller::Context::BackendType::kMetal,
-      CreateMappingFromVector(std::move(data)), "test_bundle");
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(data),
+      "test_bundle");
   EXPECT_FALSE(library);
 }
 
@@ -157,8 +157,8 @@ TEST(FlutterGpuShaderLibraryTest,
   // because there are no shaders to register (empty ShaderMap), NOT because the
   // verifier rejected it.
   auto library = ShaderLibrary::MakeFromFlatbuffer(
-      impeller::Context::BackendType::kMetal,
-      CreateMappingFromVector(std::move(valid)), "test_bundle");
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(valid),
+      "test_bundle");
   EXPECT_FALSE(library);
 }
 
