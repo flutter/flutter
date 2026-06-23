@@ -22,7 +22,7 @@ dependencies:
     sdk: flutter
   # This integration test includes a watchOS pod. Add a Flutter plugin
   # to prompt the tool to run pod install.
-  url_launcher: any
+  url_launcher: ^6.0.0
 
 
 dev_dependencies:
@@ -73,4 +73,4 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
-# PUBSPEC CHECKSUM: rh5vvs
+# PUBSPEC CHECKSUM: dqkobt
