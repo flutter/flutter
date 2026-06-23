@@ -4,6 +4,7 @@
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart';
 import '../android/java.dart';
 
@@ -12,6 +13,7 @@ class AndroidContext {
   AndroidContext({
     required this.androidSdk,
     required this.androidStudio,
+    required this.androidWorkflow,
     required this.gradleUtils,
     required this.java,
   });
@@ -21,6 +23,9 @@ class AndroidContext {
 
   /// Discovers and inspects local Android Studio installations and embedded JDK paths.
   final AndroidStudio? androidStudio;
+
+  /// Manages Android device workflow checks and doctor validation rules.
+  final AndroidWorkflow? androidWorkflow;
 
   /// Utility helpers for interacting with Gradle builds and resolving project configs.
   final GradleUtils gradleUtils;

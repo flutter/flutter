@@ -9,6 +9,7 @@ import 'package:package_config/package_config_types.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';

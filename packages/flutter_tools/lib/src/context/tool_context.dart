@@ -5,10 +5,12 @@
 import 'package:file/file.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -26,6 +28,7 @@ import '../version.dart';
 /// Holds core, platform-independent dependencies.
 class ToolContext {
   ToolContext({
+    required this.artifacts,
     required this.botDetector,
     required this.cache,
     required this.config,
@@ -36,6 +39,7 @@ class ToolContext {
     required this.localEngineLocator,
     required this.logger,
     this.nativeAssetsBuilder,
+    required this.os,
     required this.outputPreferences,
     required this.platform,
     required this.preRunValidator,
@@ -48,6 +52,9 @@ class ToolContext {
     required this.terminal,
     required this.userMessages,
   });
+
+  /// Resolves cached platform artifacts, engine binaries, and framework tools.
+  final Artifacts artifacts;
 
   /// Detects whether the tool is running in a CI or automated bot environment.
   final BotDetector botDetector;
@@ -78,6 +85,9 @@ class ToolContext {
 
   /// Builds and packages native C/C++ or Rust assets for compilation and tests.
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
+  /// Utility helpers for operating system queries, executable discovery, and path lookups.
+  final OperatingSystemUtils os;
 
   /// Manages formatting preferences for console output, such as line wrapping width.
   final OutputPreferences outputPreferences;

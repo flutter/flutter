@@ -29,12 +29,11 @@ class AppleContext {
 
   /// Validates the host CocoaPods installation health and doctor status.
   final CocoaPodsValidator cocoapodsValidator;
-
   /// Manages discovery, booting, and queries for iOS simulator devices.
-  final IOSSimulatorUtils iosSimulatorUtils;
+  final IOSSimulatorUtils? iosSimulatorUtils;
 
   /// Evaluates host readiness and toolchain requirements for iOS workflows.
-  final IOSWorkflow iosWorkflow;
+  final IOSWorkflow? iosWorkflow;
 
   /// Parses Apple Property List (`.plist`) XML and binary format files.
   final PlistParser plistParser;
