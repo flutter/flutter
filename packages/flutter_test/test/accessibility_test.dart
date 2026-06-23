@@ -194,6 +194,40 @@ void main() {
       },
     );
 
+    // When several Text widgets are merged into a single semantics node, every
+    // one of them must still have its contrast checked individually — finding
+    // the first failing widget is enough to fail the guideline.
+    testWidgets('Multiple text elements merged into one semantics node are both checked', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.white,
+            child: const MergeSemantics(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Visible text 1',
+                    style: TextStyle(fontSize: 16.0, color: Colors.white), // Fails.
+                  ),
+                  Text(
+                    'Visible text 2',
+                    style: TextStyle(fontSize: 16.0, color: Colors.black), // Passes.
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
     const surface = Color(0xFFF0F0F0);
 
     /// Shades of blue with contrast ratio of 2.9, 4.4, 4.5 from [surface].

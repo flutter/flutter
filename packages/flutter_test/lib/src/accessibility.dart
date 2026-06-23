@@ -343,6 +343,20 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return data;
       });
 
+      // Precompute each text element's painted bounds in screen coordinates once
+      // per view. Mapping a render object to screen space walks the render tree
+      // (getTransformTo), which is O(tree depth); doing it here rather than
+      // inside _evaluateNode for every (node, element) pair keeps the per-node
+      // check to an O(1) rect intersection and avoids O(nodes * elements *
+      // depth) work.
+      final elementScreenBounds = <Element, Rect>{};
+      for (final element in textElements) {
+        final Rect? screenBounds = _elementScreenBounds(element, renderView);
+        if (screenBounds != null) {
+          elementScreenBounds[element] = screenBounds;
+        }
+      }
+
       // Tracks which text elements have already been checked within this view,
       // so that each one is evaluated against a single semantics node (the
       // deepest one it belongs to) even though it geometrically falls within
@@ -354,7 +368,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         image,
         byteData!,
         renderView,
-        textElements,
+        elementScreenBounds,
         evaluatedElements,
       );
     }
@@ -368,7 +382,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
-    List<Element> textElements,
+    Map<Element, Rect> elementScreenBounds,
     Set<Element> evaluatedElements,
   ) async {
     var result = const Evaluation.pass();
@@ -396,7 +410,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         image,
         byteData,
         renderView,
-        textElements,
+        elementScreenBounds,
         evaluatedElements,
       );
     }
@@ -406,11 +420,17 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     // Check the contrast of every text-bearing widget rendered within this
     // node's bounds. Children are visited first, so the deepest (most specific)
     // node claims each element; the rest skip it via [evaluatedElements].
-    for (final element in textElements) {
+    // [nodeBounds] depends only on the node, so compute it once here rather than
+    // once per element.
+    final Rect nodeBounds = _nodeScreenBounds(node);
+    for (final MapEntry<Element, Rect> entry in elementScreenBounds.entries) {
+      final Element element = entry.key;
       if (evaluatedElements.contains(element)) {
         continue;
       }
-      if (!_elementCorrespondsToNode(node, element, renderView)) {
+      final Rect intersection = nodeBounds.intersect(entry.value);
+      if (intersection.width <= 0 || intersection.height <= 0) {
+        // The element doesn't correspond to this semantics node.
         continue;
       }
       evaluatedElements.add(element);
@@ -419,13 +439,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     return result;
   }
 
-  /// Whether [element]'s painted region overlaps the region described by
-  /// [node], i.e. the text-bearing widget is rendered where the semantics node
-  /// reports itself to be.
-  bool _elementCorrespondsToNode(SemanticsNode node, Element element, RenderView renderView) {
+  /// [element]'s painted bounds in screen coordinates, or null if it has no
+  /// [RenderBox] and therefore cannot be matched against a semantics node.
+  Rect? _elementScreenBounds(Element element, RenderView renderView) {
     final RenderObject? renderBox = element.renderObject;
     if (renderBox is! RenderBox) {
-      return false;
+      return null;
     }
 
     final Matrix4 globalTransform = renderBox.getTransformTo(null);
@@ -436,8 +455,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final rootTransform = Matrix4.identity();
     renderView.applyPaintTransform(renderView.child!, rootTransform);
     rootTransform.multiply(globalTransform);
-    final Rect screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+    return MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+  }
 
+  /// [node]'s rect mapped into the same screen coordinate space used by
+  /// [_elementScreenBounds], by applying its own and its ancestors' transforms.
+  Rect _nodeScreenBounds(SemanticsNode node) {
     Rect nodeBounds = node.rect;
     SemanticsNode? current = node;
     while (current != null) {
@@ -447,8 +470,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       }
       current = current.parent;
     }
-    final Rect intersection = nodeBounds.intersect(screenBounds);
-    return intersection.width > 0 && intersection.height > 0;
+    return nodeBounds;
   }
 
   Future<Evaluation> _evaluateElement(
