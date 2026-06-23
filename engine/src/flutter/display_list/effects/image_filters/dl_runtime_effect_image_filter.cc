@@ -9,9 +9,11 @@ namespace flutter {
 std::shared_ptr<DlImageFilter> DlRuntimeEffectImageFilter::Make(
     sk_sp<DlRuntimeEffect> runtime_effect,
     std::vector<std::shared_ptr<DlColorSource>> samplers,
-    std::shared_ptr<std::vector<uint8_t>> uniform_data) {
+    std::shared_ptr<std::vector<uint8_t>> uniform_data,
+    DlImageSampling input_sampling) {
   return std::make_shared<DlRuntimeEffectImageFilter>(
-      std::move(runtime_effect), std::move(samplers), std::move(uniform_data));
+      std::move(runtime_effect), std::move(samplers), std::move(uniform_data),
+      input_sampling);
 }
 
 DlRect* DlRuntimeEffectImageFilter::map_local_bounds(
@@ -42,7 +44,8 @@ bool DlRuntimeEffectImageFilter::equals_(const DlImageFilter& other) const {
   auto that = static_cast<const DlRuntimeEffectImageFilter*>(&other);
   if (runtime_effect_ != that->runtime_effect_ ||
       samplers_.size() != that->samplers().size() ||
-      uniform_data_->size() != that->uniform_data()->size()) {
+      uniform_data_->size() != that->uniform_data()->size() ||
+      input_sampling_ != that->input_sampling()) {
     return false;
   }
   for (auto i = 0u; i < samplers_.size(); i++) {

@@ -907,6 +907,21 @@ TEST(DisplayListImageFilter, RuntimeEffectEquality) {
   EXPECT_NE(filter_a, filter_c);
 }
 
+TEST(DisplayListImageFilter, RuntimeEffectEqualityWithInputSampling) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_b(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_c(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>(),
+      DlImageSampling::kLinear);
+
+  EXPECT_EQ(filter_a.input_sampling(), DlImageSampling::kNearestNeighbor);
+  EXPECT_EQ(filter_c.input_sampling(), DlImageSampling::kLinear);
+  EXPECT_EQ(filter_a, filter_b);
+  EXPECT_NE(filter_a, filter_c);
+}
+
 TEST(DisplayListImageFilter, RuntimeEffectEqualityWithSamplers) {
   auto image_a =
       DlColorSource::MakeImage(nullptr, DlTileMode::kClamp, DlTileMode::kDecal);

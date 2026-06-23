@@ -131,9 +131,10 @@ void ImageFilter::initComposeFilter(ImageFilter* outer, ImageFilter* inner) {
                                        inner->filter(DlTileMode::kClamp));
 }
 
-void ImageFilter::initShader(ReusableFragmentShader* shader) {
+void ImageFilter::initShader(ReusableFragmentShader* shader,
+                             int filterQualityIndex) {
   FML_DCHECK(shader);
-  filter_ = shader->as_image_filter();
+  filter_ = shader->as_image_filter(SamplingFromIndex(filterQualityIndex));
 }
 
 bool ImageFilter::equals(Dart_Handle a_handle, Dart_Handle b_handle) {

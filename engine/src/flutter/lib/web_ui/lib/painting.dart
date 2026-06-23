@@ -691,7 +691,11 @@ class ImageFilter {
       engine.renderer.composeImageFilters(outer: outer, inner: inner);
 
   // ignore: avoid_unused_constructor_parameters
-  factory ImageFilter.shader(FragmentShader shader) {
+  factory ImageFilter.shader(
+    FragmentShader shader, {
+    // ignore: avoid_unused_constructor_parameters
+    FilterQuality filterQuality = FilterQuality.none,
+  }) {
     throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
   }
 
