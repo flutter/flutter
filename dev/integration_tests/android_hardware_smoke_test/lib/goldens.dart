@@ -14,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import 'constants.dart';
 import 'pixel_exact_local_file_comparator.dart';
 
 /// Captures the image bytes of the widget associated with [targetKey] and either compares it to a golden file or returns the bytes to the test driver for host-side comparison, depending on the value of [performAppSideGoldenCompare].
@@ -33,7 +34,7 @@ Future<void> handleGoldenRequest(
   try {
     final String? goldenVariantValue = await goldenVariant;
 
-    if (testName == 'platformViewTest') {
+    if (testName.startsWith(platformViewPrefix)) {
       // Platform views cannot be captured using RepaintBoundary.toImage() since they reside in separate
       // native surface layers. Instead, we wait for layout to settle, calculate the widget's physical
       // coordinates on screen, and return them so the runner can perform a compositor-level capture.
@@ -68,11 +69,11 @@ Future<void> handleGoldenRequest(
       final int h = (size.height * devicePixelRatio).round();
 
       completer.complete(<String, Object?>{
-        'message': 'Rendered $testName',
-        'x': x,
-        'y': y,
-        'width': w,
-        'height': h,
+        keyMessage: 'Rendered $testName',
+        keyX: x,
+        keyY: y,
+        keyWidth: w,
+        keyHeight: h,
       });
       return;
     }
@@ -85,17 +86,17 @@ Future<void> handleGoldenRequest(
         resultImageBytes,
         goldenVariantValue,
       );
-      completer.complete(<String, Object?>{'message': failureMessage ?? 'Rendered $testName'});
+      completer.complete(<String, Object?>{keyMessage: failureMessage ?? 'Rendered $testName'});
     } else {
       completer.complete(<String, Object?>{
-        'message': 'Rendered $testName',
-        'imageBytes': base64.encode(resultImageBytes),
+        keyMessage: 'Rendered $testName',
+        keyImageBytes: base64.encode(resultImageBytes),
       });
     }
   } catch (e, stackTrace) {
     // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      'message': 'Error occurred during golden request handling: $e\n$stackTrace',
+      keyMessage: 'Error occurred during golden request handling: $e\n$stackTrace',
     });
   }
 }
