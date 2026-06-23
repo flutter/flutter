@@ -8,36 +8,41 @@
 #include <gtk/gtk.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
 
-G_DECLARE_FINAL_TYPE(FlViewRenderer,
-                     fl_view_renderer,
-                     FL,
-                     VIEW_RENDERER,
-                     GtkDrawingArea)
+G_DECLARE_DERIVABLE_TYPE(FlViewRenderer,
+                         fl_view_renderer,
+                         FL,
+                         VIEW_RENDERER,
+                         GtkDrawingArea)
 
 /**
  * FlViewRenderer:
  *
  * #FlViewRenderer is a GTK widget that renders the contents of a Flutter view.
- * It owns the compositor and OpenGL context used to draw frames produced by the
- * Flutter engine. Input handling and other view responsibilities are handled by
- * #FlView.
+ * Input handling and other view responsibilities are handled by #FlView.
+ *
+ * Subclasses implement rendering for a particular backend, for example
+ * #FlViewRendererOpenGL and #FlViewRendererSoftware. The "first-frame" signal
+ * is emitted by subclasses when the first frame has been rendered.
  */
 
-/**
- * fl_view_renderer_new:
- * @engine: the #FlEngine to render.
- * @sized_to_content: %TRUE if the view size is controlled by Flutter.
- *
- * Creates a new widget that renders Flutter frames.
- *
- * Returns: a new #FlViewRenderer.
- */
-FlViewRenderer* fl_view_renderer_new(FlEngine* engine,
-                                     gboolean sized_to_content);
+struct _FlViewRendererClass {
+  GtkDrawingAreaClass parent_class;
+
+  /**
+   * Sets the background color drawn behind the Flutter frame.
+   */
+  void (*set_background_color)(FlViewRenderer* renderer, const GdkRGBA* color);
+
+  /**
+   * Composites a frame into the renderer. May be called from any thread.
+   */
+  void (*present_layers)(FlViewRenderer* renderer,
+                         const FlutterLayer** layers,
+                         size_t layers_count);
+};
 
 /**
  * fl_view_renderer_set_background_color:
