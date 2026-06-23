@@ -8,6 +8,7 @@ library;
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -80,68 +81,80 @@ class AndroidSdk {
   /// the SDK on demand.
   bool get licensesAvailable => directory.childDirectory('licenses').existsSync();
 
-  static AndroidSdk? locateAndroidSdk() {
+  static AndroidSdk? locateAndroidSdk({
+    FileSystem? fileSystem,
+    Platform? platform,
+    Config? config,
+  }) {
+    final FileSystem fs = fileSystem ?? globals.fs;
+    final Platform plt = platform ?? globals.platform;
+    final Config cfg = config ?? globals.config;
+    final fsUtils = FileSystemUtils(fileSystem: fs, platform: plt);
+    final osUtils = OperatingSystemUtils(
+      fileSystem: fs,
+      logger: globals.logger,
+      platform: plt,
+      processManager: globals.processManager,
+    );
+
     String? findAndroidHomeDir() {
       String? androidHomeDir;
-      if (globals.config.containsKey('android-sdk')) {
-        androidHomeDir = globals.config.getValue('android-sdk') as String?;
-      } else if (globals.platform.environment.containsKey(kAndroidHome)) {
-        androidHomeDir = globals.platform.environment[kAndroidHome];
-      } else if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {
-        androidHomeDir = globals.platform.environment[kAndroidSdkRoot];
-      } else if (globals.platform.isLinux) {
-        if (globals.fsUtils.homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(globals.fsUtils.homeDirPath!, 'Android', 'Sdk');
+      if (cfg.containsKey('android-sdk')) {
+        androidHomeDir = cfg.getValue('android-sdk') as String?;
+      } else if (plt.environment.containsKey(kAndroidHome)) {
+        androidHomeDir = plt.environment[kAndroidHome];
+      } else if (plt.environment.containsKey(kAndroidSdkRoot)) {
+        androidHomeDir = plt.environment[kAndroidSdkRoot];
+      } else if (plt.isLinux) {
+        if (fsUtils.homeDirPath != null) {
+          androidHomeDir = fs.path.join(fsUtils.homeDirPath!, 'Android', 'Sdk');
         }
-      } else if (globals.platform.isMacOS) {
-        if (globals.fsUtils.homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(
-            globals.fsUtils.homeDirPath!,
-            'Library',
-            'Android',
-            'sdk',
-          );
+      } else if (plt.isMacOS) {
+        if (fsUtils.homeDirPath != null) {
+          androidHomeDir = fs.path.join(fsUtils.homeDirPath!, 'Library', 'Android', 'sdk');
         }
-      } else if (globals.platform.isWindows) {
-        if (globals.fsUtils.homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(
-            globals.fsUtils.homeDirPath!,
-            'AppData',
-            'Local',
-            'Android',
-            'sdk',
-          );
+      } else if (plt.isWindows) {
+        if (fsUtils.homeDirPath != null) {
+          androidHomeDir = fs.path.join(fsUtils.homeDirPath!, 'AppData', 'Local', 'Android', 'sdk');
         }
       }
 
       if (androidHomeDir != null) {
-        if (validSdkDirectory(androidHomeDir)) {
+        if (validSdkDirectory(androidHomeDir, fileSystem: fs)) {
           return androidHomeDir;
         }
-        if (validSdkDirectory(globals.fs.path.join(androidHomeDir, 'sdk'))) {
-          return globals.fs.path.join(androidHomeDir, 'sdk');
+        if (validSdkDirectory(fs.path.join(androidHomeDir, 'sdk'), fileSystem: fs)) {
+          return fs.path.join(androidHomeDir, 'sdk');
         }
       }
 
       // in build-tools/$version/aapt
-      final List<File> aaptBins = globals.os.whichAll('aapt');
+      final List<File> aaptBins = osUtils.whichAll('aapt');
       for (var aaptBin in aaptBins) {
         // Make sure we're using the aapt from the SDK.
-        aaptBin = globals.fs.file(aaptBin.resolveSymbolicLinksSync());
-        final String dir = aaptBin.parent.parent.parent.path;
-        if (validSdkDirectory(dir)) {
-          return dir;
+        try {
+          aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
+          final String dir = aaptBin.parent.parent.parent.path;
+          if (validSdkDirectory(dir, fileSystem: fs)) {
+            return dir;
+          }
+        } on FileSystemException {
+          // Ignore if the file cannot be resolved (e.g. in tests using MemoryFileSystem).
         }
       }
 
       // in platform-tools/adb
-      final List<File> adbBins = globals.os.whichAll('adb');
+      final List<File> adbBins = osUtils.whichAll('adb');
       for (var adbBin in adbBins) {
         // Make sure we're using the adb from the SDK.
-        adbBin = globals.fs.file(adbBin.resolveSymbolicLinksSync());
-        final String dir = adbBin.parent.parent.path;
-        if (validSdkDirectory(dir)) {
-          return dir;
+        try {
+          adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
+          final String dir = adbBin.parent.parent.path;
+          if (validSdkDirectory(dir, fileSystem: fs)) {
+            return dir;
+          }
+        } on FileSystemException {
+          // Ignore if the file cannot be resolved.
         }
       }
 
@@ -155,19 +168,22 @@ class AndroidSdk {
       return null;
     }
 
-    return AndroidSdk(globals.fs.directory(androidHomeDir));
+    return AndroidSdk(fs.directory(androidHomeDir), fileSystem: fs);
   }
 
-  static bool validSdkDirectory(String dir) {
-    return sdkDirectoryHasLicenses(dir) || sdkDirectoryHasPlatformTools(dir);
+  static bool validSdkDirectory(String dir, {FileSystem? fileSystem}) {
+    return sdkDirectoryHasLicenses(dir, fileSystem: fileSystem) ||
+        sdkDirectoryHasPlatformTools(dir, fileSystem: fileSystem);
   }
 
-  static bool sdkDirectoryHasPlatformTools(String dir) {
-    return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'platform-tools'));
+  static bool sdkDirectoryHasPlatformTools(String dir, {FileSystem? fileSystem}) {
+    final FileSystem fs = fileSystem ?? globals.fs;
+    return fs.isDirectorySync(fs.path.join(dir, 'platform-tools'));
   }
 
-  static bool sdkDirectoryHasLicenses(String dir) {
-    return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'licenses'));
+  static bool sdkDirectoryHasLicenses(String dir, {FileSystem? fileSystem}) {
+    final FileSystem fs = fileSystem ?? globals.fs;
+    return fs.isDirectorySync(fs.path.join(dir, 'licenses'));
   }
 
   List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
