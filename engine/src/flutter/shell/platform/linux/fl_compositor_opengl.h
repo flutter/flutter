@@ -10,7 +10,6 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
-#include "flutter/shell/platform/linux/fl_task_runner.h"
 
 G_BEGIN_DECLS
 
@@ -28,7 +27,6 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
 
 /**
  * fl_compositor_opengl_new:
- * @task_runner: an #FlTaskRunnner.
  * @opengl_manager: an #FlOpenGLManager
  * @shareable: %TRUE if the can use a framebuffer that is shared between
  * contexts.
@@ -37,8 +35,7 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
  *
  * Returns: a new #FlCompositorOpenGL.
  */
-FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
-                                             FlOpenGLManager* opengl_manager,
+FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
                                              gboolean shareable);
 
 /**
@@ -72,8 +69,6 @@ void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* compositor,
  * @compositor: an #FlCompositorOpenGL.
  * @cr: a Cairo rendering context.
  * @window: window being rendered into.
- * @wait_for_frame: if the available frame is not the size of the window block
- * until a new frame is received.
  *
  * Renders the current frame. Called from the GTK thread.
  *
@@ -81,8 +76,7 @@ void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* compositor,
  */
 gboolean fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
                                      cairo_t* cr,
-                                     GdkWindow* window,
-                                     gboolean wait_for_frame);
+                                     GdkWindow* window);
 
 G_END_DECLS
 
