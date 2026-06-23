@@ -14,11 +14,10 @@ HostWindowTooltip::HostWindowTooltip(
     const BoxConstraints& constraints,
     GetWindowPositionCallback get_position_callback,
     HWND parent)
-    : HostWindow(window_manager, engine),
+    : HostWindowSized(window_manager, engine, /*resizable=*/false),
       get_position_callback_(get_position_callback),
       parent_(parent),
-      isolate_(Isolate::Current()),
-      view_alive_(std::make_shared<int>(0)) {
+      isolate_(Isolate::Current()) {
   // Use minimum constraints as initial size to ensure the view can be created
   // with valid metrics.
   auto const initial_width =
@@ -35,47 +34,15 @@ HostWindowTooltip::HostWindowTooltip(
       .title = L"",
       .owner_window = parent,
       .nCmdShow = SW_SHOWNOACTIVATE,
-      .sizing_delegate = this,
+      .sizing_delegate = AsSizingDelegate(),
       .is_sized_to_content = true});
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(parent_));
 }
 
-HostWindowTooltip::~HostWindowTooltip() {
-  // Destroy the view (and therefore the raster thread's access to this object
-  // as a sizing delegate) while this HostWindowTooltip is still fully alive.
-  //
-  // This tooltip is itself the view's FlutterWindowsViewSizingDelegate. The
-  // view is owned by |view_controller_|, a member of the HostWindow base class,
-  // which would otherwise be destroyed *after* this derived object's
-  // FlutterWindowsViewSizingDelegate subobject. Resetting it here triggers
-  // FlutterWindowsEngine::RemoveView, which guarantees the raster thread no
-  // longer presents to (or sizes) this view, before the sizing delegate is
-  // torn down. Without this, the raster thread's sized-to-content path can
-  // call into a destroyed sizing delegate and crash.
-  view_controller_.reset();
-}
-
-void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {
-  // This is called from the raster thread.
-  std::weak_ptr<int> weak_view_alive = view_alive_;
-  engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
-    auto const view_alive = weak_view_alive.lock();
-    if (!view_alive) {
-      return;
-    }
-    if (width_ == width && height_ == height) {
-      return;
-    }
-
-    if (is_being_destroyed_) {
-      return;
-    }
-
-    width_ = width;
-    height_ = height;
-    UpdatePosition();
-  });
+void HostWindowTooltip::ApplyContentSize(int32_t physical_width,
+                                         int32_t physical_height) {
+  UpdatePosition();
 }
 
 WindowRect HostWindowTooltip::GetWorkArea() const {
@@ -113,7 +80,7 @@ void HostWindowTooltip::UpdatePosition() {
 
   IsolateScope scope(isolate_);
   auto rect = get_position_callback_(
-      WindowSize{width_, height_},
+      WindowSize{physical_width_, physical_height_},
       WindowRect{parent_top_left.x, parent_top_left.y,
                  parent_bottom_right.x - parent_top_left.x,
                  parent_bottom_right.y - parent_top_left.y},
@@ -124,7 +91,7 @@ void HostWindowTooltip::UpdatePosition() {
 
   // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.
-  if (rect->width < width_ || rect->height < height_) {
+  if (rect->width < physical_width_ || rect->height < physical_height_) {
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }

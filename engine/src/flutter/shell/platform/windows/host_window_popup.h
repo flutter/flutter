@@ -6,13 +6,12 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_POPUP_H_
 
 #include <cstdint>
-#include "host_window.h"
+#include "host_window_sized.h"
 #include "shell/platform/windows/flutter_windows_view.h"
 #include "shell/platform/windows/window_manager.h"
 
 namespace flutter {
-class HostWindowPopup : public HostWindow,
-                        private FlutterWindowsViewSizingDelegate {
+class HostWindowPopup : public HostWindowSized {
  public:
   // Creates a popup window.
   HostWindowPopup(WindowManager* window_manager,
@@ -21,29 +20,20 @@ class HostWindowPopup : public HostWindow,
                   GetWindowPositionCallback get_position_callback,
                   HWND parent);
 
-  ~HostWindowPopup() override;
-
   // Update the position of the popup window based off the current size
   // of the popup.
   void UpdatePosition();
 
+ protected:
+  void ApplyContentSize(int32_t physical_width,
+                        int32_t physical_height) override;
+
  private:
-  void DidUpdateViewSize(int32_t width, int32_t height) override;
   WindowRect GetWorkArea() const override;
 
   GetWindowPositionCallback get_position_callback_;
   HWND parent_;
   Isolate isolate_;
-
-  // Used to track whether the view is still in tasks scheduled from raster
-  // thread.
-  std::shared_ptr<int> view_alive_;
-
-  // The current width of the popup.
-  int width_ = 0;
-
-  // The current height of the popup.
-  int height_ = 0;
 };
 }  // namespace flutter
 

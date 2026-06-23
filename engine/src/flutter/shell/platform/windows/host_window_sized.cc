@@ -18,7 +18,7 @@ HostWindowSized::HostWindowSized(WindowManager* window_manager,
 
 HostWindowSized::~HostWindowSized() {
   // Destroy the view (and therefore the raster thread's access to this object
-  // as a sizing delegate) while this HostWindowSized is still fully alive.
+  // as a sizing delegate) while this object is still fully alive.
   //
   // When sized to content, this object is the view's
   // FlutterWindowsViewSizingDelegate. The view is owned by |view_controller_|,
@@ -28,6 +28,12 @@ HostWindowSized::~HostWindowSized() {
   // raster thread no longer presents to (or sizes) this view, before the
   // sizing delegate is torn down. Without this, the raster thread's
   // sized-to-content path can call into a destroyed sizing delegate and crash.
+  //
+  // Subclasses (e.g. HostWindowPopup, HostWindowTooltip) must not define their
+  // own destructor for this purpose: the sizing-delegate entry point
+  // (DidUpdateViewSize) lives in this class, so resetting the view here, in the
+  // most-derived sizing-delegate owner's destructor, is sufficient to stop the
+  // raster thread before any subobject is destroyed.
   view_controller_.reset();
 }
 
@@ -39,40 +45,46 @@ void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {
     if (!view_alive) {
       return;
     }
-    if (physical_width_ == width && physical_width_ == height) {
+    if (physical_width_ == width && physical_height_ == height) {
       return;
     }
     if (is_being_destroyed_) {
       return;
     }
     physical_width_ = width;
-    physical_width_ = height;
+    physical_height_ = height;
 
-    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
-    GetWindowInfo(window_handle_, &window_info);
-
-    // Convert physical pixels to logical pixels.
-    UINT const dpi = GetDpiForHWND(window_handle_);
-    double const scale = static_cast<double>(dpi > 0 ? dpi : 96) / 96.0;
-    std::optional<Size> const window_size = GetWindowSizeForClientSize(
-        *engine_->windows_proc_table(), Size(width / scale, height / scale),
-        box_constraints_.smallest(), box_constraints_.biggest(),
-        window_info.dwStyle, window_info.dwExStyle, nullptr);
-
-    if (!window_size) {
-      return;
-    }
-
-    SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
-                 window_size->height(),
-                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-
-    if (resizable_) {
-      // For resizable windows, stop tracking content size after the initial
-      // frame so subsequent user-initiated resizes are forwarded to Flutter.
-      view_controller_->view()->SetSizedToContent(false);
-    }
+    ApplyContentSize(width, height);
   });
+}
+
+void HostWindowSized::ApplyContentSize(int32_t physical_width,
+                                       int32_t physical_height) {
+  WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+  GetWindowInfo(window_handle_, &window_info);
+
+  // Convert physical pixels to logical pixels.
+  UINT const dpi = GetDpiForHWND(window_handle_);
+  double const scale = static_cast<double>(dpi > 0 ? dpi : 96) / 96.0;
+  std::optional<Size> const window_size = GetWindowSizeForClientSize(
+      *engine_->windows_proc_table(),
+      Size(physical_width / scale, physical_height / scale),
+      box_constraints_.smallest(), box_constraints_.biggest(),
+      window_info.dwStyle, window_info.dwExStyle, nullptr);
+
+  if (!window_size) {
+    return;
+  }
+
+  SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
+               window_size->height(),
+               SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+
+  if (resizable_) {
+    // For resizable windows, stop tracking content size after the initial
+    // frame so subsequent user-initiated resizes are forwarded to Flutter.
+    view_controller_->view()->SetSizedToContent(false);
+  }
 }
 
 WindowRect HostWindowSized::GetWorkArea() const {

@@ -12,14 +12,16 @@
 
 namespace flutter {
 
-// Base class for HostWindowRegular and HostWindowDialog.
+// Base class for the sized-to-content archetypes: HostWindowRegular,
+// HostWindowDialog, HostWindowPopup, and HostWindowTooltip.
 //
-// Provides the shared sized-to-content implementation used by both archetypes:
-// tracking the last rendered content size, calling SetContentSize() after each
-// frame, and optionally disabling content-size tracking once the user resizes
-// the window. HostWindowPopup and HostWindowTooltip are not derived from this
-// class because they position themselves relative to a parent window rather
-// than sizing to their own content.
+// Provides the shared sized-to-content implementation used by these
+// archetypes: tracking the last rendered content size and reacting to it after
+// each frame. The default reaction resizes the window in place and optionally
+// disables content-size tracking once the user resizes the window.
+// HostWindowPopup and HostWindowTooltip override ApplyContentSize() to instead
+// reposition themselves relative to a parent window whenever their content
+// size changes.
 class HostWindowSized : public HostWindow,
                         private FlutterWindowsViewSizingDelegate {
  protected:
@@ -34,6 +36,14 @@ class HostWindowSized : public HostWindow,
   // because FlutterWindowsViewSizingDelegate is a private base of this class
   // and the conversion is therefore inaccessible to derived classes.
   FlutterWindowsViewSizingDelegate* AsSizingDelegate() { return this; }
+
+  // Called on the platform thread after the rendered content size has changed
+  // to |physical_width| x |physical_height| (in physical pixels). The base
+  // implementation resizes the window in place to fit the content and, for
+  // resizable windows, stops tracking content size after the initial frame.
+  // Subclasses that position themselves relative to a parent override this.
+  virtual void ApplyContentSize(int32_t physical_width,
+                                int32_t physical_height);
 
   // Whether the user can manually resize this window.
   const bool resizable_;
