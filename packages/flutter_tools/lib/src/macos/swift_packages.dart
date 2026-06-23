@@ -127,13 +127,7 @@ class SwiftPackage {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
         var skipWriteSource = false;
         if (requiredSwiftFile.existsSync()) {
-          try {
-            if (requiredSwiftFile.readAsStringSync() == _swiftPackageSourceTemplate) {
-              skipWriteSource = true;
-            }
-          } on FileSystemException {
-            // If reading fails, overwrite it.
-          }
+          skipWriteSource = true;
         } else {
           // If the required file doesn't exist, check if the directory already contains other source files.
           if (targetDirectory.existsSync() && targetDirectory.listSync().isNotEmpty) {
