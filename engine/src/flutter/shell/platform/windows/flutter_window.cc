@@ -735,14 +735,11 @@ FlutterWindow::HandleMessage(UINT const message,
         break;
       }
 
-      if (message == WM_LBUTTONDOWN) {
-        // Capture the pointer in case the user drags outside the client area.
-        // In this case, the "mouse leave" event is delayed until the user
-        // releases the button. It's only activated on left click given that
-        // it's more common for apps to handle dragging with only the left
-        // button.
-        SetCapture(window_handle_);
-      }
+      // Capture the pointer in case the user drags outside the client area.
+      // In this case, the "mouse leave" event is delayed until the user
+      // releases the button.
+      SetCapture(window_handle_);
+
       button_pressed = message;
       if (message == WM_XBUTTONDOWN) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
@@ -764,7 +761,8 @@ FlutterWindow::HandleMessage(UINT const message,
         break;
       }
 
-      if (message == WM_LBUTTONUP) {
+      flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
+      if (flutter_button == 0) {
         ReleaseCapture();
       }
       button_pressed = message;
@@ -773,7 +771,6 @@ FlutterWindow::HandleMessage(UINT const message,
       }
       x_pos = GET_X_LPARAM(lparam);
       y_pos = GET_Y_LPARAM(lparam);
-      flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
 
       OnPointerUp(static_cast<double>(x_pos), static_cast<double>(y_pos),
                   device_kind, kDefaultPointerDeviceId, flutter_button);
