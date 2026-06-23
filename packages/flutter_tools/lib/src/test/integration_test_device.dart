@@ -26,6 +26,7 @@ class IntegrationTestTestDevice implements TestDevice {
     required this.debuggingOptions,
     required this.userIdentifier,
     required this.compileExpression,
+    this.ddsShutdownTimeout = const Duration(seconds: 5),
   });
 
   final int id;
@@ -33,6 +34,7 @@ class IntegrationTestTestDevice implements TestDevice {
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
+  final Duration ddsShutdownTimeout;
   late final _ddsLauncher = DartDevelopmentService(logger: globals.logger);
 
   ApplicationPackage? _applicationPackage;
@@ -152,7 +154,11 @@ class IntegrationTestTestDevice implements TestDevice {
     }
 
     await device.dispose();
-    _ddsLauncher.shutdown();
+    try {
+      await _ddsLauncher.shutdown().timeout(ddsShutdownTimeout);
+    } on TimeoutException {
+      globals.printTrace('Warning: Dart Development Service shutdown timed out.');
+    }
     _finished.complete();
   }
 
