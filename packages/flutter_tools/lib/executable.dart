@@ -241,7 +241,7 @@ List<FlutterCommand> generateCommands({
   ),
   CreateCommand(verboseHelp: verboseHelp),
   DaemonCommand(hidden: !verboseHelp),
-  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
     deviceManager: toolDependencies.deviceManager,
     doctor: toolDependencies.doctor,
