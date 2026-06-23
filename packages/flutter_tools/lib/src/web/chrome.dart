@@ -574,7 +574,9 @@ class Chromium {
 
     for (var i = 1; i <= attempts; i++) {
       try {
-        final List<ChromeTab> tabs = await chromeConnection.getTabs(retryFor: retryFor);
+        final List<ChromeTab> tabs = await chromeConnection
+            .getTabs(retryFor: retryFor)
+            .timeout(const Duration(seconds: 20));
 
         if (tabs.isNotEmpty) {
           _hasValidChromeConnection = true;
@@ -588,6 +590,10 @@ class Chromium {
           rethrow;
         }
       } on IOException {
+        if (i == attempts) {
+          rethrow;
+        }
+      } on TimeoutException {
         if (i == attempts) {
           rethrow;
         }
