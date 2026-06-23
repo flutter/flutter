@@ -100,8 +100,12 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
   @override
   Stream<bool> get onAnalyzing => const Stream<bool>.empty();
 
+  bool waitForAnalysisCalled = false;
+
   @override
-  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {}
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    waitForAnalysisCalled = true;
+  }
 }
 
 class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
@@ -208,7 +212,10 @@ void main() {
     return fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
   }
 
-  Future<void> runWidgetPreviewCommand(List<String> arguments) async {
+  Future<void> runWidgetPreviewCommand(
+    List<String> arguments, {
+    Future<AnalysisServer> Function()? analysisServerFactoryOverride,
+  }) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
         verboseHelp: false,
@@ -228,7 +235,8 @@ void main() {
         processManager: loggingProcessManager,
         terminal: FakeTerminal(),
         dtdServicesOverride: fakeDtdServices,
-        analysisServerFactoryOverride: () async => FakeAnalysisServer(),
+        analysisServerFactoryOverride:
+            analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
       ),
     );
     await runner.run(<String>['widget-preview', ...arguments]);
@@ -258,6 +266,7 @@ void main() {
     required Directory? rootProject,
     List<String>? arguments,
     bool legacyDetection = false,
+    Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
     // This might get changed during the test, so keep track of the original directory.
     final Directory current = fs.currentDirectory;
@@ -268,7 +277,7 @@ void main() {
       '--no-launch-previewer',
       '--verbose',
       ?rootProject?.path,
-    ]);
+    ], analysisServerFactoryOverride: analysisServerFactoryOverride);
     // Don't perform analysis on Windows since `dart pub add` will use '\' for
     // path dependencies and cause analysis to fail.
     // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
@@ -417,6 +426,35 @@ void main() {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
         expectSinglePreviewLaunchTimingEvent();
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'start waits for analysis to complete',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final fakeAnalysisServer = FakeAnalysisServer();
+
+        await startWidgetPreview(
+          rootProject: rootProject,
+          analysisServerFactoryOverride: () async => fakeAnalysisServer,
+        );
+
+        expect(fakeAnalysisServer.waitForAnalysisCalled, isTrue);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
