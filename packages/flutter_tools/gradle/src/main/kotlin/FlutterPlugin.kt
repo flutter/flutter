@@ -153,7 +153,10 @@ class FlutterPlugin : Plugin<Project> {
 
         FlutterPluginUtils.getTargetPlatforms(project).forEach { targetArch ->
             val abiValue: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
-            FlutterPluginUtils.getAndroidExtension(project).splits.abi.include(abiValue!!)
+            FlutterPluginUtils
+                .getAndroidExtension(project)
+                .splits.abi
+                .include(abiValue!!)
         }
 
         val flutterExecutableName = getExecutableNameForPlatform("flutter")
