@@ -234,63 +234,13 @@ abstract class CkSurface extends Surface {
   @override
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
     await _initialized.future;
-
-    final engineImage = image as EngineImage;
-    assert(
-      engineImage.backendImage is CkImageDelegate,
-      'The image being rasterized must be a CanvasKit image.',
-    );
-    final SkImage skImage = (engineImage.backendImage as CkImageDelegate).skImage;
-
-    final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba
-        ? canvasKit.AlphaType.Unpremul
-        : canvasKit.AlphaType.Premul;
-
-    Uint8List? bytes;
-    if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
-      final imageInfo = SkImageInfo(
-        alphaType: alphaType,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-        width: skImage.width(),
-        height: skImage.height(),
-      );
-      bytes = skImage.readPixels(0, 0, imageInfo);
-    } else {
-      bytes = skImage.encodeToBytes(); // defaults to PNG 100%
-    }
-
-    if (bytes != null) {
-      return bytes.buffer.asByteData();
-    }
-
-    setSize(BitmapSize(engineImage.width, engineImage.height));
+    final ckImage = image as CkImage;
     final SkSurface skSurface = _skSurface!;
     final canvas = CkCanvas.fromSkCanvas(skSurface.getCanvas());
-
-    canvas.clear(const ui.Color(0x00000000));
-    final paint = CkPaint();
-
-    canvas.drawImage(engineImage, ui.Offset.zero, paint);
+    canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
     final SkImage snapshot = skSurface.makeImageSnapshot();
-
-    try {
-      if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
-        final imageInfo = SkImageInfo(
-          alphaType: alphaType,
-          colorType: canvasKit.ColorType.RGBA_8888,
-          colorSpace: SkColorSpaceSRGB,
-          width: engineImage.width.toDouble(),
-          height: engineImage.height.toDouble(),
-        );
-        bytes = snapshot.readPixels(0, 0, imageInfo);
-      } else {
-        bytes = snapshot.encodeToBytes();
-      }
-    } finally {
-      snapshot.delete();
-    }
-
+    final Uint8List? bytes = snapshot.encodeToBytes();
+    snapshot.delete();
     return bytes?.buffer.asByteData();
   }
 
@@ -378,7 +328,7 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
 
   @override
   bool get isConnected =>
-      (canvas as JSAny?).isA<DomHTMLCanvasElement>() &&
+      ((canvas as JSAny?).isA<DomHTMLCanvasElement>()) &&
       (canvas as DomHTMLCanvasElement).isConnected!;
 
   @override

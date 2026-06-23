@@ -1151,9 +1151,9 @@ void _canvasTests() {
   });
 
   test('drawAtlas', () async {
-    final EngineImage image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawAtlas(
-      (image.backendImage as CkImageDelegate).skImage,
+      image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[1, 0, 2, 3]),
       SkPaint(),
@@ -1179,9 +1179,9 @@ void _canvasTests() {
   });
 
   test('drawImageOptions', () async {
-    final EngineImage image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageOptions(
-      (image.backendImage as CkImageDelegate).skImage,
+      image.skImage,
       10,
       20,
       canvasKit.FilterMode.Linear,
@@ -1191,21 +1191,14 @@ void _canvasTests() {
   });
 
   test('drawImageCubic', () async {
-    final EngineImage image = await createImageFromBytes(kTransparentImage);
-    canvas.drawImageCubic(
-      (image.backendImage as CkImageDelegate).skImage,
-      10,
-      20,
-      0.3,
-      0.3,
-      SkPaint(),
-    );
+    final CkImage image = await createImageFromBytes(kTransparentImage);
+    canvas.drawImageCubic(image.skImage, 10, 20, 0.3, 0.3, SkPaint());
   });
 
   test('drawImageRectOptions', () async {
-    final EngineImage image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageRectOptions(
-      (image.backendImage as CkImageDelegate).skImage,
+      image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
@@ -1215,9 +1208,9 @@ void _canvasTests() {
   });
 
   test('drawImageRectCubic', () async {
-    final EngineImage image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageRectCubic(
-      (image.backendImage as CkImageDelegate).skImage,
+      image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[0, 0, 1, 1]),
       0.3,
@@ -1227,9 +1220,9 @@ void _canvasTests() {
   });
 
   test('drawImageNine', () async {
-    final EngineImage image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageNine(
-      (image.backendImage as CkImageDelegate).skImage,
+      image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
@@ -1447,16 +1440,16 @@ void _canvasTests() {
       SkPaint()..setColorInt(0xAAFFFFFF),
     );
     final picture = CkPicture(otherRecorder.finishRecordingAsPicture());
-    final image = await picture.toImage(1, 1) as EngineImage;
-    final ByteData rawData = (await image.toByteData())!;
+    final image = await picture.toImage(1, 1) as CkImage;
+    final ByteData rawData = await image.toByteData();
     expect(rawData.lengthInBytes, greaterThan(0));
     expect(rawData.buffer.asUint32List(), <int>[0xAAAAAAAA]);
-    final ByteData rawStraightData = (await image.toByteData(
+    final ByteData rawStraightData = await image.toByteData(
       format: ui.ImageByteFormat.rawStraightRgba,
-    ))!;
+    );
     expect(rawStraightData.lengthInBytes, greaterThan(0));
     expect(rawStraightData.buffer.asUint32List(), <int>[0xAAFFFFFF]);
-    final ByteData pngData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+    final ByteData pngData = await image.toByteData(format: ui.ImageByteFormat.png);
     expect(pngData.lengthInBytes, greaterThan(0));
   });
 }

@@ -54,7 +54,7 @@ void testMain() {
     });
 
     test('Image shader initialize/dispose cycle', () async {
-      final EngineImage image = await createImageFromBytes(kTransparentImage);
+      final CkImage image = await createImageFromBytes(kTransparentImage);
       final imageShader =
           ui.ImageShader(
                 image,
@@ -78,7 +78,7 @@ void testMain() {
     });
 
     test('Image shader withQuality', () async {
-      final EngineImage image = await createImageFromBytes(kTransparentImage);
+      final CkImage image = await createImageFromBytes(kTransparentImage);
       final imageShader =
           ui.ImageShader(
                 image,
@@ -156,7 +156,7 @@ void testMain() {
       expect(conicalGradient.isGradient, isTrue);
       conicalGradient.dispose();
 
-      final EngineImage image = await createImageFromBytes(kTransparentImage);
+      final CkImage image = await createImageFromBytes(kTransparentImage);
       final imageShader =
           ui.ImageShader(
                 image,
