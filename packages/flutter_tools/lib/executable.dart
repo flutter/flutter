@@ -294,7 +294,7 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
   ),
   UpgradeCommand(verboseHelp: verboseHelp),
-  SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
+  SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(verboseHelp: verboseHelp),

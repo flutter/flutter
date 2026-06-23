@@ -188,6 +188,7 @@ abstract class FlutterCommand extends Command<void> {
   Platform get platform => _toolContext?.platform ?? globals.platform;
   ProcessManager get processManager => _toolContext?.processManager ?? globals.processManager;
   ProcessUtils get processUtils => _toolContext?.processUtils ?? globals.processUtils;
+  Stdio get stdio => _toolContext?.stdio ?? globals.stdio;
   UserMessages get userMessages => _toolContext?.userMessages ?? globals.userMessages;
   SystemClock get systemClock => _toolContext?.systemClock ?? globals.systemClock;
   Terminal get terminal => _toolContext?.terminal ?? globals.terminal;
