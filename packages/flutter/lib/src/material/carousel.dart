@@ -657,7 +657,14 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   void _handleAutoPlayTimerTick(Timer timer) {
-    if (_isInteractionPaused || !_controller.hasClients) {
+    if (_isInteractionPaused ||
+        !_controller.hasClients ||
+        !_controller.position.hasContentDimensions) {
+      return;
+    }
+
+    final int? itemCount = _controller._getItemCount();
+    if (itemCount == null || itemCount <= 1) {
       return;
     }
 
@@ -673,7 +680,6 @@ class _CarouselViewState extends State<CarouselView> {
       }
     }
 
-    final int? itemCount = _controller._getItemCount();
     final position = _controller.position as _CarouselPosition;
     final int shiftCount = position
         .getItemFromPixels(position.pixels, position.viewportDimension)
@@ -685,7 +691,7 @@ class _CarouselViewState extends State<CarouselView> {
       nextIndex += maxWeightIndex;
     }
 
-    if (widget.infinite && itemCount != null && itemCount > 0) {
+    if (widget.infinite) {
       nextIndex = nextIndex % itemCount;
     }
 
@@ -2138,6 +2144,9 @@ class CarouselController extends ScrollController {
     if (!hasFlexWeights) {
       final double targetInFirstCycle = index * _carouselState!._itemExtent!;
       if (!_carouselState!.widget.infinite) {
+        if (!position.hasContentDimensions) {
+          return targetInFirstCycle;
+        }
         return math.min(
           math.max(targetInFirstCycle, position.minScrollExtent),
           position.maxScrollExtent,
@@ -2163,6 +2172,9 @@ class CarouselController extends ScrollController {
 
     final double targetInFirstCycle = dimension * (weights.first / totalWeight) * leadingIndex;
     if (!carouselState.widget.infinite) {
+      if (!position.hasContentDimensions) {
+        return targetInFirstCycle;
+      }
       return math.min(
         math.max(targetInFirstCycle, position.minScrollExtent),
         position.maxScrollExtent,
