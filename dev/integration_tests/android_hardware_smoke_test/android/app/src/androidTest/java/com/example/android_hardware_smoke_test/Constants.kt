@@ -59,5 +59,5 @@ object Constants {
     const val PLATFORM_VIEW_TEXTURE_LAYER_TEST = "${PLATFORM_VIEW_PREFIX}TextureLayerTest"
     const val PLATFORM_VIEW_HYBRID_COMPOSITION_TEST = "${PLATFORM_VIEW_PREFIX}HybridCompositionTest"
     const val PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST =
-            "${PLATFORM_VIEW_PREFIX}HybridCompositionPlusPlusTest"
+        "${PLATFORM_VIEW_PREFIX}HybridCompositionPlusPlusTest"
 }
