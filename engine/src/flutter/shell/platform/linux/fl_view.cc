@@ -23,6 +23,8 @@
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/fl_view_renderer.h"
+#include "flutter/shell/platform/linux/fl_view_renderer_opengl.h"
+#include "flutter/shell/platform/linux/fl_view_renderer_software.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -607,7 +609,17 @@ static void setup_engine(FlView* self) {
                           G_CALLBACK(update_semantics_cb), self,
                           G_CONNECT_SWAPPED);
 
-  self->renderer = fl_view_renderer_new(self->engine, self->sized_to_content);
+  switch (fl_engine_get_renderer_type(self->engine)) {
+    case kSoftware:
+      self->renderer = FL_VIEW_RENDERER(
+          fl_view_renderer_software_new(self->engine, self->sized_to_content));
+      break;
+    case kOpenGL:
+    default:
+      self->renderer = FL_VIEW_RENDERER(
+          fl_view_renderer_opengl_new(self->engine, self->sized_to_content));
+      break;
+  }
   gtk_widget_show(GTK_WIDGET(self->renderer));
   gtk_container_add(GTK_CONTAINER(self->event_box), GTK_WIDGET(self->renderer));
   g_signal_connect_swapped(self->renderer, "realize", G_CALLBACK(realize_cb),
