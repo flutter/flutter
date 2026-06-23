@@ -144,7 +144,8 @@ class EngineImage implements ui.Image, StackTraceDebugger {
     // pointers fully alive and valid until this method completes.
     final EngineImage cloneImage = clone();
     try {
-      final bool isSourceDetached = cloneImage.imageSource == null ||
+      final bool isSourceDetached =
+          cloneImage.imageSource == null ||
           (cloneImage.imageSource is ImageBitmapImageSource &&
               (cloneImage.imageSource! as ImageBitmapImageSource).imageBitmap.width == 0) ||
           (cloneImage.imageSource is VideoFrameImageSource &&
@@ -250,16 +251,18 @@ class EngineImage implements ui.Image, StackTraceDebugger {
           BitmapSize(cloneImage.width, cloneImage.height),
         );
 
-        final List<DomImageBitmap> bitmaps = await (renderer.pictureToImageSurface as OffscreenSurface)
-            .rasterizeToImageBitmaps(<ui.Picture>[picture]);
+        final List<DomImageBitmap> bitmaps =
+            await (renderer.pictureToImageSurface as OffscreenSurface).rasterizeToImageBitmaps(
+              <ui.Picture>[picture],
+            );
         final DomImageBitmap bitmap = bitmaps.single;
 
         final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
           bitmap.width,
           bitmap.height,
         );
-        final context = offscreenCanvas.getContext('bitmaprenderer')!
-            as DomImageBitmapRenderingContext;
+        final context =
+            offscreenCanvas.getContext('bitmaprenderer')! as DomImageBitmapRenderingContext;
         context.transferFromImageBitmap(bitmap);
         final DomBlob blob = await offscreenCanvas.convertToBlob();
         final arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;
