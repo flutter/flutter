@@ -7,13 +7,21 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
-  DevicesCommand({bool verboseHelp = false}) {
+  DevicesCommand({
+    required DeviceManager deviceManager,
+    required Doctor doctor,
+    required ToolContext toolContext,
+    bool verboseHelp = false,
+  }) : _deviceManager = deviceManager,
+       _doctor = doctor,
+       super(toolContext: toolContext) {
     addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
@@ -24,6 +32,15 @@ class DevicesCommand extends FlutterCommand {
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
+
+  final DeviceManager _deviceManager;
+  final Doctor _doctor;
+
+  @override
+  DeviceManager get deviceManager => _deviceManager;
+
+  @override
+  Doctor get doctor => _doctor;
 
   @override
   final name = 'devices';
@@ -49,8 +66,8 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults?['timeout'] != null) {
-      globals.printWarning(
-        '${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.',
+      logger.printWarning(
+        '${logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.',
       );
     }
     return super.validateCommand();
@@ -58,7 +75,7 @@ class DevicesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (globals.doctor?.canListAnything != true) {
+    if (!doctor.canListAnything) {
       throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
         'information about installing additional components.',
@@ -67,9 +84,9 @@ class DevicesCommand extends FlutterCommand {
     }
 
     final output = DevicesCommandOutput(
-      platform: globals.platform,
-      logger: globals.logger,
-      deviceManager: globals.deviceManager,
+      platform: platform,
+      logger: logger,
+      deviceManager: deviceManager,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       deviceConnectionInterface: deviceConnectionInterface,
     );

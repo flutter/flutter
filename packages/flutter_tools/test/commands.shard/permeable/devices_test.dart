@@ -5,11 +5,16 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 
@@ -30,23 +35,19 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testUsingContext(
-    'devices can display no connected devices with the --machine flag',
-    () async {
-      final command = DevicesCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>['devices', '--machine']);
+  testUsingContext('devices can display no connected devices with the --machine flag', () async {
+    final DevicesCommand command = createDevicesCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['devices', '--machine']);
 
-      expect(json.decode(logger.statusText), isEmpty);
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
-  );
+    expect(json.decode(logger.statusText), isEmpty);
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext(
     'devices can display via the --machine flag',
     () async {
       deviceManager.devices = <Device>[WebServerDevice(logger: logger)];
-      final command = DevicesCommand();
+      final DevicesCommand command = createDevicesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['devices', '--machine']);
 
@@ -95,4 +96,42 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<Device>> refreshAllDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) async {
     return devices;
   }
+}
+
+DevicesCommand createDevicesCommand({bool verboseHelp = false}) {
+  return DevicesCommand(
+    toolContext: FakeToolContext(
+      fs: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      deviceManager: globals.deviceManager!,
+      doctor: globals.doctor!,
+    ),
+    verboseHelp: verboseHelp,
+  );
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({
+    required this.fs,
+    required this.logger,
+    required this.platform,
+    required this.deviceManager,
+    required this.doctor,
+  });
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
+
+  @override
+  final DeviceManager deviceManager;
+
+  @override
+  final Doctor doctor;
 }
