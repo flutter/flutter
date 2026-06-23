@@ -76,6 +76,20 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval);
 - (BOOL)supportsShowingSystemContextMenu;
 - (BOOL)stateIsActive;
 - (BOOL)stateIsBackground;
+
+/**
+ * Determines whether a UIScene notification should be handled by this view controller.
+ *
+ * In multi-scene environments (such as iPadOS split view, macOS Catalyst multi-window, or App
+ * Extensions), multiple UIWindowScene instances can exist in the same process space. Because the
+ * scene observers register to listen for all targets, they may receive lifecycle notifications
+ * from unrelated auxiliary or secondary scenes.
+ *
+ * @param notification The UIScene notification containing the transitioning UIScene in its object.
+ * @return YES if the notification matches this view controller's scene context.
+ *         NO if it originates from an unrelated scene and should be ignored.
+ */
+- (BOOL)shouldHandleSceneNotification:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_

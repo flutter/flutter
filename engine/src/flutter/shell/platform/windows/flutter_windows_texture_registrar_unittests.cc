@@ -26,6 +26,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   properties.assets_path = L"C:\\foo\\flutter_assets";
   properties.icu_data_path = L"C:\\foo\\icudtl.dat";
   properties.aot_library_path = L"C:\\foo\\aot.so";
+  properties.impeller_switch = DisabledImpeller;
   FlutterProjectBundle project(properties);
   auto engine = std::make_unique<FlutterWindowsEngine>(project);
 
