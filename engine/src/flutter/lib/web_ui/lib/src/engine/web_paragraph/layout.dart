@@ -491,8 +491,8 @@ class TextLayout {
           line.formattingShift = delta / 2;
         }
       }
-      WebParagraphDebug.apiTrace(
-        'formatLines(${paragraph.text}, $width): ${line.advance} $effectiveAlign $delta ${line.formattingShift} ${paragraph.longestLine} ${paragraph.maxLineWidthWithTrailingSpaces}',
+      WebParagraphDebug.log(
+        'formatLines($width): ${line.advance} $effectiveAlign $delta ${line.formattingShift} ${paragraph.longestLine} ${paragraph.maxLineWidthWithTrailingSpaces}',
       );
     }
   }
@@ -551,7 +551,7 @@ class TextLayout {
           firstRect = (block.span as TextSpan)
               .getTextRangeSelectionInBlock(block, intersect)
               .translate(
-                block.shiftFromLineStart, // We do not use baseline for placeholder
+                0, // We do not use baseline for placeholder
                 block.multipliedFontBoundingBoxAscent,
               );
         }
@@ -567,16 +567,16 @@ class TextLayout {
             bottom = top + block.multipliedHeight;
             assert((block.multipliedHeight - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.max:
-            top = firstRect.top + line.advance.top;
-            bottom = firstRect.top + line.advance.bottom;
+            top = line.advance.top;
+            bottom = line.advance.bottom;
             assert((line.advance.height - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.strut:
             final double baseline = line.fontBoundingBoxAscent;
             final WebStrutStyle? strutStyle = paragraph.paragraphStyle.strutStyle;
 
             if (strutStyle == null) {
-              top = firstRect.top + line.advance.top;
-              bottom = firstRect.top + line.advance.bottom;
+              top = line.advance.top;
+              bottom = line.advance.bottom;
             } else {
               top = baseline - strutStyle.strutAscent;
               bottom = baseline + strutStyle.strutDescent;
@@ -606,7 +606,7 @@ class TextLayout {
               bottom -= shift;
             }
         }
-        left = firstRect.left - (line.advance.left + line.formattingShift);
+        left = firstRect.left + (line.advance.left + line.formattingShift);
         right = left + firstRect.width;
         result.add(
           ui.TextBox.fromLTRBD(
@@ -689,13 +689,10 @@ class TextLayout {
   }
 
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    WebParagraphDebug.apiTrace('getPositionForOffset("${paragraph.text}", $offset)');
+    WebParagraphDebug.log('getPositionForOffset($offset)');
 
     if (paragraph.text.isEmpty) {
-      return ui.TextPosition(
-        offset: 0,
-        affinity: offset.dx <= 0 ? ui.TextAffinity.upstream : ui.TextAffinity.downstream,
-      );
+      return const ui.TextPosition(offset: 0);
     }
 
     var lineNum = 0;
@@ -713,9 +710,25 @@ class TextLayout {
         WebParagraphDebug.log('found line: ${line.textClusterRange} ${line.advance} vs $offset');
       }
 
+      if ((line.fullWidth - line.trailingSpacesWidth) < epsilon &&
+          line.trailingSpacesWidth < epsilon) {
+        // Accordingly to SkParagraph this is a special Flutter case
+        return ui.TextPosition(offset: line.textRange.end);
+      }
+
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
       final double lineShift = line.advance.left + line.formattingShift;
+      var blockNum = 0;
       for (final LineBlock block in line.visualBlocks) {
+        blockNum++;
+
+        if (block is EllipsisBlock) {
+          return ui.TextPosition(offset: block.textRange.end);
+        }
+        if (block is PlaceholderBlock) {
+          return ui.TextPosition(offset: block.textRange.end);
+        }
+
         // Calculate left and right edges of the block
         final double left = block.advance.left + lineShift - epsilon;
         final double right = block.advance.right + lineShift + epsilon;
@@ -725,15 +738,14 @@ class TextLayout {
           continue;
         } else if (left > offset.dx) {
           // This must be the very left block visually or we would find the block before
+          assert(blockNum == 1);
           final LineBlock firstVisualBlockInLine = line.visualBlocks.first;
-          if (firstVisualBlockInLine.isLtr) {
-            return ui.TextPosition(offset: firstVisualBlockInLine.clusterRange.start);
-          } else {
-            return ui.TextPosition(
-              offset: firstVisualBlockInLine.clusterRange.end,
-              affinity: ui.TextAffinity.upstream,
-            );
-          }
+          return firstVisualBlockInLine.isLtr
+              ? ui.TextPosition(offset: firstVisualBlockInLine.textRange.start)
+              : ui.TextPosition(
+                  offset: firstVisualBlockInLine.textRange.end,
+                  affinity: ui.TextAffinity.upstream,
+                );
         }
         if (WebParagraphDebug.logging) {
           WebParagraphDebug.log('found block: $block $left:$right vs $offset');
@@ -754,14 +766,16 @@ class TextLayout {
             WebParagraphDebug.log('test cluster: $left:$right vs $offset');
           }
           if (left <= offset.dx && right > offset.dx) {
+            final double center = (left + right) / 2;
+            print('center: $center ${offset.dx} ${cluster.start} ${cluster.end}');
             ui.TextPosition position;
-            if (offset.dx - left <= right - offset.dx) {
+            if (offset.dx < center) {
               position = block.isLtr
                   ? ui.TextPosition(offset: cluster.start)
-                  : ui.TextPosition(offset: cluster.end - 1, affinity: ui.TextAffinity.upstream);
+                  : ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream);
             } else {
               position = block.isLtr
-                  ? ui.TextPosition(offset: cluster.end - 1, affinity: ui.TextAffinity.upstream)
+                  ? ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream)
                   : ui.TextPosition(offset: cluster.start);
             }
             return position;
@@ -770,25 +784,20 @@ class TextLayout {
         // We found the block but not the cluster? How could that happen
         assert(false);
       }
-      // This must be the last block in the line
+      // We found the line but not the block? That must be the last line
+      assert(lineNum == lines.length);
+      // We deal with it the same way as if we didn't find the line (taking the last block of the last line)
       final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
       return lastVisualBlockInLine.isLtr
           ? ui.TextPosition(
-              offset: lastVisualBlockInLine.clusterRange.end,
+              offset: lastVisualBlockInLine.textRange.end,
               affinity: ui.TextAffinity.upstream,
             )
-          : ui.TextPosition(offset: lastVisualBlockInLine.clusterRange.start);
+          : ui.TextPosition(offset: lastVisualBlockInLine.textRange.start);
     }
-    // We didn't find the line containing our offset and
-    // we didn't find the line that is down from the offset
-    // So all the line are above the offset and we need to return the last position on the last line
-    final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
-    return lastVisualBlockInLine.isLtr
-        ? ui.TextPosition(
-            offset: lastVisualBlockInLine.clusterRange.end,
-            affinity: ui.TextAffinity.upstream,
-          )
-        : ui.TextPosition(offset: lastVisualBlockInLine.clusterRange.start);
+
+    // This is the default result for any position outside of the paragraph width and height
+    return const ui.TextPosition(offset: 0);
   }
 
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
@@ -796,43 +805,35 @@ class TextLayout {
       return null;
     }
 
-    final ClusterRange clusterRange = _mapping.toClusterRange(codeUnitOffset, codeUnitOffset + 1);
-    if (clusterRange.isEmpty) {
-      return null;
-    }
-
     final int? lineNumber = paragraph.getLineNumberAt(codeUnitOffset);
     if (lineNumber == null) {
       return null;
     }
+
+    // The cluster is on this line
+    // We cannot assume clusters go sequentially because of bidi reshuffling
+    // but we don't care about the order because we only look for a cluster that contains the offset
     final TextLine line = lines[lineNumber];
-
-    // The cluster is on this line.
     for (final LineBlock visualBlock in line.visualBlocks) {
-      if (visualBlock.clusterRange.isBefore(clusterRange.start)) {
-        // We cannot assume clusters go sequentially because of bidi reshuffling
-        continue;
-      } else if (visualBlock.clusterRange.isAfter(clusterRange.start)) {
-        // We haven't reached the cluster yet, keep going.
-        continue;
+      for (
+        int start = visualBlock.clusterRange.start;
+        start < visualBlock.clusterRange.end;
+        start++
+      ) {
+        final WebCluster cluster = allClusters[start];
+        if (cluster.start <= codeUnitOffset && codeUnitOffset < cluster.end) {
+          return ui.GlyphInfo(
+            cluster.advance.translate(
+              line.advance.left + line.formattingShift + visualBlock.spanShiftFromLineStart,
+              line.advance.top + line.fontBoundingBoxAscent,
+            ),
+            ui.TextRange(start: cluster.start, end: cluster.end),
+            visualBlock.isLtr ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+          );
+        }
       }
-
-      assert(visualBlock.clusterRange.overlapsWith(clusterRange.start, clusterRange.end));
-
-      final ClusterRange intersection = visualBlock.clusterRange.intersect(clusterRange);
-      assert(intersection.isNotEmpty);
-
-      final WebCluster cluster = allClusters[intersection.start];
-      return ui.GlyphInfo(
-        cluster.advance.translate(
-          line.advance.left + line.formattingShift + visualBlock.spanShiftFromLineStart,
-          line.advance.top + line.fontBoundingBoxAscent,
-        ),
-        ui.TextRange(start: cluster.start, end: cluster.end),
-        _detectTextDirection(clusterRange),
-      );
     }
-
+    // No cluster found that contains the offset
     return null;
   }
 

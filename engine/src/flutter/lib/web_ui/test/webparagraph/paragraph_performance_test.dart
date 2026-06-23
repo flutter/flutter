@@ -12,6 +12,9 @@ import '../common/test_initialization.dart';
 import '../ui/utils.dart';
 
 void main() {
+  setUp(() {
+    renderer.fontCollection.debugResetFallbackFonts();
+  });
   internalBootstrapBrowserTest(() => testMain);
 }
 
@@ -172,4 +175,67 @@ Future<void> testMain() async {
     timeout: Timeout.none,
     skip: true,
   );
+
+  test('Paragraph print', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 1000);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    final paragraphStyle = ParagraphStyle(
+      fontFamily: 'Noto Sans',
+      fontSize: 40,
+      textDirection: TextDirection.ltr,
+      height: 1.0,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(TextStyle(color: const Color(0xFFFF0000)));
+    builder.addText('اللغة العربية لغة عالمية غبية');
+    builder.pop();
+
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    print('paragraph: ${paragraph.longestLine} ${paragraph.height}');
+    canvas.drawParagraph(paragraph, const Offset(20, 20));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    final List<Offset> centers = [];
+    for (var i = 0; i < 29; i += 1) {
+      final GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
+      if (glyphInfo == null) {
+        continue;
+      }
+      final int start = glyphInfo.graphemeClusterCodeUnitRange.start;
+      final int end = glyphInfo.graphemeClusterCodeUnitRange.end;
+      if (start == end) {
+        continue;
+      }
+
+      final List<TextBox> boxes = paragraph.getBoxesForRange(
+        glyphInfo.graphemeClusterCodeUnitRange.start,
+        glyphInfo.graphemeClusterCodeUnitRange.end,
+      );
+      if (boxes.isNotEmpty) {
+        print('getRectsForRange($i: [$start:$end)): ${boxes.length} ${boxes.first.toRect()}');
+        for (final box in boxes) {
+          centers.add(box.toRect().center);
+        }
+      } else {
+        print('getRectsForRange($i: [$start:$end)): empty');
+      }
+    }
+    for (final point in centers) {
+      final TextPosition pos = paragraph.getPositionForOffset(point);
+      print(
+        'getGlyphPositionAtCoordinate($point): ${pos.offset}, ${pos.affinity == TextAffinity.upstream ? "up" : "down"}',
+      );
+    }
+    for (final point in centers) {
+      final GlyphInfo? glyph1 = paragraph.getClosestGlyphInfoForOffset(point.translate(0.2, 0));
+      print('getClosestGlyphClusterAt($point)+0.2: $glyph1');
+      final GlyphInfo? glyph2 = paragraph.getClosestGlyphInfoForOffset(point.translate(-0.2, 0));
+      print('getClosestGlyphClusterAt($point)-0.2: $glyph2');
+    }
+    await matchGoldenFile('web_paragraph.print.png', region: region);
+  }, solo: true);
 }

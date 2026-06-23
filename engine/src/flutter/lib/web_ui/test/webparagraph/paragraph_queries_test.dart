@@ -294,29 +294,31 @@ Future<void> testMain() async {
   });
 
   test('Paragraph print', () {
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       textDirection: ui.TextDirection.rtl,
       height: 1.0,
     );
 
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF000000)));
     builder.addText('اللغة العربية لغة عالمية غبية');
+    builder.pop();
 
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final List<ui.Offset> centers = [];
     for (var i = 0; i < 55; ++i) {
       final List<ui.TextBox> boxes = paragraph.getBoxesForRange(i, i + 1);
       if (boxes.isNotEmpty) {
+        print('getRectsForRange($i, ${i + 1}): ${boxes.length} ${boxes.first.toRect()}');
         for (final box in boxes) {
-          print('getRectsForRange($i, ${i + 1}): $box');
           centers.add(box.toRect().center);
         }
       } else {
-        print('getRectsForRange($i, ${i + 1}): empty');
+        print('getRectsForRange($i, ${i + 1}): ${boxes.length}');
       }
     }
     for (final point in centers) {
@@ -326,8 +328,10 @@ Future<void> testMain() async {
       );
     }
     for (final point in centers) {
-      final ui.GlyphInfo? glyph = paragraph.getClosestGlyphInfoForOffset(point);
-      print('getClosestGlyphClusterAt($point): $glyph');
+      final ui.GlyphInfo? glyph1 = paragraph.getClosestGlyphInfoForOffset(point.translate(0.2, 0));
+      print('getClosestGlyphClusterAt($point)+0.2: $glyph1');
+      final ui.GlyphInfo? glyph2 = paragraph.getClosestGlyphInfoForOffset(point.translate(-0.2, 0));
+      print('getClosestGlyphClusterAt($point)-0.2: $glyph2');
     }
-  });
+  }, solo: true);
 }
