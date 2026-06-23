@@ -1097,14 +1097,13 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
     return false;
   }
   bool? usesAndroidX;
+  final RegExp androidXRegExp = RegExp(r'^android\.useAndroidX(?:\s*[=:]\s*|\s+)(\S+)');
   for (final String rawLine in properties.readAsLinesSync()) {
     final String line = rawLine.trimLeft();
     if (line.isEmpty || line.startsWith('#') || line.startsWith('!')) {
       continue;
     }
-    final RegExpMatch? match = RegExp(
-      r'^android\.useAndroidX(?:\s*[=:]\s*|\s+)(\S+)',
-    ).firstMatch(line);
+    final RegExpMatch? match = androidXRegExp.firstMatch(line);
     if (match == null) {
       continue;
     }
