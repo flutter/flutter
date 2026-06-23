@@ -23,8 +23,8 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.GradleException
@@ -948,11 +948,19 @@ class FlutterPluginUtilsTest {
             private val mockGradle = mockk<Gradle>()
             private val mockLogger = mockk<Logger>(relaxed = true)
 
+            private fun mockBuiltInKotlinProperty(value: String?) {
+                val mockProvider = mockk<org.gradle.api.provider.Provider<String>>()
+                every { mockProvider.orNull } returns value
+                val mockProviders = mockk<org.gradle.api.provider.ProviderFactory>()
+                every { mockProviders.gradleProperty("android.builtInKotlin") } returns mockProvider
+                every { rootProject.providers } returns mockProviders
+                every { rootProject.findProperty("android.builtInKotlin") } returns value
+            }
+
             @BeforeEach
             fun setUp() {
                 mockkObject(FlutterPluginUtils)
                 mockkObject(VersionFetcher)
-                every { FlutterPluginUtils.getRuntimeAGPVersion() } returns Version(9, 0, 0)
                 every { VersionFetcher.getAGPVersion(any()) } returns AndroidPluginVersion(9, 0, 0)
             }
 
@@ -981,6 +989,69 @@ class FlutterPluginUtilsTest {
                 verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
                 verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                 verify { mockLogger wasNot called }
+            }
+
+            @Nested
+            inner class IsBuiltInKotlinEnabledTests {
+                @Test
+                fun `returns true when property is true`() {
+                    val project = mockk<Project>()
+                    every { project.rootProject } returns rootProject
+                    every { project.providers } answers { rootProject.providers }
+                    mockBuiltInKotlinProperty("true")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(project, AndroidPluginVersion(8, 0, 0))
+
+                    assertTrue(result)
+                }
+
+                @Test
+                fun `returns false when property is false`() {
+                    val project = mockk<Project>()
+                    every { project.rootProject } returns rootProject
+                    every { project.providers } answers { rootProject.providers }
+                    mockBuiltInKotlinProperty("false")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(project, AndroidPluginVersion(9, 0, 0))
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `defaults to true when property is null and AGP major version is 9`() {
+                    val project = mockk<Project>()
+                    every { project.rootProject } returns rootProject
+                    every { project.providers } answers { rootProject.providers }
+                    mockBuiltInKotlinProperty(null)
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(project, AndroidPluginVersion(9, 0, 0))
+
+                    assertTrue(result)
+                }
+
+                @Test
+                fun `defaults to false when property is null and AGP major version is less than 9`() {
+                    val project = mockk<Project>()
+                    every { project.rootProject } returns rootProject
+                    every { project.providers } answers { rootProject.providers }
+                    mockBuiltInKotlinProperty(null)
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(project, AndroidPluginVersion(8, 0, 0))
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `defaults to false when property is null and AGP version is null`() {
+                    val project = mockk<Project>()
+                    every { project.rootProject } returns rootProject
+                    every { project.providers } answers { rootProject.providers }
+                    mockBuiltInKotlinProperty(null)
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(project, null)
+
+                    assertFalse(result)
+                }
             }
 
             private fun writeGradleProperties(
@@ -1029,7 +1100,9 @@ class FlutterPluginUtilsTest {
                 every { project.logger } returns mockLogger
                 every { project.pluginManager } returns pluginManager
                 every { project.rootProject } returns rootProject
+                every { project.providers } answers { rootProject.providers }
                 every { project.gradle } returns mockGradle
+                every { project.findProperty(any()) } answers { rootProject.findProperty(arg(0)) }
 
                 val pluginContainer = mockk<org.gradle.api.plugins.PluginContainer>(relaxed = true)
                 every { pluginContainer.withId(any(), any()) } answers {
@@ -1074,7 +1147,7 @@ class FlutterPluginUtilsTest {
 
                 val allProjects = setOf(appProject) + pluginProjects
                 every { rootProject.subprojects } returns allProjects
-                every { rootProject.findProperty("android.builtInKotlin") } returns builtInKotlin
+                mockBuiltInKotlinProperty(builtInKotlin)
 
                 val testProject = TestEnvironment(appProject, pluginProjects)
 
