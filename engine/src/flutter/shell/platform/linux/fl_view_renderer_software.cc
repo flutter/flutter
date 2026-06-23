@@ -6,6 +6,10 @@
 
 #include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_task_runner.h"
+
+// Maximum time to wait for a frame to be ready before giving up and rendering.
+static constexpr gint64 kRenderTimeoutMicroseconds = 100000;  // 100ms
 
 struct _FlViewRendererSoftware {
   FlViewRenderer parent_instance;
@@ -22,8 +26,14 @@ struct _FlViewRendererSoftware {
   // TRUE if have got the first frame to render.
   gboolean have_first_frame;
 
-  // Combines layers into frame.
+  // Combines and stores frames.
   FlCompositorSoftware* compositor;
+
+  // Task runner to wait for frames on.
+  FlTaskRunner* task_runner;
+
+  // Ensure Flutter and GTK can access the frame stored in the compositor.
+  GMutex frame_mutex;
 };
 
 G_DEFINE_TYPE(FlViewRendererSoftware,
@@ -52,8 +62,11 @@ static gboolean redraw_cb(gpointer user_data) {
   size_t width = allocation.width * scale_factor;
   size_t height = allocation.height * scale_factor;
   size_t frame_width, frame_height;
-  fl_compositor_software_get_frame_size(self->compositor, &frame_width,
-                                        &frame_height);
+  {
+    g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+    fl_compositor_software_get_frame_size(self->compositor, &frame_width,
+                                          &frame_height);
+  }
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(render_widget, frame_width / scale_factor,
@@ -90,8 +103,9 @@ static void fl_view_renderer_software_realize(GtkWidget* widget) {
 
   GTK_WIDGET_CLASS(fl_view_renderer_software_parent_class)->realize(widget);
 
-  self->compositor =
-      fl_compositor_software_new(fl_engine_get_task_runner(self->engine));
+  self->task_runner =
+      FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
+  self->compositor = fl_compositor_software_new();
 }
 
 // Implements GtkWidget::draw.
@@ -106,10 +120,45 @@ static gboolean fl_view_renderer_software_draw(GtkWidget* widget, cairo_t* cr) {
     return TRUE;
   }
 
+  GdkWindow* window = gtk_widget_get_window(widget);
+  gint scale_factor = gdk_window_get_scale_factor(window);
   gboolean wait_for_frame = !self->sized_to_content;
-  return fl_compositor_software_render(self->compositor, cr,
-                                       gtk_widget_get_window(widget),
-                                       wait_for_frame);
+
+  g_mutex_lock(&self->frame_mutex);
+
+  // If frame not ready, then wait for it.
+  if (wait_for_frame) {
+    gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
+    while (true) {
+      size_t width = gdk_window_get_width(window) * scale_factor;
+      size_t height = gdk_window_get_height(window) * scale_factor;
+      size_t frame_width, frame_height;
+      fl_compositor_software_get_frame_size(self->compositor, &frame_width,
+                                            &frame_height);
+      if (frame_width == width && frame_height == height) {
+        break;
+      }
+
+      if (g_get_monotonic_time() > expiry_time) {
+        g_warning(
+            "Timed out waiting for software frame of size %zdx%zd (have "
+            "%zdx%zd)",
+            width, height, frame_width, frame_height);
+        break;
+      }
+
+      g_mutex_unlock(&self->frame_mutex);
+      fl_task_runner_wait(self->task_runner, expiry_time);
+      g_mutex_lock(&self->frame_mutex);
+    }
+  }
+
+  gboolean result =
+      fl_compositor_software_render(self->compositor, cr, scale_factor);
+
+  g_mutex_unlock(&self->frame_mutex);
+
+  return result;
 }
 
 // Implements FlViewRenderer::set_background_color.
@@ -138,7 +187,14 @@ static void fl_view_renderer_software_present_layers(
     return;
   }
 
-  fl_compositor_software_present_layers(self->compositor, layers, layers_count);
+  {
+    g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+    fl_compositor_software_present_layers(self->compositor, layers,
+                                          layers_count);
+  }
+
+  // Wake up the GTK thread if it is waiting for this frame.
+  fl_task_runner_stop_wait(self->task_runner);
 
   // Perform the redraw in the GTK thread.
   g_idle_add(redraw_cb, g_object_ref(self));
@@ -150,6 +206,8 @@ static void fl_view_renderer_software_dispose(GObject* object) {
   g_clear_object(&self->engine);
   g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_clear_object(&self->compositor);
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_software_parent_class)->dispose(object);
 }
@@ -184,6 +242,8 @@ static void fl_view_renderer_software_class_init(
 }
 
 static void fl_view_renderer_software_init(FlViewRendererSoftware* self) {
+  g_mutex_init(&self->frame_mutex);
+
   GdkRGBA default_background = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   self->background_color = gdk_rgba_copy(&default_background);

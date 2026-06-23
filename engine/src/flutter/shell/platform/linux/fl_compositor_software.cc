@@ -4,14 +4,8 @@
 
 #include "fl_compositor_software.h"
 
-// Maximum time to wait for a frame to be ready before giving up and rendering.
-static constexpr gint64 kCompositorRenderTimeoutMicroseconds = 100000;  // 100ms
-
 struct _FlCompositorSoftware {
   GObject parent_instance;
-
-  // Task runner to wait for frames on.
-  FlTaskRunner* task_runner;
 
   // Width of frame in pixels.
   size_t width;
@@ -21,9 +15,6 @@ struct _FlCompositorSoftware {
 
   // Surface to draw on view.
   cairo_surface_t* surface;
-
-  // Ensure Flutter and GTK can access the surface.
-  GMutex frame_mutex;
 };
 
 G_DEFINE_TYPE(FlCompositorSoftware, fl_compositor_software, G_TYPE_OBJECT)
@@ -31,12 +22,10 @@ G_DEFINE_TYPE(FlCompositorSoftware, fl_compositor_software, G_TYPE_OBJECT)
 static void fl_compositor_software_dispose(GObject* object) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
 
-  g_clear_object(&self->task_runner);
   if (self->surface != nullptr) {
     g_free(cairo_image_surface_get_data(self->surface));
   }
   g_clear_pointer(&self->surface, cairo_surface_destroy);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_compositor_software_parent_class)->dispose(object);
 }
@@ -46,22 +35,16 @@ static void fl_compositor_software_class_init(
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_software_dispose;
 }
 
-static void fl_compositor_software_init(FlCompositorSoftware* self) {
-  g_mutex_init(&self->frame_mutex);
-}
+static void fl_compositor_software_init(FlCompositorSoftware* self) {}
 
-FlCompositorSoftware* fl_compositor_software_new(FlTaskRunner* task_runner) {
-  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(
+FlCompositorSoftware* fl_compositor_software_new() {
+  return FL_COMPOSITOR_SOFTWARE(
       g_object_new(fl_compositor_software_get_type(), nullptr));
-  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
-  return self;
 }
 
 gboolean fl_compositor_software_present_layers(FlCompositorSoftware* self,
                                                const FlutterLayer** layers,
                                                size_t layers_count) {
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
   if (layers_count == 0) {
     return TRUE;
   }
@@ -90,16 +73,12 @@ gboolean fl_compositor_software_present_layers(FlCompositorSoftware* self,
         backing_store->software.height, backing_store->software.row_bytes);
   }
 
-  fl_task_runner_stop_wait(self->task_runner);
-
   return TRUE;
 }
 
 void fl_compositor_software_get_frame_size(FlCompositorSoftware* self,
                                            size_t* width,
                                            size_t* height) {
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
   if (width != nullptr) {
     *width = self->width;
   }
@@ -110,38 +89,9 @@ void fl_compositor_software_get_frame_size(FlCompositorSoftware* self,
 
 gboolean fl_compositor_software_render(FlCompositorSoftware* self,
                                        cairo_t* cr,
-                                       GdkWindow* window,
-                                       gboolean wait_for_frame) {
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
+                                       gint scale_factor) {
   if (self->surface == nullptr) {
     return FALSE;
-  }
-
-  // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
-  if (wait_for_frame) {
-    gint64 expiry_time =
-        g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
-    while (true) {
-      size_t width = gdk_window_get_width(window) * scale_factor;
-      size_t height = gdk_window_get_height(window) * scale_factor;
-      if (self->width == width && self->height == height) {
-        break;
-      }
-
-      if (g_get_monotonic_time() > expiry_time) {
-        g_warning(
-            "Timed out waiting for software frame of size %zdx%zd (have "
-            "%zdx%zd)",
-            width, height, self->width, self->height);
-        break;
-      }
-
-      g_mutex_unlock(&self->frame_mutex);
-      fl_task_runner_wait(self->task_runner, expiry_time);
-      g_mutex_lock(&self->frame_mutex);
-    }
   }
 
   cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);

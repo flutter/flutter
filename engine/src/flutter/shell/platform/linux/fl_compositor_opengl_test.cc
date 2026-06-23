@@ -63,8 +63,7 @@ TEST_F(FlCompositorOpenGLTest, Render) {
   }).join();
 
   size_t frame_width, frame_height;
-  fl_compositor_opengl_get_frame_size(compositor, &frame_width,
-                               &frame_height);
+  fl_compositor_opengl_get_frame_size(compositor, &frame_width, &frame_height);
   EXPECT_EQ(frame_width, width);
   EXPECT_EQ(frame_height, height);
 

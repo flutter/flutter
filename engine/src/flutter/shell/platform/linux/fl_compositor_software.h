@@ -6,10 +6,9 @@
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_SOFTWARE_H_
 
 #include <cairo/cairo.h>
-#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/linux/fl_task_runner.h"
 
 G_BEGIN_DECLS
 
@@ -28,21 +27,22 @@ G_DECLARE_FINAL_TYPE(FlCompositorSoftware,
 
 /**
  * fl_compositor_software_new:
- * @task_runner: an #FlTaskRunnner.
  *
  * Creates a new software rendering compositor.
  *
  * Returns: a new #FlCompositorSoftware.
  */
-FlCompositorSoftware* fl_compositor_software_new(FlTaskRunner* task_runner);
+FlCompositorSoftware* fl_compositor_software_new();
 
 /**
  * fl_compositor_software_present_layers:
  * @compositor: an #FlCompositorSoftware.
- * @layers: layers to be composited.
+ * @layers: layers to be composited. Each layer must be a backing store layer
+ * (%kFlutterLayerContentTypeBackingStore) backed by a software backing store
+ * (%kFlutterBackingStoreTypeSoftware).
  * @layers_count: number of layers.
  *
- * Composite layers. Called from the Flutter rendering thread.
+ * Combines and stores the provided layers as the current frame.
  *
  * Returns %TRUE if successful.
  */
@@ -56,7 +56,7 @@ gboolean fl_compositor_software_present_layers(FlCompositorSoftware* compositor,
  * @width: location to write frame width in pixels.
  * @height: location to write frame height in pixels.
  *
- * Get the size of the layer ready for rendering.
+ * Get the size of the stored frame. The size is zero if there is no frame yet.
  */
 void fl_compositor_software_get_frame_size(FlCompositorSoftware* compositor,
                                            size_t* width,
@@ -66,18 +66,15 @@ void fl_compositor_software_get_frame_size(FlCompositorSoftware* compositor,
  * fl_compositor_software_render:
  * @compositor: an #FlCompositorSoftware.
  * @cr: a Cairo rendering context.
- * @window: window being rendered into.
- * @wait_for_frame: if the available frame is not the size of the window block
- * until a new frame is received.
+ * @scale_factor: the device scale factor to render at.
  *
- * Renders the current frame. Called from the GTK thread.
+ * Renders the stored frame.
  *
  * Returns %TRUE if successful.
  */
 gboolean fl_compositor_software_render(FlCompositorSoftware* compositor,
                                        cairo_t* cr,
-                                       GdkWindow* window,
-                                       gboolean wait_for_frame);
+                                       gint scale_factor);
 
 G_END_DECLS
 
