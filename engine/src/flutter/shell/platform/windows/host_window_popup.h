@@ -21,6 +21,8 @@ class HostWindowPopup : public HostWindow,
                   GetWindowPositionCallback get_position_callback,
                   HWND parent);
 
+  ~HostWindowPopup() override;
+
   // Update the position of the popup window based off the current size
   // of the popup.
   void UpdatePosition();

@@ -27,6 +27,8 @@ class HostWindowSized : public HostWindow,
                   FlutterWindowsEngine* engine,
                   bool resizable);
 
+  ~HostWindowSized() override;
+
   // Returns a pointer to this as a FlutterWindowsViewSizingDelegate, for use
   // as HostWindowInitializationParams::sizing_delegate. This is necessary
   // because FlutterWindowsViewSizingDelegate is a private base of this class

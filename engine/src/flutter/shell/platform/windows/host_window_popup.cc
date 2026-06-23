@@ -40,6 +40,21 @@ HostWindowPopup::HostWindowPopup(
       .is_sized_to_content = true});
 }
 
+HostWindowPopup::~HostWindowPopup() {
+  // Destroy the view (and therefore the raster thread's access to this object
+  // as a sizing delegate) while this HostWindowPopup is still fully alive.
+  //
+  // This popup is itself the view's FlutterWindowsViewSizingDelegate. The view
+  // is owned by |view_controller_|, a member of the HostWindow base class,
+  // which would otherwise be destroyed *after* this derived object's
+  // FlutterWindowsViewSizingDelegate subobject. Resetting it here triggers
+  // FlutterWindowsEngine::RemoveView, which guarantees the raster thread no
+  // longer presents to (or sizes) this view, before the sizing delegate is
+  // torn down. Without this, the raster thread's sized-to-content path can
+  // call into a destroyed sizing delegate and crash.
+  view_controller_.reset();
+}
+
 void HostWindowPopup::DidUpdateViewSize(int32_t width, int32_t height) {
   // This is called from the raster thread.
   std::weak_ptr<int> weak_view_alive = view_alive_;
