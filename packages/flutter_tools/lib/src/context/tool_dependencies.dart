@@ -30,6 +30,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../doctor.dart';
 import '../flutter_cache.dart';
 import '../flutter_features.dart';
 import '../flutter_features_config.dart';
@@ -66,6 +67,7 @@ class ToolDependencies {
     required this.buildSystem,
     required this.buildTargets,
     required this.crashReporter,
+    required this.doctor,
     required this.toolContext,
   });
 
@@ -75,6 +77,7 @@ class ToolDependencies {
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final CrashReporter crashReporter;
+  final Doctor doctor;
   final ToolContext toolContext;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
@@ -295,6 +298,8 @@ class ToolDependencies {
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
+    final finalDoctor = Doctor(logger: finalLogger, clock: finalSystemClock);
+
     // 11. AppleContext Dependencies
     final XcodeProjectInterpreter finalXcodeProjectInterpreter =
         xcodeProjectInterpreter ??
@@ -450,6 +455,7 @@ class ToolDependencies {
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
+      doctor: finalDoctor,
       toolContext: ToolContext(
         botDetector: finalBotDetector,
         cache: finalCache,

@@ -4,11 +4,14 @@
 
 import '../android/android_workflow.dart';
 import '../base/common.dart';
-import '../globals.dart' as globals;
+import '../context/tool_context.dart';
+import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
-  DoctorCommand({this.verbose = false}) {
+  DoctorCommand({required Doctor doctor, required ToolContext toolContext, this.verbose = false})
+    : _doctor = doctor,
+      super(toolContext: toolContext) {
     argParser.addFlag(
       'android-licenses',
       negatable: false,
@@ -24,7 +27,11 @@ class DoctorCommand extends FlutterCommand {
     );
   }
 
+  final Doctor _doctor;
   final bool verbose;
+
+  @override
+  Doctor get doctor => _doctor;
 
   @override
   final name = 'doctor';
@@ -40,7 +47,7 @@ class DoctorCommand extends FlutterCommand {
     if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
       final String engineRevision = stringArg('check-for-remote-artifacts')!;
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
-        final bool success = await globals.doctor?.checkRemoteArtifacts(engineRevision) ?? false;
+        final bool success = await _doctor.checkRemoteArtifacts(engineRevision);
         if (success) {
           throwToolExit(
             'Artifacts for engine $engineRevision are missing or are '
@@ -55,13 +62,11 @@ class DoctorCommand extends FlutterCommand {
         );
       }
     }
-    final bool success =
-        await globals.doctor?.diagnose(
-          androidLicenses: boolArg('android-licenses'),
-          verbose: verbose,
-          androidLicenseValidator: androidLicenseValidator,
-        ) ??
-        false;
+    final bool success = await _doctor.diagnose(
+      androidLicenses: boolArg('android-licenses'),
+      verbose: verbose,
+      androidLicenseValidator: androidLicenseValidator,
+    );
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }
