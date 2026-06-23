@@ -20,6 +20,7 @@ import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
 import '../git.dart';
 import '../native_assets.dart';
+import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../runner/local_engine.dart';
@@ -41,6 +42,7 @@ class ToolContext {
     this.nativeAssetsBuilder,
     required this.os,
     required this.outputPreferences,
+    required this.persistentToolState,
     required this.platform,
     required this.preRunValidator,
     required this.processManager,
@@ -66,6 +68,7 @@ class ToolContext {
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
   final OperatingSystemUtils os;
   final OutputPreferences outputPreferences;
+  final PersistentToolState persistentToolState;
   final Platform platform;
   final PreRunValidator preRunValidator;
   final ProcessManager processManager;

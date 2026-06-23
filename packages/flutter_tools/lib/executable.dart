@@ -253,7 +253,7 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verbose: verbose,
   ),
-  DowngradeCommand(verboseHelp: verboseHelp, logger: globals.logger),
+  DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
     verboseHelp: verboseHelp,
     fileSystem: globals.fs,

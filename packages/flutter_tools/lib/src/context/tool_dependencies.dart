@@ -546,6 +546,7 @@ class ToolDependencies {
         nativeAssetsBuilder: finalNativeAssetsBuilder,
         os: finalOS,
         outputPreferences: finalOutputPreferences,
+        persistentToolState: finalPersistentToolState,
         platform: finalPlatform,
         preRunValidator: finalPreRunValidator,
         processManager: finalProcessManager,

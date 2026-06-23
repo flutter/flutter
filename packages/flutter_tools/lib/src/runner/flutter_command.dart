@@ -38,6 +38,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../git.dart';
 import '../globals.dart' as globals;
+import '../persistent_tool_state.dart';
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
@@ -193,6 +194,8 @@ abstract class FlutterCommand extends Command<void> {
   FlutterVersion get flutterVersion => _toolContext?.flutterVersion ?? globals.flutterVersion;
   Logger get logger => _toolContext?.logger ?? globals.logger;
   OperatingSystemUtils get os => _toolContext?.os ?? globals.os;
+  PersistentToolState get persistentToolState =>
+      _toolContext?.persistentToolState ?? globals.persistentToolState!;
   Platform get platform => _toolContext?.platform ?? globals.platform;
   ProcessManager get processManager => _toolContext?.processManager ?? globals.processManager;
   ProcessUtils get processUtils => _toolContext?.processUtils ?? globals.processUtils;
