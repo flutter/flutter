@@ -166,7 +166,7 @@ incomplete patch from the list of [issues with partial patches][has-partial-patc
 
 ### Open Pull Request Limits
 
-To ensure our maintainers can provide timely and high-quality feedback, public Flutter repositories limit open pull requests to **2 concurrent open pull requests** for contributors without write access.
+To ensure our maintainers can provide timely and high-quality feedback, public Flutter repositories limit contributors without write access to **2 concurrent open pull requests**.
 * **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
 * **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
 
