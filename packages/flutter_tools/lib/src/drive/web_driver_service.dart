@@ -351,8 +351,12 @@ Map<String, dynamic> getDesiredCapabilities(
         '--disable-search-engine-choice-screen',
         if (headless!) ...<String>[
           '--headless',
-          if (platform.isLinux) ...<String>['--use-gl=angle', '--use-angle=swiftshader'],
-          '--enable-unsafe-swiftshader',
+          if (platform.isLinux) ...<String>[
+            '--use-gl=angle',
+            '--use-angle=swiftshader',
+            '--enable-unsafe-swiftshader',
+            '--disable-gpu-sandbox',
+          ],
         ],
         ...webBrowserFlags,
       ],

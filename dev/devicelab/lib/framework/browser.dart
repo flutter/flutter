@@ -108,8 +108,12 @@ class Chrome {
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
       if (options.headless ?? false) ...<String>[
         '--headless',
-        if (io.Platform.isLinux) ...<String>['--use-gl=angle', '--use-angle=swiftshader'],
-        '--enable-unsafe-swiftshader',
+        if (io.Platform.isLinux) ...<String>[
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--enable-unsafe-swiftshader',
+          '--disable-gpu-sandbox',
+        ],
       ],
       if (withDebugging) '--remote-debugging-port=${options.debugPort}',
       '--window-size=${options.windowWidth},${options.windowHeight}',

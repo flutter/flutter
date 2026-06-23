@@ -57,8 +57,12 @@ void main() {
         'args': <String>[
           ...kChromeArgs,
           '--headless',
-          if (io.Platform.isLinux) ...<String>['--use-gl=angle', '--use-angle=swiftshader'],
-          '--enable-unsafe-swiftshader',
+          if (io.Platform.isLinux) ...<String>[
+            '--use-gl=angle',
+            '--use-angle=swiftshader',
+            '--enable-unsafe-swiftshader',
+            '--disable-gpu-sandbox',
+          ],
         ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
