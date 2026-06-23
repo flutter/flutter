@@ -8,10 +8,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -38,7 +41,7 @@ void main() {
 
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
+          createScreenshotCommand(),
         ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(
           isException.having(
@@ -53,7 +56,7 @@ void main() {
     testUsingContext('rasterizer and skia screenshots require VM Service uri', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
+          createScreenshotCommand(),
         ).run(<String>['screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
@@ -61,9 +64,7 @@ void main() {
 
     testUsingContext('device screenshots require device', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
-        ).run(<String>['screenshot']),
+        () => createTestCommandRunner(createScreenshotCommand()).run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
@@ -71,7 +72,7 @@ void main() {
     testUsingContext('device screenshots cannot provided VM Service', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
+          createScreenshotCommand(),
         ).run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
         throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
@@ -148,7 +149,7 @@ void main() {
     });
 
     testUsingContext('should not throw for a single device', () async {
-      final command = ScreenshotCommand(fs: MemoryFileSystem.test());
+      final ScreenshotCommand command = createScreenshotCommand();
 
       final deviceUnsupportedForProject = _ScreenshotDevice(
         id: '123',
@@ -162,7 +163,7 @@ void main() {
     }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
 
     testUsingContext('should tool exit for multiple devices', () async {
-      final command = ScreenshotCommand(fs: MemoryFileSystem.test());
+      final ScreenshotCommand command = createScreenshotCommand();
 
       final devicesUnsupportedForProject = <_ScreenshotDevice>[
         _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
@@ -253,4 +254,27 @@ class _TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
+}
+
+ScreenshotCommand createScreenshotCommand({FileSystem? fs, Logger? logger, Platform? platform}) {
+  return ScreenshotCommand(
+    toolContext: FakeToolContext(
+      fs: fs ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      platform: platform ?? FakePlatform(),
+    ),
+  );
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({required this.fs, required this.logger, required this.platform});
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
 }
