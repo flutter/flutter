@@ -566,11 +566,15 @@ object FlutterPluginUtils {
     internal fun isBuiltInKotlinEnabled(
         project: Project,
         agpVersion: AndroidPluginVersion?
-    ): Boolean =
-        project.providers
+    ): Boolean {
+        if (agpVersion == null || agpVersion.major < 9) {
+            return false
+        }
+        return project.providers
             .gradleProperty("android.builtInKotlin")
             .orNull
-            ?.toBoolean() ?: (agpVersion != null && agpVersion.major >= 9)
+            ?.toBoolean() ?: true
+    }
 
     /** Prints error message for usage of KGP. */
     @JvmStatic
@@ -653,7 +657,7 @@ object FlutterPluginUtils {
      * @property hasAppPlugin `true` if the Android Gradle Plugin (AGP) for applications is declared in the subproject's build script.
      * @property hasLibPlugin `true` if the Android Gradle Plugin (AGP) for libraries is declared in the subproject's build script.
      */
-    private data class SubprojectPluginState(
+    internal data class SubprojectPluginState(
         val hasKgpPlugin: Boolean,
         val hasAppPlugin: Boolean,
         val hasLibPlugin: Boolean
@@ -666,7 +670,7 @@ object FlutterPluginUtils {
      * Returns null if the build script does not exist, is inside an ephemeral `.android/` directory,
      * or fails to read due to an [IOException].
      */
-    private fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
+    internal fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
         val buildFile = subproject.buildFile
 
         // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory
