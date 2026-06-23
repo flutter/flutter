@@ -13,14 +13,8 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 
-// Maximum time to wait for a frame to be ready before giving up and rendering.
-static constexpr gint64 kCompositorRenderTimeoutMicroseconds = 100000;  // 100ms
-
 struct _FlCompositorOpenGL {
   GObject parent_instance;
-
-  // Task runner to wait for frames on.
-  FlTaskRunner* task_runner;
 
   // TRUE if can share framebuffers between contexts.
   gboolean shareable;
@@ -36,9 +30,6 @@ struct _FlCompositorOpenGL {
 
   // Shader program used to composite layers.
   FlCompositorOpenGLShader* shader;
-
-  // Ensure Flutter and GTK can access the frame data (framebuffer or pixels).
-  GMutex frame_mutex;
 };
 
 G_DEFINE_TYPE(FlCompositorOpenGL, fl_compositor_opengl, G_TYPE_OBJECT)
@@ -48,11 +39,9 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 
   g_clear_object(&self->shader);
 
-  g_clear_object(&self->task_runner);
   g_clear_object(&self->opengl_manager);
   g_clear_object(&self->framebuffer);
   g_clear_pointer(&self->pixels, g_free);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
 }
@@ -61,17 +50,13 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
 }
 
-static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
-  g_mutex_init(&self->frame_mutex);
-}
+static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
 
-FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
-                                             FlOpenGLManager* opengl_manager,
+FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
                                              gboolean shareable) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
 
-  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
   self->shareable = shareable;
   self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
   self->shader = fl_compositor_opengl_shader_new(opengl_manager);
@@ -101,9 +86,7 @@ static void composite_layer(FlCompositorOpenGL* self,
 gboolean fl_compositor_opengl_present_layers(FlCompositorOpenGL* self,
                                              const FlutterLayer** layers,
                                              size_t layers_count) {
-  g_mutex_lock(&self->frame_mutex);
   if (layers_count == 0) {
-    g_mutex_unlock(&self->frame_mutex);
     return TRUE;
   }
 
@@ -236,18 +219,12 @@ gboolean fl_compositor_opengl_present_layers(FlCompositorOpenGL* self,
   }
   glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
 
-  g_mutex_unlock(&self->frame_mutex);
-
-  fl_task_runner_stop_wait(self->task_runner);
-
   return TRUE;
 }
 
 void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* self,
                                          size_t* width,
                                          size_t* height) {
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
   if (width != nullptr) {
     *width = self->framebuffer != nullptr
                  ? fl_framebuffer_get_width(self->framebuffer)
@@ -262,43 +239,14 @@ void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* self,
 
 gboolean fl_compositor_opengl_render(FlCompositorOpenGL* self,
                                      cairo_t* cr,
-                                     GdkWindow* window,
-                                     gboolean wait_for_frame) {
-  g_mutex_lock(&self->frame_mutex);
+                                     GdkWindow* window) {
   if (self->framebuffer == nullptr) {
-    g_mutex_unlock(&self->frame_mutex);
     return FALSE;
   }
 
-  // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width, height;
-  gint64 expiry_time =
-      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
-  while (true) {
-    width = gdk_window_get_width(window) * scale_factor;
-    height = gdk_window_get_height(window) * scale_factor;
-    if (!wait_for_frame) {
-      break;
-    }
-
-    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
-    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
-    if (framebuffer_width == width && framebuffer_height == height) {
-      break;
-    }
-
-    if (g_get_monotonic_time() > expiry_time) {
-      g_warning(
-          "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
-          width, height, framebuffer_width, framebuffer_height);
-      break;
-    }
-
-    g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_wait(self->task_runner, expiry_time);
-    g_mutex_lock(&self->frame_mutex);
-  }
+  size_t width = gdk_window_get_width(window) * scale_factor;
+  size_t height = gdk_window_get_height(window) * scale_factor;
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     g_autoptr(FlFramebuffer) sibling =
@@ -332,8 +280,6 @@ gboolean fl_compositor_opengl_render(FlCompositorOpenGL* self,
   }
 
   glFlush();
-
-  g_mutex_unlock(&self->frame_mutex);
 
   return TRUE;
 }
