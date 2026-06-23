@@ -54,7 +54,7 @@ else
   fix_flag="--fix --lint-all"
 fi
 
-# Determine wether to use x64 or arm64.
+# Determine whether to use x64 or arm64.
 if command -v arch &> /dev/null && [[ $(arch) == "arm64" ]]; then
   CLANG_TIDY_PATH="flutter/buildtools/mac-arm64/clang/bin/clang-tidy"
 fi

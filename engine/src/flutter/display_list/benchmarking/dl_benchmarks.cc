@@ -118,6 +118,16 @@ DlPaint GetPaintForRun(unsigned attributes) {
     paint.setStrokeWidth(1.0f);
   }
 
+  if (attributes & kShadow5) {
+    static auto blur5filter =
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f);
+    paint.setMaskFilter(blur5filter);
+  } else if (attributes & kShadow10) {
+    static auto blur10filter =
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f);
+    paint.setMaskFilter(blur10filter);
+  }
+
   paint.setAntiAlias(attributes & kAntiAliasing);
   return paint;
 }
@@ -1627,51 +1637,49 @@ constexpr int kAAHairlinePrimitive =
     kAntiAliasing | kStrokedStyle | kHairlineStroke;
 constexpr int kAAStroke10Primitive =
     kAntiAliasing | kStrokedStyle | kWideStroke10;
+constexpr int kFilledShadow5Primitive =
+    kFilledStyle | kShadow5;
+constexpr int kFilledShadow10Primitive =
+    kFilledStyle | kShadow10;
 
-#define BENCHMARK_PRIMITIVE_SYNC_OVERHEAD(BACKEND)                           \
-  BENCHMARK_CAPTURE(BM_SyncOverhead, BACKEND, BackendType::k##BACKEND)       \
+#define BENCHMARK_OVERHEAD(FUNC, BACKEND)                                    \
+  BENCHMARK_CAPTURE(BM_##FUNC, BACKEND, BackendType::k##BACKEND)             \
       ->RangeMultiplier(4)                                                   \
       ->Range(16, 1024)                                                      \
       ->UseRealTime()                                                        \
       ->Unit(benchmark::kNanosecond);
 
-#define BENCHMARK_PRIMITIVE_EMPTY_DISPLAY_LIST_OVERHEAD(BACKEND)             \
-  BENCHMARK_CAPTURE(BM_EmptyDisplayList, BACKEND, BackendType::k##BACKEND)   \
-      ->RangeMultiplier(4)                                                   \
-      ->Range(16, 1024)                                                      \
-      ->UseRealTime()                                                        \
-      ->Unit(benchmark::kNanosecond);
-
-#define BENCHMARK_PRIMITIVE_SINGLE_OP_DISPLAY_LIST_OVERHEAD(BACKEND)         \
-  BENCHMARK_CAPTURE(BM_SingleOpDisplayList, BACKEND,                         \
-                    BackendType::k##BACKEND)                                 \
-      ->RangeMultiplier(4)                                                   \
-      ->Range(16, 1024)                                                      \
-      ->UseRealTime()                                                        \
-      ->Unit(benchmark::kNanosecond);
-
-#define DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, ATTRIBUTES)                 \
+#define DRAW_BENCHMARK_PRIMITIVES_LIMITS(BACKEND, TYPE, ATTRIBUTES,          \
+                                         MIN, MAX, MULT)                     \
   BENCHMARK_CAPTURE(BM_Draw##TYPE, ATTRIBUTES/BACKEND,                       \
                     BackendType::k##BACKEND,                                 \
                     k##ATTRIBUTES##Primitive)                                \
-      ->RangeMultiplier(4)                                                   \
-      ->Range(16, 1024)                                                      \
+      ->RangeMultiplier(MULT)                                                \
+      ->Range(MIN, MAX)                                                      \
       ->UseRealTime()                                                        \
       ->Unit(benchmark::kMillisecond);
 
+#define DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, ATTRIBUTES)                  \
+  DRAW_BENCHMARK_PRIMITIVES_LIMITS(BACKEND, TYPE, ATTRIBUTES, 16, 1024, 4)
+
+#define DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, ATTRIBUTES)           \
+  DRAW_BENCHMARK_PRIMITIVES_LIMITS(BACKEND, TYPE, ATTRIBUTES, 64, 256, 4)
+
 #define DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                              \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, AAHairline)                       \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, AAStroke10)
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, Line, AAHairline)                        \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, Line, AAStroke10)                        \
 
 #define DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, TYPE)                        \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAFilled)                         \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAHairline)                       \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAStroke10)                       \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAFilled)                          \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAHairline)                        \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAStroke10)                        \
+  DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow5)              \
+  DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow10)             \
 
 #define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
-  BENCHMARK_PRIMITIVE_SYNC_OVERHEAD(BACKEND)                                 \
-  BENCHMARK_PRIMITIVE_EMPTY_DISPLAY_LIST_OVERHEAD(BACKEND)                   \
-  BENCHMARK_PRIMITIVE_SINGLE_OP_DISPLAY_LIST_OVERHEAD(BACKEND)               \
+  BENCHMARK_OVERHEAD(SyncOverhead, BACKEND)                                  \
+  BENCHMARK_OVERHEAD(EmptyDisplayList, BACKEND)                              \
+  BENCHMARK_OVERHEAD(SingleOpDisplayList, BACKEND)                           \
   DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                                    \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Rect)                              \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Oval)                              \

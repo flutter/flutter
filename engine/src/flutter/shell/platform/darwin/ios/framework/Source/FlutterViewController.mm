@@ -20,6 +20,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
@@ -118,13 +119,13 @@ typedef struct MouseState {
 /// cancellation.
 @property(nonatomic, assign) NSTimeInterval scrollInertiaEventAppKitDeadline;
 
-/// VSyncClient for touch events delivery frame rate correction.
+/// FlutterVSyncClient for touch events delivery frame rate correction.
 ///
 /// On promotion devices(eg: iPhone13 Pro), the delivery frame rate of touch events is 60HZ
 /// but the frame rate of rendering is 120HZ, which is different and will leads jitter and laggy.
-/// With this VSyncClient, it can correct the delivery frame rate of touch events to let it keep
-/// the same with frame rate of rendering.
-@property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
+/// With this FlutterVSyncClient, it can correct the delivery frame rate of touch events to let it
+/// keep the same with frame rate of rendering.
+@property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 
 /// The size of the FlutterView's frame, as determined by auto-layout,
 /// before Flutter's custom auto-resizing constraints are applied.
@@ -681,6 +682,17 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
                             : [self isSceneStateMatching:UISceneActivationStateBackground];
 }
 
+- (BOOL)shouldHandleSceneNotification:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (notification.object == nil) {
+    return YES;
+  }
+  UIWindowScene* scene = self.flutterWindowSceneIfViewLoaded;
+  if (scene == nil) {
+    return YES;
+  }
+  return notification.object == scene;
+}
+
 - (BOOL)isApplicationStateMatching:(UIApplicationState)match
                    withApplication:(UIApplication*)application {
   switch (application.applicationState) {
@@ -977,25 +989,40 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Scene lifecycle notifications
 
 - (void)sceneBecameActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneBecameActive");
   [self appOrSceneBecameActive];
 }
 
 - (void)sceneWillResignActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneWillResignActive");
   [self appOrSceneWillResignActive];
 }
 
 - (void)sceneWillDisconnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self appOrSceneWillTerminate];
 }
 
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneDidEnterBackground");
   [self appOrSceneDidEnterBackground];
 }
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneWillEnterForeground");
   [self appOrSceneWillEnterForeground];
 }
@@ -1285,7 +1312,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  double displayRefreshRate = DisplayLinkManager.displayRefreshRate;
+  double displayRefreshRate = FlutterDisplayLinkManager.displayRefreshRate;
   const double epsilon = 0.1;
   if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
 
@@ -1295,11 +1322,15 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  auto callback = [](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    // Do nothing in this block. Just trigger system to callback touch events with correct rate.
-  };
-  _touchRateCorrectionVSyncClient =
-      [[VSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner callback:callback];
+  void (^callback)(CFTimeInterval, CFTimeInterval) =
+      ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+        // Do nothing in this block. Just trigger system to callback touch events with correct rate.
+      };
+  _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
+                initWithTaskRunner:self.engine.platformTaskRunner
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
 

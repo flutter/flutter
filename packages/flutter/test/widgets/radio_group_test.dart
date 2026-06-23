@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
+import 'radio_group_tester.dart';
+import 'radio_tester.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
@@ -22,8 +24,8 @@ void main() {
         child: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
-              _TestRadio<int>(key: key0, value: 0),
-              _TestRadio<int>(key: key1, value: 1),
+              TestRadio<int>(key: key0, value: 0),
+              TestRadio<int>(key: key1, value: 1),
             ],
           ),
         ),
@@ -71,8 +73,8 @@ void main() {
         child: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
-              _TestRadio<int>(key: key0, value: 0, enabled: false),
-              _TestRadio<int>(key: key1, value: 1),
+              TestRadio<int>(key: key0, value: 0, enabled: false),
+              TestRadio<int>(key: key1, value: 1),
             ],
           ),
         ),
@@ -111,7 +113,7 @@ void main() {
               TestCheckbox(value: true, onChanged: (bool? value) {}),
               const TestRadioGroup<int>(
                 child: Column(
-                  children: <Widget>[_TestRadio<int>(value: 0), _TestRadio<int>(value: 1)],
+                  children: <Widget>[TestRadio<int>(value: 0), TestRadio<int>(value: 1)],
                 ),
               ),
               TestCheckbox(value: true, onChanged: (bool? value) {}),
@@ -135,9 +137,9 @@ void main() {
         home: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
-              _TestRadio<int>(key: key0, focusNode: focusNode, value: 0),
-              _TestRadio<int>(key: key1, value: 1),
-              _TestRadio<int>(key: key2, value: 2),
+              TestRadio<int>(key: key0, focusNode: focusNode, value: 0),
+              TestRadio<int>(key: key1, value: 1),
+              TestRadio<int>(key: key2, value: 2),
             ],
           ),
         ),
@@ -189,9 +191,9 @@ void main() {
         home: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
-              _TestRadio<int>(key: key0, focusNode: focusNode, value: 0),
-              _TestRadio<int>(key: key1, enabled: false, value: 1),
-              _TestRadio<int>(key: key2, value: 2),
+              TestRadio<int>(key: key0, focusNode: focusNode, value: 0),
+              TestRadio<int>(key: key1, enabled: false, value: 1),
+              TestRadio<int>(key: key2, value: 2),
             ],
           ),
         ),
@@ -251,9 +253,9 @@ void main() {
             TestRadioGroup<int>(
               child: Column(
                 children: <Widget>[
-                  _TestRadio<int>(key: key0, focusNode: radio0, value: 0),
-                  _TestRadio<int>(key: key1, focusNode: radio1, value: 1),
-                  _TestRadio<int>(key: key2, value: 2),
+                  TestRadio<int>(key: key0, focusNode: radio0, value: 0),
+                  TestRadio<int>(key: key1, focusNode: radio1, value: 1),
+                  TestRadio<int>(key: key2, value: 2),
                 ],
               ),
             ),
@@ -311,10 +313,10 @@ void main() {
         home: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
-              const _TestRadio<int>(value: 0),
-              _TestRadio<int>(key: key1, value: 1),
-              const _TestRadio<int>(value: 1),
-              const _TestRadio<int>(value: 2),
+              const TestRadio<int>(value: 0),
+              TestRadio<int>(key: key1, value: 1),
+              const TestRadio<int>(value: 1),
+              const TestRadio<int>(value: 2),
             ],
           ),
         ),
@@ -347,11 +349,11 @@ void main() {
           groupValue: 4,
           child: const Column(
             children: <Widget>[
-              _TestRadio<int>(value: 0),
-              _TestRadio<int>(value: 1),
-              _TestRadio<int>(value: 2),
-              _TestRadio<int>(value: 3),
-              _TestRadio<int>(value: 4),
+              TestRadio<int>(value: 0),
+              TestRadio<int>(value: 1),
+              TestRadio<int>(value: 2),
+              TestRadio<int>(value: 3),
+              TestRadio<int>(value: 4),
             ],
           ),
         ),
@@ -367,10 +369,10 @@ void main() {
           groupValue: 4,
           child: const Column(
             children: <Widget>[
-              _TestRadio<int>(value: 1),
-              _TestRadio<int>(value: 2),
-              _TestRadio<int>(value: 3),
-              _TestRadio<int>(value: 4),
+              TestRadio<int>(value: 1),
+              TestRadio<int>(value: 2),
+              TestRadio<int>(value: 3),
+              TestRadio<int>(value: 4),
             ],
           ),
         ),
@@ -405,9 +407,9 @@ void main() {
           child: TestRadioGroup<int>(
             child: Column(
               children: <Widget>[
-                _TestRadio<int>(focusNode: firstRadioFocusNode, value: 0),
-                const _TestRadio<int>(value: 1),
-                const _TestRadio<int>(value: 2),
+                TestRadio<int>(focusNode: firstRadioFocusNode, value: 0),
+                const TestRadio<int>(value: 1),
+                const TestRadio<int>(value: 2),
                 TestTextField(focusNode: textFieldFocusNode),
               ],
             ),
@@ -502,8 +504,7 @@ void main() {
       TestWidgetsApp(
         home: Center(
           child: SizedBox.shrink(
-            child: RadioGroup<int>(
-              onChanged: (_) {},
+            child: TestRadioGroup<int>(
               child: Column(
                 children: [
                   RawRadio<int>(
@@ -512,7 +513,7 @@ void main() {
                     toggleable: false,
                     focusNode: focusNode1,
                     autofocus: false,
-                    groupRegistry: TestRegistry<int>(),
+                    groupRegistry: TestRadioGroupRegistry<int>(),
                     enabled: true,
                     builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
                         const Text('X'),
@@ -523,7 +524,7 @@ void main() {
                     toggleable: false,
                     focusNode: focusNode2,
                     autofocus: false,
-                    groupRegistry: TestRegistry<int>(),
+                    groupRegistry: TestRadioGroupRegistry<int>(),
                     enabled: true,
                     builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
                         const Text('Y'),
@@ -535,102 +536,6 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(RadioGroup<int>)), Size.zero);
+    expect(tester.getSize(find.byType(TestRadioGroup<int>)), Size.zero);
   });
-}
-
-class TestRadioGroup<T> extends StatefulWidget {
-  const TestRadioGroup({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<StatefulWidget> createState() => TestRadioGroupState<T>();
-}
-
-class TestRadioGroupState<T> extends State<TestRadioGroup<T>> {
-  T? groupValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return RadioGroup<T>(
-      onChanged: (T? newValue) {
-        setState(() {
-          groupValue = newValue;
-        });
-      },
-      groupValue: groupValue,
-      child: widget.child,
-    );
-  }
-}
-
-/// A minimal radio button for widget tests that registers with a [RadioGroup]
-/// ancestor, avoiding a dependency on the Material library.
-class _TestRadio<T> extends StatefulWidget {
-  const _TestRadio({super.key, required this.value, this.focusNode, this.enabled});
-
-  final T value;
-  final FocusNode? focusNode;
-  final bool? enabled;
-
-  @override
-  State<_TestRadio<T>> createState() => _TestRadioState<T>();
-}
-
-class _TestRadioState<T> extends State<_TestRadio<T>> {
-  FocusNode? _internalFocusNode;
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
-
-  @override
-  void dispose() {
-    _internalFocusNode?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool enabled = widget.enabled ?? true;
-    return RawRadio<T>(
-      value: widget.value,
-      mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
-      toggleable: false,
-      focusNode: _effectiveFocusNode,
-      autofocus: false,
-      groupRegistry: enabled ? RadioGroup.maybeOf<T>(context) : null,
-      enabled: enabled,
-      builder: (BuildContext context, ToggleableStateMixin state) {
-        return SizedBox(
-          width: 18,
-          height: 18,
-          child: Center(
-            child: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: state.value ?? false ? const Color(0xFF000000) : const Color(0x00000000),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class TestRegistry<T> extends RadioGroupRegistry<T> {
-  final Set<RadioClient<T>> clients = <RadioClient<T>>{};
-  @override
-  T? groupValue;
-
-  @override
-  ValueChanged<T?> get onChanged =>
-      (T? newValue) => groupValue = newValue;
-
-  @override
-  void registerClient(RadioClient<T> radio) => clients.add(radio);
-
-  @override
-  void unregisterClient(RadioClient<T> radio) => clients.remove(radio);
 }

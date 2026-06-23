@@ -6787,6 +6787,49 @@ void main() {
     expect(paragraph.selections.first, const TextSelection(baseOffset: 0, extentOffset: 12));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/168765
+  testWidgets(
+    'context menu overlay entry is built after selection handles',
+    (WidgetTester tester) async {
+      final buildOrder = <String>[];
+      final selectionControls = _TextSelectionControlsSpy(
+        onBuildHandle: () => buildOrder.add('handle'),
+      );
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: selectionControls,
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buildOrder.add('contextMenu');
+                  return const SizedBox.shrink();
+                },
+            child: const Text('How are you?'),
+          ),
+        ),
+      );
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+      );
+
+      // Long press to trigger selection handles and context menu.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Verify that the context menu was built after the selection handles,
+      // which means the context menu overlay entry is on top and receives
+      // hit tests first.
+      expect(buildOrder, <String>['handle', 'handle', 'contextMenu']);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+  );
+
   testWidgets(
     'selects backwards across multiple Text widgets and WidgetSpans via mouse drag',
     (WidgetTester tester) async {
@@ -7150,5 +7193,32 @@ class RenderSelectAll extends RenderProxyBox with Selectable, SelectionRegistran
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
     this.startHandle = startHandle;
     this.endHandle = endHandle;
+  }
+}
+
+/// A [TextSelectionControls] spy with [TextSelectionHandleControls] mixin that
+/// exposes an [onBuildHandle] callback, used to verify overlay insertion order.
+class _TextSelectionControlsSpy extends TextSelectionControls with TextSelectionHandleControls {
+  _TextSelectionControlsSpy({this.onBuildHandle});
+
+  final VoidCallback? onBuildHandle;
+
+  @override
+  Size getHandleSize(double textLineHeight) => const Size(20.0, 30.0);
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    onBuildHandle?.call();
+    return const SizedBox(width: 20.0, height: 30.0);
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
   }
 }

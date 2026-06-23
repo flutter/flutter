@@ -129,6 +129,23 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
   }
 }
 
+bool FlutterDesktopEngineIsPlatformThread(FlutterDesktopEngineRef engine) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->EngineIsPlatformThread();
+  }
+  return false;
+}
+
+void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
+                                                VoidCallback callback,
+                                                VoidCallback on_cancel,
+                                                void* user_data) {
+  if (s_stub_implementation) {
+    s_stub_implementation->EnginePostPlatformThreadTask(callback, on_cancel,
+                                                        user_data);
+  }
+}
+
 void FlutterDesktopEngineReloadSystemFonts(FlutterDesktopEngineRef engine) {
   if (s_stub_implementation) {
     s_stub_implementation->EngineReloadSystemFonts();
@@ -215,6 +232,16 @@ FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetViewById(
     return s_stub_implementation->PluginRegistrarGetViewById(view_id);
   }
   return nullptr;
+}
+
+bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar,
+    IDXGIAdapter** adapter_out) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->PluginRegistrarGetGraphicsAdapter(
+        adapter_out);
+  }
+  return false;
 }
 
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(

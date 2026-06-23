@@ -1157,7 +1157,7 @@ class DeviceDomain extends Domain {
 
   /// Creates an application package from a file in the temp directory.
   Future<String> uploadApplicationPackage(Map<String, Object?> args) async {
-    final TargetPlatform targetPlatform = getTargetPlatformForName(
+    final targetPlatform = TargetPlatform.fromName(
       _getStringArg(args, 'targetPlatform', required: true)!,
     );
     final File applicationBinary = daemon.proxyDomain.tempDirectory.childFile(
@@ -1415,7 +1415,7 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
   return <String, Object?>{
     'id': device.id,
     'name': device.displayName,
-    'platform': getNameForTargetPlatform(await device.targetPlatform),
+    'platform': (await device.targetPlatform).getName(),
     'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),
@@ -1808,6 +1808,9 @@ class ProxyDomain extends Domain {
 /// A [Logger] which omits log messages to avoid breaking `--machine` formatting.
 final class MachineOutputLogger extends DelegatingLogger {
   MachineOutputLogger({required Logger parent}) : super(parent);
+
+  @override
+  bool get isMachine => true;
 
   AppDomain? _domain;
   late final AppInstance _app;
