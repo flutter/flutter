@@ -116,7 +116,6 @@ source_set("flutter_linux_sources") {
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
     "fl_binary_messenger.cc",
-    "fl_compositor.cc",
     "fl_compositor_opengl.cc",
     "fl_compositor_opengl_shader.cc",
     "fl_compositor_software.cc",

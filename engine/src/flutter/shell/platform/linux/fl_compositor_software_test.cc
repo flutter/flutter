@@ -47,11 +47,11 @@ TEST_F(FlCompositorSoftwareTest, Render) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+    fl_compositor_software_present_layers(compositor, layers, 1);
   }).join();
 
   size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor), &frame_width,
+  fl_compositor_software_get_frame_size(compositor, &frame_width,
                                &frame_height);
   EXPECT_EQ(frame_width, width);
   EXPECT_EQ(frame_height, height);
@@ -63,7 +63,7 @@ TEST_F(FlCompositorSoftwareTest, Render) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_software_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -86,7 +86,7 @@ TEST_F(FlCompositorSoftwareTest, Resize) {
                          .size = {width1, height1}};
   const FlutterLayer* layers1[1] = {&layer1};
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers1, 1);
+    fl_compositor_software_present_layers(compositor, layers1, 1);
   }).join();
 
   // Present layer in current size.
@@ -107,7 +107,7 @@ TEST_F(FlCompositorSoftwareTest, Resize) {
   const FlutterLayer* layers2[1] = {&layer2};
   fml::AutoResetWaitableEvent latch;
   std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers2, 1);
+    fl_compositor_software_present_layers(compositor, layers2, 1);
     latch.Signal();
   }).detach();
 
@@ -118,7 +118,7 @@ TEST_F(FlCompositorSoftwareTest, Resize) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width2, height2, stride2);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  fl_compositor_software_render(compositor, cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 

@@ -20,7 +20,7 @@ struct _FlViewRendererSoftware {
   gboolean have_first_frame;
 
   // Combines layers into frame.
-  FlCompositor* compositor;
+  FlCompositorSoftware* compositor;
 };
 
 G_DEFINE_TYPE(FlViewRendererSoftware,
@@ -49,7 +49,8 @@ static gboolean redraw_cb(gpointer user_data) {
   size_t width = allocation.width * scale_factor;
   size_t height = allocation.height * scale_factor;
   size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
+  fl_compositor_software_get_frame_size(self->compositor, &frame_width,
+                                        &frame_height);
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(render_widget, frame_width / scale_factor,
@@ -74,8 +75,8 @@ static void fl_view_renderer_software_realize(GtkWidget* widget) {
 
   GTK_WIDGET_CLASS(fl_view_renderer_software_parent_class)->realize(widget);
 
-  self->compositor = FL_COMPOSITOR(
-      fl_compositor_software_new(fl_engine_get_task_runner(self->engine)));
+  self->compositor =
+      fl_compositor_software_new(fl_engine_get_task_runner(self->engine));
 }
 
 // Implements GtkWidget::draw.
@@ -91,8 +92,9 @@ static gboolean fl_view_renderer_software_draw(GtkWidget* widget, cairo_t* cr) {
   }
 
   gboolean wait_for_frame = !self->sized_to_content;
-  return fl_compositor_render(self->compositor, cr,
-                              gtk_widget_get_window(widget), wait_for_frame);
+  return fl_compositor_software_render(self->compositor, cr,
+                                       gtk_widget_get_window(widget),
+                                       wait_for_frame);
 }
 
 // Implements FlViewRenderer::present_layers.
@@ -108,7 +110,7 @@ static void fl_view_renderer_software_present_layers(
     return;
   }
 
-  fl_compositor_present_layers(self->compositor, layers, layers_count);
+  fl_compositor_software_present_layers(self->compositor, layers, layers_count);
 
   // Perform the redraw in the GTK thread.
   g_idle_add(redraw_cb, g_object_ref(self));

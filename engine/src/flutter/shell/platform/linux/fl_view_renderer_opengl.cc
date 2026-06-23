@@ -26,7 +26,7 @@ struct _FlViewRendererOpenGL {
   GdkGLContext* render_context;
 
   // Combines layers into frame.
-  FlCompositor* compositor;
+  FlCompositorOpenGL* compositor;
 };
 
 G_DEFINE_TYPE(FlViewRendererOpenGL,
@@ -55,7 +55,8 @@ static gboolean redraw_cb(gpointer user_data) {
   size_t width = allocation.width * scale_factor;
   size_t height = allocation.height * scale_factor;
   size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
+  fl_compositor_opengl_get_frame_size(self->compositor, &frame_width,
+                                      &frame_height);
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(render_widget, frame_width / scale_factor,
@@ -99,9 +100,9 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
   // then we have to copy the texture via the CPU.
   gboolean shareable =
       GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
-  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
+  self->compositor = fl_compositor_opengl_new(
       fl_engine_get_task_runner(self->engine),
-      fl_engine_get_opengl_manager(self->engine), shareable));
+      fl_engine_get_opengl_manager(self->engine), shareable);
 }
 
 // Implements GtkWidget::draw.
@@ -121,7 +122,7 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
   }
 
   gboolean wait_for_frame = !self->sized_to_content;
-  gboolean result = fl_compositor_render(
+  gboolean result = fl_compositor_opengl_render(
       self->compositor, cr, gtk_widget_get_window(widget), wait_for_frame);
 
   if (self->render_context != nullptr) {
@@ -143,7 +144,7 @@ static void fl_view_renderer_opengl_present_layers(FlViewRenderer* renderer,
     return;
   }
 
-  fl_compositor_present_layers(self->compositor, layers, layers_count);
+  fl_compositor_opengl_present_layers(self->compositor, layers, layers_count);
 
   // Perform the redraw in the GTK thread.
   g_idle_add(redraw_cb, g_object_ref(self));
