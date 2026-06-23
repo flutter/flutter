@@ -10,6 +10,7 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
@@ -186,59 +187,106 @@ class ShaderCompiler {
       '--include=$shaderLibPath',
     ];
 
-    var failure = false;
-    var retryWithoutSksl = false;
-
-    final List<String> shaderTargets = _shaderTargetsFromTargetPlatform(targetPlatform);
-    final List<String> cmd = makeImpellercCommand(shaderTargets);
-    _logger.printTrace('impellerc command: $cmd');
-    final ProcessResult result = await _processManager.run(cmd, stderrEncoding: utf8);
-    if (result.exitCode != 0) {
-      // Maybe retry impellerc command without --sksl.
-      if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
-        // The original command did not target sksl or targeted only sksl, so
-        // we can't retry without --sksl.
-        _logger.printError('impellerc failure: ${result.stderr}');
-        failure = true;
-      } else {
-        retryWithoutSksl = true;
+    Future<ProcessResult> runCommand(List<String> command) async {
+      try {
+        return await _processManager.run(command, stderrEncoding: utf8);
+      } on ProcessException catch (e) {
+        if (_isBlockedBySecurityPolicy(e)) {
+          throw _SecurityPolicyBlockException(e);
+        }
+        rethrow;
       }
     }
 
-    if (retryWithoutSksl) {
-      shaderTargets.remove('--sksl');
-      final List<String> retryCmd = makeImpellercCommand(shaderTargets);
-      _logger.printTrace('Retrying impellerc command without sksl: $retryCmd');
-      final ProcessResult retryResult = await _processManager.run(retryCmd, stderrEncoding: utf8);
-      if (retryResult.exitCode != 0) {
-        // Retry failed.
-        _logger.printError('impellerc failure: ${retryResult.stderr}');
-        failure = true;
-      } else {
-        // Retry succeeded. Don't fail, but log a warning message and the sksl
-        // compiler error.
-        // The "warning: " prefix must be used to make these non-fatal log
-        // messages appear in the console when building with the Xcode backend.
-        _logger.printError(
-          'warning: Shader `${input.path}` is incompatible with SkSL. This '
-          'shader will not load when running with the Skia backend.',
-        );
-        _logger.printError('impellerc failure: ${result.stderr}');
-      }
-    }
+    try {
+      var failure = false;
+      var retryWithoutSksl = false;
 
-    if (failure) {
+      final List<String> shaderTargets = _shaderTargetsFromTargetPlatform(targetPlatform);
+      final List<String> cmd = makeImpellercCommand(shaderTargets);
+      _logger.printTrace('impellerc command: $cmd');
+      final ProcessResult result = await runCommand(cmd);
+      if (result.exitCode != 0) {
+        // Maybe retry impellerc command without --sksl.
+        if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
+          // The original command did not target sksl or targeted only sksl, so
+          // we can't retry without --sksl.
+          _logger.printError('impellerc failure: ${result.stderr}');
+          failure = true;
+        } else {
+          retryWithoutSksl = true;
+        }
+      }
+
+      if (retryWithoutSksl) {
+        shaderTargets.remove('--sksl');
+        final List<String> retryCmd = makeImpellercCommand(shaderTargets);
+        _logger.printTrace('Retrying impellerc command without sksl: $retryCmd');
+        final ProcessResult retryResult = await runCommand(retryCmd);
+        if (retryResult.exitCode != 0) {
+          // Retry failed.
+          _logger.printError('impellerc failure: ${retryResult.stderr}');
+          failure = true;
+        } else {
+          // Retry succeeded. Don't fail, but log a warning message and the sksl
+          // compiler error.
+          // The "warning: " prefix must be used to make these non-fatal log
+          // messages appear in the console when building with the Xcode backend.
+          _logger.printError(
+            'warning: Shader `${input.path}` is incompatible with SkSL. This '
+            'shader will not load when running with the Skia backend.',
+          );
+          _logger.printError('impellerc failure: ${result.stderr}');
+        }
+      }
+
+      if (failure) {
+        if (fatal) {
+          throw ShaderCompilerException._(
+            'Shader compilation of "${input.path}" to "$outputPath" '
+            'failed with exit code ${result.exitCode}.',
+          );
+        }
+        return false;
+      }
+    } on _SecurityPolicyBlockException catch (_) {
+      _logSecurityBlockError(impellerc.path);
       if (fatal) {
-        throw ShaderCompilerException._(
-          'Shader compilation of "${input.path}" to "$outputPath" '
-          'failed with exit code ${result.exitCode}.',
-        );
+        throwToolExit('Impeller shader compiler was blocked by security policy.', exitCode: 1);
       }
       return false;
     }
     ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     return true;
   }
+
+  bool _isBlockedBySecurityPolicy(ProcessException exception) {
+    final String message = exception.message.toLowerCase();
+    return message.contains('application control policy') ||
+        message.contains('blocked by your administrator') ||
+        message.contains('blocked by group policy') ||
+        exception.errorCode == _winErrorAccessDisabledByPolicy;
+  }
+
+  void _logSecurityBlockError(String impellercPath) {
+    _logger.printError(
+      '------------------------------------------------------------------------\n'
+      'Error: The Impeller shader compiler (impellerc) was blocked by system\n'
+      'security policies (e.g., Windows Application Control or AppLocker).\n'
+      '\n'
+      'To resolve this, please contact your system administrator to whitelist\n'
+      'the binary at:\n'
+      '  $impellercPath\n'
+      '------------------------------------------------------------------------',
+    );
+  }
+}
+
+const int _winErrorAccessDisabledByPolicy = 1260;
+
+class _SecurityPolicyBlockException implements Exception {
+  _SecurityPolicyBlockException(this.cause);
+  final ProcessException cause;
 }
 
 class ShaderCompilerException implements Exception {
