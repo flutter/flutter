@@ -252,6 +252,9 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
       sl_options.version = 300;
     }
     sl_options.es = true;
+    // ESSL 1.00 (OpenGLES < 3.0) does not support comma expressions in loop
+    // headers. Tell SPIRV-Cross to avoid emitting them.
+    sl_options.avoid_comma_expressions_in_loops = sl_options.version < 300;
     if (source_options.require_framebuffer_fetch &&
         source_options.type == SourceType::kFragmentShader) {
       gl_compiler->remap_ext_framebuffer_fetch(0, 0, true);
@@ -472,6 +475,18 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
         spirv_options.macro_definitions.push_back("IMPELLER_GRAPHICS_BACKEND");
         spirv_options.relaxed_vulkan_rules = true;
       }
+      // When any optimization level above 'zero' is enabled, the SPIR-V
+      // optimizer may aggressively hoist loop updates/bodies into the loop
+      // continue blocks. For OpenGLES < 3.0 (ESSL 1.00), this results in either
+      // invalid comma expressions in loop headers, or catastrophic cascading
+      // expression invalidations in SPIRV-Cross when translating to complex
+      // loops. Disable optimizations to keep continue blocks simple and compile
+      // cleanly.
+      if (source_options.target_platform == TargetPlatform::kOpenGLES &&
+          source_options.gles_language_version < 300) {
+        spirv_options.optimization_level =
+            shaderc_optimization_level::shaderc_optimization_level_zero;
+      }
       spirv_options.target = target;
     } break;
     case TargetPlatform::kRuntimeStageMetal:
@@ -493,6 +508,13 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
         // Flutter <= 3.44 before the OpenGLES flip was removed.
         spirv_options.macro_definitions.push_back(
             "IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED");
+      }
+      // Disable optimizations for OpenGLES < 3.0 runtime stages for the same
+      // reasons as TargetPlatform::kOpenGLES (avoiding complex continue
+      // blocks).
+      if (source_options.target_platform == TargetPlatform::kRuntimeStageGLES) {
+        spirv_options.optimization_level =
+            shaderc_optimization_level::shaderc_optimization_level_zero;
       }
     } break;
     case TargetPlatform::kSkSL: {
