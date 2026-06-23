@@ -234,7 +234,11 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await ChannelCommand.upgradeChannel(flutterVersion);
+    await ChannelCommand.upgradeChannel(
+      currentVersion: flutterVersion,
+      git: globals.git,
+      logger: globals.logger,
+    );
     globals.printStatus(
       'Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...',
     );

@@ -117,11 +117,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   Cache get cache => _injectedCache ?? globals.cache;
   final Cache? _injectedCache;
 
+  @override
   @protected
   Platform get platform => _injectedPlatform ?? globals.platform;
   final Platform? _injectedPlatform;
 
   // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
+  @override
   @protected
   FlutterVersion get flutterVersion => _injectedFlutterVersion ?? globals.flutterVersion;
   final FlutterVersion? _injectedFlutterVersion;
