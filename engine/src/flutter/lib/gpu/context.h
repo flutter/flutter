@@ -82,6 +82,27 @@ FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
     flutter::gpu::Context* wrapper);
 
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_SupportsTextureCompression(
+    flutter::gpu::Context* wrapper,
+    int family);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_SupportsTextureFormat(
+    flutter::gpu::Context* wrapper,
+    int format,
+    bool render_target,
+    bool shader_read,
+    bool shader_write);
+
 }  // extern "C"
 
 #endif  // FLUTTER_LIB_GPU_CONTEXT_H_

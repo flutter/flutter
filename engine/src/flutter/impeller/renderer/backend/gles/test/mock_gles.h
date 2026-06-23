@@ -97,6 +97,10 @@ class IMockGLESImpl {
   virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
   virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
+  virtual void BufferSubData(GLenum target,
+                             GLintptr offset,
+                             GLsizeiptr size,
+                             const void* data) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
@@ -111,16 +115,16 @@ class IMockGLESImpl {
                             GLsizei count,
                             GLenum type,
                             const void* indices) {}
-  virtual void DrawArraysInstancedEXT(GLenum mode,
-                                      GLint first,
-                                      GLsizei count,
-                                      GLsizei instancecount) {}
-  virtual void DrawElementsInstancedEXT(GLenum mode,
-                                        GLsizei count,
-                                        GLenum type,
-                                        const void* indices,
-                                        GLsizei instancecount) {}
-  virtual void VertexAttribDivisorEXT(GLuint index, GLuint divisor) {}
+  virtual void DrawArraysInstanced(GLenum mode,
+                                   GLint first,
+                                   GLsizei count,
+                                   GLsizei instancecount) {}
+  virtual void DrawElementsInstanced(GLenum mode,
+                                     GLsizei count,
+                                     GLenum type,
+                                     const void* indices,
+                                     GLsizei instancecount) {}
+  virtual void VertexAttribDivisor(GLuint index, GLuint divisor) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -248,6 +252,11 @@ class MockGLESImpl : public IMockGLESImpl {
               DeleteBuffers,
               (GLsizei n, const GLuint* buffers),
               (override));
+  MOCK_METHOD(
+      void,
+      BufferSubData,
+      (GLenum target, GLintptr offset, GLsizeiptr size, const void* data),
+      (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
   MOCK_METHOD(void,
               DiscardFramebufferEXT,
@@ -275,11 +284,11 @@ class MockGLESImpl : public IMockGLESImpl {
               (GLenum mode, GLsizei count, GLenum type, const void* indices),
               (override));
   MOCK_METHOD(void,
-              DrawArraysInstancedEXT,
+              DrawArraysInstanced,
               (GLenum mode, GLint first, GLsizei count, GLsizei instancecount),
               (override));
   MOCK_METHOD(void,
-              DrawElementsInstancedEXT,
+              DrawElementsInstanced,
               (GLenum mode,
                GLsizei count,
                GLenum type,
@@ -287,7 +296,7 @@ class MockGLESImpl : public IMockGLESImpl {
                GLsizei instancecount),
               (override));
   MOCK_METHOD(void,
-              VertexAttribDivisorEXT,
+              VertexAttribDivisor,
               (GLuint index, GLuint divisor),
               (override));
 };
