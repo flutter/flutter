@@ -1096,7 +1096,26 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
   if (!properties.existsSync()) {
     return false;
   }
-  return properties.readAsStringSync().contains('android.useAndroidX=true');
+  bool? usesAndroidX;
+  for (final String rawLine in properties.readAsLinesSync()) {
+    final String line = rawLine.trimLeft();
+    if (line.isEmpty || line.startsWith('#') || line.startsWith('!')) {
+      continue;
+    }
+    final RegExpMatch? match = RegExp(
+      r'^android\.useAndroidX(?:\s*[=:]\s*|\s+)(\S+)',
+    ).firstMatch(line);
+    if (match == null) {
+      continue;
+    }
+    final String value = match.group(1)!.toLowerCase();
+    if (value == 'true') {
+      usesAndroidX = true;
+    } else if (value == 'false') {
+      usesAndroidX = false;
+    }
+  }
+  return usesAndroidX ?? false;
 }
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
