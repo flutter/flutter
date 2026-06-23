@@ -16,19 +16,23 @@ import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
 
+/// Utilities for interacting with the host operating system.
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils({
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    Abi? currentAbi,
   }) {
+    final Abi resolvedAbi = currentAbi ?? Abi.current();
     if (platform.isWindows) {
       return _WindowsUtils(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     } else if (platform.isMacOS) {
       return _MacOSUtils(
@@ -36,6 +40,7 @@ abstract class OperatingSystemUtils {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     } else if (platform.isLinux) {
       return _LinuxUtils(
@@ -43,6 +48,7 @@ abstract class OperatingSystemUtils {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     } else {
       return _PosixUtils(
@@ -50,6 +56,7 @@ abstract class OperatingSystemUtils {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     }
   }
@@ -59,11 +66,15 @@ abstract class OperatingSystemUtils {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    required Abi currentAbi,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _processManager = processManager,
+       _currentAbi = currentAbi,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+
+  final Abi _currentAbi;
 
   @visibleForTesting
   static final gzipLevel1 = GZipCodec(level: 1);
@@ -132,7 +143,19 @@ abstract class OperatingSystemUtils {
     return osNames[osName] ?? osName;
   }
 
-  HostPlatform get hostPlatform;
+  /// Represents the platform of the host machine running the Flutter tool.
+  HostPlatform get hostPlatform {
+    return switch (_currentAbi) {
+      Abi.macosX64 => HostPlatform.darwin_x64,
+      Abi.macosArm64 => HostPlatform.darwin_arm64,
+      Abi.linuxX64 => HostPlatform.linux_x64,
+      Abi.linuxArm64 => HostPlatform.linux_arm64,
+      Abi.linuxRiscv64 => HostPlatform.linux_riscv64,
+      Abi.windowsX64 => HostPlatform.windows_x64,
+      Abi.windowsArm64 => HostPlatform.windows_arm64,
+      _ => throw UnsupportedError('Unsupported host platform: $_currentAbi'),
+    };
+  }
 
   List<File> _which(String execName, {bool all = false});
 
@@ -178,6 +201,7 @@ class _PosixUtils extends OperatingSystemUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   }) : super._private();
 
   @override
@@ -259,35 +283,6 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   String get pathVarSeparator => ':';
-
-  HostPlatform? _hostPlatform;
-
-  @override
-  HostPlatform get hostPlatform {
-    if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
-      // On x64 stdout is "uname -m: x86_64"
-      // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
-      if (hostPlatformCheck.exitCode != 0) {
-        _hostPlatform = HostPlatform.linux_x64;
-        _logger.printError(
-          'Encountered an error trying to run "uname -m":\n'
-          '  exit code: ${hostPlatformCheck.exitCode}\n'
-          '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
-          '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
-          'Assuming host platform is ${_hostPlatform!.cliName}.',
-        );
-      } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
-        _hostPlatform = HostPlatform.linux_x64;
-      } else if (hostPlatformCheck.stdout.trim().endsWith('riscv64')) {
-        _hostPlatform = HostPlatform.linux_riscv64;
-      } else {
-        // We default to ARM if it's not x86_64 and we did not get an error.
-        _hostPlatform = HostPlatform.linux_arm64;
-      }
-    }
-    return _hostPlatform!;
-  }
 }
 
 class _LinuxUtils extends _PosixUtils {
@@ -296,6 +291,7 @@ class _LinuxUtils extends _PosixUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   });
 
   String? _name;
@@ -363,34 +359,11 @@ class _MacOSUtils extends _PosixUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   });
 
-  String? _name;
+  HostPlatform? _hostPlatform;
 
-  @override
-  String get name {
-    if (_name == null) {
-      final results = <RunResult>[
-        _processUtils.runSync(<String>['sw_vers', '-productName']),
-        _processUtils.runSync(<String>['sw_vers', '-productVersion']),
-        _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
-        _processUtils.runSync(<String>['uname', '-m']),
-      ];
-      if (results.every((RunResult result) => result.exitCode == 0)) {
-        String osName = hostPlatform.cliName;
-        // If the script is running in Rosetta, "uname -m" will return x86_64.
-        if (hostPlatform == HostPlatform.darwin_arm64 && results[3].stdout.contains('x86_64')) {
-          osName = '$osName (Rosetta)';
-        }
-        _name =
-            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} $osName';
-      }
-      _name ??= super.name;
-    }
-    return _name!;
-  }
-
-  // On ARM returns arm64, even when this process is running in Rosetta.
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
@@ -419,6 +392,31 @@ class _MacOSUtils extends _PosixUtils {
       }
     }
     return _hostPlatform!;
+  }
+
+  String? _name;
+
+  @override
+  String get name {
+    if (_name == null) {
+      final results = <RunResult>[
+        _processUtils.runSync(<String>['sw_vers', '-productName']),
+        _processUtils.runSync(<String>['sw_vers', '-productVersion']),
+        _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+        _processUtils.runSync(<String>['uname', '-m']),
+      ];
+      if (results.every((RunResult result) => result.exitCode == 0)) {
+        String osName = hostPlatform.cliName;
+        // If the script is running in Rosetta, "uname -m" will return x86_64.
+        if (hostPlatform == HostPlatform.darwin_arm64 && results[3].stdout.contains('x86_64')) {
+          osName = '$osName (Rosetta)';
+        }
+        _name =
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} $osName';
+      }
+      _name ??= super.name;
+    }
+    return _name!;
   }
 
   // unzip, then rsync
@@ -472,20 +470,8 @@ class _WindowsUtils extends OperatingSystemUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   }) : super._private();
-
-  HostPlatform? _hostPlatform;
-
-  @override
-  HostPlatform get hostPlatform {
-    if (_hostPlatform == null) {
-      final abi = Abi.current();
-      _hostPlatform = (abi == Abi.windowsArm64)
-          ? HostPlatform.windows_arm64
-          : HostPlatform.windows_x64;
-    }
-    return _hostPlatform!;
-  }
 
   @override
   void makeExecutable(File file) {}
@@ -531,6 +517,9 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {
+    // The target directory does not change across entries, so compute its
+    // canonical form once instead of per file.
+    final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(targetDirectory.path);
     for (final ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
@@ -548,10 +537,12 @@ class _WindowsUtils extends OperatingSystemUtils {
       //
       // See https://snyk.io/research/zip-slip-vulnerability for more context.
       final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(destFile.path);
-      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
-        targetDirectory.path,
+      final bool isAtRoot = _fileSystem.path.equals(
+        targetDirectoryCanonicalPath,
+        destinationFileCanonicalPath,
       );
-      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
+      if (!isAtRoot &&
+          !_fileSystem.path.isWithin(targetDirectoryCanonicalPath, destinationFileCanonicalPath)) {
         throw StateError(
           'Tried to extract the file $destinationFileCanonicalPath outside of the '
           'target directory $targetDirectoryCanonicalPath',

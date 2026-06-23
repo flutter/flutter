@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(simolus3): Remove these analyzer ignores, https://dartbug.com/63166.
+// ignore: unnecessary_import, import_internal_library
+import 'dart:_js_interop_wasm';
 import 'dart:_wasm';
 import 'dart:async';
 import 'dart:ffi';

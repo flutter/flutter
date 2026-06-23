@@ -419,7 +419,16 @@ class FlutterProject {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) async {
-    if (!directory.existsSync() || isPlugin) {
+    // When no platforms are enabled, nothing reads the plugin list or the
+    // injected per-platform files.
+    final bool anyPlatformEnabled =
+        androidPlatform ||
+        iosPlatform ||
+        linuxPlatform ||
+        macOSPlatform ||
+        windowsPlatform ||
+        webPlatform;
+    if (!directory.existsSync() || isPlugin || !anyPlatformEnabled) {
       return;
     }
     await refreshPluginsList(
