@@ -50,13 +50,13 @@ void main() {
     );
 
     final Color scaffoldBg = Theme.of(tester.element(boldButton)).scaffoldBackgroundColor;
-    final Color selectedBg = _getButtonBg(tester, boldButton, scaffoldBg);
+    final Color selectedBg = _getButtonBg(tester, boldButton, scaffoldBg, isSelected: true);
 
     // Tap the button to deselect it.
     await tester.tap(boldButton);
     await tester.pumpAndSettle();
 
-    final Color unselectedBg = _getButtonBg(tester, boldButton, scaffoldBg);
+    final Color unselectedBg = _getButtonBg(tester, boldButton, scaffoldBg, isSelected: false);
 
     final double contrastRatio = _contrastRatio(selectedBg, unselectedBg);
     expect(
