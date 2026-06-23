@@ -49,6 +49,12 @@ const kFlutterToolsScriptFileName =
     'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const kFlutterEnginePackageName = 'sky_engine';
 
+const String _kDartSdkDir = 'dart-sdk';
+const String _kEngineDartSdkStamp = 'engine-dart-sdk.stamp';
+const String _kDevToolsDirPath = 'dart-sdk/bin/resources/devtools';
+const String _kDevToolsVersionJson = 'version.json';
+const String _kDartSdkVersionFile = 'version';
+
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
   const DevelopmentArtifact._(this.name, {this.feature});
@@ -222,6 +228,8 @@ class Cache {
   final Stdio? _stdio;
   final Net _net;
   final FileSystemUtils _fsUtils;
+
+  bool _isDartSdkValidated = false;
 
   late final ArtifactUpdater _artifactUpdater = _createUpdater();
 
@@ -433,16 +441,12 @@ class Cache {
   }
 
   String get devToolsVersion {
+    _validateDartSdkIntegrity();
     if (_devToolsVersion == null) {
-      const devToolsDirPath = 'dart-sdk/bin/resources/devtools';
-      final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
-      if (!devToolsDir.existsSync()) {
-        throw Exception('Could not find directory at ${devToolsDir.path}');
-      }
-      final versionFilePath = '${devToolsDir.path}/version.json';
-      final File versionFile = _fileSystem.file(versionFilePath);
+      final Directory devToolsDir = getCacheDir(_kDevToolsDirPath, shouldCreate: false);
+      final File versionFile = devToolsDir.childFile(_kDevToolsVersionJson);
       if (!versionFile.existsSync()) {
-        throw Exception('Could not find file at $versionFilePath');
+        throw Exception('Could not find file at ${versionFile.path}');
       }
       final dynamic data = jsonDecode(versionFile.readAsStringSync());
       if (data is! Map<String, Object?>) {
@@ -451,20 +455,156 @@ class Cache {
         );
       }
       final Object? version = data['version'];
-      if (version == null) {
-        throw Exception('Could not parse DevTools version from $version');
-      }
       if (version is! String) {
         throw Exception(
-          "Could not parse DevTools version. Expected object of type 'String', but got one of type '${version.runtimeType}'",
+          "Could not parse DevTools version. Expected object of type 'String', but got one of type '${version?.runtimeType}'",
         );
       }
-      return _devToolsVersion = version;
+      _devToolsVersion = version;
     }
     return _devToolsVersion!;
   }
 
   String? _devToolsVersion;
+
+  void _validateDartSdkIntegrity() {
+    if (_isDartSdkValidated) {
+      return;
+    }
+    final File stampFile = _fileSystem.file(
+      _fileSystem.path.join(getRoot().path, _kEngineDartSdkStamp),
+    );
+    if (!stampFile.existsSync()) {
+      return;
+    }
+
+    try {
+      final Directory dartSdkDir = getCacheDir(_kDartSdkDir, shouldCreate: false);
+      if (!dartSdkDir.existsSync()) {
+        _handleSdkCorruption('Dart SDK directory does not exist at ${dartSdkDir.path}');
+      }
+
+      final File versionFile = dartSdkDir.childFile(_kDartSdkVersionFile);
+      if (!versionFile.existsSync()) {
+        _handleSdkCorruption('Dart SDK version file does not exist at ${versionFile.path}');
+      }
+      String sdkVersionContent;
+      try {
+        sdkVersionContent = versionFile.readAsStringSync().trim();
+      } on Object catch (e, s) {
+        _handleSdkCorruption('Failed to read Dart SDK version file at ${versionFile.path}', e, s);
+      }
+      if (sdkVersionContent.isEmpty) {
+        _handleSdkCorruption('Dart SDK version file at ${versionFile.path} is empty');
+      }
+
+      final Directory devToolsDir = getCacheDir(_kDevToolsDirPath, shouldCreate: false);
+      if (!devToolsDir.existsSync()) {
+        _handleSdkCorruption('DevTools directory does not exist at ${devToolsDir.path}');
+      }
+
+      final File devToolsVersionFile = devToolsDir.childFile(_kDevToolsVersionJson);
+      if (!devToolsVersionFile.existsSync()) {
+        _handleSdkCorruption('DevTools version file does not exist at ${devToolsVersionFile.path}');
+      }
+
+      String content;
+      try {
+        content = devToolsVersionFile.readAsStringSync();
+      } on Object catch (e, s) {
+        _handleSdkCorruption(
+          'Failed to read DevTools version file at ${devToolsVersionFile.path}',
+          e,
+          s,
+        );
+      }
+
+      Object? data;
+      try {
+        data = jsonDecode(content);
+      } on Object catch (e, s) {
+        _handleSdkCorruption(
+          'Failed to parse JSON from DevTools version file at ${devToolsVersionFile.path}',
+          e,
+          s,
+        );
+      }
+
+      if (data is! Map<String, Object?>) {
+        _handleSdkCorruption(
+          'Expected JSON object of type "Map<String, Object?>" in ${devToolsVersionFile.path} but got type "${data.runtimeType}"',
+        );
+      }
+      final Object? version = data['version'];
+      if (version == null) {
+        _handleSdkCorruption(
+          'DevTools version key is null or missing in ${devToolsVersionFile.path}',
+        );
+      }
+      if (version is! String) {
+        _handleSdkCorruption(
+          'Expected DevTools version to be a String in ${devToolsVersionFile.path} but got type "${version.runtimeType}"',
+        );
+      }
+      if (version.trim().isEmpty) {
+        _handleSdkCorruption('DevTools version is empty in ${devToolsVersionFile.path}');
+      }
+    } on ToolExit {
+      rethrow;
+    } on Object catch (err, stackTrace) {
+      _handleSdkCorruption('Unexpected error during Dart SDK integrity check', err, stackTrace);
+    }
+
+    _isDartSdkValidated = true;
+  }
+
+  Never _handleSdkCorruption(String message, [Object? error, StackTrace? stackTrace]) {
+    _logger.printError(
+      'Error: The Dart SDK cache at "${getCacheDir(_kDartSdkDir, shouldCreate: false).path}" appears to be corrupted or incomplete.\n'
+      'Details: $message\n'
+      '${error != null ? 'Underlying error: $error\n' : ''}'
+      'To recover, the Flutter tool will now invalidate this cache. '
+      'The next time you run any "flutter" command, the Dart SDK will be automatically re-downloaded.\n',
+      emphasis: true,
+    );
+    if (stackTrace != null) {
+      _logger.printTrace('SDK cache corruption stack trace:\n$stackTrace');
+    }
+
+    final File stampFile = _fileSystem.file(
+      _fileSystem.path.join(getRoot().path, _kEngineDartSdkStamp),
+    );
+    try {
+      if (stampFile.existsSync()) {
+        _logger.printStatus('Invalidating Dart SDK cache by deleting stamp file...');
+        stampFile.deleteSync();
+      }
+    } on Object catch (e) {
+      _logger.printTrace('Failed to delete $_kEngineDartSdkStamp: $e');
+    }
+
+    final Directory sdkDir = getCacheDir(_kDartSdkDir, shouldCreate: false);
+    try {
+      if (sdkDir.existsSync()) {
+        _logger.printStatus(
+          'Attempting to delete corrupted Dart SDK directory at ${sdkDir.path}...',
+        );
+        sdkDir.deleteSync(recursive: true);
+      }
+    } on Object catch (e) {
+      _logger.printTrace('Failed to delete corrupted $_kDartSdkDir directory: $e');
+      _logger.printError(
+        'Warning: We were unable to delete the corrupted directory automatically (it may be locked by this process).\n'
+        'If the next run fails to re-download, please manually delete the directory at:\n'
+        '  ${sdkDir.path}\n',
+      );
+    }
+
+    throwToolExit(
+      'The Dart SDK cache is corrupted and has been invalidated.\n'
+      'Please re-run your command or run "flutter doctor" to automatically re-download and rebuild the SDK.',
+    );
+  }
 
   /// The current version of Dart used to build Flutter and run the tool.
   String get dartSdkVersion {
@@ -786,6 +926,7 @@ class Cache {
 
   /// Update the cache to contain all `requiredArtifacts`.
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+    _validateDartSdkIntegrity();
     if (!_lockEnabled) {
       return;
     }
