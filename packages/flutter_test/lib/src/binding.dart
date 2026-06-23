@@ -2439,9 +2439,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             if (_phase != EnginePhase.paint && sendFramesToEngine) {
               _firstFrameSent = true;
               for (final RenderView renderView in renderViews) {
-                if (renderView.needsCompositeFrame) {
-                  renderView.compositeFrame(); // this sends the bits to the GPU
-                }
+                renderView.compositeFrame(); // this sends the bits to the GPU
               }
               if (_phase != EnginePhase.composite) {
                 rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
