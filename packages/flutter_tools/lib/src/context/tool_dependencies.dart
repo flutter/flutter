@@ -455,6 +455,7 @@ class ToolDependencies {
         cache: finalCache,
         config: finalConfig,
         customDevicesConfig: finalCustomDevicesConfig,
+        flutterVersion: flutterVersion,
         fs: finalFS,
         git: finalGit,
         localEngineLocator: finalLocalEngineLocator,

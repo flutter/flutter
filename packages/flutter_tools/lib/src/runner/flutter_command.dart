@@ -31,6 +31,7 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
+import '../git.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
@@ -175,6 +176,8 @@ abstract class FlutterCommand extends Command<void> {
   final ToolContext? _toolContext;
 
   FileSystem get fileSystem => _toolContext?.fs ?? globals.fs;
+  Git get git => _toolContext?.git ?? globals.git;
+  FlutterVersion get flutterVersion => _toolContext?.flutterVersion ?? globals.flutterVersion;
   Logger get logger => _toolContext?.logger ?? globals.logger;
   Platform get platform => _toolContext?.platform ?? globals.platform;
   ProcessManager get processManager => _toolContext?.processManager ?? globals.processManager;
