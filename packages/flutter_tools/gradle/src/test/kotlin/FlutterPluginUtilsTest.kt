@@ -1149,6 +1149,10 @@ class FlutterPluginUtilsTest {
 
                 val pluginContainer = mockk<org.gradle.api.plugins.PluginContainer>(relaxed = true)
                 every { pluginContainer.withId(any(), any()) } answers {
+                    // We must cast to Action<Plugin<*>> instead of Action<*> because Action is a consumer (in-variance).
+                    // In Kotlin, star-projecting a consumer results in Action<Nothing>, making it impossible to execute.
+                    // The unchecked cast warning caused by JVM generic type erasure is safely suppressed here.
+                    @Suppress("UNCHECKED_CAST")
                     val action = args[1] as Action<org.gradle.api.Plugin<*>>
                     action.execute(mockk(relaxed = true))
                 }
