@@ -4,6 +4,8 @@
 
 #include "flutter/lib/gpu/texture.h"
 
+#include <cstring>
+
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -21,8 +23,11 @@
 #include "impeller/renderer/context.h"
 
 #if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/display_list/image/dl_image.h"      // nogncheck
 #include "impeller/display_list/dl_image_impeller.h"  // nogncheck
 #endif
+#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_wrappable.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
@@ -140,6 +145,41 @@ bool Texture::Overwrite(Context& gpu_context,
   return true;
 }
 
+#if IMPELLER_SUPPORTS_RENDERING
+// Extracts the impeller::Texture that backs the ui.Image `image_wrapper`.
+// Returns nullptr if the image is not backed by a Flutter GPU compatible
+// texture, for example a non-Impeller image or a deferred image (from
+// Picture.toImageSync) that has not finished rasterizing yet.
+static std::shared_ptr<impeller::Texture> GetTextureFromImage(
+    Context* gpu_context,
+    Dart_Handle image_wrapper) {
+  if (gpu_context == nullptr || Dart_IsNull(image_wrapper)) {
+    return nullptr;
+  }
+  // A `ui.Image` wraps the private `_Image` native field holder.
+  Dart_Handle inner = Dart_GetField(image_wrapper, tonic::ToDart("_image"));
+  if (Dart_IsError(inner) || Dart_IsNull(inner)) {
+    return nullptr;
+  }
+  intptr_t peer = 0;
+  Dart_Handle result = Dart_GetNativeInstanceField(
+      inner, tonic::DartWrappable::kPeerIndex, &peer);
+  if (Dart_IsError(result) || peer == 0) {
+    return nullptr;
+  }
+  auto* canvas_image = reinterpret_cast<flutter::CanvasImage*>(peer);
+  sk_sp<flutter::DlImage> dl_image = canvas_image->image();
+  if (!dl_image) {
+    return nullptr;
+  }
+  const impeller::DlImageImpeller* impeller_image = dl_image->asImpellerImage();
+  if (!impeller_image) {
+    return nullptr;
+  }
+  return impeller_image->GetImpellerTexture(gpu_context->GetContextShared());
+}
+#endif
+
 Dart_Handle Texture::AsImage() const {
   // DlImageImpeller isn't compiled in builds with Impeller disabled. If
   // Impeller is disabled, it's impossible to get here anyhow, so just ifdef it
@@ -237,4 +277,68 @@ bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,
 
 Dart_Handle InternalFlutterGpu_Texture_AsImage(flutter::gpu::Texture* wrapper) {
   return wrapper->AsImage();
+}
+
+Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
+    flutter::gpu::Context* gpu_context,
+    Dart_Handle image_wrapper) {
+#if IMPELLER_SUPPORTS_RENDERING
+  auto texture = flutter::gpu::GetTextureFromImage(gpu_context, image_wrapper);
+  if (!texture) {
+    return Dart_NewTypedData(Dart_TypedData_kInt32, 0);
+  }
+  const impeller::TextureDescriptor& desc = texture->GetTextureDescriptor();
+  const impeller::TextureUsageMask usage = desc.usage;
+
+  // Layout must match the parsing in the Dart `Texture._fromImage`.
+  int32_t values[10];
+  values[0] = static_cast<int32_t>(
+      flutter::gpu::FromImpellerStorageMode(desc.storage_mode));
+  values[1] =
+      static_cast<int32_t>(flutter::gpu::FromImpellerPixelFormat(desc.format));
+  values[2] = static_cast<int32_t>(desc.size.width);
+  values[3] = static_cast<int32_t>(desc.size.height);
+  values[4] = static_cast<int32_t>(desc.sample_count);
+  // The Flutter GPU `TextureType` enum mirrors `impeller::TextureType`.
+  values[5] = static_cast<int32_t>(desc.type);
+  values[6] = (usage & impeller::TextureUsage::kRenderTarget) ? 1 : 0;
+  values[7] = (usage & impeller::TextureUsage::kShaderRead) ? 1 : 0;
+  values[8] = (usage & impeller::TextureUsage::kShaderWrite) ? 1 : 0;
+  values[9] = static_cast<int32_t>(desc.mip_count);
+
+  const intptr_t length = sizeof(values) / sizeof(values[0]);
+  Dart_Handle list = Dart_NewTypedData(Dart_TypedData_kInt32, length);
+  if (Dart_IsError(list)) {
+    return Dart_NewTypedData(Dart_TypedData_kInt32, 0);
+  }
+  Dart_TypedData_Type type;
+  void* data = nullptr;
+  intptr_t data_length = 0;
+  if (Dart_IsError(
+          Dart_TypedDataAcquireData(list, &type, &data, &data_length))) {
+    return Dart_NewTypedData(Dart_TypedData_kInt32, 0);
+  }
+  std::memcpy(data, values, sizeof(values));
+  Dart_TypedDataReleaseData(list);
+  return list;
+#else
+  return Dart_NewTypedData(Dart_TypedData_kInt32, 0);
+#endif
+}
+
+bool InternalFlutterGpu_Texture_InitializeFromImage(
+    Dart_Handle wrapper,
+    flutter::gpu::Context* gpu_context,
+    Dart_Handle image_wrapper) {
+#if IMPELLER_SUPPORTS_RENDERING
+  auto texture = flutter::gpu::GetTextureFromImage(gpu_context, image_wrapper);
+  if (!texture) {
+    return false;
+  }
+  auto res = fml::MakeRefCounted<flutter::gpu::Texture>(std::move(texture));
+  res->AssociateWithDartWrapper(wrapper);
+  return true;
+#else
+  return false;
+#endif
 }
