@@ -77,10 +77,13 @@ void ConicalGradientContents::SetFocus(std::optional<Point> focus,
 }
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
-#define UNIFORM_FRAG_INFO(t) \
-  t##GradientUniformFillConicalPipeline::FragmentShader::FragInfo
-#define UNIFORM_COLOR_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Conical)::colors)
-#define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Conical)::stop_pairs)
+#define UNIFORM_COLORS_INFO(t) \
+  t##GradientUniformFillConicalPipeline::FragmentShader::ColorsInfo
+#define UNIFORM_STOP_PAIRS_INFO(t) \
+  t##GradientUniformFillConicalPipeline::FragmentShader::StopPairsInfo
+#define UNIFORM_COLOR_SIZE ARRAY_LEN(UNIFORM_COLORS_INFO(Conical)::colors)
+#define UNIFORM_STOP_SIZE \
+  ARRAY_LEN(UNIFORM_STOP_PAIRS_INFO(Conical)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
 static_assert(UNIFORM_STOP_SIZE == kMaxUniformGradientStops / 2);
 

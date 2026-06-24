@@ -61,10 +61,12 @@ bool RadialGradientContents::IsOpaque(const Matrix& transform) const {
 }
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
-#define UNIFORM_FRAG_INFO(t) \
-  t##GradientUniformFillPipeline::FragmentShader::FragInfo
-#define UNIFORM_COLOR_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Radial)::colors)
-#define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Radial)::stop_pairs)
+#define UNIFORM_COLORS_INFO(t) \
+  t##GradientUniformFillPipeline::FragmentShader::ColorsInfo
+#define UNIFORM_STOP_PAIRS_INFO(t) \
+  t##GradientUniformFillPipeline::FragmentShader::StopPairsInfo
+#define UNIFORM_COLOR_SIZE ARRAY_LEN(UNIFORM_COLORS_INFO(Radial)::colors)
+#define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_STOP_PAIRS_INFO(Radial)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
 static_assert(UNIFORM_STOP_SIZE == kMaxUniformGradientStops / 2);
 
