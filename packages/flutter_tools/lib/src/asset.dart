@@ -128,8 +128,6 @@ const kMaterialFonts = <Map<String, Object>>[
   },
 ];
 
-const kMaterialShaders = <String>['shaders/ink_sparkle.frag', 'shaders/stretch_effect.frag'];
-
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
@@ -606,14 +604,14 @@ class ManifestAssetBundle implements AssetBundle {
         }
       }
     }
-    final materialAssets = <_Asset>[
+    final materialAndFrameworkAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
       // For all platforms, include the shaders unconditionally. They are
       // small, and whether they're used is determined only by the app source
       // code and not by the Flutter manifest.
-      ..._getMaterialShaders(),
+      ..._getFrameworkShaders(),
     ];
-    for (final asset in materialAssets) {
+    for (final asset in materialAndFrameworkAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
       entries[asset.entryUri.path] ??= AssetBundleEntry(
@@ -783,8 +781,10 @@ class ManifestAssetBundle implements AssetBundle {
     return result;
   }
 
-  List<_Asset> _getMaterialShaders() {
-    final String shaderPath = _fileSystem.path.join(
+  List<_Asset> _getFrameworkShaders() {
+    final result = <_Asset>[];
+
+    final String materialShaderPath = _fileSystem.path.join(
       _flutterRoot,
       'packages',
       'flutter',
@@ -793,21 +793,33 @@ class ManifestAssetBundle implements AssetBundle {
       'material',
       'shaders',
     );
-    // This file will exist in a real invocation unless the git checkout is
-    // corrupted somehow, but unit tests generally don't create this file
-    // in their mock file systems. Leaving it out in those cases is harmless.
-    if (!_fileSystem.directory(shaderPath).existsSync()) {
-      return <_Asset>[];
-    }
-
-    final result = <_Asset>[];
-    for (final String shader in kMaterialShaders) {
-      final Uri entryUri = _fileSystem.path.toUri(shader);
+    if (_fileSystem.directory(materialShaderPath).existsSync()) {
       result.add(
         _Asset(
-          baseDir: shaderPath,
-          relativeUri: Uri(path: entryUri.pathSegments.last),
-          entryUri: entryUri,
+          baseDir: materialShaderPath,
+          relativeUri: Uri(path: 'ink_sparkle.frag'),
+          entryUri: _fileSystem.path.toUri('shaders/ink_sparkle.frag'),
+          package: null,
+          kind: AssetKind.shader,
+        ),
+      );
+    }
+
+    final String widgetsShaderPath = _fileSystem.path.join(
+      _flutterRoot,
+      'packages',
+      'flutter',
+      'lib',
+      'src',
+      'widgets',
+      'shaders',
+    );
+    if (_fileSystem.directory(widgetsShaderPath).existsSync()) {
+      result.add(
+        _Asset(
+          baseDir: widgetsShaderPath,
+          relativeUri: Uri(path: 'stretch_effect.frag'),
+          entryUri: _fileSystem.path.toUri('shaders/stretch_effect.frag'),
           package: null,
           kind: AssetKind.shader,
         ),
