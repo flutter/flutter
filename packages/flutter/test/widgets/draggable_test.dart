@@ -1119,6 +1119,8 @@ void main() {
       await gesture.moveTo(thirdLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('N')), thirdLocation);
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Horizontal axis draggable moves horizontally', (WidgetTester tester) async {
@@ -1134,6 +1136,8 @@ void main() {
       await gesture.moveTo(thirdLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('H')), thirdLocation);
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Horizontal axis draggable does not move vertically', (WidgetTester tester) async {
@@ -1152,6 +1156,8 @@ void main() {
       await gesture.moveTo(thirdDragLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('H')), thirdWidgetLocation);
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Vertical axis draggable moves vertically', (WidgetTester tester) async {
@@ -1167,6 +1173,8 @@ void main() {
       await gesture.moveTo(thirdLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('V')), thirdLocation);
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Vertical axis draggable does not move horizontally', (WidgetTester tester) async {
@@ -3381,6 +3389,8 @@ void main() {
       find.descendant(of: find.byType(Overlay).last, matching: find.text('Dragging')),
       findsNothing,
     );
+    await gesture.up();
+    await tester.pump();
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
@@ -3953,6 +3963,9 @@ void main() {
 
     await tester.tap(find.text('Draggable'));
     expect(onTap, true);
+
+    await gesture.up();
+    await tester.pump();
   });
 
   testWidgets('configurable feedback ignore pointer behavior - LongPressDraggable', (
