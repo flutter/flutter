@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(
@@ -3465,42 +3464,6 @@ void main() {
     expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
 
     semantics.dispose();
-  });
-
-  testWidgets('showDialog applies custom barrierBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            return ElevatedButton(
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  barrierBuilder:
-                      (BuildContext innerContext, Animation<double> animation, Widget barrier) {
-                        return Padding(
-                          key: const ValueKey<String>('dialog-barrier-padding'),
-                          padding: const EdgeInsets.all(56.7),
-                          child: barrier,
-                        );
-                      },
-                  builder: (BuildContext innerContext) {
-                    return const SizedBox();
-                  },
-                );
-              },
-              child: const Text('Show Dialog'),
-            );
-          },
-        ),
-      ),
-    );
-
-    // Open the dialog.
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const ValueKey<String>('dialog-barrier-padding')), findsOneWidget);
   });
 }
 

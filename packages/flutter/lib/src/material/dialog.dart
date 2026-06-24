@@ -1539,10 +1539,6 @@ class _DialogContentPage extends Page<void> {
 /// --enable-windowing`, then this  argument is ignored as dialogs are displayed
 /// in their own windows which do not have a modal barrier.
 ///
-/// The `barrierBuilder` argument is used to define how the route's modal
-/// barrier is built. If not null, this builder is used to wrap or replace
-/// the default [ModalBarrier].
-///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
 /// (see [SafeArea] for more details). It is `true` by default, which means
@@ -1637,7 +1633,6 @@ Future<T?> showDialog<T>({
   bool fullscreenDialog = false,
   bool? requestFocus,
   AnimationStyle? animationStyle,
-  RouteBarrierBuilder? barrierBuilder,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1672,7 +1667,6 @@ Future<T?> showDialog<T>({
         requestFocus: requestFocus,
         animationStyle: animationStyle,
         fullscreenDialog: fullscreenDialog,
-        barrierBuilder: barrierBuilder,
       );
     },
     builder: (BuildContext routeContext) {
@@ -1802,10 +1796,6 @@ bool _debugIsActive(BuildContext context) {
 /// barrier that darkens everything below the dialog. If `null`, the default
 /// color `Colors.black54` is used.
 ///
-/// The `barrierBuilder` argument is used to define how the route's modal
-/// barrier is built. If not null, this builder is used to wrap or replace
-/// the default [ModalBarrier].
-///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
 /// (see [SafeArea] for more details). It is `true` by default, which means
@@ -1842,7 +1832,6 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.traversalEdgeBehavior,
     super.fullscreenDialog,
     AnimationStyle? animationStyle,
-    super.barrierBuilder,
   }) : _animationStyle = animationStyle,
        super(
          pageBuilder:

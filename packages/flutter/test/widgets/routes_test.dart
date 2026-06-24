@@ -2822,6 +2822,9 @@ void main() {
   });
 
   testWidgets('showGeneralDialog applies custom barrierBuilder', (WidgetTester tester) async {
+    const expectedPadding = 12.0;
+    const barrierKey = ValueKey<String>('custom-barrier-padding');
+
     await tester.pumpWidget(
       TestWidgetsApp(
         home: Builder(
@@ -2833,11 +2836,12 @@ void main() {
                   barrierDismissible: true,
                   barrierLabel: 'barrier_label',
                   transitionDuration: Duration.zero,
+                  barrierColor: _green,
                   barrierBuilder:
-                      (BuildContext context, Animation<double> animation, Widget barrier) {
+                      (BuildContext context, RouteBarrierDetails details, Widget barrier) {
                         return Padding(
-                          key: const ValueKey<String>('custom-barrier-padding'),
-                          padding: const EdgeInsets.all(12),
+                          key: barrierKey,
+                          padding: const EdgeInsets.all(expectedPadding),
                           child: barrier,
                         );
                       },
@@ -2846,9 +2850,7 @@ void main() {
                         BuildContext context,
                         Animation<double> animation,
                         Animation<double> secondaryAnimation,
-                      ) {
-                        return const SizedBox();
-                      },
+                      ) => const SizedBox(),
                 );
               },
               child: const Text('Show Dialog'),
@@ -2862,8 +2864,13 @@ void main() {
     await tester.tap(find.byType(TestButton));
     await tester.pumpAndSettle();
 
-    // Verify the custom barrier is present.
-    expect(find.byKey(const ValueKey<String>('custom-barrier-padding')), findsOneWidget);
+    final Padding paddingWidget = tester.widget<Padding>(find.byKey(barrierKey));
+    expect(paddingWidget.padding, const EdgeInsets.all(expectedPadding));
+
+    final ModalBarrier barrierWidget = tester.widget<ModalBarrier>(
+      find.descendant(of: find.byKey(barrierKey), matching: find.byType(ModalBarrier)),
+    );
+    expect(barrierWidget.color, _green);
   });
 }
 
