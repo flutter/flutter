@@ -32,9 +32,6 @@ struct _FlWindowStateMonitor {
 #if !FLUTTER_LINUX_GTK4
   GdkWindowState window_state;
 #endif
-
-  // Signal connection ID for window-state-changed
-  gulong window_state_event_cb_id;
 };
 
 G_DEFINE_TYPE(FlWindowStateMonitor, fl_window_state_monitor, G_TYPE_OBJECT);
@@ -92,10 +89,6 @@ static void fl_window_state_monitor_dispose(GObject* object) {
   FlWindowStateMonitor* self = FL_WINDOW_STATE_MONITOR(object);
 
   g_clear_object(&self->messenger);
-  if (self->window_state_event_cb_id != 0) {
-    g_signal_handler_disconnect(self->window, self->window_state_event_cb_id);
-    self->window_state_event_cb_id = 0;
-  }
 
   G_OBJECT_CLASS(fl_window_state_monitor_parent_class)->dispose(object);
 }
@@ -116,13 +109,11 @@ FlWindowStateMonitor* fl_window_state_monitor_new(FlBinaryMessenger* messenger,
 
   // Listen to window state changes.
 #if !FLUTTER_LINUX_GTK4
-  self->window_state_event_cb_id =
-      g_signal_connect_swapped(self->window, "window-state-event",
-                               G_CALLBACK(window_state_event_cb), self);
+  g_signal_connect_object(self->window, "window-state-event",
+                          G_CALLBACK(window_state_event_cb), self,
+                          G_CONNECT_SWAPPED);
   self->window_state =
       gdk_window_get_state(gtk_widget_get_window(GTK_WIDGET(self->window)));
-#else
-  self->window_state_event_cb_id = 0;
 #endif
 
   return self;

@@ -9,38 +9,13 @@
 
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_compositor_opengl_shader.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #if FLUTTER_LINUX_GTK4 && GTK_CHECK_VERSION(4, 12, 0)
 #include <gdk/gdkgltexturebuilder.h>
 #endif
-
-// Vertex shader to draw Flutter window contents.
-static const char* vertex_shader_src =
-    "attribute vec2 position;\n"
-    "attribute vec2 in_texcoord;\n"
-    "uniform vec2 offset;\n"
-    "uniform vec2 scale;\n"
-    "varying vec2 texcoord;\n"
-    "\n"
-    "void main() {\n"
-    "  gl_Position = vec4(offset + position * scale, 0, 1);\n"
-    "  texcoord = in_texcoord;\n"
-    "}\n";
-
-// Fragment shader to draw Flutter window contents.
-static const char* fragment_shader_src =
-    "#ifdef GL_ES\n"
-    "precision mediump float;\n"
-    "#endif\n"
-    "\n"
-    "uniform sampler2D texture;\n"
-    "varying vec2 texcoord;\n"
-    "\n"
-    "void main() {\n"
-    "  gl_FragColor = texture2D(texture, texcoord);\n"
-    "}\n";
 
 struct _FlCompositorOpenGL {
   FlCompositor parent_instance;
@@ -73,17 +48,8 @@ struct _FlCompositorOpenGL {
   // was rendered
   bool had_first_frame;
 
-  // Shader program.
-  GLuint program;
-
-  // Location of layer offset in [program].
-  GLint offset_location;
-
-  // Location of layer scale in [program].
-  GLint scale_location;
-
-  // Verticies for the uniform square.
-  GLuint vertex_buffer;
+  // Shader program used to composite layers.
+  FlCompositorOpenGLShader* shader;
 
   // Ensure Flutter and GTK can access the frame data (framebuffer or pixels).
   GMutex frame_mutex;
@@ -231,6 +197,81 @@ static void cleanup_shader(FlCompositorOpenGL* self) {
   }
 }
 
+static void setup_shader(FlCompositorOpenGL* self) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to setup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
+
+  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
+  glCompileShader(vertex_shader);
+  GLint vertex_compile_status;
+  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_compile_status);
+  if (vertex_compile_status == GL_FALSE) {
+    g_autofree gchar* shader_log = get_shader_log(vertex_shader);
+    g_warning("Failed to compile vertex shader: %s", shader_log);
+  }
+
+  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(fragment_shader, 1, &fragment_shader_src, nullptr);
+  glCompileShader(fragment_shader);
+  GLint fragment_compile_status;
+  glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_compile_status);
+  if (fragment_compile_status == GL_FALSE) {
+    g_autofree gchar* shader_log = get_shader_log(fragment_shader);
+    g_warning("Failed to compile fragment shader: %s", shader_log);
+  }
+
+  self->program = glCreateProgram();
+  glAttachShader(self->program, vertex_shader);
+  glAttachShader(self->program, fragment_shader);
+  glLinkProgram(self->program);
+
+  GLint link_status;
+  glGetProgramiv(self->program, GL_LINK_STATUS, &link_status);
+  if (link_status == GL_FALSE) {
+    g_autofree gchar* program_log = get_program_log(self->program);
+    g_warning("Failed to link program: %s", program_log);
+  }
+
+  self->offset_location = glGetUniformLocation(self->program, "offset");
+  self->scale_location = glGetUniformLocation(self->program, "scale");
+
+  glDeleteShader(vertex_shader);
+  glDeleteShader(fragment_shader);
+
+  // The uniform square abcd in two triangles cba + cdb
+  // a--b
+  // |  |
+  // c--d
+  GLfloat vertex_data[] = {-1, -1, 0, 0, 1, 1,  1, 1, -1, 1, 0, 1,
+                           -1, -1, 0, 0, 1, -1, 1, 0, 1,  1, 1, 1};
+
+  glGenBuffers(1, &self->vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
+               GL_STATIC_DRAW);
+}
+
+static void cleanup_shader(FlCompositorOpenGL* self) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to cleanup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
+
+  if (self->program != 0) {
+    glDeleteProgram(self->program);
+  }
+  if (self->vertex_buffer != 0) {
+    glDeleteBuffers(1, &self->vertex_buffer);
+  }
+}
+
 static void composite_layer(FlCompositorOpenGL* self,
                             FlFramebuffer* framebuffer,
                             double x,
@@ -239,10 +280,10 @@ static void composite_layer(FlCompositorOpenGL* self,
                             int height) {
   size_t texture_width = fl_framebuffer_get_width(framebuffer);
   size_t texture_height = fl_framebuffer_get_height(framebuffer);
-  glUniform2f(self->offset_location, (2 * x / width) - 1.0,
-              (2 * y / height) - 1.0);
-  glUniform2f(self->scale_location, texture_width / width,
-              texture_height / height);
+  fl_compositor_opengl_shader_set_offset(self->shader, (2 * x / width) - 1.0,
+                                         (2 * y / height) - 1.0);
+  fl_compositor_opengl_shader_set_scale(self->shader, texture_width / width,
+                                        texture_height / height);
 
   GLuint texture_id = fl_framebuffer_get_texture_id(framebuffer);
   glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -493,21 +534,11 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   GLuint vao;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
-  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
-  GLint position_location = glGetAttribLocation(self->program, "position");
-  glEnableVertexAttribArray(position_location);
-  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE,
-                        sizeof(GLfloat) * 4, 0);
-  GLint texcoord_location = glGetAttribLocation(self->program, "in_texcoord");
-  glEnableVertexAttribArray(texcoord_location);
-  glVertexAttribPointer(texcoord_location, 2, GL_FLOAT, GL_FALSE,
-                        sizeof(GLfloat) * 4,
-                        reinterpret_cast<void*>(sizeof(GLfloat) * 2));
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glUseProgram(self->program);
+  fl_compositor_opengl_shader_use(self->shader);
 
   // Disable the scissor test as it can affect blit operations.
   // Prevents regressions like: https://github.com/flutter/flutter/issues/140828
@@ -664,7 +695,7 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
 static void fl_compositor_opengl_dispose(GObject* object) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(object);
 
-  cleanup_shader(self);
+  g_clear_object(&self->shader);
 
   g_clear_object(&self->task_runner);
   g_clear_object(&self->opengl_manager);
@@ -702,8 +733,7 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
   self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
   self->shareable = shareable;
   self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
-
-  setup_shader(self);
+  self->shader = fl_compositor_opengl_shader_new(opengl_manager);
 
   return self;
 }

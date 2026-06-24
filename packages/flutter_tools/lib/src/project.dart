@@ -16,6 +16,7 @@ import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/project_migrator.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
@@ -27,6 +28,7 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
@@ -437,6 +439,15 @@ class FlutterProject {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) async {
+    if (!directory.existsSync()) {
+      return;
+    }
+
+    final migration = ProjectMigration(<ProjectMigrator>[
+      AnalysisOptionsMigration(this, globals.logger),
+    ]);
+    await migration.run();
+
     // When no platforms are enabled, nothing reads the plugin list or the
     // injected per-platform files.
     final bool anyPlatformEnabled =
@@ -446,7 +457,7 @@ class FlutterProject {
         macOSPlatform ||
         windowsPlatform ||
         webPlatform;
-    if (!directory.existsSync() || isPlugin || !anyPlatformEnabled) {
+    if (isPlugin || !anyPlatformEnabled) {
       return;
     }
     await refreshPluginsList(
