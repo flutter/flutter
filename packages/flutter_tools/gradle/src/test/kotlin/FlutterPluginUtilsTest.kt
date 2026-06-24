@@ -52,6 +52,23 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+private data class SubprojectConfig(
+    val name: String,
+    val plugins: List<String> = emptyList(),
+    val legacyPlugins: List<String> = emptyList()
+)
+
+private class TestEnvironment(
+    val appProject: Project,
+    val plugins: List<Project>,
+    val subprojectsActionSlot: io.mockk.CapturingSlot<Action<Project>> = slot(),
+    val projectsEvaluatedActionSlot: io.mockk.CapturingSlot<Action<Gradle>> = slot()
+) {
+    val appPluginManager: PluginManager get() = appProject.pluginManager
+    val plugin1Manager: PluginManager get() = plugins[0].pluginManager
+    val plugin2Manager: PluginManager get() = plugins[1].pluginManager
+}
+
 class FlutterPluginUtilsTest {
     companion object {
         const val EXAMPLE_ENGINE_VERSION = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
