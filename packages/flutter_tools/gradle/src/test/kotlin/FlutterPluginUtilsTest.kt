@@ -715,28 +715,60 @@ class FlutterPluginUtilsTest {
 
     enum class DslType { GROOVY, KOTLIN }
 
-    // These values should also match the flutter create template values.
-// In //packages/flutter_tools/lib/src/android/gradle_utils.dart
+    @Nested
+    inner class SupportBuiltInKotlinTests {
         @Nested
         inner class TestApplyingPluginsRegexTests {
             @Test
             fun `AGP app regex on single line apply`() {
-                assertSingeLinePluginDetection(FlutterPluginUtils.appPluginRegexKotlin, "com.android.application", DslType.KOTLIN)
-                assertSingeLinePluginDetection(FlutterPluginUtils.appPluginRegexGroovy, "com.android.application", DslType.GROOVY)
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.appPluginRegexKotlin,
+                    "com.android.application",
+                    DslType.KOTLIN
+                )
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.appPluginRegexGroovy,
+                    "com.android.application",
+                    DslType.GROOVY
+                )
             }
 
             @Test
             fun `AGP lib regex on single line apply`() {
-                assertSingeLinePluginDetection(FlutterPluginUtils.libPluginRegexKotlin, "com.android.library", DslType.KOTLIN)
-                assertSingeLinePluginDetection(FlutterPluginUtils.libPluginRegexGroovy, "com.android.library", DslType.GROOVY)
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.libPluginRegexKotlin,
+                    "com.android.library",
+                    DslType.KOTLIN
+                )
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.libPluginRegexGroovy,
+                    "com.android.library",
+                    DslType.GROOVY
+                )
             }
 
             @Test
             fun `KGP regex on single line apply`() {
-                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexKotlin, "kotlin-android", DslType.KOTLIN)
-                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexGroovy, "kotlin-android", DslType.GROOVY)
-                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexKotlin, "org.jetbrains.kotlin.android", DslType.KOTLIN)
-                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexGroovy, "org.jetbrains.kotlin.android", DslType.GROOVY)
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.kgpRegexKotlin,
+                    "kotlin-android",
+                    DslType.KOTLIN
+                )
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.kgpRegexGroovy,
+                    "kotlin-android",
+                    DslType.GROOVY
+                )
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.kgpRegexKotlin,
+                    "org.jetbrains.kotlin.android",
+                    DslType.KOTLIN
+                )
+                assertSingeLinePluginDetection(
+                    FlutterPluginUtils.kgpRegexGroovy,
+                    "org.jetbrains.kotlin.android",
+                    DslType.GROOVY
+                )
             }
 
             @Test
@@ -749,17 +781,25 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsBlock
+                    )
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsBlock
+                    )
                 )
 
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsBlock
+                    )
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsBlock
+                    )
                 )
 
                 val libProjectBuildGradlePluginsBlock =
@@ -770,17 +810,25 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(
+                        libProjectBuildGradlePluginsBlock
+                    )
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(
+                        libProjectBuildGradlePluginsBlock
+                    )
                 )
 
                 assertTrue(
-                    FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(
+                        libProjectBuildGradlePluginsBlock
+                    )
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(
+                        libProjectBuildGradlePluginsBlock
+                    )
                 )
 
                 val appProjectBuildGradlePluginsBlockNoParens =
@@ -791,17 +839,25 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockNoParens
+                    )
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockNoParens
+                    )
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockNoParens
+                    )
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockNoParens
+                    )
                 )
 
                 val appProjectBuildGradlePluginsBlockMixed =
@@ -812,17 +868,25 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockMixed
+                    )
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockMixed
+                    )
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockMixed
+                    )
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsBlockMixed
+                    )
                 )
             }
 
@@ -868,17 +932,25 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsCommentOnePlugin
+                    )
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsCommentOnePlugin
+                    )
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsCommentOnePlugin
+                    )
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsCommentOnePlugin
+                    )
                 )
 
                 val appProjectBuildGradlePluginsComment =
@@ -889,17 +961,25 @@ class FlutterPluginUtilsTest {
                     // }
                     """.trimIndent()
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsComment
+                    )
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(
+                        appProjectBuildGradlePluginsComment
+                    )
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsComment
+                    )
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(
+                        appProjectBuildGradlePluginsComment
+                    )
                 )
             }
         }
@@ -917,15 +997,27 @@ class FlutterPluginUtilsTest {
                 assertTrue(regex.containsMatchIn("plugins {\n  id '$pluginId'\n}"))
                 assertTrue(regex.containsMatchIn("plugins { alias '$pluginId' }"))
 
-                assertFalse(regex.containsMatchIn("apply plugin\n:'$pluginId'"), "Newline before colon failure")
-                assertFalse(regex.containsMatchIn("plugins { id\n'$pluginId' }"), "newline before opening quote")
+                assertFalse(
+                    regex.containsMatchIn("apply plugin\n:'$pluginId'"),
+                    "Newline before colon failure"
+                )
+                assertFalse(
+                    regex.containsMatchIn("plugins { id\n'$pluginId' }"),
+                    "newline before opening quote"
+                )
             }
             if (dslType == DslType.KOTLIN) {
                 assertTrue(regex.containsMatchIn("plugins {\n  id(\"$pluginId\")\n}"))
                 assertTrue(regex.containsMatchIn("plugins { id(\n'$pluginId'\n) }"))
 
-                assertFalse(regex.containsMatchIn("plugins { id '$pluginId' }"), "Kotlin DSL requires parentheses")
-                assertFalse(regex.containsMatchIn("apply plugin: '$pluginId'"), "Kotlin DSL does not use apply plugin: for AGP/KGP")
+                assertFalse(
+                    regex.containsMatchIn("plugins { id '$pluginId' }"),
+                    "Kotlin DSL requires parentheses"
+                )
+                assertFalse(
+                    regex.containsMatchIn("apply plugin: '$pluginId'"),
+                    "Kotlin DSL does not use apply plugin: for AGP/KGP"
+                )
             }
 
             assertTrue(regex.containsMatchIn("plugins { id('$pluginId') }"))
@@ -933,14 +1025,29 @@ class FlutterPluginUtilsTest {
             assertTrue(regex.containsMatchIn("plugins { alias('$pluginId') }"))
             assertTrue(regex.containsMatchIn("plugins { alias(\"$pluginId\") }"))
 
-            assertFalse(regex.containsMatchIn("// id '$pluginId'"), "Failed to ignore single line comment")
-            assertFalse(regex.containsMatchIn("// id('$pluginId')"), "Failed to ignore single line comment")
+            assertFalse(
+                regex.containsMatchIn("// id '$pluginId'"),
+                "Failed to ignore single line comment"
+            )
+            assertFalse(
+                regex.containsMatchIn("// id('$pluginId')"),
+                "Failed to ignore single line comment"
+            )
 
             // Check newline constraints
-            assertFalse(regex.containsMatchIn("plugins\n{ id('$pluginId') }"), "Newline before opening bracket should fail")
-            assertFalse(regex.containsMatchIn("plugins { id\n('$pluginId') }"), "Newline before opening parentheses should fail")
+            assertFalse(
+                regex.containsMatchIn("plugins\n{ id('$pluginId') }"),
+                "Newline before opening bracket should fail"
+            )
+            assertFalse(
+                regex.containsMatchIn("plugins { id\n('$pluginId') }"),
+                "Newline before opening parentheses should fail"
+            )
             // Check spacing inside quotes
-            assertFalse(regex.containsMatchIn("id ' $pluginId '"), "Should fail when there are spaces in quotes")
+            assertFalse(
+                regex.containsMatchIn("id ' $pluginId '"),
+                "Should fail when there are spaces in quotes"
+            )
         }
 
         @Nested
@@ -1221,7 +1328,10 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    legacyPlugins = listOf("com.android.application", "kotlin-android")
+                                    legacyPlugins = listOf(
+                                        "com.android.application",
+                                        "kotlin-android"
+                                    )
                                 ),
                             pluginConfigs =
                                 listOf(
@@ -1373,8 +1483,16 @@ class FlutterPluginUtilsTest {
                         setupTest(
                             tempDir = tempDir,
                             agpVersion = AndroidPluginVersion(errorAgpMajorVersion, 0, 0),
-                            appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
-                            pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
+                            appConfig = SubprojectConfig(
+                                "app",
+                                plugins = listOf("com.android.application")
+                            ),
+                            pluginConfigs = listOf(
+                                SubprojectConfig(
+                                    "plugin",
+                                    plugins = listOf("com.android.library")
+                                )
+                            )
                         )
 
                     val appPluginManager = testProject.appPluginManager
@@ -1398,8 +1516,16 @@ class FlutterPluginUtilsTest {
                         setupTest(
                             tempDir = tempDir,
                             agpVersion = AndroidPluginVersion(errorAgpMajorVersion, 0, 0),
-                            appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
-                            pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
+                            appConfig = SubprojectConfig(
+                                "app",
+                                plugins = listOf("com.android.application", "kotlin-android")
+                            ),
+                            pluginConfigs = listOf(
+                                SubprojectConfig(
+                                    "plugin",
+                                    plugins = listOf("com.android.library", "kotlin-android")
+                                )
+                            )
                         )
 
                     val appPluginManager = testProject.appPluginManager
@@ -1460,6 +1586,7 @@ class FlutterPluginUtilsTest {
                 }
             }
         }
+    }
 
     // forceNdkDownload
     @Test
