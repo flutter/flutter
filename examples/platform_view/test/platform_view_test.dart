@@ -55,18 +55,27 @@ void main() {
   testWidgets('tapping the continue button updates the counter from the platform response', (
     WidgetTester tester,
   ) async {
+    // Override the default mock to return a distinct value so we can verify
+    // the counter is actually updated from the platform response rather than
+    // just echoing back the value that was sent.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      channel,
+      (MethodCall call) async {
+        if (call.method == 'switchView') {
+          return 42;
+        }
+        return null;
+      },
+    );
+
     await tester.pumpWidget(const platform_view.PlatformView());
 
-    // Increment locally first so the value passed to the platform is non-zero.
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pump();
+    expect(find.text('Button tapped 0 times.'), findsOneWidget);
 
-    expect(find.text('Button tapped 1 time.'), findsOneWidget);
-
-    // The platform mock echoes back the received counter value.
+    // Tapping the continue button invokes switchView; the mock responds with 42.
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
-    expect(find.text('Button tapped 1 time.'), findsOneWidget);
+    expect(find.text('Button tapped 42 times.'), findsOneWidget);
   });
 }
