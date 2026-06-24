@@ -40,7 +40,11 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Center(
-        child: Semantics(liveRegion: !supportsAnnounce, child: Text('Tap count: $_tapCount')),
+        child: Semantics(
+          container: !supportsAnnounce,
+          liveRegion: !supportsAnnounce,
+          child: Text('Tap count: $_tapCount'),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
