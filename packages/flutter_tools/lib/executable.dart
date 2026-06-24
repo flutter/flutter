@@ -315,7 +315,7 @@ List<FlutterCommand> generateCommands({
     artifacts: globals.artifacts!,
     terminal: globals.terminal,
   ),
-  UpgradeCommand(verboseHelp: verboseHelp),
+  UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),

@@ -7,22 +7,30 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/git.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:test/fake.dart';
 
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakeFlutterVersion;
+import '../../src/fakes.dart' show FakeAndroidSdk, FakeFlutterVersion;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late FakeProcessManager processManager;
+  late FakeToolContext fakeToolContext;
   UpgradeCommand command;
   late CommandRunner<void> runner;
   const flutterRoot = '/path/to/flutter';
@@ -34,12 +42,31 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    fileSystem.directory(flutterRoot).createSync(recursive: true);
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
-    command = UpgradeCommand(
-      verboseHelp: false,
-      commandRunner: UpgradeCommandRunner()..clock = SystemClock.fixed(DateTime.utc(2026)),
+
+    final testPlatform = FakePlatform();
+    final testProcessUtils = ProcessUtils(processManager: processManager, logger: logger);
+    final testGit = Git(currentPlatform: testPlatform, runProcessWith: testProcessUtils);
+    final testFlutterVersion = FakeFlutterVersion(branch: 'dev');
+    final testPersistentToolState = PersistentToolState.test(
+      directory: fileSystem.directory(flutterRoot),
+      logger: logger,
     );
+
+    fakeToolContext = FakeToolContext(
+      fs: fileSystem,
+      logger: logger,
+      platform: testPlatform,
+      git: testGit,
+      flutterVersion: testFlutterVersion,
+      persistentToolState: testPersistentToolState,
+      processUtils: testProcessUtils,
+      systemClock: SystemClock.fixed(DateTime.utc(2026)),
+    );
+
+    command = UpgradeCommand(toolContext: fakeToolContext, verboseHelp: false);
     runner = createTestCommandRunner(command);
   });
 
@@ -125,6 +152,7 @@ void main() {
       FlutterVersion: () => FakeFlutterVersion(branch: 'dev'),
       Logger: () => logger,
       ProcessManager: () => processManager,
+      AndroidSdk: () => FakeAndroidSdk(),
     },
   );
 
@@ -135,6 +163,10 @@ void main() {
   testUsingContext(
     'can push people from master to beta',
     () async {
+      fakeToolContext.flutterVersion = FakeFlutterVersion(
+        frameworkVersion: startingTag,
+        engineRevision: 'engine',
+      );
       final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> args) async {
@@ -219,12 +251,18 @@ void main() {
           FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
       Logger: () => logger,
       ProcessManager: () => processManager,
+      AndroidSdk: () => FakeAndroidSdk(),
     },
   );
 
   testUsingContext(
     'do not push people from beta to anything else',
     () async {
+      fakeToolContext.flutterVersion = FakeFlutterVersion(
+        branch: 'beta',
+        frameworkVersion: startingTag,
+        engineRevision: 'engine',
+      );
       final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> command) async {
@@ -315,11 +353,16 @@ void main() {
       ),
       Logger: () => logger,
       ProcessManager: () => processManager,
+      AndroidSdk: () => FakeAndroidSdk(),
     },
   );
   testUsingContext(
     'allows upgrading if the only local modifications are pubspec.lock files',
     () async {
+      fakeToolContext.flutterVersion = FakeFlutterVersion(
+        frameworkVersion: startingTag,
+        engineRevision: 'engine',
+      );
       final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> args) async {
@@ -368,12 +411,18 @@ void main() {
           FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
       Logger: () => logger,
       ProcessManager: () => processManager,
+      AndroidSdk: () => FakeAndroidSdk(),
     },
   );
 
   testUsingContext(
     'fails upgrading on stable if pubspec.lock files are modified',
     () async {
+      fakeToolContext.flutterVersion = FakeFlutterVersion(
+        branch: 'stable',
+        frameworkVersion: startingTag,
+        engineRevision: 'engine',
+      );
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'tag', '--points-at', 'HEAD'],
@@ -414,6 +463,127 @@ void main() {
       ),
       Logger: () => logger,
       ProcessManager: () => processManager,
+      AndroidSdk: () => FakeAndroidSdk(),
     },
   );
+
+  testUsingContext(
+    'resolves all dependencies from ToolContext and not the Zone',
+    () async {
+      final mockFs = MemoryFileSystem.test();
+      final mockLogger = BufferLogger.test();
+      final mockPlatform = FakePlatform();
+      final mockProcessManager = FakeProcessManager.empty();
+      final mockProcessUtils = ProcessUtils(processManager: mockProcessManager, logger: mockLogger);
+      final mockGit = Git(currentPlatform: mockPlatform, runProcessWith: mockProcessUtils);
+      final mockClock = SystemClock.fixed(DateTime.utc(2026));
+      final mockVersion = FakeFlutterVersion(branch: 'beta', frameworkRevision: 'abc');
+      final mockPersistentToolState = PersistentToolState.test(
+        directory: mockFs.systemTempDirectory.createTempSync('persistent_tool_state.'),
+        logger: mockLogger,
+      );
+
+      final strictToolContext = FakeToolContext(
+        fs: mockFs,
+        logger: mockLogger,
+        git: mockGit,
+        systemClock: mockClock,
+        platform: mockPlatform,
+        persistentToolState: mockPersistentToolState,
+        processUtils: mockProcessUtils,
+        flutterVersion: mockVersion,
+      );
+
+      final strictCommand = UpgradeCommand(toolContext: strictToolContext, verboseHelp: false);
+
+      final CommandRunner<void> strictRunner = createTestCommandRunner(strictCommand);
+
+      mockProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD'], stdout: '3.0.0'),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            '-c',
+            'log.showSignature=false',
+            'log',
+            '-n',
+            '1',
+            '--pretty=format:%H',
+          ],
+          stdout: 'abc',
+        ),
+        const FakeCommand(command: <String>['git', 'tag', '--points-at', 'abc'], stdout: '3.0.0'),
+        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+          stdout: 'def456',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+          stdout: 'upstream/beta',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'ls-remote', '--get-url', 'upstream'],
+          stdout: 'https://github.com/flutter/flutter.git',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', 'def456'],
+          stdout: '3.1.0',
+        ),
+        const FakeCommand(command: <String>['git', 'status', '-s']),
+        const FakeCommand(
+          command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+          stdout: 'beta',
+        ),
+        const FakeCommand(command: <String>['git', 'reset', '--hard', 'def456']),
+      ]);
+
+      await strictRunner.run(<String>['upgrade', '--working-directory', '/path/to/flutter']);
+
+      expect(mockProcessManager, hasNoRemainingExpectations);
+      expect(mockLogger.statusText, contains('Upgrading Flutter to 3.1.0 from 3.0.0'));
+    },
+    overrides: <Type, Generator>{
+      // Override AndroidSdk to null to prevent the runner from trying to locate Android SDK,
+      // which falls back to executing 'which' on the host and throws due to FakeProcessManager.
+      AndroidSdk: () => null,
+    },
+  );
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({
+    required this.fs,
+    required this.logger,
+    required this.platform,
+    required this.git,
+    required this.flutterVersion,
+    required this.persistentToolState,
+    required this.processUtils,
+    required this.systemClock,
+  });
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
+
+  @override
+  final Git git;
+
+  @override
+  FlutterVersion flutterVersion;
+
+  @override
+  final PersistentToolState persistentToolState;
+
+  @override
+  final ProcessUtils processUtils;
+
+  @override
+  final SystemClock systemClock;
 }

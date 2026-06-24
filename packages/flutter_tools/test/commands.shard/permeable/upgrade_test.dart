@@ -6,16 +6,21 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -28,6 +33,7 @@ void main() {
     final jan12026 = DateTime.utc(2026);
 
     late FakeUpgradeCommandRunner fakeCommandRunner;
+    late ZoneDelegatingToolContext fakeCommandRunnerContext;
     late UpgradeCommandRunner realCommandRunner;
     late FakeProcessManager processManager;
     late FakePlatform fakePlatform;
@@ -42,10 +48,13 @@ void main() {
     );
 
     setUp(() {
-      fakeCommandRunner = FakeUpgradeCommandRunner()..clock = SystemClock.fixed(jan12026);
-      realCommandRunner = UpgradeCommandRunner()
-        ..workingDirectory = getFlutterRoot()
-        ..clock = SystemClock.fixed(jan12026);
+      fakeCommandRunnerContext = ZoneDelegatingToolContext(
+        customClock: SystemClock.fixed(jan12026),
+      );
+      fakeCommandRunner = FakeUpgradeCommandRunner(toolContext: fakeCommandRunnerContext);
+      realCommandRunner = UpgradeCommandRunner(
+        toolContext: ZoneDelegatingToolContext(customClock: SystemClock.fixed(jan12026)),
+      )..workingDirectory = getFlutterRoot();
       processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()
@@ -55,50 +64,42 @@ void main() {
         });
     });
 
-    testUsingContext(
-      'throws on unknown tag, official branch,  noforce',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
+    testUsingContext('throws on unknown tag, official branch,  noforce', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: const GitTagVersion.unknown(),
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: const GitTagVersion.unknown(),
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
-    testUsingContext(
-      'throws tool exit with uncommitted changes',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.willHaveUncommittedChanges = true;
+    testUsingContext('throws tool exit with uncommitted changes', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.willHaveUncommittedChanges = true;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
     testUsingContext(
       'hasUncommittedChanges ignores pubspec.lock on non-stable channel',
@@ -213,7 +214,7 @@ void main() {
 
         final DateTime now = DateTime.now().subtract(const Duration(minutes: 25));
         fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.clock = SystemClock.fixed(now);
+        fakeCommandRunnerContext.customClock = SystemClock.fixed(now);
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -270,7 +271,7 @@ void main() {
 
         final now = DateTime.now();
         final DateTime before = now.subtract(const Duration(minutes: 25));
-        fakeCommandRunner.clock = SystemClock.fixed(now);
+        fakeCommandRunnerContext.customClock = SystemClock.fixed(now);
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -633,7 +634,11 @@ void main() {
         );
 
         final CommandRunner<void> runner = createTestCommandRunner(
-          UpgradeCommand(verboseHelp: false, commandRunner: fakeCommandRunner),
+          UpgradeCommand(
+            toolContext: ZoneDelegatingToolContext(),
+            verboseHelp: false,
+            commandRunner: fakeCommandRunner,
+          ),
         );
 
         fakeCommandRunner.alreadyUpToDate = false;
@@ -729,7 +734,7 @@ void main() {
             },
           ),
         );
-        await precacheArtifacts();
+        await precacheArtifacts(ZoneDelegatingToolContext());
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
@@ -854,6 +859,7 @@ void main() {
           () async {
             fakeProcessManager = FakeProcessManager.any();
             final upgradeCommand = UpgradeCommand(
+              toolContext: ZoneDelegatingToolContext(),
               verboseHelp: false,
               commandRunner: fakeCommandRunner,
             );
@@ -884,6 +890,8 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
+  FakeUpgradeCommandRunner({required super.toolContext});
+
   bool willHaveUncommittedChanges = false;
   bool alreadyUpToDate = false;
 
@@ -903,4 +911,27 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   @override
   Future<void> runDoctor() async {}
+}
+
+class ZoneDelegatingToolContext extends Fake implements ToolContext {
+  ZoneDelegatingToolContext({this.customClock});
+
+  SystemClock? customClock;
+
+  @override
+  FileSystem get fs => globals.fs;
+  @override
+  Logger get logger => globals.logger;
+  @override
+  Platform get platform => globals.platform;
+  @override
+  Git get git => globals.git;
+  @override
+  FlutterVersion get flutterVersion => globals.flutterVersion;
+  @override
+  PersistentToolState get persistentToolState => globals.persistentToolState!;
+  @override
+  ProcessUtils get processUtils => globals.processUtils;
+  @override
+  SystemClock get systemClock => customClock ?? globals.systemClock;
 }

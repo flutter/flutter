@@ -16,7 +16,8 @@ import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
   ChannelCommand({required ToolContext toolContext, bool verboseHelp = false})
-    : super(toolContext: toolContext) {
+    : _toolContext = toolContext,
+      super(toolContext: toolContext) {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -31,6 +32,8 @@ class ChannelCommand extends FlutterCommand {
       defaultsTo: true,
     );
   }
+
+  final ToolContext _toolContext;
 
   @override
   String get name => 'channel';
@@ -169,7 +172,7 @@ class ChannelCommand extends FlutterCommand {
     }
     await _checkout(branchName, git: git);
     if (boolArg('cache-artifacts')) {
-      await precacheArtifacts(Cache.flutterRoot);
+      await precacheArtifacts(_toolContext, Cache.flutterRoot);
     }
     logger.printStatus("Successfully switched to flutter channel '$branchName'.");
     logger.printStatus(
