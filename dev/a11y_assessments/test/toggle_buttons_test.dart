@@ -69,11 +69,15 @@ void main() {
 }
 
 /// Resolves the background color of the button and blends it with the scaffold background.
-Color _getButtonBg(WidgetTester tester, Finder buttonFinder, Color scaffoldBg, {required bool isSelected}) {
+Color _getButtonBg(
+  WidgetTester tester,
+  Finder buttonFinder,
+  Color scaffoldBg, {
+  required bool isSelected,
+}) {
   final TextButton button = tester.widget<TextButton>(buttonFinder);
-  final Set<WidgetState> states = isSelected ? const <WidgetState>{WidgetState.selected} : const <WidgetState>{};
-  final Color resolved =
-      button.style?.backgroundColor?.resolve(states) ?? Colors.transparent;
+  final states = isSelected ? const <WidgetState>{WidgetState.selected} : const <WidgetState>{};
+  final Color resolved = button.style?.backgroundColor?.resolve(states) ?? Colors.transparent;
   return Color.alphaBlend(resolved, scaffoldBg);
 }
 
