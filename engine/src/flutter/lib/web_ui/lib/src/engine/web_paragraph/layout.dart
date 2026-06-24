@@ -783,8 +783,7 @@ class TextLayout {
         // We found the block but not the cluster? How could that happen
         assert(false);
       }
-      // We found the line but not the block? That must be the last line
-      assert(lineNum == lines.length);
+      // We found the line but not the block because the offset is to the right of all blocks in this line.
       // We deal with it the same way as if we didn't find the line (taking the last block of the last line)
       final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
       return lastVisualBlockInLine.isLtr

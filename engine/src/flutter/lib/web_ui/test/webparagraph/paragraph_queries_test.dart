@@ -293,45 +293,102 @@ Future<void> testMain() async {
     expect(paragraph.numberOfLines, 1);
   });
 
-  test('Paragraph print', () {
-    final paragraphStyle = ui.ParagraphStyle(
-      fontFamily: 'Roboto',
-      fontSize: 40,
-      textDirection: ui.TextDirection.rtl,
-      height: 1.0,
-    );
-
-    final builder = ui.ParagraphBuilder(paragraphStyle);
-    builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF000000)));
-    builder.addText('اللغة العربية لغة عالمية غبية');
-    builder.pop();
-
-    final ui.Paragraph paragraph = builder.build();
+  test('getGlyphInfoAt handles out of bounds offset', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
-    final List<ui.Offset> centers = [];
-    for (var i = 0; i < 55; ++i) {
+    // Out of bounds should return null
+    final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(text.length);
+    expect(glyphInfo, isNull);
+  });
+
+  test('getGlyphInfoAt handles bidirectional text', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Hello مرحبا'); // LTR + RTL
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Get glyph info for LTR text
+    final ui.GlyphInfo? glyphInfoLtr = paragraph.getGlyphInfoAt(0);
+    // Get glyph info for RTL text
+    final ui.GlyphInfo? glyphInfoRtl = paragraph.getGlyphInfoAt(6);
+
+    expect(glyphInfoLtr, isNotNull);
+    expect(glyphInfoRtl, isNotNull);
+
+    if (glyphInfoLtr != null && glyphInfoRtl != null) {
+      expect(glyphInfoLtr.writingDirection == ui.TextDirection.ltr, true);
+      expect(glyphInfoRtl.writingDirection == ui.TextDirection.rtl, true);
+    }
+  });
+
+  test('getClosestGlyphInfoForOffset uses correct affinity', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 1);
+    if (boxes.isNotEmpty) {
+      final ui.Rect rect = boxes.first.toRect();
+      final ui.GlyphInfo? glyph = paragraph.getClosestGlyphInfoForOffset(rect.center);
+      expect(glyph, isNotNull);
+      expect(glyph!.graphemeClusterCodeUnitRange, const ui.TextRange(start: 0, end: 1));
+    }
+  });
+
+  test('Round-trip getBoxesForRange and getPositionForOffset', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Get boxes for a range
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 5);
+    expect(boxes.isNotEmpty, true);
+
+    if (boxes.isNotEmpty) {
+      final ui.Rect rect = boxes.first.toRect();
+      final ui.TextPosition position0 = paragraph.getPositionForOffset(
+        rect.centerLeft.translate(0.1, 0),
+      );
+      final ui.TextPosition position1 = paragraph.getPositionForOffset(
+        rect.centerRight.translate(-0.1, 0),
+      );
+      // Position should be within the range we queried
+      expect(position0.offset == 0, true);
+      expect(position1.offset == 5, true);
+    }
+  });
+
+  test('Consistency between getBoxesForRange and getGlyphInfoAt', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    for (var i = 0; i < text.length; i++) {
       final List<ui.TextBox> boxes = paragraph.getBoxesForRange(i, i + 1);
-      if (boxes.isNotEmpty) {
-        print('getRectsForRange($i, ${i + 1}): ${boxes.length} ${boxes.first.toRect()}');
-        for (final box in boxes) {
-          centers.add(box.toRect().center);
-        }
+      final ui.GlyphInfo? glyph = paragraph.getGlyphInfoAt(i);
+
+      if (boxes.isNotEmpty && glyph != null) {
+        // Both should return non-zero dimensions
+        expect(boxes.first.toRect().width > 0, true);
+        expect(glyph.graphemeClusterLayoutBounds.width > 0, true);
       } else {
-        print('getRectsForRange($i, ${i + 1}): ${boxes.length}');
+        assert(false);
       }
     }
-    for (final point in centers) {
-      final ui.TextPosition pos = paragraph.getPositionForOffset(point);
-      print(
-        'getGlyphPositionAtCoordinate($point): ${pos.offset}, ${pos.affinity == ui.TextAffinity.upstream ? "up" : "down"}',
-      );
-    }
-    for (final point in centers) {
-      final ui.GlyphInfo? glyph1 = paragraph.getClosestGlyphInfoForOffset(point.translate(0.2, 0));
-      print('getClosestGlyphClusterAt($point)+0.2: $glyph1');
-      final ui.GlyphInfo? glyph2 = paragraph.getClosestGlyphInfoForOffset(point.translate(-0.2, 0));
-      print('getClosestGlyphClusterAt($point)-0.2: $glyph2');
-    }
-  }, skip: true);
+  });
 }
