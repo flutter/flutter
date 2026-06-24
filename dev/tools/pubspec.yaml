@@ -9,8 +9,8 @@ resolution: workspace
 dependencies:
   archive: any
   args: any
+  convert: any
   http: any
-  intl: any
   meta: any
   path: any
   process: any

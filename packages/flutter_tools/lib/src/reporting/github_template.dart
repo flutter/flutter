@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:intl/intl.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -66,12 +65,29 @@ class GitHubTemplateCreator {
       return '${error.runtimeType}: ${LineSplitter.split(error.stackTrace.toString()).take(1)}';
     } else if (error is String) {
       // Force comma separator to standardize.
-      return 'String: <${NumberFormat(null, 'en_US').format(error.length)} characters>';
+      final lengthStr = error.length.toString();
+      final StringBuffer buffer = _asCommaSeparatedNumber(lengthStr);
+
+      return 'String: <$buffer characters>';
     }
     // Tool crash issue templates benefit from the concrete Dart error type.
     // The tool is not obfuscated, and collapsing unknown types loses useful signal.
     // ignore: avoid_type_to_string
     return error.runtimeType.toString();
+  }
+
+  /// Insert a comma every three digits in a number.
+  static StringBuffer _asCommaSeparatedNumber(String lengthStr) {
+    final buffer = StringBuffer();
+    final int mod = lengthStr.length % 3;
+
+    for (var i = 0; i < lengthStr.length; i++) {
+      if (i > 0 && (i - mod) % 3 == 0) {
+        buffer.write(',');
+      }
+      buffer.write(lengthStr[i]);
+    }
+    return buffer;
   }
 
   /// GitHub URL to present to the user containing encoded suggested template.
