@@ -839,7 +839,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   if (self.node.flags.isEnabled == flutter::SemanticsTristate::kFalse) {
     traits |= UIAccessibilityTraitNotEnabled;
   }
-  if (self.node.flags.isHeader) {
+  if (self.node.headingLevel > 0) {
+    // VoiceOver treats UIAccessibilityTraitHeader as heading.
     traits |= UIAccessibilityTraitHeader;
   }
   if (self.node.flags.isImage) {

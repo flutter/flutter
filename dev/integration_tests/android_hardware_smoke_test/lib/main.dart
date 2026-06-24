@@ -3,71 +3,161 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'backdrop_filter_blur.dart';
+import 'constants.dart';
 import 'goldens.dart';
+import 'image_drawing_canvas.dart';
+import 'platform_view.dart';
+import 'text_drawing_canvas.dart';
+import 'vector_drawings_canvas.dart';
 
+/// The global key identifying the target [RepaintBoundary] for golden screenshot capturing.
 final GlobalKey targetKey = GlobalKey();
 
 void main() async {
   runApp(const MyApp());
 }
 
+/// The root application widget for the Android hardware smoke test.
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.imageLoader = defaultImageLoader});
+
+  /// The callback used to lazily fetch image texture assets during test runs.
+  final ImageLoader imageLoader;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MyWidget(),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      home: MyWidget(imageLoader: imageLoader),
     );
   }
 }
 
+/// A stateful widget rendering vector drawings, blur effects, or platform views based on test driver requests.
 class MyWidget extends StatefulWidget {
-  const MyWidget({super.key});
+  const MyWidget({super.key, required this.imageLoader});
+
+  /// The callback used to lazily fetch image texture assets during test runs.
+  final ImageLoader imageLoader;
 
   @override
   State<MyWidget> createState() => _MyState();
 }
 
 class _MyState extends State<MyWidget> {
-  static const MethodChannel nativeChannel = MethodChannel(
-    'com.example.android_hardware_smoke_test/native_support',
-  );
-
-  static const testChannel = BasicMessageChannel<Object?>(
-    'com.example.android_hardware_smoke_test/test_channel',
-    JSONMessageCodec(),
-  );
+  static const _nativeChannel = MethodChannel(nativeSupportChannelName);
+  static const _testChannel = BasicMessageChannel<Object?>(testChannelName, JSONMessageCodec());
 
   String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
+  ui.Image? _loadedImage;
+  Completer<void>? _platformViewCreatedCompleter;
 
-  Future<Map<String, Object?>?> handler(Object? message) {
+  Future<ui.Image> _loadImage() async {
+    return widget.imageLoader();
+  }
+
+  Future<Map<String, Object?>?> _handler(Object? message) async {
     final Map<String, Object?>? messageMap = (message as Map<Object?, Object?>?)
         ?.cast<String, Object?>();
-    final testName = messageMap?['testName'] as String?;
+
+    if (messageMap?[keyCommand] == commandCompareGolden) {
+      // Handle the out-of-band comparison request. This is triggered by the on-device test runner
+      // once it has captured and cropped the platform view screenshot using UiAutomation.
+      final testName = messageMap![keyTestName]! as String;
+      final imageBase64 = messageMap[keyImageBytes]! as String;
+      final Uint8List imageBytes = base64.decode(imageBase64);
+      final String? goldenVariantValue = await _goldenVariantFuture;
+
+      final String? failureMessage = await compareGoldenOnDevice(
+        testName,
+        imageBytes,
+        goldenVariantValue,
+      );
+
+      return <String, Object?>{keyMessage: failureMessage ?? 'Comparison Success'};
+    }
+
+    final testName = messageMap?[keyTestName] as String?;
     final bool performAppSideGoldenCompare =
-        messageMap?['performAppSideGoldenCompare'] as bool? ?? true;
+        messageMap?[keyPerformAppSideGoldenCompare] as bool? ?? true;
+
+    // Widget tests pass captureScreenshot: false.
+    // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
+    // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
+    final bool captureScreenshot = messageMap?[keyCaptureScreenshot] as bool? ?? true;
+
+    if (testName == kPlatformViewHybridCompositionPlusPlusTest) {
+      final bool isHcpp = await HybridAndroidViewController.checkIfSupported();
+      if (!isHcpp) {
+        return <String, Object?>{
+          keyMessage: 'Skipped',
+          keyReason:
+              'HCPP is not supported on this device/configuration (requires Vulkan and Android 14+)',
+        };
+      }
+    }
+
+    // Lazily load the image asset only when requested. This avoids loading it
+    // unnecessarily, blocks rendering until fully loaded, and catches load
+    // failures to explicitly fail the host-side driver test.
+    if (testName == kImageTest && _loadedImage == null) {
+      try {
+        final ui.Image img = await _loadImage();
+        // When handler starts, mounted is guaranteed to be true because handler is registered in initState.
+        // However, the widget could unmount during the async gap of await _loadImage(), so we need to check mounted again before calling setState.
+        if (!mounted) {
+          img.dispose();
+          return <String, Object?>{
+            keyMessage: 'Widget unmounted during image load',
+            keyImageBytes: null,
+          };
+        }
+        setState(() {
+          _loadedImage = img;
+        });
+      } catch (e, stackTrace) {
+        return <String, Object?>{keyMessage: 'Failed to load image asset: $e\n$stackTrace'};
+      }
+    }
+
     final completer = Completer<Map<String, Object?>>();
+
+    final bool isPlatformView = testName?.startsWith(platformViewPrefix) ?? false;
+    if (isPlatformView) {
+      _platformViewCreatedCompleter = Completer<void>();
+    } else {
+      _platformViewCreatedCompleter = null;
+    }
 
     setState(() {
       _message = testName ?? 'Empty message';
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      handleGoldenRequest(
-        testName ?? 'unknown',
-        completer,
-        performAppSideGoldenCompare,
-        targetKey,
-        _goldenVariantFuture,
-      );
+      if (captureScreenshot) {
+        handleGoldenRequest(
+          testName ?? 'unknown',
+          completer,
+          performAppSideGoldenCompare,
+          targetKey,
+          _goldenVariantFuture,
+          settleFuture: _platformViewCreatedCompleter?.future,
+        );
+      } else {
+        completer.complete(<String, Object?>{
+          keyMessage: 'Rendered $testName',
+          keyImageBytes: null,
+        });
+      }
     }, debugLabel: 'Rendered $testName');
 
     return completer.future;
@@ -77,84 +167,54 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    // Request the golden variant from the native side, but don't await it yet.
-    // We only need it to be resolved by the time of the postFrameCallback in the handler.
-    _goldenVariantFuture = nativeChannel.invokeMethod<String>('impeller_backend');
-    testChannel.setMessageHandler(handler);
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(methodImpellerBackend);
+    _testChannel.setMessageHandler(_handler);
   }
 
   @override
   void dispose() {
+    _loadedImage?.dispose();
+    _testChannel.setMessageHandler(null);
     super.dispose();
-    testChannel.setMessageHandler(null);
   }
 
   @override
   Widget build(BuildContext context) {
+    void onPlatformViewCreated() {
+      if (_platformViewCreatedCompleter?.isCompleted == false) {
+        _platformViewCreatedCompleter?.complete();
+      }
+    }
+
+    final Widget testContent = switch (_message) {
+      kBackdropFilterBlurTest => const BackdropFilterBlur(),
+      kPlatformViewTextureLayerTest => AndroidPlatformView(
+        mode: PlatformViewMode.textureLayer,
+        onCreated: onPlatformViewCreated,
+      ),
+      kPlatformViewHybridCompositionTest => AndroidPlatformView(
+        mode: PlatformViewMode.hybridComposition,
+        onCreated: onPlatformViewCreated,
+      ),
+      kPlatformViewHybridCompositionPlusPlusTest => AndroidPlatformView(
+        mode: PlatformViewMode.hybridCompositionPlusPlus,
+        onCreated: onPlatformViewCreated,
+      ),
+      kTextTest => const TextDrawingCanvas(),
+      kImageTest => ImageDrawingCanvas(image: _loadedImage),
+      _ => VectorDrawingsCanvas(message: _message),
+    };
+
     return SafeArea(
       child: Stack(
         children: <Widget>[
           RepaintBoundary(
             key: targetKey,
-            child: CustomPaint(
-              size: const Size(150, 150),
-              painter: MyPainter(message: _message),
-            ),
+            child: SizedBox(width: 150, height: 150, child: testContent),
           ),
           Align(child: Text(_message)),
         ],
       ),
     );
-  }
-}
-
-class MyPainter extends CustomPainter {
-  MyPainter({required this.message}) : assert(message.isNotEmpty);
-  final String message;
-
-  void renderBlueRectangleTest(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.blue
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-  }
-
-  void renderTrianglePathTest(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.blue
-      ..style = PaintingStyle.fill;
-    final path = Path();
-    path.moveTo(size.width / 2, 10);
-    path.lineTo(size.width - 10, size.height - 10);
-    path.lineTo(10, size.height - 10);
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  void renderDefault(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.blueGrey
-      ..strokeWidth = 10
-      ..style = PaintingStyle.stroke;
-    canvas.drawCircle(const Offset(80, 80), 40, paint);
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    switch (message) {
-      case 'blueRectangleTest':
-        renderBlueRectangleTest(canvas, size);
-        return;
-      case 'trianglePathTest':
-        renderTrianglePathTest(canvas, size);
-        return;
-      default:
-        renderDefault(canvas, size);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant MyPainter oldDelegate) {
-    return message != oldDelegate.message;
   }
 }
