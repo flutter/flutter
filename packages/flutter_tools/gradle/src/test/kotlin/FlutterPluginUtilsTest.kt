@@ -1064,7 +1064,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
+                            agpVersion = templateAgpMajorVersion,
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1110,7 +1110,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
+                            agpVersion = templateAgpMajorVersion,
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1159,7 +1159,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
+                            agpVersion = templateAgpMajorVersion,
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1217,7 +1217,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
+                            agpVersion = templateAgpMajorVersion,
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1289,7 +1289,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
+                            agpVersion = templateAgpMajorVersion,
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1324,7 +1324,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
+                            agpVersion = templateAgpMajorVersion,
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1460,7 +1460,6 @@ class FlutterPluginUtilsTest {
                 }
             }
         }
-    }
 
     // forceNdkDownload
     @Test
