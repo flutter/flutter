@@ -6,11 +6,11 @@ import 'package:completion/completion.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../globals.dart' as globals;
+import '../context/tool_context.dart';
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
-  ShellCompletionCommand() {
+  ShellCompletionCommand({required ToolContext toolContext}) : super(toolContext: toolContext) {
     argParser.addFlag(
       'overwrite',
       help:
@@ -51,11 +51,11 @@ class ShellCompletionCommand extends FlutterCommand {
 
     if (rest.isEmpty || rest.first == '-') {
       final String script = generateCompletionScript(<String>['flutter']);
-      globals.stdio.stdoutWrite(script);
+      stdio.stdoutWrite(script);
       return FlutterCommandResult.warning();
     }
 
-    final File outputFile = globals.fs.file(rest.first);
+    final File outputFile = fileSystem.file(rest.first);
     if (outputFile.existsSync() && !boolArg('overwrite')) {
       throwToolExit(
         'Output file ${outputFile.path} already exists, will not overwrite. '
