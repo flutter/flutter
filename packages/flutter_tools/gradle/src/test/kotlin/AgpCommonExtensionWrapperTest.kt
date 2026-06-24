@@ -4,13 +4,11 @@
 
 package com.flutter.gradle
 
-import com.android.build.api.dsl.AndroidSourceSet
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.Splits
 import io.mockk.every
 import io.mockk.mockk
-import org.gradle.api.NamedDomainObjectContainer
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
