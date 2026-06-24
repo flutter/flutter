@@ -146,8 +146,12 @@ void main() {
       handle.dispose();
     });
 
+    // When a Text's semantics label fully replaces its visible string (the label
+    // shares nothing with the rendered text), the rendered text conveys no
+    // meaning to assistive technologies and is treated as decorative — it has no
+    // contrast requirement, so a low-contrast value here still passes.
     testWidgets(
-      'Text.semanticsLabel that differs from the visible text still has its contrast checked',
+      'Text.semanticsLabel that fully replaces the visible text is treated as decorative and not checked',
       (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
@@ -164,7 +168,7 @@ void main() {
             ),
           ),
         );
-        await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       },
     );

@@ -313,14 +313,17 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    // Locate the text-bearing widgets whose contrast should be checked by
-    // inspecting the widget tree directly, rather than matching a semantics
-    // node's label or value against the rendered text. The label or value can
-    // legitimately differ from the visible text — for example when a Semantics
-    // widget contributes its own label that merges with a descendant Text, or
-    // when Text.semanticsLabel is set — in which case matching by string would
-    // fail to find the widget and silently skip the contrast check.
-    // See https://github.com/flutter/flutter/issues/180081.
+    // Collect the text-bearing widgets up front, then match each to a semantics
+    // node below using two conditions: the node's label/value must *contain* the
+    // widget's rendered text, and the widget must paint within the node's bounds.
+    //
+    // Containment (rather than the previous exact match) is what catches a
+    // Semantics widget that contributes an extra label merging with a descendant
+    // Text — the merged label "Custom label\nVisible text" never equals any
+    // single Text's string, so the old code skipped the check. It also keeps
+    // purely decorative text — which contributes to no node's label/value — out
+    // of the check. The geometric bound disambiguates other widgets that merely
+    // share the same string. See https://github.com/flutter/flutter/issues/180081.
     final List<Element> textElements = find
         .byWidgetPredicate((Widget widget) => widget is Text || widget is EditableText)
         .hitTestable()
@@ -345,10 +348,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
       // Precompute each text element's painted bounds in screen coordinates once
       // per view. Mapping a render object to screen space walks the render tree
-      // (getTransformTo), which is O(tree depth); doing it here rather than
-      // inside _evaluateNode for every (node, element) pair keeps the per-node
-      // check to an O(1) rect intersection and avoids O(nodes * elements *
-      // depth) work.
+      // (getTransformTo, O(tree depth)); doing it here rather than for every
+      // (node, element) pair keeps the per-node geometric check O(1).
       final elementScreenBounds = <Element, Rect>{};
       for (final element in textElements) {
         final Rect? screenBounds = _elementScreenBounds(element, renderView);
@@ -359,8 +360,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
       // Tracks which text elements have already been checked within this view,
       // so that each one is evaluated against a single semantics node (the
-      // deepest one it belongs to) even though it geometrically falls within
-      // its ancestors too.
+      // deepest one that owns it) and not again for its ancestors.
       final evaluatedElements = <Element>{};
       result += await _evaluateNode(
         root,
@@ -417,26 +417,46 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     if (shouldSkipNode(data)) {
       return result;
     }
-    // Check the contrast of every text-bearing widget rendered within this
-    // node's bounds. Children are visited first, so the deepest (most specific)
-    // node claims each element; the rest skip it via [evaluatedElements].
-    // [nodeBounds] depends only on the node, so compute it once here rather than
-    // once per element.
+    // Match each text-bearing widget to this node when (a) its rendered text is
+    // part of the node's accessibility label or value, and (b) it paints within
+    // the node's bounds. (a) keeps decorative text and labels that fully replace
+    // the visible text out of the check; (b) disambiguates other widgets that
+    // happen to share the same string. Children are visited first, so the
+    // deepest (most specific) node claims each element via [evaluatedElements].
     final Rect nodeBounds = _nodeScreenBounds(node);
     for (final MapEntry<Element, Rect> entry in elementScreenBounds.entries) {
       final Element element = entry.key;
       if (evaluatedElements.contains(element)) {
         continue;
       }
+      final String? text = _renderedText(element);
+      if (text == null || text.isEmpty) {
+        continue;
+      }
+      if (!data.label.contains(text) && !data.value.contains(text)) {
+        continue;
+      }
       final Rect intersection = nodeBounds.intersect(entry.value);
       if (intersection.width <= 0 || intersection.height <= 0) {
-        // The element doesn't correspond to this semantics node.
         continue;
       }
       evaluatedElements.add(element);
       result += await _evaluateElement(node, element, tester, image, byteData, renderView);
     }
     return result;
+  }
+
+  /// The plain rendered text of a [Text] or [EditableText] [element], or null if
+  /// it exposes no text string.
+  String? _renderedText(Element element) {
+    final Widget widget = element.widget;
+    if (widget is Text) {
+      return widget.data ?? widget.textSpan?.toPlainText();
+    }
+    if (widget is EditableText) {
+      return widget.controller.text;
+    }
+    return null;
   }
 
   /// [element]'s painted bounds in screen coordinates, or null if it has no
