@@ -161,5 +161,46 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
             round_superellipse_params.top_right.signed_scale.Abs().y);
 }
 
+TEST(UberSDFParametersTest, MakeLine) {
+  Scalar length = 20.0f;
+  Scalar width = 10.0f;
+
+  // 1. Line with Butt cap
+  {
+    auto params = UberSDFParameters::MakeLine(
+        Color::Red(), length,
+        StrokeParameters{.width = width, .cap = Cap::kButt});
+    EXPECT_EQ(params.type, UberSDFParameters::Type::kRect);
+    EXPECT_EQ(params.color, Color::Red());
+    EXPECT_EQ(params.center, Point(0, 0));
+    EXPECT_EQ(params.size, Point(length * 0.5f, width * 0.5f));
+    EXPECT_FALSE(params.stroke.has_value());
+  }
+
+  // 2. Line with Square cap
+  {
+    auto params = UberSDFParameters::MakeLine(
+        Color::Red(), length,
+        StrokeParameters{.width = width, .cap = Cap::kSquare});
+    EXPECT_EQ(params.type, UberSDFParameters::Type::kRect);
+    EXPECT_EQ(params.center, Point(0, 0));
+    EXPECT_EQ(params.size, Point(length * 0.5f + width * 0.5f, width * 0.5f));
+  }
+
+  // 3. Line with Round cap
+  {
+    auto params = UberSDFParameters::MakeLine(
+        Color::Red(), length,
+        StrokeParameters{.width = width, .cap = Cap::kRound});
+    EXPECT_EQ(params.type, UberSDFParameters::Type::kRoundedRect);
+    EXPECT_EQ(params.center, Point(0, 0));
+    EXPECT_EQ(params.size, Point(length * 0.5f + width * 0.5f, width * 0.5f));
+    EXPECT_EQ(params.radii.w, width * 0.5f);
+    EXPECT_EQ(params.radii.y, width * 0.5f);
+    EXPECT_EQ(params.radii.z, width * 0.5f);
+    EXPECT_EQ(params.radii.x, width * 0.5f);
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

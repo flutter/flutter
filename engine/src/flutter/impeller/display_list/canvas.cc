@@ -778,23 +778,34 @@ void Canvas::DrawLine(const Point& p0,
                       const Point& p1,
                       const Paint& paint,
                       bool reuse_depth) {
+  if ((renderer_.GetContext()->GetFlags().use_sdfs ||
+       renderer_.GetContext()->GetFlags().antialiased_lines) &&
+      IsCompatibleWithSDFRendering(paint)) {
+    // UberSDF line geometry is a horizontal line centered at the origin.
+    // Draw the line from p0 to p1 by applying a translation and rotation
+    // to the UberSDF line.
+    Point center = (p0 + p1) * 0.5f;
+    Matrix translation = Matrix::MakeTranslation(center);
+
+    Point vector = p1 - p0;
+    Scalar length = vector.GetLength();
+    Radians angle = Radians(std::atan2(vector.y, vector.x));
+    Matrix rotation = Matrix::MakeRotationZ(angle);
+
+    auto params =
+        UberSDFParameters::MakeLine(paint.color, length, paint.stroke);
+    AddRenderSDFEntityToCurrentPass(paint, params,
+                                    /*shape_transform=*/translation * rotation);
+    return;
+  }
+
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
-
-  if ((renderer_.GetContext()->GetFlags().antialiased_lines ||
-       renderer_.GetContext()->GetFlags().use_sdfs) &&
-      !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
-      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
-    auto contents = LineContents::Make(std::move(geometry), paint.color);
-    entity.SetContents(std::move(contents));
-    AddRenderEntityToCurrentPass(entity, reuse_depth);
-  } else {
-    AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
-                                            /*reuse_depth=*/reuse_depth);
-  }
+  AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
+                                          /*reuse_depth=*/reuse_depth);
 }
 
 void Canvas::DrawDashedLine(const Point& p0,
@@ -2009,10 +2020,17 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   AddRenderEntityToCurrentPass(entity, false);
 }
 
-void Canvas::AddRenderSDFEntityToCurrentPass(const Paint& paint,
-                                             UberSDFParameters params) {
+void Canvas::AddRenderSDFEntityToCurrentPass(
+    const Paint& paint,
+    UberSDFParameters params,
+    std::optional<Matrix> shape_transform) {
+  Matrix transform = GetCurrentTransform();
+  if (shape_transform.has_value()) {
+    transform = transform * shape_transform.value();
+  }
+
   Entity entity;
-  entity.SetTransform(GetCurrentTransform());
+  entity.SetTransform(transform);
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.color_source) {
@@ -2028,8 +2046,17 @@ void Canvas::AddRenderSDFEntityToCurrentPass(const Paint& paint,
   if (paint.color_source) {
     // UberSDF doesn't perform things like gradients so we blend the SDF
     // with the color source.
-    std::shared_ptr<Contents> color_source_contents =
+    std::shared_ptr<ColorSourceContents> color_source_contents =
         paint.CreateContents(renderer_, geom);
+    if (shape_transform.has_value() && color_source_contents) {
+      // The color source is defined in the original coordinate space, but the
+      // shape is rendered in a coordinate system transformed by
+      // shape_transform. We must apply the inverse of shape_transform to the
+      // color source to cancel out the shape's rotation/translation, drawing
+      // the color source in the original coordinate space.
+      color_source_contents->SetEffectTransform(
+          shape_transform.value().Invert());
+    }
     std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
         BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
                             FilterInput::Make(color_source_contents)});

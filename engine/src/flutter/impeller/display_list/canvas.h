@@ -382,8 +382,17 @@ class Canvas {
       bool reuse_depth = false,
       std::shared_ptr<Contents> override_contents = nullptr);
 
-  void AddRenderSDFEntityToCurrentPass(const Paint& paint,
-                                       UberSDFParameters params);
+  /// @brief  Adds a rendering entity using the UberSDF pipeline
+  ///         to the current render pass.
+  ///
+  /// @param  paint            The paint style to apply.
+  /// @param  params           The SDF parameters for the shape.
+  /// @param  shape_transform  An optional transform applied to the shape
+  ///                          relative to the current canvas transform.
+  void AddRenderSDFEntityToCurrentPass(
+      const Paint& paint,
+      UberSDFParameters params,
+      std::optional<Matrix> shape_transform = std::nullopt);
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
