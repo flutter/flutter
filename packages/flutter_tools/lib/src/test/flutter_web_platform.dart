@@ -761,6 +761,7 @@ class BrowserManager {
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
         return stream.map((Object? message) {
+          _logger.printStatus('[CHROME_DIAGNOSTIC] WebSocket message received: $message');
           if (!_closed) {
             _timer.reset();
           }
