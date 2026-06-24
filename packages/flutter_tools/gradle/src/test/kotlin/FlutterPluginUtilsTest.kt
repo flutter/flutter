@@ -52,10 +52,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Configuration for a mock Gradle subproject.
+ *
+ * @property name The name of the subproject.
+ * @property declarativelyAppliedPlugins Plugins applied via the modern Gradle `plugins {}` block.
+ *           For more details, see [Gradle Plugins Block Docs](https://docs.gradle.org/current/userguide/plugins_intermediate.html#sec:plugins_block).
+ * @property imperativelyAppliedPlugins Plugins applied via the legacy Gradle `apply plugin:` statement.
+ *           For more details, see [Gradle Old Plugin Application Docs](https://docs.gradle.org/current/userguide/plugins_intermediate.html#sec:old_plugin_application).
+ */
 private data class SubprojectConfig(
     val name: String,
-    val plugins: List<String> = emptyList(),
-    val legacyPlugins: List<String> = emptyList()
+    val declarativelyAppliedPlugins: List<String> = emptyList(),
+    val imperativelyAppliedPlugins: List<String> = emptyList()
 )
 
 private class TestEnvironment(
@@ -968,26 +977,32 @@ class FlutterPluginUtilsTest {
             private fun createSubproject(
                 tempDir: Path,
                 projectName: String,
-                plugins: List<String> = emptyList(),
-                legacyPlugins: List<String> = emptyList()
+                declarativelyAppliedPlugins: List<String> = emptyList(),
+                imperativelyAppliedPlugins: List<String> = emptyList()
             ): Project {
                 val projectDir = tempDir.resolve(projectName).toFile().apply { mkdirs() }
                 val buildGradleFile =
                     File(projectDir, "build.gradle").apply {
                         createNewFile()
-                        val pluginsBlock =
-                            if (plugins.isNotEmpty()) {
-                                "plugins {\n" + plugins.joinToString("\n") { "    id(\"$it\")" } + "\n}\n"
+                        // Expected output of declarativeBlock if declarativelyAppliedPlugins contains ["kotlin-android"]:
+                        // plugins {
+                        //     id("kotlin-android")
+                        // }
+                        val declarativeBlock =
+                            if (declarativelyAppliedPlugins.isNotEmpty()) {
+                                "plugins {\n" + declarativelyAppliedPlugins.joinToString("\n") { "    id(\"$it\")" } + "\n}\n"
                             } else {
                                 ""
                             }
-                        val legacyBlock =
-                            if (legacyPlugins.isNotEmpty()) {
-                                legacyPlugins.joinToString("\n") { "apply plugin: '$it'" } + "\n"
+                        // Expected output of imperativeBlock if imperativelyAppliedPlugins contains ["kotlin-android"]:
+                        // apply plugin: 'kotlin-android'
+                        val imperativeBlock =
+                            if (imperativelyAppliedPlugins.isNotEmpty()) {
+                                imperativelyAppliedPlugins.joinToString("\n") { "apply plugin: '$it'" } + "\n"
                             } else {
                                 ""
                             }
-                        writeText(pluginsBlock + legacyBlock)
+                        writeText(declarativeBlock + imperativeBlock)
                     }
                 val pluginManager = mockk<PluginManager>(relaxed = true)
                 val project = mockk<Project>()
@@ -1018,8 +1033,8 @@ class FlutterPluginUtilsTest {
                     createSubproject(
                         tempDir = tempDir,
                         projectName = appConfig.name,
-                        plugins = appConfig.plugins,
-                        legacyPlugins = appConfig.legacyPlugins
+                        declarativelyAppliedPlugins = appConfig.declarativelyAppliedPlugins,
+                        imperativelyAppliedPlugins = appConfig.imperativelyAppliedPlugins
                     )
 
                 val pluginProjects =
@@ -1027,8 +1042,8 @@ class FlutterPluginUtilsTest {
                         createSubproject(
                             tempDir = tempDir,
                             projectName = config.name,
-                            plugins = config.plugins,
-                            legacyPlugins = config.legacyPlugins
+                            declarativelyAppliedPlugins = config.declarativelyAppliedPlugins,
+                            imperativelyAppliedPlugins = config.imperativelyAppliedPlugins
                         )
                     }
 
@@ -1068,13 +1083,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    plugins = listOf("com.android.application", "kotlin-android")
+                                    declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        plugins = listOf("com.android.library")
+                                        declarativelyAppliedPlugins = listOf("com.android.library")
                                     )
                                 )
                         )
@@ -1114,13 +1129,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    plugins = listOf("com.android.application")
+                                    declarativelyAppliedPlugins = listOf("com.android.application")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        plugins = listOf("com.android.library", "kotlin-android")
+                                        declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
                                     )
                                 )
                         )
@@ -1163,13 +1178,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    plugins = listOf("com.android.application", "kotlin-android")
+                                    declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        plugins = listOf("com.android.library", "kotlin-android")
+                                        declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
                                     )
                                 )
                         )
@@ -1211,7 +1226,7 @@ class FlutterPluginUtilsTest {
                 }
 
                 @Test
-                fun `logs app and plugin warning when legacy KGP configuration is applied in both app and plugins`(
+                fun `logs app and plugin warning when imperative KGP configuration is applied in both app and plugins`(
                     @TempDir tempDir: Path
                 ) {
                     val testProject =
@@ -1221,7 +1236,7 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    legacyPlugins =
+                                    imperativelyAppliedPlugins =
                                         listOf(
                                             "com.android.application",
                                             "kotlin-android"
@@ -1231,7 +1246,7 @@ class FlutterPluginUtilsTest {
                                 listOf(
                                     SubprojectConfig(
                                         "plugin1",
-                                        legacyPlugins =
+                                        imperativelyAppliedPlugins =
                                             listOf(
                                                 "com.android.library",
                                                 "kotlin-android"
@@ -1239,7 +1254,7 @@ class FlutterPluginUtilsTest {
                                     ),
                                     SubprojectConfig(
                                         "plugin2",
-                                        legacyPlugins =
+                                        imperativelyAppliedPlugins =
                                             listOf(
                                                 "com.android.library",
                                                 "kotlin-android"
@@ -1297,13 +1312,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    legacyPlugins = listOf("com.android.application")
+                                    imperativelyAppliedPlugins = listOf("com.android.application")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        legacyPlugins = listOf("com.android.library")
+                                        imperativelyAppliedPlugins = listOf("com.android.library")
                                     )
                                 )
                         )
@@ -1332,13 +1347,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    plugins = listOf("com.android.application")
+                                    declarativelyAppliedPlugins = listOf("com.android.application")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        plugins = listOf("com.android.library")
+                                        declarativelyAppliedPlugins = listOf("com.android.library")
                                     )
                                 )
                         )
@@ -1380,13 +1395,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    plugins = listOf("com.android.application")
+                                    declarativelyAppliedPlugins = listOf("com.android.application")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        plugins = listOf("com.android.library")
+                                        declarativelyAppliedPlugins = listOf("com.android.library")
                                     )
                                 )
                         )
@@ -1415,13 +1430,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    plugins = listOf("com.android.application", "kotlin-android")
+                                    declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        plugins = listOf("com.android.library", "kotlin-android")
+                                        declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
                                     )
                                 )
                         )
@@ -1449,13 +1464,13 @@ class FlutterPluginUtilsTest {
                             appConfig =
                                 SubprojectConfig(
                                     "app",
-                                    plugins = listOf("com.android.application")
+                                    declarativelyAppliedPlugins = listOf("com.android.application")
                                 ),
                             pluginConfigs =
                                 listOf(
                                     SubprojectConfig(
                                         "plugin",
-                                        plugins = listOf("com.android.library")
+                                        declarativelyAppliedPlugins = listOf("com.android.library")
                                     )
                                 )
                         )
