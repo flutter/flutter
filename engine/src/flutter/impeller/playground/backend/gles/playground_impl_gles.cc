@@ -40,7 +40,7 @@ class GLESPlaygroundEnvironment : public ::testing::Environment {
       shared_context_sdf;
 };
 
-GLESPlaygroundEnvironment* const g_gles_playground_env =
+GLESPlaygroundEnvironment* g_gles_playground_env =
     static_cast<GLESPlaygroundEnvironment*>(
         ::testing::AddGlobalTestEnvironment(new GLESPlaygroundEnvironment()));
 
