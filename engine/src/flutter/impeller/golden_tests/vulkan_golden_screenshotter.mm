@@ -23,7 +23,8 @@ VulkanGoldenScreenshotter::~VulkanGoldenScreenshotter() = default;
 std::unique_ptr<Screenshot> VulkanGoldenScreenshotter::MakeScreenshot(
     const AiksContext& aiks_context,
     const std::shared_ptr<Texture>& texture) {
-  return VulkanScreenshotter::MakeScreenshot(aiks_context.GetContext(), texture);
+  return VulkanScreenshotter::MakeScreenshot(aiks_context.GetContext(),
+                                             texture);
 }
 
 PlaygroundImpl& VulkanGoldenScreenshotter::GetPlayground() {

@@ -7,9 +7,7 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("screenshot") {
   testonly = true
-  sources = [
-    "screenshot.h",
-  ]
+  sources = [ "screenshot.h" ]
 }
 
 if (is_mac) {

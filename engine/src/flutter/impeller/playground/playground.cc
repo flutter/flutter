@@ -107,7 +107,8 @@ static void InitializeGLFWOnce() {
   });
 }
 
-Playground::Playground(PlaygroundSwitches switches) : switches_(switches) {
+Playground::Playground(const PlaygroundSwitches& switches)
+    : switches_(switches) {
   InitializeGLFWOnce();
   flutter::testing::SetupSwiftshaderOnce(switches_.use_swiftshader);
 }
@@ -255,7 +256,8 @@ bool Playground::WriteGoldenImage(const RenderTarget& render_target,
   std::string filename = GetGoldenFilename(postfix);
   // testing::GoldenDigest::Instance()->AddImage(
   //     test_name, filename, screenshot->GetWidth(), screenshot->GetHeight());
-  std::string filenamepath = switches_.golden_output_dir.value() + "/" + filename;
+  std::string filenamepath =
+      switches_.golden_output_dir.value() + "/" + filename;
   if (!screenshot->WriteToPNG(filenamepath)) {
     FML_LOG(ERROR) << "Failed to write screenshot to " << filename;
     return false;

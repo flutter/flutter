@@ -385,8 +385,9 @@ std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
         << "We don't support creating multiple contexts for one test";
     pimpl_->test_vulkan_playground =
         MakeVulkanPlayground(enable_vulkan_validations);
-    pimpl_->screenshotter = std::make_unique<testing::VulkanGoldenScreenshotter>(
-        pimpl_->test_vulkan_playground);
+    pimpl_->screenshotter =
+        std::make_unique<testing::VulkanGoldenScreenshotter>(
+            pimpl_->test_vulkan_playground);
     return pimpl_->test_vulkan_playground->GetContext();
   } else if (GetParam() == PlaygroundBackend::kOpenGLES ||
              GetParam() == PlaygroundBackend::kOpenGLESSDF) {
@@ -394,8 +395,9 @@ std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
         << "We don't support creating multiple contexts for one test";
     bool use_sdfs = (GetParam() == PlaygroundBackend::kOpenGLESSDF);
     pimpl_->test_opengl_playground = MakeOpenGLESPlayground(use_sdfs);
-    pimpl_->screenshotter = std::make_unique<testing::VulkanGoldenScreenshotter>(
-        pimpl_->test_opengl_playground);
+    pimpl_->screenshotter =
+        std::make_unique<testing::VulkanGoldenScreenshotter>(
+            pimpl_->test_opengl_playground);
     return pimpl_->test_opengl_playground->GetContext();
   } else {
     FML_CHECK(false);

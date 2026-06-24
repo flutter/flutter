@@ -12,8 +12,7 @@ namespace testing {
 
 std::unique_ptr<Screenshot> Screenshotter::MakeScreenshot(
     std::shared_ptr<Context>& context,
-    const std::shared_ptr<Texture>& texture)
-{
+    const std::shared_ptr<Texture>& texture) {
   switch (context->GetBackendType()) {
     case Context::BackendType::kMetal:
       return MetalScreenshotter::MakeScreenshot(context, texture);

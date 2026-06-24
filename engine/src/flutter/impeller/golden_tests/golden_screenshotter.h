@@ -5,8 +5,8 @@
 #ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_GOLDEN_SCREENSHOTTER_H_
 #define FLUTTER_IMPELLER_GOLDEN_TESTS_GOLDEN_SCREENSHOTTER_H_
 
-#include "flutter/impeller/testing/screenshot.h"
 #include "flutter/impeller/playground/playground_impl.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "impeller/display_list/aiks_context.h"
 
 namespace impeller {

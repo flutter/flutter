@@ -37,7 +37,7 @@ class Playground {
  public:
   using SinglePassCallback = std::function<bool(RenderPass& pass)>;
 
-  explicit Playground(PlaygroundSwitches switches);
+  explicit Playground(const PlaygroundSwitches& switches);
 
   virtual ~Playground();
 

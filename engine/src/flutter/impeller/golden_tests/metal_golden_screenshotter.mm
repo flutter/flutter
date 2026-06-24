@@ -24,8 +24,7 @@ MetalGoldenScreenshotter::~MetalGoldenScreenshotter() = default;
 
 std::unique_ptr<Screenshot> MetalGoldenScreenshotter::MakeScreenshot(
     const AiksContext& aiks_context,
-    const std::shared_ptr<Texture>& texture)
-{
+    const std::shared_ptr<Texture>& texture) {
   return MetalScreenshotter::MakeScreenshot(aiks_context.GetContext(), texture);
 }
 
@@ -33,5 +32,5 @@ PlaygroundImpl& MetalGoldenScreenshotter::GetPlayground() {
   return *playground_;
 }
 
-}
-}
+}  // namespace testing
+}  // namespace impeller

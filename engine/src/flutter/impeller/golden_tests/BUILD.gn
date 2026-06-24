@@ -50,9 +50,9 @@ if (is_mac) {
     testonly = true
 
     sources = [
+      "golden_screenshotter.h",
       "metal_golden_screenshotter.h",
       "metal_golden_screenshotter.mm",
-      "golden_screenshotter.h",
       "vulkan_golden_screenshotter.h",
       "vulkan_golden_screenshotter.mm",
     ]
