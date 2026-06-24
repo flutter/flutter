@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/linux/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -69,6 +70,46 @@ void main() {
         (globals.logger as BufferLogger).traceText,
         isNot(contains('Running build hooks for ')),
       );
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/187018: a
+  // linux_arm build must hand the build runner a linux/arm target. Before
+  // linux_arm existed, armv7 Linux cross-builds emitted a NativeAssetsManifest
+  // keyed `android_arm`, so at load time the engine's `linux_arm` lookup missed
+  // and FFI/code-asset plugins were silently dropped. Mock the build runner and
+  // assert the OS and architecture carried on the BuildInput.
+  testUsingContext(
+    'linux_arm passes OS linux and architecture arm to the build runner',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      await packageConfig.create(recursive: true);
+
+      BuildInput? capturedInput;
+      await runFlutterSpecificHooks(
+        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        targetPlatform: TargetPlatform.linux_arm,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['foo'],
+          onBuild: (BuildInput input) {
+            capturedInput = input;
+            return const FakeFlutterNativeAssetsBuilderResult();
+          },
+        ),
+        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+        buildDataAssets: true,
+        recordedUsesFile: null,
+      );
+
+      expect(capturedInput, isNotNull, reason: 'build runner should have been invoked');
+      expect(capturedInput!.config.code.targetOS, OS.linux);
+      expect(capturedInput!.config.code.targetArchitecture, Architecture.arm);
     },
   );
 
