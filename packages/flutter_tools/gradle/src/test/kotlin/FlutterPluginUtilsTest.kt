@@ -1053,81 +1053,23 @@ class FlutterPluginUtilsTest {
             fun `logs app warning when KGP is only applied in app`(
                 @TempDir tempDir: Path
             ) {
-                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-                val appBuildGradleFile =
-                    File(appDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.application")
-                                id("kotlin-android")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-                val pluginBuildGradleFile =
-                    File(pluginDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.library")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val rootProject = mockk<Project>()
-                val mockGradle = mockk<Gradle>()
-                val mockLogger = mockk<Logger>(relaxed = true)
-
-                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
-                val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
-
-                val appProject =
-                    createMockSubproject(
+                val testProject =
+                    setupTest(
                         tempDir = tempDir,
-                        buildFile = appBuildGradleFile,
-                        projectName = "app",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
+                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
                     )
 
-                val pluginProject =
-                    createMockSubproject(
-                        tempDir = tempDir,
-                        buildFile = pluginBuildGradleFile,
-                        projectName = "plugin",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
-                    )
+                val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                val appPluginManager = testProject.appPluginManager
+                val plugin1Manager = testProject.plugin1Manager
 
-                val subprojectsActionSlot = slot<Action<Project>>()
-                val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
-
-                every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
-                every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
-
-                detectApplyingKotlinGradlePlugin(appProject)
-
-                verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
-                subprojectsActionSlot.captured.execute(appProject)
-                subprojectsActionSlot.captured.execute(pluginProject)
-
-                verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
-                projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                executeDetectApplyingKotlinGradlePlugin(testProject)
 
                 verify {
                     mockLogger.error(
                         """
-                        WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
+                        WARNING: Your Android app project: app located at: $appBuildFilePath
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                         Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
@@ -1138,84 +1080,25 @@ class FlutterPluginUtilsTest {
                 verify(exactly = 0) {
                     mockLogger.error(match { it.contains("Your app uses the following plugins") })
                 }
-                verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 1) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
             }
 
             @Test
             fun `logs plugin warning when KGP is only applied in one plugin`(
                 @TempDir tempDir: Path
             ) {
-                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-                val appBuildGradleFile =
-                    File(appDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.application")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-                val pluginBuildGradleFile =
-                    File(pluginDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.library")
-                                id("kotlin-android")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val rootProject = mockk<Project>()
-                val mockGradle = mockk<Gradle>()
-                val mockLogger = mockk<Logger>(relaxed = true)
-
-                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
-                val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
-
-                val appProject =
-                    createMockSubproject(
+                val testProject =
+                    setupTest(
                         tempDir = tempDir,
-                        buildFile = appBuildGradleFile,
-                        projectName = "app",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
+                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
                     )
 
-                val pluginProject =
-                    createMockSubproject(
-                        tempDir = tempDir,
-                        buildFile = pluginBuildGradleFile,
-                        projectName = "plugin",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
-                    )
+                val appPluginManager = testProject.appPluginManager
+                val plugin1Manager = testProject.plugin1Manager
 
-                val subprojectsActionSlot = slot<Action<Project>>()
-                val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
-
-                every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
-                every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
-
-                detectApplyingKotlinGradlePlugin(appProject)
-
-                verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
-                subprojectsActionSlot.captured.execute(appProject)
-                subprojectsActionSlot.captured.execute(pluginProject)
-
-                verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
-                projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                executeDetectApplyingKotlinGradlePlugin(testProject)
 
                 verify {
                     mockLogger.error(
@@ -1235,90 +1118,31 @@ class FlutterPluginUtilsTest {
                 verify(exactly = 0) {
                     mockLogger.error(match { it.contains("Your Android app project") })
                 }
-                verify(exactly = 1) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
             }
 
             @Test
             fun `logs app and plugin warning when KGP is applied in both app and plugins`(
                 @TempDir tempDir: Path
             ) {
-                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-                val appBuildGradleFile =
-                    File(appDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.application")
-                                id("kotlin-android")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-                val pluginBuildGradleFile =
-                    File(pluginDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.library")
-                                id("kotlin-android")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val rootProject = mockk<Project>()
-                val mockGradle = mockk<Gradle>()
-                val mockLogger = mockk<Logger>(relaxed = true)
-
-                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
-                val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
-
-                val appProject =
-                    createMockSubproject(
+                val testProject =
+                    setupTest(
                         tempDir = tempDir,
-                        buildFile = appBuildGradleFile,
-                        projectName = "app",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
+                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
                     )
 
-                val pluginProject =
-                    createMockSubproject(
-                        tempDir = tempDir,
-                        buildFile = pluginBuildGradleFile,
-                        projectName = "plugin",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
-                    )
+                val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                val appPluginManager = testProject.appPluginManager
+                val plugin1Manager = testProject.plugin1Manager
 
-                val subprojectsActionSlot = slot<Action<Project>>()
-                val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
-
-                every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
-                every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
-
-                detectApplyingKotlinGradlePlugin(appProject)
-
-                verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
-                subprojectsActionSlot.captured.execute(appProject)
-                subprojectsActionSlot.captured.execute(pluginProject)
-
-                verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
-                projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                executeDetectApplyingKotlinGradlePlugin(testProject)
 
                 verify {
                     mockLogger.error(
                         """
-                        WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
+                        WARNING: Your Android app project: app located at: $appBuildFilePath
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                         Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
@@ -1341,99 +1165,36 @@ class FlutterPluginUtilsTest {
                     )
                 }
 
-                verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
             }
 
             @Test
             fun `logs app and plugin warning when legacy KGP configuration is applied in both app and plugins`(
                 @TempDir tempDir: Path
             ) {
-                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-                val appBuildGradleFile =
-                    File(appDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            apply plugin: 'com.android.application'
-                            apply plugin: 'kotlin-android'
-                            """.trimIndent()
-                        )
-                    }
-
-                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-                val pluginBuildGradleFile =
-                    File(pluginDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            apply plugin: 'com.android.library'
-                            apply plugin: 'kotlin-android'
-                            """.trimIndent()
-                        )
-                    }
-
-                val rootProject = mockk<Project>()
-                val mockGradle = mockk<Gradle>()
-                val mockLogger = mockk<Logger>(relaxed = true)
-
-                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
-                val pluginProjectOnePluginManager = mockk<PluginManager>(relaxed = true)
-                val pluginProjectTwoPluginManager = mockk<PluginManager>(relaxed = true)
-
-                val appProject =
-                    createMockSubproject(
+                val testProject =
+                    setupTest(
                         tempDir = tempDir,
-                        buildFile = appBuildGradleFile,
-                        projectName = "app",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        appConfig = SubprojectConfig("app", legacyPlugins = listOf("com.android.application", "kotlin-android")),
+                        pluginConfigs =
+                            listOf(
+                                SubprojectConfig("plugin1", legacyPlugins = listOf("com.android.library", "kotlin-android")),
+                                SubprojectConfig("plugin2", legacyPlugins = listOf("com.android.library", "kotlin-android"))
+                            )
                     )
 
-                val pluginProjectOne =
-                    createMockSubproject(
-                        tempDir = tempDir,
-                        buildFile = pluginBuildGradleFile,
-                        projectName = "plugin1",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = pluginProjectOnePluginManager
-                    )
+                val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                val appPluginManager = testProject.appPluginManager
+                val plugin1Manager = testProject.plugin1Manager
+                val plugin2Manager = testProject.plugin2Manager
 
-                val pluginProjectTwo =
-                    createMockSubproject(
-                        tempDir = tempDir,
-                        buildFile = pluginBuildGradleFile,
-                        projectName = "plugin2",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = pluginProjectTwoPluginManager
-                    )
-
-                val subprojectsActionSlot = slot<Action<Project>>()
-                val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
-
-                every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
-                every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
-
-                detectApplyingKotlinGradlePlugin(appProject)
-
-                verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
-                subprojectsActionSlot.captured.execute(appProject)
-                subprojectsActionSlot.captured.execute(pluginProjectOne)
-                subprojectsActionSlot.captured.execute(pluginProjectTwo)
-
-                verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
-                projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                executeDetectApplyingKotlinGradlePlugin(testProject)
 
                 verify {
                     mockLogger.error(
                         """
-                        WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
+                        WARNING: Your Android app project: app located at: $appBuildFilePath
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                         Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
@@ -1456,9 +1217,9 @@ class FlutterPluginUtilsTest {
                     )
                 }
 
-                verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectOnePluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectTwoPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
+                verify(exactly = 0) { plugin2Manager.apply("kotlin-android") }
             }
 
             @Test
