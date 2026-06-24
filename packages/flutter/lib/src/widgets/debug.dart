@@ -8,6 +8,7 @@
 ///
 /// @docImport 'binding.dart';
 /// @docImport 'focus_manager.dart';
+/// @docImport 'focus_scope.dart';
 /// @docImport 'widget_inspector.dart';
 library;
 
@@ -187,6 +188,9 @@ bool debugHighlightDeprecatedWidgets = false;
 ///  * Yellow: the node skips focus traversal ([FocusNode.skipTraversal] is true)
 ///    but can still receive focus directly.
 ///  * Red: the node cannot receive focus ([FocusNode.canRequestFocus] is false).
+///
+/// Enabling this causes [Focus] widgets to wrap their children with a widget,
+/// which can cause state loss if the child is a stateful widget that isn't keyed.
 ///
 /// This has no effect in release builds.
 ///
