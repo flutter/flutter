@@ -186,7 +186,9 @@ impeller::vk::ImageView EmbedderExternalTextureSourceVulkan::GetImageView()
 
 // |TextureSourceVK|
 impeller::vk::ImageView
-EmbedderExternalTextureSourceVulkan::GetRenderTargetView() const {
+EmbedderExternalTextureSourceVulkan::GetRenderTargetView(
+    uint32_t mip_level,
+    uint32_t array_layer) const {
   return texture_image_view_.get();
 }
 
