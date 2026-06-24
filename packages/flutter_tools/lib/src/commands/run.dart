@@ -224,6 +224,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addOption(
+        'log-filter',
+        help: 'Only show log lines matching this string or regular expression.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -288,6 +292,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @visibleForTesting
   @protected
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
+    final String? logFilter = stringArg('log-filter');
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
         featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
@@ -330,6 +335,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableHcpp: enableHcpp,
         testFlag: testFlag,
         traceSystrace: traceSystrace,
+        logFilter: logFilter,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -395,6 +401,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableHcpp: enableHcpp,
         webDevServerConfig: webDevServerConfig,
         testFlag: testFlag,
+        logFilter: logFilter,
       );
     }
   }
@@ -683,6 +690,14 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
+    final String? logFilter = stringArg('log-filter');
+    if (logFilter != null && logFilter.isNotEmpty) {
+      try {
+        RegExp(logFilter);
+      } on FormatException catch (e) {
+        throwToolExit('Invalid RegExp pattern for --log-filter: ${e.message}');
+      }
+    }
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication) {

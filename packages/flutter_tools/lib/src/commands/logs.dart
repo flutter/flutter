@@ -19,6 +19,10 @@ class LogsCommand extends FlutterCommand {
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
     );
+    argParser.addOption(
+      'log-filter',
+      help: 'Only show log lines matching this string or regular expression.',
+    );
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
@@ -44,6 +48,14 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+    final String? filter = stringArg('log-filter');
+    if (filter != null && filter.isNotEmpty) {
+      try {
+        RegExp(filter);
+      } on FormatException catch (e) {
+        throwToolExit('Invalid RegExp pattern for --log-filter: ${e.message}');
+      }
+    }
     device = await findTargetDevice(includeDevicesUnsupportedByProject: true);
     if (device == null) {
       throwToolExit(null);
@@ -77,9 +89,16 @@ class LogsCommand extends FlutterCommand {
       exitCompleter.complete(exitCode);
     }
 
+    final String? filter = stringArg('log-filter');
+    final RegExp? regExp = filter != null && filter.isNotEmpty ? RegExp(filter) : null;
+
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => globals.printStatus(message, wrap: false),
+      (String message) {
+        if (regExp == null || regExp.hasMatch(message)) {
+          globals.printStatus(message, wrap: false);
+        }
+      },
       onDone: () => maybeComplete(),
       onError: (dynamic error) => maybeComplete(error is int ? error : 1),
     );

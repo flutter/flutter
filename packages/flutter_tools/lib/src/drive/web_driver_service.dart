@@ -88,6 +88,7 @@ class WebDriverService extends DriverService {
               webDevServerConfig: debuggingOptions.webDevServerConfig,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
+              logFilter: debuggingOptions.logFilter,
             )
           : DebuggingOptions.enabled(
               buildInfo,
@@ -95,6 +96,7 @@ class WebDriverService extends DriverService {
               disablePortPublication: debuggingOptions.disablePortPublication,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
+              logFilter: debuggingOptions.logFilter,
             ),
       platformArgs: platformArgs,
       stayResident: true,
