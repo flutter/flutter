@@ -79,11 +79,11 @@ TEST(FlDartProjectTest, DartEntrypointArgs) {
 
 TEST(FlDartProjectTest, EnableImpeller) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
-  EXPECT_FALSE(fl_dart_project_get_enable_impeller(project));
-
-  fl_dart_project_set_enable_impeller(project, TRUE);
   EXPECT_TRUE(fl_dart_project_get_enable_impeller(project));
 
   fl_dart_project_set_enable_impeller(project, FALSE);
   EXPECT_FALSE(fl_dart_project_get_enable_impeller(project));
+
+  fl_dart_project_set_enable_impeller(project, TRUE);
+  EXPECT_TRUE(fl_dart_project_get_enable_impeller(project));
 }
