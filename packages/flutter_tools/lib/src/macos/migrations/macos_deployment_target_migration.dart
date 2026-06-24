@@ -34,36 +34,27 @@ class MacOSDeploymentTargetMigration extends ProjectMigrator {
 
   @override
   String? migrateLine(String line) {
-    // Xcode project file changes.
-    const deploymentTargetOriginal1011 = 'MACOSX_DEPLOYMENT_TARGET = 10.11;';
-    const deploymentTargetOriginal1013 = 'MACOSX_DEPLOYMENT_TARGET = 10.13;';
-    const deploymentTargetOriginal1014 = 'MACOSX_DEPLOYMENT_TARGET = 10.14;';
+    final targetVersionRegex = RegExp(r'MACOSX_DEPLOYMENT_TARGET = (10\.\d+|11\.\d+);');
+    final podfilePlatformVersionRegex = RegExp(r"platform :osx, '(10\.\d+|11\.\d+)'");
 
-    // Podfile changes.
-    const podfilePlatformVersionOriginal1011 = "platform :osx, '10.11'";
-    const podfilePlatformVersionOriginal1013 = "platform :osx, '10.13'";
-    const podfilePlatformVersionOriginal1014 = "platform :osx, '10.14'";
+    final bool hasTargetVersion = targetVersionRegex.hasMatch(line);
+    final bool hasPodfileVersion = podfilePlatformVersionRegex.hasMatch(line);
 
-    if (line.contains(deploymentTargetOriginal1011) ||
-        line.contains(deploymentTargetOriginal1013) ||
-        line.contains(deploymentTargetOriginal1014) ||
-        line.contains(podfilePlatformVersionOriginal1011) ||
-        line.contains(podfilePlatformVersionOriginal1013) ||
-        line.contains(podfilePlatformVersionOriginal1014)) {
+    if (hasTargetVersion || hasPodfileVersion) {
       if (!migrationRequired) {
-        // Only print for the first discovered change found.
-        logger.printStatus('Updating minimum macOS deployment target to 10.15.');
+        logger.printStatus('Updating minimum macOS deployment target to 12.0.');
       }
 
-      const deploymentTargetReplacement = 'MACOSX_DEPLOYMENT_TARGET = 10.15;';
-      const podfilePlatformVersionReplacement = "platform :osx, '10.15'";
-      return line
-          .replaceAll(deploymentTargetOriginal1011, deploymentTargetReplacement)
-          .replaceAll(deploymentTargetOriginal1013, deploymentTargetReplacement)
-          .replaceAll(deploymentTargetOriginal1014, deploymentTargetReplacement)
-          .replaceAll(podfilePlatformVersionOriginal1011, podfilePlatformVersionReplacement)
-          .replaceAll(podfilePlatformVersionOriginal1013, podfilePlatformVersionReplacement)
-          .replaceAll(podfilePlatformVersionOriginal1014, podfilePlatformVersionReplacement);
+      if (hasTargetVersion) {
+        return line.replaceAllMapped(targetVersionRegex, (Match match) {
+          return 'MACOSX_DEPLOYMENT_TARGET = 12.0;';
+        });
+      }
+      if (hasPodfileVersion) {
+        return line.replaceAllMapped(podfilePlatformVersionRegex, (Match match) {
+          return "platform :osx, '12.0'";
+        });
+      }
     }
 
     return line;
