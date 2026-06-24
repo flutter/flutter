@@ -9,7 +9,7 @@
 #include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
 #include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/impeller/geometry/round_rect.h"
-#include "flutter/impeller/golden_tests/screenshot.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 

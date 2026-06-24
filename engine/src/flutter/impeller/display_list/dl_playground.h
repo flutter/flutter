@@ -7,7 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
-#include "flutter/impeller/golden_tests/screenshot.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "impeller/playground/playground_test.h"
 #include "third_party/skia/include/core/SkFont.h"
 

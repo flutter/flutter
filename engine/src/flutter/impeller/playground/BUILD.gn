@@ -22,6 +22,7 @@ impeller_component("playground") {
   deps = [
     "../renderer/backend",
     "//flutter/testing:test_swiftshader_utils",
+    "//flutter/impeller/testing:metal_screenshot",
   ]
 
   if (impeller_enable_metal) {

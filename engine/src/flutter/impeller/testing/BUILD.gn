@@ -1,0 +1,39 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("screenshot") {
+  testonly = true
+  sources = [
+    "screenshot.h",
+  ]
+}
+
+if (is_mac) {
+  impeller_component("metal_screenshot") {
+    testonly = true
+
+    sources = [
+      "metal/metal_screenshot.h",
+      "metal/metal_screenshot.mm",
+      "metal/metal_screenshotter.h",
+      "metal/metal_screenshotter.mm",
+      "screenshotter.cc",
+      "screenshotter.h",
+      "vulkan/vulkan_screenshotter.h",
+      "vulkan/vulkan_screenshotter.mm",
+    ]
+
+    deps = [
+      ":screenshot",
+      "//flutter/display_list",
+      "//flutter/fml",
+      "//flutter/impeller/display_list",
+      "//flutter/impeller/renderer/backend/metal",
+      "//flutter/impeller/renderer/backend/vulkan",
+    ]
+  }
+}

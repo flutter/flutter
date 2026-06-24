@@ -15,6 +15,7 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/runtime_stage/runtime_stage.h"
+#include "third_party/googletest/googletest/include/gtest/gtest.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
@@ -31,6 +32,7 @@
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/testing/screenshotter.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui.h"
 
@@ -43,6 +45,25 @@
 #endif  // IMPELLER_ENABLE_VULKAN
 
 namespace impeller {
+
+namespace {
+std::string GetTestName() {
+  std::string suite_name =
+      ::testing::UnitTest::GetInstance()->current_test_suite()->name();
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  std::stringstream ss;
+  ss << "impeller_" << suite_name << "_" << test_name;
+  std::string result = ss.str();
+  // Make sure there are no slashes in the test name.
+  std::replace(result.begin(), result.end(), '/', '_');
+  return result;
+}
+
+std::string GetGoldenFilename(const std::string& postfix = "") {
+  return GetTestName() + postfix + ".png";
+}
+}  // namespace
 
 std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   switch (backend) {
@@ -209,23 +230,76 @@ void Playground::SetCursorPosition(Point pos) {
   cursor_position_ = pos;
 }
 
+bool Playground::ShouldWriteGoldenImage() {
+  return should_write_golden_;
+}
+
+void Playground::SetEnableWriteGolden(bool write_golden) {
+  should_write_golden_ = write_golden;
+}
+
+bool Playground::WriteGoldenImage(const RenderTarget& render_target,
+                                  const std::string& postfix) {
+  if (!switches_.golden_output_dir.has_value()) {
+    return true;
+  }
+  std::shared_ptr<Context> context = GetContext();
+  std::unique_ptr<testing::Screenshot> screenshot =
+      testing::Screenshotter::MakeScreenshot(
+          context, render_target.GetRenderTargetTexture());
+  if (!screenshot || !screenshot->GetBytes()) {
+    FML_LOG(ERROR) << "Failed to collect screenshot for test " << GetTestName();
+    return false;
+  }
+  std::string test_name = GetTestName();
+  std::string filename = GetGoldenFilename(postfix);
+  // testing::GoldenDigest::Instance()->AddImage(
+  //     test_name, filename, screenshot->GetWidth(), screenshot->GetHeight());
+  std::string filenamepath = switches_.golden_output_dir.value() + "/" + filename;
+  if (!screenshot->WriteToPNG(filenamepath)) {
+    FML_LOG(ERROR) << "Failed to write screenshot to " << filename;
+    return false;
+  }
+  return true;
+}
+
 bool Playground::OpenPlaygroundHere(
     const Playground::RenderCallback& render_callback) {
   if (!render_callback) {
     return true;
   }
 
-  if (!switches_.enable_playground) {
-    std::unique_ptr<Surface> surface = impl_->AcquireSurfaceFrame(context_);
-    if (!surface) {
-      return false;
-    }
-    RenderTarget render_target = surface->GetRenderTarget();
-    if (render_callback(render_target)) {
-      return impl_->GetContext()->FlushCommandBuffers();
-    }
+  auto window = reinterpret_cast<GLFWwindow*>(impl_->GetWindowHandle());
+  if (!window) {
     return false;
   }
+  ::glfwSetWindowSize(window, GetWindowSize().width, GetWindowSize().height);
+
+  std::unique_ptr<Surface> surface = impl_->AcquireSurfaceFrame(context_);
+  if (!surface) {
+    return false;
+  }
+  RenderTarget render_target = surface->GetRenderTarget();
+
+  bool writing_golden =
+      switches_.golden_output_dir.has_value() && should_write_golden_;
+  if (!switches_.enable_playground || writing_golden) {
+    if (!render_callback(render_target) ||
+        !impl_->GetContext()->FlushCommandBuffers()) {
+      return false;
+    }
+    if (writing_golden) {
+      if (!render_callback(render_target) ||
+          !impl_->GetContext()->FlushCommandBuffers()) {
+        return false;
+      }
+      return WriteGoldenImage(render_target);
+    }
+    if (!switches_.enable_playground) {
+      return true;
+    }
+  }
+  FML_CHECK(switches_.enable_playground);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -238,10 +312,6 @@ bool Playground::OpenPlaygroundHere(
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   io.ConfigWindowsResizeFromEdges = true;
 
-  auto window = reinterpret_cast<GLFWwindow*>(impl_->GetWindowHandle());
-  if (!window) {
-    return false;
-  }
   ::glfwSetWindowTitle(window, GetWindowTitle().c_str());
   ::glfwSetWindowUserPointer(window, this);
   ::glfwSetWindowSizeCallback(
@@ -269,7 +339,6 @@ bool Playground::OpenPlaygroundHere(
 
   ImGui::SetNextWindowPos({10, 10});
 
-  ::glfwSetWindowSize(window, GetWindowSize().width, GetWindowSize().height);
   ::glfwSetWindowPos(window, 200, 100);
   ::glfwShowWindow(window);
 
@@ -284,9 +353,6 @@ bool Playground::OpenPlaygroundHere(
     }
 
     ImGui_ImplGlfw_NewFrame();
-
-    auto surface = impl_->AcquireSurfaceFrame(context_);
-    RenderTarget render_target = surface->GetRenderTarget();
 
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(),

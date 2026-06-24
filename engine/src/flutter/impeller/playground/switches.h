@@ -33,6 +33,11 @@ struct PlaygroundSwitches {
   ///
   bool use_angle = false;
 
+  /// If true then the results of the first rendered image of the playground
+  /// test will be written to the directory indicated by the working_dir
+  /// command line switch.
+  std::optional<std::string> golden_output_dir;
+
   bool enable_wide_gamut = false;
 
   Flags flags;

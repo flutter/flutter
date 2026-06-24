@@ -68,8 +68,16 @@ void PlaygroundTest::SetUp() {
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines/") != std::string::npos;
 
+  // If the test suite is a golden test suite, set the test to write
+  // goldens by default (this can still be overridden by the test calling
+  // |SetEnableWriteGolden| itself).
+  SetEnableWriteGolden(IsGoldenTestSuite());
   SetupContext(GetParam(), switches);
   SetupWindow();
+}
+
+bool PlaygroundTest::IsGoldenTestSuite() const {
+  return false;
 }
 
 PlaygroundBackend PlaygroundTest::GetBackend() const {

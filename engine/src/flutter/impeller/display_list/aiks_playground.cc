@@ -27,6 +27,10 @@ void AiksPlayground::TearDown() {
   PlaygroundTest::TearDown();
 }
 
+bool AiksPlaygroundWithGoldens::IsGoldenTestSuite() const {
+  return true;
+}
+
 bool AiksPlayground::OpenPlaygroundHere(
     const sk_sp<flutter::DisplayList>& list) {
   return OpenPlaygroundHere([list]() { return list; });

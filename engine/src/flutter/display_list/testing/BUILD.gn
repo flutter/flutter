@@ -76,7 +76,7 @@ source_set("display_list_surface_provider") {
   ]
 
   if (is_mac) {
-    deps += [ "//flutter/impeller/golden_tests:metal_screenshot" ]
+    deps += [ "//flutter/impeller/testing:metal_screenshot", ]
   }
 
   public_configs = [ ":surface_provider_config" ]
@@ -123,6 +123,8 @@ source_set("display_list_surface_provider") {
       deps += [
         "//flutter/impeller/display_list",
         "//flutter/impeller/playground",
+        "//flutter/impeller/testing:metal_screenshot",
+        "//flutter/impeller/testing:screenshot",
       ]
     }
     deps += [ "//flutter/testing:metal" ]

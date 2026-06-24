@@ -10,7 +10,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_context.h"
-#include "flutter/impeller/golden_tests/screenshot.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
@@ -97,7 +97,13 @@ class GoldenPlaygroundTest
 
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
-  bool IsGoldenTest() const { return true; }
+  /// @brief Sets a particular test to either write a golden or not.
+  ///
+  /// For purposes of the GoldenPlayground test harness, we don't maintain
+  /// a flag for this status, all tests are assumed to be golden tests and
+  /// passing false here means we should just skip this test entirely
+  /// (enforced in the implementation with a GTEST_SKIP).
+  void SetEnableWriteGolden(bool write_golden);
 
   bool IsPlaygroundEnabled() const { return false; }
 

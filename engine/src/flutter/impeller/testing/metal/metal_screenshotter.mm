@@ -2,28 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/golden_tests/metal_screenshotter.h"
+#include "flutter/impeller/testing/metal/metal_screenshotter.h"
 
 #include <CoreImage/CoreImage.h>
 #include "impeller/renderer/backend/metal/context_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #define GLFW_INCLUDE_NONE
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "third_party/glfw/include/GLFW/glfw3.h"
+#include "flutter/impeller/testing/metal/metal_screenshot.h"
 
 namespace impeller {
 namespace testing {
 
-MetalScreenshotter::MetalScreenshotter(const PlaygroundSwitches& switches) {
-  FML_CHECK(::glfwInit() == GLFW_TRUE);
-  playground_ = PlaygroundImpl::Create(PlaygroundBackend::kMetal, switches);
-}
+MetalScreenshotter::MetalScreenshotter() {}
 
 std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     const AiksContext& aiks_context,
-    const std::shared_ptr<Texture> texture) {
+    const std::shared_ptr<Texture>& texture) {
+  return MakeScreenshot(aiks_context.GetContext(), texture);
+}
+
+std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
   @autoreleasepool {
-    std::shared_ptr<Context> context = aiks_context.GetContext();
     fml::AutoResetWaitableEvent latch;
     if (auto cmd_buffer = context->CreateCommandBuffer()) {
       if (context->GetCommandQueue()
