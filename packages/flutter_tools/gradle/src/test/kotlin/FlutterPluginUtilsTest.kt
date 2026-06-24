@@ -1018,9 +1018,9 @@ class FlutterPluginUtilsTest {
 
             private fun setupTest(
                 tempDir: Path,
-                agpVersion: AndroidPluginVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
-                appConfig: SubprojectConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
-                pluginConfigs: List<SubprojectConfig> = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
+                agpVersion: AndroidPluginVersion,
+                appConfig: SubprojectConfig,
+                pluginConfigs: List<SubprojectConfig>
             ): TestEnvironment {
                 every { VersionFetcher.getAGPVersion(any()) } returns agpVersion
 
