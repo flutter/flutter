@@ -1049,284 +1049,409 @@ class FlutterPluginUtilsTest {
                 testProject.projectsEvaluatedActionSlot.captured.execute(mockGradle)
             }
 
-            @Test
-            fun `logs app warning when KGP is only applied in app`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
-                    )
+            @Nested
+            inner class TestLogWarningsWhenAGPis9OrHigher {
+                @Test
+                fun `logs app warning when KGP is only applied in app`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            appConfig =
+                                SubprojectConfig(
+                                    "app",
+                                    plugins = listOf("com.android.application", "kotlin-android")
+                                ),
+                            pluginConfigs =
+                                listOf(
+                                    SubprojectConfig(
+                                        "plugin",
+                                        plugins = listOf("com.android.library")
+                                    )
+                                )
+                        )
 
-                val appBuildFilePath = testProject.appProject.buildFile.absolutePath
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
+                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
 
-                executeDetectApplyingKotlinGradlePlugin(testProject)
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
 
-                verify {
-                    mockLogger.error(
-                        """
-                        WARNING: Your Android app project: app located at: $appBuildFilePath
-                        applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
-                        Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
+                    verify {
+                        mockLogger.error(
+                            """
+                            WARNING: Your Android app project: app located at: $appBuildFilePath
+                            applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
+                            Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
-                        """.trimIndent()
-                    )
+                            """.trimIndent()
+                        )
+                    }
+
+                    verify(exactly = 0) {
+                        mockLogger.error(match { it.contains("Your app uses the following plugins") })
+                    }
+                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                 }
 
-                verify(exactly = 0) {
-                    mockLogger.error(match { it.contains("Your app uses the following plugins") })
+                @Test
+                fun `logs plugin warning when KGP is only applied in one plugin`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            appConfig =
+                                SubprojectConfig(
+                                    "app",
+                                    plugins = listOf("com.android.application")
+                                ),
+                            pluginConfigs =
+                                listOf(
+                                    SubprojectConfig(
+                                        "plugin",
+                                        plugins = listOf("com.android.library", "kotlin-android")
+                                    )
+                                )
+                        )
+
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                    verify {
+                        mockLogger.error(
+                            """
+                            WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin
+                            Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+                            Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+                            If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+                            an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+
+                            If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
+                            """.trimIndent()
+                        )
+                    }
+
+                    verify(exactly = 0) {
+                        mockLogger.error(match { it.contains("Your Android app project") })
+                    }
+                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
                 }
-                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+
+                @Test
+                fun `logs app and plugin warning when KGP is applied in both app and plugins`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            appConfig =
+                                SubprojectConfig(
+                                    "app",
+                                    plugins = listOf("com.android.application", "kotlin-android")
+                                ),
+                            pluginConfigs =
+                                listOf(
+                                    SubprojectConfig(
+                                        "plugin",
+                                        plugins = listOf("com.android.library", "kotlin-android")
+                                    )
+                                )
+                        )
+
+                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                    verify {
+                        mockLogger.error(
+                            """
+                            WARNING: Your Android app project: app located at: $appBuildFilePath
+                            applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
+                            Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
+
+                            """.trimIndent()
+                        )
+                    }
+
+                    verify {
+                        mockLogger.error(
+                            """
+                            WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin
+                            Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+                            Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+                            If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+                            an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+
+                            If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
+                            """.trimIndent()
+                        )
+                    }
+
+                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
+                }
+
+                @Test
+                fun `logs app and plugin warning when legacy KGP configuration is applied in both app and plugins`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            appConfig =
+                                SubprojectConfig(
+                                    "app",
+                                    legacyPlugins = listOf("com.android.application", "kotlin-android")
+                                ),
+                            pluginConfigs =
+                                listOf(
+                                    SubprojectConfig(
+                                        "plugin1",
+                                        legacyPlugins =
+                                            listOf(
+                                                "com.android.library",
+                                                "kotlin-android"
+                                            )
+                                    ),
+                                    SubprojectConfig(
+                                        "plugin2",
+                                        legacyPlugins =
+                                            listOf(
+                                                "com.android.library",
+                                                "kotlin-android"
+                                            )
+                                    )
+                                )
+                        )
+
+                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+                    val plugin2Manager = testProject.plugin2Manager
+
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                    verify {
+                        mockLogger.error(
+                            """
+                            WARNING: Your Android app project: app located at: $appBuildFilePath
+                            applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
+                            Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
+
+                            """.trimIndent()
+                        )
+                    }
+
+                    verify {
+                        mockLogger.error(
+                            """
+                            WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin1, plugin2
+                            Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+                            Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+                            If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+                            an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+
+                            If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
+                            """.trimIndent()
+                        )
+                    }
+
+                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
+                    verify(exactly = 0) { plugin2Manager.apply("kotlin-android") }
+                }
+
+                @Test
+                fun `does not log when migrated to Built-in Kotlin`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            appConfig =
+                                SubprojectConfig(
+                                    "app",
+                                    legacyPlugins = listOf("com.android.application")
+                                ),
+                            pluginConfigs =
+                                listOf(
+                                    SubprojectConfig(
+                                        "plugin",
+                                        legacyPlugins = listOf("com.android.library")
+                                    )
+                                )
+                        )
+
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                    verify(exactly = 0) {
+                        mockLogger.error(any())
+                    }
+
+                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                }
+
+                @Test
+                fun `logs KGP warning when KGP attempts to but fails to apply`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            appConfig =
+                                SubprojectConfig(
+                                    "app",
+                                    plugins = listOf("com.android.application")
+                                ),
+                            pluginConfigs =
+                                listOf(
+                                    SubprojectConfig(
+                                        "plugin",
+                                        plugins = listOf("com.android.library")
+                                    )
+                                )
+                        )
+
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+
+                    every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                    every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                    verify(exactly = 0) {
+                        mockLogger.error(any())
+                    }
+
+                    verify {
+                        mockLogger.quiet(
+                            """
+                            Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
+                            If your project uses Kotlin, ensure KGP is declared in the root plugins block.
+                            For more details check: $BUILT_IN_KOTLIN_DOCS
+                            """.trimIndent()
+                        )
+                    }
+                }
             }
 
-            @Test
-            fun `logs plugin warning when KGP is only applied in one plugin`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
-                    )
+            @Nested
+            inner class TestLogWarningsWhenAGPIsLessThan9 {
+                @Test
+                fun `does not log warnings when migrated to built-in kotlin`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(8, 0, 0),
+                            appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
+                            pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
+                        )
 
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
 
-                executeDetectApplyingKotlinGradlePlugin(testProject)
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
 
-                verify {
-                    mockLogger.error(
-                        """
-                        WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin
-                        Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+                    // No warnings should be logged because AGP version is < 9.
+                    verify(exactly = 0) { mockLogger.error(any()) }
 
-                        Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
-                        If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
-                        an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
-
-                        If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
-                        """.trimIndent()
-                    )
+                    // KGP is still applied in case the entire project has been migrated.
+                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                 }
 
-                verify(exactly = 0) {
-                    mockLogger.error(match { it.contains("Your Android app project") })
-                }
-                verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
-            }
+                @Test
+                fun `does not log warnings when KGP is applied`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(8, 0, 0),
+                            appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
+                            pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
+                        )
 
-            @Test
-            fun `logs app and plugin warning when KGP is applied in both app and plugins`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
-                    )
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
 
-                val appBuildFilePath = testProject.appProject.buildFile.absolutePath
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
 
-                executeDetectApplyingKotlinGradlePlugin(testProject)
+                    // No warnings should be logged because AGP version is < 9.
+                    verify(exactly = 0) { mockLogger.error(any()) }
 
-                verify {
-                    mockLogger.error(
-                        """
-                        WARNING: Your Android app project: app located at: $appBuildFilePath
-                        applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
-                        Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
-
-                        """.trimIndent()
-                    )
+                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
                 }
 
-                verify {
-                    mockLogger.error(
-                        """
-                        WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin
-                        Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+                @Test
+                fun `logs KGP warning when KGP attempts to but fails to apply`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = AndroidPluginVersion(8, 0, 0),
+                            appConfig =
+                                SubprojectConfig(
+                                    "app",
+                                    plugins = listOf("com.android.application")
+                                ),
+                            pluginConfigs =
+                                listOf(
+                                    SubprojectConfig(
+                                        "plugin",
+                                        plugins = listOf("com.android.library")
+                                    )
+                                )
+                        )
 
-                        Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
-                        If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
-                        an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
 
-                        If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
-                        """.trimIndent()
-                    )
+                    every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                    every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                    verify(exactly = 0) {
+                        mockLogger.error(any())
+                    }
+
+                    verify {
+                        mockLogger.quiet(
+                            """
+                            Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
+                            If your project uses Kotlin, ensure KGP is declared in the root plugins block.
+                            For more details check: $BUILT_IN_KOTLIN_DOCS
+                            """.trimIndent()
+                        )
+                    }
                 }
-
-                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
-            }
-
-            @Test
-            fun `logs app and plugin warning when legacy KGP configuration is applied in both app and plugins`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        appConfig = SubprojectConfig("app", legacyPlugins = listOf("com.android.application", "kotlin-android")),
-                        pluginConfigs =
-                            listOf(
-                                SubprojectConfig("plugin1", legacyPlugins = listOf("com.android.library", "kotlin-android")),
-                                SubprojectConfig("plugin2", legacyPlugins = listOf("com.android.library", "kotlin-android"))
-                            )
-                    )
-
-                val appBuildFilePath = testProject.appProject.buildFile.absolutePath
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
-                val plugin2Manager = testProject.plugin2Manager
-
-                executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                verify {
-                    mockLogger.error(
-                        """
-                        WARNING: Your Android app project: app located at: $appBuildFilePath
-                        applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
-                        Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
-
-                        """.trimIndent()
-                    )
-                }
-
-                verify {
-                    mockLogger.error(
-                        """
-                        WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin1, plugin2
-                        Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
-
-                        Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
-                        If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
-                        an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
-
-                        If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
-                        """.trimIndent()
-                    )
-                }
-
-                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
-                verify(exactly = 0) { plugin2Manager.apply("kotlin-android") }
-            }
-
-            @Test
-            fun `does not log when migrated to Built-in Kotlin`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        appConfig = SubprojectConfig("app", legacyPlugins = listOf("com.android.application")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", legacyPlugins = listOf("com.android.library")))
-                    )
-
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
-
-                executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                verify(exactly = 0) {
-                    mockLogger.error(any())
-                }
-
-                verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
-                verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
-            }
-
-            @Test
-            fun `logs when KGP is applied but fails to apply`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
-                    )
-
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
-
-                every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-
-                executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                verify(exactly = 0) {
-                    mockLogger.error(any())
-                }
-
-                verify {
-                    mockLogger.quiet(
-                        """
-                        Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
-                        If your project uses Kotlin, ensure KGP is declared in the root plugins block.
-                        For more details check: $BUILT_IN_KOTLIN_DOCS
-                        """.trimIndent()
-                    )
-                }
-            }
-
-            @Test
-            fun `does not log warnings when AGP version is lower than 9 and migrated to built-in kotlin`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        agpVersion = AndroidPluginVersion(8, 0, 0),
-                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
-                    )
-
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
-
-                executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                // No warnings should be logged because AGP version is < 9.
-                verify(exactly = 0) { mockLogger.error(any()) }
-
-                // KGP is still applied in case the entire project has been migrated.
-                verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
-                verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
-            }
-
-            @Test
-            fun `does not log warnings when AGP version is lower than 9 and unmigrated to built-in kotlin`(
-                @TempDir tempDir: Path
-            ) {
-                val testProject =
-                    setupTest(
-                        tempDir = tempDir,
-                        agpVersion = AndroidPluginVersion(8, 0, 0),
-                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
-                    )
-
-                val appPluginManager = testProject.appPluginManager
-                val plugin1Manager = testProject.plugin1Manager
-
-                executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                // No warnings should be logged because AGP version is < 9.
-                verify(exactly = 0) { mockLogger.error(any()) }
-
-                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
             }
         }
     }
