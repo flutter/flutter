@@ -6,16 +6,28 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/macos_workflow.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -35,20 +47,15 @@ void main() {
   testUsingContext(
     'Help for command line arguments is consistently styled and complete',
     () => TestBed().run(() {
+      final toolDependencies = FakeToolDependencies();
       final runner = FlutterCommandRunner(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
-        toolContext: FakeToolContext(),
+        toolContext: toolDependencies.toolContext,
         verboseHelp: true,
       );
       executable
-          .generateCommands(
-            androidContext: FakeAndroidContext(),
-            appleContext: FakeAppleContext(),
-            toolContext: FakeToolContext(),
-            verbose: true,
-            verboseHelp: true,
-          )
+          .generateCommands(toolDependencies: toolDependencies, verbose: true, verboseHelp: true)
           .forEach(runner.addCommand);
       verifyCommandRunner(runner);
       for (final Command<void> command in runner.commands.values) {
@@ -425,6 +432,75 @@ class FakeToolContext extends Fake implements ToolContext {
   FlutterVersion get flutterVersion => globals.flutterVersion;
 }
 
-class FakeAppleContext extends Fake implements AppleContext {}
+class FakeAppleContext extends Fake implements AppleContext {
+  @override
+  final Xcode xcode = FakeXcode();
+
+  @override
+  final XcodeProjectInterpreter xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+}
 
 class FakeAndroidContext extends Fake implements AndroidContext {}
+
+class FakeToolDependencies extends Fake implements ToolDependencies {
+  @override
+  final ToolContext toolContext = FakeToolContext();
+
+  @override
+  final AppleContext appleContext = FakeAppleContext();
+
+  @override
+  final AndroidContext androidContext = FakeAndroidContext();
+
+  @override
+  final DeviceManager deviceManager = FakeDeviceManager();
+
+  @override
+  final Doctor doctor = FakeDoctor();
+
+  @override
+  final EmulatorManager emulatorManager = FakeEmulatorManager();
+
+  @override
+  final BuildSystem buildSystem = FakeBuildSystem();
+
+  @override
+  final BuildTargets buildTargets = FakeBuildTargets();
+
+  @override
+  final CrashReporter crashReporter = FakeCrashReporter();
+
+  @override
+  final MacOSWorkflow macOSWorkflow = FakeMacOSWorkflow();
+
+  @override
+  final WindowsWorkflow windowsWorkflow = FakeWindowsWorkflow();
+
+  @override
+  final Analytics analytics = FakeAnalytics();
+}
+
+class FakeDeviceManager extends Fake implements DeviceManager {}
+
+class FakeDoctor extends Fake implements Doctor {}
+
+class FakeEmulatorManager extends Fake implements EmulatorManager {}
+
+class FakeBuildSystem extends Fake implements BuildSystem {}
+
+class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeCrashReporter extends Fake implements CrashReporter {}
+
+class FakeMacOSWorkflow extends Fake implements MacOSWorkflow {}
+
+class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {}
+
+class FakeAnalytics extends Fake implements Analytics {
+  @override
+  bool get okToSend => false;
+}
+
+class FakeXcode extends Fake implements Xcode {}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}

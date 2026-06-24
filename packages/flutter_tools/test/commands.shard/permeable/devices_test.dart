@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -100,25 +99,19 @@ class FakeDeviceManager extends Fake implements DeviceManager {
 
 DevicesCommand createDevicesCommand({bool verboseHelp = false}) {
   return DevicesCommand(
+    deviceManager: globals.deviceManager!,
+    doctor: globals.doctor!,
     toolContext: FakeToolContext(
       fs: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
-      deviceManager: globals.deviceManager!,
-      doctor: globals.doctor!,
     ),
     verboseHelp: verboseHelp,
   );
 }
 
 class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({
-    required this.fs,
-    required this.logger,
-    required this.platform,
-    required this.deviceManager,
-    required this.doctor,
-  });
+  FakeToolContext({required this.fs, required this.logger, required this.platform});
 
   @override
   final FileSystem fs;
@@ -128,10 +121,4 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   final Platform platform;
-
-  @override
-  final DeviceManager deviceManager;
-
-  @override
-  final Doctor doctor;
 }

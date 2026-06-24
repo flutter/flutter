@@ -36,6 +36,9 @@ class FakeFile extends Fake implements File {
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   void chmod(FileSystemEntity entity, String mode) {}
+
+  @override
+  List<File> whichAll(String execName) => const <File>[];
 }
 
 class FakeArtifacts extends Fake implements Artifacts {
@@ -186,6 +189,8 @@ void main() {
       final mockDeviceManager = FakeDeviceManager();
       final mockEmulatorManager = FakeEmulatorManager();
       final mockPersistentToolState = FakePersistentToolState();
+      final mockSdk = FakeAndroidSdk();
+      final mockStudio = FakeAndroidStudio();
 
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
         os: mockOS,
@@ -198,6 +203,8 @@ void main() {
         deviceManager: mockDeviceManager,
         emulatorManager: mockEmulatorManager,
         persistentToolState: mockPersistentToolState,
+        androidSdk: mockSdk,
+        androidStudio: mockStudio,
         fs: fs,
         logger: logger,
         platform: platform,
