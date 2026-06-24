@@ -18,10 +18,18 @@ uniform FragInfo {
   float alpha;
   float colors_length;
   vec4 decal_border_color;
-  vec4 colors[256];
-  vec4 stop_pairs[128];
 }
 frag_info;
+
+uniform ColorsInfo {
+  vec4 colors[256];
+}
+colors_info;
+
+uniform StopPairsInfo {
+  vec4 stop_pairs[128];
+}
+stop_pairs_info;
 
 vec4 DoConicalGradientUniformFill(vec2 res) {
   float t = res.x;
@@ -32,23 +40,23 @@ vec4 DoConicalGradientUniformFill(vec2 res) {
   } else {
     t = IPFloatTile(t, frag_info.tile_mode);
 
-    vec2 prev_stop = frag_info.stop_pairs[0].xy;
+    vec2 prev_stop = stop_pairs_info.stop_pairs[0].xy;
     bool even = false;
     for (int i = 1; i < frag_info.colors_length; i++) {
       // stop_pairs[i/2].xy = values for stop i
       // stop_pairs[i/2].zw = values for stop i+1
-      vec2 cur_stop = even ? frag_info.stop_pairs[i / 2].xy
-                           : frag_info.stop_pairs[i / 2].zw;
+      vec2 cur_stop = even ? stop_pairs_info.stop_pairs[i / 2].xy
+                           : stop_pairs_info.stop_pairs[i / 2].zw;
       even = !even;
       // stop.x == t value
       // stop.y == inverse_delta to next stop
       if (t >= prev_stop.x && t <= cur_stop.x) {
         if (cur_stop.y > 1000.0) {
-          result_color = frag_info.colors[i];
+          result_color = colors_info.colors[i];
         } else {
           float ratio = (t - prev_stop.x) * cur_stop.y;
           result_color =
-              mix(frag_info.colors[i - 1], frag_info.colors[i], ratio);
+              mix(colors_info.colors[i - 1], colors_info.colors[i], ratio);
         }
         break;
       }

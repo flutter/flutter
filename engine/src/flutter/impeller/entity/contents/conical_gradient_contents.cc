@@ -165,6 +165,9 @@ bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
       renderer, entity, pass, pipeline_callback, frame_info,
       [this, &renderer, &entity](RenderPass& pass) {
         FS::FragInfo frag_info;
+        FS::ColorsInfo colors_info;
+        FS::StopPairsInfo stop_pairs_info;
+
         frag_info.center = center_;
         if (focus_) {
           frag_info.focus = focus_.value();
@@ -179,13 +182,16 @@ bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
         frag_info.colors_length = PopulateUniformGradientColors(
-            colors_, stops_, frag_info.colors, frag_info.stop_pairs);
+            colors_, stops_, colors_info.colors, stop_pairs_info.stop_pairs);
         frag_info.decal_border_color = decal_border_color_;
 
         pass.SetCommandLabel("ConicalGradientUniformFill");
 
-        FS::BindFragInfo(
-            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
+        auto& transients_buffer = renderer.GetTransientsDataBuffer();
+        FS::BindFragInfo(pass, transients_buffer.EmplaceUniform(frag_info));
+        FS::BindColorsInfo(pass, transients_buffer.EmplaceUniform(colors_info));
+        FS::BindStopPairsInfo(
+            pass, transients_buffer.EmplaceUniform(stop_pairs_info));
 
         return true;
       });
