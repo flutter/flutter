@@ -1284,198 +1284,50 @@ class FlutterPluginUtilsTest {
             fun `does not log warnings when AGP version is lower than 9 and migrated to built-in kotlin`(
                 @TempDir tempDir: Path
             ) {
-                every { VersionFetcher.getAGPVersion(any()) } returns AndroidPluginVersion(8, 0, 0)
-
-                val rootProject = mockk<Project>()
-                val mockGradle = mockk<Gradle>()
-                val mockLogger = mockk<Logger>(relaxed = true)
-
-                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-                val appBuildGradleFile =
-                    File(appDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.application")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-                val pluginBuildGradleFile =
-                    File(pluginDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.library")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
-                val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
-
-                val appProject =
-                    createMockSubproject(
+                val testProject =
+                    setupTest(
                         tempDir = tempDir,
-                        buildFile = appBuildGradleFile,
-                        projectName = "app",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        agpVersion = AndroidPluginVersion(8, 0, 0),
+                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
+                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
                     )
 
-                val pluginProject =
-                    createMockSubproject(
-                        tempDir = tempDir,
-                        buildFile = pluginBuildGradleFile,
-                        projectName = "plugin",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
-                    )
+                val appPluginManager = testProject.appPluginManager
+                val plugin1Manager = testProject.plugin1Manager
 
-                val subprojectsActionSlot = slot<Action<Project>>()
-                val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
-
-                every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
-                every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
-
-                detectApplyingKotlinGradlePlugin(appProject)
-
-                verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
-                subprojectsActionSlot.captured.execute(appProject)
-                subprojectsActionSlot.captured.execute(pluginProject)
-
-                verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
-                projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                executeDetectApplyingKotlinGradlePlugin(testProject)
 
                 // No warnings should be logged because AGP version is < 9.
                 verify(exactly = 0) { mockLogger.error(any()) }
 
                 // KGP is still applied in case the entire project has been migrated.
-                verify(exactly = 1) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 1) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
             }
 
             @Test
             fun `does not log warnings when AGP version is lower than 9 and unmigrated to built-in kotlin`(
                 @TempDir tempDir: Path
             ) {
-                every { VersionFetcher.getAGPVersion(any()) } returns AndroidPluginVersion(8, 0, 0)
-
-                val rootProject = mockk<Project>()
-                val mockGradle = mockk<Gradle>()
-                val mockLogger = mockk<Logger>(relaxed = true)
-
-                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-                val appBuildGradleFile =
-                    File(appDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.application")
-                                id("kotlin-android")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-                val pluginBuildGradleFile =
-                    File(pluginDir, "build.gradle").apply {
-                        createNewFile()
-                        writeText(
-                            """
-                            plugins {
-                                id("com.android.library")
-                                id("kotlin-android")
-                            }
-                            """.trimIndent()
-                        )
-                    }
-
-                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
-                val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
-
-                val appProject =
-                    createMockSubproject(
+                val testProject =
+                    setupTest(
                         tempDir = tempDir,
-                        buildFile = appBuildGradleFile,
-                        projectName = "app",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        agpVersion = AndroidPluginVersion(8, 0, 0),
+                        appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
+                        pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
                     )
 
-                val pluginProject =
-                    createMockSubproject(
-                        tempDir = tempDir,
-                        buildFile = pluginBuildGradleFile,
-                        projectName = "plugin",
-                        mockLogger = mockLogger,
-                        rootProjectMock = rootProject,
-                        gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
-                    )
+                val appPluginManager = testProject.appPluginManager
+                val plugin1Manager = testProject.plugin1Manager
 
-                val subprojectsActionSlot = slot<Action<Project>>()
-                val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
-
-                every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
-                every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
-
-                detectApplyingKotlinGradlePlugin(appProject)
-
-                verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
-                subprojectsActionSlot.captured.execute(appProject)
-                subprojectsActionSlot.captured.execute(pluginProject)
-
-                verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
-                projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                executeDetectApplyingKotlinGradlePlugin(testProject)
 
                 // No warnings should be logged because AGP version is < 9.
                 verify(exactly = 0) { mockLogger.error(any()) }
 
-                verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
             }
-        }
-
-        private fun createMockSubproject(
-            tempDir: Path,
-            buildFile: File,
-            projectName: String,
-            mockLogger: Logger,
-            rootProjectMock: Project? = null,
-            gradleMock: Gradle? = null,
-            pluginManager: PluginManager
-        ): Project {
-            val projectDir = tempDir.resolve(projectName).toFile().apply { mkdirs() }
-
-            val project = mockk<Project>()
-            every { project.name } returns projectName
-            every { project.projectDir } returns projectDir
-            every { project.buildFile } returns buildFile
-            every { project.logger } returns mockLogger
-            every { project.pluginManager } returns pluginManager
-
-            val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
-            every { extensions.findByType(any<Class<*>>()) } returns null
-            every { project.extensions } returns extensions
-
-            if (rootProjectMock != null) every { project.rootProject } returns rootProjectMock
-            if (gradleMock != null) every { project.gradle } returns gradleMock
-
-            return project
         }
     }
 
