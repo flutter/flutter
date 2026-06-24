@@ -1,5 +1,5 @@
 ---
-name: shepherd_prs
+name: shepherd-prs
 description: Skill to automate shepherding, updating, and landing approved Pull Requests in the flutter/flutter repository using the custom self-contained shepherd.dart script.
 ---
 
@@ -90,7 +90,7 @@ When running the `run` command, inspect the returned JSON logs. Handle specific 
   2. If the check run continues to fail after manual re-runs, inspect the failure logs using `gh pr view <number> --repo flutter/flutter` or through the checks details, and write a summary of the failure for the user.
 
 ### 3. Target Branch Correction (`CHANGEBASE`)
-* **Dismissed Reviews Warning**: Changing the target branch of a PR often causes GitHub to automatically dismiss existing approvals. 
+* **Dismissed Reviews Warning**: Changing the target branch of a PR often causes GitHub to automatically dismiss existing approvals.
   - *Action*: If the target branch was changed, the PR will disappear from the approved list. Output a clear note to the user informing them that the base was corrected, and they need to go to the PR page on GitHub to **re-approve the PR** so the automation can resume shepherding it.
 
 ### 4. Merge Conflicts (`CONFLICTS`)
