@@ -1862,18 +1862,18 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       if (_primaryFocus != rootScope) {
         assert(_focusDebug(() => 'focus changed while app was paused, ignoring $_suspendedNode'));
         _suspendedNode = null;
-      } else if (_suspendedNode != null && _markedForFocus == null) {
+      } else if (_suspendedNode != null) {
         // Only restore the focus that was suspended when the app went inactive
-        // if nothing else has requested focus in the meantime. When the app
-        // resumes because a different window/view was activated, that view has
-        // already requested focus (_markedForFocus != null); restoring the
-        // suspended node would steal focus back to the previously focused
-        // window.
-        assert(_focusDebug(() => 'requesting focus for $_suspendedNode'));
-        _suspendedNode!.requestFocus();
-        _suspendedNode = null;
-      } else {
-        _suspendedNode = null;
+        // if nothing else has requested focus in the meantime. For example,
+        // activating a different window will cause its view to request focus.
+        if (_markedForFocus == null) {
+          assert(_focusDebug(() => 'requesting focus for $_suspendedNode'));
+          _suspendedNode!.requestFocus();
+          _suspendedNode = null;
+        } else {
+          assert(_haveScheduledUpdate);
+          _suspendedNode = null;
+        }
       }
     } else if (_primaryFocus != rootScope) {
       assert(_focusDebug(() => 'suspending $_primaryFocus'));
