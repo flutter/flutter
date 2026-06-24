@@ -949,6 +949,21 @@ class FlutterPluginUtilsTest {
             private val mockGradle = mockk<Gradle>()
             private val mockLogger = mockk<Logger>(relaxed = true)
 
+            private val templateAgpMajorVersion = getTemplateAGPMajorVersion()
+
+            private fun getTemplateAGPMajorVersion(): Int {
+                val gradleUtilsFile = File("../lib/src/android/gradle_utils.dart")
+                if (!gradleUtilsFile.exists()) {
+                    throw IllegalStateException("gradle_utils.dart not found at ${gradleUtilsFile.absolutePath}")
+                }
+                val content = gradleUtilsFile.readText()
+                val match = Regex("""const templateAndroidGradlePluginVersion = '([^']+)';""").find(content)
+                    ?: throw IllegalStateException("Could not find templateAndroidGradlePluginVersion in gradle_utils.dart")
+                val versionStr = match.groupValues[1]
+                val parts = versionStr.split(".")
+                return parts[0].toInt()
+            }
+
             @BeforeEach
             fun setUp() {
                 mockkObject(VersionFetcher)
@@ -1002,7 +1017,7 @@ class FlutterPluginUtilsTest {
 
             private fun setupTest(
                 tempDir: Path,
-                agpVersion: AndroidPluginVersion = AndroidPluginVersion(9, 0, 0),
+                agpVersion: AndroidPluginVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
                 appConfig: SubprojectConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
                 pluginConfigs: List<SubprojectConfig> = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
             ): TestEnvironment {
@@ -1058,7 +1073,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1104,7 +1119,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1153,7 +1168,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1211,7 +1226,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1283,7 +1298,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1318,7 +1333,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(9, 0, 0),
+                            agpVersion = AndroidPluginVersion(templateAgpMajorVersion, 0, 0),
                             appConfig =
                                 SubprojectConfig(
                                     "app",
