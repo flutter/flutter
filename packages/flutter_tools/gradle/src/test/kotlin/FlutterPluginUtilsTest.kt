@@ -945,15 +945,108 @@ class FlutterPluginUtilsTest {
 
         @Nested
         inner class DetectApplyingKotlinGradlePluginTests {
+            private val rootProject = mockk<Project>()
+            private val mockGradle = mockk<Gradle>()
+            private val mockLogger = mockk<Logger>(relaxed = true)
+
             @BeforeEach
             fun setUp() {
                 mockkObject(VersionFetcher)
-                every { VersionFetcher.getAGPVersion(any()) } returns AndroidPluginVersion(9, 0, 0)
             }
 
             @AfterEach
             fun tearDown() {
                 unmockkObject(VersionFetcher)
+            }
+
+            private fun createSubproject(
+                tempDir: Path,
+                projectName: String,
+                plugins: List<String> = emptyList(),
+                legacyPlugins: List<String> = emptyList()
+            ): Project {
+                val projectDir = tempDir.resolve(projectName).toFile().apply { mkdirs() }
+                val buildGradleFile =
+                    File(projectDir, "build.gradle").apply {
+                        createNewFile()
+                        val pluginsBlock =
+                            if (plugins.isNotEmpty()) {
+                                "plugins {\n" + plugins.joinToString("\n") { "    id(\"$it\")" } + "\n}\n"
+                            } else {
+                                ""
+                            }
+                        val legacyBlock =
+                            if (legacyPlugins.isNotEmpty()) {
+                                legacyPlugins.joinToString("\n") { "apply plugin: '$it'" } + "\n"
+                            } else {
+                                ""
+                            }
+                        writeText(pluginsBlock + legacyBlock)
+                    }
+                val pluginManager = mockk<PluginManager>(relaxed = true)
+                val project = mockk<Project>()
+                every { project.name } returns projectName
+                every { project.projectDir } returns projectDir
+                every { project.buildFile } returns buildGradleFile
+                every { project.logger } returns mockLogger
+                every { project.pluginManager } returns pluginManager
+                every { project.rootProject } returns rootProject
+                every { project.gradle } returns mockGradle
+
+                val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
+                every { extensions.findByType(any<Class<*>>()) } returns null
+                every { project.extensions } returns extensions
+
+                return project
+            }
+
+            private fun setupTest(
+                tempDir: Path,
+                agpVersion: AndroidPluginVersion = AndroidPluginVersion(9, 0, 0),
+                appConfig: SubprojectConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
+                pluginConfigs: List<SubprojectConfig> = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
+            ): TestEnvironment {
+                every { VersionFetcher.getAGPVersion(any()) } returns agpVersion
+
+                val appProject =
+                    createSubproject(
+                        tempDir = tempDir,
+                        projectName = appConfig.name,
+                        plugins = appConfig.plugins,
+                        legacyPlugins = appConfig.legacyPlugins
+                    )
+
+                val pluginProjects =
+                    pluginConfigs.map { config ->
+                        createSubproject(
+                            tempDir = tempDir,
+                            projectName = config.name,
+                            plugins = config.plugins,
+                            legacyPlugins = config.legacyPlugins
+                        )
+                    }
+
+                val allProjects = setOf(appProject) + pluginProjects
+                every { rootProject.subprojects } returns allProjects
+
+                val testProject = TestEnvironment(appProject, pluginProjects)
+                every { rootProject.subprojects(capture(testProject.subprojectsActionSlot)) } returns Unit
+                every { mockGradle.projectsEvaluated(capture(testProject.projectsEvaluatedActionSlot)) } returns Unit
+
+                return testProject
+            }
+
+            private fun executeDetectApplyingKotlinGradlePlugin(testProject: TestEnvironment) {
+                detectApplyingKotlinGradlePlugin(testProject.appProject)
+
+                verify { rootProject.subprojects(capture(testProject.subprojectsActionSlot)) }
+                testProject.subprojectsActionSlot.captured.execute(testProject.appProject)
+                for (plugin in testProject.plugins) {
+                    testProject.subprojectsActionSlot.captured.execute(plugin)
+                }
+
+                verify { mockGradle.projectsEvaluated(capture(testProject.projectsEvaluatedActionSlot)) }
+                testProject.projectsEvaluatedActionSlot.captured.execute(mockGradle)
             }
 
             @Test
