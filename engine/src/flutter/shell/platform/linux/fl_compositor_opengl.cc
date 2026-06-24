@@ -29,6 +29,12 @@ struct _FlCompositorOpenGL {
   // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
 
+  // OpenGL shader program and vertex buffer.
+  GLuint program;
+  GLuint vertex_buffer;
+  GLint offset_location;
+  GLint scale_location;
+
   // Last rendered frame.
   FlFramebuffer* framebuffer;
 
@@ -95,182 +101,6 @@ static void swizzle_rgba_to_bgra(uint8_t* pixels, size_t width, size_t height) {
   }
 }
 #endif
-
-// Returns the log for the given OpenGL shader. Must be freed by the caller.
-static gchar* get_shader_log(GLuint shader) {
-  GLint log_length;
-  gchar* log;
-
-  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
-
-  log = static_cast<gchar*>(g_malloc(log_length + 1));
-  glGetShaderInfoLog(shader, log_length, nullptr, log);
-
-  return log;
-}
-
-// Returns the log for the given OpenGL program. Must be freed by the caller.
-static gchar* get_program_log(GLuint program) {
-  GLint log_length;
-  gchar* log;
-
-  glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
-
-  log = static_cast<gchar*>(g_malloc(log_length + 1));
-  glGetProgramInfoLog(program, log_length, nullptr, log);
-
-  return log;
-}
-
-static void setup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
-    g_warning(
-        "Failed to setup compositor shaders, unable to make OpenGL context "
-        "current");
-    return;
-  }
-
-  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
-  glCompileShader(vertex_shader);
-  GLint vertex_compile_status;
-  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_compile_status);
-  if (vertex_compile_status == GL_FALSE) {
-    g_autofree gchar* shader_log = get_shader_log(vertex_shader);
-    g_warning("Failed to compile vertex shader: %s", shader_log);
-  }
-
-  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &fragment_shader_src, nullptr);
-  glCompileShader(fragment_shader);
-  GLint fragment_compile_status;
-  glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_compile_status);
-  if (fragment_compile_status == GL_FALSE) {
-    g_autofree gchar* shader_log = get_shader_log(fragment_shader);
-    g_warning("Failed to compile fragment shader: %s", shader_log);
-  }
-
-  self->program = glCreateProgram();
-  glAttachShader(self->program, vertex_shader);
-  glAttachShader(self->program, fragment_shader);
-  glLinkProgram(self->program);
-
-  GLint link_status;
-  glGetProgramiv(self->program, GL_LINK_STATUS, &link_status);
-  if (link_status == GL_FALSE) {
-    g_autofree gchar* program_log = get_program_log(self->program);
-    g_warning("Failed to link program: %s", program_log);
-  }
-
-  self->offset_location = glGetUniformLocation(self->program, "offset");
-  self->scale_location = glGetUniformLocation(self->program, "scale");
-
-  glDeleteShader(vertex_shader);
-  glDeleteShader(fragment_shader);
-
-  // The uniform square abcd in two triangles cba + cdb
-  // a--b
-  // |  |
-  // c--d
-  GLfloat vertex_data[] = {-1, -1, 0, 0, 1, 1,  1, 1, -1, 1, 0, 1,
-                           -1, -1, 0, 0, 1, -1, 1, 0, 1,  1, 1, 1};
-
-  glGenBuffers(1, &self->vertex_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
-               GL_STATIC_DRAW);
-}
-
-static void cleanup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
-    g_warning(
-        "Failed to cleanup compositor shaders, unable to make OpenGL context "
-        "current");
-    return;
-  }
-
-  if (self->program != 0) {
-    glDeleteProgram(self->program);
-  }
-  if (self->vertex_buffer != 0) {
-    glDeleteBuffers(1, &self->vertex_buffer);
-  }
-}
-
-static void setup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
-    g_warning(
-        "Failed to setup compositor shaders, unable to make OpenGL context "
-        "current");
-    return;
-  }
-
-  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
-  glCompileShader(vertex_shader);
-  GLint vertex_compile_status;
-  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_compile_status);
-  if (vertex_compile_status == GL_FALSE) {
-    g_autofree gchar* shader_log = get_shader_log(vertex_shader);
-    g_warning("Failed to compile vertex shader: %s", shader_log);
-  }
-
-  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &fragment_shader_src, nullptr);
-  glCompileShader(fragment_shader);
-  GLint fragment_compile_status;
-  glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_compile_status);
-  if (fragment_compile_status == GL_FALSE) {
-    g_autofree gchar* shader_log = get_shader_log(fragment_shader);
-    g_warning("Failed to compile fragment shader: %s", shader_log);
-  }
-
-  self->program = glCreateProgram();
-  glAttachShader(self->program, vertex_shader);
-  glAttachShader(self->program, fragment_shader);
-  glLinkProgram(self->program);
-
-  GLint link_status;
-  glGetProgramiv(self->program, GL_LINK_STATUS, &link_status);
-  if (link_status == GL_FALSE) {
-    g_autofree gchar* program_log = get_program_log(self->program);
-    g_warning("Failed to link program: %s", program_log);
-  }
-
-  self->offset_location = glGetUniformLocation(self->program, "offset");
-  self->scale_location = glGetUniformLocation(self->program, "scale");
-
-  glDeleteShader(vertex_shader);
-  glDeleteShader(fragment_shader);
-
-  // The uniform square abcd in two triangles cba + cdb
-  // a--b
-  // |  |
-  // c--d
-  GLfloat vertex_data[] = {-1, -1, 0, 0, 1, 1,  1, 1, -1, 1, 0, 1,
-                           -1, -1, 0, 0, 1, -1, 1, 0, 1,  1, 1, 1};
-
-  glGenBuffers(1, &self->vertex_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
-               GL_STATIC_DRAW);
-}
-
-static void cleanup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
-    g_warning(
-        "Failed to cleanup compositor shaders, unable to make OpenGL context "
-        "current");
-    return;
-  }
-
-  if (self->program != 0) {
-    glDeleteProgram(self->program);
-  }
-  if (self->vertex_buffer != 0) {
-    glDeleteBuffers(1, &self->vertex_buffer);
-  }
-}
 
 static void composite_layer(FlCompositorOpenGL* self,
                             FlFramebuffer* framebuffer,

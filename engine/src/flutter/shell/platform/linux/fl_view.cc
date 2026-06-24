@@ -42,63 +42,6 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
-struct _FlView {
-  GtkBox parent_instance;
-
-  // Event box the render area goes inside.
-  GtkWidget* event_box;
-
-  // Handle zoom gestures.
-  GtkGesture* zoom_gesture;
-
-  // Handle rotation gestures.
-  GtkGesture* rotate_gesture;
-
-  // The widget rendering the Flutter view.
-  GtkDrawingArea* render_area;
-
-  // Rendering context when using OpenGL.
-  GdkGLContext* render_context;
-
-  // Engine this view is showing.
-  FlEngine* engine;
-
-  // Combines layers into frame.
-  FlCompositor* compositor;
-
-  // ID for this view.
-  FlutterViewId view_id;
-
-  // Background color.
-  GdkRGBA* background_color;
-
-  // TRUE if have got the first frame to render.
-  gboolean have_first_frame;
-
-  // Monitor to track window state.
-  FlWindowStateMonitor* window_state_monitor;
-
-  // Manages scrolling events.
-  FlScrollingManager* scrolling_manager;
-
-  // Manages pointer events.
-  FlPointerManager* pointer_manager;
-
-  // Manages touch events.
-  FlTouchManager* touch_manager;
-
-  // Accessible tree from Flutter, exposed as an AtkPlug.
-  FlViewAccessible* view_accessible;
-
-  // Signal subscripton for cursor changes.
-  guint cursor_changed_cb_id;
-
-  // TRUE if the view size should be controlled by Flutter.
-  gboolean sized_to_content;
-
-  GCancellable* cancellable;
-};
-
 enum { SIGNAL_FIRST_FRAME, LAST_SIGNAL };
 
 static guint fl_view_signals[LAST_SIGNAL];
@@ -312,9 +255,9 @@ static void setup_cursor(FlView* self) {
   FlMouseCursorHandler* handler =
       fl_engine_get_mouse_cursor_handler(self->engine);
 
-  g_signal_connect_object(handler, "cursor-changed",
-                          G_CALLBACK(cursor_changed_cb), self,
-                          G_CONNECT_SWAPPED);
+  self->cursor_changed_cb_id = g_signal_connect_object(
+      handler, "cursor-changed", G_CALLBACK(cursor_changed_cb), self,
+      G_CONNECT_SWAPPED);
   cursor_changed_cb(self);
 }
 

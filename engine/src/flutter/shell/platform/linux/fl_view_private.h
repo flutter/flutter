@@ -28,8 +28,6 @@ struct _FlView {
   GdkGLContext* render_context;
   FlEngine* engine;
   FlCompositor* compositor;
-  guint on_pre_engine_restart_cb_id;
-  guint update_semantics_cb_id;
   FlutterViewId view_id;
   GdkRGBA* background_color;
   gboolean have_first_frame;

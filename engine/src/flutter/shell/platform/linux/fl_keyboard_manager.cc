@@ -336,8 +336,15 @@ static void fl_keyboard_manager_dispose(GObject* object) {
   g_clear_object(&self->key_embedder_responder);
   g_clear_object(&self->key_channel_responder);
   g_clear_object(&self->derived_layout);
+#if FLUTTER_LINUX_GTK4
   g_clear_object(&self->display);
+#else
+  if (self->keymap_keys_changed_cb_id != 0) {
+    g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
+    self->keymap_keys_changed_cb_id = 0;
+  }
   g_clear_object(&self->keymap);
+#endif
   g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_keyboard_manager_parent_class)->dispose(object);
