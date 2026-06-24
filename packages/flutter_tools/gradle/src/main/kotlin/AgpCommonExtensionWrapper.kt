@@ -4,7 +4,6 @@
 
 package com.flutter.gradle
 
-import com.android.build.api.dsl.AndroidSourceSet
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.DynamicFeatureExtension
@@ -86,16 +85,6 @@ class AgpCommonExtensionWrapper(
                 is LibraryExtension -> backingExtension.buildTypes
                 is DynamicFeatureExtension -> backingExtension.buildTypes
                 is TestExtension -> backingExtension.buildTypes
-                else -> throw IllegalArgumentException(unsupportedMessage())
-            }
-
-    val sourceSets: NamedDomainObjectContainer<out AndroidSourceSet>
-        get() =
-            when (backingExtension) {
-                is ApplicationExtension -> backingExtension.sourceSets
-                is LibraryExtension -> backingExtension.sourceSets
-                is DynamicFeatureExtension -> backingExtension.sourceSets
-                is TestExtension -> backingExtension.sourceSets
                 else -> throw IllegalArgumentException(unsupportedMessage())
             }
 
