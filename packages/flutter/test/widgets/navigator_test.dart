@@ -12,11 +12,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'button_tester.dart';
 import 'list_tile_tester.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'route_tester.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
@@ -6342,6 +6344,134 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets('Navigator.pop throws FlutterError when popped with mismatched type', (
+    WidgetTester tester,
+  ) async {
+    Object? popException;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return TestButton(
+              onPressed: () {
+                Navigator.push<bool>(
+                  context,
+                  PageRouteBuilder<bool>(
+                    pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                      return TestButton(
+                        onPressed: () {
+                          try {
+                            Navigator.pop(context, 'NO');
+                          } catch (e) {
+                            popException = e;
+                          }
+                        },
+                        child: const Text('NO'),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Open Route'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Route'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('NO'));
+
+    expect(popException, isFlutterError);
+    final popError = popException! as FlutterError;
+
+    expect(
+      popError.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A request was made to pop a route with a result of type String,\n'
+        '   but the route expected a value of type bool.\n'
+        '   This usually happens when the type provided to Navigator.pop() is\n'
+        '   not a subtype of the type expected by the Route (e.g.\n'
+        '   DialogRoute<Null>), or when a generic type is explicitly provided\n'
+        '   to a route creation method (such as showDialog<T>()) but the\n'
+        '   popped value does not match this type.\n'
+        '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
+        '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
+        '     PageRouteBuilder<bool>))\n'
+        '   The provided result was: NO\n'
+        '',
+      ),
+    );
+  });
+
+  testWidgets('Navigator.maybePop throws FlutterError when popped with mismatched type', (
+    WidgetTester tester,
+  ) async {
+    Object? maybePopException;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return TestButton(
+              onPressed: () {
+                Navigator.push<bool>(
+                  context,
+                  PageRouteBuilder<bool>(
+                    pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                      return TestButton(
+                        onPressed: () {
+                          Navigator.maybePop(context, 'YES').catchError((Object e) {
+                            maybePopException = e;
+                            return false;
+                          });
+                        },
+                        child: const Text('YES'),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Open Route'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Route'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('YES'));
+    await tester.pumpAndSettle();
+
+    expect(maybePopException, isFlutterError);
+    final maybePopError = maybePopException! as FlutterError;
+
+    expect(
+      maybePopError.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A request was made to pop a route with a result of type String,\n'
+        '   but the route expected a value of type bool.\n'
+        '   This usually happens when the type provided to\n'
+        '   Navigator.maybePop() is not a subtype of the type expected by the\n'
+        '   Route (e.g. DialogRoute<Null>), or when a generic type is\n'
+        '   explicitly provided to a route creation method (such as\n'
+        '   showDialog<T>()) but the popped value does not match this type.\n'
+        '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
+        '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
+        '     PageRouteBuilder<bool>))\n'
+        '   The provided result was: YES\n'
+        '',
+      ),
+    );
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
