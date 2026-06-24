@@ -12,7 +12,7 @@ This skill teaches you how to act as a co-pilot/agent to shepherd and land appro
 ## 1. Finding and Executing the Tool
 
 The shepherding tool is a **fully self-contained, single-file Dart script** with **zero external dependencies**!
-* **Script Location**: `<skill_path>/shepherd.dart` (where `<skill_path>` is the directory containing this `SKILL.md` file, e.g., `.agents/skills/shepherd_prs/` in a local workspace, or `~/.gemini/config/skills/shepherd_prs/` when installed globally).
+* **Script Location**: `<skill_path>/scripts/shepherd.dart` (where `<skill_path>` is the directory containing this `SKILL.md` file, e.g., `.agents/skills/shepherd-prs/` in a local workspace, or `~/.gemini/config/skills/shepherd-prs/` when installed globally).
 
 ### Prerequisites
 * **GitHub CLI (`gh`)**: You must have the GitHub CLI installed and authenticated on your system.
@@ -20,7 +20,7 @@ The shepherding tool is a **fully self-contained, single-file Dart script** with
 
 No package initialization or `dart pub get` is required! You can run it directly:
 ```bash
-dart <skill_path>/shepherd.dart <command> [options]
+dart <skill_path>/scripts/shepherd.dart <command> [options]
 ```
 
 ---
@@ -30,7 +30,7 @@ dart <skill_path>/shepherd.dart <command> [options]
 To understand the current state of approved third-party PRs, run the list command. It outputs a structured JSON array of Pull Request objects by default:
 
 ```bash
-dart <skill_path>/shepherd.dart list
+dart <skill_path>/scripts/shepherd.dart list
 ```
 
 ### Parsing the JSON:
@@ -55,19 +55,19 @@ To execute shepherding actions, run the `run` subcommand. By default, it outputs
 ### A. Run on a Specific PR (Recommended)
 Targeting a single PR is the safest way to execute actions and track progress:
 ```bash
-dart <skill_path>/shepherd.dart run --pr <pr_number>
+dart <skill_path>/scripts/shepherd.dart run --pr <pr_number>
 ```
 
 ### B. Run on All Eligible PRs
 To process the entire queue in a single pass:
 ```bash
-dart <skill_path>/shepherd.dart run --all
+dart <skill_path>/scripts/shepherd.dart run --all
 ```
 
 ### C. Dry-Run Mode
 To evaluate and log actions without executing them, append the `--dry-run` flag:
 ```bash
-dart <skill_path>/shepherd.dart run --all --dry-run
+dart <skill_path>/scripts/shepherd.dart run --all --dry-run
 ```
 
 ---
@@ -112,16 +112,16 @@ When the user asks for the status of their pending third-party PR reviews:
 
 - **User:** "What is the status of my approved PRs?"
 - **Agent:**
-  1. Identifies the read-only inquiry and runs `dart .agents/skills/shepherd-prs/shepherd.dart list`.
+  1. Identifies the read-only inquiry and runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart list`.
   2. Parses the JSON output to present a summary of all approved third-party PRs, their CI checks, and recommended actions.
   3. Asks the user for confirmation before executing any shepherding actions.
 
 - **User:** "Yes, please update the branch for PR #186254."
 - **Agent:**
-  1. Identifies the user's explicit confirmation and runs `dart .agents/skills/shepherd-prs/shepherd.dart run --pr 186254`.
+  1. Identifies the user's explicit confirmation and runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart run --pr 186254`.
   2. Logs the result of the branch update to the user.
 
 - **User:** "Run shepherding on all my eligible PRs."
 - **Agent:**
   1. Asks the user for confirmation: "I will run shepherding on all eligible approved PRs. Would you like me to proceed?"
-  2. Upon receiving confirmation, runs `dart .agents/skills/shepherd-prs/shepherd.dart run --all` and reports the action logs.
+  2. Upon receiving confirmation, runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart run --all` and reports the action logs.
