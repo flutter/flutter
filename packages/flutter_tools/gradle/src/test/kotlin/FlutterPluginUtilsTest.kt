@@ -950,6 +950,7 @@ class FlutterPluginUtilsTest {
             private val mockLogger = mockk<Logger>(relaxed = true)
 
             private val templateAgpMajorVersion = getTemplateAGPMajorVersion()
+            private val errorAgpMajorVersion = DependencyVersionChecker.errorAGPVersion.major
 
             private fun getTemplateAGPMajorVersion(): Int {
                 val gradleUtilsFile = File("../lib/src/android/gradle_utils.dart")
@@ -1381,7 +1382,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(8, 0, 0),
+                            agpVersion = AndroidPluginVersion(errorAgpMajorVersion, 0, 0),
                             appConfig = SubprojectConfig("app", plugins = listOf("com.android.application")),
                             pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library")))
                         )
@@ -1406,7 +1407,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(8, 0, 0),
+                            agpVersion = AndroidPluginVersion(errorAgpMajorVersion, 0, 0),
                             appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
                             pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
                         )
@@ -1430,7 +1431,7 @@ class FlutterPluginUtilsTest {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = AndroidPluginVersion(8, 0, 0),
+                            agpVersion = AndroidPluginVersion(errorAgpMajorVersion, 0, 0),
                             appConfig =
                                 SubprojectConfig(
                                     "app",
