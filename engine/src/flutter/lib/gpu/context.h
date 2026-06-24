@@ -91,7 +91,7 @@ extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
     flutter::gpu::Context* wrapper);
 
 FLUTTER_GPU_EXPORT
-extern double InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
+extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
     flutter::gpu::Context* wrapper);
 
 FLUTTER_GPU_EXPORT

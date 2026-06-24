@@ -13,7 +13,7 @@ namespace impeller {
 
 SamplerLibraryVK::SamplerLibraryVK(
     const std::weak_ptr<DeviceHolderVK>& device_holder,
-    float max_sampler_anisotropy)
+    uint32_t max_sampler_anisotropy)
     : device_holder_(device_holder),
       max_sampler_anisotropy_(max_sampler_anisotropy) {}
 
@@ -34,8 +34,8 @@ raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
   // samplerAnisotropy feature is unavailable. The upper bound is floored at 1
   // so std::clamp never sees an inverted range if a driver reports below 1.
   desc_copy.max_anisotropy = static_cast<uint8_t>(
-      std::clamp(static_cast<float>(desc_copy.max_anisotropy), 1.0f,
-                 std::max(1.0f, max_sampler_anisotropy_)));
+      std::clamp<uint32_t>(desc_copy.max_anisotropy, 1u,
+                           std::max<uint32_t>(1u, max_sampler_anisotropy_)));
 
   uint64_t p_key = SamplerDescriptor::ToKey(desc_copy);
   for (const auto& [key, value] : samplers_) {

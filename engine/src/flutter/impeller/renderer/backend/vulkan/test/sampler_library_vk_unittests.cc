@@ -19,7 +19,7 @@ TEST(SamplerLibraryVK, WorkaroundsCanDisableReadingFromMipLevels) {
   auto const context = MockVulkanContextBuilder().Build();
 
   auto library_vk = std::make_shared<SamplerLibraryVK>(
-      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1.0f);
+      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
   std::shared_ptr<SamplerLibrary> library = library_vk;
 
   SamplerDescriptor desc;
@@ -39,7 +39,7 @@ TEST(SamplerLibraryVK, MaxAnisotropyIsClampedToTheDeviceLimit) {
   auto const context = MockVulkanContextBuilder().Build();
 
   std::shared_ptr<SamplerLibrary> library = std::make_shared<SamplerLibraryVK>(
-      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/4.0f);
+      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/4u);
 
   SamplerDescriptor desc;
   desc.min_filter = MinMagFilter::kLinear;
@@ -59,7 +59,7 @@ TEST(SamplerLibraryVK, MaxAnisotropyIsDisabledWhenUnsupported) {
   auto const context = MockVulkanContextBuilder().Build();
 
   std::shared_ptr<SamplerLibrary> library = std::make_shared<SamplerLibraryVK>(
-      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1.0f);
+      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
 
   SamplerDescriptor desc;
   desc.min_filter = MinMagFilter::kLinear;

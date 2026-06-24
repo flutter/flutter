@@ -214,8 +214,9 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   if (desc->HasExtension(kTextureFilterAnisotropicExt)) {
     GLfloat value = 1.0f;
     gl.GetFloatv(IMPELLER_GL_MAX_TEXTURE_MAX_ANISOTROPY, &value);
-    // The extension guarantees a maximum of at least 2.
-    max_sampler_anisotropy_ = std::max(value, 2.0f);
+    // The extension guarantees a maximum of at least 2. The limit is a float
+    // but is always an integer in practice, so floor it.
+    max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
   }
 }
 
@@ -352,7 +353,7 @@ ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
   return max_texture_size;
 }
 
-float CapabilitiesGLES::GetMaxSamplerAnisotropy() const {
+uint32_t CapabilitiesGLES::GetMaxSamplerAnisotropy() const {
   return max_sampler_anisotropy_;
 }
 

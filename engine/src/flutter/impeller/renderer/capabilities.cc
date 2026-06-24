@@ -126,7 +126,7 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
-  float GetMaxSamplerAnisotropy() const override {
+  uint32_t GetMaxSamplerAnisotropy() const override {
     return max_sampler_anisotropy_;
   }
 
@@ -157,7 +157,7 @@ class StandardCapabilities final : public Capabilities {
                        PixelFormat default_depth_stencil_format,
                        PixelFormat default_glyph_atlas_format,
                        ISize default_maximum_render_pass_attachment_size,
-                       float max_sampler_anisotropy,
+                       uint32_t max_sampler_anisotropy,
                        size_t minimum_uniform_alignment,
                        bool needs_partitioned_host_buffer,
                        bool supports_texture_compression_bc,
@@ -210,7 +210,7 @@ class StandardCapabilities final : public Capabilities {
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
   ISize default_maximum_render_pass_attachment_size_ = ISize(1, 1);
-  float max_sampler_anisotropy_ = 1.0f;
+  uint32_t max_sampler_anisotropy_ = 1;
   size_t minimum_uniform_alignment_ = 256;
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
@@ -338,7 +338,8 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTextureCompression(
   return *this;
 }
 
-CapabilitiesBuilder& CapabilitiesBuilder::SetMaxSamplerAnisotropy(float value) {
+CapabilitiesBuilder& CapabilitiesBuilder::SetMaxSamplerAnisotropy(
+    uint32_t value) {
   max_sampler_anisotropy_ = value;
   return *this;
 }

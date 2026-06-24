@@ -1177,7 +1177,7 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('GpuContext.maxSamplerAnisotropy reports at least 1', () async {
-    expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1.0));
+    expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy', () async {

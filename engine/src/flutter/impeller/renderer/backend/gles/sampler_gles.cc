@@ -128,10 +128,11 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
   // previously configured value from leaking into this sampler's state. The
   // parameter only exists when GL_EXT_texture_filter_anisotropic is present;
   // it is applied with TexParameterfv, which is core ES 2.0.
-  const float max_anisotropy = gl.GetCapabilities()->GetMaxSamplerAnisotropy();
+  const uint32_t max_anisotropy =
+      gl.GetCapabilities()->GetMaxSamplerAnisotropy();
   if (max_anisotropy > 1) {
-    const GLfloat anisotropy[1] = {std::clamp(
-        static_cast<GLfloat>(desc.max_anisotropy), 1.0f, max_anisotropy)};
+    const GLfloat anisotropy[1] = {static_cast<GLfloat>(
+        std::clamp<uint32_t>(desc.max_anisotropy, 1u, max_anisotropy))};
     gl.TexParameterfv(*target, IMPELLER_GL_TEXTURE_MAX_ANISOTROPY, anisotropy);
   }
 

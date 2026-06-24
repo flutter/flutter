@@ -122,9 +122,9 @@ TEST(CapabilitiesTest, MinUniformAlignment) {
 
 TEST(CapabilitiesTest, MaxSamplerAnisotropy) {
   auto defaults = CapabilitiesBuilder().Build();
-  EXPECT_EQ(defaults->GetMaxSamplerAnisotropy(), 1.0f);
-  auto mutated = CapabilitiesBuilder().SetMaxSamplerAnisotropy(16.0f).Build();
-  EXPECT_EQ(mutated->GetMaxSamplerAnisotropy(), 16.0f);
+  EXPECT_EQ(defaults->GetMaxSamplerAnisotropy(), 1u);
+  auto mutated = CapabilitiesBuilder().SetMaxSamplerAnisotropy(16).Build();
+  EXPECT_EQ(mutated->GetMaxSamplerAnisotropy(), 16u);
 }
 
 }  // namespace testing

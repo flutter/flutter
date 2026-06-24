@@ -301,7 +301,7 @@ class CapabilitiesVK final : public Capabilities,
   ISize GetMaximumRenderPassAttachmentSize() const override;
 
   // |Capabilities|
-  float GetMaxSamplerAnisotropy() const override;
+  uint32_t GetMaxSamplerAnisotropy() const override;
 
   // |Capabilities|
   size_t GetMinimumUniformAlignment() const override;
@@ -359,7 +359,7 @@ class CapabilitiesVK final : public Capabilities,
   bool supports_device_transient_textures_ = false;
   bool supports_texture_fixed_rate_compression_ = false;
   ISize max_render_pass_attachment_size_ = ISize{0, 0};
-  float max_sampler_anisotropy_ = 1.0f;
+  uint32_t max_sampler_anisotropy_ = 1;
   bool has_triangle_fans_ = true;
   bool has_primitive_restart_ = true;
   bool has_framebuffer_fetch_ = true;

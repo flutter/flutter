@@ -75,7 +75,7 @@ TEST(CapabilitiesGLES, SupportsMSAA) {
 TEST(CapabilitiesGLES, MaxSamplerAnisotropyUnsupportedByDefault) {
   auto mock_gles = MockGLES::Init();
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
-  EXPECT_EQ(capabilities->GetMaxSamplerAnisotropy(), 1.0f);
+  EXPECT_EQ(capabilities->GetMaxSamplerAnisotropy(), 1u);
 }
 
 TEST(CapabilitiesGLES, MaxSamplerAnisotropyWithExtension) {
@@ -86,7 +86,7 @@ TEST(CapabilitiesGLES, MaxSamplerAnisotropyWithExtension) {
   auto mock_gles = MockGLES::Init(extensions);
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
   // The extension guarantees a maximum anisotropy of at least 2.
-  EXPECT_GE(capabilities->GetMaxSamplerAnisotropy(), 2.0f);
+  EXPECT_GE(capabilities->GetMaxSamplerAnisotropy(), 2u);
 }
 
 }  // namespace testing

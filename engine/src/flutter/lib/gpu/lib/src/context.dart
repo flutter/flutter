@@ -83,7 +83,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
   ///
   /// A value of 1 means anisotropic filtering is not supported. Most devices
   /// that support anisotropic filtering report a maximum of 16.
-  double get maxSamplerAnisotropy {
+  int get maxSamplerAnisotropy {
     return _getMaxSamplerAnisotropy();
   }
 
@@ -319,10 +319,10 @@ base class GpuContext extends NativeFieldWrapperClass1 {
   )
   external bool _getSupportsManuallyMippedTextures();
 
-  @Native<Double Function(Pointer<Void>)>(
+  @Native<Int Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Context_GetMaxSamplerAnisotropy',
   )
-  external double _getMaxSamplerAnisotropy();
+  external int _getMaxSamplerAnisotropy();
 
   @Native<Bool Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',

@@ -152,7 +152,7 @@ class Capabilities {
   ///        A value of 1 means anisotropic filtering is not supported.
   ///        Sampler descriptors with `max_anisotropy` greater than this value
   ///        are clamped to it.
-  virtual float GetMaxSamplerAnisotropy() const = 0;
+  virtual uint32_t GetMaxSamplerAnisotropy() const = 0;
 
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
@@ -214,7 +214,7 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetMaximumRenderPassAttachmentSize(ISize size);
 
-  CapabilitiesBuilder& SetMaxSamplerAnisotropy(float value);
+  CapabilitiesBuilder& SetMaxSamplerAnisotropy(uint32_t value);
 
   CapabilitiesBuilder& SetMinimumUniformAlignment(size_t value);
 
@@ -245,7 +245,7 @@ class CapabilitiesBuilder {
   std::optional<PixelFormat> default_glyph_atlas_format_ = std::nullopt;
   std::optional<ISize> default_maximum_render_pass_attachment_size_ =
       std::nullopt;
-  float max_sampler_anisotropy_ = 1.0f;
+  uint32_t max_sampler_anisotropy_ = 1;
   size_t minimum_uniform_alignment_ = 256;
 
   CapabilitiesBuilder(const CapabilitiesBuilder&) = delete;

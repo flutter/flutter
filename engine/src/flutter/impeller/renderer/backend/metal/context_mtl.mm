@@ -89,7 +89,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
       // Anisotropic filtering with a clamp in the range [1, 16] is supported
       // on all Metal devices.
-      .SetMaxSamplerAnisotropy(16.0f)
+      .SetMaxSamplerAnisotropy(16)
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
       .SetSupportsTextureCompression(CompressedTextureFamily::kBC,

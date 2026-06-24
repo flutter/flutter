@@ -22,7 +22,7 @@ class SamplerLibraryVK final
   ~SamplerLibraryVK() override;
 
   SamplerLibraryVK(const std::weak_ptr<DeviceHolderVK>& device_holder,
-                   float max_sampler_anisotropy);
+                   uint32_t max_sampler_anisotropy);
 
   void ApplyWorkarounds(const WorkaroundsVK& workarounds);
 
@@ -31,7 +31,7 @@ class SamplerLibraryVK final
 
   std::weak_ptr<DeviceHolderVK> device_holder_;
   std::vector<std::pair<uint64_t, std::shared_ptr<const Sampler>>> samplers_;
-  float max_sampler_anisotropy_ = 1.0f;
+  uint32_t max_sampler_anisotropy_ = 1;
   bool mips_disabled_workaround_ = false;
 
   // |SamplerLibrary|

@@ -684,10 +684,13 @@ bool CapabilitiesVK::SetPhysicalDevice(
             device_properties_.limits.maxFramebufferHeight};
 
   // Anisotropic filtering is gated on the samplerAnisotropy feature. When the
-  // feature is unavailable, report a maximum of 1 (disabled).
-  max_sampler_anisotropy_ = enabled_features.get().features.samplerAnisotropy
-                                ? device_properties_.limits.maxSamplerAnisotropy
-                                : 1.0f;
+  // feature is unavailable, report a maximum of 1 (disabled). The device limit
+  // is a float but is always an integer in practice, so floor it.
+  max_sampler_anisotropy_ =
+      enabled_features.get().features.samplerAnisotropy
+          ? static_cast<uint32_t>(
+                device_properties_.limits.maxSamplerAnisotropy)
+          : 1u;
 
   // Molten, Vulkan on Metal, cannot support triangle fans because Metal doesn't
   // support triangle fans.
@@ -883,7 +886,7 @@ ISize CapabilitiesVK::GetMaximumRenderPassAttachmentSize() const {
   return max_render_pass_attachment_size_;
 }
 
-float CapabilitiesVK::GetMaxSamplerAnisotropy() const {
+uint32_t CapabilitiesVK::GetMaxSamplerAnisotropy() const {
   return max_sampler_anisotropy_;
 }
 
