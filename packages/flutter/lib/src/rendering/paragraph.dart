@@ -41,8 +41,10 @@ typedef _TextBoundaryAtPosition = _TextBoundaryRecord Function(TextPosition posi
 
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
 /// [TextPosition], for the given [String].
-typedef _TextBoundaryAtPositionInText =
-    _TextBoundaryRecord Function(TextPosition position, String text);
+typedef _TextBoundaryAtPositionInText = _TextBoundaryRecord Function(
+  TextPosition position,
+  String text,
+);
 
 const String _kEllipsis = '\u2026';
 
@@ -353,6 +355,7 @@ class RenderParagraph extends RenderBox
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
+    double devicePixelRatio = 1.0,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -361,6 +364,7 @@ class RenderParagraph extends RenderBox
        ),
        _softWrap = softWrap,
        _overflow = overflow,
+       _devicePixelRatio = devicePixelRatio,
        _selectionColor = selectionColor,
        _textPainter = TextPainter(
          text: text,
@@ -663,6 +667,25 @@ class RenderParagraph extends RenderBox
     _textPainter.textScaler = value;
     _overflowShader = null;
     markNeedsLayout();
+  }
+
+  /// The number of device pixels for each logical pixel.
+  ///
+  /// This is used by some renderers (like WebParagraph on the web) to
+  /// regenerate the text bitmap when the scale changes.
+  double get devicePixelRatio => _devicePixelRatio;
+  double _devicePixelRatio;
+
+  set devicePixelRatio(double value) {
+    if (_devicePixelRatio == value) {
+      return;
+    }
+    _devicePixelRatio = value;
+    if (kIsWeb) {
+      // The `WebParagraph` implementation renders the paragraph as an image. After a
+      // `devicePixelRatio` change, the image needs to be regenerated or it would look blurry.
+      markNeedsPaint();
+    }
   }
 
   /// An optional maximum number of lines for the text to span, wrapping if
@@ -1017,6 +1040,19 @@ class RenderParagraph extends RenderBox
       return true;
     }());
 
+    if (_lastSelectableFragments != null) {
+      if (_needsClipping) {
+        context.canvas.save();
+        context.canvas.clipRect(offset & size);
+      }
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintSelection(context, offset);
+      }
+      if (_needsClipping) {
+        context.canvas.restore();
+      }
+    }
+
     if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
@@ -1027,12 +1063,6 @@ class RenderParagraph extends RenderBox
         context.canvas.save();
       }
       context.canvas.clipRect(bounds);
-    }
-
-    if (_lastSelectableFragments != null) {
-      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
-      }
     }
 
     assert(() {
@@ -1053,6 +1083,12 @@ class RenderParagraph extends RenderBox
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
+    }
+
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintHandles(context, offset);
+      }
     }
   }
 
@@ -1462,6 +1498,7 @@ class RenderParagraph extends RenderBox
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(DoubleProperty('devicePixelRatio', devicePixelRatio, defaultValue: 1.0));
   }
 }
 
@@ -3585,7 +3622,7 @@ class _SelectableFragment
     return _rect.size;
   }
 
-  void paint(PaintingContext context, Offset offset) {
+  void paintSelection(PaintingContext context, Offset offset) {
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
     }
@@ -3600,6 +3637,12 @@ class _SelectableFragment
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
         context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }
+    }
+  }
+
+  void paintHandles(PaintingContext context, Offset offset) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return;
     }
     if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
       context.pushLayer(

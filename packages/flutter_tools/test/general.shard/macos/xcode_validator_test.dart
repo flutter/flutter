@@ -15,6 +15,14 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
   group('Xcode validation', () {
     testWithoutContext('Emits missing status when Xcode is not installed', () async {
       final ProcessManager processManager = FakeProcessManager.any();
@@ -43,6 +51,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
       ]);
       final xcode = Xcode.test(
         processManager: processManager,
@@ -88,8 +98,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(
@@ -130,8 +140,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(
           command: <String>['xcrun', 'clang'],
           exitCode: 1,
@@ -161,8 +171,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
@@ -191,8 +201,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(
@@ -221,8 +231,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(
@@ -257,8 +267,8 @@ void main() {
             command: <String>['/usr/bin/xcode-select', '--print-path'],
             stdout: '/Library/Developer/CommandLineTools',
           ),
-          const FakeCommand(command: <String>['which', 'sysctl']),
-          const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+          kWhichSysctlCommand,
+          kx64CheckCommand,
           const FakeCommand(command: <String>['xcrun', 'clang']),
           const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
           const FakeCommand(
@@ -294,8 +304,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(

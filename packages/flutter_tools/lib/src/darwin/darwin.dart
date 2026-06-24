@@ -9,6 +9,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/swift_packages.dart';
+import '../platform_plugins.dart';
 import '../project.dart';
 
 /// Encapsulates platform-specific values for Darwin targets ([ios] and [macos]).
@@ -65,10 +66,17 @@ enum FlutterDarwinPlatform {
   /// A list of supported [XcodeSdk].
   final List<XcodeSdk> sdks;
 
+  String get pluginConfigKey {
+    return switch (this) {
+      ios => IOSPlugin.kConfigKey,
+      macos => MacOSPlugin.kConfigKey,
+    };
+  }
+
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
     return switch (this) {
-      ios => Version(13, 0, null),
+      ios => Version(15, 0, null),
       macos => Version(10, 15, null),
     };
   }
