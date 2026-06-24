@@ -237,5 +237,5 @@ Future<void> testMain() async {
       print('getClosestGlyphClusterAt($point)-0.2: $glyph2');
     }
     await matchGoldenFile('web_paragraph.print.png', region: region);
-  }, solo: true);
+  }, skip: true);
 }

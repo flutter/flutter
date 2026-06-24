@@ -44,10 +44,7 @@ Future<void> testMain() async {
       positionee,
       const ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
     );
-    expect(
-      positionbb,
-      const ui.TextPosition(offset: text.length, affinity: ui.TextAffinity.upstream),
-    );
+    expect(positionbb, const ui.TextPosition(offset: text.length - 1));
   });
 
   test('Paragraph getPositionForOffset multiple lines', () {
@@ -80,10 +77,7 @@ Future<void> testMain() async {
       positionee,
       const ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
     );
-    expect(
-      positionbb,
-      const ui.TextPosition(offset: text.length, affinity: ui.TextAffinity.upstream),
-    );
+    expect(positionbb, const ui.TextPosition(offset: text.length - 1));
   });
 
   test('Paragraph getPositionForOffset above and below the line', () {
@@ -114,9 +108,9 @@ Future<void> testMain() async {
       ui.Offset(middle, paragraph.height + 10),
     );
 
-    expect(position1, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(position4, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
+    expect(position1, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position2, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position3, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(position4, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
   });
 }

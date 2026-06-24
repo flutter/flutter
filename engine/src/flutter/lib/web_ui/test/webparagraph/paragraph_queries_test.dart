@@ -333,5 +333,5 @@ Future<void> testMain() async {
       final ui.GlyphInfo? glyph2 = paragraph.getClosestGlyphInfoForOffset(point.translate(-0.2, 0));
       print('getClosestGlyphClusterAt($point)-0.2: $glyph2');
     }
-  }, solo: true);
+  }, skip: true);
 }

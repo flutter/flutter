@@ -958,7 +958,7 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
     final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
-    WebParagraphDebug.apiTrace('getGlyphInfoAt$codeUnitOffset): $result');
+    WebParagraphDebug.apiTrace('getGlyphInfoAt($codeUnitOffset): $result');
     return result;
   }
 
@@ -998,12 +998,6 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    /* Jul
-    final int codepointPosition = switch (position.affinity) {
-      ui.TextAffinity.upstream => position.offset - 1,
-      ui.TextAffinity.downstream => position.offset,
-    };
-    */
     final int codepointPosition = position.offset;
     final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
     WebParagraphDebug.apiTrace('getLineBoundary($position): $result');

@@ -767,7 +767,6 @@ class TextLayout {
           }
           if (left <= offset.dx && right > offset.dx) {
             final double center = (left + right) / 2;
-            print('center: $center ${offset.dx} ${cluster.start} ${cluster.end}');
             ui.TextPosition position;
             if (offset.dx < center) {
               position = block.isLtr
@@ -1086,14 +1085,15 @@ abstract class LineBlock {
     if (span.style.height == null) {
       return;
     }
-    final double runHeight = span.style.height! * span.style.fontSize!;
+    final double fontSize = span.style.fontSize ?? 14.0;
+    final double runHeight = span.style.height! * fontSize;
     final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
     if (span.style.leadingDistribution == ui.TextLeadingDistribution.even) {
       final double extraLeading = (runHeight - fontHeight) / 2;
       _multipliedFontBoundingBoxAscent += extraLeading;
       _multipliedFontBoundingBoxDescent += extraLeading;
     } else {
-      final double multiplier = runHeight / fontHeight;
+      final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
       _multipliedFontBoundingBoxAscent *= multiplier;
       _multipliedFontBoundingBoxDescent *= multiplier;
     }

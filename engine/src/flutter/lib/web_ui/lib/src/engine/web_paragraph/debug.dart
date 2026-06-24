@@ -13,38 +13,38 @@ class WebParagraphDebug {
 
   /// Logs a debug message if logging is enabled.
   static void log(String arg) {
-    //assert(() {
+    assert(() {
     if (logging) {
       print(arg);
     }
-    //  return true;
-    //}());
+      return true;
+    }());
   }
 
   /// Logs an API trace message if API logging is enabled.
   static void apiTrace(String arg) {
-    //assert(() {
+    assert(() {
     if (apiLogging || logging) {
       print(arg);
     }
-    //  return true;
-    //}());
+      return true;
+    }());
   }
 
   /// Logs an API warning message.
   static void warning(String arg) {
-    //assert(() {
+    assert(() {
     print('WARNING: $arg');
-    //  return true;
-    //}());
+      return true;
+    }());
   }
 
   /// Logs an API error message.
   static void error(String arg) {
-    //assert(() {
+    assert(() {
     print('ERROR: $arg');
-    //  return true;
-    //}());
+      return true;
+    }());
   }
 }
 
