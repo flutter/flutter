@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, omit_obvious_local_variable_types
+// ignore_for_file: avoid_print
 
 import 'dart:async';
 import 'dart:convert';
@@ -40,7 +40,7 @@ class ChecksSummary {
     'passed': passed,
     'failed': failed,
     'running': running,
-    'failures': failures.map((CheckFailure f) => f.toJson()).toList(),
+    'failures': failures.map((f) => f.toJson()).toList(),
   };
 }
 
@@ -73,7 +73,7 @@ class PullRequest {
   final String defaultBranchName;
 
   bool get isThirdParty {
-    const Set<String> members = {'MEMBER', 'OWNER', 'COLLABORATOR'};
+    const members = {'MEMBER', 'OWNER', 'COLLABORATOR'};
     return !members.contains(authorAssociation.toUpperCase());
   }
 
@@ -166,7 +166,7 @@ class GhClient {
   }
 
   Future<dynamic> _getApi(String path, {List<String>? options}) async {
-    final List<String> args = <String>['api', path];
+    final args = <String>['api', path];
     if (options != null) {
       args.addAll(options);
     }
@@ -175,13 +175,13 @@ class GhClient {
   }
 
   Future<String> getViewerLogin() async {
-    final Map<String, dynamic> response = await _getApi('/user') as Map<String, dynamic>;
+    final response = await _getApi('/user') as Map<String, dynamic>;
     return response['login'] as String;
   }
 
   Future<int> getCommitsBehind(String headSha) async {
     try {
-      final Map<String, dynamic> response =
+      final response =
           await _getApi('/repos/$owner/$repo/compare/main...$headSha') as Map<String, dynamic>;
       return response['behind_by'] as int? ?? 0;
     } catch (_) {
@@ -191,9 +191,8 @@ class GhClient {
 
   Future<String> getPrHeadSha(int prNumber) async {
     try {
-      final Map<String, dynamic> response =
-          await _getApi('/repos/$owner/$repo/pulls/$prNumber') as Map<String, dynamic>;
-      final Map<String, dynamic> head = response['head'] as Map<String, dynamic>;
+      final response = await _getApi('/repos/$owner/$repo/pulls/$prNumber') as Map<String, dynamic>;
+      final head = response['head'] as Map<String, dynamic>;
       return head['sha'] as String;
     } catch (_) {
       return '';
@@ -201,10 +200,9 @@ class GhClient {
   }
 
   Future<List<PullRequest>> fetchApprovedPRs(String viewerLogin) async {
-    final String queryStr =
-        'repo:$owner/$repo is:pr is:open review:approved reviewed-by:$viewerLogin';
+    final queryStr = 'repo:$owner/$repo is:pr is:open review:approved reviewed-by:$viewerLogin';
 
-    final String graphqlQuery =
+    final graphqlQuery =
         '''
       query(\$queryStr: String!) {
         search(query: \$queryStr, type: ISSUE, first: 50) {
@@ -266,7 +264,7 @@ class GhClient {
       }
     ''';
 
-    final List<String> args = <String>[
+    final args = <String>[
       'api',
       'graphql',
       '-F',
@@ -276,19 +274,19 @@ class GhClient {
     ];
 
     final String output = await _runCommand('gh', args);
-    final Map<String, dynamic> payload = jsonDecode(output) as Map<String, dynamic>;
-    final Map<String, dynamic>? data = payload['data'] as Map<String, dynamic>?;
+    final payload = jsonDecode(output) as Map<String, dynamic>;
+    final data = payload['data'] as Map<String, dynamic>?;
     if (data == null) {
       throw Exception('Failed to query GitHub GraphQL API: $payload');
     }
 
-    final Map<String, dynamic> search = data['search'] as Map<String, dynamic>;
-    final List<dynamic> nodes = search['nodes'] as List<dynamic>;
+    final search = data['search'] as Map<String, dynamic>;
+    final nodes = search['nodes'] as List<dynamic>;
 
     final Iterable<Future<PullRequest?>> prFutures = nodes.map((dynamic node) async {
-      final Map<String, dynamic> prData = node as Map<String, dynamic>;
+      final prData = node as Map<String, dynamic>;
 
-      final Map<String, dynamic>? reviews = prData['reviews'] as Map<String, dynamic>?;
+      final reviews = prData['reviews'] as Map<String, dynamic>?;
       final List<dynamic>? reviewNodes = reviews != null
           ? reviews['nodes'] as List<dynamic>?
           : null;
@@ -300,44 +298,42 @@ class GhClient {
         return null;
       }
 
-      final int number = prData['number'] as int;
-      final String title = prData['title'] as String;
-      final Map<String, dynamic>? authorData = prData['author'] as Map<String, dynamic>?;
-      final String author = authorData != null ? authorData['login'] as String : 'unknown';
-      final String authorAssociation = prData['authorAssociation'] as String;
-      final String baseRefName = prData['baseRefName'] as String;
+      final number = prData['number'] as int;
+      final title = prData['title'] as String;
+      final authorData = prData['author'] as Map<String, dynamic>?;
+      final author = authorData != null ? authorData['login'] as String : 'unknown';
+      final authorAssociation = prData['authorAssociation'] as String;
+      final baseRefName = prData['baseRefName'] as String;
 
-      final Map<String, dynamic> repositoryData = prData['repository'] as Map<String, dynamic>;
-      final Map<String, dynamic>? defaultBranchRef =
-          repositoryData['defaultBranchRef'] as Map<String, dynamic>?;
-      final String defaultBranchName = defaultBranchRef != null
+      final repositoryData = prData['repository'] as Map<String, dynamic>;
+      final defaultBranchRef = repositoryData['defaultBranchRef'] as Map<String, dynamic>?;
+      final defaultBranchName = defaultBranchRef != null
           ? defaultBranchRef['name'] as String
           : 'main';
 
-      final Map<String, dynamic> labelsSection = prData['labels'] as Map<String, dynamic>;
-      final List<dynamic> labelNodes = labelsSection['nodes'] as List<dynamic>;
+      final labelsSection = prData['labels'] as Map<String, dynamic>;
+      final labelNodes = labelsSection['nodes'] as List<dynamic>;
       final List<String> labels = labelNodes
           .map((dynamic l) => (l as Map<String, dynamic>)['name'] as String)
           .toList();
 
       final String mergeable = prData['mergeable'] as String? ?? 'UNKNOWN';
-      final bool hasMergeConflicts = mergeable == 'CONFLICTING';
+      final hasMergeConflicts = mergeable == 'CONFLICTING';
 
-      final Map<String, dynamic> commitsSection = prData['commits'] as Map<String, dynamic>;
-      final List<dynamic> commitsNodes = commitsSection['nodes'] as List<dynamic>;
+      final commitsSection = prData['commits'] as Map<String, dynamic>;
+      final commitsNodes = commitsSection['nodes'] as List<dynamic>;
       if (commitsNodes.isEmpty) {
         return null;
       }
 
-      final Map<String, dynamic> firstCommitNode = commitsNodes.first as Map<String, dynamic>;
-      final Map<String, dynamic> headCommitData = firstCommitNode['commit'] as Map<String, dynamic>;
-      final String headSha = headCommitData['oid'] as String;
+      final firstCommitNode = commitsNodes.first as Map<String, dynamic>;
+      final headCommitData = firstCommitNode['commit'] as Map<String, dynamic>;
+      final headSha = headCommitData['oid'] as String;
 
       final int behindCommits = await getCommitsBehind(headSha);
       final bool isBehind = behindCommits > 0;
 
-      final Map<String, dynamic>? rollup =
-          headCommitData['statusCheckRollup'] as Map<String, dynamic>?;
+      final rollup = headCommitData['statusCheckRollup'] as Map<String, dynamic>?;
       final ChecksSummary checksSummary = _parseChecks(rollup);
 
       return PullRequest(
@@ -364,33 +360,33 @@ class GhClient {
       return ChecksSummary(total: 0, passed: 0, failed: 0, running: 0, failures: <CheckFailure>[]);
     }
 
-    final Map<String, dynamic>? contexts = rollup['contexts'] as Map<String, dynamic>?;
+    final contexts = rollup['contexts'] as Map<String, dynamic>?;
     if (contexts == null) {
       return ChecksSummary(total: 0, passed: 0, failed: 0, running: 0, failures: <CheckFailure>[]);
     }
 
-    final List<dynamic> nodes = contexts['nodes'] as List<dynamic>;
+    final nodes = contexts['nodes'] as List<dynamic>;
     var total = 0;
     var passed = 0;
     var failed = 0;
     var running = 0;
-    final List<CheckFailure> failures = <CheckFailure>[];
+    final failures = <CheckFailure>[];
 
     for (final dynamic node in nodes) {
       if (node == null) {
         continue;
       }
       total++;
-      final Map<String, dynamic> data = node as Map<String, dynamic>;
-      final String typename = data['__typename'] as String;
+      final data = node as Map<String, dynamic>;
+      final typename = data['__typename'] as String;
 
       if (typename == 'CheckRun') {
-        final String name = data['name'] as String;
-        final String id = data['id'] as String;
-        final int? databaseId = data['databaseId'] as int?;
-        final String runId = databaseId != null ? databaseId.toString() : id;
-        final String status = data['status'] as String;
-        final String? conclusion = data['conclusion'] as String?;
+        final name = data['name'] as String;
+        final id = data['id'] as String;
+        final databaseId = data['databaseId'] as int?;
+        final runId = databaseId != null ? databaseId.toString() : id;
+        final status = data['status'] as String;
+        final conclusion = data['conclusion'] as String?;
 
         if (status == 'COMPLETED') {
           if (conclusion == 'SUCCESS' || conclusion == 'SKIPPED' || conclusion == 'NEUTRAL') {
@@ -403,9 +399,9 @@ class GhClient {
           running++;
         }
       } else if (typename == 'StatusContext') {
-        final String context = data['context'] as String;
-        final String id = data['id'] as String;
-        final String state = data['state'] as String;
+        final context = data['context'] as String;
+        final id = data['id'] as String;
+        final state = data['state'] as String;
 
         if (state == 'SUCCESS') {
           passed++;
@@ -471,7 +467,7 @@ class ShepherdService {
 
   Future<Map<String, dynamic>> _loadState() async {
     try {
-      final File file = File(_stateFilePath);
+      final file = File(_stateFilePath);
       if (file.existsSync()) {
         final String content = await file.readAsString();
         return jsonDecode(content) as Map<String, dynamic>;
@@ -482,7 +478,7 @@ class ShepherdService {
 
   Future<void> _saveState(Map<String, dynamic> state) async {
     try {
-      final File file = File(_stateFilePath);
+      final file = File(_stateFilePath);
       final Directory directory = file.parent;
       if (!directory.existsSync()) {
         await directory.create(recursive: true);
@@ -493,13 +489,13 @@ class ShepherdService {
 
   Future<Map<String, dynamic>> _syncAndGetState(List<PullRequest> prs) async {
     final Map<String, dynamic> state = await _loadState();
-    final Map<String, dynamic> syncedState = <String, dynamic>{};
+    final syncedState = <String, dynamic>{};
 
-    for (final PullRequest pr in prs) {
-      final String prKey = pr.number.toString();
+    for (final pr in prs) {
+      final prKey = pr.number.toString();
       final String currentHead = await ghClient.getPrHeadSha(pr.number);
 
-      final Map<String, dynamic>? existingPrState = state[prKey] as Map<String, dynamic>?;
+      final existingPrState = state[prKey] as Map<String, dynamic>?;
       if (existingPrState != null && existingPrState['headSha'] == currentHead) {
         syncedState[prKey] = existingPrState;
       } else {
@@ -516,9 +512,9 @@ class ShepherdService {
     Map<String, dynamic> globalState, {
     required bool dryRun,
   }) async {
-    final String prKey = pr.number.toString();
+    final prKey = pr.number.toString();
     final ShepherdAction action = pr.nextRecommendedAction;
-    final String prPrefix = '[#${pr.number}]';
+    final prPrefix = '[#${pr.number}]';
 
     if (action == ShepherdAction.none) {
       if (pr.labels.contains('autosubmit')) {
@@ -553,7 +549,7 @@ class ShepherdService {
         await ghClient.updateBranch(pr.number);
         return '$prPrefix SUCCESS: Triggered branch update (was behind by ${pr.behindByCommits} commits).';
       } catch (e) {
-        final String errStr = e.toString();
+        final errStr = e.toString();
         if (errStr.contains('workflow') && errStr.contains('scope')) {
           return '$prPrefix ERROR: Failed to update branch because your GitHub CLI token lacks the "workflow" scope.\n'
               '  Remediation: Run the following command in your terminal and try again:\n'
@@ -588,13 +584,13 @@ class ShepherdService {
     }
 
     if (action == ShepherdAction.rerunChecks) {
-      final Map<String, dynamic> prState = globalState[prKey] as Map<String, dynamic>;
-      final Map<String, int> retriesMap = Map<String, int>.from(
+      final prState = globalState[prKey] as Map<String, dynamic>;
+      final retriesMap = Map<String, int>.from(
         prState['retries'] as Map<dynamic, dynamic>? ?? <dynamic, dynamic>{},
       );
 
-      final List<CheckFailure> failuresToRerun = <CheckFailure>[];
-      final List<String> skippedFailures = <String>[];
+      final failuresToRerun = <CheckFailure>[];
+      final skippedFailures = <String>[];
 
       for (final CheckFailure failure in pr.checks.failures) {
         final int currentRerunCount = retriesMap[failure.name] ?? 0;
@@ -612,8 +608,8 @@ class ShepherdService {
             '  Skipped: ${skippedFailures.join(", ")}';
       }
 
-      final List<String> logs = <String>[];
-      for (final CheckFailure failure in failuresToRerun) {
+      final logs = <String>[];
+      for (final failure in failuresToRerun) {
         final int? attempt = retriesMap[failure.name];
         logs.add(
           '$prPrefix WARNING: Check "${failure.name}" (attempt $attempt/$maxRetries) cannot be re-run via the API due to GitHub App permission policies. Please open https://github.com/${ghClient.owner}/${ghClient.repo}/pull/${pr.number} in your browser and click the "Re-run" button next to the check.',
@@ -643,18 +639,18 @@ class ShepherdService {
     required bool dryRun,
   }) async {
     final List<PullRequest> prs = await ghClient.fetchApprovedPRs(viewerLogin);
-    final List<PullRequest> eligiblePrs = prs.where((PullRequest pr) => pr.isThirdParty).toList();
+    final List<PullRequest> eligiblePrs = prs.where((pr) => pr.isThirdParty).toList();
 
     if (eligiblePrs.isEmpty) {
       return <String>['No open, approved third-party PRs found requiring shepherding.'];
     }
 
     final Map<String, dynamic> globalState = await _syncAndGetState(eligiblePrs);
-    final List<String> logs = <String>[];
+    final List<String> logs = [];
 
     if (targetPrNumber != null) {
       final PullRequest targetPr = eligiblePrs.firstWhere(
-        (PullRequest pr) => pr.number == targetPrNumber,
+        (pr) => pr.number == targetPrNumber,
         orElse: () => throw ArgumentError(
           'PR #$targetPrNumber is not in your approved, third-party PR list.',
         ),
@@ -662,7 +658,7 @@ class ShepherdService {
       final String log = await shepherdPR(targetPr, globalState, dryRun: dryRun);
       logs.add(log);
     } else {
-      for (final PullRequest pr in eligiblePrs) {
+      for (final pr in eligiblePrs) {
         final String log = await shepherdPR(pr, globalState, dryRun: dryRun);
         logs.add(log);
       }
