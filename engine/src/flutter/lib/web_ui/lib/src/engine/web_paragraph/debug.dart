@@ -14,9 +14,9 @@ class WebParagraphDebug {
   /// Logs a debug message if logging is enabled.
   static void log(String arg) {
     assert(() {
-    if (logging) {
-      print(arg);
-    }
+      if (logging) {
+        print(arg);
+      }
       return true;
     }());
   }
@@ -24,9 +24,9 @@ class WebParagraphDebug {
   /// Logs an API trace message if API logging is enabled.
   static void apiTrace(String arg) {
     assert(() {
-    if (apiLogging || logging) {
-      print(arg);
-    }
+      if (apiLogging || logging) {
+        print(arg);
+      }
       return true;
     }());
   }
@@ -34,7 +34,7 @@ class WebParagraphDebug {
   /// Logs an API warning message.
   static void warning(String arg) {
     assert(() {
-    print('WARNING: $arg');
+      print('WARNING: $arg');
       return true;
     }());
   }
@@ -42,7 +42,7 @@ class WebParagraphDebug {
   /// Logs an API error message.
   static void error(String arg) {
     assert(() {
-    print('ERROR: $arg');
+      print('ERROR: $arg');
       return true;
     }());
   }
