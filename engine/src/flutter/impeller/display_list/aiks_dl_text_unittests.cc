@@ -1200,7 +1200,7 @@ TEST_P(AiksTest, HandlesMissingAndPlaceholderGlyphs) {
 
   // String containing standard and some obscure/unsupported characters
   const std::string text =
-      "Hello \U0001F600 World \u2603 \x1D15E";  // Emoji and rare symbols
+      "Hello \U0001F600 World \u2603 \U0001D15E";  // Emoji and rare symbols
 
   auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
   ASSERT_TRUE(blob);
