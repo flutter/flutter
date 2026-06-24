@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Regression test for https://github.com/flutter/flutter/issues/187018:
-// an armv7 Linux cross-build must resolve to a linux/arm native-assets target
-// so the emitted NativeAssetsManifest.json is keyed `linux_arm` — NOT the
-// `android_arm` key that previously leaked in and silently disabled FFI
-// plugins.
+// Regression test for https://github.com/flutter/flutter/issues/187018.
 //
-// This is a hermetic unit test: it exercises the TargetPlatform -> native
-// assets target translation directly, with no real build and no arm32 silicon
-// (per the maintainer's requested testing approach on the issue).
+// Before linux_arm existed, armv7 Linux cross-builds emitted a
+// NativeAssetsManifest.json keyed `android_arm` instead of `linux_arm`. That
+// wrong key silently disabled FFI and code-asset plugins: at load time nothing
+// matched the linux/arm host, so the plugins were dropped without surfacing an
+// error.
+//
+// The TargetPlatform -> native-assets target translation is pure and
+// deterministic, so these are hermetic unit tests: they assert the resolved
+// target's OS, architecture, and manifest key directly. No arm32 silicon and
+// no engine artifacts are required to prove the manifest is keyed `linux_arm`.
 
 import 'package:code_assets/code_assets.dart';
 import 'package:file/memory.dart';
