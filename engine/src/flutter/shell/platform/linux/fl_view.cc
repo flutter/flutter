@@ -52,12 +52,6 @@ struct _FlView {
   // Combines layers into frame.
   FlCompositor* compositor;
 
-  // Signal subscription for engine restart signal.
-  guint on_pre_engine_restart_cb_id;
-
-  // Signal subscription for updating semantics signal.
-  guint update_semantics_cb_id;
-
   // ID for this view.
   FlutterViewId view_id;
 
@@ -81,9 +75,6 @@ struct _FlView {
 
   // Accessible tree from Flutter, exposed as an AtkPlug.
   FlViewAccessible* view_accessible;
-
-  // Signal subscripton for cursor changes.
-  guint cursor_changed_cb_id;
 
   // TRUE if the view size should be controlled by Flutter.
   gboolean sized_to_content;
@@ -110,7 +101,7 @@ G_DEFINE_TYPE_WITH_CODE(
 
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
+  g_autoptr(FlView) self = FL_VIEW(user_data);
 
   if (!self->have_first_frame) {
     self->have_first_frame = TRUE;
@@ -205,8 +196,9 @@ static void setup_cursor(FlView* self) {
   FlMouseCursorHandler* handler =
       fl_engine_get_mouse_cursor_handler(self->engine);
 
-  self->cursor_changed_cb_id = g_signal_connect_swapped(
-      handler, "cursor-changed", G_CALLBACK(cursor_changed_cb), self);
+  g_signal_connect_object(handler, "cursor-changed",
+                          G_CALLBACK(cursor_changed_cb), self,
+                          G_CONNECT_SWAPPED);
   cursor_changed_cb(self);
 }
 
@@ -296,7 +288,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
   // Perform the redraw in the GTK thead.
-  g_idle_add(redraw_cb, self);
+  g_idle_add(redraw_cb, g_object_ref(self));
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -530,8 +522,9 @@ static void realize_cb(FlView* self) {
                                   GTK_WINDOW(toplevel_window));
 
   // Handle requests by the user to close the application.
-  g_signal_connect_swapped(toplevel_window, "delete-event",
-                           G_CALLBACK(window_delete_event_cb), self);
+  g_signal_connect_object(toplevel_window, "delete-event",
+                          G_CALLBACK(window_delete_event_cb), self,
+                          G_CONNECT_SWAPPED);
 
   // Flutter engine will need to make the context current from raster thread
   // during initialization.
@@ -603,27 +596,9 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
   if (self->engine != nullptr) {
-    FlMouseCursorHandler* handler =
-        fl_engine_get_mouse_cursor_handler(self->engine);
-    if (self->cursor_changed_cb_id != 0) {
-      g_signal_handler_disconnect(handler, self->cursor_changed_cb_id);
-      self->cursor_changed_cb_id = 0;
-    }
-
     // Release the view ID from the engine.
     fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
                           nullptr);
-  }
-
-  if (self->on_pre_engine_restart_cb_id != 0) {
-    g_signal_handler_disconnect(self->engine,
-                                self->on_pre_engine_restart_cb_id);
-    self->on_pre_engine_restart_cb_id = 0;
-  }
-
-  if (self->update_semantics_cb_id != 0) {
-    g_signal_handler_disconnect(self->engine, self->update_semantics_cb_id);
-    self->update_semantics_cb_id = 0;
   }
 
   g_clear_object(&self->render_context);
@@ -740,11 +715,12 @@ static void setup_engine(FlView* self) {
   init_scrolling(self);
   init_touch(self);
 
-  self->on_pre_engine_restart_cb_id =
-      g_signal_connect_swapped(self->engine, "on-pre-engine-restart",
-                               G_CALLBACK(on_pre_engine_restart_cb), self);
-  self->update_semantics_cb_id = g_signal_connect_swapped(
-      self->engine, "update-semantics", G_CALLBACK(update_semantics_cb), self);
+  g_signal_connect_object(self->engine, "on-pre-engine-restart",
+                          G_CALLBACK(on_pre_engine_restart_cb), self,
+                          G_CONNECT_SWAPPED);
+  g_signal_connect_object(self->engine, "update-semantics",
+                          G_CALLBACK(update_semantics_cb), self,
+                          G_CONNECT_SWAPPED);
 }
 
 static void fl_view_init(FlView* self) {

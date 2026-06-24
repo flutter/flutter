@@ -641,6 +641,28 @@ abstract class Route<T> extends _RoutePlaceholder {
     return _navigator?._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ??
         false;
   }
+
+  /// Asserts that the given [result] is of a type that can be consumed by this route.
+  ///
+  /// This is used by [Navigator] to provide a clear error message when a route is popped with a mismatched result type.
+  bool _debugCheckCanConsumeResult(Object? result, {required String methodName}) {
+    if (result is! T?) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'A request was made to pop a route with a result of type ${result.runtimeType}, but the route expected a value of type $T.',
+        ),
+        ErrorDescription(
+          'This usually happens when the type provided to Navigator.$methodName() '
+          'is not a subtype of the type expected by the Route (e.g. DialogRoute<Null>), '
+          'or when a generic type is explicitly provided to a route creation method '
+          '(such as showDialog<T>()) but the popped value does not match this type.',
+        ),
+        DiagnosticsProperty<Route<Object?>>('The route was', this),
+        DiagnosticsProperty<Object?>('The provided result was', result),
+      ]);
+    }
+    return true;
+  }
 }
 
 /// Data that might be useful in constructing a [Route].
@@ -1301,7 +1323,7 @@ const TraversalEdgeBehavior kDefaultRouteDirectionalTraversalEdgeBehavior =
 /// such as Android, the system UI will provide a back button (outside the
 /// bounds of your application) that will allow the user to navigate back
 /// to earlier routes in your application's stack. On platforms that don't
-/// have this build-in navigation mechanism, the use of an [AppBar] (typically
+/// have this built-in navigation mechanism, the use of an [AppBar] (typically
 /// used in the [Scaffold.appBar] property) can automatically add a back
 /// button for user navigation.
 ///
@@ -5563,7 +5585,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return false;
     }
     assert(lastEntry.route._isInstalledIn(this));
-
+    assert(lastEntry.route._debugCheckCanConsumeResult(result, methodName: 'maybePop'));
     // TODO(justinmc): When the deprecated willPop method is removed, delete
     // this code and use only popDisposition, below.
     if (await lastEntry.route.willPop() == RoutePopDisposition.doNotPop) {
@@ -5619,6 +5641,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   void pop<T extends Object?>([T? result]) {
     assert(!_debugLocked);
+    assert(() {
+      final _RouteEntry? entry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      return entry?.route._debugCheckCanConsumeResult(result, methodName: 'pop') ?? true;
+    }());
     assert(() {
       _debugLocked = true;
       return true;

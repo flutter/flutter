@@ -9,17 +9,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-PaintHandle? _sharedDownscalingPaintHandle;
-PaintHandle _getDownscalingPaintHandle() {
-  if (_sharedDownscalingPaintHandle == null) {
-    final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.low;
-    _sharedDownscalingPaintHandle = (tempPaint as SkwasmPaint).toRawPaint(
-      defaultBlurTileMode: ui.TileMode.clamp,
-    );
-  }
-  return _sharedDownscalingPaintHandle!;
-}
-
 class SkwasmCanvas implements LayerCanvas {
   factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) => SkwasmCanvas.fromHandle(
     withStackScope(
@@ -136,7 +125,7 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    canvasClipPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, doAntiAlias);
+    canvasClipPath(_handle, ((path as EnginePath).backendPath as SkwasmPath).handle, doAntiAlias);
   }
 
   @override
@@ -232,18 +221,28 @@ class SkwasmCanvas implements LayerCanvas {
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, paintHandle);
+    final enginePath = path as EnginePath;
+    final skwasmPath = enginePath.backendPath as SkwasmPath;
+    canvasDrawPath(_handle, skwasmPath.handle, paintHandle);
     paintDispose(paintHandle);
+  }
+
+  ImageHandle _getImageHandle(ui.Image image) {
+    if (image case EngineImage(backendImage: SkwasmImage(:final handle))) {
+      return handle;
+    }
+    throw ArgumentError('The image being drawn must be a Skwasm image.');
   }
 
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
+    final ImageHandle imageHandle = _getImageHandle(image);
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
     canvasDrawImage(
       _handle,
-      (image as SkwasmImage).handle,
+      imageHandle,
       offset.dx,
       offset.dy,
       paintHandle,
@@ -254,58 +253,7 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    if (shouldIterativelyDownscale(src, dst, paint)) {
-      // Use iterative downscaling to avoid aliasing artifacts when downscaling
-      // by a large factor (scale < 0.5). This is a workaround for a Skia bug
-      // where mipmaps are not used for downscaling on the web.
-      // See: https://g-issues.skia.org/issues/500117356
-      final int targetWidth = dst.width.toInt();
-      final int targetHeight = dst.height.toInt();
-
-      final ui.Image downscaledImage = getOrCreateDownscaledImage(
-        box: (image as SkwasmImage).box,
-        originalImage: image,
-        src: src,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
-        rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {
-          final CanvasHandle tempCanvasHandle = (canvas as SkwasmCanvas)._handle;
-          withStackScope((StackScope scope) {
-            final Pointer<Float> sourceRect = scope.convertRectToNative(s);
-            final Pointer<Float> destRect = scope.convertRectToNative(d);
-            canvasDrawImageRect(
-              tempCanvasHandle,
-              (img as SkwasmImage).handle,
-              sourceRect,
-              destRect,
-              _getDownscalingPaintHandle(),
-              ui.FilterQuality.low.index,
-            );
-          });
-        },
-      );
-
-      withStackScope((StackScope scope) {
-        final Pointer<Float> sourceRect = scope.convertRectToNative(
-          ui.Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
-        );
-        final Pointer<Float> destRect = scope.convertRectToNative(dst);
-        final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
-          defaultBlurTileMode: ui.TileMode.clamp,
-        );
-        canvasDrawImageRect(
-          _handle,
-          (downscaledImage as SkwasmImage).handle,
-          sourceRect,
-          destRect,
-          paintHandle,
-          paint.filterQuality.index,
-        );
-        paintDispose(paintHandle);
-      });
-      return;
-    }
-
+    final ImageHandle imageHandle = _getImageHandle(image);
     withStackScope((StackScope scope) {
       final Pointer<Float> sourceRect = scope.convertRectToNative(src);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -314,7 +262,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageRect(
         _handle,
-        (image as SkwasmImage).handle,
+        imageHandle,
         sourceRect,
         destRect,
         paintHandle,
@@ -326,6 +274,7 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageNine(ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
+    final ImageHandle imageHandle = _getImageHandle(image);
     withStackScope((StackScope scope) {
       final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -334,7 +283,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageNine(
         _handle,
-        (image as SkwasmImage).handle,
+        imageHandle,
         centerRect,
         destRect,
         paintHandle,
@@ -388,29 +337,35 @@ class SkwasmCanvas implements LayerCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) => withStackScope((StackScope scope) {
-    final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
-    final RawRect rawRects = scope.convertRectsToNative(rects);
-    final RawColorArray rawColors = colors != null
-        ? scope.convertColorArrayToNative(colors)
-        : nullptr;
-    final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
-      defaultBlurTileMode: ui.TileMode.clamp,
-    );
-    canvasDrawAtlas(
-      _handle,
-      (atlas as SkwasmImage).handle,
-      rawTransforms,
-      rawRects,
-      rawColors,
-      transforms.length,
-      (blendMode ?? ui.BlendMode.src).index,
-      rawCullRect,
-      paintHandle,
-    );
-    paintDispose(paintHandle);
-  });
+  ) {
+    final ImageHandle atlasHandle = _getImageHandle(atlas);
+    withStackScope((StackScope scope) {
+      final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
+      final RawRect rawRects = scope.convertRectsToNative(rects);
+      final RawColorArray rawColors = colors != null
+          ? scope.convertColorArrayToNative(colors)
+          : nullptr;
+      final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
+
+      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
+
+      canvasDrawAtlas(
+        _handle,
+        atlasHandle,
+        rawTransforms,
+        rawRects,
+        rawColors,
+        transforms.length,
+        (blendMode ?? ui.BlendMode.src).index,
+        rawCullRect,
+        paintHandle,
+      );
+
+      paintDispose(paintHandle);
+    });
+  }
 
   @override
   void drawRawAtlas(
@@ -421,35 +376,41 @@ class SkwasmCanvas implements LayerCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) => withStackScope((StackScope scope) {
-    final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
-    final RawRect rawRects = scope.convertDoublesToNative(rects);
-    final RawColorArray rawColors = colors != null
-        ? scope.convertIntsToUint32Native(colors)
-        : nullptr;
-    final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
-      defaultBlurTileMode: ui.TileMode.clamp,
-    );
-    canvasDrawAtlas(
-      _handle,
-      (atlas as SkwasmImage).handle,
-      rawTransforms,
-      rawRects,
-      rawColors,
-      rstTransforms.length ~/ 4,
-      (blendMode ?? ui.BlendMode.src).index,
-      rawCullRect,
-      paintHandle,
-    );
-    paintDispose(paintHandle);
-  });
+  ) {
+    final ImageHandle atlasHandle = _getImageHandle(atlas);
+    withStackScope((StackScope scope) {
+      final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
+      final RawRect rawRects = scope.convertDoublesToNative(rects);
+      final RawColorArray rawColors = colors != null
+          ? scope.convertIntsToUint32Native(colors)
+          : nullptr;
+      final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
+
+      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
+
+      canvasDrawAtlas(
+        _handle,
+        atlasHandle,
+        rawTransforms,
+        rawRects,
+        rawColors,
+        rstTransforms.length ~/ 4,
+        (blendMode ?? ui.BlendMode.src).index,
+        rawCullRect,
+        paintHandle,
+      );
+
+      paintDispose(paintHandle);
+    });
+  }
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
     canvasDrawShadow(
       _handle,
-      ((path as LazyPath).builtPath as SkwasmPath).handle,
+      ((path as EnginePath).backendPath as SkwasmPath).handle,
       elevation,
       EngineFlutterDisplay.instance.devicePixelRatio,
       color.value,

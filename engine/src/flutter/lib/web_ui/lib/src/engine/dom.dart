@@ -872,8 +872,8 @@ extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntr
 
 @JS('HTMLCanvasElement')
 extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
-  external double? width;
-  external double? height;
+  external num? width;
+  external num? height;
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
@@ -1062,6 +1062,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   }
 
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void putImageData(DomImageData imagedata, int dx, int dy);
   external void lineTo(num x, num y);
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
@@ -2701,6 +2702,11 @@ extension JSArrayExtension on JSArray<JSAny?> {
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
 }
+
+@JS('window.TextCluster')
+external JSAny? get _textClusterConstructor;
+
+bool browserSupportsTextCluster = _textClusterConstructor != null;
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {

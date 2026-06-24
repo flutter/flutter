@@ -249,6 +249,7 @@ test_fixtures("fixtures") {
     "fixtures/dpr_noxform.png",
     "fixtures/dpr_xform.png",
     "fixtures/gradient.png",
+    "fixtures/impeller_render_platform_view.png",
     "fixtures/impeller_test.png",
     "fixtures/impeller_text_test.png",
     "fixtures/vk_dpr_noxform.png",
@@ -459,7 +460,8 @@ shared_library("flutter_engine_library") {
     ldflags += [ "-Wl,-install_name,@rpath/FlutterEmbedder.framework/$_framework_binary_subpath" ]
   }
   if (is_linux) {
-    ldflags += [ "-Wl,--version-script=" + rebase_path("embedder_exports.lst") ]
+    ldflags += [ "-Wl,--version-script=" +
+                 rebase_path("embedder_exports.lst", root_build_dir) ]
   }
 
   deps = [ ":embedder" ]

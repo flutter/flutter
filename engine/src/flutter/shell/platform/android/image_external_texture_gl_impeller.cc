@@ -43,8 +43,6 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
   // The contents will be initialized later in the call to
   // `glEGLImageTargetTexture2DOES` instead of by Impeller.
   texture->MarkContentsInitialized();
-  texture->SetCoordinateSystem(
-      impeller::TextureCoordinateSystem::kUploadFromHost);
   if (!texture->Bind()) {
     return nullptr;
   }
