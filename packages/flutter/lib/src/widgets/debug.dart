@@ -189,7 +189,7 @@ bool debugHighlightDeprecatedWidgets = false;
 ///    but can still receive focus directly.
 ///  * Red: the node cannot receive focus ([FocusNode.canRequestFocus] is false).
 ///
-/// Enabling this causes [Focus] widgets to wrap their children with a widget,
+/// Enabling this causes each [Focus] widget to wrap its child with a widget,
 /// which can cause state loss if the child is a stateful widget that isn't keyed.
 ///
 /// This has no effect in release builds.
