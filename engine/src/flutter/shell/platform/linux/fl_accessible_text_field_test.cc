@@ -209,9 +209,7 @@ TEST_F(FlAccessibleTextFieldTest, GetText) {
 }
 
 // Tests AtkText::get_text with out-of-bounds offsets.
-TEST(FlAccessibleTextFieldTest, GetTextBoundsChecking) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, GetTextBoundsChecking) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -671,9 +669,7 @@ TEST_F(FlAccessibleTextFieldTest, TextBoundary) {
 }
 
 // Tests that get_string_at_offset handles offset beyond text length.
-TEST(FlAccessibleTextFieldTest, TextBoundaryOffsetBeyondEnd) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryOffsetBeyondEnd) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -705,9 +701,7 @@ TEST(FlAccessibleTextFieldTest, TextBoundaryOffsetBeyondEnd) {
 }
 
 // Tests that get_string_at_offset handles offset at position zero.
-TEST(FlAccessibleTextFieldTest, TextBoundaryOffsetAtStart) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryOffsetAtStart) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -731,9 +725,7 @@ TEST(FlAccessibleTextFieldTest, TextBoundaryOffsetAtStart) {
 }
 
 // Tests that get_string_at_offset handles empty text.
-TEST(FlAccessibleTextFieldTest, TextBoundaryEmptyText) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryEmptyText) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -753,9 +745,7 @@ TEST(FlAccessibleTextFieldTest, TextBoundaryEmptyText) {
 }
 
 // Tests that get_string_at_offset handles offset at exact text length.
-TEST(FlAccessibleTextFieldTest, TextBoundaryOffsetAtEnd) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryOffsetAtEnd) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -783,9 +773,7 @@ TEST(FlAccessibleTextFieldTest, TextBoundaryOffsetAtEnd) {
 
 // Tests that line and paragraph boundaries are computed in character offsets
 // rather than byte offsets when the text contains multi-byte UTF-8 characters.
-TEST(FlAccessibleTextFieldTest, TextBoundaryMultiByte) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryMultiByte) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 

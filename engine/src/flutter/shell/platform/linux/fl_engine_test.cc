@@ -931,9 +931,7 @@ TEST_F(FlEngineTest, SendKeyEventError) {
   EXPECT_TRUE(called);
 }
 
-TEST_F(FlEngineTest, EnableImpeller) {
-  fl_dart_project_set_enable_impeller(project, TRUE);
-
+TEST_F(FlEngineTest, EnableImpellerDefault) {
   bool called = false;
   fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
       Initialize,
@@ -954,6 +952,34 @@ TEST_F(FlEngineTest, EnableImpeller) {
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
   StartEngine(engine);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, DisableImpeller) {
+  fl_dart_project_set_enable_impeller(project, FALSE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        called = true;
+        bool has_impeller_switch = false;
+        for (int i = 0; i < args->command_line_argc; i++) {
+          if (strcmp(args->command_line_argv[i], "--enable-impeller") == 0) {
+            has_impeller_switch = true;
+          }
+        }
+        EXPECT_FALSE(has_impeller_switch);
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
   EXPECT_TRUE(called);
 }
 

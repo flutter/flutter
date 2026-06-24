@@ -72,11 +72,11 @@ TEST_F(FlDartProjectTest, DartEntrypointArgs) {
 }
 
 TEST_F(FlDartProjectTest, EnableImpeller) {
-  EXPECT_FALSE(fl_dart_project_get_enable_impeller(project));
-
-  fl_dart_project_set_enable_impeller(project, TRUE);
   EXPECT_TRUE(fl_dart_project_get_enable_impeller(project));
 
   fl_dart_project_set_enable_impeller(project, FALSE);
   EXPECT_FALSE(fl_dart_project_get_enable_impeller(project));
+
+  fl_dart_project_set_enable_impeller(project, TRUE);
+  EXPECT_TRUE(fl_dart_project_get_enable_impeller(project));
 }

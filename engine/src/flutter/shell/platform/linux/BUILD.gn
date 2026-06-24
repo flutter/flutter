@@ -173,6 +173,7 @@ source_set("flutter_linux_sources") {
     "fl_view.cc",
     "fl_view_accessible.cc",
     "fl_view_monitor.cc",
+    "fl_view_renderer.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
   ]
