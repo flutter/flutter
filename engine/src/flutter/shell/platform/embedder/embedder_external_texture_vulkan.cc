@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_texture_vulkan.h"
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
@@ -126,7 +127,7 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
     return nullptr;
   }
 
-  return DlImage::Make(std::move(image));
+  return DlImageSkia::Make(std::move(image));
 }
 
 sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
