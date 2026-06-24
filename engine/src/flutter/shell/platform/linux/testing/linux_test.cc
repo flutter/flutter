@@ -27,6 +27,9 @@ void LinuxTest::TearDown() {
 }
 
 void LinuxTest::StartEngine(FlEngine* engine) {
+  if (engine == nullptr) {
+    engine = this->engine;
+  }
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);

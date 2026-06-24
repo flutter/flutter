@@ -145,7 +145,7 @@ TEST_F(FlAccessibleTextFieldTest, PerformAction) {
   g_autoptr(GPtrArray) action_datas = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(fl_value_unref));
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -250,7 +250,7 @@ TEST_F(FlAccessibleTextFieldTest, SetCaretOffset) {
   int base = -1;
   int extent = -1;
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -324,7 +324,7 @@ TEST_F(FlAccessibleTextFieldTest, AddSelection) {
   int base = -1;
   int extent = -1;
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -359,7 +359,7 @@ TEST_F(FlAccessibleTextFieldTest, RemoveSelection) {
   int base = -1;
   int extent = -1;
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -400,7 +400,7 @@ TEST_F(FlAccessibleTextFieldTest, SetSelection) {
   int base = -1;
   int extent = -1;
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -436,7 +436,7 @@ TEST_F(FlAccessibleTextFieldTest, SetSelection) {
 TEST_F(FlAccessibleTextFieldTest, SetTextContents) {
   g_autofree gchar* text = nullptr;
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -462,7 +462,7 @@ TEST_F(FlAccessibleTextFieldTest, InsertDeleteText) {
   int base = -1;
   int extent = -1;
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -510,7 +510,7 @@ TEST_F(FlAccessibleTextFieldTest, CopyCutPasteText) {
   int extent = -1;
   FlutterSemanticsAction act = kFlutterSemanticsActionCustomAction;
 
-  StartEngine(engine);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,

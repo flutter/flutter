@@ -16,7 +16,7 @@
 class FlTouchManagerTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlTouchManagerTest, TouchEvents) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(

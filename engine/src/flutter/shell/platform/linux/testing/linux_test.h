@@ -40,8 +40,9 @@ class LinuxTest : public ::testing::Test {
   // backed by a different binary messenger may replace this in SetUp.
   FlEngine* engine = nullptr;
 
-  // Starts the given engine, failing the test if it does not start.
-  void StartEngine(FlEngine* engine);
+  // Starts an engine, failing the test if it does not start. If no engine is
+  // given the engine created by the fixture is started.
+  void StartEngine(FlEngine* engine = nullptr);
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(LinuxTest);

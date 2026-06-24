@@ -182,7 +182,7 @@ TEST_F(FlSettingsHandlerTest, TextScaleFactor) {
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 TEST_F(FlSettingsHandlerTest, AccessibilityFeatures) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterAccessibilityFeature> calls;
   fl_engine_get_embedder_api(engine)->UpdateAccessibilityFeatures =

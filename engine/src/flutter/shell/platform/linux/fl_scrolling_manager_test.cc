@@ -16,7 +16,7 @@
 class FlScrollingManagerTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlScrollingManagerTest, DiscreteDirectional) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -84,7 +84,7 @@ TEST_F(FlScrollingManagerTest, DiscreteDirectional) {
 }
 
 TEST_F(FlScrollingManagerTest, DiscreteScrolling) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -124,7 +124,7 @@ TEST_F(FlScrollingManagerTest, DiscreteScrolling) {
 }
 
 TEST_F(FlScrollingManagerTest, Panning) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -190,7 +190,7 @@ TEST_F(FlScrollingManagerTest, Panning) {
 }
 
 TEST_F(FlScrollingManagerTest, Zooming) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -232,7 +232,7 @@ TEST_F(FlScrollingManagerTest, Zooming) {
 }
 
 TEST_F(FlScrollingManagerTest, Rotating) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -274,7 +274,7 @@ TEST_F(FlScrollingManagerTest, Rotating) {
 }
 
 TEST_F(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -333,7 +333,7 @@ TEST_F(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
 // Make sure that zoom and rotate sequences which don't end at the same time
 // don't cause any problems.
 TEST_F(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
-  StartEngine(engine);
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(

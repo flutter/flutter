@@ -12,7 +12,7 @@
 class FlDisplayMonitorTest : public flutter::testing::LinuxTest {};
 
 TEST_F(FlDisplayMonitorTest, Test) {
-  StartEngine(engine);
+  StartEngine();
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate = MOCK_ENGINE_PROC(

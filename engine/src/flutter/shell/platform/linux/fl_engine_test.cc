@@ -20,7 +20,7 @@ class FlEngineTest : public flutter::testing::LinuxTest {};
 
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {
-  StartEngine(engine);
+  StartEngine();
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate = MOCK_ENGINE_PROC(
@@ -72,7 +72,7 @@ TEST_F(FlEngineTest, NotifyDisplayUpdate) {
 
 // Checks sending window metrics events works.
 TEST_F(FlEngineTest, WindowMetrics) {
-  StartEngine(engine);
+  StartEngine();
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendWindowMetricsEvent = MOCK_ENGINE_PROC(
@@ -122,7 +122,7 @@ TEST_F(FlEngineTest, MousePointer) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
   fl_engine_send_mouse_pointer_event(engine, 1, kDown, 1234567890, 800, 600,
                                      kFlutterPointerDeviceKindMouse, 1.2, -3.4,
                                      kFlutterPointerButtonMouseSecondary);
@@ -156,7 +156,7 @@ TEST_F(FlEngineTest, PointerPanZoom) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
   fl_engine_send_pointer_pan_zoom_event(engine, 1, 1234567890, 800, 600,
                                         kPanZoomUpdate, 1.5, 2.5, 3.5, 4.5);
 
@@ -182,7 +182,7 @@ TEST_F(FlEngineTest, DispatchSemanticsAction) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
   g_autoptr(GBytes) data = g_bytes_new_static("test", 4);
   fl_engine_dispatch_semantics_action(engine, 456, 42,
                                       kFlutterSemanticsActionTap, data);
@@ -214,7 +214,7 @@ TEST_F(FlEngineTest, PlatformMessage) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
   g_autoptr(GBytes) message = g_bytes_new_static("test", 4);
   fl_engine_send_platform_message(engine, "test", message, nullptr, nullptr,
                                   nullptr);
@@ -247,7 +247,7 @@ TEST_F(FlEngineTest, PlatformMessageResponse) {
           }));
 
   g_autoptr(GError) error = nullptr;
-  StartEngine(engine);
+  StartEngine();
   g_autoptr(GBytes) response = g_bytes_new_static("test", 4);
   EXPECT_TRUE(fl_engine_send_platform_message_response(
       engine, reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(42),
@@ -295,7 +295,7 @@ TEST_F(FlEngineTest, SettingsHandler) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
 
   EXPECT_TRUE(called);
 }
@@ -325,7 +325,7 @@ TEST_F(FlEngineTest, OnPreEngineRestart) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  StartEngine(engine);
+  StartEngine();
 
   EXPECT_TRUE(called);
   EXPECT_NE(callback, nullptr);
@@ -371,7 +371,7 @@ TEST_F(FlEngineTest, DartEntrypointArgs) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  StartEngine(engine);
+  StartEngine();
 
   EXPECT_TRUE(called);
 }
@@ -389,7 +389,7 @@ TEST_F(FlEngineTest, EngineId) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  StartEngine(engine);
+  StartEngine();
   EXPECT_TRUE(engine_id != 0);
 
   EXPECT_EQ(fl_engine_for_id(engine_id), engine);
@@ -412,7 +412,7 @@ TEST_F(FlEngineTest, UIIsolateDefaultThreadPolicy) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  StartEngine(engine);
+  StartEngine();
   EXPECT_TRUE(same_task_runner);
 }
 
@@ -434,7 +434,7 @@ TEST_F(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  StartEngine(engine);
+  StartEngine();
   EXPECT_TRUE(same_task_runner);
 }
 
@@ -455,7 +455,7 @@ TEST_F(FlEngineTest, UIIsolateOnSeparateThread) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  StartEngine(engine);
+  StartEngine();
   EXPECT_TRUE(separate_thread);
 }
 
@@ -494,7 +494,7 @@ TEST_F(FlEngineTest, Locales) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
 
   EXPECT_TRUE(called);
 
@@ -525,7 +525,7 @@ TEST_F(FlEngineTest, CLocale) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
 
   EXPECT_TRUE(called);
 
@@ -561,7 +561,7 @@ TEST_F(FlEngineTest, DuplicateLocale) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
 
   EXPECT_TRUE(called);
 
@@ -607,7 +607,7 @@ TEST_F(FlEngineTest, EmptyLocales) {
         return kSuccess;
       }));
 
-  StartEngine(engine);
+  StartEngine();
 
   EXPECT_TRUE(called);
 
@@ -811,7 +811,7 @@ TEST_F(FlEngineTest, RemoveViewEngineError) {
 }
 
 TEST_F(FlEngineTest, SendKeyEvent) {
-  StartEngine(engine);
+  StartEngine();
 
   bool called;
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -855,7 +855,7 @@ TEST_F(FlEngineTest, SendKeyEvent) {
 }
 
 TEST_F(FlEngineTest, SendKeyEventNotHandled) {
-  StartEngine(engine);
+  StartEngine();
 
   bool called;
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -895,7 +895,7 @@ TEST_F(FlEngineTest, SendKeyEventNotHandled) {
 TEST_F(FlEngineTest, SendKeyEventError) {
   g_autoptr(GError) error = nullptr;
   // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
-  StartEngine(engine);
+  StartEngine();
 
   bool called;
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -951,7 +951,7 @@ TEST_F(FlEngineTest, EnableImpellerDefault) {
   fl_engine_get_embedder_api(engine)->RunInitialized =
       MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
 
-  StartEngine(engine);
+  StartEngine();
   EXPECT_TRUE(called);
 }
 

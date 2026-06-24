@@ -32,7 +32,7 @@ class FlKeyboardHandlerTest : public flutter::testing::LinuxTest {
     engine =
         fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
     manager = fl_keyboard_manager_new(engine);
-    StartEngine(engine);
+    StartEngine();
     handler = fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
   }
 
