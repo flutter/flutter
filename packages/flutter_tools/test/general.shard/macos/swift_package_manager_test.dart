@@ -69,7 +69,7 @@ void main() {
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
+                ? '.iOS("15.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
@@ -164,7 +164,7 @@ $_doubleIndent
               );
 
               final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                  ? '.iOS("13.0")'
+                  ? '.iOS("15.0")'
                   : '.macOS("10.15")';
               expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
               expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
@@ -219,7 +219,7 @@ $_doubleIndent
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
+                ? '.iOS("15.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
@@ -318,7 +318,7 @@ let package = Package(
             );
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
+                ? '.iOS("15.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
@@ -392,7 +392,7 @@ import PackageDescription
 let package = Package(
     name: "valid_plugin_1",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "valid-plugin-1", targets: ["valid-plugin-1"])
@@ -472,7 +472,7 @@ let package = Package(
             );
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
+                ? '.iOS("15.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
@@ -492,7 +492,7 @@ import PackageDescription
 let package = Package(
     name: "valid_plugin_1",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "valid-plugin-1", targets: ["valid-plugin-1"])

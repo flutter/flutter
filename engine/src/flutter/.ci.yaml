@@ -81,6 +81,10 @@ targets:
           "builder",
           "git"
         ]
+      ignore_cache_paths: >-
+        [
+          "builder/engine/src/third_party/fuchsia-sdk/sdk/.build-id"
+        ]
       gclient_variables: >-
         {
           "download_emsdk": "true",
@@ -100,6 +104,10 @@ targets:
         [
           "builder",
           "git"
+        ]
+      ignore_cache_paths: >-
+        [
+          "builder/engine/src/third_party/fuchsia-sdk/sdk/.build-id"
         ]
       gclient_variables: >-
         {
@@ -122,6 +130,7 @@ targets:
         ]
       ignore_cache_paths: >-
         [
+          "builder/engine/src/third_party/fuchsia-sdk/sdk/.build-id",
           "builder/src/flutter/prebuilts/SDKs",
           "builder/src/flutter/prebuilts/Library"
         ]
