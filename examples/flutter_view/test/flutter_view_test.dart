@@ -46,16 +46,17 @@ void main() {
         return null;
       },
     );
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        'increment',
+        null,
+      );
+    });
 
     await tester.pumpWidget(const flutter_view.FlutterView());
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
 
     expect(lastSentMessage, 'pong');
-
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-      'increment',
-      null,
-    );
   });
 }
