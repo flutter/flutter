@@ -35,6 +35,7 @@ on an Android device or emulator.
 - [`platform_view/texture_layer_hybrid_composition_platform_view`](#platform_viewtexture_layer_hybrid_composition_platform_view)
 - [`platform_view/virtual_display_platform_view`](#platform_viewvirtual_display_platform_view)
 - [`platform_view_tap_color_change`](#platform_view_tap_color_change)
+- [`system_ui_mode_transitions`](#system_ui_mode_transitions)
 
 ### `flutter_rendered_blue_rectangle`
 
@@ -141,6 +142,29 @@ $ flutter run lib/platform_view_tap_color_change_main.dart
 
 # Run the test
 $ flutter drive lib/platform_view_tap_color_change_main_test.dart
+```
+
+### `system_ui_mode_transitions`
+
+This app exposes a Flutter Driver `requestData` handler that applies
+`SystemUiMode` values in sequence and reads the resulting decor-view
+`systemUiVisibility` flags via the `native_driver` method channel. The
+companion test driver asserts that switching to `edgeToEdge` from any
+hiding mode (`leanBack`/`immersive`/`immersiveSticky`) clears
+`FLAG_FULLSCREEN`/`FLAG_HIDE_NAVIGATION`, and that switching from
+`edgeToEdge` to a hiding mode applies the expected immersive flags.
+
+The regression-named test reproduces
+[#186723](https://github.com/flutter/flutter/issues/186723) on the
+`immersiveSticky → edgeToEdge` cell. Requires Android 10 (API 29) or
+later; older API levels skip.
+
+```sh
+# Run the app
+$ flutter run lib/system_ui_mode_transitions_main.dart
+
+# Run the test
+$ flutter drive lib/system_ui_mode_transitions_main.dart
 ```
 
 ## Deflaking
