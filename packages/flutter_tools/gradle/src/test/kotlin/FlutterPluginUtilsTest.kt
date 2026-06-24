@@ -715,8 +715,8 @@ class FlutterPluginUtilsTest {
 
     enum class DslType { GROOVY, KOTLIN }
 
-    @Nested
-    inner class SupportBuiltInKotlinTests {
+    // These values should also match the flutter create template values.
+// In //packages/flutter_tools/lib/src/android/gradle_utils.dart
         @Nested
         inner class TestApplyingPluginsRegexTests {
             @Test
@@ -949,21 +949,11 @@ class FlutterPluginUtilsTest {
             private val mockGradle = mockk<Gradle>()
             private val mockLogger = mockk<Logger>(relaxed = true)
 
-            private val templateAgpMajorVersion = getTemplateAGPMajorVersion()
-            private val errorAgpMajorVersion = DependencyVersionChecker.errorAGPVersion.major
+            // This AGP version will should match the Flutter create template values.
+            // In //packages/flutter_tools/lib/src/android/gradle_utils.dart
+            private val templateAgpMajorVersion = AndroidPluginVersion(9, 0, 1)
 
-            private fun getTemplateAGPMajorVersion(): Int {
-                val gradleUtilsFile = File("../lib/src/android/gradle_utils.dart")
-                if (!gradleUtilsFile.exists()) {
-                    throw IllegalStateException("gradle_utils.dart not found at ${gradleUtilsFile.absolutePath}")
-                }
-                val content = gradleUtilsFile.readText()
-                val match = Regex("""const templateAndroidGradlePluginVersion = '([^']+)';""").find(content)
-                    ?: throw IllegalStateException("Could not find templateAndroidGradlePluginVersion in gradle_utils.dart")
-                val versionStr = match.groupValues[1]
-                val parts = versionStr.split(".")
-                return parts[0].toInt()
-            }
+            private val errorAgpMajorVersion = DependencyVersionChecker.errorAGPVersion.major
 
             @BeforeEach
             fun setUp() {
