@@ -9,10 +9,18 @@ import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'goldens.dart';
+import 'impeller_enabled.dart';
 
 typedef CanvasCallback = void Function(Canvas canvas);
 
 void main() {
+  Picture makePicture(CanvasCallback callback) {
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    callback(canvas);
+    return recorder.endRecording();
+  }
+
   test('Vertices checks', () {
     try {
       Vertices(VertexMode.triangles, const <Offset>[
@@ -94,13 +102,6 @@ void main() {
 
   test('BackdropFilter with multiple clips', () async {
     // Regression test for https://github.com/flutter/flutter/issues/144211
-    Picture makePicture(CanvasCallback callback) {
-      final recorder = PictureRecorder();
-      final canvas = Canvas(recorder);
-      callback(canvas);
-      return recorder.endRecording();
-    }
-
     final sceneBuilder = SceneBuilder();
 
     final Picture redClippedPicture = makePicture((Canvas canvas) {
@@ -136,13 +137,6 @@ void main() {
   });
 
   Image backdropBlurWithTileMode(TileMode? tileMode) {
-    Picture makePicture(CanvasCallback callback) {
-      final recorder = PictureRecorder();
-      final canvas = Canvas(recorder);
-      callback(canvas);
-      return recorder.endRecording();
-    }
-
     const double rectSize = 10;
     const count = 50;
     const double imgSize = rectSize * count;
@@ -185,6 +179,77 @@ void main() {
 
     return image;
   }
+
+  Future<Image> backdropShaderWithFilterQuality(FilterQuality filterQuality) async {
+    const int width = 16;
+    const int height = 4;
+    const double widthAsDouble = 16.0;
+    const double heightAsDouble = 4.0;
+    const double stripeWidth = 1.0;
+
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'filter_shader_fractional_texel.frag.iplr',
+    );
+    final FragmentShader shader = program.fragmentShader();
+
+    final Picture stripePicture = makePicture((Canvas canvas) {
+      for (int x = 0; x < width; x++) {
+        canvas.drawRect(
+          Rect.fromLTWH(x * stripeWidth, 0, stripeWidth, heightAsDouble),
+          Paint()..color = x.isEven ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+        );
+      }
+    });
+
+    final Picture transparentPicture = makePicture((Canvas canvas) {
+      canvas.drawRect(
+        const Rect.fromLTWH(0, 0, widthAsDouble, heightAsDouble),
+        Paint()..color = const Color(0x00000000),
+      );
+    });
+
+    final sceneBuilder = SceneBuilder();
+    sceneBuilder.addPicture(Offset.zero, stripePicture);
+    sceneBuilder.pushBackdropFilter(ImageFilter.shader(shader, filterQuality: filterQuality));
+    sceneBuilder.addPicture(Offset.zero, transparentPicture);
+    sceneBuilder.pop();
+
+    final Scene scene = sceneBuilder.build();
+    final Image image = scene.toImageSync(width, height);
+
+    scene.dispose();
+    stripePicture.dispose();
+    transparentPicture.dispose();
+    shader.dispose();
+
+    return image;
+  }
+
+  Future<int> redAt(Image image, int x, int y) async {
+    final ByteData data = (await image.toByteData())!;
+    return data.getUint8((y * image.width + x) * 4);
+  }
+
+  test('BackdropFilter with ImageFilter.shader honors FilterQuality', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/188365.
+    if (!impellerEnabled) {
+      print('Skipped for Skia.');
+      return;
+    }
+
+    final Image nearest = await backdropShaderWithFilterQuality(FilterQuality.none);
+    final Image linear = await backdropShaderWithFilterQuality(FilterQuality.low);
+
+    final int nearestSample = await redAt(nearest, 0, 1);
+    final int linearSample = await redAt(linear, 0, 1);
+
+    expect(nearestSample, anyOf(0, 255));
+    expect(linearSample, allOf(greaterThan(0), lessThan(255)));
+    expect(linearSample, isNot(nearestSample));
+
+    nearest.dispose();
+    linear.dispose();
+  });
 
   test('BackdropFilter with Blur honors TileMode.decal', () async {
     final Image image = backdropBlurWithTileMode(TileMode.decal);

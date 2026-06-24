@@ -13,6 +13,7 @@ if (enable_unittests) {
     "circle_sdf.frag",
     "double_sampler_swapped.frag",
     "double_sampler.frag",
+    "filter_shader_fractional_texel.frag",
     "filter_shader.frag",
     "functions.frag",
     "missing_size.frag",
