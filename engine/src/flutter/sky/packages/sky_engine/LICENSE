@@ -13788,6 +13788,13 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source
    distribution.
 --------------------------------------------------------------------------------
+libjxl
+
+Copyright (c) the JPEG XL Project Authors. All rights reserved.
+
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 freetype2
 
 Copyright 1990, 1994, 1998  The Open Group
