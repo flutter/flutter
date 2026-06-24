@@ -265,6 +265,9 @@ class ChromiumLauncher {
         '--no-sandbox',
         '--headless',
         '--window-size=1024,1024',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-client-side-phishing-detection',
         if (_platform.isLinux) ...<String>[
           '--use-gl=angle',
           '--use-angle=swiftshader',
