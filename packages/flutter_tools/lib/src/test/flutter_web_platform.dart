@@ -989,6 +989,9 @@ class BrowserManager {
       ),
     );
 
+    _logger.printStatus(
+      '[CHROME_DIAGNOSTIC] BrowserManager.load: sending loadSuite command for $path',
+    );
     _channel.sink.add(<String, Object>{
       'command': 'loadSuite',
       'url': url.toString(),
@@ -997,6 +1000,7 @@ class BrowserManager {
     });
 
     try {
+      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.load: deserializing suite for $path');
       controller = deserializeSuite(
         path,
         SuitePlatform(Runtime.chrome),
@@ -1007,7 +1011,14 @@ class BrowserManager {
       );
 
       _controllers.add(controller);
-      return await controller.suite;
+      _logger.printStatus(
+        '[CHROME_DIAGNOSTIC] BrowserManager.load: awaiting controller.suite for $path',
+      );
+      final RunnerSuite suite = await controller.suite;
+      _logger.printStatus(
+        '[CHROME_DIAGNOSTIC] BrowserManager.load: controller.suite completed successfully for $path',
+      );
+      return suite;
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
       closeIframe();
