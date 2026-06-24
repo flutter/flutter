@@ -107,3 +107,21 @@ When the user asks for the status of their pending third-party PR reviews:
 3. **Present a clear summary** of the PRs, including their current status and recommended actions.
 4. **Explicitly ask the user for confirmation** before executing any shepherding/running actions.
 5. **Only proceed with executing actions** (e.g., `run --all` or `run --pr`) after receiving explicit approval from the user.
+
+## Examples
+
+- **User:** "What is the status of my approved PRs?"
+- **Agent:**
+  1. Identifies the read-only inquiry and runs `dart .agents/skills/shepherd-prs/shepherd.dart list`.
+  2. Parses the JSON output to present a summary of all approved third-party PRs, their CI checks, and recommended actions.
+  3. Asks the user for confirmation before executing any shepherding actions.
+
+- **User:** "Yes, please update the branch for PR #186254."
+- **Agent:**
+  1. Identifies the user's explicit confirmation and runs `dart .agents/skills/shepherd-prs/shepherd.dart run --pr 186254`.
+  2. Logs the result of the branch update to the user.
+
+- **User:** "Run shepherding on all my eligible PRs."
+- **Agent:**
+  1. Asks the user for confirmation: "I will run shepherding on all eligible approved PRs. Would you like me to proceed?"
+  2. Upon receiving confirmation, runs `dart .agents/skills/shepherd-prs/shepherd.dart run --all` and reports the action logs.
