@@ -18,6 +18,7 @@ import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 import com.flutter.gradle.FlutterPluginUtils.detectApplyingKotlinGradlePlugin
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.PrintTask
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -35,8 +36,8 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
-import org.gradle.internal.impldep.junit.framework.TestCase.assertFalse
-import org.gradle.internal.impldep.junit.framework.TestCase.assertTrue
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
@@ -52,6 +53,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class FlutterPluginUtilsTest {
     companion object {
@@ -2090,28 +2092,22 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `addTaskForPrintNdkVersion adds task for printing ndk version`() {
-        val project = mockk<Project>()
+        val project = mockk<Project>(relaxed = true)
         val androidExtension = mockk<ApplicationExtension>()
         every { androidExtension.ndkVersion } returns "29.0.13846066"
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns androidExtension
-        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
-        val captureSlot = slot<Action<Task>>()
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
+        val captureSlot = slot<Action<PrintTask>>()
 
         FlutterPluginUtils.addTaskForPrintNdkVersion(project)
 
-        verify { project.tasks.register("printNdkVersion", capture(captureSlot)) }
-        val mockTask = mockk<Task>()
-        val doLastSlot = slot<Action<Task>>()
-        every { mockTask.description = any() } returns Unit
-        every { mockTask.doLast(capture(doLastSlot)) } returns mockTask
-
-        captureSlot.captured.execute(mockTask)
-        doLastSlot.captured.execute(mockTask)
+        verify { project.tasks.register("printNdkVersion", eq(PrintTask::class.java), capture(captureSlot)) }
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
+        captureSlot.captured.execute(mockPrintTask)
 
         verify {
-            mockTask.description = "Prints out the configured ndkVersion for this Android project"
+            mockPrintTask.description = "Prints out the configured ndkVersion for this Android project"
         }
-        verify(exactly = 1) { project.extensions.findByType(ApplicationExtension::class.java) }
     }
 
     // isFlutterAppProject skipped as it is a wrapper for a single getter that we would have to mock
@@ -2288,21 +2284,20 @@ class FlutterPluginUtilsTest {
         }
     }
 
-    // addTaskForJavaVersion
     @Test
     fun `addTaskForJavaVersion adds task for Java version`() {
         val project = mockk<Project>()
-        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
-        val captureSlot = slot<Action<Task>>()
-        FlutterPluginUtils.addTaskForJavaVersion(project)
-        verify { project.tasks.register("javaVersion", capture(captureSlot)) }
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
+        val captureSlot = slot<Action<PrintTask>>()
 
-        val mockTask = mockk<Task>()
-        every { mockTask.description = any() } returns Unit
-        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
-        captureSlot.captured.execute(mockTask)
+        FlutterPluginUtils.addTaskForJavaVersion(project)
+        verify { project.tasks.register("javaVersion", eq(PrintTask::class.java), capture(captureSlot)) }
+
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
+        captureSlot.captured.execute(mockPrintTask)
+
         verify {
-            mockTask.description = "Print the current java version used by gradle. see: " +
+            mockPrintTask.description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
         }
     }
@@ -2310,18 +2305,25 @@ class FlutterPluginUtilsTest {
     // addTaskForKGPVersion
     @Test
     fun `addTaskForKGPVersion adds task for KGP version`() {
-        val project = mockk<Project>()
-        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
-        val captureSlot = slot<Action<Task>>()
-        FlutterPluginUtils.addTaskForKGPVersion(project)
-        verify { project.tasks.register("kgpVersion", capture(captureSlot)) }
+        val project = mockk<Project>(relaxed = true)
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
+        val captureSlot = slot<Action<PrintTask>>()
 
-        val mockTask = mockk<Task>()
-        every { mockTask.description = any() } returns Unit
-        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
-        captureSlot.captured.execute(mockTask)
-        verify {
-            mockTask.description = "Print the current kgp version used by the project."
+        mockkObject(VersionFetcher)
+        every { VersionFetcher.getKGPVersion(project) } returns Version(2, 2, 0)
+
+        try {
+            FlutterPluginUtils.addTaskForKGPVersion(project)
+            verify { project.tasks.register("kgpVersion", eq(PrintTask::class.java), capture(captureSlot)) }
+
+            val mockPrintTask = mockk<PrintTask>(relaxed = true)
+            captureSlot.captured.execute(mockPrintTask)
+
+            verify {
+                mockPrintTask.description = "Print the current kgp version used by the project."
+            }
+        } finally {
+            io.mockk.unmockkObject(VersionFetcher)
         }
     }
 
@@ -2330,23 +2332,23 @@ class FlutterPluginUtilsTest {
     fun `addTaskForPrintBuildVariants adds task for printing build variants`() {
         val project = mockk<Project>()
         val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
-        val listProperty = mockk<org.gradle.api.provider.ListProperty<String>>()
+        val listProperty = mockk<org.gradle.api.provider.ListProperty<String>>(relaxed = true)
+
+        every { project.extensions } returns mockk()
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
         every { project.objects.listProperty(String::class.java) } returns listProperty
-        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
-        val captureSlot = slot<Action<Task>>()
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
+
+        val captureSlot = slot<Action<PrintTask>>()
 
         FlutterPluginUtils.addTaskForPrintBuildVariants(project)
+        verify { project.tasks.register("printBuildVariants", eq(PrintTask::class.java), capture(captureSlot)) }
 
-        verify { project.tasks.register("printBuildVariants", capture(captureSlot)) }
-        val mockTask = mockk<Task>()
-        every { mockTask.description = any() } returns Unit
-        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
-
-        captureSlot.captured.execute(mockTask)
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
+        captureSlot.captured.execute(mockPrintTask)
 
         verify {
-            mockTask.description = "Prints out all build variants for this Android project"
+            mockPrintTask.description = "Prints out all build variants for this Android project"
         }
     }
 }
