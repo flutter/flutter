@@ -24,6 +24,8 @@ class HostWindowPopup : public HostWindowSized {
   // of the popup.
   void UpdatePosition();
 
+  ~HostWindowPopup() override;
+
  protected:
   void ApplyContentSize(int32_t physical_width,
                         int32_t physical_height) override;

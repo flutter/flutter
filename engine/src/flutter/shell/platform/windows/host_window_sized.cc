@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/host_window_sized.h"
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
@@ -17,24 +18,14 @@ HostWindowSized::HostWindowSized(WindowManager* window_manager,
       view_alive_(std::make_shared<int>(0)) {}
 
 HostWindowSized::~HostWindowSized() {
-  // Destroy the view (and therefore the raster thread's access to this object
-  // as a sizing delegate) while this object is still fully alive.
-  //
-  // When sized to content, this object is the view's
-  // FlutterWindowsViewSizingDelegate. The view is owned by |view_controller_|,
-  // a member of the HostWindow base class, which would otherwise be destroyed
-  // *after* this object's FlutterWindowsViewSizingDelegate subobject. Resetting
-  // it here triggers FlutterWindowsEngine::RemoveView, which guarantees the
-  // raster thread no longer presents to (or sizes) this view, before the
-  // sizing delegate is torn down. Without this, the raster thread's
-  // sized-to-content path can call into a destroyed sizing delegate and crash.
-  //
-  // Subclasses (e.g. HostWindowPopup, HostWindowTooltip) must not define their
-  // own destructor for this purpose: the sizing-delegate entry point
-  // (DidUpdateViewSize) lives in this class, so resetting the view here, in the
-  // most-derived sizing-delegate owner's destructor, is sufficient to stop the
-  // raster thread before any subobject is destroyed.
-  view_controller_.reset();
+  // By the time the base destructor runs, the most-derived class must have
+  // already reset |view_controller_| (and therefore stopped the raster thread
+  // from sizing this object). See the destructor comment in host_window_sized.h
+  // for the rationale. If this fires, a HostWindowSized subclass is missing the
+  // required |view_controller_.reset()| at the start of its destructor.
+  FML_DCHECK(!view_controller_)
+      << "HostWindowSized subclass must reset view_controller_ in its "
+         "destructor.";
 }
 
 void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {

@@ -39,6 +39,14 @@ HostWindowPopup::HostWindowPopup(
       .is_sized_to_content = true});
 }
 
+HostWindowPopup::~HostWindowPopup() {
+  // Reset the view while this most-derived object is still fully alive, to stop
+  // the raster thread from sizing it (via the overridden ApplyContentSize /
+  // GetWorkArea) before any subobject is torn down. See the destructor comment
+  // in host_window_sized.h for the rationale.
+  view_controller_.reset();
+}
+
 void HostWindowPopup::ApplyContentSize(int32_t physical_width,
                                        int32_t physical_height) {
   UpdatePosition();

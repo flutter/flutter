@@ -24,6 +24,8 @@ class HostWindowTooltip : public HostWindowSized {
   // of the tooltip.
   void UpdatePosition();
 
+  ~HostWindowTooltip() override;
+
  protected:
   void ApplyContentSize(int32_t physical_width,
                         int32_t physical_height) override;
