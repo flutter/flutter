@@ -688,6 +688,26 @@ object FlutterPluginUtils {
         return SubprojectPluginState(hasKgpPlugin, hasAppPlugin, hasLibPlugin)
     }
 
+    /**
+     * Checks if all subprojects within the root project have migrated away from the legacy
+     * Kotlin Gradle Plugin (KGP) to Built-in Kotlin.
+     */
+    @JvmStatic
+    @JvmName("hasNoSubprojectsApplyingKgp")
+    internal fun hasNoSubprojectsApplyingKgp(project: Project): Boolean =
+        project.rootProject.subprojects.all { subproject ->
+            val subprojectPluginState = getSubprojectPluginState(subproject)
+
+            // Non-Android subprojects (those not applying com.android.application or com.android.library)
+            // are ignored as they do not affect the Android Kotlin build configuration.
+            // For Android subprojects, we verify they do not apply the legacy KGP.
+            if (subprojectPluginState == null || (!subprojectPluginState.hasAppPlugin && !subprojectPluginState.hasLibPlugin)) {
+                true
+            } else {
+                !subprojectPluginState.hasKgpPlugin
+            }
+        }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
