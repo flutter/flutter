@@ -2209,7 +2209,6 @@ targets:
 
   - name: Linux web_skwasm_tests_2
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 45
     properties:
       dependencies: >-
@@ -2232,7 +2231,6 @@ targets:
 
   - name: Linux web_skwasm_tests_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 45
     properties:
       dependencies: >-
@@ -2255,7 +2253,6 @@ targets:
 
   - name: Linux web_skwasm_tests_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 45
     properties:
       dependencies: >-
@@ -2278,7 +2275,6 @@ targets:
 
   - name: Linux web_skwasm_tests_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 45
     properties:
       dependencies: >-
@@ -2301,7 +2297,6 @@ targets:
 
   - name: Linux web_skwasm_tests_6
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 45
     properties:
       dependencies: >-
@@ -2324,7 +2319,6 @@ targets:
 
   - name: Linux web_skwasm_tests_7_last
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 45
     properties:
       dependencies: >-
