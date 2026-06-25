@@ -76,6 +76,30 @@ TEST(FlMouseCursorHandlerTest, UnknownCursorFallsBackToDefault) {
   EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "default");
 }
 
+// A call whose argument map omits the "kind" key falls back to the GTK
+// "default" cursor without crashing.
+TEST(FlMouseCursorHandlerTest, MissingKindFallsBackToDefault) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  g_autoptr(FlMouseCursorHandler) handler =
+      fl_mouse_cursor_handler_new(FL_BINARY_MESSENGER(messenger));
+
+  gboolean called = FALSE;
+  g_autoptr(FlValue) args = fl_value_new_map();
+  fl_mock_binary_messenger_invoke_standard_method(
+      messenger, "flutter/mousecursor", "activateSystemCursor", args,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
+
+        EXPECT_TRUE(FL_IS_METHOD_SUCCESS_RESPONSE(response));
+      },
+      &called);
+  EXPECT_TRUE(called);
+
+  EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "default");
+}
+
 // Changing the cursor emits the cursor-changed signal.
 TEST(FlMouseCursorHandlerTest, CursorChangedSignal) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
