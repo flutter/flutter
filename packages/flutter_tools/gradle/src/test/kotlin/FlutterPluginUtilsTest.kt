@@ -722,6 +722,38 @@ class FlutterPluginUtilsTest {
         }
     }
 
+    private fun writeBuildFile(
+        buildFile: File,
+        declarativelyAppliedPlugins: List<String> = emptyList(),
+        imperativelyAppliedPlugins: List<String> = emptyList()
+    ) {
+        buildFile.apply {
+            parentFile.mkdirs()
+            if (!exists()) {
+                createNewFile()
+            }
+            val declarativeBlock =
+                if (declarativelyAppliedPlugins.isNotEmpty()) {
+                    // Expected output of declarativeBlock if declarativelyAppliedPlugins contains ["kotlin-android"]:
+                    // plugins {
+                    //     id("kotlin-android")
+                    // }
+                    "plugins {\n" + declarativelyAppliedPlugins.joinToString("\n") { "    id(\"$it\")" } + "\n}\n"
+                } else {
+                    ""
+                }
+            val imperativeBlock =
+                if (imperativelyAppliedPlugins.isNotEmpty()) {
+                    // Expected output of imperativeBlock if imperativelyAppliedPlugins contains ["kotlin-android"]:
+                    // apply plugin: 'kotlin-android'
+                    imperativelyAppliedPlugins.joinToString("\n") { "apply plugin: '$it'" } + "\n"
+                } else {
+                    ""
+                }
+            writeText(declarativeBlock + imperativeBlock)
+        }
+    }
+
     enum class DslType { GROOVY, KOTLIN }
 
     @Nested
@@ -981,29 +1013,8 @@ class FlutterPluginUtilsTest {
                 imperativelyAppliedPlugins: List<String> = emptyList()
             ): Project {
                 val projectDir = tempDir.resolve(projectName).toFile().apply { mkdirs() }
-                val buildGradleFile =
-                    File(projectDir, "build.gradle").apply {
-                        createNewFile()
-                        // Expected output of declarativeBlock if declarativelyAppliedPlugins contains ["kotlin-android"]:
-                        // plugins {
-                        //     id("kotlin-android")
-                        // }
-                        val declarativeBlock =
-                            if (declarativelyAppliedPlugins.isNotEmpty()) {
-                                "plugins {\n" + declarativelyAppliedPlugins.joinToString("\n") { "    id(\"$it\")" } + "\n}\n"
-                            } else {
-                                ""
-                            }
-                        // Expected output of imperativeBlock if imperativelyAppliedPlugins contains ["kotlin-android"]:
-                        // apply plugin: 'kotlin-android'
-                        val imperativeBlock =
-                            if (imperativelyAppliedPlugins.isNotEmpty()) {
-                                imperativelyAppliedPlugins.joinToString("\n") { "apply plugin: '$it'" } + "\n"
-                            } else {
-                                ""
-                            }
-                        writeText(declarativeBlock + imperativeBlock)
-                    }
+                val buildGradleFile = File(projectDir, "build.gradle")
+                writeBuildFile(buildGradleFile, declarativelyAppliedPlugins, imperativelyAppliedPlugins)
                 val pluginManager = mockk<PluginManager>(relaxed = true)
                 val project = mockk<Project>()
                 every { project.name } returns projectName
