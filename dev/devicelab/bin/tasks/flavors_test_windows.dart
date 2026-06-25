@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -22,6 +23,7 @@ Future<void> main() async {
     await createIntegrationTestFlavorsTest().call();
 
     final projectDir = '${flutterDirectory.path}/dev/integration_tests/flavors';
+    final arch = Abi.current() == Abi.windowsArm64 ? 'arm64' : 'x64';
     return inDirectory(projectDir, () async {
       // Building with `--flavor paid` should only bundle the assets that were
       // declared with the "paid" flavor (and unflavored assets), excluding
@@ -33,7 +35,7 @@ Future<void> main() async {
           projectDir,
           'build',
           'windows',
-          'x64',
+          arch,
           'paid',
           'runner',
           'Debug',

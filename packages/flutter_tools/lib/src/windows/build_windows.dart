@@ -120,7 +120,7 @@ Future<void> buildWindows(
     status.stop();
   }
 
-  final String? binaryName = getCmakeExecutableName(windowsProject, flavor: buildInfo.flavor);
+  final String? binaryName = getCmakeExecutableName(windowsProject);
   final File binaryFile = buildDirectory
       .childDirectory('runner')
       .childDirectory(sentenceCase(buildModeName))

@@ -49,13 +49,6 @@ endfunction()
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
-# Flavor support: when --flavor is passed, the flutter tool exposes it via
-# FLUTTER_APP_FLAVOR in the generated CMake config included above. Suffix the
-# binary name so that multiple flavor builds can coexist on disk.
-if(DEFINED FLUTTER_APP_FLAVOR AND NOT FLUTTER_APP_FLAVOR STREQUAL "")
-  set(BINARY_NAME "${BINARY_NAME}-${FLUTTER_APP_FLAVOR}")
-endif()
-
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 

@@ -20,14 +20,7 @@ add_executable(${BINARY_NAME} WIN32
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
 
-# When --flavor is passed, expose it to the runner so it can adapt the window
-# title (and any other flavor-aware behavior, e.g. icons via configure_file).
-if(DEFINED FLUTTER_APP_FLAVOR AND NOT FLUTTER_APP_FLAVOR STREQUAL "")
-  target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_APP_FLAVOR=\"${FLUTTER_APP_FLAVOR}\"")
-endif()
-
 # Add preprocessor definitions for the build version.
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_BINARY_NAME=\"${BINARY_NAME}\"")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTTER_VERSION_MAJOR}")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=${FLUTTER_VERSION_MINOR}")

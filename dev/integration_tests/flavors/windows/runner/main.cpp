@@ -2,10 +2,6 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
-#include <filesystem>
-#include <string>
-#include <string_view>
-
 #include "flutter_window.h"
 #include "utils.h"
 
@@ -31,17 +27,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  std::wstring window_title = L"flavors";
-#ifdef FLUTTER_APP_FLAVOR
-  {
-    const std::string_view flavor_u8(FLUTTER_APP_FLAVOR);
-    if (!flavor_u8.empty()) {
-      std::wstring flavor_wide = std::filesystem::path(flavor_u8).wstring();
-      window_title += L" (" + flavor_wide + L")";
-    }
-  }
-#endif
-  if (!window.Create(window_title, origin, size)) {
+  if (!window.Create(L"flavors", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

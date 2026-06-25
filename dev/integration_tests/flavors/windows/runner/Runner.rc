@@ -52,7 +52,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
+// IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -92,9 +92,9 @@ BEGIN
             VALUE "CompanyName", "com.yourcompany" "\0"
             VALUE "FileDescription", "flavors" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", FLUTTER_BINARY_NAME "\0"
+            VALUE "InternalName", "flavors" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.yourcompany. All rights reserved." "\0"
-            VALUE "OriginalFilename", FLUTTER_BINARY_NAME ".exe" "\0"
+            VALUE "OriginalFilename", "flavors.exe" "\0"
             VALUE "ProductName", "flavors" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

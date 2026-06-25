@@ -11,8 +11,7 @@ import 'cmake_project.dart';
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///
 /// Returns `null` if it cannot be found.
-/// When [flavor] is non-empty the binary name is suffixed with `-flavor`.
-String? getCmakeExecutableName(CmakeBasedProject project, {String? flavor}) {
+String? getCmakeExecutableName(CmakeBasedProject project) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
@@ -20,11 +19,7 @@ String? getCmakeExecutableName(CmakeBasedProject project, {String? flavor}) {
   for (final String line in project.cmakeFile.readAsLinesSync()) {
     final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
-      final String baseName = match.group(1)!;
-      if (flavor != null && flavor.isNotEmpty) {
-        return '$baseName-$flavor';
-      }
-      return baseName;
+      return match.group(1);
     }
   }
   return null;
@@ -112,9 +107,10 @@ set(FLUTTER_VERSION_PATCH ${version.patch} PARENT_SCOPE)
 set(FLUTTER_VERSION_BUILD ${buildVersion ?? 0} PARENT_SCOPE)
 ''');
 
-  // Expose the selected flavor (if any) to the CMake build so that templates
-  // can adapt flavor-aware behavior (e.g. suffixing the binary name or the
-  // window title). This mirrors how the version information is passed through.
+  // Expose the selected flavor (if any) as a CMake variable. The default
+  // template does not use it, but projects can read FLUTTER_APP_FLAVOR to
+  // customize flavor-specific resources (e.g. the app icon or window title via
+  // configure_file). This mirrors how the version information is passed through.
   final String? flavor = buildInfo.flavor;
   if (flavor != null && flavor.isNotEmpty) {
     buffer.writeln('set(FLUTTER_APP_FLAVOR "${_escapeBackslashes(flavor)}" PARENT_SCOPE)');

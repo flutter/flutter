@@ -118,31 +118,13 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('getCmakeExecutableName', () {
-    test('returns base name when no flavor', () {
+    test('returns the base binary name regardless of flavor', () {
       final cmakeFile = fileSystem.file('windows/CMakeLists.txt')
         ..createSync(recursive: true)
         ..writeAsStringSync('set(BINARY_NAME "myapp")\n');
 
       final project = FakeCmakeProject(cmakeFile);
       expect(getCmakeExecutableName(project), 'myapp');
-    });
-
-    test('returns base name when flavor is empty string', () {
-      final cmakeFile = fileSystem.file('windows/CMakeLists.txt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('set(BINARY_NAME "myapp")\n');
-
-      final project = FakeCmakeProject(cmakeFile);
-      expect(getCmakeExecutableName(project, flavor: ''), 'myapp');
-    });
-
-    test('appends flavor suffix when flavor is set', () {
-      final cmakeFile = fileSystem.file('windows/CMakeLists.txt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('set(BINARY_NAME "myapp")\n');
-
-      final project = FakeCmakeProject(cmakeFile);
-      expect(getCmakeExecutableName(project, flavor: 'apple'), 'myapp-apple');
     });
   });
 
