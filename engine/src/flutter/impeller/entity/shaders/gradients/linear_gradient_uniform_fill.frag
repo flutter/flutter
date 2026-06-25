@@ -21,11 +21,17 @@ uniform FragInfo {
 }
 frag_info;
 
+// Keep this large array in a dedicated uniform block to avoid size and
+// alignment limits on some graphics APIs and hardware platforms. Do not add any
+// new fields to this block.
 uniform ColorsInfo {
   vec4 colors[256];
 }
 colors_info;
 
+// Keep this large array in a dedicated uniform block to avoid size and
+// alignment limits on some graphics APIs and hardware platforms. Do not add any
+// new fields to this block.
 uniform StopPairsInfo {
   vec4 stop_pairs[128];
 }

@@ -12,6 +12,9 @@ uniform f16sampler2D texture_sampler;
 
 layout(constant_id = 0) const float supports_decal = 1.0;
 
+// Keep this large array in a dedicated uniform block to avoid size and
+// alignment limits on some graphics APIs and hardware platforms. Do not add any
+// new fields to this block.
 uniform KernelSamples {
   // X, Y are uv offset and Z is Coefficient. W is padding.
   vec4 sample_data[50];
