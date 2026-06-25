@@ -644,6 +644,34 @@ public class PlatformPluginTest {
   }
 
   @SuppressWarnings("deprecation")
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void switchFromAnyModeToEdgeToEdge_clearsSystemUiVisibility() {
+    PlatformChannel.SystemUiMode[] modes = {
+      PlatformChannel.SystemUiMode.LEAN_BACK,
+      PlatformChannel.SystemUiMode.IMMERSIVE,
+      PlatformChannel.SystemUiMode.IMMERSIVE_STICKY
+    };
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      for (PlatformChannel.SystemUiMode mode : modes) {
+        View fakeDecorView = mock(View.class);
+        Window fakeWindow = mock(Window.class);
+        Activity mockActivity = mock(Activity.class);
+        when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+        when(mockActivity.getWindow()).thenReturn(fakeWindow);
+        PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+        platformPlugin.mPlatformMessageHandler.showSystemUiMode(mode);
+        platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+            PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+
+        verify(fakeDecorView).setSystemUiVisibility(0);
+        windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+      }
+    }
+  }
+
+  @SuppressWarnings("deprecation")
   // FLAG_TRANSLUCENT_STATUS, FLAG_TRANSLUCENT_NAVIGATION
   @Config(sdk = API_LEVELS.API_29)
   @Test

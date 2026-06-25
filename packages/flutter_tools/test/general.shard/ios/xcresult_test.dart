@@ -14,6 +14,14 @@ import '../../src/fake_process_manager.dart';
 import 'xcresult_test_data.dart';
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
   // Creates a FakeCommand for the xcresult get call to build the app
   // in the given configuration.
   FakeCommand setUpFakeXCResultCommand({
@@ -29,7 +37,7 @@ void main() {
     final List<String> command;
     if (useNewCommand) {
       command = <String>[
-        ...xcode.xcrunCommand(),
+        'xcrun',
         'xcresulttool',
         'get',
         'build-results',
@@ -40,7 +48,7 @@ void main() {
       ];
     } else {
       command = <String>[
-        ...xcode.xcrunCommand(),
+        'xcrun',
         'xcresulttool',
         'get',
         '--path',
@@ -59,13 +67,6 @@ void main() {
     );
   }
 
-  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
-
-  const kx64CheckCommand = FakeCommand(
-    command: <String>['sysctl', 'hw.optional.arm64'],
-    exitCode: 1,
-  );
-
   XCResultGenerator setupGenerator({
     required String resultJson,
     int exitCode = 0,
@@ -75,10 +76,7 @@ void main() {
     // the logic for pre-Xcode 16 platforms.
     Version? xcodeVersion = const Version.withText(15, 0, 0, '15.0'),
   }) {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-      kWhichSysctlCommand,
-      kx64CheckCommand,
-    ]);
+    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     final xcode = Xcode.test(
       processManager: fakeProcessManager,
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
@@ -87,6 +85,8 @@ void main() {
       ),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       setUpFakeXCResultCommand(
         stdout: resultJson,
         tempResultPath: _tempResultPath,

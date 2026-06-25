@@ -53,7 +53,6 @@
 /dev/devicelab/bin/tasks/draw_vertices_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/dynamic_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/embedded_android_views_integration_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @jtmcdole @flutter/engine
@@ -279,6 +278,7 @@
 /dev/devicelab/bin/tasks/hello_world_impeller_ios_sdfs.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_impeller_linux.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_impeller_macos_sdfs.dart @b-luk @flutter/desktop
+/dev/devicelab/bin/tasks/hello_world_windows_impeller.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios_simulator.dart @louisehsu @flutter/tool
@@ -316,6 +316,8 @@
 /dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/run_release_test_windows.dart @loic-sharma @flutter/tool
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @Piinks @flutter/framework
+/dev/devicelab/bin/tasks/texture_impeller_linux.dart @gaaclarke @flutter/desktop
+/dev/devicelab/bin/tasks/texture_impeller_windows.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_ddc.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_ddc_hot_reload.dart @yjbanov @flutter/web
@@ -341,6 +343,8 @@
 /examples/hello_world/test_driver/smoke_web_engine.dart @yjbanov @flutter/web
 # Linux android views
 /dev/integration_tests/android_views @gmackall @flutter/android
+# Linux android hardware smoke test
+/dev/integration_tests/android_hardware_smoke_test @andywolff @flutter/engine
 # Linux deferred components
 /dev/integration_tests/deferred_components_test @mboetger @flutter/android
 
@@ -354,6 +358,8 @@
 # analyze @Piinks @flutter/framework
 # android_engine_opengles_tests @reidbaker @flutter/android
 # android_engine_vulkan_tests @reidbaker @flutter/android
+# android_hardware_smoke_opengles_tests @andywolff @flutter/engine
+# android_hardware_smoke_vulkan_tests @andywolff @flutter/engine
 # android_java11_tool_integration_tests @jesswrd @flutter/android
 # android_preview_tool_integration_tests @mboetger @flutter/android
 # build_tests @bkonyi @flutter/tool
