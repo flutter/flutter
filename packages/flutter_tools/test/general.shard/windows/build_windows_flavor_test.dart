@@ -119,7 +119,7 @@ void main() {
 
   group('getCmakeExecutableName', () {
     test('returns the base binary name regardless of flavor', () {
-      final cmakeFile = fileSystem.file('windows/CMakeLists.txt')
+      final File cmakeFile = fileSystem.file('windows/CMakeLists.txt')
         ..createSync(recursive: true)
         ..writeAsStringSync('set(BINARY_NAME "myapp")\n');
 
