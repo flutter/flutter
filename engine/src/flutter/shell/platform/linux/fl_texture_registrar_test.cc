@@ -68,7 +68,7 @@ static FlTestRegistrarTexture* fl_test_registrar_texture_new() {
 }
 
 static gpointer add_mock_texture_to_registrar(gpointer pointer) {
-  g_return_val_if_fail(FL_TEXTURE_REGISTRAR(pointer), nullptr);
+  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(pointer), nullptr);
   FlTextureRegistrar* registrar = FL_TEXTURE_REGISTRAR(pointer);
   g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
   fl_texture_registrar_register_texture(registrar, texture);
