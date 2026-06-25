@@ -34,6 +34,16 @@ Future<void> canCreateShaderLibrary() async {
 }
 
 @pragma('vm:entry-point')
+Future<void> canCreateShaderLibraryFromBytes(ByteData bytes) async {
+  // The bytes are the same shader bundle `fromAsset` would resolve, handed in
+  // directly to exercise the runtime (non-asset) load path.
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromBytes(bytes);
+  assert(library != null);
+  final gpu.Shader? shader = library!['UnlitVertex'];
+  assert(shader != null);
+}
+
+@pragma('vm:entry-point')
 Future<void> canReflectUniformStructs() async {
   final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
 
