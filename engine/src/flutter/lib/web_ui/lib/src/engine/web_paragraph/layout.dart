@@ -92,15 +92,6 @@ class TextLayout {
     }
   }
 
-  ui.TextDirection _detectTextDirection(ClusterRange clusterRange) {
-    for (final BidiRun bidiRun in bidiRuns) {
-      if (bidiRun.clusterRange.overlapsWith(clusterRange.start, clusterRange.end)) {
-        return bidiRun.bidiLevel.isEven ? ui.TextDirection.ltr : ui.TextDirection.rtl;
-      }
-    }
-    return paragraph.paragraphStyle.textDirection;
-  }
-
   void extractTextClusters() {
     assert(allClusters.isEmpty);
 
