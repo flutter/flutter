@@ -58,6 +58,7 @@ class PullRequest {
     required this.checks,
     required this.baseRefName,
     required this.defaultBranchName,
+    required this.headSha,
   });
 
   final int number;
@@ -71,6 +72,7 @@ class PullRequest {
   final ChecksSummary checks;
   final String baseRefName;
   final String defaultBranchName;
+  final String headSha;
 
   bool get isThirdParty {
     const members = {'MEMBER', 'OWNER', 'COLLABORATOR'};
@@ -135,6 +137,7 @@ class PullRequest {
     'checks': checks.toJson(),
     'baseRefName': baseRefName,
     'defaultBranchName': defaultBranchName,
+    'headSha': headSha,
     'nextRecommendedAction': nextRecommendedAction.name,
   };
 }
@@ -179,23 +182,14 @@ class GhClient {
     return response['login'] as String;
   }
 
-  Future<int> getCommitsBehind(String headSha) async {
+  Future<int> getCommitsBehind(String defaultBranchName, String headSha) async {
     try {
       final response =
-          await _getApi('/repos/$owner/$repo/compare/main...$headSha') as Map<String, dynamic>;
+          await _getApi('/repos/$owner/$repo/compare/$defaultBranchName...$headSha')
+              as Map<String, dynamic>;
       return response['behind_by'] as int? ?? 0;
     } catch (_) {
       return 0;
-    }
-  }
-
-  Future<String> getPrHeadSha(int prNumber) async {
-    try {
-      final response = await _getApi('/repos/$owner/$repo/pulls/$prNumber') as Map<String, dynamic>;
-      final head = response['head'] as Map<String, dynamic>;
-      return head['sha'] as String;
-    } catch (_) {
-      return '';
     }
   }
 
@@ -330,7 +324,7 @@ class GhClient {
       final headCommitData = firstCommitNode['commit'] as Map<String, dynamic>;
       final headSha = headCommitData['oid'] as String;
 
-      final int behindCommits = await getCommitsBehind(headSha);
+      final int behindCommits = await getCommitsBehind(defaultBranchName, headSha);
       final bool isBehind = behindCommits > 0;
 
       final rollup = headCommitData['statusCheckRollup'] as Map<String, dynamic>?;
@@ -348,6 +342,7 @@ class GhClient {
         checks: checksSummary,
         baseRefName: baseRefName,
         defaultBranchName: defaultBranchName,
+        headSha: headSha,
       );
     });
 
@@ -493,7 +488,7 @@ class ShepherdService {
 
     for (final pr in prs) {
       final prKey = pr.number.toString();
-      final String currentHead = await ghClient.getPrHeadSha(pr.number);
+      final String currentHead = pr.headSha;
 
       final existingPrState = state[prKey] as Map<String, dynamic>?;
       if (existingPrState != null && existingPrState['headSha'] == currentHead) {
