@@ -205,8 +205,7 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false
+        "download_android_deps": false
       },
       "dependencies": [
         "web_tests/test_bundles/dart2js-canvaskit-webparagraph",
@@ -407,8 +406,7 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false
+        "download_android_deps": false
       },
       "dependencies": [
         "web_tests/test_bundles/dart2js-canvaskit-engine",
@@ -497,8 +495,7 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false
+        "download_android_deps": false
       },
       "dependencies": [
         "web_tests/test_bundles/dart2js-canvaskit-engine",
