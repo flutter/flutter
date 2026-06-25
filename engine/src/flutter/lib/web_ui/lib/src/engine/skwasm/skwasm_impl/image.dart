@@ -25,8 +25,10 @@ class SkwasmImage implements BackendImage {
     imageDispose(handle);
   }
 
+  @override
   int get width => imageGetWidth(handle);
 
+  @override
   int get height => imageGetHeight(handle);
 
   @override

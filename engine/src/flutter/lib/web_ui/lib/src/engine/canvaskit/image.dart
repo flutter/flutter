@@ -12,9 +12,11 @@ class CkImageDelegate implements BackendImage {
   final SkImage skImage;
 
   /// Returns the width of the image in pixels.
+  @override
   int get width => skImage.width().toInt();
 
   /// Returns the height of the image in pixels.
+  @override
   int get height => skImage.height().toInt();
 
   /// Releases the native memory allocated for the Skia image.
