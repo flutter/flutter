@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/gpu/render_pass.h"
+#include <algorithm>
 #include <future>
 #include <memory>
 
@@ -471,7 +472,8 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
     int mag_filter,
     int mip_filter,
     int width_address_mode,
-    int height_address_mode) {
+    int height_address_mode,
+    int max_anisotropy) {
   auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
   const flutter::gpu::Shader::TextureBinding* texture_binding =
       shader->GetUniformTexture(uniform_name);
@@ -489,6 +491,10 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
       flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
   sampler_desc.height_address_mode =
       flutter::gpu::ToImpellerSamplerAddressMode(height_address_mode);
+  // Backends clamp this to the device limit reported by
+  // Capabilities::GetMaxSamplerAnisotropy.
+  sampler_desc.max_anisotropy =
+      static_cast<uint8_t>(std::clamp(max_anisotropy, 1, 255));
   auto sampler =
       wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
