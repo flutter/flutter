@@ -15,7 +15,6 @@
 #include <epoxy/gl.h>
 
 #include <gmodule.h>
-#include <pthread.h>
 
 static constexpr uint32_t kBufferWidth = 4u;
 static constexpr uint32_t kBufferHeight = 4u;
@@ -68,14 +67,14 @@ static FlTestRegistrarTexture* fl_test_registrar_texture_new() {
       g_object_new(fl_test_registrar_texture_get_type(), nullptr));
 }
 
-static void* add_mock_texture_to_registrar(void* pointer) {
-  g_return_val_if_fail(FL_TEXTURE_REGISTRAR(pointer), ((void*)NULL));
+static gpointer add_mock_texture_to_registrar(gpointer pointer) {
+  g_return_val_if_fail(FL_TEXTURE_REGISTRAR(pointer), nullptr);
   FlTextureRegistrar* registrar = FL_TEXTURE_REGISTRAR(pointer);
   g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
   fl_texture_registrar_register_texture(registrar, texture);
-  int64_t* id = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+  int64_t* id = g_new0(int64_t, 1);
   id[0] = fl_texture_get_id(texture);
-  pthread_exit(id);
+  return id;
 }
 
 class FlTextureRegistrarTest : public flutter::testing::LinuxTest {};
@@ -179,10 +178,7 @@ TEST_F(FlTextureRegistrarTest, MarkInvalidTextureFrameAvailable) {
 
 // Test the textures can be accessed via multiple threads without
 // synchronization issues.
-// TODO(robert-ancell): Re-enable when no longer flaky
-// https://github.com/flutter/flutter/issues/138197
-TEST_F(FlTextureRegistrarTest,
-       DISABLED_RegistrarRegisterTextureInMultipleThreads) {
+TEST_F(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
   fl_engine_get_embedder_api(engine)->RegisterExternalTexture =
       MOCK_ENGINE_PROC(
           RegisterExternalTexture,
@@ -193,19 +189,17 @@ TEST_F(FlTextureRegistrarTest,
           ([](auto engine, int64_t texture_id) { return kSuccess; }));
 
   g_autoptr(FlTextureRegistrar) registrar = fl_texture_registrar_new(engine);
-  pthread_t threads[kThreadCount];
+  GThread* threads[kThreadCount];
   int64_t ids[kThreadCount];
 
   for (uint64_t t = 0; t < kThreadCount; t++) {
-    EXPECT_EQ(pthread_create(&threads[t], NULL, add_mock_texture_to_registrar,
-                             (void*)registrar),
-              0);
+    threads[t] =
+        g_thread_new(nullptr, add_mock_texture_to_registrar, registrar);
+    EXPECT_NE(threads[t], nullptr);
   }
   for (uint64_t t = 0; t < kThreadCount; t++) {
-    void* id;
-    pthread_join(threads[t], &id);
-    ids[t] = static_cast<int64_t*>(id)[0];
-    free(id);
+    g_autofree int64_t* id = static_cast<int64_t*>(g_thread_join(threads[t]));
+    ids[t] = *id;
   };
   // Check all the textures were created.
   for (uint64_t t = 0; t < kThreadCount; t++) {
