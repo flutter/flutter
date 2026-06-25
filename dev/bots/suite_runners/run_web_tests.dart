@@ -246,7 +246,7 @@ class WebTestsSuite {
   }
 
   Future<void> runWebSkwasmUnitTests() {
-    return _runWebUnitTests(useWasm: true, webShardCount: 2);
+    return _runWebUnitTests(useWasm: true, webShardCount: 8);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.

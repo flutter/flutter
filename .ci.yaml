@@ -2195,10 +2195,142 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: web_skwasm_tests
-      subshard: "1_last"
+      subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux web_skwasm_tests_2
+    recipe: flutter/flutter_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "2"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux web_skwasm_tests_3
+    recipe: flutter/flutter_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "3"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux web_skwasm_tests_4
+    recipe: flutter/flutter_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "4"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux web_skwasm_tests_5
+    recipe: flutter/flutter_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "5"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux web_skwasm_tests_6
+    recipe: flutter/flutter_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "6"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux web_skwasm_tests_7_last
+    recipe: flutter/flutter_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "7_last"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/**
