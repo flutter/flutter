@@ -121,7 +121,12 @@ static void fl_render_texture_gtk4_class_init(FlRenderTextureGtk4Class* klass) {
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
 #if GTK_CHECK_VERSION(4, 0, 0)
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE) && \
+    GTK_CHECK_VERSION(4, 10, 0)
+  gtk_widget_class_set_accessible_role(widget_class, GTK_ACCESSIBLE_ROLE_GROUP);
+#else
   gtk_widget_class_set_accessible_role(widget_class, GTK_ACCESSIBLE_ROLE_IMG);
+#endif
 #endif
   widget_class->measure = fl_render_texture_gtk4_measure;
   widget_class->snapshot = fl_render_texture_gtk4_snapshot;

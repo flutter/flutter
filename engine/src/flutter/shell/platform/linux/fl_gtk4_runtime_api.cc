@@ -7,6 +7,7 @@
 #if FLUTTER_LINUX_GTK4
 
 #include <dlfcn.h>
+#include <mutex>
 
 static gboolean gtk_runtime_at_least(int major, int minor, int micro) {
   return gtk_check_version(major, minor, micro) == nullptr;
@@ -15,6 +16,22 @@ static gboolean gtk_runtime_at_least(int major, int minor, int micro) {
 template <typename T>
 static T lookup_symbol(const char* name) {
   return reinterpret_cast<T>(dlsym(RTLD_DEFAULT, name));
+}
+
+static void log_fallback_once(const char* symbol, const char* fallback) {
+  static std::mutex mutex;
+  static GHashTable* warned_symbols = nullptr;
+
+  std::lock_guard<std::mutex> lock(mutex);
+  if (warned_symbols == nullptr) {
+    warned_symbols = g_hash_table_new(g_str_hash, g_str_equal);
+  }
+  if (g_hash_table_contains(warned_symbols, symbol)) {
+    return;
+  }
+  g_hash_table_add(warned_symbols, const_cast<char*>(symbol));
+  g_warning("GTK4 runtime compat fallback: %s unavailable, using %s", symbol,
+            fallback);
 }
 
 const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
@@ -82,6 +99,8 @@ void fl_gtk_runtime_accessible_set_accessible_parent(
     api->gtk_accessible_set_accessible_parent(self, parent, next_sibling);
     return;
   }
+  log_fallback_once("gtk_accessible_set_accessible_parent",
+                    "no-op compatible path");
 #else
 #if GTK_CHECK_VERSION(4, 10, 0)
   gtk_accessible_set_accessible_parent(self, parent, next_sibling);
@@ -103,6 +122,8 @@ void fl_gtk_runtime_accessible_update_state_value(GtkAccessible* self,
     api->gtk_accessible_update_state_value(self, n_states, states, values);
     return;
   }
+  log_fallback_once("gtk_accessible_update_state_value",
+                    "gtk_accessible_update_state_value");
 #endif
   gtk_accessible_update_state_value(self, n_states, states, values);
 }
@@ -119,6 +140,8 @@ void fl_gtk_runtime_accessible_update_property_value(
                                               values);
     return;
   }
+  log_fallback_once("gtk_accessible_update_property_value",
+                    "gtk_accessible_update_property_value");
 #endif
   gtk_accessible_update_property_value(self, n_properties, properties, values);
 }
@@ -135,6 +158,8 @@ void fl_gtk_runtime_accessible_update_relation_value(
                                               values);
     return;
   }
+  log_fallback_once("gtk_accessible_update_relation_value",
+                    "gtk_accessible_update_relation_value");
 #endif
   gtk_accessible_update_relation_value(self, n_relations, relations, values);
 }
@@ -147,6 +172,8 @@ void fl_gtk_runtime_accessible_state_init_value(GtkAccessibleState state,
     api->gtk_accessible_state_init_value(state, value);
     return;
   }
+  log_fallback_once("gtk_accessible_state_init_value",
+                    "gtk_accessible_state_init_value");
 #endif
   gtk_accessible_state_init_value(state, value);
 }
@@ -160,6 +187,8 @@ void fl_gtk_runtime_accessible_property_init_value(
     api->gtk_accessible_property_init_value(property, value);
     return;
   }
+  log_fallback_once("gtk_accessible_property_init_value",
+                    "gtk_accessible_property_init_value");
 #endif
   gtk_accessible_property_init_value(property, value);
 }
@@ -173,6 +202,8 @@ void fl_gtk_runtime_accessible_relation_init_value(
     api->gtk_accessible_relation_init_value(relation, value);
     return;
   }
+  log_fallback_once("gtk_accessible_relation_init_value",
+                    "gtk_accessible_relation_init_value");
 #endif
   gtk_accessible_relation_init_value(relation, value);
 }
@@ -186,6 +217,7 @@ void fl_gtk_runtime_accessible_announce(GtkAccessible* self,
     api->gtk_accessible_announce(self, message, priority);
     return;
   }
+  log_fallback_once("gtk_accessible_announce", "no-op compatible path");
 #endif
   (void)self;
   (void)message;

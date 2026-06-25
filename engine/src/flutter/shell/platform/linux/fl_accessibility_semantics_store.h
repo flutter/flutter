@@ -14,7 +14,9 @@ G_BEGIN_DECLS
 typedef struct {
   int32_t id;
   gchar* label;
+  gchar* hint;
   gchar* value;
+  gchar* tooltip;
   FlutterSemanticsFlags flags;
   FlutterSemanticsAction actions;
   gint text_selection_base;
@@ -24,6 +26,7 @@ typedef struct {
   FlutterTransformation transform;
   size_t child_count;
   int32_t* children_in_traversal_order;
+  int32_t heading_level;
 } FlAccessibilitySemanticsNode;
 
 G_DECLARE_FINAL_TYPE(FlAccessibilitySemanticsStore,

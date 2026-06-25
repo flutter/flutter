@@ -29,9 +29,9 @@
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #if FLUTTER_LINUX_GTK4
-#include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
+#include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
 #endif
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #if !FLUTTER_LINUX_GTK4
@@ -72,30 +72,17 @@ G_DEFINE_TYPE_WITH_CODE(
 
 #if FLUTTER_LINUX_GTK4
 static void fl_view_gtk4_update_accessible_name(FlView* self) {
-  const gchar* label = "Flutter view";
-  if (self->accessibility_semantics_store != nullptr) {
-    const FlAccessibilitySemanticsNode* root =
-        fl_accessibility_semantics_store_lookup_node(
-            self->accessibility_semantics_store, 0);
-    if (root != nullptr && root->label != nullptr && root->label[0] != '\0') {
-      label = root->label;
-    }
+  if (self->accessibility_backend != nullptr) {
+    fl_view_gtk4_accessibility_update_accessible_name(
+        self->accessibility_backend);
   }
-
-  GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
-  GtkAccessibleProperty properties[] = {property};
-  GValue value = G_VALUE_INIT;
-  fl_gtk_runtime_accessible_property_init_value(property, &value);
-  g_value_set_string(&value, label);
-  fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self), 1,
-                                                  properties, &value);
-  g_value_unset(&value);
 }
 
 static void fl_view_gtk4_update_accessible_tree(FlView* self) {
-  // Keep the render surface attached to the view in the accessibility tree.
-  fl_gtk_runtime_accessible_set_accessible_parent(
-      GTK_ACCESSIBLE(self->render_area), GTK_ACCESSIBLE(self), nullptr);
+  if (self->accessibility_backend != nullptr) {
+    fl_view_gtk4_accessibility_update_accessible_tree(
+        self->accessibility_backend);
+  }
 }
 #endif
 
@@ -364,10 +351,14 @@ static void update_semantics_cb(FlView* self,
 #if !FLUTTER_LINUX_GTK4
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 #else
-  if (self->accessibility_semantics_store != nullptr) {
-    fl_accessibility_semantics_store_handle_update(
-        self->accessibility_semantics_store, update);
-    fl_view_gtk4_update_accessible_name(self);
+  if (self->accessibility_backend != nullptr) {
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+    fl_view_gtk4_accessibility_handle_native_update(self->accessibility_backend,
+                                                    update);
+#else
+    fl_view_gtk4_accessibility_handle_update(self->accessibility_backend,
+                                             update);
+#endif
   }
 #endif
 }
@@ -605,6 +596,8 @@ static void fl_view_dispose(GObject* object) {
 #if !FLUTTER_LINUX_GTK4
   g_clear_object(&self->view_accessible);
 #else
+  fl_view_gtk4_accessibility_dispose(self->accessibility_backend);
+  self->accessibility_backend = nullptr;
   if (self->native_texture_retry_source_id != 0) {
     g_source_remove(self->native_texture_retry_source_id);
     self->native_texture_retry_source_id = 0;
@@ -720,8 +713,8 @@ static void setup_engine(FlView* self) {
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
 #else
-  self->accessibility_semantics_store =
-      fl_accessibility_semantics_store_new(self->view_id);
+  self->accessibility_backend =
+      fl_view_gtk4_accessibility_new(self, self->view_id);
 #endif
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
