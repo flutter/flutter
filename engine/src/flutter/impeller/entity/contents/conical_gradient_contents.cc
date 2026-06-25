@@ -86,6 +86,10 @@ void ConicalGradientContents::SetFocus(std::optional<Point> focus,
   ARRAY_LEN(UNIFORM_STOP_PAIRS_INFO(Conical)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
 static_assert(UNIFORM_STOP_SIZE == kMaxUniformGradientStops / 2);
+static_assert(sizeof(UNIFORM_COLORS_INFO(Conical)) ==
+              sizeof(UNIFORM_COLORS_INFO(Conical)::colors));
+static_assert(sizeof(UNIFORM_STOP_PAIRS_INFO(Conical)) ==
+              sizeof(UNIFORM_STOP_PAIRS_INFO(Conical)::stop_pairs));
 
 bool ConicalGradientContents::Render(const ContentContext& renderer,
                                      const Entity& entity,

@@ -201,6 +201,10 @@ bool LinearGradientContents::FastLinearGradient(const ContentContext& renderer,
 #define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_STOP_PAIRS_INFO(Linear)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
 static_assert(UNIFORM_STOP_SIZE == kMaxUniformGradientStops / 2);
+static_assert(sizeof(UNIFORM_COLORS_INFO(Linear)) ==
+              sizeof(UNIFORM_COLORS_INFO(Linear)::colors));
+static_assert(sizeof(UNIFORM_STOP_PAIRS_INFO(Linear)) ==
+              sizeof(UNIFORM_STOP_PAIRS_INFO(Linear)::stop_pairs));
 
 bool LinearGradientContents::Render(const ContentContext& renderer,
                                     const Entity& entity,

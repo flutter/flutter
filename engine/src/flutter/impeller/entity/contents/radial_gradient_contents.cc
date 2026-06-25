@@ -69,6 +69,10 @@ bool RadialGradientContents::IsOpaque(const Matrix& transform) const {
 #define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_STOP_PAIRS_INFO(Radial)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
 static_assert(UNIFORM_STOP_SIZE == kMaxUniformGradientStops / 2);
+static_assert(sizeof(UNIFORM_COLORS_INFO(Radial)) ==
+              sizeof(UNIFORM_COLORS_INFO(Radial)::colors));
+static_assert(sizeof(UNIFORM_STOP_PAIRS_INFO(Radial)) ==
+              sizeof(UNIFORM_STOP_PAIRS_INFO(Radial)::stop_pairs));
 
 bool RadialGradientContents::Render(const ContentContext& renderer,
                                     const Entity& entity,

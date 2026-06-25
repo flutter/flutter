@@ -75,6 +75,10 @@ bool SweepGradientContents::IsOpaque(const Matrix& transform) const {
 #define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_STOP_PAIRS_INFO(Sweep)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
 static_assert(UNIFORM_STOP_SIZE == kMaxUniformGradientStops / 2);
+static_assert(sizeof(UNIFORM_COLORS_INFO(Sweep)) ==
+              sizeof(UNIFORM_COLORS_INFO(Sweep)::colors));
+static_assert(sizeof(UNIFORM_STOP_PAIRS_INFO(Sweep)) ==
+              sizeof(UNIFORM_STOP_PAIRS_INFO(Sweep)::stop_pairs));
 
 bool SweepGradientContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
