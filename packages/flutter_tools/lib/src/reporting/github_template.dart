@@ -77,7 +77,7 @@ class GitHubTemplateCreator {
 
   /// Insert a comma every three digits in a number.
   static String _asCommaSeparatedNumber(int length) {
-    assert(length > 0);
+    assert(length >= 0);
     final lengthStr = length.toString();
     final buffer = StringBuffer();
     final int len = lengthStr.length;
