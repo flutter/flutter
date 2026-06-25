@@ -76,18 +76,18 @@ class GitHubTemplateCreator {
   }
 
   /// Insert a comma every three digits in a number.
-  static String _asCommaSeparatedNumber(int length) {
-    assert(length >= 0);
-    final lengthStr = length.toString();
+  static String _asCommaSeparatedNumber(int number) {
+    assert(number >= 0);
+    final numberStr = number.toString();
     final buffer = StringBuffer();
-    final int len = lengthStr.length;
-    buffer.write(lengthStr[0]);
+    final int length = numberStr.length;
+    buffer.write(numberStr[0]);
 
-    for (var i = 1; i < len; i++) {
-      if ((len - i) % 3 == 0) {
+    for (var i = 1; i < length; i++) {
+      if ((length - i) % 3 == 0) {
         buffer.write(',');
       }
-      buffer.write(lengthStr[i]);
+      buffer.write(numberStr[i]);
     }
     return buffer.toString();
   }
