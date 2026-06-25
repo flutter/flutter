@@ -387,11 +387,14 @@ class Canvas {
   ///
   /// @param  paint            The paint style to apply.
   /// @param  params           The SDF parameters for the shape.
+  /// @param  reuse_depth       Whether to reuse the current depth value or
+  ///                          allocate a new depth layer.
   /// @param  shape_transform  An optional transform applied to the shape
   ///                          relative to the current canvas transform.
   void AddRenderSDFEntityToCurrentPass(
       const Paint& paint,
       UberSDFParameters params,
+      bool reuse_depth = false,
       std::optional<Matrix> shape_transform = std::nullopt);
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);

@@ -794,7 +794,7 @@ void Canvas::DrawLine(const Point& p0,
 
     auto params =
         UberSDFParameters::MakeLine(paint.color, length, paint.stroke);
-    AddRenderSDFEntityToCurrentPass(paint, params,
+    AddRenderSDFEntityToCurrentPass(paint, params, reuse_depth,
                                     /*shape_transform=*/translation * rotation);
     return;
   }
@@ -2023,6 +2023,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
 void Canvas::AddRenderSDFEntityToCurrentPass(
     const Paint& paint,
     UberSDFParameters params,
+    bool reuse_depth,
     std::optional<Matrix> shape_transform) {
   Matrix transform = GetCurrentTransform();
   if (shape_transform.has_value()) {
@@ -2049,13 +2050,19 @@ void Canvas::AddRenderSDFEntityToCurrentPass(
     std::shared_ptr<ColorSourceContents> color_source_contents =
         paint.CreateContents(renderer_, geom);
     if (shape_transform.has_value() && color_source_contents) {
-      // The color source is defined in the original coordinate space, but the
-      // shape is rendered in a coordinate system transformed by
-      // shape_transform. We must apply the inverse of shape_transform to the
-      // color source to cancel out the shape's rotation/translation, drawing
-      // the color source in the original coordinate space.
-      color_source_contents->SetEffectTransform(
-          shape_transform.value().Invert());
+      // The color source is positioned in the canvas based on its effect
+      // transform matrix (color -> canvas). Shape is positioned in the canvas
+      // by the shape_transform matrix (shape -> canvas). We must align the
+      // color source to the shape by modifying the color source's transform to
+      // be (color -> canvas -> shape).
+      //
+      // Color source exposes its transform inverted, so calculate (shape ->
+      // canvas -> color) and use it to set color source's inverse transform.
+      Matrix shape_to_canvas = shape_transform.value();
+      Matrix canvas_to_color =
+          color_source_contents->GetInverseEffectTransform();
+      Matrix shape_to_color = canvas_to_color * shape_to_canvas;
+      color_source_contents->SetInverseEffectTransform(shape_to_color);
     }
     std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
         BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
@@ -2064,12 +2071,11 @@ void Canvas::AddRenderSDFEntityToCurrentPass(
     Paint new_paint = paint;
     new_paint.color_source = nullptr;
     AddRenderEntityWithFiltersToCurrentPass(entity, geom, new_paint,
-                                            /*reuse_depth=*/false,
+                                            reuse_depth,
                                             /*override_contents=*/
                                             std::move(final_contents));
   } else {
-    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
-                                            /*reuse_depth=*/false,
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint, reuse_depth,
                                             /*override_contents=*/
                                             std::move(contents));
   }
