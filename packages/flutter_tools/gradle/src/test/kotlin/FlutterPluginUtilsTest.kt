@@ -1094,7 +1094,6 @@ class FlutterPluginUtilsTest {
                                 )
                         )
 
-                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
                     val appPluginManager = testProject.appPluginManager
                     val plugin1Manager = testProject.plugin1Manager
 
@@ -1183,7 +1182,6 @@ class FlutterPluginUtilsTest {
                                 )
                         )
 
-                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
                     val appPluginManager = testProject.appPluginManager
                     val plugin1Manager = testProject.plugin1Manager
 
@@ -1251,7 +1249,6 @@ class FlutterPluginUtilsTest {
                                 )
                         )
 
-                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
                     val appPluginManager = testProject.appPluginManager
                     val plugin1Manager = testProject.plugin1Manager
                     val plugin2Manager = testProject.plugin2Manager
