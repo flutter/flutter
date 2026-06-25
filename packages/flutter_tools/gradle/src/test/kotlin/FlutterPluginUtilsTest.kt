@@ -1860,7 +1860,7 @@ class FlutterPluginUtilsTest {
                     }
 
                      @Test
-                     fun `does not re-apply KGP nor log`(
+                     fun `does not re-apply KGP and does not log`(
                          @TempDir tempDir: Path
                      ) {
                          val testProject =
