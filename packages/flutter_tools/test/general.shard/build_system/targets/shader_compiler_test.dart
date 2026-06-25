@@ -717,5 +717,74 @@ void main() {
         ),
       );
     });
+
+    testWithoutContext('compileShader only logs the security policy block error once', () async {
+      final blockedException = ProcessException(
+        impellerc,
+        <String>[],
+        'blocked by group policy',
+        1260,
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: blockedException,
+        ),
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: blockedException,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      final bool success1 = await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        targetPlatform: TargetPlatform.ios,
+        fatal: false,
+      );
+      expect(success1, false);
+
+      final String firstErrorLog = logger.errorText;
+      expect(firstErrorLog, contains('blocked by system'));
+
+      const headerLine = '------------------------------------------------------------------------';
+      expect(headerLine.allMatches(logger.errorText).length, 2);
+
+      final bool success2 = await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        targetPlatform: TargetPlatform.ios,
+        fatal: false,
+      );
+      expect(success2, false);
+
+      expect(headerLine.allMatches(logger.errorText).length, 2);
+    });
   });
 }

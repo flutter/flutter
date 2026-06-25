@@ -104,6 +104,7 @@ class ShaderCompiler {
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  bool _hasLoggedSecurityBlockError = false;
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
@@ -269,6 +270,10 @@ class ShaderCompiler {
   }
 
   void _logSecurityBlockError(String impellercPath) {
+    if (_hasLoggedSecurityBlockError) {
+      return;
+    }
+    _hasLoggedSecurityBlockError = true;
     _logger.printError(
       '------------------------------------------------------------------------\n'
       'Error: The Impeller shader compiler (impellerc) was blocked by system\n'
