@@ -1034,12 +1034,19 @@ class PlatformViewLayer extends Layer {
 
   void _debugCheckForRasterizationConflict() {
     Layer? ancestor = parent;
-    final path = <Layer>[this];
     while (ancestor != null) {
-      path.add(ancestor);
       if (ancestor is ImageFilterLayer ||
           ancestor is ColorFilterLayer ||
           ancestor is ShaderMaskLayer) {
+        final path = <Layer>[this];
+        Layer? current = parent;
+        while (current != null) {
+          path.add(current);
+          if (current == ancestor) {
+            break;
+          }
+          current = current.parent;
+        }
         final propertiesBuilder = DiagnosticPropertiesBuilder();
         ancestor.debugFillProperties(propertiesBuilder);
         throw FlutterError.fromParts(<DiagnosticsNode>[
