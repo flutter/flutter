@@ -212,6 +212,8 @@ class UserMessages {
     }
   }
 
+  /// Overridable message to be shown when detected from device logs that UIScene migration is
+  /// still required.
   String get uiSceneMigrationWarning => '''
 ════════════════════════════════════════════════════════════════════════════════
 Your iOS app has not been migrated to the UIScene lifecycle.
