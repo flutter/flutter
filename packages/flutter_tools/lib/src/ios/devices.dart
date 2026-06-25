@@ -912,7 +912,7 @@ class IOSDevice extends Device {
     ]);
 
     // If the first future to return is null, wait for the other to complete
-    // unless canceled.
+    // unless the app was terminated.
     if (localUri == null && !appTerminatedCompleter.isCompleted) {
       final Future<List<Uri?>> allDiscoveryOptionsComplete = Future.wait(discoveryOptions);
       await Future.any(<Future<Object?>>[
@@ -920,7 +920,7 @@ class IOSDevice extends Device {
         appTerminatedCompleter.future,
       ]);
       if (!appTerminatedCompleter.isCompleted) {
-        // If it wasn't cancelled, that means one of the discovery options completed.
+        // If it wasn't terminated, that means one of the discovery options completed.
         final List<Uri?> vmUrls = await allDiscoveryOptionsComplete;
         localUri = vmUrls.where((Uri? vmUrl) => vmUrl != null).firstOrNull;
       }

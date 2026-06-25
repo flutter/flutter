@@ -1411,7 +1411,7 @@ void main() {
           device.setLogReader(iosApp, deviceLogReader);
 
           unawaited(
-            mdnsDiscovery.completer.future.whenComplete(() {
+            mdnsDiscovery.discoveryStarted.future.whenComplete(() {
               // Start writing messages to the log reader.
               Timer.run(() {
                 deviceLogReader.addLine('Foo');
@@ -1440,9 +1440,15 @@ void main() {
         }, overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery});
       });
 
-      testUsingContext(
-        'IOSDevice.startApp fails to find Dart VM when app terminates',
-        () async {
+      group('IOSDevice.startApp fails to find Dart VM', () {
+        late FakeMDnsVmServiceDiscovery mdnsDiscovery;
+        late Completer<void> mdnsDiscoveryWaitToComplete;
+        setUp(() {
+          mdnsDiscoveryWaitToComplete = Completer<void>();
+          mdnsDiscovery = FakeMDnsVmServiceDiscovery(waitToReturn: mdnsDiscoveryWaitToComplete);
+        });
+
+        testUsingContext('when app terminates', () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final processManager = FakeProcessManager.empty();
 
@@ -1494,6 +1500,12 @@ void main() {
             platformArgs: <String, dynamic>{},
           );
           unawaited(
+            mdnsDiscovery.discoveryStarted.future.whenComplete(() {
+              deviceLogReader.addLine('App terminated');
+            }),
+          );
+
+          unawaited(
             futureLaunchResult.then((LaunchResult launchResult) {
               expect(launchResult.started, false);
               expect(launchResult.hasVmService, false);
@@ -1505,18 +1517,13 @@ void main() {
                 ),
               ]);
               completer.complete();
+              mdnsDiscoveryWaitToComplete.complete();
             }),
           );
 
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-          deviceLogReader.addLine('App terminated');
-
           await completer.future;
-        },
-        overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(returnsNull: true),
-        },
-      );
+        }, overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery});
+      });
 
       testUsingContext(
         'IOSDevice.startApp prints guided message when iOS 18.4 crashes due to JIT',
@@ -1729,11 +1736,14 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
   FakeMDnsVmServiceDiscovery({
     this.returnsNull = false,
     this.allowthrowOnMissingLocalNetworkPermissionsError = true,
+    this.waitToReturn,
   });
   bool returnsNull;
   bool allowthrowOnMissingLocalNetworkPermissionsError;
 
-  Completer<void> completer = Completer<void>();
+  Completer<void> discoveryStarted = Completer<void>();
+
+  Completer<void>? waitToReturn;
   @override
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
@@ -1745,7 +1755,8 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     Duration timeout = Duration.zero,
     bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
-    completer.complete();
+    discoveryStarted.complete();
+    await waitToReturn?.future;
     if (returnsNull) {
       return null;
     }
