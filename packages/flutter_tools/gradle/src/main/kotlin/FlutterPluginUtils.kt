@@ -624,6 +624,20 @@ object FlutterPluginUtils {
         }
     }
 
+    /**
+     * Represents whether Kotlin Gradle Plugin, Android Gradle Plugin (for applications), and the
+     * Android Gradle Plugin (for libraries) are declared in a subproject's build script.
+     *
+     * @property hasKgpPlugin `true` if the Kotlin Gradle Plugin (KGP) is declared in the subproject's build script.
+     * @property hasAppPlugin `true` if the Android Gradle Plugin (AGP) for applications is declared in the subproject's build script.
+     * @property hasLibPlugin `true` if the Android Gradle Plugin (AGP) for libraries is declared in the subproject's build script.
+     */
+    internal data class SubprojectPluginState(
+        val hasKgpPlugin: Boolean,
+        val hasAppPlugin: Boolean,
+        val hasLibPlugin: Boolean
+    )
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
