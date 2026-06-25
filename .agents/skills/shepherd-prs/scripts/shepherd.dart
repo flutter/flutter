@@ -188,12 +188,11 @@ class GhClient {
     }
   }
 
-  Future<List<PullRequest>> fetchApprovedPRs(String viewerLogin) async {
-    final queryStr = 'repo:$owner/$repo is:pr is:open author:$viewerLogin';
-
-    const graphqlQuery = r'''
-      query($queryStr: String!) {
-        search(query: $queryStr, type: ISSUE, first: 50) {
+  Future<List<dynamic>> _runSearchQuery(String queryStr, String viewerLogin) async {
+    final graphqlQuery =
+        '''
+      query(\$queryStr: String!) {
+        search(query: \$queryStr, type: ISSUE, first: 50) {
           nodes {
             ... on PullRequest {
               number
@@ -241,6 +240,11 @@ class GhClient {
                   }
                 }
               }
+              reviews(author: "$viewerLogin", last: 10) {
+                nodes {
+                  state
+                }
+              }
             }
           }
         }
@@ -264,34 +268,76 @@ class GhClient {
     }
 
     final search = data['search'] as Map<String, dynamic>;
-    final nodes = search['nodes'] as List<dynamic>;
+    return search['nodes'] as List<dynamic>;
+  }
 
-    final Iterable<Future<PullRequest>> prFutures = nodes.cast<Map<String, dynamic>>().map((
-      node,
-    ) async {
+  Future<List<PullRequest>> fetchApprovedPRs(String viewerLogin) async {
+    final reviewedQueryStr =
+        'repo:$owner/$repo is:pr is:open review:approved reviewed-by:$viewerLogin';
+    final authoredQueryStr = 'repo:$owner/$repo is:pr is:open author:$viewerLogin';
+
+    final List<List<dynamic>> results = await Future.wait([
+      _runSearchQuery(reviewedQueryStr, viewerLogin),
+      _runSearchQuery(authoredQueryStr, viewerLogin),
+    ]);
+
+    final Map<int, dynamic> uniqueNodes = {};
+    for (final Map<String, dynamic> node in results[0].cast<Map<String, dynamic>>()) {
       final number = node['number'] as int;
-      final title = node['title'] as String;
-      final authorData = node['author'] as Map<String, dynamic>?;
-      final author = authorData != null ? authorData['login'] as String : 'unknown';
-      final authorAssociation = node['authorAssociation'] as String;
-      final baseRefName = node['baseRefName'] as String;
+      uniqueNodes[number] = node;
+    }
+    for (final Map<String, dynamic> node in results[1].cast<Map<String, dynamic>>()) {
+      final number = node['number'] as int;
+      uniqueNodes[number] = node;
+    }
 
-      final repositoryData = node['repository'] as Map<String, dynamic>;
+    final Iterable<Future<PullRequest?>> prFutures = uniqueNodes.values.map((dynamic node) async {
+      final prData = node as Map<String, dynamic>;
+
+      final authorData = prData['author'] as Map<String, dynamic>?;
+      final author = authorData != null ? authorData['login'] as String : 'unknown';
+      final isOwnPr = author == viewerLogin;
+
+      final reviews = prData['reviews'] as Map<String, dynamic>?;
+      final List<dynamic>? reviewNodes = reviews != null
+          ? reviews['nodes'] as List<dynamic>?
+          : null;
+      final bool hasViewerApproval =
+          reviewNodes != null &&
+          reviewNodes.any((dynamic r) => (r as Map<String, dynamic>)['state'] == 'APPROVED');
+
+      final authorAssociation = prData['authorAssociation'] as String;
+      const members = {'MEMBER', 'OWNER', 'COLLABORATOR'};
+      final bool isThirdParty = !members.contains(authorAssociation.toUpperCase());
+
+      if (!isOwnPr && !isThirdParty) {
+        return null;
+      }
+
+      if (isThirdParty && !hasViewerApproval) {
+        return null;
+      }
+
+      final number = prData['number'] as int;
+      final title = prData['title'] as String;
+      final baseRefName = prData['baseRefName'] as String;
+
+      final repositoryData = prData['repository'] as Map<String, dynamic>;
       final defaultBranchRef = repositoryData['defaultBranchRef'] as Map<String, dynamic>?;
       final defaultBranchName = defaultBranchRef != null
           ? defaultBranchRef['name'] as String
           : 'main';
 
-      final labelsSection = node['labels'] as Map<String, dynamic>;
+      final labelsSection = prData['labels'] as Map<String, dynamic>;
       final labelNodes = labelsSection['nodes'] as List<dynamic>;
       final List<String> labels = labelNodes
           .map((dynamic l) => (l as Map<String, dynamic>)['name'] as String)
           .toList();
 
-      final String mergeable = node['mergeable'] as String? ?? 'UNKNOWN';
+      final String mergeable = prData['mergeable'] as String? ?? 'UNKNOWN';
       final hasMergeConflicts = mergeable == 'CONFLICTING';
 
-      final commitsSection = node['commits'] as Map<String, dynamic>;
+      final commitsSection = prData['commits'] as Map<String, dynamic>;
       final commitsNodes = commitsSection['nodes'] as List<dynamic>;
 
       var headSha = '';
@@ -325,7 +371,8 @@ class GhClient {
       );
     });
 
-    return Future.wait(prFutures);
+    final List<PullRequest?> resultsList = await Future.wait(prFutures);
+    return resultsList.whereType<PullRequest>().toList();
   }
 
   ChecksSummary _parseChecks(Map<String, dynamic>? rollup) {
@@ -615,7 +662,9 @@ class ShepherdService {
     final eligiblePrs = prs;
 
     if (eligiblePrs.isEmpty) {
-      return <String>['No open PRs authored by you found.'];
+      return <String>[
+        'No open PRs authored by you or approved third-party PRs found requiring shepherding.',
+      ];
     }
 
     final Map<String, dynamic> globalState = await _syncAndGetState(eligiblePrs);
@@ -624,7 +673,9 @@ class ShepherdService {
     if (targetPrNumber != null) {
       final PullRequest targetPr = eligiblePrs.firstWhere(
         (pr) => pr.number == targetPrNumber,
-        orElse: () => throw ArgumentError('PR #$targetPrNumber is not in your open PR list.'),
+        orElse: () => throw ArgumentError(
+          'PR #$targetPrNumber is not in your open PR or approved third-party PR list.',
+        ),
       );
       final String log = await shepherdPR(targetPr, globalState, dryRun: dryRun);
       logs.add(log);

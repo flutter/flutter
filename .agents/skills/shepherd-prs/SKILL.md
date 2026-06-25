@@ -1,11 +1,11 @@
 ---
 name: shepherd-prs
-description: Skill to automate shepherding, updating, and landing your own open Pull Requests in the flutter/flutter repository using the custom self-contained shepherd.dart script.
+description: Skill to automate shepherding, updating, and landing both your own open PRs and approved third-party contributor PRs in the flutter/flutter repository.
 ---
 
-# Shepherding Your Own Pull Requests Skill
+# Shepherding Pull Requests Skill
 
-This skill teaches you how to act as a co-pilot/agent to shepherd and land your own open Pull Requests in the `flutter/flutter` repository using the custom, self-contained `shepherd.dart` tool.
+This skill teaches you how to act as a co-pilot/agent to shepherd, update, and land both your own open Pull Requests and approved third-party contributor Pull Requests in the `flutter/flutter` repository using the custom, self-contained `shepherd.dart` tool.
 
 ---
 
@@ -27,7 +27,7 @@ dart <skill_path>/scripts/shepherd.dart <command> [options]
 
 ## 2. Reading PR State (The `list` Command)
 
-To understand the current state of your own open PRs, run the list command. It outputs a structured JSON array of Pull Request objects by default:
+To understand the current state of both your own open PRs and approved third-party PRs, run the list command. It outputs a structured JSON array of Pull Request objects by default:
 
 ```bash
 dart <skill_path>/scripts/shepherd.dart list
@@ -101,7 +101,7 @@ When running the `run` command, inspect the returned JSON logs. Handle specific 
 
 ## 5. Workflow and Interaction Guidelines
 
-When the user asks for the status of their own open PRs:
+When the user asks for the status of their open or approved PRs:
 1. **Do NOT automatically execute shepherding actions** (e.g., do not run `shepherd.dart run --all` or `shepherd.dart run --pr <number>`) on the initial inquiry.
 2. **First, retrieve the PR states** using the list command: `dart <skill_path>/shepherd.dart list`.
 3. **Present a clear summary** of the PRs, including their current status and recommended actions.
@@ -110,10 +110,10 @@ When the user asks for the status of their own open PRs:
 
 ## Examples
 
-- **User:** "What is the status of my approved PRs?"
+- **User:** "What is the status of my approved and open PRs?"
 - **Agent:**
   1. Identifies the read-only inquiry and runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart list`.
-  2. Parses the JSON output to present a summary of all your own open PRs, their CI checks, and recommended actions.
+  2. Parses the JSON output to present a summary of all your own open PRs and approved third-party PRs, their CI checks, and recommended actions.
   3. Asks the user for confirmation before executing any shepherding actions.
 
 - **User:** "Yes, please update the branch for PR #186254."
