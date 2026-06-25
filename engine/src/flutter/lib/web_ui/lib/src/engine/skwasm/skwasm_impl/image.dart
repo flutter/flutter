@@ -42,7 +42,7 @@ class SkwasmImage implements BackendImage {
 /// The [width] and [height] are the dimensions of the image.
 /// The [format] specifies the layout of color channels in the buffer.
 /// The optional [rowBytes] defines the step length between two scan lines.
-EngineImage createSkwasmImageFromPixels(
+SkwasmImage createSkwasmImageFromPixels(
   Uint8List pixels,
   int width,
   int height,
@@ -67,7 +67,7 @@ EngineImage createSkwasmImageFromPixels(
       format.index,
       rowBytes ?? 4 * width,
     );
-    return EngineImage(SkwasmImage(imageHandle), width, height);
+    return SkwasmImage(imageHandle);
   } finally {
     skDataDispose(dataHandle);
   }

@@ -258,22 +258,103 @@ external DomIntl get domIntl;
 @JS('Symbol')
 external DomSymbol get domSymbol;
 
-@JS('createImageBitmap')
-external JSPromise<JSAny?> _createImageBitmap(JSAny source, [int x, int y, int width, int height]);
+extension CreateImageBitmapExtension on JSObject {
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmap(JSAny source);
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmapWithOptions(JSAny source, ImageBitmapOptions options);
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmapWithBounds(
+    JSAny source,
+    int x,
+    int y,
+    int width,
+    int height,
+  );
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmapWithBoundsAndOptions(
+    JSAny source,
+    int x,
+    int y,
+    int width,
+    int height,
+    ImageBitmapOptions options,
+  );
+}
+
 Future<DomImageBitmap> createImageBitmap(
-  JSAny source, [
+  JSAny source, {
   ({int x, int y, int width, int height})? bounds,
-]) {
+  ImageBitmapOptions? options,
+}) {
   if (debugThrowOnCreateImageBitmapIfDisabled && !browserSupportsCreateImageBitmap) {
     throw UnsupportedError('createImageBitmap is not supported in this browser');
   }
-  JSPromise<JSAny?> jsPromise;
+  final JSPromise<JSAny?> jsPromise;
   if (bounds != null) {
-    jsPromise = _createImageBitmap(source, bounds.x, bounds.y, bounds.width, bounds.height);
+    if (options != null) {
+      jsPromise = globalContext.createImageBitmapWithBoundsAndOptions(
+        source,
+        bounds.x,
+        bounds.y,
+        bounds.width,
+        bounds.height,
+        options,
+      );
+    } else {
+      jsPromise = globalContext.createImageBitmapWithBounds(
+        source,
+        bounds.x,
+        bounds.y,
+        bounds.width,
+        bounds.height,
+      );
+    }
   } else {
-    jsPromise = _createImageBitmap(source);
+    if (options != null) {
+      jsPromise = globalContext.createImageBitmapWithOptions(source, options);
+    } else {
+      jsPromise = globalContext.createImageBitmap(source);
+    }
   }
   return jsPromise.toDart.then((JSAny? value) => value! as DomImageBitmap);
+}
+
+@JS()
+@anonymous
+extension type ImageBitmapOptions._primary(JSObject _) implements JSObject {
+  factory ImageBitmapOptions({
+    String? imageOrientation,
+    String? premultiplyAlpha,
+    String? colorSpaceConversion,
+    int? resizeWidth,
+    int? resizeHeight,
+    String? resizeQuality,
+  }) {
+    final JSObject obj = JSObject();
+    if (imageOrientation != null) {
+      obj['imageOrientation'] = imageOrientation.toJS;
+    }
+    if (premultiplyAlpha != null) {
+      obj['premultiplyAlpha'] = premultiplyAlpha.toJS;
+    }
+    if (colorSpaceConversion != null) {
+      obj['colorSpaceConversion'] = colorSpaceConversion.toJS;
+    }
+    if (resizeWidth != null) {
+      obj['resizeWidth'] = resizeWidth.toJS;
+    }
+    if (resizeHeight != null) {
+      obj['resizeHeight'] = resizeHeight.toJS;
+    }
+    if (resizeQuality != null) {
+      obj['resizeQuality'] = resizeQuality.toJS;
+    }
+    return ImageBitmapOptions._primary(obj);
+  }
 }
 
 @JS('Navigator')
@@ -1402,10 +1483,10 @@ class HttpFetchPayloadImpl implements HttpFetchPayload {
   @override
   Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
     final DomReadableStream stream = _domResponse.body;
-    final _DomStreamReader reader = stream._getReader();
+    final DomStreamReader reader = stream.getReader();
 
     while (true) {
-      final _DomStreamChunk chunk = await reader.read();
+      final DomStreamChunk chunk = await reader.read();
       if (chunk.done) {
         break;
       }
@@ -1541,17 +1622,23 @@ extension type DomHeaders._(JSObject _) implements JSObject {
 
 extension type DomReadableStream._(JSObject _) implements JSObject {
   @JS('getReader')
-  external _DomStreamReader _getReader();
+  external DomStreamReader getReader();
+
+  @JS('tee')
+  external JSArray<DomReadableStream> tee();
 }
 
-extension type _DomStreamReader._(JSObject _) implements JSObject {
+extension type DomStreamReader._(JSObject _) implements JSObject {
   @JS('read')
   external JSPromise<JSAny?> _read();
-  Future<_DomStreamChunk> read() =>
-      _read().toDart.then((JSAny? value) => value! as _DomStreamChunk);
+  Future<DomStreamChunk> read() => _read().toDart.then((JSAny? value) => value! as DomStreamChunk);
+
+  @JS('cancel')
+  external JSPromise<JSAny?> _cancel();
+  Future<void> cancel() => _cancel().toDart;
 }
 
-extension type _DomStreamChunk._(JSObject _) implements JSObject {
+extension type DomStreamChunk._(JSObject _) implements JSObject {
   external JSAny? get value;
   external bool get done;
 }

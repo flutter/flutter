@@ -171,25 +171,108 @@ abstract class Renderer {
     required ui.ImageFilter inner,
   });
 
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List list, {
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  });
+  bool get isMultiThreaded;
 
-  Future<ui.Codec> instantiateImageCodecFromUrl(
-    Uri uri, {
-    ui_web.ImageCodecChunkCallback? chunkCallback,
-  });
+  /// Whether this renderer natively supports resizing/scaling animated images during decoding.
+  bool get supportsResizingAnimatedImages;
 
-  FutureOr<ui.Image> createImageFromImageBitmap(DomImageBitmap imageSource);
+  BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight});
 
+  BackendImage createImageFromImageSource(ImageSource source);
+
+  ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
+    final int width = imageBitmap.width;
+    final int height = imageBitmap.height;
+    final ImageSource source = ImageBitmapImageSource(imageBitmap);
+    final BackendImage backendImage = createImageFromImageSource(source);
+    return EngineImage(backendImage, width, height, imageSource: source);
+  }
+
+  /// Creates a unified [ui.Image] from a raw browser texture source (such as a
+  /// [VideoFrame], [DomImageBitmap], [DomHTMLImageElement], or [DomHTMLCanvasElement]).
+  ///
+  /// This method is a crucial bridge between the browser's DOM environment and
+  /// the engine's rendering backends, particularly when managing multi-threaded
+  /// environments (like Skwasm running in a Web Worker):
+  ///
+  /// - **Thread-Safety & Transferability:** In multi-threaded mode, DOM elements
+  ///    (like `HTMLImageElement` or `HTMLCanvasElement`) cannot be transferred
+  ///    across thread boundaries to a Web Worker. Only "transferable" objects
+  ///    (like `ImageBitmap` and `VideoFrame`) are thread-safe. If the renderer is
+  ///    multi-threaded and the source is non-transferable, we must clone it.
+  /// - **Cloning Heuristic:** We use the browser's native `createImageBitmap` to
+  ///    asynchronously capture a snapshot of the source as a transferable `ImageBitmap`.
+  ///    Cloning is also triggered if [transferOwnership] is false, ensuring the caller's
+  ///    original object remains unaffected by our internal disposal lifecycle.
+  /// - **Ownership Transfer:** If we had to clone the object but the caller requested
+  ///    ownership transfer (`transferOwnership` is true), we eagerly close the original
+  ///    source (if it is closeable like a `VideoFrame` or `ImageBitmap`) to avoid leaking
+  ///    it, as we are now responsible for the cloned copy instead.
   FutureOr<ui.Image> createImageFromTextureSource(
     JSAny object, {
     required int width,
     required int height,
     required bool transferOwnership,
+  }) async {
+    var textureSource = object;
+    final originalTextureSource = object;
+    final bool needsClone = !transferOwnership || (isMultiThreaded && !_isTransferable(object));
+    if (needsClone) {
+      textureSource = (await createImageBitmap(
+        object,
+        bounds: (x: 0, y: 0, width: width, height: height),
+      )).toJSAnyShallow;
+      if (transferOwnership) {
+        if (originalTextureSource.isA<VideoFrame>()) {
+          (originalTextureSource as VideoFrame).close();
+        } else if (originalTextureSource.isA<DomImageBitmap>()) {
+          (originalTextureSource as DomImageBitmap).close();
+        }
+      }
+    }
+
+    final ImageSource imageSource;
+    if (textureSource.isA<DomImageBitmap>()) {
+      imageSource = ImageBitmapImageSource(textureSource as DomImageBitmap);
+    } else if (textureSource.isA<VideoFrame>()) {
+      imageSource = VideoFrameImageSource(textureSource as VideoFrame);
+    } else if (textureSource.isA<DomHTMLImageElement>()) {
+      imageSource = ImageElementImageSource(textureSource as DomHTMLImageElement);
+    } else {
+      imageSource = CanvasImageSourceWrapper(textureSource as DomCanvasImageSource, width, height);
+    }
+
+    final BackendImage backendImage = createImageFromImageSource(imageSource);
+
+    return EngineImage(backendImage, width, height, imageSource: imageSource);
+  }
+
+  bool _isTransferable(JSAny object) =>
+      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
+
+  Future<ui.Codec> instantiateImageCodec(
+    Uint8List list, {
+    int? targetWidth,
+    int? targetHeight,
+    bool allowUpscaling = true,
+  }) => engineInstantiateImageCodec(
+    list,
+    targetWidth: targetWidth,
+    targetHeight: targetHeight,
+    allowUpscaling: allowUpscaling,
+  );
+
+  Future<ui.Codec> instantiateImageCodecFromUrl(
+    Uri uri, {
+    ui_web.ImageCodecChunkCallback? chunkCallback,
+  }) => engineInstantiateImageCodecFromUrl(uri, chunkCallback: chunkCallback);
+
+  FutureOr<BackendImage> decodeBackendImageFromPixels(
+    Uint8List pixels, {
+    required int width,
+    required int height,
+    required ui.PixelFormat format,
+    int? rowBytes,
   });
 
   void decodeImageFromPixels(
@@ -202,7 +285,30 @@ abstract class Renderer {
     int? targetWidth,
     int? targetHeight,
     bool allowUpscaling = true,
-  });
+  }) {
+    Timer.run(() async {
+      final BackendImage backendImage = await decodeBackendImageFromPixels(
+        pixels,
+        width: width,
+        height: height,
+        format: format,
+        rowBytes: rowBytes,
+      );
+      final ui.Image image = EngineImage(backendImage, width, height);
+      if (targetWidth != null || targetHeight != null) {
+        callback(
+          scaleImageIfNeeded(
+            image,
+            targetWidth: targetWidth,
+            targetHeight: targetHeight,
+            allowUpscaling: allowUpscaling,
+          ),
+        );
+      } else {
+        callback(image);
+      }
+    });
+  }
 
   ui.ImageShader createImageShader(
     ui.Image image,
