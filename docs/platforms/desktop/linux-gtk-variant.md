@@ -43,6 +43,9 @@ the engine decides which runner library exists at build time.
 The Linux GTK variant is selected at build time through the toolchain, with
 `gtk3` remaining the default for compatibility.
 
+For native popup and multi-window demos, see
+[Linux Native Popup And Multi-Window API](linux-popup-windowing.md).
+
 Supported inputs on this branch:
 
 ```yaml
