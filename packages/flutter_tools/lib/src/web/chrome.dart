@@ -268,6 +268,8 @@ class ChromiumLauncher {
         '--disable-background-networking',
         '--disable-sync',
         '--disable-client-side-phishing-detection',
+        '--disable-notifications',
+        '--disable-features=GCM',
         if (_platform.isLinux) ...<String>[
           '--use-gl=angle',
           '--use-angle=swiftshader',
