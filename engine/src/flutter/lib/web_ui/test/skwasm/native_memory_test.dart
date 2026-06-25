@@ -24,7 +24,7 @@ void testMain() {
         1,
         ui.PixelFormat.rgba8888,
       );
-      final EngineImage image = EngineImage(backendImage, 1, 1);
+      final image = EngineImage(backendImage, 1, 1);
 
       final EngineImage clone = image.clone();
       expect(

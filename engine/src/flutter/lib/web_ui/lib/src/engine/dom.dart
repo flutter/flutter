@@ -334,7 +334,7 @@ extension type ImageBitmapOptions._primary(JSObject _) implements JSObject {
     int? resizeHeight,
     String? resizeQuality,
   }) {
-    final JSObject obj = JSObject();
+    final obj = JSObject();
     if (imageOrientation != null) {
       obj['imageOrientation'] = imageOrientation.toJS;
     }
