@@ -199,6 +199,7 @@ TEST_F(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
   }
   for (uint64_t t = 0; t < kThreadCount; t++) {
     g_autofree int64_t* id = static_cast<int64_t*>(g_thread_join(threads[t]));
+    ASSERT_NE(id, nullptr);
     ids[t] = *id;
   }
   // Check all the textures were created.
