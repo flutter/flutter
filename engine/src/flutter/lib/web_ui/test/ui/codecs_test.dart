@@ -5,20 +5,12 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-
-extension on DomWindow {
-  @JS('skwasmDebugLogs')
-  external JSArray<JSString>? get skwasmDebugLogs;
-  @JS('skwasmDebugLogs')
-  external set skwasmDebugLogs(JSArray<JSString>? value);
-}
 
 const List<String> _kTestImages = <String>[
   '16x1.png',
@@ -384,31 +376,8 @@ Future<void> testMain() async {
   group('Images', () {
     setUpUnitTests(withImplicitView: true);
 
-    test('interop test for skwasmDebugLogs', () {
-      domWindow.skwasmDebugLogs = <JSString>['hello'.toJS].toJS;
-      final logs = domWindow.skwasmDebugLogs;
-      expect(logs, isNotNull);
-      domWindow.skwasmDebugLogs = null;
-    });
-
     tearDown(() {
       mockHttpFetchResponseFactory = null;
-      try {
-        final JSArray<JSString>? logs = domWindow.skwasmDebugLogs;
-        if (logs != null) {
-          final List<String> dartLogs = logs.toDart.map((JSString e) => e.toDart).toList();
-          if (dartLogs.isNotEmpty) {
-            print('--- SKWASM DEBUG LOGS ---');
-            for (final String log in dartLogs) {
-              print(log);
-            }
-            print('-------------------------');
-            domWindow.skwasmDebugLogs = null;
-          }
-        }
-      } catch (e) {
-        // Ignore on browsers that don't support interop or when not initialized
-      }
     });
 
     void runCodecTest(TestCodec testCodec) {
