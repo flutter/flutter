@@ -566,6 +566,9 @@ class IOSDevice extends Device {
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
       );
+
+      // This completer is used to intercept when the app crashes after the app launches but
+      // before the Dart VM service is found.
       final appTerminatedCompleter = Completer<Uri?>();
       if (deviceLogReader is SharedIOSDeviceLogReader) {
         await _addLogInterceptors(deviceLogReader, appTerminatedCompleter);
