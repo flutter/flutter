@@ -435,6 +435,42 @@ void main() {
     );
 
     testUsingContext(
+      'start copies host web directory to scaffold if it exists',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final Directory hostWebDir = rootProject.childDirectory('web')..createSync();
+        hostWebDir.childFile('index.html').writeAsStringSync('<html>custom index</html>');
+        hostWebDir.childFile('custom.js').writeAsStringSync('console.log("custom");');
+
+        await startWidgetPreview(rootProject: rootProject);
+
+        final Directory scaffoldWebDir = WidgetPreviewStartCommand.widgetPreviewScaffold
+            .childDirectory('web');
+        expect(scaffoldWebDir.existsSync(), true);
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expect(scaffoldWebDir.childFile('custom.js').readAsStringSync(), 'console.log("custom");');
+        expectSinglePreviewLaunchTimingEvent();
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
       'start creates .dart_tool/widget_preview_scaffold in the CWD',
       () async {
         final Directory rootProject = await createRootProject();
