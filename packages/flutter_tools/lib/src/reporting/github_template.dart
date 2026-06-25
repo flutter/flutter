@@ -66,7 +66,7 @@ class GitHubTemplateCreator {
     } else if (error is String) {
       // Force comma separator to standardize.
       final lengthStr = error.length.toString();
-      final StringBuffer buffer = _asCommaSeparatedNumber(lengthStr);
+      final String buffer = _asCommaSeparatedNumber(lengthStr);
 
       return 'String: <$buffer characters>';
     }
@@ -77,17 +77,21 @@ class GitHubTemplateCreator {
   }
 
   /// Insert a comma every three digits in a number.
-  static StringBuffer _asCommaSeparatedNumber(String lengthStr) {
+  static String _asCommaSeparatedNumber(String lengthStr) {
+    if (lengthStr.isEmpty) {
+      return lengthStr;
+    }
     final buffer = StringBuffer();
-    final int mod = lengthStr.length % 3;
+    final int len = lengthStr.length;
+    buffer.write(lengthStr[0]);
 
-    for (var i = 0; i < lengthStr.length; i++) {
-      if (i > 0 && (i - mod) % 3 == 0) {
+    for (var i = 1; i < len; i++) {
+      if ((len - i) % 3 == 0) {
         buffer.write(',');
       }
       buffer.write(lengthStr[i]);
     }
-    return buffer;
+    return buffer.toString();
   }
 
   /// GitHub URL to present to the user containing encoded suggested template.
