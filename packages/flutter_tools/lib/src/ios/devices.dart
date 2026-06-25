@@ -869,7 +869,9 @@ class IOSDevice extends Device {
       identifier: 'app_terminated',
       pattern: RegExp('App terminated'),
       action: () {
-        appTerminatedCompleter.complete();
+        if (!appTerminatedCompleter.isCompleted) {
+          appTerminatedCompleter.complete();
+        }
       },
       excludeFromStream: false,
     );
