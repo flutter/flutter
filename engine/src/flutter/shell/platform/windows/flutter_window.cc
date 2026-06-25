@@ -257,8 +257,8 @@ void FlutterWindow::OnPointerDown(double x,
                                   FlutterPointerDeviceKind device_kind,
                                   int32_t device_id,
                                   uint64_t buttons,
-                                  uint32_t pressure,
-                                  uint32_t rotation) {
+                                  uint32_t rotation,
+                                  uint32_t pressure) {
   if (buttons != 0) {
     binding_handler_delegate_->OnPointerDown(x, y, device_kind, device_id,
                                              buttons, rotation, pressure);
