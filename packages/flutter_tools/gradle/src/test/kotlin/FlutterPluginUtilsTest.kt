@@ -44,12 +44,15 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.io.IOException
 import java.nio.file.Path
 import java.util.Properties
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -982,6 +985,193 @@ class FlutterPluginUtilsTest {
             assertFalse(regex.containsMatchIn("plugins { id\n('$pluginId') }"), "Newline before opening parentheses should fail")
             // Check spacing inside quotes
             assertFalse(regex.containsMatchIn("id ' $pluginId '"), "Should fail when there are spaces in quotes")
+        }
+
+        @Nested
+        inner class GetSubprojectPluginStateTests {
+            @Test
+            fun `returns null if build file does not exist`() {
+                val subproject = mockk<Project>()
+                val file = mockk<File>()
+                every { subproject.buildFile } returns file
+                every { file.exists() } returns false
+
+                val result = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNull(result)
+            }
+
+            @Test
+            fun `returns null if build file path contains ephemeral android directory`() {
+                val subproject = mockk<Project>()
+                val file = mockk<File>()
+                every { subproject.buildFile } returns file
+                every { file.exists() } returns true
+                every { file.absolutePath } returns "/path/to/.android/build.gradle"
+
+                val result = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNull(result)
+            }
+
+            @Test
+            fun `returns null and logs error when IOException is thrown during read`(
+                @TempDir tempDir: Path
+            ) {
+                val subproject = mockk<Project>()
+                val mockBuildFile = mockk<File>()
+                val mockLogger = mockk<Logger>(relaxed = true)
+
+                every { subproject.buildFile } returns mockBuildFile
+                every { mockBuildFile.exists() } returns true
+                every { mockBuildFile.absolutePath } returns "/some/path/build.gradle"
+                every { mockBuildFile.extension } returns "gradle"
+                every { mockBuildFile.path } throws IOException("Simulated I/O error")
+                every { subproject.projectDir } returns tempDir.toFile()
+                every { subproject.logger } returns mockLogger
+
+                val result = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNull(result)
+                verify(exactly = 1) {
+                    mockLogger.error(
+                        "Failed to read build file: /some/path/build.gradle",
+                        any<IOException>()
+                    )
+                }
+            }
+
+            @Test
+            fun `detects KGP and AGP in app subproject indicated by AGP app id in Groovy DSL`(
+                @TempDir tempDir: Path
+            ) {
+                val buildFile = tempDir.resolve("build.gradle").toFile()
+                writeBuildFile(
+                    buildFile = buildFile,
+                    imperativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                )
+                val subproject = mockk<Project>()
+                every { subproject.buildFile } returns buildFile
+                every { subproject.projectDir } returns tempDir.toFile()
+                every { subproject.logger } returns mockk(relaxed = true)
+
+                val state = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNotNull(state)
+                assertTrue(state.hasAppPlugin)
+                assertTrue(state.hasKgpPlugin)
+                assertFalse(state.hasLibPlugin)
+            }
+
+            @Test
+            fun `detects KGP and AGP in library subproject indicated by AGP library id in Groovy DSL`(
+                @TempDir tempDir: Path
+            ) {
+                val buildFile = tempDir.resolve("build.gradle").toFile()
+                writeBuildFile(
+                    buildFile = buildFile,
+                    imperativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
+                )
+                val subproject = mockk<Project>()
+                every { subproject.buildFile } returns buildFile
+                every { subproject.projectDir } returns tempDir.toFile()
+                every { subproject.logger } returns mockk(relaxed = true)
+
+                val state = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNotNull(state)
+                assertFalse(state.hasAppPlugin)
+                assertTrue(state.hasKgpPlugin)
+                assertTrue(state.hasLibPlugin)
+            }
+
+            @Test
+            fun `does not detect KGP or AGP in Groovy DSL`(
+                @TempDir tempDir: Path
+            ) {
+                val buildFile = tempDir.resolve("build.gradle").toFile()
+                writeBuildFile(
+                    buildFile = buildFile,
+                    imperativelyAppliedPlugins = listOf("java")
+                )
+                val subproject = mockk<Project>()
+                every { subproject.buildFile } returns buildFile
+                every { subproject.projectDir } returns tempDir.toFile()
+                every { subproject.logger } returns mockk(relaxed = true)
+
+                val state = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNotNull(state)
+                assertFalse(state.hasAppPlugin)
+                assertFalse(state.hasKgpPlugin)
+                assertFalse(state.hasLibPlugin)
+            }
+
+            @Test
+            fun `detects KGP and AGP in app subproject indicated by AGP app id in Kotlin DSL`(
+                @TempDir tempDir: Path
+            ) {
+                val buildFile = tempDir.resolve("build.gradle.kts").toFile()
+                writeBuildFile(
+                    buildFile = buildFile,
+                    declarativelyAppliedPlugins = listOf("com.android.application", "org.jetbrains.kotlin.android")
+                )
+                val subproject = mockk<Project>()
+                every { subproject.buildFile } returns buildFile
+                every { subproject.projectDir } returns tempDir.toFile()
+                every { subproject.logger } returns mockk(relaxed = true)
+
+                val state = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNotNull(state)
+                assertTrue(state.hasAppPlugin)
+                assertTrue(state.hasKgpPlugin)
+                assertFalse(state.hasLibPlugin)
+            }
+
+            @Test
+            fun `detects KGP and AGP in library subproject indicated by AGP library id in Kotlin DSL`(
+                @TempDir tempDir: Path
+            ) {
+                val buildFile = tempDir.resolve("build.gradle.kts").toFile()
+                writeBuildFile(
+                    buildFile = buildFile,
+                    declarativelyAppliedPlugins = listOf("com.android.library", "org.jetbrains.kotlin.android")
+                )
+                val subproject = mockk<Project>()
+                every { subproject.buildFile } returns buildFile
+                every { subproject.projectDir } returns tempDir.toFile()
+                every { subproject.logger } returns mockk(relaxed = true)
+
+                val state = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNotNull(state)
+                assertFalse(state.hasAppPlugin)
+                assertTrue(state.hasKgpPlugin)
+                assertTrue(state.hasLibPlugin)
+            }
+
+            @Test
+            fun `does not detect KGP or AGP in Kotlin DSL`(
+                @TempDir tempDir: Path
+            ) {
+                val buildFile = tempDir.resolve("build.gradle.kts").toFile()
+                writeBuildFile(
+                    buildFile = buildFile,
+                    declarativelyAppliedPlugins = listOf("kotlin(\"jvm\") version \"1.9.0\"")
+                )
+                val subproject = mockk<Project>()
+                every { subproject.buildFile } returns buildFile
+                every { subproject.projectDir } returns tempDir.toFile()
+                every { subproject.logger } returns mockk(relaxed = true)
+
+                val state = FlutterPluginUtils.getSubprojectPluginState(subproject)
+
+                assertNotNull(state)
+                assertFalse(state.hasAppPlugin)
+                assertFalse(state.hasKgpPlugin)
+                assertFalse(state.hasLibPlugin)
+            }
         }
 
         @Nested

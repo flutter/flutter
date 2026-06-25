@@ -22,6 +22,7 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.register
 import java.io.File
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 
@@ -637,6 +638,55 @@ object FlutterPluginUtils {
         val hasAppPlugin: Boolean,
         val hasLibPlugin: Boolean
     )
+
+    /**
+     * Scans the build script of the subproject to detect declarations of Kotlin Gradle Plugin,
+     * Android Gradle Plugin (for applications), and the Android Gradle Plugin (for libraries).
+     *
+     * Returns null if the build script does not exist, is inside an ephemeral `.android/` directory,
+     * or fails to read due to an [IOException].
+     */
+    internal fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
+        val buildFile = subproject.buildFile
+
+        // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory
+        // should not be adjusted and by default does not apply KGP
+        if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) {
+            return null
+        }
+
+        val scriptText: String =
+            try {
+                if (buildFile.absolutePath.contains("app/build.gradle")) {
+                    getBuildGradleFileFromProjectDir(
+                        subproject.projectDir,
+                        subproject.logger
+                    ).readText()
+                } else {
+                    buildFile.readText()
+                }
+            } catch (e: IOException) {
+                subproject.logger.error("Failed to read build file: ${buildFile.absolutePath}", e)
+                return null
+            }
+
+        val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+            if (buildFile.extension == "kts") {
+                Triple(
+                    kgpRegexKotlin.containsMatchIn(scriptText),
+                    appPluginRegexKotlin.containsMatchIn(scriptText),
+                    libPluginRegexKotlin.containsMatchIn(scriptText)
+                )
+            } else {
+                Triple(
+                    kgpRegexGroovy.containsMatchIn(scriptText),
+                    appPluginRegexGroovy.containsMatchIn(scriptText),
+                    libPluginRegexGroovy.containsMatchIn(scriptText)
+                )
+            }
+
+        return SubprojectPluginState(hasKgpPlugin, hasAppPlugin, hasLibPlugin)
+    }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic
