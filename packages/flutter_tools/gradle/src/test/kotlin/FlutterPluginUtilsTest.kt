@@ -1858,9 +1858,9 @@ class FlutterPluginUtilsTest {
                         verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
                         verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                     }
- 
+
                      @Test
-                     fun `does not double-apply KGP when already applied`(
+                     fun `does not re-apply KGP nor log`(
                          @TempDir tempDir: Path
                      ) {
                          val testProject =
@@ -1881,12 +1881,13 @@ class FlutterPluginUtilsTest {
                                          )
                                      )
                              )
- 
+
                          val appPluginManager = testProject.appPluginManager
                          val plugin1Manager = testProject.plugin1Manager
- 
+
                          executeDetectApplyingKotlinGradlePlugin(testProject)
- 
+
+                         // No warnings should be logged because AGP version is < 9.
                          verify(exactly = 0) { mockLogger.error(any()) }
                          verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
                          verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
