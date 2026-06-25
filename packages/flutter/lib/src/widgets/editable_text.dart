@@ -4152,6 +4152,7 @@ class EditableTextState extends State<EditableText>
   }
 
   void _closeInputConnectionIfNeeded() {
+    _pendingTextInputActionRestart = false;
     if (_hasInputConnection) {
       _textInputConnection!.close();
       _textInputConnection = null;
