@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
@@ -36,28 +35,16 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final bool supportsAnnounce = MediaQuery.maybeSupportsAnnounceOf(context) ?? false;
     return Scaffold(
       appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Center(
-        child: Semantics(
-          container: !supportsAnnounce,
-          liveRegion: !supportsAnnounce,
-          child: Text('Tap count: $_tapCount'),
-        ),
+        child: Semantics(container: true, liveRegion: true, child: Text('Tap count: $_tapCount')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
             _tapCount++;
           });
-          if (supportsAnnounce) {
-            SemanticsService.sendAnnouncement(
-              View.of(context),
-              'Tap count: $_tapCount',
-              Directionality.of(context),
-            );
-          }
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

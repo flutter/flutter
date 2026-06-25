@@ -16,75 +16,34 @@ void main() {
     expect(findHeadingLevelOnes, findsOne);
   });
 
-  testWidgets('floating action button can increment tap count (with supportsAnnounce = true)', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('floating action button can increment tap count', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(supportsAnnounce: true),
-          child: Builder(
-            builder: (BuildContext context) {
-              return FloatingActionButtonUseCase().buildWithTitle(context);
-            },
-          ),
-        ),
-      ),
-    );
+    await pumpsUseCase(tester, FloatingActionButtonUseCase());
 
     expect(find.text('Tap count: 0'), findsOneWidget);
-    expect(tester.getSemantics(find.text('Tap count: 0')), matchesSemantics(label: 'Tap count: 0'));
+    expect(
+      tester.getSemantics(find.text('Tap count: 0')),
+      matchesSemantics(label: 'Tap count: 0', isLiveRegion: true),
+    );
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
 
     expect(find.text('Tap count: 1'), findsOneWidget);
-    expect(tester.takeAnnouncements(), <Matcher>[isAccessibilityAnnouncement('Tap count: 1')]);
+    expect(
+      tester.getSemantics(find.text('Tap count: 1')),
+      matchesSemantics(label: 'Tap count: 1', isLiveRegion: true),
+    );
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
 
     expect(find.text('Tap count: 2'), findsOneWidget);
-    expect(tester.takeAnnouncements(), <Matcher>[isAccessibilityAnnouncement('Tap count: 2')]);
+    expect(
+      tester.getSemantics(find.text('Tap count: 2')),
+      matchesSemantics(label: 'Tap count: 2', isLiveRegion: true),
+    );
 
     handle.dispose();
   });
-
-  testWidgets(
-    'floating action button can increment tap count (with supportsAnnounce = false, using liveRegion)',
-    (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(), // defaults to supportsAnnounce = false
-            child: Builder(
-              builder: (BuildContext context) {
-                return FloatingActionButtonUseCase().buildWithTitle(context);
-              },
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Tap count: 0'), findsOneWidget);
-      expect(
-        tester.getSemantics(find.text('Tap count: 0')),
-        matchesSemantics(label: 'Tap count: 0', isLiveRegion: true),
-      );
-
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pump();
-
-      expect(find.text('Tap count: 1'), findsOneWidget);
-      expect(
-        tester.getSemantics(find.text('Tap count: 1')),
-        matchesSemantics(label: 'Tap count: 1', isLiveRegion: true),
-      );
-      expect(tester.takeAnnouncements(), isEmpty);
-
-      handle.dispose();
-    },
-  );
 }
