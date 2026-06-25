@@ -660,7 +660,10 @@ void testMain() {
       );
       strategy.enable(config, onChange: (_, _) {}, onAction: (_) {});
       final SemanticsObject semanticsObject = createTextFieldSemantics(value: '', isFocused: true);
-      return (form: form, textField: semanticsObject.semanticRole! as SemanticTextField);
+      return (
+        form: strategy.inputConfiguration.autofillGroup!,
+        textField: semanticsObject.semanticRole! as SemanticTextField,
+      );
     }
 
     test('builds the form and links the focused field by attribute', () {
@@ -670,6 +673,7 @@ void testMain() {
 
       // Form is inserted into the text-editing host with the stable id used
       // for the form= association.
+      expect(form.associateFocusedElementByAttribute, isTrue);
       expect(flutterView.dom.textEditingHost.contains(formElement), isTrue);
       expect(formElement.id, form.formDomId);
       expect(formElement.getElementsByClassName('submitBtn'), hasLength(1));

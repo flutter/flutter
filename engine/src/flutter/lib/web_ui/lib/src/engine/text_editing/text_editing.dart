@@ -192,6 +192,7 @@ class EngineAutofillForm {
     required this.items,
     required this.formIdentifier,
     required this.focusedElementId,
+    this.associateFocusedElementByAttribute = false,
   });
 
   DomHTMLFormElement? formElement;
@@ -213,6 +214,13 @@ class EngineAutofillForm {
   final int viewId;
 
   final String focusedElementId;
+
+  /// Whether the real focused text field lives outside [formElement] and is
+  /// associated with it via the HTML `form` attribute.
+  ///
+  /// This is used by semantics mode, where moving the real text field into the
+  /// form would break accessibility traversal.
+  final bool associateFocusedElementByAttribute;
 
   bool get _isSafariStrategy =>
       textEditing.strategy is SafariDesktopTextEditingStrategy ||
@@ -309,6 +317,17 @@ class EngineAutofillForm {
     );
   }
 
+  EngineAutofillForm copyWith({bool? associateFocusedElementByAttribute}) {
+    return EngineAutofillForm(
+      viewId: viewId,
+      items: items,
+      formIdentifier: formIdentifier,
+      focusedElementId: focusedElementId,
+      associateFocusedElementByAttribute:
+          associateFocusedElementByAttribute ?? this.associateFocusedElementByAttribute,
+    );
+  }
+
   static String _getFormIdentifier(Map<String, FieldItem> items) {
     final ids = <String>[];
     for (final FieldItem item in items.values) {
@@ -324,18 +343,14 @@ class EngineAutofillForm {
   /// The [focusedElement] is inserted into the form, replacing the old focused
   /// element.
   ///
-  /// When [associateFocusedByAttribute] is true (semantics mode), the focused
+  /// When [associateFocusedElementByAttribute] is true (semantics mode), the focused
   /// element is a real `<input>` owned by the semantics tree and must stay in
   /// its `<flt-semantics>` node. Moving it into the form regressed a11y tab
   /// traversal (see flutter/flutter#180652, originally flutter/engine#25797).
   /// Instead it is linked to the form via the HTML `form` attribute, and any
   /// synthetic placeholder previously created for that field is removed so the
   /// field is represented in the form exactly once.
-  void wakeUp(
-    DomHTMLElement focusedElement,
-    AutofillInfo focusedAutofill, {
-    bool associateFocusedByAttribute = false,
-  }) {
+  void wakeUp(DomHTMLElement focusedElement, AutofillInfo focusedAutofill) {
     // Since we're disabling pointer events on the form to fix Safari autofill,
     // we need to explicitly set pointer events on the active input element in
     // order to calculate the correct pointer event offsets.
@@ -344,7 +359,13 @@ class EngineAutofillForm {
       focusedElement.style.pointerEvents = 'all';
     }
 
-    final EngineAutofillForm? existingForm = dormantForms[formIdentifier];
+    EngineAutofillForm? existingForm = dormantForms[formIdentifier];
+    if (existingForm != null &&
+        existingForm.associateFocusedElementByAttribute != associateFocusedElementByAttribute) {
+      existingForm.formElement?.remove();
+      dormantForms.remove(formIdentifier);
+      existingForm = null;
+    }
 
     final firstWakeUp = formElement == null;
 
@@ -356,16 +377,12 @@ class EngineAutofillForm {
         formElement = existingForm.formElement;
         elements.addAll(existingForm.elements);
       } else {
-        formElement = _createFormElementAndFields(
-          focusedElement,
-          focusedAutofill,
-          associateFocusedByAttribute: associateFocusedByAttribute,
-        );
+        formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
       }
     }
 
-    if (associateFocusedByAttribute) {
+    if (associateFocusedElementByAttribute) {
       // Promote the focused field to its real (semantics-owned) element: drop
       // any synthetic placeholder so the field is not submitted twice, then
       // link the real element to the form by attribute.
@@ -442,9 +459,8 @@ class EngineAutofillForm {
 
   DomHTMLFormElement _createFormElementAndFields(
     DomHTMLElement focusedElement,
-    AutofillInfo focusedAutofill, {
-    bool associateFocusedByAttribute = false,
-  }) {
+    AutofillInfo focusedAutofill,
+  ) {
     assert(this.formElement == null);
     assert(elements.isEmpty);
 
@@ -464,7 +480,7 @@ class EngineAutofillForm {
     for (final FieldItem field in items.values) {
       final DomHTMLElement htmlElement;
       if (field.autofillInfo.uniqueIdentifier == focusedAutofill.uniqueIdentifier) {
-        if (associateFocusedByAttribute) {
+        if (associateFocusedElementByAttribute) {
           // The focused element is a real semantics-owned element that stays
           // in its `<flt-semantics>` node and is linked via the `form`
           // attribute by [wakeUp]. Do not create or append a synthetic
@@ -1205,6 +1221,22 @@ class InputConfiguration {
       enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false,
       enableInteractiveSelection =
           flutterInputConfiguration.tryBool('enableInteractiveSelection') ?? true;
+
+  InputConfiguration copyWith({EngineAutofillForm? autofillGroup}) {
+    return InputConfiguration(
+      viewId: viewId,
+      inputType: inputType,
+      inputAction: inputAction,
+      obscureText: obscureText,
+      readOnly: readOnly,
+      autocorrect: autocorrect,
+      textCapitalization: textCapitalization,
+      autofill: autofill,
+      autofillGroup: autofillGroup ?? this.autofillGroup,
+      enableDeltaModel: enableDeltaModel,
+      enableInteractiveSelection: enableInteractiveSelection,
+    );
+  }
 
   /// The ID of the view that contains the text field.
   final int viewId;

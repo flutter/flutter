@@ -172,8 +172,13 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     OnActionCallback? onAction,
   }) {
     isEnabled = true;
-    inputConfiguration = inputConfig;
-    applyConfiguration(inputConfig);
+    final EngineAutofillForm? autofillGroup = inputConfig.autofillGroup;
+    inputConfiguration = autofillGroup == null
+        ? inputConfig
+        : inputConfig.copyWith(
+            autofillGroup: autofillGroup.copyWith(associateFocusedElementByAttribute: true),
+          );
+    applyConfiguration(inputConfiguration);
 
     // Build the autofill form here, before [addEventHandlers] runs (it runs
     // later in the same [enable] call). [addEventHandlers] subscribes to the
@@ -218,11 +223,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     // moved into the form (that regressed a11y tab traversal, see
     // flutter/flutter#180652). Link it to the form via the `form` attribute
     // instead. See [EngineAutofillForm.wakeUp].
-    inputConfiguration.autofillGroup!.wakeUp(
-      activeDomElement,
-      inputConfiguration.autofill!,
-      associateFocusedByAttribute: true,
-    );
+    inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
     _formIsActive = true;
   }
 
