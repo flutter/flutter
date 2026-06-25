@@ -4,6 +4,7 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
@@ -707,6 +708,31 @@ object FlutterPluginUtils {
                 !subprojectPluginState.hasKgpPlugin
             }
         }
+
+    /**
+     * Determines if the Gradle property `android.builtInKotlin` is enabled globally across the multi-project Gradle build.
+     *
+     * Evaluates the `android.builtInKotlin` Gradle property, supporting any [standard Gradle
+     * configuration source](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties) (such as the root project's `gradle.properties` file or command-line `-P` flags).
+     *
+     * Defaults to `true` for AGP 9.0+ unless `android.builtInKotlin` is explicitly configured
+     * to `false`. Always returns `false` if the AGP version is below `9.0.0` (or null).
+     * See [Android Migration Guide](https://developer.android.com/build/migrate-to-built-in-kotlin).
+     */
+    @JvmStatic
+    @JvmName("isBuiltInKotlinEnabled")
+    internal fun isBuiltInKotlinEnabled(
+        project: Project,
+        agpVersion: AndroidPluginVersion?
+    ): Boolean {
+        if (agpVersion == null || agpVersion.major < 9) {
+            return false
+        }
+        return project.providers
+            .gradleProperty("android.builtInKotlin")
+            .orNull
+            ?.toBoolean() ?: true
+    }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic

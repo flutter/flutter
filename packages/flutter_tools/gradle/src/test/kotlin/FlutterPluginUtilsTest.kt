@@ -37,6 +37,8 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -1284,6 +1286,116 @@ class FlutterPluginUtilsTest {
             private val templateAgpVersion = AndroidPluginVersion(9, 0, 1)
 
             private val errorAgpVersion = DependencyVersionChecker.errorAGPVersion
+
+            private fun mockBuiltInKotlinProperty(value: String?) {
+                val mockProvider = mockk<Provider<String>>()
+                every { mockProvider.orNull } returns value
+                val mockProviders = mockk<ProviderFactory>()
+                every { mockProviders.gradleProperty("android.builtInKotlin") } returns mockProvider
+                every { rootProject.providers } returns mockProviders
+                every { rootProject.findProperty("android.builtInKotlin") } returns value
+            }
+
+            @Nested
+            inner class IsBuiltInKotlinEnabledTests {
+                private fun setupProjectWithProperty(propertyValue: String?): Project {
+                    val project = mockk<Project>()
+                    every { project.rootProject } returns rootProject
+                    every { project.providers } answers { rootProject.providers }
+                    mockBuiltInKotlinProperty(propertyValue)
+                    return project
+                }
+
+                @Test
+                fun `returns false when AGP version is null`() {
+                    val project = setupProjectWithProperty("true")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(project, null)
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `returns false when AGP is less than 9 and builtInKotlin is set to true`() {
+                    val subproject = setupProjectWithProperty("true")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `returns false when AGP is less than 9 and builtInKotlin is set to TRUE`() {
+                    val subproject = setupProjectWithProperty("TRUE")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `returns false when AGP is less than 9 and builtInKotlin is set to false`() {
+                    val subproject = setupProjectWithProperty("false")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `returns false when AGP is less than 9 and builtInKotlin is set to FALSE`() {
+                    val subproject = setupProjectWithProperty("FALSE")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, errorAgpVersion)
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `returns true when AGP is 9 or higher and builtInKotlin is set to true`() {
+                    val subproject = setupProjectWithProperty("true")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, templateAgpVersion)
+
+                    assertTrue(result)
+                }
+
+                @Test
+                fun `returns true when AGP is 9 or higher and builtInKotlin is set to TRUE`() {
+                    val subproject = setupProjectWithProperty("TRUE")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, templateAgpVersion)
+
+                    assertTrue(result)
+                }
+
+                @Test
+                fun `returns false when AGP is 9 or higher and builtInKotlin is set to false`() {
+                    val subproject = setupProjectWithProperty("false")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, templateAgpVersion)
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `returns false when AGP is 9 or higher and builtInKotlin is set to FALSE`() {
+                    val subproject = setupProjectWithProperty("FALSE")
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, templateAgpVersion)
+
+                    assertFalse(result)
+                }
+
+                @Test
+                fun `defaults to true when property is null and AGP is 9 or higher`() {
+                    val subproject = setupProjectWithProperty(null)
+
+                    val result = FlutterPluginUtils.isBuiltInKotlinEnabled(subproject, templateAgpVersion)
+
+                    assertTrue(result)
+                }
+            }
 
             @BeforeEach
             fun setUp() {
