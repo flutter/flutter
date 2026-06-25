@@ -9,7 +9,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:stack_trace/stack_trace.dart';
@@ -79,8 +79,8 @@ String toPrettyJson(Object jsonable) {
   return '$value\n';
 }
 
-final _singleDigitPrecision = NumberFormat('0.0');
-final _decimalPattern = NumberFormat.decimalPattern();
+final _singleDigitPrecision = intl.NumberFormat('0.0');
+final _decimalPattern = intl.NumberFormat.decimalPattern();
 
 String getElapsedAsMinutesOrSeconds(Duration duration) {
   if (duration.inMinutes < 1) {
