@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -188,8 +189,33 @@ class FakeDevice extends Device {
   Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      deviceLogReader ?? FakeDeviceLogReader();
+  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+    return deviceLogReader ?? FakeDeviceLogReader();
+  }
+}
+
+class FakeAndroidDevice extends FakeDevice implements AndroidDevice {
+  FakeAndroidDevice(
+    super.name,
+    super.id, {
+    super.type = PlatformType.android,
+    super.deviceLogReader,
+  });
+
+  bool? lastPassedAdbLogFiltering;
+
+  @override
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
+    lastPassedAdbLogFiltering = adbLogFiltering;
+    return deviceLogReader ?? FakeDeviceLogReader();
+  }
+
+  @override
+  Future<bool> supportsRuntimeMode(BuildMode buildMode) async => true;
 }
 
 /// Combines fake device with its canonical JSON representation.

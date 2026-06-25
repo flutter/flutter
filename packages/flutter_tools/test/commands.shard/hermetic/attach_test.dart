@@ -1908,7 +1908,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   DeviceLogReader Function()? onGetLogReader;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
     if (onGetLogReader == null) {
       throw UnimplementedError(
         'Called getLogReader but no onGetLogReader callback was supplied in the constructor to FakeAndroidDevice.',

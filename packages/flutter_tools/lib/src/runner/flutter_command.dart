@@ -152,6 +152,7 @@ abstract final class FlutterOptions {
   static const kEnableImpeller = 'enable-impeller';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
+  static const kAdbLogFiltering = 'adb-log-filtering';
 }
 
 /// flutter command categories for usage.
@@ -845,6 +846,15 @@ abstract class FlutterCommand extends Command<void> {
         'wireless':
             'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
       },
+    );
+  }
+
+  void usesAdbLogFilteringOption({required bool hide}) {
+    argParser.addFlag(
+      FlutterOptions.kAdbLogFiltering,
+      defaultsTo: true,
+      help: 'Whether to filter ADB logcat tags/messages on the Dart side.',
+      hide: hide,
     );
   }
 
