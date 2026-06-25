@@ -1988,6 +1988,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   bool _pendingInvariantVerification = false;
 
   /// Defers invariant verification until [verifyInvariantsAfterTestTearDown].
+  ///
+  /// This is used by [testWidgets], which can install package:test tearDown
+  /// callbacks around [runTest]. Direct [runTest] callers still verify
+  /// invariants before [postTest].
   @protected
   void deferInvariantsUntilAfterTestTearDown() {
     _verifyInvariantsAfterTestTearDown = true;
