@@ -109,37 +109,43 @@ void main() {
       expect(logger.errorText, equals('match\n'));
     });
 
-    testWithoutContext('Command output tolerates malformed UTF-8 bytes (Worker A).', () async {
-      final invalidUtf8Bytes = <int>[0xFF, 0xFE, 0xFD, 0x0A, 0x68, 0x65, 0x6C, 0x6C, 0x6F];
-      processManager.addCommand(
-        FakeCommand(
-          command: const <String>['command'],
-          process: FakeProcess(stdout: invalidUtf8Bytes, stderr: invalidUtf8Bytes),
-        ),
-      );
+    testWithoutContext(
+      'Command output tolerates malformed UTF-8 bytes followed by a newline.',
+      () async {
+        final invalidUtf8Bytes = <int>[0xFF, 0xFE, 0xFD, 0x0A, 0x68, 0x65, 0x6C, 0x6C, 0x6F];
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>['command'],
+            process: FakeProcess(stdout: invalidUtf8Bytes, stderr: invalidUtf8Bytes),
+          ),
+        );
 
-      await processUtils.stream(<String>['command']);
+        await processUtils.stream(<String>['command']);
 
-      expect(logger.statusText, contains('hello'));
-      expect(logger.errorText, contains('hello'));
-      expect(logger.statusText, contains('\uFFFD'));
-      expect(logger.errorText, contains('\uFFFD'));
-    });
+        expect(logger.statusText, contains('hello'));
+        expect(logger.errorText, contains('hello'));
+        expect(logger.statusText, contains('\uFFFD'));
+        expect(logger.errorText, contains('\uFFFD'));
+      },
+    );
 
-    testWithoutContext('Command output tolerates malformed UTF-8 (Worker B).', () async {
-      final fakeProcess = FakeProcess(
-        stdout: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64], // 'ab' + malformed + 'cd'
-        stderr: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64],
-      );
-      processManager.addCommand(
-        FakeCommand(command: const <String>['command'], process: fakeProcess),
-      );
+    testWithoutContext(
+      'Command output tolerates malformed UTF-8 sequences within a line.',
+      () async {
+        final fakeProcess = FakeProcess(
+          stdout: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64], // 'ab' + malformed + 'cd'
+          stderr: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64],
+        );
+        processManager.addCommand(
+          FakeCommand(command: const <String>['command'], process: fakeProcess),
+        );
 
-      await processUtils.stream(<String>['command']);
+        await processUtils.stream(<String>['command']);
 
-      expect(logger.statusText, equals('ab\uFFFD(cd\n'));
-      expect(logger.errorText, equals('ab\uFFFD(cd\n'));
-    });
+        expect(logger.statusText, equals('ab\uFFFD(cd\n'));
+        expect(logger.errorText, equals('ab\uFFFD(cd\n'));
+      },
+    );
   });
 
   group('run', () {
