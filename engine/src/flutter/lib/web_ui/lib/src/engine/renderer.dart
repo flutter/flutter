@@ -242,7 +242,13 @@ abstract class Renderer {
       imageSource = CanvasImageSourceWrapper(textureSource as DomCanvasImageSource, width, height);
     }
 
-    final BackendImage backendImage = createImageFromImageSource(imageSource);
+    final BackendImage backendImage;
+    try {
+      backendImage = createImageFromImageSource(imageSource);
+    } catch (e) {
+      imageSource.close();
+      rethrow;
+    }
 
     return EngineImage(backendImage, width, height, imageSource: imageSource);
   }
@@ -296,14 +302,19 @@ abstract class Renderer {
       );
       final ui.Image image = EngineImage(backendImage, width, height);
       if (targetWidth != null || targetHeight != null) {
-        callback(
-          scaleImageIfNeeded(
+        final ui.Image scaledImage;
+        try {
+          scaledImage = scaleImageIfNeeded(
             image,
             targetWidth: targetWidth,
             targetHeight: targetHeight,
             allowUpscaling: allowUpscaling,
-          ),
-        );
+          );
+        } catch (e) {
+          image.dispose();
+          rethrow;
+        }
+        callback(scaledImage);
       } else {
         callback(image);
       }
