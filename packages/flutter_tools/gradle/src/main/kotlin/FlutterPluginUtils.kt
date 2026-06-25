@@ -538,38 +538,18 @@ object FlutterPluginUtils {
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
-
+        val agpVersion = VersionFetcher.getAGPVersion(project)
+        if (isBuiltInKotlinEnabled(project, agpVersion) && hasNoSubprojectsApplyingKgp(project)) {
+            return
+        }
         var shouldLogForApp = false
         project.rootProject.subprojects {
-            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
-            if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
-
-            val scriptText: String =
-                if (buildFile.absolutePath.contains("app/build.gradle")) {
-                    getBuildGradleFileFromProjectDir(this.projectDir, this.logger).readText()
-                } else {
-                    buildFile.readText()
-                }
-
-            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
-                if (buildFile.extension == "kts") {
-                    Triple(
-                        kgpRegexKotlin.containsMatchIn(scriptText),
-                        appPluginRegexKotlin.containsMatchIn(scriptText),
-                        libPluginRegexKotlin.containsMatchIn(scriptText)
-                    )
-                } else {
-                    Triple(
-                        kgpRegexGroovy.containsMatchIn(scriptText),
-                        appPluginRegexGroovy.containsMatchIn(scriptText),
-                        libPluginRegexGroovy.containsMatchIn(scriptText)
-                    )
-                }
+            val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
             // Ensures applying AGP exists in the build file configuration.
-            if (!hasAppPlugin && !hasLibPlugin) return@subprojects
+            if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
-            if (!hasKgpPlugin) {
+            if (!pluginState.hasKgpPlugin) {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
@@ -585,11 +565,11 @@ object FlutterPluginUtils {
             }
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
-            if (hasAppPlugin) {
+            if (pluginState.hasAppPlugin) {
                 shouldLogForApp = true
             }
 
-            if (hasLibPlugin) {
+            if (pluginState.hasLibPlugin) {
                 pluginsWithKGPAppliedList.add(name)
             }
         }

@@ -1407,12 +1407,26 @@ class FlutterPluginUtilsTest {
                 unmockkObject(VersionFetcher)
             }
 
+            private fun writeGradleProperties(
+                rootDir: File,
+                content: String
+            ) {
+                File(rootDir, "gradle.properties").apply {
+                    createNewFile()
+                    writeText(content)
+                }
+            }
+
             private fun createSubproject(
                 tempDir: Path,
                 projectName: String,
                 declarativelyAppliedPlugins: List<String> = emptyList(),
                 imperativelyAppliedPlugins: List<String> = emptyList()
             ): Project {
+                val rootDir = tempDir.toFile()
+                every { rootProject.file("gradle.properties") } returns File(rootDir, "gradle.properties")
+                every { rootProject.projectDir } returns rootDir
+
                 val projectDir = tempDir.resolve(projectName).toFile().apply { mkdirs() }
                 val buildGradleFile = File(projectDir, "build.gradle")
                 writeBuildFile(buildGradleFile, declarativelyAppliedPlugins, imperativelyAppliedPlugins)
@@ -1424,11 +1438,18 @@ class FlutterPluginUtilsTest {
                 every { project.logger } returns mockLogger
                 every { project.pluginManager } returns pluginManager
                 every { project.rootProject } returns rootProject
+                every { project.providers } answers { rootProject.providers }
                 every { project.gradle } returns mockGradle
+                every { project.findProperty(any()) } answers { rootProject.findProperty(arg(0)) }
 
-                val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
-                every { extensions.findByType(any<Class<*>>()) } returns null
-                every { project.extensions } returns extensions
+                val pluginContainer = mockk<org.gradle.api.plugins.PluginContainer>(relaxed = true)
+                every { pluginContainer.withId(any(), any()) } answers {
+                    // Cast is required because star-projecting Action (a consumer) yields Action<Nothing>, making it unexecutable.
+                    @Suppress("UNCHECKED_CAST")
+                    val action = args[1] as Action<org.gradle.api.Plugin<*>>
+                    action.execute(mockk(relaxed = true))
+                }
+                every { project.plugins } returns pluginContainer
 
                 return project
             }
@@ -1436,9 +1457,17 @@ class FlutterPluginUtilsTest {
             private fun setupTest(
                 tempDir: Path,
                 agpVersion: AndroidPluginVersion,
+                builtInKotlin: String?,
                 appConfig: SubprojectConfig,
-                pluginConfigs: List<SubprojectConfig>
+                pluginConfigs: List<SubprojectConfig>,
+                captureActions: Boolean = true
             ): TestEnvironment {
+                val rootDir = tempDir.toFile()
+                if (builtInKotlin != null) {
+                    writeGradleProperties(rootDir, "android.builtInKotlin=$builtInKotlin\n")
+                } else {
+                    writeGradleProperties(rootDir, "")
+                }
                 every { VersionFetcher.getAGPVersion(any()) } returns agpVersion
 
                 val appProject =
@@ -1461,10 +1490,14 @@ class FlutterPluginUtilsTest {
 
                 val allProjects = setOf(appProject) + pluginProjects
                 every { rootProject.subprojects } returns allProjects
+                mockBuiltInKotlinProperty(builtInKotlin)
 
                 val testProject = TestEnvironment(appProject, pluginProjects)
-                every { rootProject.subprojects(capture(testProject.subprojectsActionSlot)) } returns Unit
-                every { mockGradle.projectsEvaluated(capture(testProject.projectsEvaluatedActionSlot)) } returns Unit
+
+                if (captureActions) {
+                    every { rootProject.subprojects(capture(testProject.subprojectsActionSlot)) } returns Unit
+                    every { mockGradle.projectsEvaluated(capture(testProject.projectsEvaluatedActionSlot)) } returns Unit
+                }
 
                 return testProject
             }
@@ -1483,378 +1516,61 @@ class FlutterPluginUtilsTest {
             }
 
             @Nested
-            inner class TestLogWarningsWhenAGPis9OrHigher {
+            inner class BuiltInKotlinIsEnabled {
                 @Test
-                fun `logs app warning when KGP is only applied in app`(
+                fun `does not log nor apply KGP when no subproject applies KGP and built-in kotlin is enabled when AGP is 9 or higher`(
                     @TempDir tempDir: Path
                 ) {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
                             agpVersion = templateAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin",
-                                        declarativelyAppliedPlugins = listOf("com.android.library")
-                                    )
-                                )
+                            builtInKotlin = "true",
+                            appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
+                            pluginConfigs = listOf(SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))),
+                            captureActions = false
                         )
 
-                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
+                    detectApplyingKotlinGradlePlugin(testProject.appProject)
 
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    verify {
-                        mockLogger.error(
-                            match {
-                                it.contains("WARNING: Your Android app project") &&
-                                    it.contains("applies the Kotlin Gradle Plugin") &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
-                            }
-                        )
-                    }
-
-                    verify(exactly = 0) {
-                        mockLogger.error(match { it.contains("WARNING: Your app uses the following plugins") })
-                    }
-                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                    verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
+                    verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
                 }
 
                 @Test
-                fun `logs plugin warning when KGP is only applied in one plugin`(
+                fun `does not log nor apply KGP when no subproject applies KGP and built-in kotlin is not set and AGP is 9 or higher`(
                     @TempDir tempDir: Path
                 ) {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
                             agpVersion = templateAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    declarativelyAppliedPlugins = listOf("com.android.application")
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin",
-                                        declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
-                                    )
-                                )
+                            builtInKotlin = null,
+                            appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
+                            pluginConfigs = listOf(SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))),
+                            captureActions = false
                         )
 
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
+                    detectApplyingKotlinGradlePlugin(testProject.appProject)
 
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    verify {
-                        mockLogger.error(
-                            match {
-                                it.contains("WARNING: Your app uses the following plugins") &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
-                            }
-                        )
-                    }
-
-                    verify(exactly = 0) {
-                        mockLogger.error(match { it.contains("WARNING: Your Android app project") })
-                    }
-                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `logs app and plugin warning when KGP is applied in both app and plugins`(
-                    @TempDir tempDir: Path
-                ) {
-                    val testProject =
-                        setupTest(
-                            tempDir = tempDir,
-                            agpVersion = templateAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin",
-                                        declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
-                                    )
-                                )
-                        )
-
-                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
-
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    verify {
-                        mockLogger.error(
-                            match {
-                                it.contains("WARNING: Your Android app project") &&
-                                    it.contains("applies the Kotlin Gradle Plugin") &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
-                            }
-                        )
-                    }
-
-                    verify {
-                        mockLogger.error(
-                            match {
-                                it.contains("WARNING: Your app uses the following plugins") &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
-                            }
-                        )
-                    }
-
-                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `logs app and plugin warning when imperative KGP configuration is applied in both app and plugins`(
-                    @TempDir tempDir: Path
-                ) {
-                    val testProject =
-                        setupTest(
-                            tempDir = tempDir,
-                            agpVersion = templateAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    imperativelyAppliedPlugins =
-                                        listOf(
-                                            "com.android.application",
-                                            "kotlin-android"
-                                        )
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin1",
-                                        imperativelyAppliedPlugins =
-                                            listOf(
-                                                "com.android.library",
-                                                "kotlin-android"
-                                            )
-                                    ),
-                                    SubprojectConfig(
-                                        "plugin2",
-                                        imperativelyAppliedPlugins =
-                                            listOf(
-                                                "com.android.library",
-                                                "kotlin-android"
-                                            )
-                                    )
-                                )
-                        )
-
-                    val appBuildFilePath = testProject.appProject.buildFile.absolutePath
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
-                    val plugin2Manager = testProject.plugin2Manager
-
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    verify {
-                        mockLogger.error(
-                            match {
-                                it.contains("WARNING: Your Android app project") &&
-                                    it.contains("applies the Kotlin Gradle Plugin") &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
-                            }
-                        )
-                    }
-
-                    verify {
-                        mockLogger.error(
-                            match {
-                                it.contains("WARNING: Your app uses the following plugins") &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
-                            }
-                        )
-                    }
-
-                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
-                    verify(exactly = 0) { plugin2Manager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `does not log when migrated to Built-in Kotlin`(
-                    @TempDir tempDir: Path
-                ) {
-                    val testProject =
-                        setupTest(
-                            tempDir = tempDir,
-                            agpVersion = templateAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    imperativelyAppliedPlugins = listOf("com.android.application")
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin",
-                                        imperativelyAppliedPlugins = listOf("com.android.library")
-                                    )
-                                )
-                        )
-
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
-
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    verify(exactly = 0) {
-                        mockLogger.error(any())
-                    }
-
-                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `logs KGP warning when KGP attempts to but fails to apply`(
-                    @TempDir tempDir: Path
-                ) {
-                    val testProject =
-                        setupTest(
-                            tempDir = tempDir,
-                            agpVersion = templateAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    declarativelyAppliedPlugins = listOf("com.android.application")
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin",
-                                        declarativelyAppliedPlugins = listOf("com.android.library")
-                                    )
-                                )
-                        )
-
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
-
-                    every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                    every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    verify(exactly = 0) {
-                        mockLogger.error(any())
-                    }
-
-                    verify {
-                        mockLogger.quiet(
-                            match {
-                                it.contains("Applying the Kotlin Android Plugin (KGP) was unsuccessful") &&
-                                    it.contains("ensure KGP is declared in the root plugins block") &&
-                                    it.contains(BUILT_IN_KOTLIN_DOCS)
-                            }
-                        )
-                    }
+                    verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
+                    verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
                 }
             }
 
             @Nested
-            inner class TestLogWarningsWhenAGPIsLessThan9 {
+            inner class BuiltInKotlinIsDisabled {
                 @Test
-                fun `does not log warnings when migrated to built-in kotlin`(
+                fun `logs quiet warning when KGP application fails`(
                     @TempDir tempDir: Path
                 ) {
                     val testProject =
                         setupTest(
                             tempDir = tempDir,
-                            agpVersion = errorAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    declarativelyAppliedPlugins = listOf("com.android.application")
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin",
-                                        declarativelyAppliedPlugins = listOf("com.android.library")
-                                    )
-                                )
-                        )
-
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
-
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    // No warnings should be logged because AGP version is < 9.
-                    verify(exactly = 0) { mockLogger.error(any()) }
-
-                    // KGP is still applied in case the entire project has been migrated.
-                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `does not log warnings when KGP is applied`(
-                    @TempDir tempDir: Path
-                ) {
-                    val testProject =
-                        setupTest(
-                            tempDir = tempDir,
-                            agpVersion = errorAgpVersion,
-                            appConfig =
-                                SubprojectConfig(
-                                    "app",
-                                    declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
-                                ),
-                            pluginConfigs =
-                                listOf(
-                                    SubprojectConfig(
-                                        "plugin",
-                                        declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
-                                    )
-                                )
-                        )
-
-                    val appPluginManager = testProject.appPluginManager
-                    val plugin1Manager = testProject.plugin1Manager
-
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    // No warnings should be logged because AGP version is < 9.
-                    verify(exactly = 0) { mockLogger.error(any()) }
-
-                    verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `logs KGP warning when KGP attempts to but fails to apply`(
-                    @TempDir tempDir: Path
-                ) {
-                    val testProject =
-                        setupTest(
-                            tempDir = tempDir,
-                            agpVersion = errorAgpVersion,
+                            agpVersion = templateAgpVersion,
+                            builtInKotlin = "false",
                             appConfig =
                                 SubprojectConfig(
                                     "app",
@@ -1891,11 +1607,477 @@ class FlutterPluginUtilsTest {
                         )
                     }
                 }
-            }
+
+                @Test
+                fun `does not log and applies KGP when built-in kotlin is set to false and AGP is less than 9`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            agpVersion = errorAgpVersion,
+                            builtInKotlin = "false",
+                            appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
+                            pluginConfigs = listOf(SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library")))
+                        )
+
+                    executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                }
+
+                @Nested
+                inner class AppliedPluginsIsModernKotlinDSL {
+                    @Test
+                    fun `does not log and when migrated to Built-in Kotlin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify(exactly = 0) {
+                            mockLogger.error(any())
+                        }
+
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs app warning when KGP is only applied in app`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project") &&
+                                        it.contains("applies the Kotlin Gradle Plugin") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) {
+                            mockLogger.error(match { it.contains("WARNING: Your app uses the following plugins") })
+                        }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs plugin warning when KGP is only applied in one plugin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig(
+                                            "plugin",
+                                            declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
+                                        )
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your app uses the following plugins") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) {
+                            mockLogger.error(match { it.contains("WARNING: Your Android app project") })
+                        }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs app and plugin warning when KGP is applied in both app and one plugin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig(
+                                            "plugin",
+                                            declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
+                                        )
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project") &&
+                                        it.contains("applies the Kotlin Gradle Plugin") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
+                                }
+                            )
+                        }
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your app uses the following plugins") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs app and plugin warning when KGP configuration is applied in both app and plugins`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig(
+                                            "plugin1",
+                                            declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
+                                        ),
+                                        SubprojectConfig(
+                                            "plugin2",
+                                            declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
+                                        )
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project") &&
+                                        it.contains("applies the Kotlin Gradle Plugin") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
+                                }
+                            )
+                        }
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your app uses the following plugins") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                        verify(exactly = 0) { testProject.plugin2Manager.apply("kotlin-android") }
+                    }
+                }
+
+                @Nested
+                inner class AppliedPluginsIsLegacyGroovyDSL {
+                    @Test
+                    fun `does not log when migrated to Built-in Kotlin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig = SubprojectConfig("app", imperativelyAppliedPlugins = listOf("com.android.application")),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig("plugin", imperativelyAppliedPlugins = listOf("com.android.library"))
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify(exactly = 0) {
+                            mockLogger.error(any())
+                        }
+
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs app warning when KGP is only applied in app`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        imperativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig("plugin", imperativelyAppliedPlugins = listOf("com.android.library"))
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project") &&
+                                        it.contains("applies the Kotlin Gradle Plugin") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) {
+                            mockLogger.error(match { it.contains("WARNING: Your app uses the following plugins") })
+                        }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs plugin warning when KGP is only applied in one plugin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig = SubprojectConfig("app", imperativelyAppliedPlugins = listOf("com.android.application")),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig(
+                                            "plugin",
+                                            imperativelyAppliedPlugins =
+                                                listOf(
+                                                    "com.android.library",
+                                                    "kotlin-android"
+                                                )
+                                        )
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your app uses the following plugins") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) {
+                            mockLogger.error(match { it.contains("WARNING: Your Android app project") })
+                        }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs app and plugin warning when KGP is applied in both app and one plugin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        imperativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig(
+                                            "plugin",
+                                            imperativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
+                                        )
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project") &&
+                                        it.contains("applies the Kotlin Gradle Plugin") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
+                                }
+                            )
+                        }
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your app uses the following plugins") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                    }
+
+                    @Test
+                    fun `logs app and plugin warning when KGP configuration is applied in both app and plugins`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        imperativelyAppliedPlugins =
+                                            listOf(
+                                                "com.android.application",
+                                                "kotlin-android"
+                                            )
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig(
+                                            "plugin1",
+                                            imperativelyAppliedPlugins =
+                                                listOf(
+                                                    "com.android.library",
+                                                    "kotlin-android"
+                                                )
+                                        ),
+                                        SubprojectConfig(
+                                            "plugin2",
+                                            imperativelyAppliedPlugins =
+                                                listOf(
+                                                    "com.android.library",
+                                                    "kotlin-android"
+                                                )
+                                        )
+                                    )
+                            )
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project") &&
+                                        it.contains("applies the Kotlin Gradle Plugin") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_APPS)
+                                }
+                            )
+                        }
+
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your app uses the following plugins") &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS) &&
+                                        it.contains(BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS)
+                                }
+                            )
+                        }
+
+                        verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                        verify(exactly = 0) { testProject.plugin2Manager.apply("kotlin-android") }
+                    }
+                }
         }
     }
+    }
 
-    // forceNdkDownload
     @Test
     fun `forceNdkDownload skips projects which are already configuring a native build`(
         @TempDir tempDir: Path
@@ -2214,4 +2396,5 @@ class FlutterPluginUtilsTest {
             mockPrintTask.description = "Prints out all build variants for this Android project"
         }
     }
+}
 }
