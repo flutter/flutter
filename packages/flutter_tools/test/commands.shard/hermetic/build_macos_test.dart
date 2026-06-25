@@ -1331,8 +1331,8 @@ STDERR STUFF
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         // Still uses host arch in debug mode even if the flag is set.
         setUpFakeXcodeBuildHandler('Debug', destinationSpecifier: 'platform=macOS,arch=x86_64'),
-        setUpFakeXcodeBuildHandler('Profile', destinationSpecifier: 'platform=macOS,arch=arm64'),
-        setUpFakeXcodeBuildHandler('Release', destinationSpecifier: 'platform=macOS,arch=arm64'),
+        setUpFakeXcodeBuildHandler('Profile', destinationSpecifier: 'platform=macOS,arch=arm64', additionalCommandArguments: <String>['ARCHS=arm64']),
+        setUpFakeXcodeBuildHandler('Release', destinationSpecifier: 'platform=macOS,arch=arm64', additionalCommandArguments: <String>['ARCHS=arm64']),
       ]),
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),

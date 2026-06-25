@@ -204,7 +204,7 @@ Future<void> buildMacOS({
     }
   }
 
-  final String arch = switch (globals.os.hostPlatform) {
+  final String hostArch = switch (globals.os.hostPlatform) {
     HostPlatform.darwin_arm64 => 'arm64',
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
@@ -212,15 +212,19 @@ Future<void> buildMacOS({
 
   // Determine the build destination
   final String destination;
+  final String? archs;
   if (buildInfo.isDebug) {
     // Debug builds default to current host architecture
-    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$hostArch';
+    archs = null;
   } else if (featureFlags.isMacOSArm64OnlyEnabled) {
     // Release builds default to universal binary unless isMacOSArm64OnlyEnabled
     // is set.
     destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=arm64';
+    archs = 'arm64';
   } else {
     destination = XcodeSdk.MacOSX.genericPlatform;
+    archs = null;
   }
 
   // Get EXCLUDED_ARCHS from Xcode project build settings
@@ -260,6 +264,7 @@ Future<void> buildMacOS({
         if (excludedArches != null && excludedArches.trim().isNotEmpty)
           'EXCLUDED_ARCHS=$excludedArches',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
+        if (archs != null) 'ARCHS=$archs',
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
