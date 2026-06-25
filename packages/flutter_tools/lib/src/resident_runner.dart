@@ -1205,7 +1205,11 @@ abstract class ResidentRunner extends ResidentHandlers {
         flutterDevices.map<Future<void>>((FlutterDevice device) async {
           final DartDevelopmentService? dds = device.device?.dds;
           if (dds != null) {
-            await dds.shutdown();
+            try {
+              await dds.shutdown();
+            } on Object catch (error) {
+              globals.printTrace('Warning: Failed to shut down DDS for device: $error');
+            }
           }
         }),
       ).timeout(const Duration(seconds: 10));

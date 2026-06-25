@@ -158,6 +158,8 @@ class IntegrationTestTestDevice implements TestDevice {
       await _ddsLauncher.shutdown().timeout(ddsShutdownTimeout);
     } on TimeoutException {
       globals.printTrace('Warning: Dart Development Service shutdown timed out.');
+    } on Object catch (error) {
+      globals.printTrace('Warning: Failed to shut down Dart Development Service: $error');
     }
     _finished.complete();
   }
