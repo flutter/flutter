@@ -9,10 +9,14 @@ import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
+  @override
   bool get isMultiThreaded => false;
+
+  @override
+  bool get supportsResizingAnimatedImages =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
 
   bool get isWimp => false;
 
@@ -231,16 +235,12 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  void decodeImageFromPixels(
-    Uint8List pixels,
-    int width,
-    int height,
-    ui.PixelFormat format,
-    ui.ImageDecoderCallback callback, {
+  FutureOr<BackendImage> decodeBackendImageFromPixels(
+    Uint8List pixels, {
+    required int width,
+    required int height,
+    required ui.PixelFormat format,
     int? rowBytes,
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
   }) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
@@ -250,20 +250,12 @@ class SkwasmRenderer extends Renderer {
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List list, {
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) {
+  BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodecFromUrl(
-    Uri uri, {
-    ui_web.ImageCodecChunkCallback? chunkCallback,
-  }) {
+  BackendImage createImageFromImageSource(ImageSource source) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -296,21 +288,6 @@ class SkwasmRenderer extends Renderer {
     required double baseline,
     required int lineNumber,
   }) => throw UnimplementedError('Skwasm not implemented on this platform.');
-
-  @override
-  ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.Image createImageFromTextureSource(
-    JSAny object, {
-    required int width,
-    required int height,
-    required bool transferOwnership,
-  }) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
 
   @override
   void dumpDebugInfo() {

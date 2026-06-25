@@ -18,7 +18,13 @@ void testMain() {
   group('Skwasm native memory', () {
     test('SkwasmImage.clone share same handle and box', () {
       final pixels = Uint8List(4);
-      final EngineImage image = createSkwasmImageFromPixels(pixels, 1, 1, ui.PixelFormat.rgba8888);
+      final SkwasmImage backendImage = createSkwasmImageFromPixels(
+        pixels,
+        1,
+        1,
+        ui.PixelFormat.rgba8888,
+      );
+      final EngineImage image = EngineImage(backendImage, 1, 1);
 
       final EngineImage clone = image.clone();
       expect(
