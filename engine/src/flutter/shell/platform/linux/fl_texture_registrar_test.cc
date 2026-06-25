@@ -195,7 +195,7 @@ TEST_F(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
   for (uint64_t t = 0; t < kThreadCount; t++) {
     threads[t] =
         g_thread_new(nullptr, add_mock_texture_to_registrar, registrar);
-    EXPECT_NE(threads[t], nullptr);
+    ASSERT_NE(threads[t], nullptr);
   }
   for (uint64_t t = 0; t < kThreadCount; t++) {
     g_autofree int64_t* id = static_cast<int64_t*>(g_thread_join(threads[t]));
