@@ -158,8 +158,6 @@ abstract class WebParagraphPainter {
       return;
     }
 
-    _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
-
     // Draw background blocks directly on the output canvas
     // so it will be cached together with the text blocks on Canvas2D canvas
     _paintAllBlocks(StyleElements.background, canvas, offset);

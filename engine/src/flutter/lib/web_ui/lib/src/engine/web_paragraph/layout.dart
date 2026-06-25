@@ -541,10 +541,7 @@ class TextLayout {
           // We need to calculate the intersect rectangle
           firstRect = (block.span as TextSpan)
               .getTextRangeSelectionInBlock(block, intersect)
-              .translate(
-                0, // We do not use baseline for placeholder
-                block.multipliedFontBoundingBoxAscent,
-              );
+              .translate(0, block.multipliedFontBoundingBoxAscent);
         }
         // Now we need to recalculate the rects
         double left, right, top, bottom;
@@ -1069,23 +1066,28 @@ class PlaceholderCluster extends WebCluster {
 
 // This is the minimal range of cluster that belongs to the same bidi run and to the same style block
 abstract class LineBlock {
-  LineBlock(this.span, this._bidiLevel, this.clusterRange, this.textRange, this.shiftFromLineStart)
-    : _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent,
-      _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent {
+  LineBlock(
+    this.span,
+    this._bidiLevel,
+    this.clusterRange,
+    this.textRange,
+    this.shiftFromLineStart,
+  ) {
     if (span.style.height == null) {
       return;
     }
     final double fontSize = span.style.fontSize ?? 14.0;
     final double runHeight = span.style.height! * fontSize;
     final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
-    if (span.style.leadingDistribution == ui.TextLeadingDistribution.even) {
-      final double extraLeading = (runHeight - fontHeight) / 2;
-      _multipliedFontBoundingBoxAscent += extraLeading;
-      _multipliedFontBoundingBoxDescent += extraLeading;
-    } else {
-      final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
-      _multipliedFontBoundingBoxAscent *= multiplier;
-      _multipliedFontBoundingBoxDescent *= multiplier;
+    switch (span.style.leadingDistribution) {
+      case ui.TextLeadingDistribution.even:
+        final double extraLeading = (runHeight - fontHeight) / 2;
+        _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent + extraLeading;
+        _multipliedFontBoundingBoxDescent = span.fontBoundingBoxAscent + extraLeading;
+      default:
+        final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
+        _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent * multiplier;
+        _multipliedFontBoundingBoxDescent = span.fontBoundingBoxAscent * multiplier;
     }
   }
 
@@ -1098,10 +1100,10 @@ abstract class LineBlock {
   double get multipliedHeight =>
       _multipliedFontBoundingBoxAscent + _multipliedFontBoundingBoxDescent;
 
-  double _multipliedFontBoundingBoxAscent;
+  late final double _multipliedFontBoundingBoxAscent;
   double get multipliedFontBoundingBoxAscent => _multipliedFontBoundingBoxAscent;
 
-  double _multipliedFontBoundingBoxDescent;
+  late final double _multipliedFontBoundingBoxDescent;
   double get multipliedFontBoundingBoxDescent => _multipliedFontBoundingBoxDescent;
 
   final ParagraphSpan span;

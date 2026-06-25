@@ -12,9 +12,6 @@ import '../common/test_initialization.dart';
 import '../ui/utils.dart';
 
 void main() {
-  setUp(() {
-    renderer.fontCollection.debugResetFallbackFonts();
-  });
   internalBootstrapBrowserTest(() => testMain);
 }
 

@@ -591,8 +591,7 @@ abstract class SharedTextStyle {
   void applyToContext(DomCanvasRenderingContext2D context) {
     // Setup all the font-affecting attributes
     // Set 'lang' attribute as a combination of locale+language
-    final String cssFontString = _buildCssFontString();
-    context.font = cssFontString;
+    context.font = _buildCssFontString();
     context.letterSpacing = _buildLetterSpacingString();
     context.wordSpacing = _buildWordSpacingString();
     context.lang = _buildLangString();
@@ -759,8 +758,7 @@ class TextSpan extends ParagraphSpan {
     // Canvas2D will return all clusters placed right to left starting from 0.
     // Also, we have a separate (possibly, different) textDirection for the ellipsis.
     layoutContext.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
-    final DomTextMetrics result = layoutContext.measureText(text);
-    return result;
+    return layoutContext.measureText(text);
   }
 
   double? advanceWidth() {
@@ -910,9 +908,11 @@ class WebParagraph implements ui.Paragraph {
       boxHeightStyle,
       boxWidthStyle,
     );
-    WebParagraphDebug.apiTrace(
-      'getBoxesForRange($start, $end, $boxHeightStyle, $boxWidthStyle): ${result.map((r) => r.toString()).toList()}',
-    );
+    if (WebParagraphDebug.apiLogging || WebParagraphDebug.logging) {
+      WebParagraphDebug.apiTrace(
+        'getBoxesForRange($start, $end, $boxHeightStyle, $boxWidthStyle): ${result.map((r) => r.toString()).toList()}',
+      );
+    }
     return result;
   }
 
