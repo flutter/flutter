@@ -87,6 +87,12 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) {
+    // Since the underlying offscreenSurface is shared across all views, we
+    // must ensure that only one view at a time can resize the surface (in
+    // prepareToDraw) and render to it (in submitFrame/rasterize).
+    // Synchronizing the entire super.draw call ensures that both phases are
+    // executed atomically per view, preventing race conditions where another
+    // view resizes the shared surface before this view finishes rendering to it.
     return rasterizer.synchronized(() => super.draw(layerTree, recorder));
   }
 
