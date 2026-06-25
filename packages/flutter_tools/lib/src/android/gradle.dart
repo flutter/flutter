@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -30,7 +32,6 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_builder.dart';
-import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
@@ -56,10 +57,6 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 final _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
 const _kBuildVariantRegexGroupName = 'variant';
 const _kBuildVariantTaskName = 'printBuildVariants';
-final _kNdkVersionRegex = RegExp('^NdkVersion: (?<$_kNdkVersionRegexGroupName>.*)\$');
-const _kNdkVersionRegexGroupName = 'ndkVersion';
-const _kNdkVersionTaskName = 'printNdkVersion';
-const _kPreprovisionedNdkVersionProperty = 'flutter-preprovisioned-ndk-version';
 @visibleForTesting
 const failedToStripDebugSymbolsErrorMessage = r'''
 Release app bundle failed to strip debug symbols from native libraries.
@@ -278,7 +275,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required List<GradleHandledError> localGradleErrors,
     required String gradleExecutablePath,
-    bool printOutput = true,
     int retry = 0,
     VoidCallback? preRunTask,
     VoidCallback? postRunTask,
@@ -306,16 +302,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
           settings: 'androidGradlePluginVersion: $agpVersion',
         ),
       );
-
-      _logger.printStatus(
-        "${_logger.terminal.warningMark} Your app isn't using AndroidX.",
-        emphasis: true,
-      );
-      _logger.printStatus(
-        'To avoid potential build failures, you can quickly migrate your app '
-        'by following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration .',
-        indent: 4,
-      );
     }
 
     GradleHandledError? detectedGradleError;
@@ -341,7 +327,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         }
       }
       // Pipe stdout/stderr from Gradle.
-      return printOutput ? line : null;
+      return line;
     }
 
     final Status status = _logger.startProgress("Running Gradle task '$taskName'...");
@@ -390,7 +376,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
           case GradleBuildStatus.retry:
             // Use binary exponential backoff before retriggering the build.
             // The expected wait times are: 100ms, 200ms, 400ms, and so on...
-            final int waitTime = min(pow(2, retry).toInt() * 100, kMaxRetryTime.inMicroseconds);
+            final int waitTime = min(
+              pow(2, min(retry, 7)).toInt() * 100,
+              kMaxRetryTime.inMilliseconds,
+            );
             retry += 1;
             _logger.printStatus('Retrying Gradle Build: #$retry, wait time: ${waitTime}ms');
             await Future<void>.delayed(Duration(milliseconds: waitTime));
@@ -401,7 +390,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
               postRunTask: postRunTask,
               localGradleErrors: localGradleErrors,
               gradleExecutablePath: gradleExecutablePath,
-              printOutput: printOutput,
               retry: retry,
               project: project,
               maxRetries: maxRetries,
@@ -575,20 +563,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
     }
-    final String? preprovisionedNdkVersion = _shouldPreprovisionAndroidNdk(buildInfo)
-        ? await _preprovisionAndroidNdkIfNeeded(
-            project: project,
-            gradleExecutablePath: gradleExecutablePath,
-            buildInfo: buildInfo,
-          )
-        : await _getInstalledConfiguredAndroidNdkVersion(
-            project: project,
-            gradleExecutablePath: gradleExecutablePath,
-            buildInfo: buildInfo,
-          );
-    if (preprovisionedNdkVersion != null) {
-      options.add('-P$_kPreprovisionedNdkVersionProperty=$preprovisionedNdkVersion');
-    }
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(
       assembleTask,
@@ -666,7 +640,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final String filename = apkFile.basename;
       _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
-      apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+      apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
       final appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
@@ -928,151 +902,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     );
   }
 
-  Future<String?> _preprovisionAndroidNdkIfNeeded({
-    required FlutterProject project,
-    required String gradleExecutablePath,
-    required BuildInfo buildInfo,
-  }) async {
-    final AndroidSdk? androidSdk = globals.androidSdk;
-    if (androidSdk == null || !androidSdk.directory.existsSync()) {
-      return null;
-    }
-
-    final String? requiredNdkVersion = await _getNdkVersion(
-      project: project,
-      gradleExecutablePath: gradleExecutablePath,
-      buildInfo: buildInfo,
-    );
-    if (requiredNdkVersion == null) {
-      return null;
-    }
-
-    if (androidSdk.hasNdkVersion(requiredNdkVersion)) {
-      return requiredNdkVersion;
-    }
-
-    if (!androidSdk.cmdlineToolsAvailable) {
-      throwToolExit(
-        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
-        'the cmdline-tools are installed to resolve this.',
-      );
-    }
-
-    if (!androidSdk.licensesAvailable) {
-      throwToolExit(
-        'Unable to download needed Android SDK components because the Android SDK licenses have '
-        'not been accepted.\n\nTo resolve this, please run the following command in a Terminal:\n'
-        'flutter doctor --android-licenses',
-      );
-    }
-
-    final Status status = _logger.startProgress(
-      "Ensuring Android NDK '$requiredNdkVersion' is installed...",
-    );
-    try {
-      final RunResult result = await androidSdk.installNdkVersion(
-        requiredNdkVersion,
-        java: _java,
-        processUtils: _processUtils,
-      );
-      if (result.exitCode != 0) {
-        _logger.printTrace(
-          'Android sdkmanager failed while installing NDK $requiredNdkVersion.\n'
-          'stdout: ${result.stdout}\n'
-          'stderr: ${result.stderr}',
-        );
-        throwToolExit(
-          'Unable to download needed Android NDK $requiredNdkVersion.\n'
-          'Please check that the Android SDK command-line tools are installed and that SDK '
-          'licenses have been accepted with `flutter doctor --android-licenses`.',
-        );
-      }
-    } finally {
-      status.stop();
-    }
-
-    if (!androidSdk.hasNdkVersion(requiredNdkVersion)) {
-      throwToolExit(
-        'Android NDK $requiredNdkVersion could not be found in ${androidSdk.directory.path} '
-        'after sdkmanager completed.',
-      );
-    }
-
-    return requiredNdkVersion;
-  }
-
-  Future<String?> _getNdkVersion({
-    required FlutterProject project,
-    required String gradleExecutablePath,
-    required BuildInfo buildInfo,
-  }) async {
-    late Stopwatch sw;
-    var exitCode = 1;
-    String? result;
-
-    try {
-      exitCode = await _runGradleTask(
-        _kNdkVersionTaskName,
-        preRunTask: () {
-          sw = Stopwatch()..start();
-        },
-        postRunTask: () {
-          final Duration elapsedDuration = sw.elapsed;
-          _analytics.send(
-            Event.timing(
-              workflow: 'print',
-              variableName: 'android ndk version',
-              elapsedMilliseconds: elapsedDuration.inMilliseconds,
-            ),
-          );
-        },
-        options: <String>[
-          '-q',
-          if (buildInfo.androidSkipBuildDependencyValidation) '-PskipDependencyChecks=true',
-        ],
-        project: project,
-        localGradleErrors: gradleErrors,
-        gradleExecutablePath: gradleExecutablePath,
-        printOutput: false,
-        outputParser: (String line) {
-          if (_kNdkVersionRegex.firstMatch(line) case final RegExpMatch match) {
-            result = match.namedGroup(_kNdkVersionRegexGroupName);
-          }
-        },
-      );
-    } on Error catch (error) {
-      _logger.printTrace('Failed to query Android ndkVersion: $error');
-    }
-
-    if (exitCode != 0) {
-      return null;
-    }
-
-    return result;
-  }
-
-  Future<String?> _getInstalledConfiguredAndroidNdkVersion({
-    required FlutterProject project,
-    required String gradleExecutablePath,
-    required BuildInfo buildInfo,
-  }) async {
-    final AndroidSdk? androidSdk = globals.androidSdk;
-    if (androidSdk == null || !androidSdk.directory.existsSync()) {
-      return null;
-    }
-
-    final String? requiredNdkVersion = await _getNdkVersion(
-      project: project,
-      gradleExecutablePath: gradleExecutablePath,
-      buildInfo: buildInfo,
-    );
-    if (requiredNdkVersion == null) {
-      return null;
-    }
-
-    return androidSdk.hasNdkVersion(requiredNdkVersion) ? requiredNdkVersion : null;
-  }
-
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {
     late Stopwatch sw;
@@ -1221,17 +1050,26 @@ void printHowToConsumeAar({
   logger.printStatus('To learn more, visit https://flutter.dev/to/integrate-android-archive');
 }
 
-String _hex(List<int> bytes) {
-  final result = StringBuffer();
-  for (final part in bytes) {
-    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+/// Calculates the SHA-1 hash of the given [file] using chunked reading.
+@visibleForTesting
+String calculateSha(File file) {
+  final RandomAccessFile openedFile = file.openSync();
+  try {
+    final sink = AccumulatorSink<Digest>();
+    final ByteConversionSink sha1Sink = sha1.startChunkedConversion(sink);
+    final buffer = Uint8List(64 * 1024);
+    while (true) {
+      final int bytesRead = openedFile.readIntoSync(buffer);
+      if (bytesRead == 0) {
+        break;
+      }
+      sha1Sink.add(Uint8List.sublistView(buffer, 0, bytesRead));
+    }
+    sha1Sink.close();
+    return sink.events.single.toString();
+  } finally {
+    openedFile.closeSync();
   }
-  return result.toString();
-}
-
-String _calculateSha(File file) {
-  final List<int> bytes = file.readAsBytesSync();
-  return _hex(sha1.convert(bytes).bytes);
 }
 
 void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) {
@@ -1529,9 +1367,4 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
     result = 'android-arm64';
   }
   return result;
-}
-
-bool _shouldPreprovisionAndroidNdk(BuildInfo buildInfo) {
-  final String? flavor = buildInfo.flavor;
-  return flavor != null && flavor.isNotEmpty;
 }

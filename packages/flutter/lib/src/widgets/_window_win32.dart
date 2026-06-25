@@ -142,8 +142,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   RegularWindowController createRegularWindowController({
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     String? title,
-    bool decorated = true,
     required RegularWindowControllerDelegate delegate,
   }) {
     return RegularWindowControllerWin32(
@@ -152,7 +152,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
+      resizable: resizable,
     );
   }
 
@@ -162,9 +162,9 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
   }) {
     return DialogWindowControllerWin32(
       owner: this,
@@ -172,8 +172,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
       parent: parent,
+      resizable: resizable,
     );
   }
 
@@ -224,6 +224,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     String? title,
   }) {
     throw UnimplementedError('Satellite windows are not yet implemented on Windows.');
@@ -341,27 +342,24 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
+    required bool resizable,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
-    if (!decorated) {
-      // TODO(team-windows): Implement undecorated windows on Windows.
-      // See https://github.com/flutter/flutter/issues/183559
-      throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
-    }
-
     _handler = _RegularWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
+    final sizedToContent = preferredSize == null;
     final int viewId = _Win32PlatformInterface.createRegularWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
       preferredSize,
       preferredConstraints,
       title,
+      sizedToContent,
+      resizable,
     );
     if (viewId < 0) {
       throw Exception('Windows failed to create a regular window with a valid view id.');
@@ -579,8 +577,8 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
     BaseWindowController? parent,
+    required bool resizable,
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
@@ -588,14 +586,9 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
-    if (!decorated) {
-      // TODO(team-windows): Implement undecorated windows on Windows.
-      // See https://github.com/flutter/flutter/issues/183559
-      throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
-    }
-
     _handler = _DialogWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
+    final sizedToContent = preferredSize == null;
     final int viewId = _Win32PlatformInterface.createDialogWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -608,6 +601,8 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
               parent.rootView.viewId,
             )
           : null,
+      sizedToContent,
+      resizable,
     );
     if (viewId < 0) {
       throw Exception('Windows failed to create a dialog window with a valid view id.');
@@ -1292,6 +1287,8 @@ class _Win32PlatformInterface {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool sizedToContent,
+    bool resizable,
   ) {
     final ffi.Pointer<_RegularWindowCreationRequest> request =
         allocator<_RegularWindowCreationRequest>();
@@ -1299,6 +1296,8 @@ class _Win32PlatformInterface {
       request.ref.preferredSize.from(preferredSize);
       request.ref.preferredConstraints.from(preferredConstraints);
       request.ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
+      request.ref.sizedToContent = sizedToContent;
+      request.ref.resizable = resizable;
       return _createRegularWindow(engineId, request);
     } finally {
       allocator.free(request);
@@ -1320,6 +1319,8 @@ class _Win32PlatformInterface {
     BoxConstraints? preferredConstraints,
     String? title,
     HWND? parent,
+    bool sizedToContent,
+    bool resizable,
   ) {
     final ffi.Pointer<_DialogWindowCreationRequest> request =
         allocator<_DialogWindowCreationRequest>();
@@ -1328,6 +1329,8 @@ class _Win32PlatformInterface {
       request.ref.preferredConstraints.from(preferredConstraints);
       request.ref.title = (title ?? 'Dialog window').toNativeUtf16(allocator: allocator);
       request.ref.parentOrNull = parent ?? ffi.Pointer<ffi.Void>.fromAddress(0);
+      request.ref.sizedToContent = sizedToContent;
+      request.ref.resizable = resizable;
       return _createDialogWindow(engineId, request);
     } finally {
       allocator.free(request);
@@ -1598,6 +1601,12 @@ final class _RegularWindowCreationRequest extends ffi.Struct {
   external _WindowSizeRequest preferredSize;
   external _WindowConstraintsRequest preferredConstraints;
   external ffi.Pointer<_Utf16> title;
+
+  @ffi.Bool()
+  external bool sizedToContent;
+
+  @ffi.Bool()
+  external bool resizable;
 }
 
 /// Payload for the creation method used by [_Win32PlatformInterface.createDialogWindow].
@@ -1606,6 +1615,12 @@ final class _DialogWindowCreationRequest extends ffi.Struct {
   external _WindowConstraintsRequest preferredConstraints;
   external ffi.Pointer<_Utf16> title;
   external HWND parentOrNull;
+
+  @ffi.Bool()
+  external bool sizedToContent;
+
+  @ffi.Bool()
+  external bool resizable;
 }
 
 final class _TooltipWindowCreationRequest extends ffi.Struct {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -75,6 +77,9 @@ name: foo
         processManager = FakeProcessManager.empty();
         globals.fs
             .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
+            .createSync(recursive: true);
+        globals.fs
+            .file('engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf')
             .createSync(recursive: true);
 
         environment = Environment.test(
@@ -357,6 +362,55 @@ _flutter.loader.load();
       }),
     );
   });
+
+  test(
+    'WebReleaseBundle bundles a local Roboto fallback when CDN assets are disabled',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kUseLocalCanvasKitFlag] = 'true';
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
+
+      final fontManifest =
+          jsonDecode(
+                environment.outputDir
+                    .childDirectory('assets')
+                    .childFile('FontManifest.json')
+                    .readAsStringSync(),
+              )
+              as List<dynamic>;
+      expect(
+        fontManifest,
+        contains(
+          predicate<dynamic>((dynamic entry) {
+            if (entry is! Map<dynamic, dynamic>) {
+              return false;
+            }
+            if (entry['family'] != 'Roboto') {
+              return false;
+            }
+            final dynamic fonts = entry['fonts'];
+            return fonts is List<dynamic> &&
+                fonts.length == 1 &&
+                fonts.single is Map<dynamic, dynamic> &&
+                (fonts.single as Map<dynamic, dynamic>)['asset'] ==
+                    'fonts/fallback/Roboto-Regular.ttf';
+          }),
+        ),
+      );
+      expect(
+        environment.outputDir
+            .childDirectory('assets')
+            .childFile('fonts/fallback/Roboto-Regular.ttf'),
+        exists,
+      );
+    }),
+  );
 
   test(
     'WebReleaseBundle copies dart2js output and resource files to output directory',

@@ -15,7 +15,7 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   if (deps.flutterTT.policy) {
     skwasmUrl = deps.flutterTT.policy.createScriptURL(skwasmUrl);
   }
-  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`));
+  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`), `${fileStem}.wasm`);
   const skwasm = await import(skwasmUrl);
   return await skwasm.default({
     // Chrome extensions enforce strict CSP that blocks the dynamic script

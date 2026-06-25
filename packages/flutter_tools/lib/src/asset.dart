@@ -1104,7 +1104,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     result.removeWhere((_Asset asset, List<_Asset> variants) {
       if (!asset.matchesFlavor(flavor)) {
-        _logger.printWarning(
+        _logger.printTrace(
           'Skipping assets entry "${asset.entryUri.path}" since '
           'its configured flavor(s) did not match the provided flavor (if any).\n'
           'Configured flavors: ${asset.flavors.join(', ')}\n',
@@ -1112,7 +1112,7 @@ class ManifestAssetBundle implements AssetBundle {
         return true;
       }
       if (!asset.matchesPlatform(targetPlatform)) {
-        _logger.printWarning(
+        _logger.printTrace(
           'Skipping assets entry "${asset.entryUri.path}" since '
           'its configured platform(s) did not match the target platform.\n'
           'Configured platforms: ${asset.platforms.join(', ')}\n'
@@ -1165,7 +1165,7 @@ class ManifestAssetBundle implements AssetBundle {
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
-    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri, packageName: packageName);
     directoryPath = _fileSystem.path.join(
       assetBase,
       assetUri.toFilePath(windows: _platform.isWindows),
@@ -1329,7 +1329,11 @@ class ManifestAssetBundle implements AssetBundle {
     throwToolExit(errorMessage.toString());
   }
 
-  void _ensureAssetPathIsValid({required String assetsBaseDir, required Uri assetUri}) {
+  void _ensureAssetPathIsValid({
+    required String assetsBaseDir,
+    required Uri assetUri,
+    String? packageName,
+  }) {
     if (!assetUri.isScheme('file') && assetUri.scheme.isNotEmpty) {
       throwToolExit(
         'Asset path "$assetUri" has scheme "${assetUri.scheme}" and is not a valid file or '
@@ -1348,6 +1352,24 @@ class ManifestAssetBundle implements AssetBundle {
         'in the pubspec.yaml to use a relative path.',
       );
     }
+    // An asset declared by a dependency must stay within that package's own directory. A relative
+    // path that escapes the package (e.g. '../secret') would otherwise make the build read and
+    // bundle files from outside the package on the build machine, which the consuming app never
+    // declared. (The absolute-path check above is preserved for all assets.)
+    if (packageName != null) {
+      final String assetPath = assetUri.toFilePath(windows: _platform.isWindows);
+      final String base = _fileSystem.path.canonicalize(assetsBaseDir);
+      final String resolved = _fileSystem.path.canonicalize(
+        _fileSystem.path.join(assetsBaseDir, assetPath),
+      );
+      if (base != resolved && !_fileSystem.path.isWithin(base, resolved)) {
+        throwToolExit(
+          'Asset path "$assetPath" of package '
+          '"$packageName" resolves to a location outside the package directory. Package asset '
+          'paths must stay within the package.',
+        );
+      }
+    }
   }
 
   _Asset _resolveAsset(
@@ -1362,7 +1384,7 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
-    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri, packageName: packageName);
     if (assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.isFileSync(
           _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),

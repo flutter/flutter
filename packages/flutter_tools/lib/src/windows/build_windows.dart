@@ -136,7 +136,7 @@ Future<void> buildWindows(
   );
 
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = getNameForTargetPlatform(targetPlatform);
+    final String arch = targetPlatform.getName();
     final File codeSizeFile = globals.fs
         .directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$arch.json');
@@ -200,7 +200,7 @@ Future<void> _runCmakeGeneration({
       generator,
       '-A',
       getCmakeWindowsArch(targetPlatform),
-      '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
+      '-DFLUTTER_TARGET_PLATFORM=${targetPlatform.getName()}',
     ], trace: true);
   } on ArgumentError {
     throwToolExit("cmake not found. Run 'flutter doctor' for more information.");

@@ -30,7 +30,39 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.44 Changes
+
+## [3.44.4](https://github.com/flutter/flutter/releases/tag/3.44.4)
+- [flutter/188192](https://github.com/flutter/flutter/issues/188192) Fix bounds checking in Flutter Linux's FlAccessibleTextField.
+
+### [3.44.3](https://github.com/flutter/flutter/releases/tag/3.44.3)
+- [flutter/186738](https://github.com/flutter/flutter/issues/186738) Demote flavor/platform asset skipping messages from warning to trace level to reduce build log noise.
+- [flutter/186899](https://github.com/flutter/flutter/issues/186899) On Android, destroying a texture before the GLES fence that it holds was used may cause a crash.
+- [flutter/186953](https://github.com/flutter/flutter/issues/186953) When building concurrently with SwiftPM on macOS/iOS, concurrent directory/file/symlink creation may cause a crash.
+- [flutter/183179](https://github.com/flutter/flutter/issues/183179) Fixes an issue that can cause crashes when rendering animated PNG images.
+
+### [3.44.2](https://github.com/flutter/flutter/releases/tag/3.44.2)
+- [flutter/187322](https://github.com/flutter/flutter/issues/187322) When DTD connection is lost or fails at startup during widget-preview on all platforms, the tool crashes with unhandled exceptions instead of exiting gracefully.
+- [flutter/186723](https://github.com/flutter/flutter/issues/186723) When Android apps switch from any `SystemUiMode` to edge-to-edge, the system bars unexpectedly remain invisible.
+- [flutter/186054](https://github.com/flutter/flutter/issues/186054) When building an iOS or macOS app with Swift Package Manager enabled, remote package dependencies may fail to download.
+- [flutter/185775](https://github.com/flutter/flutter/issues/185775) When building for non-iOS or macOS apps, Swift Package Manager warnings may appear.
+
+### [3.44.1](https://github.com/flutter/flutter/releases/tag/3.44.1)
+- [flutter/186962](https://github.com/flutter/flutter/issues/186962) When the analysis server exits unexpectedly, the `flutter` tool can crash instead of outputting a descriptive error message.
+- [flutter/186963](https://github.com/flutter/flutter/issues/186963) When failing to connect to a Chrome instance on Windows, the `flutter` tool can crash instead of outputting a descriptive error message.
+
+### [3.44.0](https://github.com/flutter/flutter/releases/tag/3.44.0)
+
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-44-b0cc1ad3c527), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.44.0) for a detailed list of all the new changes.
+
+
 ## Flutter 3.41 Changes
+
+### [3.41.9](https://github.com/flutter/flutter/releases/tag/3.41.9)
+- [flutter/185621](https://github.com/flutter/flutter/pull/185621) Fixes a potential integer overflow that can happen when handling some animated PNG files.
+
+### [3.41.8](https://github.com/flutter/flutter/releases/tag/3.41.8)
+- [flutter/185150](https://github.com/flutter/flutter/issues/185150) When using profile mode on a physical iOS device, the app may fail to connect to the Dart VM.
 
 ### [3.41.7](https://github.com/flutter/flutter/releases/tag/3.41.7)
 - [flutter/184376](https://github.com/flutter/flutter/issues/184376) When building an iOS or macOS app, the build may fail due to git multi-pack-index error.

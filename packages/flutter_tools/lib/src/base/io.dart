@@ -37,7 +37,7 @@ import 'dart:io'
     as io
     show
         IOSink,
-        InternetAddress,
+        InterfaceAddress,
         InternetAddressType,
         NetworkInterface,
         Process,
@@ -400,7 +400,7 @@ class NetworkInterface implements io.NetworkInterface {
   final io.NetworkInterface _delegate;
 
   @override
-  List<io.InternetAddress> get addresses => _delegate.addresses;
+  List<io.InterfaceAddress> get addresses => _delegate.addresses;
 
   @override
   int get index => _delegate.index;

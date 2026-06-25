@@ -146,5 +146,100 @@ TEST(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices) {
                                        Range{0, 1}));
 }
 
+// Regression guard: a float uniform that arrives at the GLES backend without
+// `float_type` populated must be rejected rather than silently dispatched to
+// the wrong glUniform call. This is the fault mode that motivated the schema
+// extension; if a future change forgets to populate `float_type` (in the
+// shader bundle loader, runtime effects, or anywhere else), this test
+// catches it at unit-test time instead of at runtime.
+TEST(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType) {
+  BufferBindingsGLES bindings;
+  absl::flat_hash_map<std::string, GLint> uniform_bindings;
+  uniform_bindings["SHADERMETADATA.FOOBAR"] = 1;
+  bindings.SetUniformBindings(std::move(uniform_bindings));
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  std::vector<BufferResource> bound_buffers;
+  std::vector<TextureAndSampler> bound_textures;
+
+  ShaderMetadata shader_metadata = {
+      .name = "shader_metadata",
+      .members = {ShaderStructMemberMetadata{.type = ShaderType::kFloat,
+                                             .name = "foobar",
+                                             .offset = 0,
+                                             .size = sizeof(float),
+                                             .byte_length = sizeof(float),
+                                             .array_elements = std::nullopt,
+                                             .float_type = std::nullopt}}};
+  std::shared_ptr<ReactorGLES> reactor;
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
+                                 reactor, std::move(backing_store));
+  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+  bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
+
+  EXPECT_FALSE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                        bound_buffers, Range{0, 0},
+                                        Range{0, 1}));
+}
+
+// An instanced draw reaches per-instance data through instance-rate vertex
+// attributes. A vertex layout with an instance-rate binding must set a
+// glVertexAttribDivisor of 1 on that binding's attributes, while a
+// per-vertex binding keeps a divisor of 0.
+TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(0, 0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(1, 1)).Times(1);
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+
+  BufferBindingsGLES bindings;
+
+  ShaderStageIOSlot per_vertex_input = {
+      .name = "position",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  ShaderStageIOSlot per_instance_input = {
+      .name = "instance_offset",
+      .location = 1,
+      .set = 0,
+      .binding = 1,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  std::vector<ShaderStageIOSlot> inputs = {per_vertex_input,
+                                           per_instance_input};
+  std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 0,
+                              .input_rate = VertexInputRate::kVertex},
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 1,
+                              .input_rate = VertexInputRate::kInstance},
+  };
+
+  ASSERT_TRUE(bindings.RegisterVertexStageInput(mock_gl->GetProcTable(), inputs,
+                                                layouts));
+  // Binding 0 is per-vertex (divisor 0); binding 1 is per-instance
+  // (divisor 1).
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/0, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/1, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+}
+
 }  // namespace testing
 }  // namespace impeller

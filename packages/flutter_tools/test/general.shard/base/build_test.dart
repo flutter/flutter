@@ -12,11 +12,14 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
-
-const kARMCheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
-
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   group('GenSnapshot', () {
     late GenSnapshot genSnapshot;
     late Artifacts artifacts;
@@ -184,7 +187,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
-            '--macho-min-os-version=13.0',
+            '--macho-min-os-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--dwarf-stack-traces',
@@ -194,7 +197,7 @@ void main() {
           ],
         ),
         kWhichSysctlCommand,
-        kARMCheckCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -246,7 +249,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
-            '--macho-min-os-version=13.0',
+            '--macho-min-os-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--obfuscate',
@@ -254,7 +257,7 @@ void main() {
           ],
         ),
         kWhichSysctlCommand,
-        kARMCheckCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -305,14 +308,14 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
-            '--macho-min-os-version=13.0',
+            '--macho-min-os-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             'main.dill',
           ],
         ),
         kWhichSysctlCommand,
-        kARMCheckCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',

@@ -99,7 +99,7 @@ template("flutter_snapshot") {
         outputs += [ snapshot_assembly ]
         args += [
           "--snapshot_kind=app-aot-assembly",
-          "--assembly=" + rebase_path(snapshot_assembly),
+          "--assembly=" + rebase_path(snapshot_assembly, root_build_dir),
         ]
       } else if (is_android) {
         if (defined(invoker.output_aot_lib)) {
@@ -111,7 +111,7 @@ template("flutter_snapshot") {
         outputs += [ libapp ]
         args += [
           "--snapshot_kind=app-aot-elf",
-          "--elf=" + rebase_path(libapp),
+          "--elf=" + rebase_path(libapp, root_build_dir),
         ]
       } else {
         assert(false)
@@ -134,16 +134,14 @@ template("flutter_snapshot") {
         isolate_snapshot_instructions,
       ]
       args += [
-        "--snapshot_kind=app-jit",
-        "--load_vm_snapshot_data=" + rebase_path(vm_snapshot_data),
-        "--load_isolate_snapshot_data=" + rebase_path(snapshot_data),
-        "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
-        "--isolate_snapshot_instructions=" +
-            rebase_path(isolate_snapshot_instructions),
+        "--snapshot_kind=app",
+        "--snapshot_data=" + rebase_path(isolate_snapshot_data, root_build_dir),
+        "--snapshot_text=" +
+            rebase_path(isolate_snapshot_instructions, root_build_dir),
       ]
     }
 
-    args += [ rebase_path(kernel_output) ]
+    args += [ rebase_path(kernel_output, root_build_dir) ]
   }
 
   group(target_name) {

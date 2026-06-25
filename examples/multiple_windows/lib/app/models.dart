@@ -15,29 +15,39 @@ class TooltipSettings {}
 class WindowSettings {
   WindowSettings({
     this.regularSize = const Size(800, 600),
+    this.regularSizedToContent = false,
+    this.regularResizable = true,
     this.dialogSize = const Size(400, 400),
+    this.dialogSizedToContent = false,
+    this.dialogResizable = true,
     this.positioner = const WindowPositioner(
       parentAnchor: WindowPositionerAnchor.right,
       childAnchor: WindowPositionerAnchor.left,
     ),
-    this.regularDecorated = true,
-    this.dialogDecorated = true,
   });
 
   /// The initial size for newly created regular windows.
+  /// Ignored when [regularSizedToContent] is true.
   Size regularSize;
 
+  /// If true, new regular windows will be sized to fit their content.
+  bool regularSizedToContent;
+
+  /// If true, regular windows may be manually resized by the user.
+  bool regularResizable;
+
   /// The initial size of the dialog window.
+  /// Ignored when [dialogSizedToContent] is true.
   Size dialogSize;
+
+  /// If true, new dialog windows will be sized to fit their content.
+  bool dialogSizedToContent;
+
+  /// If true, dialog windows may be manually resized by the user.
+  bool dialogResizable;
 
   /// The positioner used to determine where new tooltips and popups are placed.
   WindowPositioner positioner;
-
-  /// True if regular windows are decorated.
-  bool regularDecorated;
-
-  /// True if dialog windows are decorated.
-  bool dialogDecorated;
 }
 
 /// Provides access to the [WindowSettings] from the widget tree.

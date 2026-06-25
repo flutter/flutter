@@ -426,7 +426,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterPluginRegistrant",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
@@ -2114,7 +2114,7 @@ let package = Package(
   "platforms": [
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -2187,7 +2187,7 @@ let package = Package(
         expect(processManager, hasNoRemainingExpectations);
         expect(pluginSwiftDependencies.copiedPlugins.length, 1);
         expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
+        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
 
         final File cachedManifest = cacheDir
             .childDirectory('Manifests')
@@ -2292,7 +2292,7 @@ let package = Package(
   "platforms": [
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -2377,7 +2377,7 @@ let package = Package(
         expect(processManager, hasNoRemainingExpectations);
         expect(pluginSwiftDependencies.copiedPlugins.length, 1);
         expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
+        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
         expect(logger.statusText, contains('Skipping processing plugins. No change detected.'));
       });
 
@@ -2414,7 +2414,7 @@ let package = Package(
           const FakeCommand(
             command: ['swift', 'package', 'dump-package'],
             stdout:
-                '{"platforms": [{"platformName": "ios", "version": "13.0"}], "targets": [{"name": "PluginA", "type": "regular"}], "dependencies": []}',
+                '{"platforms": [{"platformName": "ios", "version": "15.0"}], "targets": [{"name": "PluginA", "type": "regular"}], "dependencies": []}',
           ),
           const FakeCommand(
             command: [
@@ -2500,7 +2500,7 @@ let package = Package(
         );
 
         expect(processManager, hasNoRemainingExpectations);
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(14, 0, 0));
+        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
         expect(pluginSwiftDependencies.copiedPlugins.length, 2);
       });
 
@@ -2538,7 +2538,7 @@ let package = Package(
     },
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -2611,7 +2611,7 @@ let package = Package(
           expect(processManager, hasNoRemainingExpectations);
           expect(pluginSwiftDependencies.copiedPlugins.length, 1);
           expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
-          expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
+          expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
         },
       );
 
@@ -2645,7 +2645,7 @@ let package = Package(
   "platforms": [
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -3293,6 +3293,22 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
         );
 
+        final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
+        expect(scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist'), exists);
+        expect(
+          scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist').readAsStringSync(),
+          r'''
+$(BUILT_PRODUCTS_DIR)/Flutter.framework/Flutter
+$(BUILT_PRODUCTS_DIR)/Flutter.framework/Info.plist
+$(BUILT_PRODUCTS_DIR)/App.framework/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Flutter.framework/Flutter
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Flutter.framework/Info.plist
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Flutter.framework/_CodeSignature/CodeResources
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/_CodeSignature/CodeResources
+''',
+        );
+
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
         expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -3306,7 +3322,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeIntegration",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])
@@ -3527,6 +3543,22 @@ let package = Package(
           outputDirectory: outputDirectory,
           flutterIntegrationPackage: flutterIntegrationPackage,
           highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
+        );
+
+        final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
+        expect(scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist'), exists);
+        expect(
+          scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist').readAsStringSync(),
+          r'''
+$(BUILT_PRODUCTS_DIR)/FlutterMacOS.framework/Versions/A/FlutterMacOS
+$(BUILT_PRODUCTS_DIR)/FlutterMacOS.framework/Versions/A/Resources/Info.plist
+$(BUILT_PRODUCTS_DIR)/App.framework/Versions/A/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/FlutterMacOS.framework/Versions/A/FlutterMacOS
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/FlutterMacOS.framework/Versions/A/Resources/Info.plist
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/FlutterMacOS.framework/_CodeSignature/CodeResources
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/Versions/A/App
+$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/App.framework/_CodeSignature/CodeResources
+''',
         );
 
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);

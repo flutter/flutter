@@ -34,7 +34,7 @@ public class LifecycleChannel {
     INACTIVE,
     HIDDEN,
     PAUSED,
-  };
+  }
 
   private AppLifecycleState lastAndroidState = null;
   private AppLifecycleState lastFlutterState = null;
