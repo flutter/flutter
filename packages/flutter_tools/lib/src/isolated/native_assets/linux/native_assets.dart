@@ -101,6 +101,11 @@ Future<CCompilerConfig?> cCompilerConfigLinux({
       rethrow;
     }
     return null;
+  } on FileSystemException {
+    if (throwIfNotFound) {
+      rethrow;
+    }
+    return null;
   }
 }
 
