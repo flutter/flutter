@@ -64,16 +64,7 @@ abstract interface class CliEnum implements Enum {
 }
 
 /// Converts `fooBar` to `FooBar`.
-///
-/// This uses [toBeginningOfSentenceCase](https://pub.dev/documentation/intl/latest/intl/toBeginningOfSentenceCase.html),
-/// with the input and return value of non-nullable.
-String sentenceCase(String str, [String? locale]) {
-  if (str.isEmpty) {
-    return str;
-  }
-  // TODO(christopherfujino): Remove this check after the next release of intl
-  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
-}
+String sentenceCase(String str) => str.isEmpty ? str : '${str[0].toUpperCase()}${str.substring(1)}';
 
 /// Converts `foo_bar` to `Foo Bar`.
 String snakeCaseToTitleCase(String snakeCaseString) {
