@@ -52,14 +52,27 @@ class BrowserImageDecoder {
 
   void dispose() {
     _isDisposed = true;
-    for (final void Function() callback in _onDisposeCallbacks) {
-      callback();
-    }
-    _onDisposeCallbacks.clear();
+    final errors = <Object>[];
+    try {
+      for (final void Function() callback in _onDisposeCallbacks) {
+        try {
+          callback();
+        } catch (e) {
+          errors.add(e);
+        }
+      }
+    } finally {
+      _onDisposeCallbacks.clear();
+      _cachedWebDecoder?.close();
+      _cachedWebDecoder = null;
 
-    // This releases all resources, including any currently running decoding work.
-    _cachedWebDecoder?.close();
-    _cachedWebDecoder = null;
+      if (errors.isNotEmpty) {
+        printWarning(
+          'Failed to execute ${errors.length} dispose callback(s) in BrowserImageDecoder: '
+          '${errors.join(', ')}',
+        );
+      }
+    }
   }
 
   /// The index of the frame that will be decoded on the next call of [getNextFrame];
@@ -238,12 +251,12 @@ Future<DomReadableStream> handleProgressAndGetStream(
   List<void Function()>? onDisposeCallbacks,
 ]) async {
   final DomReadableStream body = response.body;
-  if (chunkCallback == null) {
-    return body;
-  }
-
   final String? contentLengthHeader = response.headers.get('Content-Length');
   final int? contentLength = contentLengthHeader != null ? int.tryParse(contentLengthHeader) : null;
+
+  if (chunkCallback == null || contentLength == null) {
+    return body;
+  }
 
   final List<DomReadableStream> streams = body.tee().toDart.cast<DomReadableStream>();
   final DomReadableStream progressStream = streams[0];
@@ -266,9 +279,7 @@ Future<DomReadableStream> handleProgressAndGetStream(
         if (value != null) {
           final array = value as JSUint8Array;
           cumulativeBytesLoaded += array.length;
-          if (contentLength != null) {
-            chunkCallback(cumulativeBytesLoaded, contentLength);
-          }
+          chunkCallback(cumulativeBytesLoaded, contentLength);
         }
       }
     } catch (e) {

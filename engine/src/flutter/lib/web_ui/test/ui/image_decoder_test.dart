@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -72,7 +73,7 @@ Future<void> testMain() async {
   test(
     'instantiateImageCodecFromUrl works with generic application/octet-stream MIME type via data URL',
     () async {
-      const String dataUrl =
+      const dataUrl =
           'data:application/octet-stream;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
       final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(Uri.parse(dataUrl));
@@ -94,7 +95,7 @@ Future<void> testMain() async {
     final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
     final Uint8List pngBytes = (await response.payload.asByteBuffer()).asUint8List();
 
-    final BrowserImageDecoder decoder = BrowserImageDecoder(
+    final decoder = BrowserImageDecoder(
       contentType: 'image/png',
       dataSource: pngBytes.toJS,
       debugSource: 'test',
@@ -150,4 +151,95 @@ Future<void> testMain() async {
       }
     },
   );
+
+  test('handleProgressAndGetStream bypasses stream teeing when chunkCallback is null', () async {
+    final mockBody = JSObject();
+    final mockResponse = JSObject();
+    mockResponse['body'] = mockBody;
+
+    final DomReadableStream result = await handleProgressAndGetStream(
+      mockResponse as DomResponse,
+      null,
+    );
+    expect(identical(result, mockBody), isTrue);
+  });
+
+  test(
+    'handleProgressAndGetStream bypasses stream teeing when Content-Length is missing',
+    () async {
+      final mockBody = JSObject();
+      final mockHeaders = JSObject();
+      mockHeaders['get'] = ((JSString name) => null).toJS;
+
+      final mockResponse = JSObject();
+      mockResponse['body'] = mockBody;
+      mockResponse['headers'] = mockHeaders;
+
+      final DomReadableStream result = await handleProgressAndGetStream(
+        mockResponse as DomResponse,
+        (int loaded, int total) {},
+      );
+      expect(identical(result, mockBody), isTrue);
+    },
+  );
+
+  test(
+    'handleProgressAndGetStream tees the stream when chunkCallback and Content-Length are present',
+    () async {
+      final DomResponse response = await rawHttpGet('/test_images/1x1.png');
+      final DomReadableStream originalBody = response.body;
+
+      var callbackCalled = false;
+      final DomReadableStream result = await handleProgressAndGetStream(response, (
+        int loaded,
+        int total,
+      ) {
+        callbackCalled = true;
+      });
+
+      expect(identical(result, originalBody), isFalse);
+
+      // Read the result stream to trigger the progress callback on the teed stream
+      final DomStreamReader reader = result.getReader();
+      while (true) {
+        final DomStreamChunk chunk = await reader.read();
+        if (chunk.done) {
+          break;
+        }
+      }
+
+      expect(callbackCalled, isTrue);
+    },
+  );
+
+  test('ImageDecoder.dispose is robust against throwing callbacks', () async {
+    if (!browserSupportsImageDecoder) {
+      return;
+    }
+
+    final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
+    final Uint8List pngBytes = (await response.payload.asByteBuffer()).asUint8List();
+
+    final decoder = BrowserImageDecoder(
+      contentType: 'image/png',
+      dataSource: pngBytes.toJS,
+      debugSource: 'test',
+    );
+
+    await decoder.initialize();
+    expect(decoder.debugCachedWebDecoder, isNotNull);
+
+    var secondCallbackCalled = false;
+    decoder.addDisposeCallback(() {
+      throw Exception('Callback failure');
+    });
+    decoder.addDisposeCallback(() {
+      secondCallbackCalled = true;
+    });
+
+    decoder.dispose();
+
+    expect(secondCallbackCalled, isTrue);
+    expect(decoder.debugCachedWebDecoder, isNull);
+  });
 }

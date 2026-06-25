@@ -131,16 +131,18 @@ class _BrowserEngineCodec extends EngineCodec {
         // Scale the frame natively.
         // We use the browser's high-performance native scale API which creates a
         // scaled ImageBitmap directly. This is asynchronous and yields the thread.
-        final DomImageBitmap bitmap = await scaleImageSource(
-          frame,
-          originalWidth,
-          originalHeight,
-          destWidth,
-          destHeight,
-        );
-
-        // The original VideoFrame is no longer needed after scaling. Eagerly close it.
-        frame.close();
+        final DomImageBitmap bitmap;
+        try {
+          bitmap = await scaleImageSource(
+            frame,
+            originalWidth,
+            originalHeight,
+            destWidth,
+            destHeight,
+          );
+        } finally {
+          frame.close();
+        }
 
         // Async Safety Check: Check if disposed during the scale operation.
         // If so, close the newly created scaled bitmap to prevent leaks.
@@ -150,20 +152,30 @@ class _BrowserEngineCodec extends EngineCodec {
         }
 
         // Upload the scaled bitmap to the GPU.
-        image = await renderer.createImageFromTextureSource(
-          bitmap,
-          width: destWidth,
-          height: destHeight,
-          transferOwnership: true,
-        );
+        try {
+          image = await renderer.createImageFromTextureSource(
+            bitmap,
+            width: destWidth,
+            height: destHeight,
+            transferOwnership: true,
+          );
+        } catch (e) {
+          bitmap.close();
+          rethrow;
+        }
       } else {
         // Upload the original unscaled frame directly to the GPU.
-        image = await renderer.createImageFromTextureSource(
-          frame,
-          width: destWidth,
-          height: destHeight,
-          transferOwnership: true,
-        );
+        try {
+          image = await renderer.createImageFromTextureSource(
+            frame,
+            width: destWidth,
+            height: destHeight,
+            transferOwnership: true,
+          );
+        } catch (e) {
+          frame.close();
+          rethrow;
+        }
       }
 
       // Async Safety Check: Check if disposed during the GPU texture upload.
@@ -316,12 +328,17 @@ class _SkiaEngineCodec extends EngineCodec {
       // Apply the frontend canvas-scaling fallback if the backend does not support
       // native resizing of animated images on decode.
       if (targetWidth != null || targetHeight != null) {
-        image = scaleImageIfNeeded(
-          image,
-          targetWidth: targetWidth,
-          targetHeight: targetHeight,
-          allowUpscaling: allowUpscaling,
-        );
+        try {
+          image = scaleImageIfNeeded(
+            image,
+            targetWidth: targetWidth,
+            targetHeight: targetHeight,
+            allowUpscaling: allowUpscaling,
+          );
+        } catch (e) {
+          image.dispose();
+          rethrow;
+        }
       }
       return AnimatedImageFrameInfo(backendFrame.duration, image);
     } catch (e) {
