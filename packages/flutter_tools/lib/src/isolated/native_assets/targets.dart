@@ -280,7 +280,7 @@ final class LinuxAssetTarget extends CodeAssetTarget {
 
     cCompilerConfigSync = await cCompilerConfigLinux(
       cmakeDirectory: isNativeAppBuild ? cmakeBuildDirectory : null,
-      throwIfNotFound: mustMatchAppBuild && isNativeAppBuild,
+      throwIfNotFound: mustMatchAppBuild,
     );
   }
 
