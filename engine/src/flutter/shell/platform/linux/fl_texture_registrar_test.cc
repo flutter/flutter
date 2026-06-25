@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_pixel_buffer_texture.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture_gl.h"
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "flutter/shell/platform/linux/testing/mock_texture_registrar.h"
 #include "gtest/gtest.h"
 
@@ -77,8 +78,10 @@ static void* add_mock_texture_to_registrar(void* pointer) {
   pthread_exit(id);
 }
 
+class FlTextureRegistrarTest : public flutter::testing::LinuxTest {};
+
 // Checks can make a mock registrar.
-TEST(FlTextureRegistrarTest, MockRegistrar) {
+TEST_F(FlTextureRegistrarTest, MockRegistrar) {
   g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
   g_autoptr(FlMockTextureRegistrar) registrar = fl_mock_texture_registrar_new();
   EXPECT_TRUE(FL_IS_MOCK_TEXTURE_REGISTRAR(registrar));
@@ -95,9 +98,7 @@ TEST(FlTextureRegistrarTest, MockRegistrar) {
 }
 
 // Test that registering a texture works.
-TEST(FlTextureRegistrarTest, RegisterTexture) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlTextureRegistrarTest, RegisterTexture) {
   bool register_called = false;
   fl_engine_get_embedder_api(engine)->RegisterExternalTexture =
       MOCK_ENGINE_PROC(RegisterExternalTexture,
@@ -126,9 +127,7 @@ TEST(FlTextureRegistrarTest, RegisterTexture) {
 }
 
 // Test that marking a texture frame available works.
-TEST(FlTextureRegistrarTest, MarkTextureFrameAvailable) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlTextureRegistrarTest, MarkTextureFrameAvailable) {
   bool register_called = false;
   fl_engine_get_embedder_api(engine)->RegisterExternalTexture =
       MOCK_ENGINE_PROC(RegisterExternalTexture,
@@ -155,9 +154,7 @@ TEST(FlTextureRegistrarTest, MarkTextureFrameAvailable) {
 }
 
 // Test handles error marking a texture frame available.
-TEST(FlTextureRegistrarTest, MarkInvalidTextureFrameAvailable) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlTextureRegistrarTest, MarkInvalidTextureFrameAvailable) {
   fl_engine_get_embedder_api(engine)->RegisterExternalTexture =
       MOCK_ENGINE_PROC(
           RegisterExternalTexture,
@@ -184,11 +181,8 @@ TEST(FlTextureRegistrarTest, MarkInvalidTextureFrameAvailable) {
 // synchronization issues.
 // TODO(robert-ancell): Re-enable when no longer flaky
 // https://github.com/flutter/flutter/issues/138197
-TEST(FlTextureRegistrarTest,
-     DISABLED_RegistrarRegisterTextureInMultipleThreads) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlTextureRegistrarTest,
+       DISABLED_RegistrarRegisterTextureInMultipleThreads) {
   fl_engine_get_embedder_api(engine)->RegisterExternalTexture =
       MOCK_ENGINE_PROC(
           RegisterExternalTexture,
