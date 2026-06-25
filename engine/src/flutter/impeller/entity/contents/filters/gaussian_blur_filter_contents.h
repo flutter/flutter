@@ -52,7 +52,7 @@ KernelSamples GenerateBlurInfo(BlurParameters parameters);
 
 /// This will shrink the size of a kernel by roughly half by sampling between
 /// samples and relying on linear interpolation between the samples.
-LerpHackResult LerpHackKernelSamples(KernelSamples samples);
+LerpHackResult LerpHackKernelSamples(const KernelSamples& samples);
 
 /// Performs a bidirectional Gaussian blur.
 //

@@ -580,8 +580,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         options.primitive_type = PrimitiveType::kTriangleStrip;
         pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
-        auto kernel_info = GenerateBlurInfo(blur_info);
-        auto lerped_kernel = LerpHackKernelSamples(kernel_info);
+        KernelSamples kernel_info = GenerateBlurInfo(blur_info);
+        LerpHackResult lerped_kernel = LerpHackKernelSamples(kernel_info);
 
         GaussianBlurFragmentShader::FragInfo frag_info;
         frag_info.unpremultiply = blur_info.apply_unpremultiply;
@@ -1059,7 +1059,7 @@ KernelSamples GenerateBlurInfo(BlurParameters parameters) {
 
 // This works by shrinking the kernel size by 2 and relying on lerp to read
 // between the samples.
-LerpHackResult LerpHackKernelSamples(KernelSamples parameters) {
+LerpHackResult LerpHackKernelSamples(const KernelSamples& parameters) {
   LerpHackResult result = {};
   result.sample_count = ((parameters.sample_count - 1) / 2) + 1;
   int32_t middle = result.sample_count / 2;
