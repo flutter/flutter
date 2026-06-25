@@ -2769,11 +2769,11 @@ class RenderTransform extends RenderProxyBox {
         } else {
           layer = ImageFilterLayer(imageFilter: filter);
         }
-        context.pushLayer(layer!, super.paint, offset);
         assert(() {
           layer!.debugCreator = debugCreator;
           return true;
         }());
+        context.pushLayer(layer!, super.paint, offset);
       }
     }
   }
