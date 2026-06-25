@@ -12,9 +12,9 @@
 // Activates a system cursor by sending an activateSystemCursor method call with
 // the given kind, returning whether a response was received.
 static gboolean activate_system_cursor(FlMockBinaryMessenger* messenger,
-                                       FlValue* kind) {
+                                       const gchar* kind) {
   g_autoptr(FlValue) args = fl_value_new_map();
-  fl_value_set_string(args, "kind", kind);
+  fl_value_set_string_take(args, "kind", fl_value_new_string(kind));
 
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
@@ -46,8 +46,7 @@ TEST(FlMouseCursorHandlerTest, ActivateSystemCursor) {
   g_autoptr(FlMouseCursorHandler) handler =
       fl_mouse_cursor_handler_new(FL_BINARY_MESSENGER(messenger));
 
-  g_autoptr(FlValue) kind = fl_value_new_string("click");
-  EXPECT_TRUE(activate_system_cursor(messenger, kind));
+  EXPECT_TRUE(activate_system_cursor(messenger, "click"));
 
   EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "pointer");
 }
@@ -58,8 +57,7 @@ TEST(FlMouseCursorHandlerTest, BasicCursor) {
   g_autoptr(FlMouseCursorHandler) handler =
       fl_mouse_cursor_handler_new(FL_BINARY_MESSENGER(messenger));
 
-  g_autoptr(FlValue) kind = fl_value_new_string("basic");
-  EXPECT_TRUE(activate_system_cursor(messenger, kind));
+  EXPECT_TRUE(activate_system_cursor(messenger, "basic"));
 
   EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "default");
 }
@@ -70,8 +68,7 @@ TEST(FlMouseCursorHandlerTest, UnknownCursorFallsBackToDefault) {
   g_autoptr(FlMouseCursorHandler) handler =
       fl_mouse_cursor_handler_new(FL_BINARY_MESSENGER(messenger));
 
-  g_autoptr(FlValue) kind = fl_value_new_string("madeUpCursorKind");
-  EXPECT_TRUE(activate_system_cursor(messenger, kind));
+  EXPECT_TRUE(activate_system_cursor(messenger, "madeUpCursorKind"));
 
   EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "default");
 }
@@ -112,8 +109,7 @@ TEST(FlMouseCursorHandlerTest, CursorChangedSignal) {
       G_CALLBACK(+[](gboolean* cursor_changed) { *cursor_changed = TRUE; }),
       &cursor_changed);
 
-  g_autoptr(FlValue) kind = fl_value_new_string("grab");
-  EXPECT_TRUE(activate_system_cursor(messenger, kind));
+  EXPECT_TRUE(activate_system_cursor(messenger, "grab"));
 
   EXPECT_TRUE(cursor_changed);
   EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "grab");
