@@ -107,11 +107,10 @@ TEST(FlMouseCursorHandlerTest, CursorChangedSignal) {
       fl_mouse_cursor_handler_new(FL_BINARY_MESSENGER(messenger));
 
   gboolean cursor_changed = FALSE;
-  g_signal_connect_swapped(handler, "cursor-changed",
-                           G_CALLBACK(+[](gboolean* cursor_changed) {
-                             *cursor_changed = TRUE;
-                           }),
-                           &cursor_changed);
+  g_signal_connect_swapped(
+      handler, "cursor-changed",
+      G_CALLBACK(+[](gboolean* cursor_changed) { *cursor_changed = TRUE; }),
+      &cursor_changed);
 
   g_autoptr(FlValue) kind = fl_value_new_string("grab");
   EXPECT_TRUE(activate_system_cursor(messenger, kind));
