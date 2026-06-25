@@ -329,11 +329,11 @@ void main() {
   });
 
   group('debugPaintFocusBoxes', () {
-    const kPrimaryFocusColor = Color(0xFF00FF00);
-    const kAncestorOfPrimaryFocusColor = Color(0xFF0000FF);
-    const kFocusableColor =  Color(0xFF00FFFF);
-    const kSkipTraversalColor =  Color(0xFFFFFF00);
-    const kNotFocusableColor = Color(0xFFFF0000);
+    const kPrimaryFocusColor = Color(0xF000FF00);
+    const kAncestorOfPrimaryFocusColor = Color(0xF00000FF);
+    const kFocusableColor =  Color(0xF000FFFF);
+    const kSkipTraversalColor =  Color(0xF0FFFF00);
+    const kNotFocusableColor = Color(0xF0FF0000);
 
     testWidgets('adds a border on each Focus widget if enabled',
         (WidgetTester tester) async {

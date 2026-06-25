@@ -915,15 +915,15 @@ class _DebugFocusBorder extends StatelessWidget {
 
   Color get _borderColor {
     if (node.hasPrimaryFocus) {
-      return const Color(0xFF00FF00);
+      return const Color(0xF000FF00);
     } else if (node.hasFocus) {
-      return const Color(0xFF0000FF);
+      return const Color(0xF00000FF);
     } else if (!node.canRequestFocus) {
-      return const Color(0xFFFF0000);
+      return const Color(0xF0FF0000);
     } else if (node.skipTraversal) {
-      return const Color(0xFFFFFF00);
+      return const Color(0xF0FFFF00);
     } else {
-      return const Color(0xFF00FFFF);
+      return const Color(0xF000FFFF);
     }
   }
 
@@ -933,7 +933,7 @@ class _DebugFocusBorder extends StatelessWidget {
       listenable: node,
       builder: (BuildContext context, _) {
         return DecoratedBox(
-          decoration: BoxDecoration(border: Border.all(color: _borderColor, width: 2.0)),
+          decoration: BoxDecoration(border: Border.all(color: _borderColor, width: 3.0)),
           position: DecorationPosition.foreground,
           child: child,
         );
