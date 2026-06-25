@@ -64,8 +64,21 @@ class LLDB {
   /// Example: Breakpoint 1: no locations (pending).
   static final _breakpointPattern = RegExp(r'Breakpoint (\d+)*:');
 
+  /// Pattern of lldb log when a stop hook is added.
+  ///
+  /// Example: Stop hook #1 added.
+  static final _stopHookAddedPattern = RegExp(r'Stop hook #[\d]+ added.');
+
+  /// Pattern of lldb log when a stop hook is processed.
+  ///
+  /// Example: "- Hook 1 (thread backtrace all)"
+  static final _stopHookProcessedPattern = RegExp(r'- Hook (\d+)*');
+
   /// A list of log patterns to ignore.
-  static final _ignorePatterns = <Pattern>[RegExp(r'\d+ location added to breakpoint \d+')];
+  static final _ignorePatterns = <Pattern>[
+    RegExp(r'\d+ location added to breakpoint \d+'),
+    _stopHookProcessedPattern,
+  ];
 
   /// Breakpoint script required for JIT on iOS.
   ///
@@ -128,6 +141,8 @@ return False
         await _setBreakpoint();
       }
       await _attachToAppProcess(appProcessId);
+      await _setupBacktrace();
+      await _setupDetach();
       await _resumeProcess(mode);
       _isAttached = true;
     } on _LLDBError catch (e) {
@@ -274,6 +289,26 @@ return False
     ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('process continue');
+    await futureLog;
+  }
+
+  /// Adds a stop hook to detach the debugger from the process once it stops, such as when it crashes.
+  ///
+  /// Without this, the debugger would remain attached to the process and the app will hang on crash.
+  Future<void> _setupDetach() async {
+    final Future<String> futureLog = _startWaitingForLog(
+      _stopHookAddedPattern,
+    ).then((value) => value, onError: _handleAsyncError);
+    await _lldbProcess?.stdinWriteln('target stop-hook add -o "detach"');
+    await futureLog;
+  }
+
+  /// Setup a stop hook to print the backtrace of all threads when the app process stops.
+  Future<void> _setupBacktrace() async {
+    final Future<String> futureLog = _startWaitingForLog(
+      _stopHookAddedPattern,
+    ).then((value) => value, onError: _handleAsyncError);
+    await _lldbProcess?.stdinWriteln('target stop-hook add -o "thread backtrace all"');
     await futureLog;
   }
 
