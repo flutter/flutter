@@ -193,9 +193,7 @@ class GhClient {
     }
   }
 
-  Future<List<PullRequest>> fetchApprovedPRs(String viewerLogin) async {
-    final queryStr = 'repo:$owner/$repo is:pr is:open review:approved reviewed-by:$viewerLogin';
-
+  Future<List<dynamic>> _runSearchQuery(String queryStr, String viewerLogin) async {
     final graphqlQuery =
         '''
       query(\$queryStr: String!) {
@@ -275,10 +273,35 @@ class GhClient {
     }
 
     final search = data['search'] as Map<String, dynamic>;
-    final nodes = search['nodes'] as List<dynamic>;
+    return search['nodes'] as List<dynamic>;
+  }
 
-    final Iterable<Future<PullRequest?>> prFutures = nodes.map((dynamic node) async {
+  Future<List<PullRequest>> fetchApprovedPRs(String viewerLogin) async {
+    final reviewedQueryStr =
+        'repo:$owner/$repo is:pr is:open review:approved reviewed-by:$viewerLogin';
+    final authoredQueryStr = 'repo:$owner/$repo is:pr is:open review:approved author:$viewerLogin';
+
+    final List<List<dynamic>> results = await Future.wait([
+      _runSearchQuery(reviewedQueryStr, viewerLogin),
+      _runSearchQuery(authoredQueryStr, viewerLogin),
+    ]);
+
+    final Map<int, dynamic> uniqueNodes = {};
+    for (final Map<String, dynamic> node in results[0].cast<Map<String, dynamic>>()) {
+      final number = node['number'] as int;
+      uniqueNodes[number] = node;
+    }
+    for (final Map<String, dynamic> node in results[1].cast<Map<String, dynamic>>()) {
+      final number = node['number'] as int;
+      uniqueNodes[number] = node;
+    }
+
+    final Iterable<Future<PullRequest?>> prFutures = uniqueNodes.values.map((dynamic node) async {
       final prData = node as Map<String, dynamic>;
+
+      final authorData = prData['author'] as Map<String, dynamic>?;
+      final author = authorData != null ? authorData['login'] as String : 'unknown';
+      final isOwnPr = author == viewerLogin;
 
       final reviews = prData['reviews'] as Map<String, dynamic>?;
       final List<dynamic>? reviewNodes = reviews != null
@@ -288,14 +311,12 @@ class GhClient {
           reviewNodes != null &&
           reviewNodes.any((dynamic r) => (r as Map<String, dynamic>)['state'] == 'APPROVED');
 
-      if (!hasViewerApproval) {
+      if (!isOwnPr && !hasViewerApproval) {
         return null;
       }
 
       final number = prData['number'] as int;
       final title = prData['title'] as String;
-      final authorData = prData['author'] as Map<String, dynamic>?;
-      final author = authorData != null ? authorData['login'] as String : 'unknown';
       final authorAssociation = prData['authorAssociation'] as String;
       final baseRefName = prData['baseRefName'] as String;
 
@@ -346,8 +367,8 @@ class GhClient {
       );
     });
 
-    final List<PullRequest?> results = await Future.wait(prFutures);
-    return results.whereType<PullRequest>().toList();
+    final List<PullRequest?> resultsList = await Future.wait(prFutures);
+    return resultsList.whereType<PullRequest>().toList();
   }
 
   ChecksSummary _parseChecks(Map<String, dynamic>? rollup) {
@@ -634,10 +655,12 @@ class ShepherdService {
     required bool dryRun,
   }) async {
     final List<PullRequest> prs = await ghClient.fetchApprovedPRs(viewerLogin);
-    final List<PullRequest> eligiblePrs = prs.where((pr) => pr.isThirdParty).toList();
+    final List<PullRequest> eligiblePrs = prs
+        .where((pr) => pr.author == viewerLogin || pr.isThirdParty)
+        .toList();
 
     if (eligiblePrs.isEmpty) {
-      return <String>['No open, approved third-party PRs found requiring shepherding.'];
+      return <String>['No open, approved third-party or own PRs found requiring shepherding.'];
     }
 
     final Map<String, dynamic> globalState = await _syncAndGetState(eligiblePrs);
@@ -647,7 +670,7 @@ class ShepherdService {
       final PullRequest targetPr = eligiblePrs.firstWhere(
         (pr) => pr.number == targetPrNumber,
         orElse: () => throw ArgumentError(
-          'PR #$targetPrNumber is not in your approved, third-party PR list.',
+          'PR #$targetPrNumber is not in your approved, third-party or own PR list.',
         ),
       );
       final String log = await shepherdPR(targetPr, globalState, dryRun: dryRun);
@@ -725,7 +748,9 @@ void main(List<String> args) async {
 
     if (command == 'list') {
       final List<PullRequest> prs = await ghClient.fetchApprovedPRs(viewerLogin);
-      final List<PullRequest> eligiblePrs = prs.where((PullRequest pr) => pr.isThirdParty).toList();
+      final List<PullRequest> eligiblePrs = prs
+          .where((PullRequest pr) => pr.author == viewerLogin || pr.isThirdParty)
+          .toList();
       print(jsonEncode(eligiblePrs.map((PullRequest pr) => pr.toJson()).toList()));
     } else if (command == 'run') {
       if (!runAll && prNumber == null) {

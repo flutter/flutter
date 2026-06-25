@@ -27,7 +27,7 @@ dart <skill_path>/scripts/shepherd.dart <command> [options]
 
 ## 2. Reading PR State (The `list` Command)
 
-To understand the current state of approved third-party PRs, run the list command. It outputs a structured JSON array of Pull Request objects by default:
+To understand the current state of approved third-party and own PRs, run the list command. It outputs a structured JSON array of Pull Request objects by default:
 
 ```bash
 dart <skill_path>/scripts/shepherd.dart list
@@ -101,7 +101,7 @@ When running the `run` command, inspect the returned JSON logs. Handle specific 
 
 ## 5. Workflow and Interaction Guidelines
 
-When the user asks for the status of their pending third-party PR reviews:
+When the user asks for the status of their pending approved PRs:
 1. **Do NOT automatically execute shepherding actions** (e.g., do not run `shepherd.dart run --all` or `shepherd.dart run --pr <number>`) on the initial inquiry.
 2. **First, retrieve the PR states** using the list command: `dart <skill_path>/shepherd.dart list`.
 3. **Present a clear summary** of the PRs, including their current status and recommended actions.
@@ -113,7 +113,7 @@ When the user asks for the status of their pending third-party PR reviews:
 - **User:** "What is the status of my approved PRs?"
 - **Agent:**
   1. Identifies the read-only inquiry and runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart list`.
-  2. Parses the JSON output to present a summary of all approved third-party PRs, their CI checks, and recommended actions.
+  2. Parses the JSON output to present a summary of all approved third-party and own PRs, their CI checks, and recommended actions.
   3. Asks the user for confirmation before executing any shepherding actions.
 
 - **User:** "Yes, please update the branch for PR #186254."
