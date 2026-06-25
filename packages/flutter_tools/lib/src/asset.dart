@@ -794,6 +794,8 @@ class ManifestAssetBundle implements AssetBundle {
       'shaders',
     );
     if (_fileSystem.directory(materialShaderPath).existsSync()) {
+      // TODO(chunhtai): remove ink_sparkle.frag sideloading.
+      // https://github.com/flutter/flutter/issues/188545.
       result.add(
         _Asset(
           baseDir: materialShaderPath,
