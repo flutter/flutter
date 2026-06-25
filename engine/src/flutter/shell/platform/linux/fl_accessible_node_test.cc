@@ -3,22 +3,15 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
-class FlAccessibleNodeTest : public ::testing::Test {
+class FlAccessibleNodeTest : public flutter::testing::LinuxTest {
  protected:
-  void SetUp() override {
-    g_autoptr(FlDartProject) project = fl_dart_project_new();
-    engine = fl_engine_new(project);
-  }
-
-  ~FlAccessibleNodeTest() { g_object_unref(engine); }
-
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-  FlEngine* engine;
 };
 
 // Checks can build a tree of nodes.

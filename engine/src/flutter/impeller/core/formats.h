@@ -511,17 +511,6 @@ constexpr const char* TextureUsageToString(TextureUsage usage) {
 
 std::string TextureUsageMaskToString(TextureUsageMask mask);
 
-// Texture coordinate system.
-enum class TextureCoordinateSystem {
-  // Alternative coordinate system used when uploading texture data from the
-  // host.
-  // (0, 0) is the bottom-left of the image with +Y going up.
-  kUploadFromHost,
-  // Default coordinate system.
-  // (0, 0) is the top-left of the image with +Y going down.
-  kRenderToTexture,
-};
-
 enum class CullMode {
   kNone,
   kFrontFace,
@@ -921,6 +910,12 @@ struct Attachment {
   std::shared_ptr<Texture> resolve_texture;
   LoadAction load_action = LoadAction::kDontCare;
   StoreAction store_action = StoreAction::kStore;
+  // The mip level of `texture` to render into. Must be < the texture's
+  // mip_count.
+  uint32_t mip_level = 0;
+  // The slice (cube map face or array layer) of `texture` to render into.
+  // Must be < the slice count implied by the texture's type.
+  uint32_t slice = 0;
 
   bool IsValid() const;
 };
