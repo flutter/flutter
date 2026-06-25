@@ -218,6 +218,6 @@ Your iOS app has not been migrated to the UIScene lifecycle.
 UIScene lifecycle is required on iOS 27 and later.
 
 To migrate your app, please follow the migration guide at:
-  https://docs.flutter.dev/release/breaking-changes/uiscenedelegate#migrate-a-flutter-app
+  https://flutter.dev/to/uiscene-migration
 ════════════════════════════════════════════════════════════════════════════════''';
 }
