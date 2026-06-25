@@ -65,8 +65,7 @@ class GitHubTemplateCreator {
       return '${error.runtimeType}: ${LineSplitter.split(error.stackTrace.toString()).take(1)}';
     } else if (error is String) {
       // Force comma separator to standardize.
-      final lengthStr = error.length.toString();
-      final String buffer = _asCommaSeparatedNumber(lengthStr);
+      final String buffer = _asCommaSeparatedNumber(error.length);
 
       return 'String: <$buffer characters>';
     }
@@ -77,10 +76,9 @@ class GitHubTemplateCreator {
   }
 
   /// Insert a comma every three digits in a number.
-  static String _asCommaSeparatedNumber(String lengthStr) {
-    if (lengthStr.isEmpty) {
-      return lengthStr;
-    }
+  static String _asCommaSeparatedNumber(int length) {
+    assert(length > 0);
+    final lengthStr = length.toString();
     final buffer = StringBuffer();
     final int len = lengthStr.length;
     buffer.write(lengthStr[0]);
