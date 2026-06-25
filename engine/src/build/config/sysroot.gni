@@ -13,6 +13,11 @@ declare_args() {
   # Whether to use the default sysroot when building for Linux, if an explicit
   # sysroot isn't set.
   use_default_linux_sysroot = true
+
+  # Select the Linux x64 sysroot variant.
+  # Keep trixie as the default on amd64, but allow switching back to bullseye
+  # for comparison or compatibility testing.
+  linux_x64_sysroot_variant = "trixie"
 }
 
 if (current_toolchain == default_toolchain && target_sysroot != "") {
@@ -23,8 +28,16 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
 } else if (is_linux && !is_chromeos) {
   if (use_default_linux_sysroot && !is_fuchsia) {
     if (current_cpu == "x64") {
-      sysroot =
-          rebase_path("//build/linux/debian_bullseye_amd64-sysroot", root_build_dir)
+      assert(linux_x64_sysroot_variant == "bullseye" ||
+                 linux_x64_sysroot_variant == "trixie",
+             "linux_x64_sysroot_variant must be bullseye or trixie")
+      if (linux_x64_sysroot_variant == "bullseye") {
+        sysroot =
+            rebase_path("//build/linux/debian_bullseye_amd64-sysroot", root_build_dir)
+      } else {
+        sysroot = rebase_path("//build/linux/debian_trixie_amd64-sysroot",
+                              root_build_dir)
+      }
     } else if (current_cpu == "arm64") {
       sysroot =
           rebase_path("//build/linux/debian_bullseye_arm64-sysroot", root_build_dir)

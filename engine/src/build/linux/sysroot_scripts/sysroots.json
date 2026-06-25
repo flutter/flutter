@@ -46,5 +46,11 @@
         "SysrootDir": "debian_trixie_riscv64-sysroot",
         "Tarball": "debian_trixie_riscv64_sysroot.tar.xz",
         "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
+    },
+    "trixie_amd64": {
+        "Sha256Sum": "8eb07f074dae448662e6ad009191563e2b7ced1fadaa72b6244c961e49d99087",
+        "SysrootDir": "debian_trixie_amd64-sysroot",
+        "Tarball": "debian_trixie_amd64_sysroot.tar.xz",
+        "URL": "https://pub-538e4d72d3224264a892247ed9612d65.r2.dev"
     }
 }
