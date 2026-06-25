@@ -580,8 +580,12 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         options.primitive_type = PrimitiveType::kTriangleStrip;
         pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
+        auto kernel_info = GenerateBlurInfo(blur_info);
+        auto lerped_kernel = LerpHackKernelSamples(kernel_info);
+
         GaussianBlurFragmentShader::FragInfo frag_info;
         frag_info.unpremultiply = blur_info.apply_unpremultiply;
+        frag_info.sample_count = lerped_kernel.sample_count;
         GaussianBlurFragmentShader::BindFragInfo(
             pass, data_host_buffer.EmplaceUniform(frag_info));
 
@@ -603,8 +607,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, data_host_buffer.EmplaceUniform(
-                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
+            pass,
+            data_host_buffer.EmplaceUniform(lerped_kernel.kernel_samples));
         return pass.Draw().ok();
       };
   if (destination_target.has_value()) {
@@ -1055,33 +1059,36 @@ KernelSamples GenerateBlurInfo(BlurParameters parameters) {
 
 // This works by shrinking the kernel size by 2 and relying on lerp to read
 // between the samples.
-GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
-    KernelSamples parameters) {
-  GaussianBlurPipeline::FragmentShader::KernelSamples result = {};
+LerpHackResult LerpHackKernelSamples(KernelSamples parameters) {
+  LerpHackResult result = {};
   result.sample_count = ((parameters.sample_count - 1) / 2) + 1;
   int32_t middle = result.sample_count / 2;
   int32_t j = 0;
   FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
-  static_assert(sizeof(result.sample_data) ==
+  static_assert(sizeof(result.kernel_samples.sample_data) ==
                 sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
 
   for (int i = 0; i < result.sample_count; i++) {
     if (i == middle) {
-      result.sample_data[i].x = parameters.samples[j].uv_offset.x;
-      result.sample_data[i].y = parameters.samples[j].uv_offset.y;
-      result.sample_data[i].z = parameters.samples[j].coefficient;
+      result.kernel_samples.sample_data[i].x =
+          parameters.samples[j].uv_offset.x;
+      result.kernel_samples.sample_data[i].y =
+          parameters.samples[j].uv_offset.y;
+      result.kernel_samples.sample_data[i].z =
+          parameters.samples[j].coefficient;
       j++;
     } else {
       KernelSample left = parameters.samples[j];
       KernelSample right = parameters.samples[j + 1];
 
-      result.sample_data[i].z = left.coefficient + right.coefficient;
+      result.kernel_samples.sample_data[i].z =
+          left.coefficient + right.coefficient;
 
       Point uv = (left.uv_offset * left.coefficient +
                   right.uv_offset * right.coefficient) /
                  (left.coefficient + right.coefficient);
-      result.sample_data[i].x = uv.x;
-      result.sample_data[i].y = uv.y;
+      result.kernel_samples.sample_data[i].x = uv.x;
+      result.kernel_samples.sample_data[i].y = uv.y;
       j += 2;
     }
   }
