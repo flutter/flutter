@@ -204,6 +204,16 @@ class TabController extends ChangeNotifier {
   ///
   /// This is [animationDuration] when [animateTo] is called without a custom
   /// duration, and when [index] is changed directly.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// controller.animateTo(1, duration: const Duration(seconds: 10));
+  /// // controller.indexChangeDuration is 10 seconds.
+  ///
+  /// controller.animateTo(2);
+  /// // controller.indexChangeDuration is controller.animationDuration.
+  /// ```
   Duration get indexChangeDuration => _indexChangeDuration;
   Duration _indexChangeDuration;
 
@@ -211,6 +221,16 @@ class TabController extends ChangeNotifier {
   ///
   /// Defaults to [Curves.ease] unless [animateTo] was called with a custom
   /// curve.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// controller.animateTo(1, curve: Curves.linear);
+  /// // controller.indexChangeCurve is Curves.linear.
+  ///
+  /// controller.animateTo(2);
+  /// // controller.indexChangeCurve is Curves.ease.
+  /// ```
   Curve get indexChangeCurve => _indexChangeCurve;
   Curve _indexChangeCurve;
 
