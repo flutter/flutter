@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <thread>
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/common/constants.h"
@@ -19,18 +20,31 @@
 
 #include <epoxy/egl.h>
 
-TEST(FlCompositorOpenGLTest, Render) {
+class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    task_runner = fl_task_runner_new(engine);
+    opengl_manager = fl_opengl_manager_new();
+    renderable = fl_mock_renderable_new();
+    compositor = fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
+    fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+  }
+
+  ~FlCompositorOpenGLTest() {
+    g_clear_object(&compositor);
+    g_clear_object(&renderable);
+    g_clear_object(&opengl_manager);
+    g_clear_object(&task_runner);
+  }
+
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
+  FlTaskRunner* task_runner = nullptr;
+  FlOpenGLManager* opengl_manager = nullptr;
+  FlMockRenderable* renderable = nullptr;
+  FlCompositorOpenGL* compositor = nullptr;
+};
 
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
+TEST_F(FlCompositorOpenGLTest, Render) {
   // Present layer from a thread.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
@@ -66,18 +80,7 @@ TEST(FlCompositorOpenGLTest, Render) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, Resize) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
+TEST_F(FlCompositorOpenGLTest, Resize) {
   // Present a layer that is the old size.
   constexpr size_t width1 = 90;
   constexpr size_t height1 = 90;
@@ -128,13 +131,7 @@ TEST(FlCompositorOpenGLTest, Resize) {
   latch.Wait();
 }
 
-TEST(FlCompositorOpenGLTest, RestoresGLState) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
+TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -144,11 +141,6 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -188,13 +180,7 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   EXPECT_EQ(glIsEnabled(GL_SCISSOR_TEST), GL_TRUE);
 }
 
-TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
+TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -206,11 +192,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -238,13 +219,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
+TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -262,11 +237,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -293,13 +263,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
+TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -310,11 +274,6 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
 
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -341,13 +300,7 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
+TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
 
@@ -359,11 +312,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -390,18 +338,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorOpenGLTest, RenderResizeCrash) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-
+TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
   // Present layer of size 100x100.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
