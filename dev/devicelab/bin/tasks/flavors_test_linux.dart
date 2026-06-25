@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -20,6 +21,7 @@ Future<void> main() async {
     await createIntegrationTestFlavorsTest().call();
 
     final projectDir = '${flutterDirectory.path}/dev/integration_tests/flavors';
+    final arch = Abi.current() == Abi.linuxArm64 ? 'arm64' : 'x64';
     return inDirectory(projectDir, () async {
       await flutter('build', options: <String>['linux', '--debug', '--flavor', 'paid']);
 
@@ -28,7 +30,7 @@ Future<void> main() async {
           projectDir,
           'build',
           'linux',
-          'x64',
+          arch,
           'paid',
           'debug',
           'bundle',

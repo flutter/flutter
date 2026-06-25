@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "my_application.h"
 
 #include <flutter_linux/flutter_linux.h>
@@ -42,21 +46,14 @@ static void my_application_activate(GApplication* application) {
     }
   }
 #endif
-#ifdef FLUTTER_APP_FLAVOR
-  g_autofree gchar* window_title =
-      g_strdup_printf("%s (%s)", "flavors", FLUTTER_APP_FLAVOR);
-#else
-  const gchar* window_title = "flavors";
-#endif
-
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, window_title);
+    gtk_header_bar_set_title(header_bar, "flavors");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, window_title);
+    gtk_window_set_title(window, "flavors");
   }
 
   gtk_window_set_default_size(window, 1280, 720);

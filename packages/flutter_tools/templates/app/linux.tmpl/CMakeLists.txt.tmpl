@@ -50,14 +50,6 @@ endfunction()
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
-# Flavor support: when --flavor is passed, the flutter tool exposes it via
-# FLUTTER_APP_FLAVOR in the generated CMake config included above. Suffix the
-# binary name and application id so that multiple flavor builds can coexist.
-if(DEFINED FLUTTER_APP_FLAVOR AND NOT FLUTTER_APP_FLAVOR STREQUAL "")
-  set(BINARY_NAME "${BINARY_NAME}-${FLUTTER_APP_FLAVOR}")
-  set(APPLICATION_ID "${APPLICATION_ID}.${FLUTTER_APP_FLAVOR}")
-endif()
-
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)

@@ -102,11 +102,11 @@ Future<void> buildLinux(
     status.cancel();
   }
 
-  final String? binaryName = getCmakeExecutableName(linuxProject, flavor: buildInfo.flavor);
+  final String? binaryName = getCmakeExecutableName(linuxProject);
   if (binaryName == null) {
     throwToolExit('Unable to find BINARY_NAME in ${linuxProject.cmakeFile.path}');
   }
-  final File binaryFile = buildDirectory.childDirectory('bundle').childFile('$binaryName');
+  final File binaryFile = buildDirectory.childDirectory('bundle').childFile(binaryName);
   final FileSystemEntity buildOutput = binaryFile.existsSync() ? binaryFile : binaryFile.parent;
   // We don't print a size because the output directory can contain
   // optional files not needed by the user and because the binary is not

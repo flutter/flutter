@@ -52,7 +52,7 @@ class BuildableLinuxApp extends LinuxApp {
 
   @override
   String executable(BuildMode buildMode, [String? flavor]) {
-    final String? binaryName = getCmakeExecutableName(project, flavor: flavor);
+    final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
       getLinuxBuildDirectory(null, flavor),
       buildMode.cliName,

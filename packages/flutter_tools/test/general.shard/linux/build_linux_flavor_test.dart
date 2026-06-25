@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/cmake.dart';
@@ -101,7 +99,7 @@ void main() {
   testUsingContext(
     'Linux build with --flavor uses a flavor-specific build dir',
     () async {
-      final command = makeBuildCommand();
+      final BuildCommand command = makeBuildCommand();
       processManager.addCommands(<FakeCommand>[
         cmakeFlavorCommand('release', 'apple'),
         ninjaFlavorCommand('release', 'apple'),
@@ -124,18 +122,15 @@ void main() {
     },
   );
 
-  test('getCmakeExecutableName appends flavor suffix', () {
+  test('getCmakeExecutableName returns the binary name without a flavor suffix', () {
     final fs = MemoryFileSystem.test();
-    final cmake = fs.file('linux/CMakeLists.txt')
+    final File cmake = fs.file('linux/CMakeLists.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync('set(BINARY_NAME "my_app")\n');
 
     final project = _FakeCmakeProject(cmake);
     expect(getCmakeExecutableName(project), 'my_app');
-    expect(getCmakeExecutableName(project, flavor: 'apple'), 'my_app-apple');
-    expect(getCmakeExecutableName(project, flavor: ''), 'my_app');
   });
-
 }
 
 class _FakeCmakeProject extends Fake implements CmakeBasedProject {

@@ -169,7 +169,7 @@ void main() {
   testUsingContext(
     'DebugBundleLinuxAssets bundles assets for the selected flavor',
     () async {
-      final flavorFileSystem = globals.fs;
+      final FileSystem flavorFileSystem = globals.fs;
       final environment = Environment.test(
         flavorFileSystem.currentDirectory,
         artifacts: Artifacts.test(),
