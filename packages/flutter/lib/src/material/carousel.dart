@@ -598,11 +598,7 @@ class _CarouselViewState extends State<CarouselView> {
     return _controller.initialItem;
   }
 
-  Widget _buildCarouselItem(int index) {
-    // For infinite scrolling, wrap the index to the actual children range.
-    if (widget.infinite && widget.children.isNotEmpty) {
-      index = index % widget.children.length;
-    }
+  Widget _buildCarouselItem(Widget contents, int index) {
     final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
     final ColorScheme colorScheme = ColorScheme.of(context);
     final EdgeInsets effectivePadding =
@@ -631,8 +627,6 @@ class _CarouselViewState extends State<CarouselView> {
           }
           return null;
         });
-
-    Widget contents = widget.children[index];
 
     if (widget.enableSplash) {
       contents = Stack(
@@ -664,34 +658,37 @@ class _CarouselViewState extends State<CarouselView> {
     );
   }
 
+  Widget? _buildItem(BuildContext context, int index) {
+    var itemIndex = index;
+    Widget? child;
+
+    if (widget.itemBuilder != null) {
+      if (widget.infinite && widget.itemCount != null && widget.itemCount! > 0) {
+        itemIndex = index % widget.itemCount!;
+      }
+      child = widget.itemBuilder!(context, itemIndex);
+    } else {
+      if (widget.infinite && widget.children.isNotEmpty) {
+        itemIndex = index % widget.children.length;
+      }
+      child = widget.children[itemIndex];
+    }
+
+    return child != null ? _buildCarouselItem(child, index) : null;
+  }
+
   Widget _buildSliverCarousel(ThemeData theme) {
     // Determine the child count and builder based on whether we're using lazy loading
     final int? childCount = widget.infinite
         ? null
-        : widget.itemBuilder != null
-        ? widget.itemCount
-        : widget.children.length;
-
-    NullableIndexedWidgetBuilder effectiveBuilder;
-    if (widget.itemBuilder != null) {
-      if (widget.infinite && widget.itemCount != null && widget.itemCount! > 0) {
-        final int itemCount = widget.itemCount!;
-        effectiveBuilder = (BuildContext context, int index) {
-          return widget.itemBuilder!(context, index % itemCount);
-        };
-      } else {
-        effectiveBuilder = widget.itemBuilder!;
-      }
-    } else {
-      effectiveBuilder = (BuildContext context, int index) => _buildCarouselItem(index);
-    }
+        : (widget.itemBuilder != null ? widget.itemCount : widget.children.length);
 
     if (_itemExtent != null) {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
         infinite: widget.infinite,
-        delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
+        delegate: SliverChildBuilderDelegate(_buildItem, childCount: childCount),
       );
     }
 
@@ -704,7 +701,7 @@ class _CarouselViewState extends State<CarouselView> {
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
       infinite: widget.infinite,
-      delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
+      delegate: SliverChildBuilderDelegate(_buildItem, childCount: childCount),
     );
   }
 

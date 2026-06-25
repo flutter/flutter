@@ -2930,6 +2930,93 @@ void main() {
 
     expect(position.pixels, 0.0);
   });
+
+  testWidgets('CarouselView.builder items customization', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final theme = ThemeData();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: CarouselView.builder(
+            padding: const EdgeInsets.all(20.0),
+            backgroundColor: Colors.amber,
+            elevation: 10.0,
+            shape: const StadiumBorder(),
+            itemExtent: 200,
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return Center(
+                  key: key,
+                  child: Center(child: Text('Item $index')),
+                );
+              }
+              return Center(child: Text('Item $index'));
+            },
+          ),
+        ),
+      ),
+    );
+
+    final Finder carouselViewMaterial = find
+        .descendant(of: find.byType(CarouselView), matching: find.byType(Material))
+        .first;
+
+    expect(
+      tester.getSize(carouselViewMaterial).width,
+      200 - 20 - 20,
+    ); // Padding is 20 on both side.
+    final Material material = tester.widget<Material>(carouselViewMaterial);
+    expect(material.color, Colors.amber);
+    expect(material.elevation, 10.0);
+    expect(material.shape, const StadiumBorder());
+  });
+
+  testWidgets('CarouselView.weightedBuilder items customization', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final theme = ThemeData();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: CarouselView.weightedBuilder(
+            padding: const EdgeInsets.all(20.0),
+            backgroundColor: Colors.amber,
+            elevation: 10.0,
+            shape: const StadiumBorder(),
+            flexWeights: const <int>[1],
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return Center(
+                  key: key,
+                  child: Center(child: Text('Item $index')),
+                );
+              }
+              return Center(child: Text('Item $index'));
+            },
+          ),
+        ),
+      ),
+    );
+
+    final Finder carouselViewMaterial = find
+        .descendant(of: find.byType(CarouselView), matching: find.byType(Material))
+        .first;
+
+    // Viewport width is 800. Weight 1 means full width.
+    expect(
+      tester.getSize(carouselViewMaterial).width,
+      800 - 20 - 20,
+    ); // Padding is 20 on both side.
+    final Material material = tester.widget<Material>(carouselViewMaterial);
+    expect(material.color, Colors.amber);
+    expect(material.elevation, 10.0);
+    expect(material.shape, const StadiumBorder());
+  });
 }
 
 Finder getItem(int index) {
