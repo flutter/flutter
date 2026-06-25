@@ -1858,6 +1858,39 @@ class FlutterPluginUtilsTest {
                         verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
                         verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                     }
+ 
+                     @Test
+                     fun `does not double-apply KGP when already applied`(
+                         @TempDir tempDir: Path
+                     ) {
+                         val testProject =
+                             setupTest(
+                                 tempDir = tempDir,
+                                 agpVersion = errorAgpVersion,
+                                 builtInKotlin = "false",
+                                 appConfig =
+                                     SubprojectConfig(
+                                         "app",
+                                         declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                     ),
+                                 pluginConfigs =
+                                     listOf(
+                                         SubprojectConfig(
+                                             "plugin",
+                                             declarativelyAppliedPlugins = listOf("com.android.library", "kotlin-android")
+                                         )
+                                     )
+                             )
+ 
+                         val appPluginManager = testProject.appPluginManager
+                         val plugin1Manager = testProject.plugin1Manager
+ 
+                         executeDetectApplyingKotlinGradlePlugin(testProject)
+ 
+                         verify(exactly = 0) { mockLogger.error(any()) }
+                         verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                         verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
+                     }
 
                     @Test
                     fun `logs quiet warning when KGP fails to apply`(
@@ -1906,7 +1939,7 @@ class FlutterPluginUtilsTest {
                     }
                 }
             }
-    }
+    }}
 
     @Test
     fun `forceNdkDownload skips projects which are already configuring a native build`(
@@ -2226,5 +2259,4 @@ class FlutterPluginUtilsTest {
             mockPrintTask.description = "Prints out all build variants for this Android project"
         }
     }
-}
 }
