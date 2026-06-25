@@ -252,6 +252,7 @@ executable("flutter_linux_unittests") {
     "fl_method_channel_test.cc",
     "fl_method_codec_test.cc",
     "fl_method_response_test.cc",
+    "fl_mouse_cursor_handler_test.cc",
     "fl_pixel_buffer_texture_test.cc",
     "fl_platform_channel_test.cc",
     "fl_platform_handler_test.cc",
