@@ -103,8 +103,9 @@ class BrowserImageDecoder {
   }
 
   Future<ImageDecoder> _createWebDecoder() async {
+    ImageDecoder? webDecoder;
     try {
-      final webDecoder = ImageDecoder(
+      webDecoder = ImageDecoder(
         ImageDecoderOptions(
           type: contentType,
           data: dataSource,
@@ -136,6 +137,7 @@ class BrowserImageDecoder {
 
       return webDecoder;
     } catch (error) {
+      webDecoder?.close();
       // TODO(srujzs): Replace this with `error.isJSAny` when we have that API
       // in `dart:js_interop`.
       // https://github.com/dart-lang/sdk/issues/56905
@@ -251,10 +253,14 @@ Future<DomReadableStream> handleProgressAndGetStream(
   List<void Function()>? onDisposeCallbacks,
 ]) async {
   final DomReadableStream body = response.body;
+  if (chunkCallback == null) {
+    return body;
+  }
+
   final String? contentLengthHeader = response.headers.get('Content-Length');
   final int? contentLength = contentLengthHeader != null ? int.tryParse(contentLengthHeader) : null;
 
-  if (chunkCallback == null || contentLength == null) {
+  if (contentLength == null) {
     return body;
   }
 
@@ -322,7 +328,12 @@ Future<ui.Codec> engineInstantiateImageCodec(
       dataSource: list.toJS,
       debugSource: 'encoded image bytes',
     );
-    await decoder.initialize();
+    try {
+      await decoder.initialize();
+    } catch (e) {
+      decoder.dispose();
+      rethrow;
+    }
     return EngineCodec.browser(
       decoder,
       targetWidth: targetWidth,
@@ -459,7 +470,12 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
       debugSource: url,
     );
     onDisposeCallbacks.forEach(decoder.addDisposeCallback);
-    await decoder.initialize();
+    try {
+      await decoder.initialize();
+    } catch (e) {
+      decoder.dispose();
+      rethrow;
+    }
     return EngineCodec.browser(decoder);
   } else {
     final ByteBuffer buffer = await response.arrayBuffer();
@@ -476,7 +492,12 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
         dataSource: list.toJS,
         debugSource: url,
       );
-      await decoder.initialize();
+      try {
+        await decoder.initialize();
+      } catch (e) {
+        decoder.dispose();
+        rethrow;
+      }
       return EngineCodec.browser(decoder);
     } else if (!imageType.isAnimated && browserSupportsCreateImageBitmap) {
       final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);

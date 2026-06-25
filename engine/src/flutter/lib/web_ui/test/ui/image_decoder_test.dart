@@ -161,7 +161,7 @@ Future<void> testMain() async {
       mockResponse as DomResponse,
       null,
     );
-    expect(identical(result, mockBody), isTrue);
+    expect(result, mockBody);
   });
 
   test(
@@ -179,7 +179,7 @@ Future<void> testMain() async {
         mockResponse as DomResponse,
         (int loaded, int total) {},
       );
-      expect(identical(result, mockBody), isTrue);
+      expect(result, mockBody);
     },
   );
 
@@ -197,7 +197,7 @@ Future<void> testMain() async {
         callbackCalled = true;
       });
 
-      expect(identical(result, originalBody), isFalse);
+      expect(result, isNot(originalBody));
 
       // Read the result stream to trigger the progress callback on the teed stream
       final DomStreamReader reader = result.getReader();
@@ -241,5 +241,33 @@ Future<void> testMain() async {
 
     expect(secondCallbackCalled, isTrue);
     expect(decoder.debugCachedWebDecoder, isNull);
+  });
+
+  test('BrowserImageDecoder calls dispose callbacks on initialization failure', () async {
+    if (!browserSupportsImageDecoder) {
+      return;
+    }
+
+    final decoder = BrowserImageDecoder(
+      contentType: 'image/png',
+      // Providing invalid/empty data will cause initialization/decoding to fail
+      dataSource: Uint8List(0).toJS,
+      debugSource: 'test',
+    );
+
+    var disposeCalled = false;
+    decoder.addDisposeCallback(() {
+      disposeCalled = true;
+    });
+
+    try {
+      await decoder.initialize();
+      fail('initialize should have thrown an exception');
+    } catch (e) {
+      decoder.dispose();
+      expect(e, isA<ImageCodecException>());
+    }
+
+    expect(disposeCalled, isTrue);
   });
 }
