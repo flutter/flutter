@@ -36,7 +36,7 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   /// that we only render one view at a time.
   Future<void> _lock = Future<void>.value();
 
-  Future<T> synchronized<T>(Future<T> Function() computation) async {
+  Future<T> _synchronized<T>(Future<T> Function() computation) async {
     final Future<void> oldLock = _lock;
     final completer = Completer<void>();
     _lock = completer.future;
@@ -93,7 +93,7 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     // Synchronizing the entire super.draw call ensures that both phases are
     // executed atomically per view, preventing race conditions where another
     // view resizes the shared surface before this view finishes rendering to it.
-    return rasterizer.synchronized(() => super.draw(layerTree, recorder));
+    return rasterizer._synchronized(() => super.draw(layerTree, recorder));
   }
 
   @override
