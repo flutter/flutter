@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -214,8 +215,11 @@ Future<void> buildMacOS({
   if (buildInfo.isDebug) {
     // Debug builds default to current host architecture
     destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
+  } else if (featureFlags.isMacOSArm64OnlyEnabled) {
+    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled
+    // is set.
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=arm64';
   } else {
-    // Release builds default to universal binary
     destination = XcodeSdk.MacOSX.genericPlatform;
   }
 

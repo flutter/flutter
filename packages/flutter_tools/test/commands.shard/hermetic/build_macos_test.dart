@@ -132,12 +132,15 @@ void main() {
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
+    String? destinationSpecifier,
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-    final destination = configuration == 'Debug'
-        ? 'platform=macOS,arch=$hostPlatformArch'
-        : 'generic/platform=macOS';
+    final String destination =
+        destinationSpecifier ??
+        (configuration == 'Debug'
+            ? 'platform=macOS,arch=$hostPlatformArch'
+            : 'generic/platform=macOS');
     return FakeCommand(
       command: <String>[
         '/usr/bin/env',
@@ -1288,6 +1291,52 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Build with arm64 destination in release/profile mode if isMacOSArm64OnlyEnabled is true',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await runner.run(const <String>['build', 'macos', '--profile', '--no-pub']);
+      await runner.run(const <String>['build', 'macos', '--no-pub']);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // Still uses host arch in debug mode even if the flag is set.
+        setUpFakeXcodeBuildHandler('Debug', destinationSpecifier: 'platform=macOS,arch=x86_64'),
+        setUpFakeXcodeBuildHandler('Profile', destinationSpecifier: 'platform=macOS,arch=arm64'),
+        setUpFakeXcodeBuildHandler('Release', destinationSpecifier: 'platform=macOS,arch=arm64'),
+      ]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

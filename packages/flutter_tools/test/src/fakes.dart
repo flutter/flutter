@@ -553,6 +553,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
+    this.isMacOSArm64OnlyEnabled = false,
   });
 
   @override
@@ -613,6 +614,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isRiscv64SupportEnabled;
 
   @override
+  final bool isMacOSArm64OnlyEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -632,6 +636,7 @@ class TestFeatureFlags implements FeatureFlags {
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
+      macosArm64Only => isMacOSArm64OnlyEnabled,
       recordUse => isRecordUseEnabled,
       _ => false,
     };
@@ -658,6 +663,7 @@ class TestFeatureFlags implements FeatureFlags {
     lldbDebugging,
     uiSceneMigration,
     riscv64,
+    macosArm64Only,
   ];
 
   @override

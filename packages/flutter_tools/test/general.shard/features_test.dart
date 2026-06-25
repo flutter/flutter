@@ -422,6 +422,29 @@ void main() {
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
     });
   });
+
+  group('macosArm64Only', () {
+    test('is available on all channels, disabled by default', () {
+      expect(
+        macosArm64Only,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: true, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(macosArm64Only.configSetting, 'enable-macos-arm64-only');
+      expect(macosArm64Only.environmentOverride, 'FLUTTER_MACOS_ARM64_ONLY');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: macosArm64Only);
+      expect(checkFlags.isMacOSArm64OnlyEnabled, isTrue);
+    });
+  });
 }
 
 final class _FakeFeaturesConfig implements FlutterFeaturesConfig {
