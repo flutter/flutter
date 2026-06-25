@@ -541,6 +541,19 @@ TEST_F(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
         return kSuccess;
       }));
 
+  // Respond to the key event channel so its async messages complete instead of
+  // leaking their GTasks.
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        g_autoptr(FlValue) return_value = fl_value_new_map();
+        fl_value_set_string_take(return_value, "handled",
+                                 fl_value_new_bool(FALSE));
+        return fl_value_ref(return_value);
+      },
+      nullptr);
+
   auto sendTap = [&](guint8 keycode, guint keyval, guint8 group) {
     g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
         0, TRUE, keycode, keyval, static_cast<GdkModifierType>(0), group);
