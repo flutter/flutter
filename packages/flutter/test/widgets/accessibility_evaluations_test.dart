@@ -179,6 +179,152 @@ void main() {
       expect(result.violations.first.reason, contains('Expected contrast ratio of at least 4.5'));
       handle.dispose();
     });
+
+    // Regression tests for https://github.com/flutter/flutter/issues/180081
+    //
+    // The contrast of a Text/EditableText widget must be checked even when the
+    // enclosing semantics node's label or value does not match the visible
+    // text, e.g. when a Semantics widget contributes its own label that merges
+    // with the descendant Text, or when Text.semanticsLabel is set.
+    testWidgets('Semantics label that differs from the child Text still has its contrast checked', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 200.0,
+            child: ColoredBox(
+              color: const Color(0xFFFFFFFF),
+              child: Center(
+                child: Semantics(
+                  label: 'Custom label',
+                  child: const Text(
+                    'Visible text',
+                    style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 16.0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isNotEmpty);
+      handle.dispose();
+    });
+
+    // When a Text's semantics label fully replaces its visible string (the label
+    // shares nothing with the rendered text), the rendered text conveys no
+    // meaning to assistive technologies and is treated as decorative — it has no
+    // contrast requirement, so a low-contrast value here still passes.
+    testWidgets(
+      'Text.semanticsLabel that fully replaces the visible text is treated as decorative and not checked',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          const TestWidgetsApp(
+            home: SizedBox.square(
+              dimension: 200.0,
+              child: ColoredBox(
+                color: Color(0xFFFFFFFF),
+                child: Center(
+                  child: Text(
+                    'Visible text',
+                    semanticsLabel: 'Custom label',
+                    style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 16.0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+          return await evaluation.evaluate(tester.binding);
+        });
+        expect(result!.violations, isEmpty);
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'Semantics label that differs from the child Text passes when contrast is sufficient',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: SizedBox.square(
+              dimension: 200.0,
+              child: ColoredBox(
+                color: const Color(0xFFFFFFFF),
+                child: Center(
+                  child: Semantics(
+                    label: 'Custom label',
+                    child: const Text(
+                      'Visible text',
+                      style: TextStyle(color: Color(0xFF000000), fontSize: 16.0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+          return await evaluation.evaluate(tester.binding);
+        });
+        expect(result!.violations, isEmpty);
+        handle.dispose();
+      },
+    );
+
+    // When several Text widgets are merged into a single semantics node, every
+    // one of them must still have its contrast checked individually. The only
+    // failing widget is placed second, so the evaluation can only fail if it
+    // does not stop at the first (passing) element.
+    testWidgets('Multiple text elements merged into one semantics node are both checked', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 200.0,
+            child: ColoredBox(
+              color: Color(0xFFFFFFFF),
+              child: Center(
+                child: MergeSemantics(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        'Visible text 1',
+                        style: TextStyle(color: Color(0xFF000000), fontSize: 16.0),
+                      ),
+                      // Keep the two lines apart so each is sampled against the
+                      // white background alone, rather than picking up the
+                      // other's glyphs through the 4px sampling inset.
+                      SizedBox(height: 40.0),
+                      Text(
+                        'Visible text 2',
+                        style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 16.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isNotEmpty);
+      handle.dispose();
+    });
   });
 
   group('UnlabeledLeafNodeEvaluation', () {

@@ -199,8 +199,9 @@ void main() {
     );
 
     // When several Text widgets are merged into a single semantics node, every
-    // one of them must still have its contrast checked individually — finding
-    // the first failing widget is enough to fail the guideline.
+    // one of them must still have its contrast checked individually. The only
+    // failing widget is placed *second*, so the guideline can only fail if
+    // evaluation does not stop at the first (passing) element.
     testWidgets('Multiple text elements merged into one semantics node are both checked', (
       WidgetTester tester,
     ) async {
@@ -216,11 +217,11 @@ void main() {
                 children: <Widget>[
                   Text(
                     'Visible text 1',
-                    style: TextStyle(fontSize: 16.0, color: Colors.white), // Fails.
+                    style: TextStyle(fontSize: 16.0, color: Colors.black), // Passes.
                   ),
                   Text(
                     'Visible text 2',
-                    style: TextStyle(fontSize: 16.0, color: Colors.black), // Passes.
+                    style: TextStyle(fontSize: 16.0, color: Colors.white), // Fails.
                   ),
                 ],
               ),
