@@ -155,6 +155,7 @@ PlaygroundImplGLES::GetShareableContext() {
     return unique_context_;
   }
 
+  FML_CHECK(g_gles_playground_env != nullptr);
   std::unique_ptr<PlaygroundImplGLES::ShareableContext>& shared_context =
       switches_.flags.use_sdfs ? g_gles_playground_env->shared_context_sdf
                                : g_gles_playground_env->shared_context;
