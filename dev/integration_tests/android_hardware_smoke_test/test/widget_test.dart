@@ -416,4 +416,24 @@ void main() {
     expect(result, isNotNull);
     expect(result, contains('does not match'));
   });
+
+  testWidgets('PixelExactLocalFileComparator supports both asset: and asset:// URI schemes', (
+    WidgetTester tester,
+  ) async {
+    const comparator = PixelExactLocalFileComparator();
+
+    await tester.runAsync(() async {
+      final bool match1 = await comparator.compare(
+        transparentImageBytes,
+        Uri(scheme: 'asset', path: 'test_driver/goldens/imageTest.vulkan.png'),
+      );
+      expect(match1, isTrue);
+
+      final bool match2 = await comparator.compare(
+        transparentImageBytes,
+        Uri.parse('asset://test_driver/goldens/imageTest.vulkan.png'),
+      );
+      expect(match2, isTrue);
+    });
+  });
 }

@@ -33,7 +33,8 @@ class PixelExactLocalFileComparator extends GoldenFileComparator {
 
   Future<Uint8List> _loadGoldenBytes(Uri golden) async {
     if (golden.scheme == 'asset') {
-      final String assetKey = golden.path.startsWith('/') ? golden.path.substring(1) : golden.path;
+      final rawPath = '${golden.host}${golden.path}';
+      final String assetKey = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
       try {
         final ByteData byteData = await rootBundle.load(assetKey);
         return byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
