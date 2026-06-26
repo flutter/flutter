@@ -189,16 +189,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     // placement path in semantics mode ([initializeElementPlacement] is a
     // no-op), so the form must be set up explicitly here.
     //
-    // Safari autofills grouped credential fields by heuristic without needing a
-    // form. The attribute-linked form regresses that: a non-focused field's real
-    // input is left outside the form and stops being filled
-    // (flutter/flutter#180652). Skip the form on Safari and let its native
-    // heuristic fill the whole group. `_formIsActive` stays false, so [disable]
-    // skips the demote/dormant cleanup too.
-    //
-    // Other WebKit browsers (Chrome, Firefox on iOS) do not fill by heuristic
-    // and need the form path, so they are not skipped here.
-    if (hasAutofillGroup && !ui_web.browser.isSafari) {
+    if (hasAutofillGroup) {
       placeForm();
     }
   }
@@ -219,6 +210,19 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void placeForm() {
+    // Safari autofills grouped credential fields by heuristic without needing a
+    // form. The attribute-linked form regresses that: a non-focused field's real
+    // input is left outside the form and stops being filled
+    // (flutter/flutter#180652). Skip the form on Safari and let its native
+    // heuristic fill the whole group. `_formIsActive` stays false, so [disable]
+    // skips the demote/dormant cleanup too.
+    //
+    // Other WebKit browsers (Chrome, Firefox on iOS) do not fill by heuristic
+    // and need the form path, so they are not skipped here.
+    if (ui_web.browser.isSafari) {
+      return;
+    }
+
     // The focused element is the real semantics-owned `<input>`. It must not be
     // moved into the form (that regressed a11y tab traversal, see
     // flutter/flutter#180652). Link it to the form via the `form` attribute
