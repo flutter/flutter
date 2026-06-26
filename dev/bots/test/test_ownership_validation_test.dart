@@ -20,7 +20,12 @@ class _TestOwnersRegistry {
   final Map<String, String> owners;
   final Map<String, String> shardOwners;
 
-  String? getOwner(String targetName, String recipe, YamlMap properties, List<String>? tags) {
+  String? getOwner(
+    String targetName,
+    String recipe,
+    Map<dynamic, dynamic> properties,
+    List<String>? tags,
+  ) {
     final String testName =
         properties['task_name'] as String? ?? _getTestNameFromTargetName(targetName);
 
@@ -68,12 +73,12 @@ List<String>? _parseTags(dynamic tagsProperty) {
 }
 
 String _getTestNameFromTargetName(String targetName) {
-  final List<String> words = targetName.split(' ');
+  final List<String> words = targetName.split(RegExp(r'\s+'));
   return words.length < 2 ? words[0] : words.sublist(1).join(' ');
 }
 
 String? _extractOwner(String line) {
-  final List<String> words = line.split(' ');
+  final List<String> words = line.split(RegExp(r'\s+'));
   for (final word in words) {
     if (word.startsWith('@') && word.length > 1) {
       return word.substring(1);
@@ -121,7 +126,7 @@ _TestOwnersRegistry _parseTestOwners(String content) {
         }
         final String? owner = _extractOwner(line);
         if (owner != null) {
-          final String path = line.split(' ').first;
+          final String path = line.split(RegExp(r'\s+')).first;
           final String taskName = p.basenameWithoutExtension(path);
           owners[taskName] = owner;
         }
@@ -130,7 +135,7 @@ _TestOwnersRegistry _parseTestOwners(String content) {
         // (e.g. '# Linux analyze' or multiple headers sharing a script).
         // We collect pending target names from comments and map them when we hit an @owner line.
         if (line.startsWith('#')) {
-          final List<String> words = line.split(' ');
+          final List<String> words = line.split(RegExp(r'\s+'));
           if (words.length > 2) {
             final String name = words.sublist(2).join(' ');
             pendingFrameworkTargets.add(name);
@@ -155,7 +160,7 @@ _TestOwnersRegistry _parseTestOwners(String content) {
         }
         final String? owner = _extractOwner(line);
         if (owner != null) {
-          final String path = line.split(' ').first;
+          final String path = line.split(RegExp(r'\s+')).first;
           final String testName = path.split('/').last;
           owners[testName] = owner;
         }
@@ -166,7 +171,7 @@ _TestOwnersRegistry _parseTestOwners(String content) {
         }
         final String? owner = _extractOwner(line);
         if (owner != null) {
-          final List<String> parts = line.split(' ');
+          final List<String> parts = line.split(RegExp(r'\s+'));
           if (parts.length > 1) {
             shardOwners[parts[1]] = owner;
           }
@@ -208,7 +213,8 @@ void main() {
       final targetMap = node as YamlMap;
       final targetName = targetMap['name'] as String;
       final String recipe = targetMap['recipe'] as String? ?? '';
-      final YamlMap properties = targetMap['properties'] as YamlMap? ?? YamlMap();
+      final Map<dynamic, dynamic> properties =
+          targetMap['properties'] as Map<dynamic, dynamic>? ?? <dynamic, dynamic>{};
       final List<String>? tags = _parseTags(properties['tags']);
 
       test('target "$targetName" must have an owner in TESTOWNERS', () {
