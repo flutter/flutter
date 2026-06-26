@@ -238,7 +238,6 @@ class VSyncClientTest: XCTestCase {
       waitForExpectations(timeout: 1.0, handler: nil)
     }
 
-    // deinit fires on the main thread, so invalidate() executes synchronously inline.
     XCTAssertNil(weakClient)
   }
 }
