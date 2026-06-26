@@ -1096,7 +1096,7 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
   if (!properties.existsSync()) {
     return false;
   }
-  return properties.readAsStringSync().contains('android.useAndroidX=true');
+  return RegExp(r'android\.useAndroidX\s*=\s*true').hasMatch(properties.readAsStringSync());
 }
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
