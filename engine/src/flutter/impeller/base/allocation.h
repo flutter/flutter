@@ -10,6 +10,7 @@
 
 #include "flutter/fml/mapping.h"
 #include "impeller/base/allocation_size.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -80,7 +81,7 @@ class Allocation {
   ///
   /// @return     The next power of two of x.
   ///
-  static uint32_t NextPowerOfTwoSize(uint32_t x);
+  static absl::StatusOr<uint64_t> NextPowerOfTwoSize(uint64_t x);
 
  private:
   uint8_t* buffer_ = nullptr;

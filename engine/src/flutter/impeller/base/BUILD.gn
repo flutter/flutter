@@ -32,6 +32,8 @@ impeller_component("base") {
   ]
 
   deps = [ "//flutter/fml" ]
+
+  public_deps = [ "//third_party/abseil-cpp/absl/status:statusor" ]
 }
 
 impeller_component("base_unittests") {
