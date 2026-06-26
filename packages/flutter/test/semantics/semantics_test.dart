@@ -1079,6 +1079,28 @@ void main() {
     expect(copy.label, 'test');
   });
 
+  test('SemanticsConfiguration treats repeated text field roles as compatible', () {
+    final wrapper = SemanticsConfiguration()
+      ..label = 'Login_email'
+      ..isTextField = true;
+    final editable = SemanticsConfiguration()
+      ..label = 'Email'
+      ..isTextField = true
+      ..onSetText = (String value) {};
+
+    expect(wrapper.isCompatibleWith(editable), isTrue);
+
+    final link = SemanticsConfiguration()
+      ..label = 'Terms'
+      ..isLink = true;
+    expect(wrapper.isCompatibleWith(link), isFalse);
+
+    final otherEditable = SemanticsConfiguration()
+      ..isTextField = true
+      ..onSetText = (String value) {};
+    expect(editable.isCompatibleWith(otherEditable), isFalse);
+  });
+
   test('SemanticsConfiguration.copy() preserves all hitTestBehavior values', () {
     final deferConfig = SemanticsConfiguration();
     expect(deferConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.defer);

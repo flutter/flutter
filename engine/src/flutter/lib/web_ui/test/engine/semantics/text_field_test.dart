@@ -106,6 +106,120 @@ void testMain() {
       expect(inputElement.getAttribute('aria-required'), isNull);
     });
 
+    test('sends setText for inactive semantic text field input changes', () {
+      final dispatchedActions = <ui.SemanticsActionEvent>[];
+      ui.PlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
+        dispatchedActions.add(event);
+      };
+      addTearDown(() {
+        ui.PlatformDispatcher.instance.onSemanticsActionEvent = null;
+      });
+
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: '',
+        hasSetText: true,
+      );
+      final textFieldRole = textFieldSemantics.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
+
+      inputElement.value = 'hello@example.com';
+      inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      final ui.SemanticsActionEvent setTextAction = dispatchedActions.singleWhere(
+        (ui.SemanticsActionEvent event) => event.type == ui.SemanticsAction.setText,
+      );
+      expect(setTextAction.nodeId, textFieldSemantics.id);
+      expect(
+        const StandardMessageCodec().decodeMessage(setTextAction.arguments! as ByteData),
+        'hello@example.com',
+      );
+    });
+
+    test('skips setText for inactive semantic text fields without setText action', () {
+      final dispatchedActions = <ui.SemanticsActionEvent>[];
+      ui.PlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
+        dispatchedActions.add(event);
+      };
+      addTearDown(() {
+        ui.PlatformDispatcher.instance.onSemanticsActionEvent = null;
+      });
+
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(value: '');
+      final textFieldRole = textFieldSemantics.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
+
+      inputElement.value = 'hello@example.com';
+      inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(
+        dispatchedActions,
+        isNot(
+          contains(
+            isA<ui.SemanticsActionEvent>().having(
+              (ui.SemanticsActionEvent event) => event.type,
+              'type',
+              ui.SemanticsAction.setText,
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('uses text editing callback for active semantic text field input changes', () {
+      final dispatchedActions = <ui.SemanticsActionEvent>[];
+      ui.PlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
+        dispatchedActions.add(event);
+      };
+      addTearDown(() {
+        ui.PlatformDispatcher.instance.onSemanticsActionEvent = null;
+      });
+      final editingStates = <EditingState>[];
+      strategy.enable(
+        singlelineConfig,
+        onChange: (EditingState? editingState, _) {
+          if (editingState != null) {
+            editingStates.add(editingState);
+          }
+        },
+        onAction: (_) {},
+      );
+
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: '',
+        isFocused: true,
+        hasSetText: true,
+      );
+      final textFieldRole = textFieldSemantics.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
+
+      inputElement.value = 'hello@example.com';
+      inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(editingStates.single.text, 'hello@example.com');
+      expect(
+        dispatchedActions,
+        isNot(
+          contains(
+            isA<ui.SemanticsActionEvent>().having(
+              (ui.SemanticsActionEvent event) => event.type,
+              'type',
+              ui.SemanticsAction.setText,
+            ),
+          ),
+        ),
+      );
+      expect(
+        dispatchedActions,
+        contains(
+          isA<ui.SemanticsActionEvent>().having(
+            (ui.SemanticsActionEvent event) => event.type,
+            'type',
+            ui.SemanticsAction.focus,
+          ),
+        ),
+      );
+    });
+
     test('renders a password field', () {
       createTextFieldSemantics(value: 'secret', isObscured: true);
 
@@ -628,6 +742,7 @@ SemanticsObject createTextFieldSemantics({
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.text,
+  bool hasSetText = false,
 }) {
   final tester = SemanticsTester(owner());
   tester.updateNode(
@@ -646,6 +761,7 @@ SemanticsObject createTextFieldSemantics({
           : (isRequired ? ui.Tristate.isTrue : ui.Tristate.isFalse),
     ),
     hasTap: true,
+    hasSetText: hasSetText,
     rect: rect,
     textDirection: ui.TextDirection.ltr,
     textSelectionBase: textSelectionBase,

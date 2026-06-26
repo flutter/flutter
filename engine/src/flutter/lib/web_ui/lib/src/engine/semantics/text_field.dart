@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
+import '../services/message_codecs.dart';
 import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
@@ -307,6 +310,25 @@ class SemanticTextField extends SemanticRole {
       'blur',
       createDomEventListener((DomEvent event) {
         SemanticsTextEditingStrategy._instance?.deactivate(this);
+      }),
+    );
+    editableElement.addEventListener(
+      'input',
+      createDomEventListener((DomEvent event) {
+        final String value = EditingState.fromDomElement(editableElement).text;
+        // Browser autofill and automation may edit the semantic DOM input
+        // before it is driving Flutter's text editing channel.
+        if (SemanticsTextEditingStrategy._instance?.activeTextField == this ||
+            !semanticsObject.hasAction(ui.SemanticsAction.setText)) {
+          return;
+        }
+        final ByteData? encodedValue = const StandardMessageCodec().encodeMessage(value);
+        EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+          viewId,
+          semanticsObject.id,
+          ui.SemanticsAction.setText,
+          encodedValue,
+        );
       }),
     );
   }

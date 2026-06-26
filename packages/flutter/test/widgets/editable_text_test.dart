@@ -4664,6 +4664,13 @@ void main() {
       ),
     );
 
+    if (kIsWeb) {
+      expect(
+        semantics,
+        includesNodeWith(value: 'test', actions: <SemanticsAction>[SemanticsAction.setText]),
+      );
+    }
+
     focusNode.requestFocus();
     await tester.pump();
 
@@ -4720,6 +4727,71 @@ void main() {
           SemanticsAction.setText,
         ],
       ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('can set text with a11y means before focus on web', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    controller.text = 'hello';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(value: 'hello', actions: <SemanticsAction>[SemanticsAction.setText]),
+    );
+    final SemanticsNode node = find.semantics.byValue('hello').evaluate().first;
+    expect(focusNode.hasFocus, isFalse);
+    expect(controller.text, 'hello');
+
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      node.id,
+      SemanticsAction.setText,
+      'how are you',
+    );
+
+    expect(controller.text, 'how are you');
+    expect(focusNode.hasFocus, isFalse);
+
+    semantics.dispose();
+  }, skip: !kIsWeb); // [intended] this verifies web-only pre-focus setText behavior.
+
+  testWidgets('read-only editable text does not expose setText before focus', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    controller.text = 'hello';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          readOnly: true,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      isNot(includesNodeWith(value: 'hello', actions: <SemanticsAction>[SemanticsAction.setText])),
     );
 
     semantics.dispose();
