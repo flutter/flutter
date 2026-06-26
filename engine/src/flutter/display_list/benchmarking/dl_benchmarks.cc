@@ -1015,6 +1015,12 @@ void BM_DrawPathLine(benchmark::State& state,
   BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kLine);
 }
 
+void BM_DrawPathQuad(benchmark::State& state,
+                     BackendType backend_type,
+                     unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kQuad);
+}
+
 void BM_DrawPathConic(benchmark::State& state,
                       BackendType backend_type,
                       unsigned attributes) {
@@ -1765,6 +1771,7 @@ constexpr int kFilledShadow10Primitive =
 
 #define DRAW_BENCHMARK_PRIMITIVES_PATH(BACKEND)                              \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathLine)                          \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathQuad)                          \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathConic)                         \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathCubic)
 
