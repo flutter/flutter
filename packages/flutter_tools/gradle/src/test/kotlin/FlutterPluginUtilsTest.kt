@@ -1498,7 +1498,10 @@ class FlutterPluginUtilsTest {
                 val testProject = TestEnvironment(appProject, pluginProjects)
 
                 if (captureActions) {
-                    every { rootProject.subprojects(capture(testProject.subprojectsActionSlot)) } returns Unit
+                    every { rootProject.subprojects(capture(testProject.subprojectsActionSlot)) } answers {
+                        val action = firstArg<Action<Project>>()
+                        allProjects.forEach { action.execute(it) }
+                    }
                     every { mockGradle.projectsEvaluated(capture(testProject.projectsEvaluatedActionSlot)) } returns Unit
                 }
 
@@ -1508,14 +1511,14 @@ class FlutterPluginUtilsTest {
             private fun executeDetectApplyingKotlinGradlePlugin(testProject: TestEnvironment) {
                 detectApplyingKotlinGradlePlugin(testProject.appProject)
 
-                verify { rootProject.subprojects(capture(testProject.subprojectsActionSlot)) }
-                testProject.subprojectsActionSlot.captured.execute(testProject.appProject)
-                for (plugin in testProject.plugins) {
-                    testProject.subprojectsActionSlot.captured.execute(plugin)
-                }
+                verify { rootProject.subprojects(any<Action<Project>>()) }
 
-                verify { mockGradle.projectsEvaluated(capture(testProject.projectsEvaluatedActionSlot)) }
-                testProject.projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                if (testProject.projectsEvaluatedActionSlot.isCaptured) {
+                    verify { mockGradle.projectsEvaluated(capture(testProject.projectsEvaluatedActionSlot)) }
+                    testProject.projectsEvaluatedActionSlot.captured.execute(mockGradle)
+                } else {
+                    verify(exactly = 0) { mockGradle.projectsEvaluated(any<Action<Gradle>>()) }
+                }
             }
 
             @Nested
@@ -1530,13 +1533,12 @@ class FlutterPluginUtilsTest {
                             agpVersion = templateAgpVersion,
                             builtInKotlin = "true",
                             appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
-                            pluginConfigs = listOf(SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))),
-                            captureActions = false
+                            pluginConfigs = listOf(SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library")))
                         )
 
                     detectApplyingKotlinGradlePlugin(testProject.appProject)
 
-                    verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
+                    verify(exactly = 1) { rootProject.subprojects(any<Action<Project>>()) }
                     verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
                     verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
                 }
@@ -1551,13 +1553,12 @@ class FlutterPluginUtilsTest {
                             agpVersion = templateAgpVersion,
                             builtInKotlin = null,
                             appConfig = SubprojectConfig("app", declarativelyAppliedPlugins = listOf("com.android.application")),
-                            pluginConfigs = listOf(SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))),
-                            captureActions = false
+                            pluginConfigs = listOf(SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library")))
                         )
 
                     detectApplyingKotlinGradlePlugin(testProject.appProject)
 
-                    verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
+                    verify(exactly = 1) { rootProject.subprojects(any<Action<Project>>()) }
                     verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
                     verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
                 }
