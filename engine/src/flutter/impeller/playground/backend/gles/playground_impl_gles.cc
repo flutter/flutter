@@ -161,10 +161,7 @@ PlaygroundImplGLES::GetShareableContext() {
 
   // If the switches have values that result in a different GLES context than
   // the existing shared context, reset the shared context to create a new one.
-  if (shared_context &&
-      (shared_context->switches.use_angle != switches_.use_angle ||
-       shared_context->switches.flags.antialiased_lines !=
-           switches_.flags.antialiased_lines)) {
+  if (shared_context && (shared_context->switches != switches_)) {
     shared_context.reset();
   }
 

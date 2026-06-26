@@ -47,6 +47,8 @@ struct PlaygroundSwitches {
   PlaygroundSwitches();
 
   explicit PlaygroundSwitches(const fml::CommandLine& args);
+
+  bool operator==(const PlaygroundSwitches&) const = default;
 };
 
 }  // namespace impeller
