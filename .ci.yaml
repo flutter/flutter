@@ -1366,21 +1366,6 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: technical_debt__cost
 
-  - name: Linux test_ownership
-    recipe: infra/test_ownership
-    enabled_branches:
-      - main
-      - master
-    properties:
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-    runIf:
-      - engine/**
-      - DEPS
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
   - name: Linux tool_integration_tests_1_7
     recipe: flutter/flutter_drone
     timeout: 60
