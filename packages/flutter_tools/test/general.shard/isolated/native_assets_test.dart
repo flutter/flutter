@@ -510,6 +510,11 @@ class ErrorThrowingFileSystem extends ForwardingFileSystem {
       errorCodeToThrow: errorCodeToThrow,
     );
   }
+
+  @override
+  File file(dynamic path) {
+    return ErrorThrowingFile(this, delegate.file(path), errorCodeToThrow: errorCodeToThrow);
+  }
 }
 
 class ErrorThrowingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
@@ -550,7 +555,16 @@ class ErrorThrowingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       ErrorThrowingFile(_fileSystem, delegate, errorCodeToThrow: errorCodeToThrow);
 
   @override
-  Link wrapLink(io.Link delegate) => delegate as Link;
+  Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
+
+  @override
+  Future<Directory> delete({bool recursive = false}) async {
+    throw FileSystemException(
+      'Mock deletion error',
+      path,
+      io.OSError('Mock OS Error', errorCodeToThrow),
+    );
+  }
 
   @override
   Stream<FileSystemEntity> list({bool recursive = false, bool followLinks = true}) {
@@ -586,10 +600,10 @@ class ErrorThrowingFile extends ForwardingFileSystemEntity<File, io.File> with F
       ErrorThrowingFile(_fileSystem, delegate, errorCodeToThrow: errorCodeToThrow);
 
   @override
-  Directory wrapDirectory(io.Directory delegate) => delegate as Directory;
+  Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
 
   @override
-  Link wrapLink(io.Link delegate) => delegate as Link;
+  Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
 
   @override
   Future<File> delete({bool recursive = false}) async {
