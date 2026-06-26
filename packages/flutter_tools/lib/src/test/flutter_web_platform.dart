@@ -33,6 +33,7 @@ import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web/module_metadata.dart';
 import '../web/web_constants.dart';
 import 'test_compiler.dart';
 import 'test_golden_comparator.dart';
@@ -65,6 +66,10 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
   };
 }
 
+/// Unsupported for general Flutter developers.
+///
+/// This is only used by the Flutter Framework tests.
+/// See: https://github.com/flutter/flutter/pull/65984.
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(
     this._server,
@@ -342,21 +347,20 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.internalServerError(body: error);
       }
       final scripts = <Map<String, String>>[];
-      for (final String line in mergedMetadata.split('\n')) {
-        final metadataMap = jsonDecode(line) as Map<String, dynamic>;
-        final srcUri = metadataMap['moduleUri'] as String;
+      for (final String rawMetadata in LineSplitter.split(mergedMetadata)) {
+        final metadata = ModuleMetadata.fromJson(jsonDecode(rawMetadata) as Map<String, Object?>);
+        final String srcUri = metadata.moduleUri;
         // Strip the leading '/' from the paths. The requests will have it added
         // when they are created in the browser.
-        final String relativeSrcUri = _fileSystem.path.relative(srcUri, from: '/');
-        final id = metadataMap['name'] as String;
-        scripts.add({'src': relativeSrcUri, 'id': id});
+        final String relativeSrcUri = srcUri.startsWith('/') ? srcUri.substring(1) : srcUri;
+        scripts.add({'src': relativeSrcUri, 'id': metadata.name});
       }
 
       String mainModuleSrc = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.dart',
         nativeNullAssertions: true,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
-        isCi: globals.platform.environment.containsKey('LUCI_CONTEXT'),
+        isCi: await globals.botDetector.isRunningOnBot,
       );
 
       mainModuleSrc +=
