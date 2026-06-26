@@ -1006,4 +1006,110 @@ void main() {
     await expectLater(find.byKey(key), matchesGoldenFile('sliver_tree.scrolling.1.png'));
     expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, -5));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/188305.
+  // While a node expands, its children must be clipped beneath the node (at the
+  // node's trailing edge) - including the first node, which used to clip at its
+  // leading edge and let its children paint over it.
+  group('Animating node clips children below its trailing edge', () {
+    const rowExtent = 40.0;
+    const animationDuration = Duration(seconds: 1);
+
+    // The top edge of every clip rect the sliver paints.
+    List<double> recordedClipTops(RenderObject renderObject) {
+      final tops = <double>[];
+      final canvas = TestRecordingCanvas();
+      final context = TestRecordingPaintingContext(canvas);
+      renderObject.paint(context, Offset.zero);
+      for (final RecordedInvocation recorded in canvas.invocations) {
+        if (recorded.invocation.memberName == #clipRect) {
+          tops.add((recorded.invocation.positionalArguments[0] as Rect).top);
+        }
+      }
+      return tops;
+    }
+
+    Widget buildTree(TreeSliverController controller) {
+      final tree = <TreeSliverNode<String>>[
+        TreeSliverNode<String>(
+          'First',
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('First:0'),
+            TreeSliverNode<String>('First:1'),
+          ],
+        ),
+        TreeSliverNode<String>(
+          'Second',
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('Second:0'),
+            TreeSliverNode<String>('Second:1'),
+          ],
+        ),
+      ];
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              controller: controller,
+              treeRowExtentBuilder: (_, _) => rowExtent,
+              toggleAnimationStyle: const AnimationStyle(
+                curve: Curves.linear,
+                duration: animationDuration,
+              ),
+              treeNodeBuilder:
+                  (
+                    BuildContext context,
+                    TreeSliverNode<Object?> node,
+                    AnimationStyle animationStyle,
+                  ) {
+                    return GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () => controller.toggleNode(node),
+                      child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
+                    );
+                  },
+            ),
+          ],
+        ),
+      );
+    }
+
+    testWidgets('first node (index 0) clips at its trailing edge', (WidgetTester tester) async {
+      final controller = TreeSliverController();
+      await tester.pumpWidget(buildTree(controller));
+
+      await tester.tap(find.text('First'));
+      await tester.pump();
+      await tester.pump(animationDuration ~/ 2); // Mid-animation.
+
+      final RenderTreeSliver renderTree = tester.allRenderObjects
+          .whereType<RenderTreeSliver>()
+          .first;
+      final List<double> clipTops = recordedClipTops(renderTree);
+      // One row down (the node's trailing edge), not at the top (0.0).
+      expect(clipTops, isNotEmpty);
+      expect(clipTops, contains(rowExtent));
+      expect(clipTops, isNot(contains(0.0)));
+    });
+
+    testWidgets('non-first node (index 1) clips at its trailing edge', (WidgetTester tester) async {
+      final controller = TreeSliverController();
+      await tester.pumpWidget(buildTree(controller));
+
+      await tester.tap(find.text('Second'));
+      await tester.pump();
+      await tester.pump(animationDuration ~/ 2); // Mid-animation.
+
+      final RenderTreeSliver renderTree = tester.allRenderObjects
+          .whereType<RenderTreeSliver>()
+          .first;
+      final List<double> clipTops = recordedClipTops(renderTree);
+      // The second node is at index 1, so its trailing edge is two rows down.
+      expect(clipTops, isNotEmpty);
+      expect(clipTops, contains(rowExtent * 2));
+      expect(clipTops, isNot(contains(0.0)));
+    });
+  });
 }
