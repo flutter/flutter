@@ -1082,11 +1082,12 @@ abstract class LineBlock {
     final double runHeight = span.style.height! * fontSize;
     final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
     switch (span.style.leadingDistribution) {
+      case null:
       case ui.TextLeadingDistribution.even:
         final double extraLeading = (runHeight - fontHeight) / 2;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent + extraLeading;
         _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent + extraLeading;
-      default:
+      case ui.TextLeadingDistribution.proportional:
         final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent * multiplier;
         _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent * multiplier;
