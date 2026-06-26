@@ -932,7 +932,7 @@ class StartupTest {
       if (enableHcpp) {
         _addHcppSupportToManifest(testDirectory);
       }
-      if ((enableImpeller ?? false) && forceOpenGLES) {
+      if ((enableImpeller ?? true) && forceOpenGLES) {
         _addOpenGLESToManifest(testDirectory);
       }
 
