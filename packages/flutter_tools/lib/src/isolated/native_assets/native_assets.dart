@@ -12,6 +12,7 @@ import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
+import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/platform.dart';
@@ -831,7 +832,15 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
     targetDir.createSync(recursive: true);
   }
   await for (final FileSystemEntity entity in targetDir.list()) {
-    await entity.delete(recursive: true);
+    try {
+      await entity.delete(recursive: true);
+    } on FileSystemException catch (e) {
+      // Ignore if the file was already deleted by another process (e.g. macOS metadata)
+      final int? errorCode = e.osError?.errorCode;
+      if (errorCode != kSystemCodeCannotFindFile && errorCode != kSystemCodePathNotFound) {
+        rethrow;
+      }
+    }
   }
 
   if (assetTargetLocations.isEmpty) {

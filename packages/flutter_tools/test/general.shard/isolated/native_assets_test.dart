@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
 import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -393,6 +394,95 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(target.didSetCCompilerConfig, isTrue);
     },
   );
+
+  group('installCodeAssets deletion race', () {
+    testUsingContext(
+      'ignores errorCode 2 and 3 when deleting entities',
+      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+      () async {
+        final File packageConfig = environment.projectDir.childFile(
+          '.dart_tool/package_config.json',
+        );
+        await packageConfig.parent.create();
+        await packageConfig.create();
+
+        final File directSoFile = environment.projectDir.childFile('direct.so');
+        directSoFile.writeAsBytesSync(<int>[]);
+
+        CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file]) =>
+            CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
+
+        final environmentDefines = <String, String>{kBuildMode: BuildMode.release.cliName};
+        final codeAssets = <CodeAsset>[
+          makeCodeAsset('malloc', DynamicLoadingBundled(), directSoFile.uri),
+        ];
+
+        final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
+          environmentDefines: environmentDefines,
+          targetPlatform: TargetPlatform.linux_x64,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          buildRunner: FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['bar'],
+            buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+          ),
+          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+          buildDataAssets: true,
+          recordedUsesFile: null,
+        );
+
+        final errorFs2 = ErrorThrowingFileSystem(fileSystem, errorCodeToThrow: 2);
+        final Uri nonFlutterTesterAssetUri = environment.buildDir
+            .childFile('native_assets.json')
+            .uri;
+        final Directory targetDirectory = environment.buildDir.childDirectory('native_assets');
+
+        // Populate targetDirectory with a file so entity.delete gets called.
+        final File existingFile = targetDirectory.childFile('existing.so');
+        await existingFile.create(recursive: true);
+
+        // Should not throw since error code is 2
+        await installCodeAssets(
+          dartHookResult: dartHookResult,
+          environmentDefines: environmentDefines,
+          targetPlatform: TargetPlatform.linux_x64,
+          projectUri: projectUri,
+          fileSystem: errorFs2,
+          nativeAssetsFileUri: nonFlutterTesterAssetUri,
+          targetUri: targetDirectory.uri,
+        );
+
+        final errorFs3 = ErrorThrowingFileSystem(fileSystem, errorCodeToThrow: 3);
+        await existingFile.create(recursive: true);
+        // Should not throw since error code is 3
+        await installCodeAssets(
+          dartHookResult: dartHookResult,
+          environmentDefines: environmentDefines,
+          targetPlatform: TargetPlatform.linux_x64,
+          projectUri: projectUri,
+          fileSystem: errorFs3,
+          nativeAssetsFileUri: nonFlutterTesterAssetUri,
+          targetUri: targetDirectory.uri,
+        );
+
+        final errorFs5 = ErrorThrowingFileSystem(fileSystem, errorCodeToThrow: 5);
+        await existingFile.create(recursive: true);
+        // Should throw since error code is 5
+        expect(
+          () => installCodeAssets(
+            dartHookResult: dartHookResult,
+            environmentDefines: environmentDefines,
+            targetPlatform: TargetPlatform.linux_x64,
+            projectUri: projectUri,
+            fileSystem: errorFs5,
+            nativeAssetsFileUri: nonFlutterTesterAssetUri,
+            targetUri: targetDirectory.uri,
+          ),
+          throwsA(isA<FileSystemException>()),
+        );
+      },
+    );
+  });
 }
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
@@ -404,5 +494,109 @@ class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
   Future<void> setCCompilerConfig(CodeAssetTarget target) async {
     await target.setCCompilerConfig();
     didSetCCompilerConfig = true;
+  }
+}
+
+class ErrorThrowingFileSystem extends ForwardingFileSystem {
+  ErrorThrowingFileSystem(super.delegate, {required this.errorCodeToThrow});
+
+  final int errorCodeToThrow;
+
+  @override
+  Directory directory(dynamic path) {
+    return ErrorThrowingDirectory(
+      this,
+      delegate.directory(path),
+      errorCodeToThrow: errorCodeToThrow,
+    );
+  }
+}
+
+class ErrorThrowingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
+    with ForwardingDirectory<Directory> {
+  ErrorThrowingDirectory(this._fileSystem, this.delegate, {required this.errorCodeToThrow});
+
+  final ErrorThrowingFileSystem _fileSystem;
+
+  @override
+  final io.Directory delegate;
+
+  final int errorCodeToThrow;
+
+  @override
+  FileSystem get fileSystem => _fileSystem;
+
+  @override
+  Directory childDirectory(String basename) {
+    return fileSystem.directory(fileSystem.path.join(path, basename));
+  }
+
+  @override
+  File childFile(String basename) {
+    return fileSystem.file(fileSystem.path.join(path, basename));
+  }
+
+  @override
+  Link childLink(String basename) {
+    return fileSystem.link(fileSystem.path.join(path, basename));
+  }
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) =>
+      ErrorThrowingDirectory(_fileSystem, delegate, errorCodeToThrow: errorCodeToThrow);
+
+  @override
+  File wrapFile(io.File delegate) =>
+      ErrorThrowingFile(_fileSystem, delegate, errorCodeToThrow: errorCodeToThrow);
+
+  @override
+  Link wrapLink(io.Link delegate) => delegate as Link;
+
+  @override
+  Stream<FileSystemEntity> list({bool recursive = false, bool followLinks = true}) {
+    return delegate.list(recursive: recursive, followLinks: followLinks).map((
+      io.FileSystemEntity entity,
+    ) {
+      if (entity is io.File) {
+        return ErrorThrowingFile(_fileSystem, entity, errorCodeToThrow: errorCodeToThrow);
+      }
+      if (entity is io.Directory) {
+        return ErrorThrowingDirectory(_fileSystem, entity, errorCodeToThrow: errorCodeToThrow);
+      }
+      throw UnimplementedError('Link not supported');
+    });
+  }
+}
+
+class ErrorThrowingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
+  ErrorThrowingFile(this._fileSystem, this.delegate, {required this.errorCodeToThrow});
+
+  final ErrorThrowingFileSystem _fileSystem;
+
+  @override
+  final io.File delegate;
+
+  final int errorCodeToThrow;
+
+  @override
+  FileSystem get fileSystem => _fileSystem;
+
+  @override
+  File wrapFile(io.File delegate) =>
+      ErrorThrowingFile(_fileSystem, delegate, errorCodeToThrow: errorCodeToThrow);
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => delegate as Directory;
+
+  @override
+  Link wrapLink(io.Link delegate) => delegate as Link;
+
+  @override
+  Future<File> delete({bool recursive = false}) async {
+    throw FileSystemException(
+      'Mock deletion error',
+      path,
+      io.OSError('Mock OS Error', errorCodeToThrow),
+    );
   }
 }
