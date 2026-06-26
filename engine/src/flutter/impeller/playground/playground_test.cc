@@ -67,8 +67,12 @@ void PlaygroundTest::SetUp() {
 
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines/") != std::string::npos;
+
+  // Until a TEST_BODY can provide information about context sharing
+  // prior to the instantiation of a PlaygroundImpl, this name search
+  // identifies the one test that needs an un-shared context.
   switches.can_share_context =
-      test_name.find("UsePrivateContext/") == std::string::npos;
+      !test_name.starts_with("ReleasesTextureOnTeardown/");
 
   SetupContext(GetParam(), switches);
   SetupWindow();

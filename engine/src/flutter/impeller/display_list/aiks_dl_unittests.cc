@@ -591,7 +591,9 @@ TEST_P(AiksTest, SetContentsWithRegion) {
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/134678.
-TEST_P(AiksTest, ReleasesTextureOnTeardownUsePrivateContext) {
+// playground_test.cc recognizes this test name explicitly to make sure
+// this particular test is run with a unique (not shared) context.
+TEST_P(AiksTest, ReleasesTextureOnTeardown) {
   auto context = MakeContext();
   std::weak_ptr<Texture> weak_texture;
 
