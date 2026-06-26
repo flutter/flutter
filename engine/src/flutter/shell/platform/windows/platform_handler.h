@@ -69,7 +69,7 @@ class PlatformHandler {
   // Sets the clipboard's plain text to |text|, and reports the result (either
   // an error, or null for success) to |result|.
   virtual void SetPlainText(
-      const std::string& text,
+      const std::string_view text,
       std::unique_ptr<MethodResult<rapidjson::Document>> result);
 
   virtual void SystemSoundPlay(

@@ -341,7 +341,7 @@ void PlatformHandler::GetHasStrings(
 }
 
 void PlatformHandler::SetPlainText(
-    const std::string& text,
+    const std::string_view text,
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
@@ -353,7 +353,9 @@ void PlatformHandler::SetPlainText(
     result->Error(kClipboardError, "Unable to open clipboard", error_code);
     return;
   }
-  int set_result = clipboard->SetString(fml::Utf8ToWideString(text));
+  std::wstring clipboard_text = fml::Utf8ToWideString(text);
+  std::replace(clipboard_text.begin(), clipboard_text.end(), L'\0', L'\uFFFD');
+  int set_result = clipboard->SetString(clipboard_text);
   if (set_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(set_result);
@@ -504,7 +506,9 @@ void PlatformHandler::HandleMethodCall(
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-    SetPlainText(itr->value.GetString(), std::move(result));
+    SetPlainText(
+        std::string_view(itr->value.GetString(), itr->value.GetStringLength()),
+        std::move(result));
   } else if (method.compare(kPlaySoundMethod) == 0) {
     // Only one string argument is expected.
     const rapidjson::Value& sound_type = method_call.arguments()[0];
