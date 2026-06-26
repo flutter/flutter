@@ -79,6 +79,9 @@ bool AndroidImageGenerator::GetPixels(const SkImageInfo& info,
   // API level 30+ once it's updated to do symbol lookups and not get
   // preprocessed out in Skia. This will allow for avoiding this copy in
   // cases where the result image doesn't need to be resized.
+  if (software_decoded_data_->size() > info.computeByteSize(row_bytes)) {
+    return false;
+  }
   memcpy(pixels, software_decoded_data_->data(),
          software_decoded_data_->size());
   return true;
@@ -186,6 +189,18 @@ std::shared_ptr<ImageGenerator> AndroidImageGenerator::MakeFromData(
   }
 
   return nullptr;
+}
+
+std::shared_ptr<AndroidImageGenerator> AndroidImageGenerator::MakeForTesting(
+    const SkImageInfo& header_info,
+    sk_sp<SkData> decoded_data) {
+  std::shared_ptr<AndroidImageGenerator> generator(
+      new AndroidImageGenerator(SkData::MakeEmpty()));
+  generator->image_info_ = header_info;
+  generator->software_decoded_data_ = std::move(decoded_data);
+  generator->header_decoded_latch_.Signal();
+  generator->fully_decoded_latch_.Signal();
+  return generator;
 }
 
 void AndroidImageGenerator::NativeImageHeaderCallback(JNIEnv* env,
