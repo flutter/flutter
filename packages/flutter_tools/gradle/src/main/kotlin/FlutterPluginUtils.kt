@@ -40,6 +40,7 @@ object FlutterPluginUtils {
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
+    internal const val PROP_FORCE_VERSION_CODE_IGNORING_ABI = "force-version-code-ignoring-abi"
 
     /**
      * The URL for documentation for general information on migration to built-in Kotlin.
@@ -293,6 +294,16 @@ object FlutterPluginUtils {
     @JvmName("shouldProjectDisableAbiFiltering")
     internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean =
         project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
+
+    /**
+     *  Developers can set this value by passing `-P force-version-code-ignoring-abi=true`
+     *  to flutter build. Where "force-version-code-ignoring-abi" comes from
+     *  PROP_FORCE_VERSION_CODE_IGNORING_ABI.
+     */
+    @JvmStatic
+    @JvmName("shouldForceVersionCodeIgnoringAbi")
+    internal fun shouldForceVersionCodeIgnoringAbi(project: Project): Boolean =
+        project.findProperty(PROP_FORCE_VERSION_CODE_IGNORING_ABI)?.toString()?.toBoolean() ?: false
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
