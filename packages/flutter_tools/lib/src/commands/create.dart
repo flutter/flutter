@@ -1387,7 +1387,16 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   final sdkPackages = <String>[];
   final FileSystem fs = directory.fileSystem;
   final File pubspecFile = directory.childFile('pubspec.yaml');
-  final Object? parsedPubspec = loadYaml(pubspecFile.readAsStringSync());
+  Object? parsedPubspec;
+  try {
+    parsedPubspec = loadYaml(pubspecFile.readAsStringSync());
+  } on YamlException catch (e) {
+    throwToolExit(
+      'Failed to parse pubspec.yaml at ${pubspecFile.path}.\n'
+      'It may be malformed: $e\n'
+      'If you want to recreate it, re-run "flutter create" with the --overwrite flag.',
+    );
+  }
   if (parsedPubspec is! YamlMap) {
     throwToolExit(
       'Failed to parse pubspec.yaml at ${pubspecFile.path}.\n'

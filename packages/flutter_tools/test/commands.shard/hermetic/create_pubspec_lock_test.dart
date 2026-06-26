@@ -94,4 +94,9 @@ void main() {
     expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
     expect(gatherSdkPackageDependencies(projectDir), isEmpty);
   });
+
+  testWithoutContext('throws ToolExit if project pubspec.yaml is malformed', () {
+    final Directory projectDir = writeProject('malformed: yaml: check');
+    expect(() => gatherSdkPackageDependencies(projectDir), throwsA(isA<ToolExit>()));
+  });
 }
