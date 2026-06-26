@@ -1387,7 +1387,9 @@ class RenderEditable extends RenderBox
       config.onSetSelection = _handleSetSelection;
     }
 
-    if (hasFocus && !readOnly) {
+    // Browser autofill and automation can ask to set text before the focus
+    // update has settled, so expose setText early on web.
+    if (!readOnly && (kIsWeb || hasFocus)) {
       config.onSetText = _handleSetText;
     }
 

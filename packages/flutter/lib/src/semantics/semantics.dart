@@ -112,9 +112,8 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
-  List<SemanticsConfiguration>,
-);
+typedef ChildSemanticsConfigurationsDelegate =
+    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// Controls how accessibility focus is blocked.
 ///
@@ -6716,12 +6715,18 @@ class SemanticsConfiguration {
   SemanticsFlags _flags = SemanticsFlags.none;
 
   bool get _hasExplicitRole {
+    if (_hasNonTextFieldExplicitRole) {
+      return true;
+    }
+    return _flags.isTextField;
+  }
+
+  bool get _hasNonTextFieldExplicitRole {
     if (_role != SemanticsRole.none) {
       return true;
     }
-    if (_flags.isTextField ||
-        // In non web platforms, the header is a trait.
-        (_flags.isHeader && kIsWeb) ||
+    // In non web platforms, the header is a trait.
+    if ((_flags.isHeader && kIsWeb) ||
         _flags.isSlider ||
         _flags.isLink ||
         _flags.scopesRoute ||
@@ -6730,6 +6735,15 @@ class SemanticsConfiguration {
       return true;
     }
     return false;
+  }
+
+  bool _hasConflictingFlags(SemanticsConfiguration other) {
+    if (!_flags.hasConflictingFlags(other._flags)) {
+      return false;
+    }
+    final SemanticsFlags flags = _flags.copyWith(isTextField: false);
+    final SemanticsFlags otherFlags = other._flags.copyWith(isTextField: false);
+    return flags.hasConflictingFlags(otherFlags);
   }
 
   // CONFIGURATION COMBINATION LOGIC
@@ -6755,7 +6769,7 @@ class SemanticsConfiguration {
     if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
     }
-    if (_flags.hasConflictingFlags(other._flags)) {
+    if (_hasConflictingFlags(other)) {
       return false;
     }
 
@@ -6774,7 +6788,9 @@ class SemanticsConfiguration {
     if (_localeForSubtree != other._localeForSubtree) {
       return false;
     }
-    if (_hasExplicitRole && other._hasExplicitRole) {
+    if (_hasExplicitRole &&
+        other._hasExplicitRole &&
+        (_hasNonTextFieldExplicitRole || other._hasNonTextFieldExplicitRole)) {
       return false;
     }
     if (_hitTestBehavior != ui.SemanticsHitTestBehavior.defer ||
