@@ -539,9 +539,7 @@ object FlutterPluginUtils {
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
         val agpVersion = VersionFetcher.getAGPVersion(project)
-        if (isBuiltInKotlinEnabled(project, agpVersion) && hasNoSubprojectsApplyingKgp(project)) {
-            return
-        }
+        val isBuiltInKotlin = isBuiltInKotlinEnabled(project, agpVersion)
         var shouldLogForApp = false
         project.rootProject.subprojects {
             val pluginState = getSubprojectPluginState(this) ?: return@subprojects
@@ -549,7 +547,7 @@ object FlutterPluginUtils {
             // Ensures applying AGP exists in the build file configuration.
             if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
-            if (!pluginState.hasKgpPlugin) {
+            if (!isBuiltInKotlin && !pluginState.hasKgpPlugin) {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
@@ -561,23 +559,28 @@ object FlutterPluginUtils {
                         """.trimIndent()
                     )
                 }
-                return@subprojects
             }
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
-            if (pluginState.hasAppPlugin) {
+            if (pluginState.hasAppPlugin && pluginState.hasKgpPlugin) {
                 shouldLogForApp = true
             }
 
-            if (pluginState.hasLibPlugin) {
+            if (pluginState.hasLibPlugin && pluginState.hasKgpPlugin) {
                 pluginsWithKGPAppliedList.add(name)
             }
         }
 
+        // If no legacy KGP declarations were found, we have nothing to log.
+        // Exit early to avoid registering a redundant projectsEvaluated listener.
+        if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
+            return
+        }
+
         project.gradle.projectsEvaluated {
             // Safe to query AGP version after all projects are evaluated.
-            val agpVersion = VersionFetcher.getAGPVersion(project)
-            if (agpVersion == null || agpVersion.major < 9) {
+            val evaluatedAgpVersion = VersionFetcher.getAGPVersion(project)
+            if (evaluatedAgpVersion == null || evaluatedAgpVersion.major < 9) {
                 return@projectsEvaluated
             }
             if (shouldLogForApp) {
