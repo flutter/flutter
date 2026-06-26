@@ -4,8 +4,8 @@
 
 #include "flutter/fml/logging.h"
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMutatorView.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 
 namespace {
 FlutterMutatorView* MutatorViewForPlatformView(NSView* platform_view) {

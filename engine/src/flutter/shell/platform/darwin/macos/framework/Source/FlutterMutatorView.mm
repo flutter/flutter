@@ -852,9 +852,7 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
     }
   }
 
-  [_platformViewContainer addSubview:_mouseInterceptorView
-                          positioned:NSWindowAbove
-                          relativeTo:nil];
+  [_platformViewContainer addSubview:_mouseInterceptorView positioned:NSWindowAbove relativeTo:nil];
   _mouseInterceptorView.frame = untransformedBounds;
 
   // Transform for the platform view is finalTransform adjusted for bounding rect origin.
