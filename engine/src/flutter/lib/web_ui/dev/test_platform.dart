@@ -509,6 +509,9 @@ class BrowserPlatform extends PlatformPlugin {
       final String buildConfigsString = suite.testBundle.compileConfigs
           .map((CompileConfiguration config) => _makeBuildConfigString(scriptBase, config))
           .join(',\n');
+      final skwasmVariantConfig = suite.runConfig.skwasmVariant == null
+          ? ''
+          : '      skwasmVariant: "${suite.runConfig.skwasmVariant!.name}",\n';
       final bootstrapScript =
           '''
 <script>
@@ -524,6 +527,10 @@ class BrowserPlatform extends PlatformPlugin {
       $buildConfigsString
     ]
   };
+  window._flutterTestConfig = {
+    enableWimp: ${suite.runConfig.enableWimp},
+    skwasmVariant: ${jsonEncode(suite.runConfig.skwasmVariant?.name)},
+  };
 </script>
 <script src="/flutter_js/flutter.js"></script>
 <script>
@@ -532,7 +539,7 @@ class BrowserPlatform extends PlatformPlugin {
       canvasKitVariant: "${getCanvasKitVariant()}",
       canvasKitBaseUrl: "/canvaskit",
       forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
-      wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
+$skwasmVariantConfig      wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
       preferWebParagraph: ${suite.runConfig.enableWebParagraph},
       enableWimp: ${suite.runConfig.enableWimp},
     },

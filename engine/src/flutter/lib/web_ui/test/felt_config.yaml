@@ -130,6 +130,21 @@ run-configs:
     wasm-allow-list:
       gecko: true
 
+  - name: firefox-coi-wasm
+    browser: firefox
+    canvaskit-variant: full
+    cross-origin-isolated: true
+    wasm-allow-list:
+      gecko: true
+
+  - name: firefox-coi-wasm-normal
+    browser: firefox
+    canvaskit-variant: full
+    cross-origin-isolated: true
+    skwasm-variant: normal
+    wasm-allow-list:
+      gecko: true
+
   - name: safari
     browser: safari
     canvaskit-variant: full
@@ -137,6 +152,21 @@ run-configs:
   - name: safari-wasm
     browser: safari
     canvaskit-variant: full
+    wasm-allow-list:
+      webkit: true
+
+  - name: safari-coi-wasm
+    browser: safari
+    canvaskit-variant: full
+    cross-origin-isolated: true
+    wasm-allow-list:
+      webkit: true
+
+  - name: safari-coi-wasm-normal
+    browser: safari
+    canvaskit-variant: full
+    cross-origin-isolated: true
+    skwasm-variant: normal
     wasm-allow-list:
       webkit: true
 
@@ -150,12 +180,12 @@ test-suites:
   - name: chrome-dart2wasm-wimp-ui
     test-bundle: dart2wasm-skwasm-ui
     run-config: chrome-wimp
-    artifact-deps: [ skwasm ]
+    artifact-deps: [ skwasm, wimp ]
 
   - name: chrome-dart2wasm-wimp-skwasm
     test-bundle: dart2wasm-skwasm-skwasm
     run-config: chrome-wimp
-    artifact-deps: [ skwasm ]
+    artifact-deps: [ skwasm, wimp ]
 
   - name: chrome-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
@@ -228,6 +258,12 @@ test-suites:
     artifact-deps: [ skwasm ]
     enable-ci: false
 
+  - name: firefox-dart2wasm-skwasm-skwasm
+    test-bundle: dart2wasm-skwasm-skwasm
+    run-config: firefox-coi-wasm-normal
+    artifact-deps: [ skwasm ]
+    enable-ci: false
+
   - name: safari-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
     run-config: safari
@@ -252,6 +288,12 @@ test-suites:
   - name: safari-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui
     run-config: safari-wasm
+    artifact-deps: [ skwasm ]
+    enable-ci: false
+
+  - name: safari-dart2wasm-skwasm-skwasm
+    test-bundle: dart2wasm-skwasm-skwasm
+    run-config: safari-coi-wasm-normal
     artifact-deps: [ skwasm ]
     enable-ci: false
 

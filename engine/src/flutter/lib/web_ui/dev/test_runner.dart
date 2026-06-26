@@ -363,6 +363,9 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       if (artifacts.skwasm) {
         print('  skwasm'.ansiYellow);
       }
+      if (artifacts.wimp) {
+        print('  wimp'.ansiYellow);
+      }
     }
     if (isList) {
       return true;

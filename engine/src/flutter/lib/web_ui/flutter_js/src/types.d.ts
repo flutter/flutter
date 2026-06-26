@@ -50,6 +50,11 @@ type CanvasKitVariant =
   "full" |
   "chromium";
 
+type SkwasmVariant =
+  "auto" |
+  "normal" |
+  "heavy";
+
 type WasmAllowList = {
   [k in BrowserEngine]?: boolean;
 }
@@ -58,6 +63,11 @@ export interface FlutterConfiguration {
   assetBase?: string;
   canvasKitBaseUrl?: string;
   canvasKitVariant?: CanvasKitVariant;
+  /**
+   * Selects the Skwasm runtime artifact. Defaults to "auto", which chooses
+   * "heavy" when browser feature detection requires it.
+   */
+  skwasmVariant?: SkwasmVariant;
   renderer?: WebRenderer;
   preferWebParagraph?: boolean;
   enableWimp?: boolean;

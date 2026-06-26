@@ -5,11 +5,20 @@
 import { createWasmInstantiator } from "./instantiate_wasm.js";
 import { resolveUrlWithSegments } from "./utils.js";
 
-export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
+export const resolveSkwasmFileStem = (config, browserEnvironment) => {
+  const standardFileStem = config.enableWimp ? 'wimp' : 'skwasm';
+  switch (config.skwasmVariant) {
+    case 'normal':
+      return standardFileStem;
+    case 'heavy':
+      return 'skwasm_heavy';
+  }
   const needsHeavy = (!browserEnvironment.hasImageCodecs || !browserEnvironment.hasChromiumBreakIterators)
-  const fileStem = needsHeavy
-     ? 'skwasm_heavy'
-     : (config.enableWimp ? 'wimp' : 'skwasm');
+  return needsHeavy ? 'skwasm_heavy' : standardFileStem;
+}
+
+export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
+  const fileStem = resolveSkwasmFileStem(config, browserEnvironment);
   const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
   let skwasmUrl = rawSkwasmUrl;
   if (deps.flutterTT.policy) {

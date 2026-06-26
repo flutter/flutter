@@ -34,6 +34,8 @@ class TestBundle {
 
 enum CanvasKitVariant { full, chromium }
 
+enum SkwasmVariant { auto, normal, heavy }
+
 enum BrowserName { chrome, edge, firefox, safari }
 
 class RunConfiguration {
@@ -42,6 +44,7 @@ class RunConfiguration {
     this.browser,
     this.browserFlags,
     this.variant,
+    this.skwasmVariant,
     this.crossOriginIsolated,
     this.forceSingleThreadedSkwasm,
     this.enableWebParagraph,
@@ -53,6 +56,7 @@ class RunConfiguration {
   final BrowserName browser;
   final List<String> browserFlags;
   final CanvasKitVariant? variant;
+  final SkwasmVariant? skwasmVariant;
   final bool crossOriginIsolated;
   final bool forceSingleThreadedSkwasm;
   final bool enableWebParagraph;
@@ -66,18 +70,21 @@ class ArtifactDependencies {
     required this.canvasKit,
     required this.canvasKitChromium,
     required this.skwasm,
+    required this.wimp,
   });
 
   ArtifactDependencies.none()
     : canvasKitWebParagraph = false,
       canvasKit = false,
       canvasKitChromium = false,
-      skwasm = false;
+      skwasm = false,
+      wimp = false;
 
   final bool canvasKitWebParagraph;
   final bool canvasKit;
   final bool canvasKitChromium;
   final bool skwasm;
+  final bool wimp;
 
   ArtifactDependencies operator |(ArtifactDependencies other) {
     return ArtifactDependencies(
@@ -85,6 +92,7 @@ class ArtifactDependencies {
       canvasKit: canvasKit || other.canvasKit,
       canvasKitChromium: canvasKitChromium || other.canvasKitChromium,
       skwasm: skwasm || other.skwasm,
+      wimp: wimp || other.wimp,
     );
   }
 
@@ -94,6 +102,7 @@ class ArtifactDependencies {
       canvasKit: canvasKit && other.canvasKit,
       canvasKitChromium: canvasKitChromium && other.canvasKitChromium,
       skwasm: skwasm && other.skwasm,
+      wimp: wimp && other.wimp,
     );
   }
 }
@@ -191,6 +200,10 @@ class FeltConfig {
       final CanvasKitVariant? variant = variantNode == null
           ? null
           : CanvasKitVariant.values.byName(variantNode as String);
+      final dynamic skwasmVariantNode = runConfigYaml['skwasm-variant'];
+      final SkwasmVariant? skwasmVariant = skwasmVariantNode == null
+          ? null
+          : SkwasmVariant.values.byName(skwasmVariantNode as String);
       final bool crossOriginIsolated = runConfigYaml['cross-origin-isolated'] as bool? ?? false;
       final bool forceSingleThreadedSkwasm =
           runConfigYaml['force-single-threaded-skwasm'] as bool? ?? false;
@@ -202,6 +215,7 @@ class FeltConfig {
         browser,
         browserFlags,
         variant,
+        skwasmVariant,
         crossOriginIsolated,
         forceSingleThreadedSkwasm,
         enableWebParagraph,
@@ -237,6 +251,7 @@ class FeltConfig {
       var canvasKit = false;
       var canvasKitChromium = false;
       var skwasm = false;
+      var wimp = false;
       final dynamic depsNode = testSuiteYaml['artifact-deps'];
       if (depsNode != null) {
         for (final dynamic dep in depsNode as YamlList) {
@@ -261,6 +276,11 @@ class FeltConfig {
                 throw AssertionError('Artifact dep $dep listed twice in suite $name.');
               }
               skwasm = true;
+            case 'wimp':
+              if (wimp) {
+                throw AssertionError('Artifact dep $dep listed twice in suite $name.');
+              }
+              wimp = true;
             default:
               throw AssertionError('Unrecognized artifact dependency: $dep');
           }
@@ -271,6 +291,7 @@ class FeltConfig {
         canvasKit: canvasKit,
         canvasKitChromium: canvasKitChromium,
         skwasm: skwasm,
+        wimp: wimp,
       );
       final bool enableCi = (testSuiteYaml['enable-ci'] as bool?) ?? true;
       final suite = TestSuite(name, bundle, runConfig, artifactDeps, enableCi);
