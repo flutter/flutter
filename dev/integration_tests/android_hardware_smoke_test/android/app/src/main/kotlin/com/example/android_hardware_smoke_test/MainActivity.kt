@@ -2,27 +2,54 @@
 
 package com.example.android_hardware_smoke_test
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugin.common.BasicMessageChannel
-import io.flutter.plugin.common.JSONMessageCodec
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 
-class MainActivity : FlutterActivity() {
+class MainActivity :
+    FlutterActivity(),
+    NativeSupportApi {
     companion object {
         private const val TAG = "MainActivity"
-        const val CHANNEL_NAME = "com.example.android_hardware_smoke_test/test_channel"
-        private const val METHOD_CHANNEL_NAME = "com.example.android_hardware_smoke_test/native_support"
     }
 
-    var messageChannel: BasicMessageChannel<Any>? = null
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    var engine: FlutterEngine? = null
+        private set
+
     private var impellerBackend = "vulkan"
+
+    // Overridden to return a cached, application-wide FlutterEngine instance.
+    // In JUnit integration tests, the activity is destroyed and recreated for each test case.
+    // Tearing down and recreating a new FlutterEngine (and its native Impeller Vulkan resources)
+    // per test method triggers native driver race conditions and Vulkan memory/mutex crashes on Android.
+    // Reusing the cached engine keeps the Vulkan context stable across all test runs.
+    override fun provideFlutterEngine(context: Context): FlutterEngine? {
+        val cache = FlutterEngineCache.getInstance()
+        var cachedEngine = cache.get("smoke_test_engine")
+        if (cachedEngine == null) {
+            cachedEngine = FlutterEngine(context.applicationContext)
+            cachedEngine.dartExecutor.executeDartEntrypoint(
+                DartExecutor.DartEntrypoint.createDefault()
+            )
+            cache.put("smoke_test_engine", cachedEngine)
+        }
+        return cachedEngine
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        engine = flutterEngine
 
         try {
             val appInfo =
@@ -38,12 +65,7 @@ class MainActivity : FlutterActivity() {
             Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
         }
 
-        messageChannel =
-            BasicMessageChannel(
-                flutterEngine.dartExecutor.binaryMessenger,
-                CHANNEL_NAME,
-                JSONMessageCodec.INSTANCE
-            )
+        NativeSupportApi.setUp(flutterEngine.dartExecutor.binaryMessenger, this)
 
         flutterEngine
             .platformViewsController
@@ -52,15 +74,6 @@ class MainActivity : FlutterActivity() {
                 "com.example.android_hardware_smoke_test/native_text_view",
                 NativeTextViewFactory()
             )
-
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
-            .setMethodCallHandler { call, result ->
-                if (call.method == "impeller_backend") {
-                    result.success(impellerBackend)
-                } else {
-                    result.notImplemented()
-                }
-            }
 
         // Register the native_driver channel. This responds to AndroidNativeDriver's connection ping
         // and property checks, enabling the host-side runner to take compositor-level screenshots via ADB.
@@ -86,4 +99,6 @@ class MainActivity : FlutterActivity() {
                 }
             }
     }
+
+    override fun getImpellerBackend(): String? = impellerBackend
 }

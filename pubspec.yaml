@@ -221,5 +221,6 @@ dependencies:
 
 dev_dependencies:
   ffigen: 20.1.1
+  pigeon: 27.1.0
 
 # PUBSPEC CHECKSUM: in3p1o

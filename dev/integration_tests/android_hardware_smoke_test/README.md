@@ -44,7 +44,7 @@ flowchart TD
     Mode -->|"Instrumented Mode"| JUnit["native Android JUnit<br/>(FlutterActivityTest)"]
 
     HostScript --> RequestData["Driver script connects and requests<br/>testName via driver.requestData()"]
-    JUnit --> SendMessage["JUnit test runner sends<br/>testName over Message Channel"]
+    JUnit --> SendMessage["JUnit test runner calls<br/>api.renderTest(RenderRequest)"]
 
     RequestData --> RenderHost["Dart app renders target state"]
     SendMessage --> RenderDevice["Dart app renders target state"]
@@ -62,7 +62,16 @@ flowchart TD
 
 ### Instrumented On-Device Mode (OEM / Standalone)
 * **Orchestration**: Runs purely on the device under Android `AndroidJUnit4` runner.
-* **Execution**: Java JUnit code (`FlutterActivityTest.java`) launches the main activity and sends the test payload over a JSON message channel. The app (`lib/main.dart`) renders the widget, performs a local pixel-by-pixel on-device comparison against baseline images bundled within the APK assets, and replies with the status to the Java runner to pass or fail the JUnit assertion.
+* **Execution**: Kotlin JUnit code (`FlutterActivityTest.kt`) launches the main activity and triggers the rendering scenarios using strongly-typed Pigeon APIs (`SmokeTestFlutterApi`). The app (`lib/main.dart`) renders the widget, performs a local pixel-by-pixel on-device comparison against baseline images bundled within the APK assets, and replies with the status to the Kotlin runner to pass or fail the JUnit assertion.
+
+## 3.1 Type-Safe Platform Communication (Pigeon)
+
+To coordinate test execution and retrieve system state, the test harness uses **Pigeon** to generate strongly-typed native interface bindings instead of relying on manual `MethodChannel` or `BasicMessageChannel` JSON serialization.
+
+### Why Pigeon is used:
+- **Compile-Time Type Safety**: Exposing strongly-typed request and response structures (like `RenderRequest`, `RenderResponse`, and `CompareGoldenRequest`) ensures that contract mismatches, misspelling of message payload keys, or unsupported scenarios are caught at compile-time on both Dart and Kotlin sides.
+- **Zero Manual Serialization**: Avoids the fragility, boilerplate, and encoding bugs of manual JSON string building/parsing inside the JUnit runner and the Dart application.
+- **Clean API Design**: Separates different concerns (e.g. `renderTest` vs `compareGolden` vs `getImpellerBackend`) into clear, asynchronous API method calls rather than routing all traffic through a single monolithic method-name switch statement.
 
 ---
 
@@ -116,8 +125,8 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 > **Statically Compiled Single Source of Truth**:
 > The app's compiled `AndroidManifest.xml` `<meta-data>` tag is the single source of truth for the graphics backend configuration under **both** Instrumented On-Device Mode (OEM) and Host-Driven Driver Mode (CI).
 >
-> * **Instrumented On-Device Mode (OEM)**: The native Java JUnit harness (`FlutterActivityTest.java`) reads this value dynamically using the `PackageManager` API and routes it to Dart.
-> * **Host-Driven Driver Mode (CI / Host)**: The Dart app queries the native Android embedder via a custom `MethodChannel` to self-discover its compiled backend and self-reports it to the host test script inside its JSON reply payload, completely eliminating the need for environment variables on the host PC.
+> * **Instrumented On-Device Mode (OEM)**: The native Kotlin JUnit harness (`FlutterActivityTest.kt`) reads this value dynamically using the `PackageManager` API and routes it to Dart.
+> * **Host-Driven Driver Mode (CI / Host)**: The Dart app queries the native Android embedder via a Pigeon-generated API (`NativeSupportApi`) to self-discover its compiled backend and self-reports it to the host test script inside its `RenderResponse` object, completely eliminating the need for environment variables on the host PC.
 >
 > To switch the active graphics backend manually for local runs, open `android/app/src/main/AndroidManifest.xml` and update the `io.flutter.embedding.android.ImpellerBackend` value:
 >
@@ -235,7 +244,7 @@ flowchart TD
     CoordsDevice --> CaptureDevice["JUnit test runner takes UiAutomation<br/>screencap and crops natively"]:::unique
 
     CaptureHost -->|"Remaining steps occur normally"| CompareHost["Driver script asserts exact match<br/>against local filesystem"]
-    CaptureDevice --> SendBytes["JUnit test runner sends cropped<br/>base64 bytes to Dart app over message channel"]:::unique
+    CaptureDevice --> SendBytes["JUnit test runner calls<br/>api.compareGolden(CompareGoldenRequest)"]:::unique
 
     SendBytes --> ImmediateComparison["App handles cropped bytes immediately without new frame render"]:::unique
 
@@ -256,7 +265,7 @@ The beginning and end of the test are the same as for other tests as described i
   * **Host-Driven Mode:** The driver script takes a full-screen screenshot of the physical device using ADB (`adb shell screencap` wrapped inside `NativeDriver.screenshot()` in [`driver_test.dart`](test_driver/driver_test.dart)). Then crops it locally to the retrieved coordinates using the Dart `image` package.
   * **Instrumented Mode:** The JUnit test runner takes a full-screen screenshot using `UiAutomation.takeScreenshot()` in [`FlutterActivityTest.kt: captureAndSendScreenshot`](android/app/src/androidTest/java/com/example/android_hardware_smoke_test/FlutterActivityTest.kt). Then crops the bitmap natively using `Bitmap.createBitmap`.
 * **Extra round trip and encoding-independent pixel comparison for Instrumented Mode**:
-  * **Instrumented Mode:** The Dart app is where we perform the golden comparison, so the JUnit test runner sends the cropped bytes back to the Dart app by base64-encoding them and sending them over the `BasicMessageChannel`. It sets a field on the JSON message called `command` with the value `compare_golden`. When the Dart app parses this request, it performs the golden comparison immediately instead of waiting for another frame through `addPostFrameCallback`. However, the normal `NaiveLocalFileComparator` compares all image bytes. This is a problem because the different methods of capturing screenshots may produce images with PNG encoding differences. To compare pixels regardless of encoding, we use a [PixelExactLocalFileComparator](lib/pixel_exact_local_file_comparator.dart). After comparison, it reports success or failure in the same way as it would for other tests.
+  * **Instrumented Mode:** The Dart app is where we perform the golden comparison, so the JUnit test runner sends the cropped bytes back to the Dart app by invoking the Pigeon API `compareGolden` with a `CompareGoldenRequest(scenario, croppedBytes)` payload. When the Dart app receives this request, it performs the golden comparison immediately instead of waiting for another frame through `addPostFrameCallback`. However, the normal `NaiveLocalFileComparator` compares all image bytes. This is a problem because the different methods of capturing screenshots may produce images with PNG encoding differences. To compare pixels regardless of encoding, we use a [PixelExactLocalFileComparator](lib/pixel_exact_local_file_comparator.dart). After comparison, it reports success or failure in the same way as it would for other tests.
   * **Host-Driven Mode:** The driver doesn't need a new round trip because it performs the comparison directly in the same way as it does for image bytes returned from the Dart app.
 
 

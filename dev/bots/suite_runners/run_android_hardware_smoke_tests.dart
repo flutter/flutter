@@ -28,6 +28,9 @@ Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) as
     '.',
   ], workingDirectory: testDir);
 
+  // Generate Pigeon bindings and suppress Kotlin package lints
+  await runCommand('dart', <String>['tool/generate.dart'], workingDirectory: testDir);
+
   final File androidManifestXml = const LocalFileSystem().file(
     path.join(testDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
   );

@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Pigeon generated files
+/lib/src/messages.g.dart
+/android/app/src/main/kotlin/com/example/android_hardware_smoke_test/Messages.g.kt

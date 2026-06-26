@@ -108,6 +108,7 @@ tasks.register("embedTestResultImages") {
 
         // 3. Dynamically parse and inject <img> tags for all discovered tests
         if (discoveredTests.isNotEmpty()) {
+            var totalEmbedded = 0
             targetVariantDir.walk().forEach { file ->
                 if (file.extension.equals("html", ignoreCase = true)) {
                     var htmlContent = file.readText()
@@ -116,14 +117,20 @@ tasks.register("embedTestResultImages") {
                     for (test in discoveredTests) {
                         val testName = test.testName
                         val fileName = test.fileName
-                        val targetCell = "<td>$testName</td>"
+                        val scenarioName = testName
+                            .removeSuffix("Test")
+                            .replace(Regex("(?<=[a-z0-9])([A-Z])"), "_$1")
+                            .uppercase()
+                        val targetCell = "<td>runScenario[$scenarioName]</td>"
+
                         if (htmlContent.contains(targetCell)) {
                             htmlContent =
                                 htmlContent.replace(
                                     targetCell,
-                                    "<td>$testName<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
+                                    "<td>runScenario[$scenarioName]<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
                                 )
                             modified = true
+                            totalEmbedded++
                         }
                     }
 
@@ -132,12 +139,16 @@ tasks.register("embedTestResultImages") {
                     }
                 }
             }
-            println(
-                "🎉 Successfully embedded ${discoveredTests.size} test result images in HTML report: ${File(
-                    targetVariantDir,
-                    "index.html"
-                ).absolutePath}"
-            )
+            if (totalEmbedded > 0) {
+                println(
+                    "🎉 Successfully embedded $totalEmbedded test result images in HTML report: ${File(
+                        targetVariantDir,
+                        "index.html"
+                    ).absolutePath}"
+                )
+            } else {
+                println("ℹ️ Discovered ${discoveredTests.size} result images but found no matching HTML table cells to embed them in.")
+            }
         } else {
             println("No test result images found on device to embed.")
         }

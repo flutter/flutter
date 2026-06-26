@@ -7,29 +7,33 @@
 package com.example.android_hardware_smoke_test
 
 import android.graphics.Bitmap
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-@RunWith(AndroidJUnit4::class)
-class FlutterActivityTest {
+@RunWith(Parameterized::class)
+class FlutterActivityTest(
+    private val scenario: TestScenario
+) {
     companion object {
         private const val TAG = "FlutterActivityTest"
         private const val SCREENSHOT_CAPTURE_DELAY_MS = 200L
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
+
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun data(): Collection<TestScenario> = TestScenario.values().toList()
     }
 
     @get:Rule val rule = ActivityScenarioRule(MainActivity::class.java)
@@ -38,55 +42,64 @@ class FlutterActivityTest {
      * Common test body for executing a test on the device by sending a command to the Flutter
      * application.
      *
-     * Sends a JSON message over the [BasicMessageChannel] containing the [testName] and an
-     * on-device comparison request instruction. The test awaits a completed frame render reply up
-     * to 60 seconds, logging warning diagnostics if the operation is exceptionally slow.
+     * Sends a [RenderRequest] over the Pigeon API containing the target scenario and comparison instruction.
+     * The test awaits a completed frame render reply up to 60 seconds, logging warning diagnostics
+     * if the operation is exceptionally slow.
      *
-     * @param testName The descriptive identifier of the test case to render and compare.
+     * @param scenario The target rendering scenario to execute and compare.
      */
-    private fun templateTest(testName: String) {
-        Log.d(TAG, "Starting $testName")
+    private fun templateTest(scenario: TestScenario) {
+        val testName =
+            scenario.name
+                .lowercase()
+                .split("_")
+                .mapIndexed { index, part ->
+                    if (index == 0) part else part.replaceFirstChar { it.uppercase() }
+                }.joinToString("") + "Test"
         val future = CompletableFuture<String>()
 
         rule.scenario.onActivity { activity ->
-            // Confirm screen is not locked by checking activity has lifecycle state RESUMED
-            assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
-
             try {
-                val isPlatformView = testName.startsWith(Constants.PLATFORM_VIEW_PREFIX)
-                val message =
-                    JSONObject().apply {
-                        put(Constants.KEY_TEST_NAME, testName)
-                        put(Constants.KEY_PERFORM_APP_SIDE_GOLDEN_COMPARE, !isPlatformView)
-                    }
+                // Confirm screen is not locked by checking activity has lifecycle state RESUMED
+                assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
 
-                Log.d(TAG, "Sending '$message' on message channel")
+                val mainActivity = activity as MainActivity
+                val api = SmokeTestFlutterApi(mainActivity.engine!!.dartExecutor.binaryMessenger)
+                val isPlatformView = testName.startsWith("platformView")
+                val request =
+                    RenderRequest(
+                        scenario = scenario,
+                        performAppSideGoldenCompare = !isPlatformView,
+                        captureScreenshot = true
+                    )
 
-                activity.messageChannel?.send(message) { reply ->
-                    try {
-                        val replyJson =
-                            reply as? JSONObject
-                                ?: throw IllegalStateException("Expected JSONObject reply from Dart, but received: $reply")
-                        val replyMessage = replyJson.getString(Constants.KEY_MESSAGE)
+                api.renderTest(request) { result ->
+                    result.fold(
+                        onSuccess = { reply ->
+                            try {
+                                if (reply.message == "Skipped") {
+                                    val reason = reply.reason ?: "Unsupported"
+                                    future.complete("Skipped: $reason")
+                                } else if (isPlatformView && reply.message.startsWith("Rendered platformView")) {
+                                    val x = reply.x?.toInt() ?: throw IllegalStateException("Expected non-null x coordinate")
+                                    val y = reply.y?.toInt() ?: throw IllegalStateException("Expected non-null y coordinate")
+                                    val width = reply.width?.toInt() ?: throw IllegalStateException("Expected non-null width")
+                                    val height = reply.height?.toInt() ?: throw IllegalStateException("Expected non-null height")
 
-                        if (replyMessage == "Skipped") {
-                            val reason = replyJson.optString(Constants.KEY_REASON, "Unsupported")
-                            future.complete("Skipped: $reason")
-                        } else if (isPlatformView && replyMessage.startsWith("Rendered ${Constants.PLATFORM_VIEW_PREFIX}")) {
-                            val x = replyJson.getInt(Constants.KEY_X)
-                            val y = replyJson.getInt(Constants.KEY_Y)
-                            val width = replyJson.getInt(Constants.KEY_WIDTH)
-                            val height = replyJson.getInt(Constants.KEY_HEIGHT)
-
-                            captureAndSendScreenshot(x, y, width, height, testName, future)
-                        } else {
-                            future.complete(replyMessage)
+                                    captureAndSendScreenshot(x, y, width, height, scenario, testName, api, future)
+                                } else {
+                                    future.complete(reply.message)
+                                }
+                            } catch (e: Exception) {
+                                future.completeExceptionally(e)
+                            }
+                        },
+                        onFailure = { error ->
+                            future.completeExceptionally(error)
                         }
-                    } catch (e: Exception) {
-                        future.completeExceptionally(e)
-                    }
+                    )
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 future.completeExceptionally(e)
             }
         }
@@ -111,20 +124,19 @@ class FlutterActivityTest {
             // Wait with a very generous timeout to catch true deadlocks/crashes
             reply = future.get(TEST_TIMEOUT_SEC, TimeUnit.SECONDS)
         } catch (e: Exception) {
-            Log.e(TAG, "$testName Failed to receive result on message channel: ${e.message}")
+            Log.e(TAG, "$testName Failed to receive result over Pigeon API: ${e.message}")
             throw RuntimeException(e)
         } finally {
             executor.shutdown()
         }
 
-        Log.d(TAG, "Received $reply on message channel")
         if (reply.startsWith("Skipped")) {
             Log.w(TAG, "$testName: Skipped - $reply")
             org.junit.Assume.assumeTrue(reply, false)
             return
         }
 
-        if (testName.startsWith(Constants.PLATFORM_VIEW_PREFIX)) {
+        if (testName.startsWith("platformView")) {
             assertEquals("Comparison Success", reply)
         } else {
             assertEquals("Rendered $testName", reply)
@@ -136,7 +148,9 @@ class FlutterActivityTest {
         y: Int,
         width: Int,
         height: Int,
+        scenario: TestScenario,
         testName: String,
+        api: SmokeTestFlutterApi,
         future: CompletableFuture<String>
     ) {
         // Capture the screenshot on a background thread with a short delay. We must NOT sleep or capture
@@ -175,29 +189,19 @@ class FlutterActivityTest {
                     cropped.recycle()
                 }
                 val croppedBytes = stream.toByteArray()
-                val base64Image = Base64.encodeToString(croppedBytes, Base64.NO_WRAP)
 
-                val compareMsg =
-                    JSONObject().apply {
-                        put(Constants.KEY_COMMAND, Constants.COMMAND_COMPARE_GOLDEN)
-                        put(Constants.KEY_TEST_NAME, testName)
-                        put(Constants.KEY_IMAGE_BYTES, base64Image)
-                    }
+                val request = CompareGoldenRequest(scenario, croppedBytes)
 
-                Log.d(TAG, "Sending compare_golden request to Dart app")
-                // Send the cropped PNG bytes back to Dart so all golden comparisons are resolved via Dart's matchesGoldenFile.
-                rule.scenario.onActivity { mainActivity ->
-                    mainActivity.messageChannel?.send(compareMsg) { compareReply ->
-                        try {
-                            val compareReplyJson =
-                                compareReply as? JSONObject
-                                    ?: throw IllegalStateException(
-                                        "Expected JSONObject reply from compare_golden request, but received: $compareReply"
-                                    )
-                            future.complete(compareReplyJson.getString(Constants.KEY_MESSAGE))
-                        } catch (e: Exception) {
-                            future.completeExceptionally(e)
-                        }
+                rule.scenario.onActivity { _ ->
+                    api.compareGolden(request) { result ->
+                        result.fold(
+                            onSuccess = { reply ->
+                                future.complete(reply.message)
+                            },
+                            onFailure = { error ->
+                                future.completeExceptionally(error)
+                            }
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -209,47 +213,7 @@ class FlutterActivityTest {
     }
 
     @Test
-    fun blueRectangleTest() {
-        templateTest(Constants.BLUE_RECTANGLE_TEST)
-    }
-
-    @Test
-    fun trianglePathTest() {
-        templateTest(Constants.TRIANGLE_PATH_TEST)
-    }
-
-    @Test
-    fun textTest() {
-        templateTest(Constants.TEXT_TEST)
-    }
-
-    @Test
-    fun imageTest() {
-        templateTest(Constants.IMAGE_TEST)
-    }
-
-    @Test
-    fun advancedBlendTest() {
-        templateTest(Constants.ADVANCED_BLEND_TEST)
-    }
-
-    @Test
-    fun backdropFilterBlurTest() {
-        templateTest(Constants.BACKDROP_FILTER_BLUR_TEST)
-    }
-
-    @Test
-    fun platformViewTextureLayerTest() {
-        templateTest(Constants.PLATFORM_VIEW_TEXTURE_LAYER_TEST)
-    }
-
-    @Test
-    fun platformViewHybridCompositionTest() {
-        templateTest(Constants.PLATFORM_VIEW_HYBRID_COMPOSITION_TEST)
-    }
-
-    @Test
-    fun platformViewHybridCompositionPlusPlusTest() {
-        templateTest(Constants.PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST)
+    fun runScenario() {
+        templateTest(scenario)
     }
 }
