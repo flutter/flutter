@@ -50,6 +50,13 @@ import 'swift_package_manager.dart';
 /// Function: createItemModels(for:itemModelSource:)
 /// Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
 /// Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+///
+/// xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open log store at /path/to/app/build/macos/Logs/Build
+/// xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open Build log store: Error Domain=NSCocoaErrorDomain Code=4 "The file "LogStoreManifest.plist" doesn't exist." UserInfo={...}. User info: {
+///     NSFilePath = "/path/to/app/build/macos/Logs/Build/LogStoreManifest.plist";
+///     NSURL = "file:///path/to/app/build/macos/Logs/Build/LogStoreManifest.plist";
+///     NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"";
+/// }.
 
 /// ```
 final _filteredOutput = RegExp(
@@ -57,6 +64,10 @@ final _filteredOutput = RegExp(
   r'Requested but did not find extension point with identifier|'
   r'note\:|'
   r'\[MT\] DVTAssertions: Warning in /System/Volumes/Data/SWE/|'
+  r'.*\[MT\] IDELogStore: Failed to open|'
+  r'.*LogStoreManifest\.plist|'
+  r'.*NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2|'
+  r'^\s*\}\.\s*$|'
   r'Details\:  createItemModels|'
   r'Function\: createItemModels|'
   r'Thread\:   <_NSMainThread\:|'
