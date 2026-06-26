@@ -2024,4 +2024,7 @@ class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
 class OverrideUserMessages extends UserMessages {
   @override
   String get uiSceneMigrationWarning => 'override message';
+
+  @override
+  String get uiSceneMigrationRequiredError => 'override message';
 }

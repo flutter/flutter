@@ -214,7 +214,10 @@ class UserMessages {
 
   /// Overridable message to be shown when detected from device logs that UIScene migration is
   /// still required.
-  String get uiSceneMigrationWarning => '''
+  String? uiSceneMigrationWarning;
+
+  /// Message to be shown when the app crashes on launch because it has not been migrated to the UIScene lifecycle.
+  String get uiSceneMigrationRequiredError => '''
 ════════════════════════════════════════════════════════════════════════════════
 Your iOS app has not been migrated to the UIScene lifecycle.
 UIScene lifecycle is required on iOS 27 and later.
