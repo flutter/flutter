@@ -1501,7 +1501,7 @@ void main() {
           );
           unawaited(
             mdnsDiscovery.discoveryStarted.future.whenComplete(() {
-              deviceLogReader.addLine('App terminated');
+              deviceLogReader.addLine('App terminated due to signal 5');
             }),
           );
 
