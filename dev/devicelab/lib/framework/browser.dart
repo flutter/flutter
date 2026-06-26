@@ -445,18 +445,21 @@ class BlinkFrame {
   BlinkTraceEvent? endMeasuredFrame;
 }
 
-/// Takes a list of events that have non-null [BlinkTraceEvent.tdur] computes
-/// their average as a [Duration] value.
+/// Takes a list of events that have a non-null [BlinkTraceEvent.tdur] or
+/// [BlinkTraceEvent.dur] and computes their average as a [Duration] value.
 Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
-  // Compute the sum of "tdur" fields of the last _kMeasuredSampleCount events.
+  // Compute the sum of trace duration fields of the last _kMeasuredSampleCount
+  // events. Chrome versions can report duration-only frame events, so fall
+  // back to "dur" when thread duration is not present.
   final double sum = events.skip(math.max(events.length - _kMeasuredSampleCount, 0)).fold(0.0, (
     double previousValue,
     BlinkTraceEvent event,
   ) {
-    if (event.tdur == null) {
-      throw FormatException('Trace event lacks "tdur" field: $event');
+    final int? duration = event.tdur ?? event.dur;
+    if (duration == null) {
+      throw FormatException('Trace event lacks duration field: $event');
     }
-    return previousValue + event.tdur!;
+    return previousValue + duration;
   });
   final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
   return Duration(microseconds: sum ~/ sampleCount);
@@ -500,7 +503,8 @@ class BlinkTraceEvent {
       tid = _readInt(json, 'tid'),
       ts = _readInt(json, 'ts'),
       tts = _readInt(json, 'tts'),
-      tdur = _readInt(json, 'tdur');
+      tdur = _readInt(json, 'tdur'),
+      dur = _readInt(json, 'dur');
 
   /// Event-specific data.
   final Map<String, dynamic> args;
@@ -528,6 +532,9 @@ class BlinkTraceEvent {
 
   /// Event duration in microseconds.
   final int? tdur;
+
+  /// Wall-clock event duration in microseconds.
+  final int? dur;
 
   /// A "begin frame" event contains all of the scripting time of an animation
   /// frame (JavaScript, WebAssembly), plus a negligible amount of internal
@@ -590,7 +597,8 @@ class BlinkTraceEvent {
       'tid: $tid, '
       'ts: $ts, '
       'tts: $tts, '
-      'tdur: $tdur)';
+      'tdur: $tdur, '
+      'dur: $dur)';
 }
 
 /// Read an integer out of [json] stored under [key].
