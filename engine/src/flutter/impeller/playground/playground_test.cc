@@ -67,6 +67,8 @@ void PlaygroundTest::SetUp() {
 
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines/") != std::string::npos;
+  switches.can_share_context =
+      test_name.find("UsePrivateContext/") == std::string::npos;
 
   SetupContext(GetParam(), switches);
   SetupWindow();

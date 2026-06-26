@@ -591,7 +591,7 @@ TEST_P(AiksTest, SetContentsWithRegion) {
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/134678.
-TEST_P(AiksTest, ReleasesTextureOnTeardown) {
+TEST_P(AiksTest, ReleasesTextureOnTeardownUsePrivateContext) {
   auto context = MakeContext();
   std::weak_ptr<Texture> weak_texture;
 

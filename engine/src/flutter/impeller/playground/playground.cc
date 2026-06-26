@@ -98,8 +98,8 @@ std::shared_ptr<Context> Playground::GetContext() const {
 }
 
 std::shared_ptr<Context> Playground::MakeContext() const {
-  // Playgrounds are already making a context for each test, so we can just
-  // return the `context_`.
+  // The playground will make a new context for this specific test if the
+  // test was named with a "UsePrivateContext" suffix.
   return context_;
 }
 

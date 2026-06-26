@@ -131,18 +131,7 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   }
 
   std::unique_ptr<PlaygroundImplGLES::ShareableContext>& shared_context =
-      switches.flags.use_sdfs ? g_gles_playground_env->shared_context_sdf
-                              : g_gles_playground_env->shared_context;
-
-  // If the switches have values that result in a different GLES context than
-  // the existing shared context, reset the shared context to create a new one.
-  if (shared_context &&
-      (shared_context->switches.use_angle != switches_.use_angle ||
-       shared_context->switches.flags.antialiased_lines !=
-           switches_.flags.antialiased_lines)) {
-    shared_context.reset();
-  }
-
+      GetShareableContext();
   if (!shared_context) {
     shared_context = MakeShareableContext(switches_);
     if (!shared_context) {
@@ -157,6 +146,31 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   handle_.reset(window);
 
   shared_context->context->GetGPUTracer()->Reset();
+}
+
+std::unique_ptr<PlaygroundImplGLES::ShareableContext>&
+PlaygroundImplGLES::GetShareableContext() {
+  if (!switches_.can_share_context) {
+    // Caller will initialize the information in the private context field.
+    return unique_context_;
+  }
+
+  std::unique_ptr<PlaygroundImplGLES::ShareableContext>& shared_context =
+      switches_.flags.use_sdfs ? g_gles_playground_env->shared_context_sdf
+                               : g_gles_playground_env->shared_context;
+
+  // If the switches have values that result in a different GLES context than
+  // the existing shared context, reset the shared context to create a new one.
+  if (shared_context &&
+      (shared_context->switches.use_angle != switches_.use_angle ||
+       shared_context->switches.flags.antialiased_lines !=
+           switches_.flags.antialiased_lines)) {
+    shared_context.reset();
+  }
+
+  // Caller will initialize the shared information in the global shared
+  // context field.
+  return shared_context;
 }
 
 GLFWwindow* PlaygroundImplGLES::CreateGLWindow(
