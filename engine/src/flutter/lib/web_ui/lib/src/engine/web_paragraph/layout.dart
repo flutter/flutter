@@ -1074,6 +1074,8 @@ abstract class LineBlock {
     this.shiftFromLineStart,
   ) {
     if (span.style.height == null) {
+      _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent;
+      _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent;
       return;
     }
     final double fontSize = span.style.fontSize ?? 14.0;
@@ -1083,11 +1085,11 @@ abstract class LineBlock {
       case ui.TextLeadingDistribution.even:
         final double extraLeading = (runHeight - fontHeight) / 2;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent + extraLeading;
-        _multipliedFontBoundingBoxDescent = span.fontBoundingBoxAscent + extraLeading;
+        _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent + extraLeading;
       default:
         final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent * multiplier;
-        _multipliedFontBoundingBoxDescent = span.fontBoundingBoxAscent * multiplier;
+        _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent * multiplier;
     }
   }
 
