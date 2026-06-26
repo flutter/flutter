@@ -25,8 +25,13 @@ std::shared_ptr<impeller::HostBuffer> CreateHostBufferFromContext(
 }
 
 // The number of workgroups needed to cover `invocations` invocations given a
-// per-workgroup `local_size`.
+// per-workgroup `local_size`. A `local_size` of 0 means the shader sizes its
+// workgroup with a specialization constant, in which case the caller should
+// dispatch an explicit count rather than derive one here.
 constexpr uint32_t WorkgroupCount(size_t invocations, uint32_t local_size) {
+  if (local_size == 0u) {
+    return 0u;
+  }
   return static_cast<uint32_t>((invocations + local_size - 1) / local_size);
 }
 }  // namespace

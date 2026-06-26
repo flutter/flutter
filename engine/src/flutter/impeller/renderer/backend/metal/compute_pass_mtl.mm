@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/metal/compute_pass_mtl.h"
 
 #include <Metal/Metal.h>
+#include <algorithm>
 #include <memory>
 
 #include "flutter/fml/backtrace.h"
@@ -135,13 +136,19 @@ fml::Status ComputePassMTL::Compute(uint32_t workgroup_count_x,
   // Unlike Vulkan and GLES, Metal does not bake the threadgroup size into the
   // shader; it is supplied here at dispatch. Honor the shader's declared local
   // size. A dimension of 0 means the shader sized it with a specialization
-  // constant, so fall back to packing the device maximum into the x dimension.
+  // constant. In that case fill the remaining threadgroup capacity into x while
+  // honoring any literal y and z, keeping the total within the device maximum.
   MTLSize threads_per_threadgroup;
   if (workgroup_size_[0] == 0u) {
-    const NSUInteger max_total_threads_per_threadgroup =
+    const NSUInteger max_total =
         pass_bindings_cache_.GetPipeline().maxTotalThreadsPerThreadgroup;
-    threads_per_threadgroup =
-        MTLSizeMake(max_total_threads_per_threadgroup, 1, 1);
+    const NSUInteger size_y =
+        workgroup_size_[1] == 0u ? 1u : workgroup_size_[1];
+    const NSUInteger size_z =
+        workgroup_size_[2] == 0u ? 1u : workgroup_size_[2];
+    const NSUInteger size_x =
+        std::max<NSUInteger>(1u, max_total / (size_y * size_z));
+    threads_per_threadgroup = MTLSizeMake(size_x, size_y, size_z);
   } else {
     threads_per_threadgroup = MTLSizeMake(
         workgroup_size_[0], workgroup_size_[1] == 0u ? 1 : workgroup_size_[1],
