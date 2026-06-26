@@ -275,22 +275,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  device_info:
-    dependency: "direct main"
-    description:
-      name: device_info
-      sha256: f4a8156cb7b7480d969cb734907d18b333c8f0bc0b1ad0b342cdcecf30d62c48
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.3"
-  device_info_platform_interface:
-    dependency: "direct main"
-    description:
-      name: device_info_platform_interface
-      sha256: b148e0bf9640145d09a4f8dea96614076f889e7f7f8b5ecab1c7e5c2dbc73c1b
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   devtools_shared:
     dependency: transitive
     description:
@@ -818,14 +802,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  pedantic:
-    dependency: "direct main"
-    description:
-      name: pedantic
-      sha256: "67fc27ed9639506c856c840ccce7594d0bdcd91bc8d53d6e52359449a1d50602"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.11.1"
   petitparser:
     dependency: "direct main"
     description:
