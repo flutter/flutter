@@ -18,6 +18,25 @@ class SkwasmRenderer extends Renderer {
 
   bool get isWimp => skwasmIsWimp();
 
+  late Surface _pictureToImageSurface;
+
+  static Rasterizer _createRasterizer({required bool isMultiThreaded}) {
+    // HTMLCanvasElement cannot be posted to a worker. Multi-threaded Skwasm can
+    // use the onscreen path only when the visible canvas can transfer control to
+    // an OffscreenCanvas. Single-threaded Skwasm can use the HTMLCanvasElement
+    // directly.
+    if (configuration.skwasmForceMultiSurfaceRasterizer &&
+        (browserSupportsTransferControlToOffscreen || !isMultiThreaded)) {
+      return MultiSurfaceRasterizer(
+        (OnscreenCanvasProvider canvasProvider) =>
+            SkwasmSurface.onscreen(canvasProvider, useTransferredCanvas: isMultiThreaded),
+      );
+    }
+    return OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
+    );
+  }
+
   @override
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
@@ -318,9 +337,8 @@ class SkwasmRenderer extends Renderer {
 
   @override
   FutureOr<void> initialize() async {
-    rasterizer = OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
-    );
+    rasterizer = _createRasterizer(isMultiThreaded: isMultiThreaded);
+    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
     return super.initialize();
   }
 
@@ -531,11 +549,10 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
-    );
+    rasterizer = _createRasterizer(isMultiThreaded: isMultiThreaded);
+    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
 
   @override
-  Surface get pictureToImageSurface => (rasterizer as OffscreenCanvasRasterizer).offscreenSurface;
+  Surface get pictureToImageSurface => _pictureToImageSurface;
 }

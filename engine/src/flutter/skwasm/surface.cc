@@ -168,7 +168,8 @@ void Skwasm::Surface::ResizeSurface(int width, int height) {
 // Rendering
 
 uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
-                                         int count) {
+                                         int count,
+                                         bool capture_image_bitmaps) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = ++current_callback_id_;
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> picture_pointers =
@@ -180,7 +181,8 @@ uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
   // Releasing picture_pointers here and will recreate the unique_ptr on the
   // other thread See surface_renderPicturesOnWorker
   skwasm_dispatchRenderPictures(GetRasterThread(), this,
-                                picture_pointers.release(), count, callback_id);
+                                picture_pointers.release(), count, callback_id,
+                                capture_image_bitmaps);
   return callback_id;
 }
 
@@ -194,7 +196,8 @@ void Skwasm::Surface::RenderPicturesOnWorker(
     sk_sp<flutter::DisplayList>* pictures,
     int picture_count,
     uint32_t callback_id,
-    double raster_start) {
+    double raster_start,
+    bool capture_image_bitmaps) {
   Skwasm::makeCurrent(gl_context_);
   // This is initialized on the first call to `skwasm_captureImageBitmap` and
   // then populated with more bitmaps on subsequent calls.
@@ -202,8 +205,10 @@ void Skwasm::Surface::RenderPicturesOnWorker(
   for (int i = 0; i < picture_count; i++) {
     sk_sp<flutter::DisplayList> picture = pictures[i];
     render_context_->RenderPicture(picture);
-    image_bitmap_array =
-        skwasm_captureImageBitmap(gl_context_, image_bitmap_array);
+    if (capture_image_bitmaps) {
+      image_bitmap_array =
+          skwasm_captureImageBitmap(gl_context_, image_bitmap_array);
+    }
   }
   skwasm_resolveAndPostImages(this, image_bitmap_array, raster_start,
                               callback_id);
@@ -415,8 +420,9 @@ SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Skwasm::Surface* surface,
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Skwasm::Surface* surface,
                                               flutter::DisplayList** pictures,
-                                              int count) {
-  return surface->RenderPictures(pictures, count);
+                                              int count,
+                                              bool capture_image_bitmaps) {
+  return surface->RenderPictures(pictures, count, capture_image_bitmaps);
 }
 
 SKWASM_EXPORT void surface_renderPicturesOnWorker(
@@ -424,12 +430,13 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(
     sk_sp<flutter::DisplayList>* pictures,
     int picture_count,
     uint32_t callback_id,
-    double raster_start) {
+    double raster_start,
+    bool capture_image_bitmaps) {
   // This will release the pictures when they leave scope.
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> pictures_pointer =
       std::unique_ptr<sk_sp<flutter::DisplayList>[]>(pictures);
   surface->RenderPicturesOnWorker(pictures, picture_count, callback_id,
-                                  raster_start);
+                                  raster_start, capture_image_bitmaps);
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Skwasm::Surface* surface,

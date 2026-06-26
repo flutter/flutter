@@ -900,6 +900,8 @@ extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, Dom
 
   DomImageBitmapRenderingContext get contextBitmapRenderer =>
       getContext('bitmaprenderer')! as DomImageBitmapRenderingContext;
+
+  external DomOffscreenCanvas transferControlToOffscreen();
 }
 
 @visibleForTesting
@@ -2682,6 +2684,11 @@ bool browserSupportsFinalizationRegistry = _finalizationRegistryConstructor != n
 external JSAny? get _offscreenCanvasConstructor;
 
 bool browserSupportsOffscreenCanvas = _offscreenCanvasConstructor != null;
+
+@JS('HTMLCanvasElement.prototype.transferControlToOffscreen')
+external JSAny? get _transferControlToOffscreen;
+
+bool get browserSupportsTransferControlToOffscreen => _transferControlToOffscreen != null;
 
 /// Set to `true` to disable `createImageBitmap` support. Used in tests.
 @visibleForTesting

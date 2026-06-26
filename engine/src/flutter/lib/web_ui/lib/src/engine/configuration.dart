@@ -295,6 +295,13 @@ class FlutterConfiguration {
     'FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER',
   );
 
+  bool get skwasmForceMultiSurfaceRasterizer =>
+      _configuration?.skwasmForceMultiSurfaceRasterizer ??
+      _defaultSkwasmForceMultiSurfaceRasterizer;
+  static const bool _defaultSkwasmForceMultiSurfaceRasterizer = bool.fromEnvironment(
+    'FLUTTER_WEB_SKWASM_FORCE_MULTI_SURFACE_RASTERIZER',
+  );
+
   /// The maximum number of canvases to use when rendering in CanvasKit.
   ///
   /// Limits the amount of overlays that can be created.
@@ -396,6 +403,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
     String? fontFallbackBaseUrl,
     bool? debugSkipFontRetryDelay,
     bool? forceSingleThreadedSkwasm,
+    bool? skwasmForceMultiSurfaceRasterizer,
   });
 
   external String? get assetBase;
@@ -413,6 +421,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external String? get fontFallbackBaseUrl;
   external bool? get debugSkipFontRetryDelay;
   external bool? get forceSingleThreadedSkwasm;
+  external bool? get skwasmForceMultiSurfaceRasterizer;
 }
 
 /// A JavaScript entrypoint that allows developer to set rendering backend

@@ -82,25 +82,51 @@ typedef RenderResult = ({
   int rasterEndMicros,
 });
 
-class SkwasmSurface implements OffscreenSurface {
+class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
   factory SkwasmSurface(OffscreenCanvasProvider canvasProvider) {
     final SurfaceHandle handle = withStackScope<SurfaceHandle>((StackScope scope) {
       return surfaceCreate();
     });
-    final surface = SkwasmSurface._fromHandle(handle, canvasProvider);
+    final surface = SkwasmSurface._fromHandle(handle, canvasProvider, isOnscreen: false);
     return surface;
   }
 
-  SkwasmSurface._fromHandle(this.handle, this._canvasProvider)
-    : _initializedCompleter = Completer<void>() {
+  factory SkwasmSurface.onscreen(
+    OnscreenCanvasProvider canvasProvider, {
+    required bool useTransferredCanvas,
+  }) {
+    final SurfaceHandle handle = withStackScope<SurfaceHandle>((StackScope scope) {
+      return surfaceCreate();
+    });
+    final surface = SkwasmSurface._fromHandle(
+      handle,
+      canvasProvider,
+      isOnscreen: true,
+      useTransferredCanvas: useTransferredCanvas,
+    );
+    return surface;
+  }
+
+  SkwasmSurface._fromHandle(
+    this.handle,
+    this._canvasProvider, {
+    required bool isOnscreen,
+    bool useTransferredCanvas = false,
+  }) : _initializedCompleter = Completer<void>() {
+    _isOnscreen = isOnscreen;
+    _useTransferredCanvas = useTransferredCanvas;
     surfaceSetCallbackHandler(handle, SkwasmCallbackHandler.instance.callbackPointer);
     _canvas = _canvasProvider.acquireCanvas(const BitmapSize(1, 1), onContextLost: onContextLost);
+    _maybeAttachCanvasToDom();
     _initialize();
   }
 
-  final OffscreenCanvasProvider _canvasProvider;
-  late DomOffscreenCanvas _canvas;
+  final CanvasProvider<DomEventTarget> _canvasProvider;
+  late DomEventTarget _canvas;
   late SurfaceHandle handle;
+  late final bool _isOnscreen;
+  late final bool _useTransferredCanvas;
+  final DomElement _hostElement = createDomElement('flt-canvas-container');
   double _currentDevicePixelRatio = -1;
   BitmapSize _currentSize = const BitmapSize(1, 1);
   Completer<void> _initializedCompleter;
@@ -114,15 +140,25 @@ class SkwasmSurface implements OffscreenSurface {
     }
     _initializedCompleter = Completer<void>();
     _handledContextLostEvent?.complete();
-    final DomOffscreenCanvas newCanvas = _canvasProvider.acquireCanvas(
+    if (_isOnscreen) {
+      _canvasProvider.releaseCanvas(_canvas);
+    }
+    final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
       _currentSize,
       onContextLost: onContextLost,
     );
     recreateContextForCanvas(newCanvas);
   }
 
+  void _maybeAttachCanvasToDom() {
+    if (_isOnscreen) {
+      _hostElement.appendChild(_canvas as DomHTMLCanvasElement);
+    }
+  }
+
   void _initialize() {
-    final CallbackId callbackId = surfaceSetCanvas(handle, _canvas);
+    final DomEventTarget canvasForSkwasm = _canvasForSkwasm();
+    final CallbackId callbackId = surfaceSetCanvas(handle, canvasForSkwasm);
 
     SkwasmCallbackHandler.instance.registerCallback(callbackId).then((JSAny contextLostCallbackId) {
       // The context may have been lost before the Surface finished
@@ -135,13 +171,25 @@ class SkwasmSurface implements OffscreenSurface {
       // attached to it will never fire. Inform the CanvasProvider that it
       // should release its reference to the canvas and unregister any listeners
       // attached to it.
-      _canvasProvider.releaseCanvas(_canvas);
+      if (!_isOnscreen) {
+        _canvasProvider.releaseCanvas(canvasForSkwasm);
+      }
       SkwasmCallbackHandler.instance
           .registerCallback((contextLostCallbackId as JSNumber).toDartInt)
           .then((_) {
             onContextLost();
           });
     });
+  }
+
+  DomEventTarget _canvasForSkwasm() {
+    if (!_isOnscreen) {
+      return _canvas;
+    }
+    if (!_useTransferredCanvas) {
+      return _canvas;
+    }
+    return (_canvas as DomHTMLCanvasElement).transferControlToOffscreen();
   }
 
   @override
@@ -172,6 +220,9 @@ class SkwasmSurface implements OffscreenSurface {
   @override
   void dispose() {
     surfaceDestroy(handle);
+    if (_isOnscreen) {
+      _canvasProvider.releaseCanvas(_canvas);
+    }
   }
 
   @override
@@ -184,7 +235,7 @@ class SkwasmSurface implements OffscreenSurface {
       for (var i = 0; i < pictures.length; i++) {
         pictureHandles[i] = (pictures[i] as SkwasmPicture).handle;
       }
-      return surfaceRenderPictures(handle, pictureHandles, pictures.length);
+      return surfaceRenderPictures(handle, pictureHandles, pictures.length, true);
     });
     final rasterResult =
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
@@ -198,7 +249,8 @@ class SkwasmSurface implements OffscreenSurface {
 
   @override
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas) async {
-    _canvas = newCanvas as DomOffscreenCanvas;
+    _canvas = newCanvas;
+    _maybeAttachCanvasToDom();
     _initialize();
     await initialized;
     final BitmapSize lastSize = _currentSize;
@@ -217,6 +269,9 @@ class SkwasmSurface implements OffscreenSurface {
     }
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = size;
+    if (_isOnscreen) {
+      _canvasProvider.resizeCanvas(_canvas, size);
+    }
     final int callbackId = surfaceSetSize(handle, size.width, size.height);
     await SkwasmCallbackHandler.instance.registerCallback(callbackId);
   }
@@ -237,16 +292,41 @@ class SkwasmSurface implements OffscreenSurface {
   @override
   Future<void> get handledContextLossEvent => _handledContextLostEvent!.future;
 
-  // TODO(harryterkelsen): Implement this to support MultiSurfaceRasterizer in
-  // Skwasm.
   @override
-  DomCanvasImageSource get canvasImageSource =>
-      throw StateError('canvasImageSource is not supported for SkwasmSurface');
+  DomCanvasImageSource get canvasImageSource {
+    if (!_isOnscreen) {
+      throw StateError('canvasImageSource is not supported for offscreen SkwasmSurface');
+    }
+    return _canvas as DomCanvasImageSource;
+  }
 
-  // TODO(harryterkelsen): Implement this to support MultiSurfaceRasterizer in
-  // Skwasm.
   @override
-  Future<void> rasterizeToCanvas(ui.Picture picture) {
-    throw StateError('rasterizeToCanvas is not supported for SkwasmSurface');
+  Future<void> rasterizeToCanvas(ui.Picture picture) async {
+    if (!_isOnscreen) {
+      throw StateError('rasterizeToCanvas is not supported for offscreen SkwasmSurface');
+    }
+    await initialized;
+    final int callbackId = withStackScope((StackScope scope) {
+      final Pointer<PictureHandle> pictureHandles = scope
+          .allocPointerArray(1)
+          .cast<PictureHandle>();
+      pictureHandles[0] = (picture as SkwasmPicture).handle;
+      return surfaceRenderPictures(handle, pictureHandles, 1, false);
+    });
+    await SkwasmCallbackHandler.instance.registerCallback(callbackId);
+  }
+
+  @override
+  DomElement get hostElement => _hostElement;
+
+  @override
+  bool get isConnected =>
+      _isOnscreen &&
+      ((_canvas as JSAny?).isA<DomHTMLCanvasElement>()) &&
+      (_canvas as DomHTMLCanvasElement).isConnected!;
+
+  @override
+  void initialize() {
+    // No extra initialization is required.
   }
 }
