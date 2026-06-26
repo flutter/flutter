@@ -23,6 +23,12 @@ std::shared_ptr<impeller::HostBuffer> CreateHostBufferFromContext(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
       context->GetCapabilities()->GetMinimumUniformAlignment());
 }
+
+// The number of workgroups needed to cover `invocations` invocations given a
+// per-workgroup `local_size`.
+constexpr uint32_t WorkgroupCount(size_t invocations, uint32_t local_size) {
+  return static_cast<uint32_t>((invocations + local_size - 1) / local_size);
+}
 }  // namespace
 
 namespace impeller {
@@ -80,7 +86,8 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   CS::BindInput1(*pass, host_buffer->EmplaceStorageBuffer(input_1));
   CS::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-  ASSERT_TRUE(pass->Compute(ISize(kCount, 1)).ok());
+  ASSERT_TRUE(
+      pass->Compute(WorkgroupCount(kCount, CS::kWorkgroupSize[0])).ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -150,7 +157,9 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
   CS::BindInputData(*pass, host_buffer->EmplaceStorageBuffer(input_data));
   CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-  ASSERT_TRUE(pass->Compute(ISize(kCount, 1)).ok());
+  // The prefix sum is computed within a single workgroup whose size is sized to
+  // the device (a specialization constant), so dispatch exactly one.
+  ASSERT_TRUE(pass->Compute(1).ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -208,7 +217,8 @@ TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
 
   CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-  ASSERT_TRUE(pass->Compute(ISize(kCount, 1)).ok());
+  ASSERT_TRUE(
+      pass->Compute(WorkgroupCount(kCount, CS::kWorkgroupSize[0])).ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -269,7 +279,8 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     CS::BindInputData(*pass, host_buffer->EmplaceStorageBuffer(input_data));
     CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-    pass->Compute(ISize(kCount, 1));
+    // Single workgroup; see CanComputePrefixSum.
+    pass->Compute(1);
     pass->EncodeCommands();
     host_buffer->Reset();
     return context->GetCommandQueue()->Submit({cmd_buffer}).ok();
@@ -332,7 +343,8 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     CS1::BindInput(*pass, host_buffer->EmplaceStorageBuffer(input_1));
     CS1::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer_1));
 
-    ASSERT_TRUE(pass->Compute(ISize(512, 1)).ok());
+    ASSERT_TRUE(
+        pass->Compute(WorkgroupCount(kCount1, CS1::kWorkgroupSize[0])).ok());
     pass->AddBufferMemoryBarrier();
   }
 
@@ -341,7 +353,8 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
 
     CS1::BindInput(*pass, DeviceBuffer::AsBufferView(output_buffer_1));
     CS2::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer_2));
-    ASSERT_TRUE(pass->Compute(ISize(512, 1)).ok());
+    ASSERT_TRUE(
+        pass->Compute(WorkgroupCount(kCount2, CS2::kWorkgroupSize[0])).ok());
   }
 
   ASSERT_TRUE(pass->EncodeCommands());
@@ -423,7 +436,8 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
   CS::BindInput1(*pass, host_buffer->EmplaceStorageBuffer(input_1));
   CS::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-  ASSERT_TRUE(pass->Compute(ISize(kCount, 1)).ok());
+  ASSERT_TRUE(
+      pass->Compute(WorkgroupCount(kCount, CS::kWorkgroupSize[0])).ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -502,9 +516,9 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
   CS::BindInput1(*pass, host_buffer->EmplaceStorageBuffer(input_1));
   CS::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-  // Intentionally making the grid size zero in one dimension. No GPU will
+  // Intentionally making the workgroup count zero in one dimension. No GPU will
   // tolerate this.
-  EXPECT_FALSE(pass->Compute(ISize(0, 1)).ok());
+  EXPECT_FALSE(pass->Compute(0, 1, 1).ok());
   pass->EncodeCommands();
 }
 

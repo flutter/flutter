@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_COMPUTE_PASS_H_
 #define FLUTTER_IMPELLER_RENDERER_COMPUTE_PASS_H_
 
+#include <cstdint>
 #include <string>
 
 #include "fml/status.h"
@@ -33,7 +34,20 @@ class ComputePass : public ResourceBinder {
   virtual void SetPipeline(
       const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) = 0;
 
-  virtual fml::Status Compute(const ISize& grid_size) = 0;
+  //----------------------------------------------------------------------------
+  /// @brief      Dispatch a grid of compute workgroups.
+  ///
+  ///             The arguments are workgroup (threadgroup) counts, not
+  ///             invocation counts. The number of invocations per workgroup
+  ///             (the local size) is declared by the shader. The total
+  ///             invocations along an axis is therefore the workgroup count
+  ///             times the shader's local size.
+  ///
+  /// @return     A cancelled status if any dimension is zero.
+  ///
+  virtual fml::Status Compute(uint32_t workgroup_count_x,
+                              uint32_t workgroup_count_y = 1u,
+                              uint32_t workgroup_count_z = 1u) = 0;
 
   /// @brief Ensures all previously encoded compute command's buffer writes are
   ///        visible to any subsequent compute commands.

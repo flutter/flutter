@@ -7,6 +7,9 @@
 
 #include <Metal/Metal.h>
 
+#include <array>
+#include <cstdint>
+
 #include "impeller/renderer/backend/metal/compute_pass_bindings_cache_mtl.h"
 #include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/pipeline_descriptor.h"
@@ -25,6 +28,9 @@ class ComputePassMTL final : public ComputePass {
   id<MTLComputeCommandEncoder> encoder_ = nil;
   ComputePassBindingsCacheMTL pass_bindings_cache_ =
       ComputePassBindingsCacheMTL();
+  // The workgroup size of the currently bound pipeline. A dimension of 0 is
+  // resolved to the device maximum at dispatch.
+  std::array<uint32_t, 3> workgroup_size_ = {0u, 0u, 0u};
   bool is_valid_ = false;
   bool has_label_ = false;
 
@@ -35,7 +41,9 @@ class ComputePassMTL final : public ComputePass {
   bool IsValid() const override;
 
   // |ComputePass|
-  fml::Status Compute(const ISize& grid_size) override;
+  fml::Status Compute(uint32_t workgroup_count_x,
+                      uint32_t workgroup_count_y,
+                      uint32_t workgroup_count_z) override;
 
   // |ComputePass|
   void SetCommandLabel(std::string_view label) override;

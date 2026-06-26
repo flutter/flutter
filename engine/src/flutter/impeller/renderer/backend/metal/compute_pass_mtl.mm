@@ -66,6 +66,7 @@ void ComputePassMTL::SetPipeline(
     const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
   pass_bindings_cache_.SetComputePipelineState(
       ComputePipelineMTL::Cast(*pipeline).GetMTLComputePipelineState());
+  workgroup_size_ = pipeline->GetDescriptor().GetWorkgroupSize();
 }
 
 // |ComputePass|
@@ -122,38 +123,35 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
   return true;
 }
 
-fml::Status ComputePassMTL::Compute(const ISize& grid_size) {
-  if (grid_size.IsEmpty()) {
-    return fml::Status(fml::StatusCode::kUnknown,
-                       "Invalid grid size for compute command.");
+fml::Status ComputePassMTL::Compute(uint32_t workgroup_count_x,
+                                    uint32_t workgroup_count_y,
+                                    uint32_t workgroup_count_z) {
+  if (workgroup_count_x == 0u || workgroup_count_y == 0u ||
+      workgroup_count_z == 0u) {
+    return fml::Status(fml::StatusCode::kCancelled,
+                       "Invalid workgroup count for compute command.");
   }
 
-  // Threadgroup sizes must be uniform.
-  auto width = grid_size.width;
-  auto height = grid_size.height;
-
-  auto max_total_threads_per_threadgroup = static_cast<int64_t>(
-      pass_bindings_cache_.GetPipeline().maxTotalThreadsPerThreadgroup);
-
-  // Special case for linear processing.
-  if (height == 1) {
-    int64_t thread_groups = std::max(
-        static_cast<int64_t>(
-            std::ceil(width * 1.0 / max_total_threads_per_threadgroup * 1.0)),
-        1LL);
-    [encoder_
-         dispatchThreadgroups:MTLSizeMake(thread_groups, 1, 1)
-        threadsPerThreadgroup:MTLSizeMake(max_total_threads_per_threadgroup, 1,
-                                          1)];
+  // Unlike Vulkan and GLES, Metal does not bake the threadgroup size into the
+  // shader; it is supplied here at dispatch. Honor the shader's declared local
+  // size. A dimension of 0 means the shader sized it with a specialization
+  // constant, so fall back to packing the device maximum into the x dimension.
+  MTLSize threads_per_threadgroup;
+  if (workgroup_size_[0] == 0u) {
+    const NSUInteger max_total_threads_per_threadgroup =
+        pass_bindings_cache_.GetPipeline().maxTotalThreadsPerThreadgroup;
+    threads_per_threadgroup =
+        MTLSizeMake(max_total_threads_per_threadgroup, 1, 1);
   } else {
-    while (width * height > max_total_threads_per_threadgroup) {
-      width = std::max(1LL, width / 2);
-      height = std::max(1LL, height / 2);
-    }
-
-    auto size = MTLSizeMake(width, height, 1);
-    [encoder_ dispatchThreadgroups:size threadsPerThreadgroup:size];
+    threads_per_threadgroup = MTLSizeMake(
+        workgroup_size_[0], workgroup_size_[1] == 0u ? 1 : workgroup_size_[1],
+        workgroup_size_[2] == 0u ? 1 : workgroup_size_[2]);
   }
+
+  [encoder_
+       dispatchThreadgroups:MTLSizeMake(workgroup_count_x, workgroup_count_y,
+                                        workgroup_count_z)
+      threadsPerThreadgroup:threads_per_threadgroup];
 
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
