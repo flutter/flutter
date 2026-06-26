@@ -6,27 +6,50 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:android_driver_extensions/native_driver.dart'
-    show GoldenFileComparator;
+import 'package:android_driver_extensions/native_driver.dart' show GoldenFileComparator;
+import 'package:flutter/services.dart' show ByteData, rootBundle;
 
-/// We use a raw pixel-exact comparator on-device because comparing compressed PNG files byte-for-byte
-/// is flaky. Android's native zlib compressor (libpng) and Dart's pure-Dart 'image' encoder use
-/// different metadata, chunk orderings, and zlib compression levels for identical images.
+/// A raw pixel-exact comparator used on-device during **Instrumented Mode** test runs.
+///
+/// This is required because comparing compressed PNG files byte-for-byte on the device is flaky.
+/// Android's native screencap compressor (libpng) and Dart's pure-Dart 'image' encoder use
+/// different metadata, chunk orderings, and zlib compression levels for identical pixel grids.
+///
+/// During **Host-Driven Mode** (using `flutter drive`), golden comparisons are resolved on the
+/// host computer using the host-side comparator instead.
 class PixelExactLocalFileComparator extends GoldenFileComparator {
   const PixelExactLocalFileComparator();
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final goldenFile = io.File(golden.toFilePath());
-    if (!goldenFile.existsSync()) {
-      throw StateError('Golden file not found: ${goldenFile.path}');
-    }
-    final Uint8List goldenBytes = await goldenFile.readAsBytes();
+    final Uint8List goldenBytes = await _loadGoldenBytes(golden);
 
     // Decode both images to raw pixels
     final ui.Image image1 = await _decodePng(imageBytes);
     final ui.Image image2 = await _decodePng(goldenBytes);
 
+    return _comparePixels(image1, image2);
+  }
+
+  Future<Uint8List> _loadGoldenBytes(Uri golden) async {
+    if (golden.scheme == 'asset') {
+      final String assetKey = golden.path.startsWith('/') ? golden.path.substring(1) : golden.path;
+      try {
+        final ByteData byteData = await rootBundle.load(assetKey);
+        return byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+      } catch (e) {
+        throw StateError('Failed to load golden asset "$assetKey" from package assets: $e');
+      }
+    }
+
+    final goldenFile = io.File(golden.toFilePath());
+    if (!goldenFile.existsSync()) {
+      throw StateError('Golden file not found: ${goldenFile.path}');
+    }
+    return goldenFile.readAsBytes();
+  }
+
+  Future<bool> _comparePixels(ui.Image image1, ui.Image image2) async {
     try {
       if (image1.width != image2.width || image1.height != image2.height) {
         return false;

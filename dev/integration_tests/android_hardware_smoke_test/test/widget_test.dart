@@ -2,17 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:android_driver_extensions/native_driver.dart' as android_driver;
 import 'package:android_hardware_smoke_test/constants.dart';
+import 'package:android_hardware_smoke_test/goldens.dart';
 import 'package:android_hardware_smoke_test/image_drawing_canvas.dart';
 import 'package:android_hardware_smoke_test/main.dart';
+import 'package:android_hardware_smoke_test/pixel_exact_local_file_comparator.dart';
 import 'package:android_hardware_smoke_test/platform_view.dart';
 import 'package:android_hardware_smoke_test/text_drawing_canvas.dart';
 import 'package:android_hardware_smoke_test/vector_drawings_canvas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
+
+/// Pre-compiled 1x1 transparent PNG bytes used for mock asset loads and golden comparisons.
+///
+/// This is used instead of [testImage] (which is a decoded [ui.Image] object) because:
+/// 1. `compareGoldenOnDevice` and our comparator expect raw compressed [Uint8List] bytes.
+/// 2. The mock `'flutter/assets'` binary messenger channel must return raw file bytes.
+/// 3. Converting [testImage] to PNG bytes dynamically using `toByteData(format: png)`
+///    is slow and deadlocks inside the test's `FakeAsync` zone.
+final Uint8List transparentImageBytes = Uint8List.fromList(
+  img.encodePng(img.Image(width: 1, height: 1)),
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +59,29 @@ void main() {
       (MethodCall methodCall) async {
         if (methodCall.method == 'isSurfaceControlEnabled') {
           return mockHcppSupported;
+        }
+        return null;
+      },
+    );
+
+    // Mock path_provider plugins channel
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'getTemporaryDirectory') {
+          return Directory.systemTemp.path;
+        }
+        return null;
+      },
+    );
+
+    // Mock the asset loader for the golden image
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+      'flutter/assets',
+      (ByteData? message) async {
+        final String assetKey = utf8.decode(Uint8List.sublistView(message!));
+        if (assetKey == 'test_driver/goldens/imageTest.vulkan.png') {
+          return ByteData.sublistView(transparentImageBytes);
         }
         return null;
       },
@@ -303,4 +343,77 @@ void main() {
       expect(find.byType(AndroidPlatformView), findsNothing);
     },
   );
+
+  testWidgets(
+    'compareGoldenOnDevice configures PixelExactLocalFileComparator and executes comparison',
+    (WidgetTester tester) async {
+      String? result;
+      await tester.runAsync(() async {
+        result = await compareGoldenOnDevice(kImageTest, transparentImageBytes, 'vulkan');
+      });
+
+      // Since mock assets decode to identical transparent black mock images, their pixels match,
+      // and the comparison should return null (success).
+      expect(result, isNull);
+
+      // Assert that the global goldenFileComparator was configured to PixelExactLocalFileComparator
+      expect(android_driver.goldenFileComparator, isA<PixelExactLocalFileComparator>());
+    },
+  );
+
+  testWidgets('compareGoldenOnDevice throws StateError when golden file is not found', (
+    WidgetTester tester,
+  ) async {
+    await tester.runAsync(() async {
+      expect(
+        () => compareGoldenOnDevice('nonExistentTest', transparentImageBytes, 'vulkan'),
+        throwsStateError,
+      );
+    });
+  });
+
+  testWidgets('compareGoldenOnDevice returns failure message on dimension mismatch', (
+    WidgetTester tester,
+  ) async {
+    final image2x2Bytes = Uint8List.fromList(img.encodePng(img.Image(width: 2, height: 2)));
+
+    String? result;
+    await tester.runAsync(() async {
+      result = await compareGoldenOnDevice(kImageTest, image2x2Bytes, 'vulkan');
+    });
+
+    expect(result, isNotNull);
+    expect(result, contains('does not match'));
+  });
+
+  testWidgets('compareGoldenOnDevice returns failure message on pixel mismatch', (
+    WidgetTester tester,
+  ) async {
+    final redImage = img.Image(width: 1, height: 1);
+    redImage.setPixelRgba(0, 0, 255, 0, 0, 255);
+    final redPngBytes = Uint8List.fromList(img.encodePng(redImage));
+
+    // Register the mock asset to return redPngBytes for pixelMismatchTest
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+      'flutter/assets',
+      (ByteData? message) async {
+        final String assetKey = utf8.decode(Uint8List.sublistView(message!));
+        if (assetKey == 'test_driver/goldens/pixelMismatchTest.vulkan.png') {
+          return ByteData.sublistView(redPngBytes);
+        }
+        if (assetKey == 'test_driver/goldens/imageTest.vulkan.png') {
+          return ByteData.sublistView(transparentImageBytes);
+        }
+        return null;
+      },
+    );
+
+    String? result;
+    await tester.runAsync(() async {
+      result = await compareGoldenOnDevice('pixelMismatchTest', transparentImageBytes, 'vulkan');
+    });
+
+    expect(result, isNotNull);
+    expect(result, contains('does not match'));
+  });
 }
