@@ -661,7 +661,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       headless: !_config.pauseAfterLoad,
       logger: _logger,
       webBrowserFlags: <String>[
-        if (useWasm) '--disable-dev-shm-usage',
+        '--disable-dev-shm-usage',
       ],
     );
   }
