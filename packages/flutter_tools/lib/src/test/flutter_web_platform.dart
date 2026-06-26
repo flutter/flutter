@@ -17,6 +17,7 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -863,6 +864,29 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
+    unawaited(Future<void>(() async {
+      try {
+        final ChromeTab? tab = await chrome.chromeConnection.getTab(
+          (ChromeTab tab) => tab.url.contains('index.html'),
+          retryFor: const Duration(seconds: 5),
+        );
+        if (tab != null) {
+          final WipConnection connection = await tab.connect();
+          await connection.runtime.enable();
+          logger.printStatus('[CHROME_DIAGNOSTIC] Connected to tab ${tab.id} for console logging.');
+          connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+            logger.printStatus('[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}');
+          });
+          connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
+            logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
+          });
+        } else {
+          logger.printStatus('[CHROME_DIAGNOSTIC] Could not find test tab for console logging.');
+        }
+      } on Object catch (e) {
+        logger.printStatus('[CHROME_DIAGNOSTIC] Failed to setup console logging: $e');
+      }
+    }));
     final completer = Completer<BrowserManager>();
 
     final diagnosticTimer = Timer.periodic(const Duration(seconds: 5), (Timer timer) async {
