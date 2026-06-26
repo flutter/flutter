@@ -1,4 +1,4 @@
-name: Tree Analyze Test
+name: Tree Analyze
 
 on:
   pull_request:
