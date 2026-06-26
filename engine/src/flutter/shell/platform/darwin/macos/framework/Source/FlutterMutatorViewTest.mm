@@ -21,11 +21,19 @@
 
 @interface MouseTrackingPlatformView : NSView
 @property(nonatomic, assign) NSInteger mouseDownCount;
+@property(nonatomic, assign) NSInteger mouseUpCount;
+@property(nonatomic, assign) NSInteger scrollWheelCount;
 @end
 
 @implementation MouseTrackingPlatformView
 - (void)mouseDown:(NSEvent*)event {
   self.mouseDownCount += 1;
+}
+- (void)mouseUp:(NSEvent*)event {
+  self.mouseUpCount += 1;
+}
+- (void)scrollWheel:(NSEvent*)event {
+  self.scrollWheelCount += 1;
 }
 @end
 
@@ -81,6 +89,27 @@ NSEvent* MouseDownEvent() {
                          eventNumber:0
                           clickCount:1
                             pressure:1.0];
+}
+
+NSEvent* MouseUpEvent() {
+  return [NSEvent mouseEventWithType:NSEventTypeLeftMouseUp
+                            location:NSMakePoint(10, 10)
+                       modifierFlags:0
+                           timestamp:0
+                        windowNumber:0
+                             context:nil
+                         eventNumber:0
+                          clickCount:1
+                            pressure:0.0];
+}
+
+NSEvent* ScrollWheelEvent() {
+  id event = [OCMockObject mockForClass:[NSEvent class]];
+  NSEventType eventType = NSEventTypeScrollWheel;
+  NSPoint locationInWindow = NSMakePoint(10, 10);
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(eventType)] type];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(locationInWindow)] locationInWindow];
+  return event;
 }
 }  // namespace
 
@@ -607,6 +636,62 @@ TEST(FlutterMutatorViewTest, MouseInterceptorReleasesOrBlocksPlatformMouseDown) 
 
   [mutatorView blockGesture];
   EXPECT_EQ(platformView.mouseDownCount, 1);
+}
+
+TEST(FlutterMutatorViewTest, MouseInterceptorReleasesCompletedClickAcceptedAfterMouseUp) {
+  MouseTrackingPlatformView* platformView = [[MouseTrackingPlatformView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+
+  ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
+
+  NSView* hitView = [mutatorView hitTest:NSMakePoint(10, 10)];
+  EXPECT_NE(hitView, platformView);
+
+  [hitView mouseDown:MouseDownEvent()];
+  [hitView mouseUp:MouseUpEvent()];
+  EXPECT_EQ(platformView.mouseDownCount, 0);
+  EXPECT_EQ(platformView.mouseUpCount, 0);
+
+  [mutatorView releaseGesture];
+  EXPECT_EQ(platformView.mouseDownCount, 1);
+  EXPECT_EQ(platformView.mouseUpCount, 1);
+}
+
+TEST(FlutterMutatorViewTest, MouseInterceptorDispatchesToPlatformHitTestTarget) {
+  NSView* platformView = [[NSView alloc] init];
+  MouseTrackingPlatformView* platformSubview = [[MouseTrackingPlatformView alloc] init];
+  platformSubview.frame = CGRectMake(0, 0, 100, 100);
+  [platformView addSubview:platformSubview];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+
+  ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
+
+  NSView* hitView = [mutatorView hitTest:NSMakePoint(10, 10)];
+  EXPECT_NE(hitView, platformView);
+  EXPECT_NE(hitView, platformSubview);
+
+  [hitView mouseDown:MouseDownEvent()];
+  EXPECT_EQ(platformSubview.mouseDownCount, 0);
+
+  [mutatorView releaseGesture];
+  EXPECT_EQ(platformSubview.mouseDownCount, 1);
+}
+
+TEST(FlutterMutatorViewTest, MouseInterceptorDispatchesScrollWheelToPlatformHitTestTarget) {
+  NSView* platformView = [[NSView alloc] init];
+  MouseTrackingPlatformView* platformSubview = [[MouseTrackingPlatformView alloc] init];
+  platformSubview.frame = CGRectMake(0, 0, 100, 100);
+  [platformView addSubview:platformSubview];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+
+  ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
+
+  NSView* hitView = [mutatorView hitTest:NSMakePoint(10, 10)];
+  EXPECT_NE(hitView, platformView);
+  EXPECT_NE(hitView, platformSubview);
+
+  [hitView scrollWheel:ScrollWheelEvent()];
+  EXPECT_EQ(platformSubview.scrollWheelCount, 1);
 }
 
 TEST(FlutterMutatorViewTest, ReparentingPlatformView) {

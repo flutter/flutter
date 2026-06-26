@@ -148,13 +148,15 @@ PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
 
 @implementation FlutterPlatformViewMouseInterceptor {
   __weak NSView* _platformView;
-  NSEvent* _pendingMouseDownEvent;
+  __weak NSView* _forwardingTargetView;
+  NSMutableArray<NSEvent*>* _pendingMouseEvents;
   BOOL _forwardingGesture;
 }
 
 - (instancetype)initWithPlatformView:(NSView*)platformView {
   if (self = [super initWithFrame:NSZeroRect]) {
     _platformView = platformView;
+    _pendingMouseEvents = [[NSMutableArray alloc] init];
   }
   return self;
 }
@@ -173,29 +175,67 @@ PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
 
 - (void)releaseGesture {
   _forwardingGesture = YES;
-  if (_pendingMouseDownEvent != nil) {
-    NSEvent* pendingMouseDownEvent = _pendingMouseDownEvent;
-    _pendingMouseDownEvent = nil;
-    [self dispatchMouseDownEventToPlatformView:pendingMouseDownEvent];
+  if (_pendingMouseEvents.count != 0) {
+    NSArray<NSEvent*>* pendingMouseEvents = [_pendingMouseEvents copy];
+    [_pendingMouseEvents removeAllObjects];
+    _forwardingTargetView = [self targetViewForPlatformEvent:pendingMouseEvents.firstObject];
+    for (NSEvent* event in pendingMouseEvents) {
+      [self dispatchMouseEvent:event toPlatformTarget:_forwardingTargetView];
+    }
+    _forwardingGesture = ![self isMouseUpEvent:pendingMouseEvents.lastObject];
+    if (!_forwardingGesture) {
+      _forwardingTargetView = nil;
+    }
   }
 }
 
 - (void)blockGesture {
-  _pendingMouseDownEvent = nil;
+  [_pendingMouseEvents removeAllObjects];
+  _forwardingTargetView = nil;
   _forwardingGesture = NO;
 }
 
-- (void)dispatchMouseDownEventToPlatformView:(NSEvent*)event {
+- (BOOL)isMouseUpEvent:(NSEvent*)event {
+  switch (event.type) {
+    case NSEventTypeRightMouseUp:
+    case NSEventTypeOtherMouseUp:
+    case NSEventTypeLeftMouseUp:
+      return YES;
+    default:
+      return NO;
+  }
+}
+
+- (NSView*)targetViewForPlatformEvent:(NSEvent*)event {
+  NSPoint point = [_platformView convertPoint:event.locationInWindow fromView:nil];
+  return [_platformView hitTest:point] ?: _platformView;
+}
+
+- (NSView*)forwardingTargetForEvent:(NSEvent*)event {
+  if (_forwardingTargetView == nil) {
+    _forwardingTargetView = [self targetViewForPlatformEvent:event];
+  }
+  return _forwardingTargetView;
+}
+
+- (void)dispatchMouseEvent:(NSEvent*)event toPlatformTarget:(NSResponder*)target {
   switch (event.type) {
     case NSEventTypeRightMouseDown:
-      [_platformView rightMouseDown:event];
-      break;
     case NSEventTypeOtherMouseDown:
-      [_platformView otherMouseDown:event];
-      break;
     case NSEventTypeLeftMouseDown:
+      [self dispatchMouseDownEventToResponder:target event:event];
+      break;
+    case NSEventTypeRightMouseDragged:
+    case NSEventTypeOtherMouseDragged:
+    case NSEventTypeLeftMouseDragged:
+      [self dispatchMouseDraggedEventToResponder:target event:event];
+      break;
+    case NSEventTypeRightMouseUp:
+    case NSEventTypeOtherMouseUp:
+    case NSEventTypeLeftMouseUp:
+      [self dispatchMouseUpEventToResponder:target event:event];
+      break;
     default:
-      [_platformView mouseDown:event];
       break;
   }
 }
@@ -246,26 +286,30 @@ PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
 }
 
 - (void)handleMouseDown:(NSEvent*)event {
-  _pendingMouseDownEvent = event;
+  [_pendingMouseEvents removeAllObjects];
+  [_pendingMouseEvents addObject:event];
+  _forwardingTargetView = nil;
   _forwardingGesture = NO;
   [self dispatchMouseDownEventToResponder:self.nextResponder event:event];
 }
 
 - (void)handleMouseDragged:(NSEvent*)event {
   if (_forwardingGesture) {
-    [self dispatchMouseDraggedEventToResponder:_platformView event:event];
+    [self dispatchMouseDraggedEventToResponder:[self forwardingTargetForEvent:event] event:event];
   } else {
+    [_pendingMouseEvents addObject:event];
     [self dispatchMouseDraggedEventToResponder:self.nextResponder event:event];
   }
 }
 
 - (void)handleMouseUp:(NSEvent*)event {
   if (_forwardingGesture) {
-    [self dispatchMouseUpEventToResponder:_platformView event:event];
+    [self dispatchMouseUpEventToResponder:[self forwardingTargetForEvent:event] event:event];
   } else {
+    [_pendingMouseEvents addObject:event];
     [self dispatchMouseUpEventToResponder:self.nextResponder event:event];
   }
-  _pendingMouseDownEvent = nil;
+  _forwardingTargetView = nil;
   _forwardingGesture = NO;
 }
 
@@ -306,7 +350,7 @@ PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
 }
 
 - (void)scrollWheel:(NSEvent*)event {
-  [_platformView scrollWheel:event];
+  [[self targetViewForPlatformEvent:event] scrollWheel:event];
 }
 
 @end
