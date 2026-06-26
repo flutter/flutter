@@ -17,7 +17,10 @@ import '../../../globals.dart' as globals;
 ///
 /// Flutter also builds code assets for widget tests. Since there is no app build in that context,
 /// [cmakeDirectory] should be set to null for those builds.
-Future<CCompilerConfig?> cCompilerConfigLinux({Directory? cmakeDirectory}) async {
+Future<CCompilerConfig?> cCompilerConfigLinux({
+  Directory? cmakeDirectory,
+  bool throwIfNotFound = true,
+}) async {
   if (cmakeDirectory == null) {
     // No CMake reference (e.g. for a widget test). Hooks can resolve to any
     // compiler.
@@ -27,9 +30,12 @@ Future<CCompilerConfig?> cCompilerConfigLinux({Directory? cmakeDirectory}) async
   // For app builds, use the same compiler as the native/GTK parts of the app.
   final File cmakeCacheTxt = cmakeDirectory.childFile('CMakeCache.txt');
   if (!cmakeCacheTxt.existsSync()) {
-    throwToolExit(
-      'Could not read compiler configurations for build hooks, expected ${cmakeCacheTxt.path} to exist.',
-    );
+    if (throwIfNotFound) {
+      throwToolExit(
+        'Could not read compiler configurations for build hooks, expected ${cmakeCacheTxt.path} to exist.',
+      );
+    }
+    return null;
   }
 
   const archiverVariable = 'CMAKE_AR';
@@ -76,19 +82,31 @@ Future<CCompilerConfig?> cCompilerConfigLinux({Directory? cmakeDirectory}) async
     return file.uri;
   }
 
-  // Find clang next to the clang++ we use in CMake
-  File clangPpFile = globals.fs.file(requireTool(cxxCompiler, compilerVariable));
-  clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
-  final File clangFile = clangPpFile.parent.childFile('clang');
-  if (!clangFile.existsSync()) {
-    throwToolExit('Expected to find clang next to ${clangPpFile.path}');
-  }
+  try {
+    // Find clang next to the clang++ we use in CMake
+    File clangPpFile = globals.fs.file(requireTool(cxxCompiler, compilerVariable));
+    clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
+    final File clangFile = clangPpFile.parent.childFile('clang');
+    if (!clangFile.existsSync()) {
+      throwToolExit('Expected to find clang next to ${clangPpFile.path}');
+    }
 
-  return CCompilerConfig(
-    compiler: clangFile.uri,
-    linker: requireTool(linker, linkerVariable),
-    archiver: requireTool(archiver, archiverVariable),
-  );
+    return CCompilerConfig(
+      compiler: clangFile.uri,
+      linker: requireTool(linker, linkerVariable),
+      archiver: requireTool(archiver, archiverVariable),
+    );
+  } on ToolExit {
+    if (throwIfNotFound) {
+      rethrow;
+    }
+    return null;
+  } on FileSystemException {
+    if (throwIfNotFound) {
+      rethrow;
+    }
+    return null;
+  }
 }
 
 // Format: `VARIABLE_NAME:TYPE=value`;
