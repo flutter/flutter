@@ -444,12 +444,13 @@ void main() {
     );
 
     testUsingContext(
-      'start copies host web directory to scaffold if it exists',
+      'start copies host web directory to scaffold if it exists and removes stale files',
       () async {
         final Directory rootProject = await createRootProject();
         final Directory hostWebDir = rootProject.childDirectory('web')..createSync();
         hostWebDir.childFile('index.html').writeAsStringSync('<html>custom index</html>');
-        hostWebDir.childFile('custom.js').writeAsStringSync('console.log("custom");');
+        final File staleFile = hostWebDir.childFile('stale.js')
+          ..writeAsStringSync('console.log("stale");');
 
         await startWidgetPreview(rootProject: rootProject);
 
@@ -460,8 +461,23 @@ void main() {
           scaffoldWebDir.childFile('index.html').readAsStringSync(),
           '<html>custom index</html>',
         );
-        expect(scaffoldWebDir.childFile('custom.js').readAsStringSync(), 'console.log("custom");');
+        expect(scaffoldWebDir.childFile('stale.js').readAsStringSync(), 'console.log("stale");');
         expectSinglePreviewLaunchTimingEvent();
+
+        // Now remove stale.js from host, and add a new file.
+        staleFile.deleteSync();
+        hostWebDir.childFile('new.js').writeAsStringSync('console.log("new");');
+
+        // Run again
+        await startWidgetPreview(rootProject: rootProject);
+
+        expect(scaffoldWebDir.childFile('stale.js').existsSync(), false);
+        expect(scaffoldWebDir.childFile('new.js').readAsStringSync(), 'console.log("new");');
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expectNPreviewLaunchTimingEvents(2);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,

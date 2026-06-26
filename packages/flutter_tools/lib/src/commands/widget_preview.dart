@@ -458,6 +458,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final Directory hostWebDir = rootProject.directory.childDirectory('web');
     if (hostWebDir.existsSync()) {
       final Directory scaffoldWebDir = scaffoldDirectory.childDirectory('web');
+      if (scaffoldWebDir.existsSync()) {
+        logger.printTrace('Deleting scaffold web directory: ${scaffoldWebDir.path}');
+        scaffoldWebDir.deleteSync(recursive: true);
+      }
       logger.printTrace(
         'Copying host web directory to scaffold web directory: ${hostWebDir.path} -> ${scaffoldWebDir.path}',
       );
