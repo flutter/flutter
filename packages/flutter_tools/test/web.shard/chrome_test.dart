@@ -29,7 +29,6 @@ const kChromeArgs = <String>[
   '--no-default-browser-check',
   '--disable-default-apps',
   '--disable-translate',
-  '--disable-dev-shm-usage',
   '--password-store=basic',
   '--use-mock-keychain',
   '--disable-search-engine-choice-screen',

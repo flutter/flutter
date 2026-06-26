@@ -346,7 +346,6 @@ Map<String, dynamic> getDesiredCapabilities(
         '--no-default-browser-check',
         '--no-sandbox',
         '--no-first-run',
-        '--disable-dev-shm-usage',
         '--password-store=basic',
         if (platform.isMacOS) '--use-mock-keychain',
         '--disable-search-engine-choice-screen',

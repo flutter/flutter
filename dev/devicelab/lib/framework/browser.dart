@@ -125,7 +125,6 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      '--disable-dev-shm-usage',
       '--password-store=basic',
       '--disable-search-engine-choice-screen',
       if (io.Platform.isMacOS) '--use-mock-keychain',

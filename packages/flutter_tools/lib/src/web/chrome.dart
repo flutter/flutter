@@ -246,7 +246,6 @@ class ChromiumLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      '--disable-dev-shm-usage',
       '--password-store=basic',
       if (_platform.isMacOS) '--use-mock-keychain',
 
