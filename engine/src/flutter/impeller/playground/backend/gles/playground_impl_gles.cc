@@ -267,7 +267,7 @@ PlaygroundImplGLES::MakeShareableContext(const PlaygroundSwitches& switches) {
 }
 
 PlaygroundImplGLES::~PlaygroundImplGLES() {
-  if (context_) {
+  if (context_ && handle_) {
     ::glfwMakeContextCurrent(handle_.get());
     [[maybe_unused]] auto result = context_->FlushCommandBuffers();
   }
