@@ -6,7 +6,7 @@
 library;
 
 import '../src/common.dart';
-import 'test_data/hot_restart_outside_lib_web_test_common.dart';
+import 'test_data/hot_action_outside_lib_chrome_test_common.dart';
 
 void main() {
   testHotActionOutsideLib(HotAction.reload);

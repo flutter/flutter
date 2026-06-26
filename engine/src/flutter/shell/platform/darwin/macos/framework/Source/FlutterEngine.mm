@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/common/app_lifecycle_state.h"
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -673,9 +674,15 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   std::vector<std::string> switches = self.switches;
 
   // Enable Impeller only if specifically asked for from the project or cmdline arguments.
-  if (_project.enableImpeller ||
-      std::find(switches.begin(), switches.end(), "--enable-impeller=true") != switches.end()) {
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+    // Keep it disabled.
+  } else if (_project.enableImpeller || std::find(switches.begin(), switches.end(),
+                                                  "--enable-impeller=true") != switches.end()) {
     switches.push_back("--enable-impeller=true");
+  }
+
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=true") == switches.end()) {
+    FML_LOG(IMPORTANT) << "Using the Skia rendering backend (Metal).";
   }
 
   if (_project.enableSDFs ||
@@ -728,7 +735,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   };
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
-  flutterArguments.enable_wide_gamut = _project.enableWideGamut;
+  BOOL enableWideGamut = _project.enableWideGamut;
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+    enableWideGamut = NO;
+  }
+  flutterArguments.enable_wide_gamut = enableWideGamut;
 
   BOOL mergedPlatformUIThread = YES;
   NSNumber* enableMergedPlatformUIThread =

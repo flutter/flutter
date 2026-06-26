@@ -78,10 +78,19 @@ void main() {
   // `reinitializeShaderLibrary` service extension looks the library up by
   // asset path and reloads into the existing instance.
   test('ShaderLibrary.fromAsset caches by asset path', () async {
-    final gpu.ShaderLibrary? a = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
-    final gpu.ShaderLibrary? b = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+    final gpu.ShaderLibrary? a = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+    final gpu.ShaderLibrary? b = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
     expect(a, isNotNull);
     expect(identical(a, b), isTrue);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // A load failure comes back through the returned Future rather than as a
+  // synchronous throw, so callers can uniformly `await` the loader.
+  test('ShaderLibrary.fromAsset surfaces load failure through the Future', () async {
+    final Future<gpu.ShaderLibrary?> future = gpu.ShaderLibrary.fromAsset(
+      'does_not_exist.shaderbundle',
+    );
+    await expectLater(future, throwsA(isA<Exception>()));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // `reinitialize` with an asset that hasn't been loaded yet must no-op.
@@ -98,7 +107,7 @@ void main() {
   // a pipeline clears the bit. Uses test_alt.shaderbundle, which no other
   // test in this file loads, so the bit reflects a fresh load.
   test('shaders start dirty and are cleaned by registration', () async {
-    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test_alt.shaderbundle')!;
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test_alt.shaderbundle'))!;
     final gpu.Shader vertex = library['UnlitVertex']!;
     final gpu.Shader fragment = library['UnlitFragment']!;
     expect(vertex.debugIsDirty, isTrue, reason: 'freshly parsed shaders start dirty');
@@ -114,7 +123,7 @@ void main() {
   // comparison so unchanged shaders stay clean across reload. Reloading
   // identical bytes must leave every shader clean.
   test('reinitialize with unchanged bytes leaves shaders clean', () async {
-    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
     final gpu.Shader vertex = library['UnlitVertex']!;
     final gpu.Shader fragment = library['UnlitFragment']!;
     // Force registration so the dirty bit is observable as false before reload.
@@ -133,7 +142,7 @@ void main() {
   // clean, changed shaders flip dirty so the next pipeline build evicts and
   // re-registers them.
   test('reinitialize marks only changed shaders dirty', () async {
-    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
     final gpu.Shader vertex = library['UnlitVertex']!;
     final gpu.Shader fragment = library['UnlitFragment']!;
     gpu.gpuContext.createRenderPipeline(vertex, fragment);
@@ -156,7 +165,7 @@ void main() {
   // function runs `UnregisterFunction` + `RemovePipelinesWithEntryPoint`
   // before re-registering.
   test('reinitialize evicts and re-registers shader functions cleanly', () async {
-    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
     final gpu.Shader vertex = library['UnlitVertex']!;
     final gpu.Shader fragment = library['UnlitFragment']!;
 

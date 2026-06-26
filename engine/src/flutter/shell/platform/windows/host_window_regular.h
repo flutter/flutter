@@ -29,6 +29,8 @@ class HostWindowRegular : public HostWindowSized {
                     bool sized_to_content,
                     bool resizable);
 
+  ~HostWindowRegular() override;
+
  private:
   static Rect GetInitialRect(FlutterWindowsEngine* engine,
                              const WindowSizeRequest& preferred_size,
