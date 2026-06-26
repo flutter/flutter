@@ -217,14 +217,10 @@ Future<void> buildMacOS({
     // Debug builds default to current host architecture
     destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$hostArch';
     archs = null;
-  } else if (featureFlags.isMacOSArm64OnlyEnabled) {
-    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled
-    // is set.
-    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=arm64';
-    archs = 'arm64';
   } else {
+    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled is set.
     destination = XcodeSdk.MacOSX.genericPlatform;
-    archs = null;
+    archs = featureFlags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
   }
 
   // Get EXCLUDED_ARCHS from Xcode project build settings

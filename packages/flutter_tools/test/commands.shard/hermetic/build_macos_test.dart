@@ -132,15 +132,12 @@ void main() {
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
-    String? destinationSpecifier,
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-    final String destination =
-        destinationSpecifier ??
-        (configuration == 'Debug'
-            ? 'platform=macOS,arch=$hostPlatformArch'
-            : 'generic/platform=macOS');
+    final destination = configuration == 'Debug'
+        ? 'platform=macOS,arch=$hostPlatformArch'
+        : 'generic/platform=macOS';
     return FakeCommand(
       command: <String>[
         '/usr/bin/env',
@@ -1330,9 +1327,9 @@ STDERR STUFF
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         // Still uses host arch in debug mode even if the flag is set.
-        setUpFakeXcodeBuildHandler('Debug', destinationSpecifier: 'platform=macOS,arch=x86_64'),
-        setUpFakeXcodeBuildHandler('Profile', destinationSpecifier: 'platform=macOS,arch=arm64', additionalCommandArguments: <String>['ARCHS=arm64']),
-        setUpFakeXcodeBuildHandler('Release', destinationSpecifier: 'platform=macOS,arch=arm64', additionalCommandArguments: <String>['ARCHS=arm64']),
+        setUpFakeXcodeBuildHandler('Debug'),
+        setUpFakeXcodeBuildHandler('Profile', additionalCommandArguments: <String>['ARCHS=arm64']),
+        setUpFakeXcodeBuildHandler('Release', additionalCommandArguments: <String>['ARCHS=arm64']),
       ]),
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),
