@@ -672,8 +672,6 @@ object FlutterPluginUtils {
         return SubprojectPluginState(hasKgpPlugin, hasAppPlugin, hasLibPlugin)
     }
 
-
-
     /**
      * Determines if the Gradle property `android.builtInKotlin` is enabled globally across the multi-project Gradle build.
      *

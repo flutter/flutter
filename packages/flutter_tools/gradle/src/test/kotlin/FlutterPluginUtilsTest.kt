@@ -1176,8 +1176,6 @@ class FlutterPluginUtilsTest {
             }
         }
 
-    
-
         @Nested
         inner class DetectApplyingKotlinGradlePluginTests {
             private val rootProject = mockk<Project>()
