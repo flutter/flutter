@@ -14,7 +14,19 @@
 
 @property(readonly, nonatomic, nonnull) NSMutableArray<NSView*>* pathClipViews;
 @property(readonly, nonatomic, nullable) NSView* platformViewContainer;
+- (void)releaseGesture;
+- (void)blockGesture;
 
+@end
+
+@interface MouseTrackingPlatformView : NSView
+@property(nonatomic, assign) NSInteger mouseDownCount;
+@end
+
+@implementation MouseTrackingPlatformView
+- (void)mouseDown:(NSEvent*)event {
+  self.mouseDownCount += 1;
+}
 @end
 
 static constexpr float kMaxErr = 1e-10;
@@ -57,6 +69,18 @@ void ExpectTransform3DEqual(const CATransform3D& t, const CATransform3D& u) {
   EXPECT_NEAR(t.m42, u.m42, kMaxErr);
   EXPECT_NEAR(t.m43, u.m43, kMaxErr);
   EXPECT_NEAR(t.m44, u.m44, kMaxErr);
+}
+
+NSEvent* MouseDownEvent() {
+  return [NSEvent mouseEventWithType:NSEventTypeLeftMouseDown
+                            location:NSMakePoint(10, 10)
+                       modifierFlags:0
+                           timestamp:0
+                        windowNumber:0
+                             context:nil
+                         eventNumber:0
+                          clickCount:1
+                            pressure:1.0];
 }
 }  // namespace
 
@@ -539,8 +563,8 @@ TEST(FlutterMutatorViewTest, HitTestIgnoreRegion) {
   NSView* platformView = [[NSView alloc] init];
   FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
   ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 10)], platformView);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 10)], platformView);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(10, 10)], nil);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(50, 10)], nil);
 
   [mutatorView resetHitTestRegion];
   [mutatorView addHitTestIgnoreRegion:CGRectMake(0, 0, 50, 50)];
@@ -550,16 +574,39 @@ TEST(FlutterMutatorViewTest, HitTestIgnoreRegion) {
   EXPECT_EQ([mutatorView hitTest:NSMakePoint(49, 10)], nil);
   EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 49)], nil);
   EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 50)], nil);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 10)], platformView);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 50)], platformView);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(50, 10)], nil);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(10, 50)], nil);
 
   [mutatorView resetHitTestRegion];
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 10)], platformView);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(49, 10)], platformView);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 49)], platformView);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 50)], platformView);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 10)], platformView);
-  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 50)], platformView);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(10, 10)], nil);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(49, 10)], nil);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(10, 49)], nil);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(50, 50)], nil);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(50, 10)], nil);
+  EXPECT_NE([mutatorView hitTest:NSMakePoint(10, 50)], nil);
+}
+
+TEST(FlutterMutatorViewTest, MouseInterceptorReleasesOrBlocksPlatformMouseDown) {
+  MouseTrackingPlatformView* platformView = [[MouseTrackingPlatformView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+
+  ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
+
+  NSView* hitView = [mutatorView hitTest:NSMakePoint(10, 10)];
+  EXPECT_NE(hitView, platformView);
+
+  [hitView mouseDown:MouseDownEvent()];
+  EXPECT_EQ(platformView.mouseDownCount, 0);
+
+  [mutatorView releaseGesture];
+  EXPECT_EQ(platformView.mouseDownCount, 1);
+
+  hitView = [mutatorView hitTest:NSMakePoint(10, 10)];
+  [hitView mouseDown:MouseDownEvent()];
+  EXPECT_EQ(platformView.mouseDownCount, 1);
+
+  [mutatorView blockGesture];
+  EXPECT_EQ(platformView.mouseDownCount, 1);
 }
 
 TEST(FlutterMutatorViewTest, ReparentingPlatformView) {

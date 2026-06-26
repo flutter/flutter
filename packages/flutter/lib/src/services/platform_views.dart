@@ -315,9 +315,11 @@ class PlatformViewsService {
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
-    // TODO(amirh): pass layoutDirection once the system channel supports it.
-    // https://github.com/flutter/flutter/issues/133682
-    final args = <String, dynamic>{'id': id, 'viewType': viewType};
+    final args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+      'direction': AndroidViewController._getAndroidDirection(layoutDirection),
+    };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
       args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);

@@ -5,6 +5,18 @@
 #include "flutter/fml/logging.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMutatorView.h"
+
+namespace {
+FlutterMutatorView* MutatorViewForPlatformView(NSView* platform_view) {
+  for (NSView* view = platform_view; view != nil; view = view.superview) {
+    if ([view isKindOfClass:[FlutterMutatorView class]]) {
+      return (FlutterMutatorView*)view;
+    }
+  }
+  return nil;
+}
+}  // namespace
 
 @implementation FlutterPlatformViewController {
   // NSDictionary maps platform view type identifiers to FlutterPlatformViewFactories.
@@ -136,7 +148,7 @@
     return;
   }
 
-  // TODO(cbracken): Implement. https://github.com/flutter/flutter/issues/124492
+  [MutatorViewForPlatformView(_platformViews[viewId]) releaseGesture];
   result(nil);
 }
 
@@ -151,7 +163,7 @@
     return;
   }
 
-  // TODO(cbracken): Implement. https://github.com/flutter/flutter/issues/124492
+  [MutatorViewForPlatformView(_platformViews[viewId]) blockGesture];
   result(nil);
 }
 
