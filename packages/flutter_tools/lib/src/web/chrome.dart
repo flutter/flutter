@@ -237,6 +237,7 @@ class ChromiumLauncher {
       '--remote-debugging-port=$port',
       // When the DevTools has focus we don't want to slow down the application.
       '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
       // Since we are using a temp profile, disable features that slow the
       // Chrome launch.
       '--disable-extensions',

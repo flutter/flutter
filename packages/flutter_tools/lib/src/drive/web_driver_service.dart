@@ -339,6 +339,7 @@ Map<String, dynamic> getDesiredCapabilities(
       'args': <String>[
         '--bwsi',
         '--disable-background-timer-throttling',
+        '--disable-renderer-backgrounding',
         '--disable-default-apps',
         '--disable-extensions',
         '--disable-popup-blocking',
