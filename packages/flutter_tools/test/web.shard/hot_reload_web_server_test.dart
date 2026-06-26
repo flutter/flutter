@@ -63,7 +63,7 @@ void main() {
         );
         // Confirm the new code ran in the browser.
         await expectLater(
-          testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', defaultTimeout),
+          testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', const Duration(seconds: 15)),
           completes,
         );
         // Close the browser.
