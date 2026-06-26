@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/memory_fs.dart';
+import 'package:flutter_tools/src/web/module_metadata.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
 import '../../src/common.dart';
@@ -135,8 +138,14 @@ void main() {
       final webMemoryFS = WebMemoryFS();
       final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
       final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');
+      final fakeMetadata = ModuleMetadata(
+        'main',
+        'unused',
+        'main.dart.lib.js.map',
+        'main.dart.lib.js',
+      );
       final File metadata = fileSystem.file('metadata')
-        ..writeAsStringSync('{"moduleUri": "main.dart.lib.js", "name": "main"}');
+        ..writeAsStringSync(jsonEncode(fakeMetadata.toJson()));
       final File manifest = fileSystem.file('manifest')
         ..writeAsStringSync(
           '{"main.dart.lib.js":{"code":[0,${source.lengthSync()}],"sourcemap":[0,${sourcemap.lengthSync()}],"metadata":[0,${metadata.lengthSync()}]}}',
