@@ -1727,7 +1727,7 @@ void main() {
                 },
                 (Object error, StackTrace stack) {
                   expect(error, isA<ToolExit>());
-                  expect(error.toString(), contains('override message'));
+                  expect(error.toString(), contains(kUISceneMigrationRequiredError));
                   completer.complete();
                 },
               ),
@@ -2024,7 +2024,4 @@ class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
 class OverrideUserMessages extends UserMessages {
   @override
   String get uiSceneMigrationWarning => 'override message';
-
-  @override
-  String get uiSceneMigrationRequiredError => 'override message';
 }
