@@ -141,8 +141,7 @@ return False
         await _setBreakpoint();
       }
       await _attachToAppProcess(appProcessId);
-      await _setupBacktrace();
-      await _setupDetach();
+      await _setupStopHooks();
       await _resumeProcess(mode);
       _isAttached = true;
     } on _LLDBError catch (e) {
@@ -228,6 +227,9 @@ return False
   bool exit() {
     final bool success = (_lldbProcess == null) || _lldbProcess!.kill();
     _lldbProcess = null;
+    if (_logCompleter != null) {
+      _logCompleter!.completeError(_LLDBError('LLDB process exited'));
+    }
     _logCompleter = null;
     _isAttached = false;
     return success;
@@ -240,31 +242,24 @@ return False
 
   /// Attaches LLDB to the [appProcessId] running on the device.
   Future<void> _attachToAppProcess(int appProcessId) async {
-    if (_lldbProcess == null) {
-      throw _LLDBError('LLDB process is not running.');
-    }
-
     // Since the app starts stopped (--start-stopped), we expect a stopped state
     // after attaching.
     final Future<String> futureLog = _startWaitingForLog(
       _lldbProcessStopped,
     ).then((value) => value, onError: _handleAsyncError);
 
-    await _lldbProcess!.stdinWriteln('device process attach --pid $appProcessId');
+    await _lldbProcess?.stdinWriteln('device process attach --pid $appProcessId');
     await futureLog;
   }
 
   /// Sets a breakpoint, waits for it print the breakpoint id, and adds a python
   /// script command to be executed whenever the breakpoint is hit.
   Future<void> _setBreakpoint() async {
-    if (_lldbProcess == null) {
-      throw _LLDBError('LLDB process is not running.');
-    }
     final Future<String> futureLog = _startWaitingForLog(
       _breakpointPattern,
     ).then((value) => value, onError: _handleAsyncError);
 
-    await _lldbProcess!.stdinWriteln(
+    await _lldbProcess?.stdinWriteln(
       r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
     );
     final String log = await futureLog;
@@ -276,21 +271,18 @@ return False
 
     // Once it has the breakpoint id, set the python script.
     // For more information, see: lldb > help break command add
-    await _lldbProcess!.stdinWriteln('breakpoint command add --script-type python $breakpointId');
-    await _lldbProcess!.stdinWriteln(_pythonScript);
-    await _lldbProcess!.stdinWriteln('DONE');
+    await _lldbProcess?.stdinWriteln('breakpoint command add --script-type python $breakpointId');
+    await _lldbProcess?.stdinWriteln(_pythonScript);
+    await _lldbProcess?.stdinWriteln('DONE');
 
     // Disable asynchronous mode to workaround issues with rearming of breakpoints.
     // See https://github.com/flutter/flutter/issues/184254 and upstream issue
     // https://github.com/llvm/llvm-project/issues/190956.
-    await _lldbProcess!.stdinWriteln('script lldb.debugger.SetAsync(False)');
+    await _lldbProcess?.stdinWriteln('script lldb.debugger.SetAsync(False)');
   }
 
   /// Resume the stopped process.
   Future<void> _resumeProcess(BuildMode mode) async {
-    if (_lldbProcess == null) {
-      throw _LLDBError('LLDB process is not running.');
-    }
     final Future<String> futureLog = _startWaitingForLog(
       // When using debug mode, a breakpoint is added once the process resumes and no resume log
       // is shown. Instead we match on the breakpoint added log. In profile mode, a resume log is
@@ -298,33 +290,19 @@ return False
       mode == BuildMode.debug ? _lldbBreakpointAdded : _lldbProcessResuming,
     ).then((value) => value, onError: _handleAsyncError);
 
-    await _lldbProcess!.stdinWriteln('process continue');
+    await _lldbProcess?.stdinWriteln('process continue');
     await futureLog;
   }
 
-  /// Adds a stop hook to detach the debugger from the process once it stops, such as when it crashes.
+  /// Adds a stop hook to print the backtrace of all threads and then detach the debugger from the
+  /// process once it stops, such as when it crashes.
   ///
   /// Without this, the debugger would remain attached to the process and the app will hang on crash.
-  Future<void> _setupDetach() async {
-    if (_lldbProcess == null) {
-      throw _LLDBError('LLDB process is not running.');
-    }
+  Future<void> _setupStopHooks() async {
     final Future<String> futureLog = _startWaitingForLog(
       _stopHookAddedPattern,
     ).then((value) => value, onError: _handleAsyncError);
-    await _lldbProcess!.stdinWriteln('target stop-hook add -o "detach"');
-    await futureLog;
-  }
-
-  /// Setup a stop hook to print the backtrace of all threads when the app process stops.
-  Future<void> _setupBacktrace() async {
-    if (_lldbProcess == null) {
-      throw _LLDBError('LLDB process is not running.');
-    }
-    final Future<String> futureLog = _startWaitingForLog(
-      _stopHookAddedPattern,
-    ).then((value) => value, onError: _handleAsyncError);
-    await _lldbProcess!.stdinWriteln('target stop-hook add -o "thread backtrace all"');
+    await _lldbProcess?.stdinWriteln('target stop-hook add -o "thread backtrace all" -o "detach"');
     await futureLog;
   }
 

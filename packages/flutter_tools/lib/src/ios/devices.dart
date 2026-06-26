@@ -867,7 +867,7 @@ class IOSDevice extends Device {
 
     final appTerminatedInterceptor = LogInterceptor(
       identifier: 'app_terminated',
-      pattern: RegExp('App terminated'),
+      pattern: RegExp('^App terminated due to signal'),
       action: () {
         if (!appTerminatedCompleter.isCompleted) {
           appTerminatedCompleter.complete();

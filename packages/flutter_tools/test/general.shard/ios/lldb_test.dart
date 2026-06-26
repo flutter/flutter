@@ -64,15 +64,13 @@ void main() {
 
     final breakPointCompleter = Completer<List<int>>();
     final processAttachCompleter = Completer<List<int>>();
-    final setupBacktraceCompleter = Completer<List<int>>();
-    final setupDetachCompleter = Completer<List<int>>();
+    final setupStopHooksCompleter = Completer<List<int>>();
     final processResumedCompleted = Completer<List<int>>();
 
     final stdoutStream = Stream<List<int>>.fromFutures([
       breakPointCompleter.future,
       processAttachCompleter.future,
-      setupBacktraceCompleter.future,
-      setupDetachCompleter.future,
+      setupStopHooksCompleter.future,
       processResumedCompleted.future,
     ]);
 
@@ -100,16 +98,14 @@ void main() {
     const breakPointMatcher = r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
     const processAttachMatcher = 'device process attach --pid $appProcessId';
     const processResumedMatcher = 'process continue';
-    const setupBacktraceMatcher = 'target stop-hook add -o "thread backtrace all"';
-    const setupDetachMatcher = 'target stop-hook add -o "detach"';
+    const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
     final expectedInputs = [
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
       'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
-      setupBacktraceMatcher,
-      setupDetachMatcher,
+      setupStopHooksMatcher,
       processResumedMatcher,
     ];
 
@@ -137,11 +133,8 @@ Target 0: (Runner) stopped.
 '''),
         );
       }
-      if (line == setupBacktraceMatcher) {
-        setupBacktraceCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
-      }
-      if (line == setupDetachMatcher) {
-        setupDetachCompleter.complete(utf8.encode('Stop hook #2 added.\n'));
+      if (line == setupStopHooksMatcher) {
+        setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
       }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
@@ -167,14 +160,12 @@ Target 0: (Runner) stopped.
     const appProcessId = 5678;
 
     final processAttachCompleter = Completer<List<int>>();
-    final setupBacktraceCompleter = Completer<List<int>>();
-    final setupDetachCompleter = Completer<List<int>>();
+    final setupStopHooksCompleter = Completer<List<int>>();
     final processResumedCompleted = Completer<List<int>>();
 
     final stdoutStream = Stream<List<int>>.fromFutures([
       processAttachCompleter.future,
-      setupBacktraceCompleter.future,
-      setupDetachCompleter.future,
+      setupStopHooksCompleter.future,
       processResumedCompleted.future,
     ]);
 
@@ -201,13 +192,11 @@ Target 0: (Runner) stopped.
 
     const processAttachMatcher = 'device process attach --pid $appProcessId';
     const processResumedMatcher = 'process continue';
-    const setupBacktraceMatcher = 'target stop-hook add -o "thread backtrace all"';
-    const setupDetachMatcher = 'target stop-hook add -o "detach"';
+    const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
     final expectedInputs = [
       'device select $deviceId',
       processAttachMatcher,
-      setupBacktraceMatcher,
-      setupDetachMatcher,
+      setupStopHooksMatcher,
       processResumedMatcher,
     ];
 
@@ -230,11 +219,8 @@ Target 0: (Runner) stopped.
 '''),
         );
       }
-      if (line == setupBacktraceMatcher) {
-        setupBacktraceCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
-      }
-      if (line == setupDetachMatcher) {
-        setupDetachCompleter.complete(utf8.encode('Stop hook #2 added.\n'));
+      if (line == setupStopHooksMatcher) {
+        setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
       }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));
@@ -345,14 +331,19 @@ Target 0: (Runner) stopped.
       processUtils: processUtils,
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     );
-    final expectedInputs = ['device select $deviceId'];
+    final expectedInputs = [
+      'device select $deviceId',
+      r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
+    ];
     const errorText = "error: 'device' is not a valid command.\n";
 
     stdinController.stream.transform<String>(utf8.decoder).transform(const LineSplitter()).listen((
       String line,
     ) {
       expectedInputs.remove(line);
-      errorCompleter.complete(utf8.encode(errorText));
+      if (expectedInputs.isEmpty) {
+        errorCompleter.complete(utf8.encode(errorText));
+      }
     });
 
     final bool success = await lldb.attachAndStart(
@@ -429,16 +420,14 @@ Target 0: (Runner) stopped.
 
     final breakPointCompleter = Completer<List<int>>();
     final processAttachCompleter = Completer<List<int>>();
-    final setupBacktraceCompleter = Completer<List<int>>();
-    final setupDetachCompleter = Completer<List<int>>();
+    final setupStopHooksCompleter = Completer<List<int>>();
     final processResumedCompleted = Completer<List<int>>();
     final logAfterAttachCompleter = Completer<List<int>>();
 
     final stdoutStream = Stream<List<int>>.fromFutures([
       breakPointCompleter.future,
       processAttachCompleter.future,
-      setupBacktraceCompleter.future,
-      setupDetachCompleter.future,
+      setupStopHooksCompleter.future,
       processResumedCompleted.future,
       logAfterAttachCompleter.future,
     ]);
@@ -467,16 +456,14 @@ Target 0: (Runner) stopped.
     const breakPointMatcher = r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
     const processAttachMatcher = 'device process attach --pid $appProcessId';
     const processResumedMatcher = 'process continue';
-    const setupBacktraceMatcher = 'target stop-hook add -o "thread backtrace all"';
-    const setupDetachMatcher = 'target stop-hook add -o "detach"';
+    const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
     final expectedInputs = [
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
       'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
-      setupBacktraceMatcher,
-      setupDetachMatcher,
+      setupStopHooksMatcher,
       processResumedMatcher,
     ];
 
@@ -504,11 +491,8 @@ Target 0: (Runner) stopped.
 '''),
         );
       }
-      if (line == setupBacktraceMatcher) {
-        setupBacktraceCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
-      }
-      if (line == setupDetachMatcher) {
-        setupDetachCompleter.complete(utf8.encode('Stop hook #2 added.\n'));
+      if (line == setupStopHooksMatcher) {
+        setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
       }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
