@@ -81,7 +81,7 @@ void testMain() {
 
     test('dispose removes the canvas element from the DOM', () {
       final canvas = RenderCanvas();
-      addTearDown(canvas.hostElement.remove);
+      addTearDown(() => canvas.hostElement.remove());
       domDocument.body!.append(canvas.hostElement);
 
       expect(canvas.hostElement.isConnected, isTrue);
