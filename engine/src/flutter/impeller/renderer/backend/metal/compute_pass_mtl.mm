@@ -124,11 +124,9 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
   return true;
 }
 
-fml::Status ComputePassMTL::Compute(uint32_t workgroup_count_x,
-                                    uint32_t workgroup_count_y,
-                                    uint32_t workgroup_count_z) {
-  if (workgroup_count_x == 0u || workgroup_count_y == 0u ||
-      workgroup_count_z == 0u) {
+fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u) {
     return fml::Status(fml::StatusCode::kCancelled,
                        "Invalid workgroup count for compute command.");
   }
@@ -156,8 +154,8 @@ fml::Status ComputePassMTL::Compute(uint32_t workgroup_count_x,
   }
 
   [encoder_
-       dispatchThreadgroups:MTLSizeMake(workgroup_count_x, workgroup_count_y,
-                                        workgroup_count_z)
+       dispatchThreadgroups:MTLSizeMake(workgroup_count[0], workgroup_count[1],
+                                        workgroup_count[2])
       threadsPerThreadgroup:threads_per_threadgroup];
 
 #ifdef IMPELLER_DEBUG

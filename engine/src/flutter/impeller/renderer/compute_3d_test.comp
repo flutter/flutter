@@ -1,0 +1,21 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// A non-uniform 3D local size to exercise dispatch in all three dimensions.
+layout(local_size_x = 2, local_size_y = 3, local_size_z = 4) in;
+layout(std430) buffer;
+
+layout(binding = 0) writeonly buffer OutputData {
+  uint data[];
+}
+output_data;
+
+void main() {
+  // The total invocation grid is the workgroup count times the local size, so
+  // it exactly covers the output buffer with no bounds check needed.
+  uvec3 grid = gl_NumWorkGroups * gl_WorkGroupSize;
+  uvec3 id = gl_GlobalInvocationID;
+  uint flat = id.z * grid.x * grid.y + id.y * grid.x + id.x;
+  output_data.data[flat] = flat;
+}

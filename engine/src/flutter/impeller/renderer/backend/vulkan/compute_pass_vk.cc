@@ -62,11 +62,9 @@ void ComputePassVK::SetPipeline(
 }
 
 // |ComputePass|
-fml::Status ComputePassVK::Compute(uint32_t workgroup_count_x,
-                                   uint32_t workgroup_count_y,
-                                   uint32_t workgroup_count_z) {
-  if (workgroup_count_x == 0u || workgroup_count_y == 0u ||
-      workgroup_count_z == 0u || !pipeline_valid_) {
+fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u || !pipeline_valid_) {
     bound_image_offset_ = 0u;
     bound_buffer_offset_ = 0u;
     descriptor_write_offset_ = 0u;
@@ -99,8 +97,8 @@ fml::Status ComputePassVK::Compute(uint32_t workgroup_count_x,
   // The arguments are workgroup counts. The per-workgroup invocation count (the
   // local size) is baked into the shader module, so dispatch the counts
   // directly.
-  command_buffer_vk.dispatch(workgroup_count_x, workgroup_count_y,
-                             workgroup_count_z);
+  command_buffer_vk.dispatch(workgroup_count[0], workgroup_count[1],
+                             workgroup_count[2]);
 
 #ifdef IMPELLER_DEBUG
   if (has_label_) {

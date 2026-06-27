@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_COMPUTE_PASS_H_
 #define FLUTTER_IMPELLER_RENDERER_COMPUTE_PASS_H_
 
+#include <array>
 #include <cstdint>
 #include <string>
 
@@ -37,17 +38,15 @@ class ComputePass : public ResourceBinder {
   //----------------------------------------------------------------------------
   /// @brief      Dispatch a grid of compute workgroups.
   ///
-  ///             The arguments are workgroup (threadgroup) counts, not
-  ///             invocation counts. The number of invocations per workgroup
-  ///             (the local size) is declared by the shader. The total
-  ///             invocations along an axis is therefore the workgroup count
-  ///             times the shader's local size.
+  ///             The components of `workgroup_count` are workgroup
+  ///             (threadgroup) counts, not invocation counts. The number of
+  ///             invocations per workgroup (the local size) is declared by the
+  ///             shader. The total invocations along an axis is therefore the
+  ///             workgroup count times the shader's local size.
   ///
   /// @return     A cancelled status if any dimension is zero.
   ///
-  virtual fml::Status Compute(uint32_t workgroup_count_x,
-                              uint32_t workgroup_count_y = 1u,
-                              uint32_t workgroup_count_z = 1u) = 0;
+  virtual fml::Status Compute(std::array<uint32_t, 3> workgroup_count) = 0;
 
   /// @brief Ensures all previously encoded compute command's buffer writes are
   ///        visible to any subsequent compute commands.

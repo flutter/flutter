@@ -65,11 +65,10 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
   auto device_properties = strong_device->GetPhysicalDevice().getProperties();
   auto max_wg_size = device_properties.limits.maxComputeWorkGroupSize;
 
-  // Size specialization constant 0 to the device's maximum workgroup size.
-  // This only affects shaders that declare their workgroup size via
-  // `local_size_x_id = 0` (a device-adaptive size); shaders that declare a
-  // literal `local_size` have no such constant, so Vulkan ignores this entry
-  // and the literal size baked into the module is used as-is.
+  // Specialization constant 0 carries the workgroup size. Set it to the device
+  // maximum. This only affects shaders that declare their size with
+  // `local_size_x_id = 0`. A shader with a literal `local_size` has no such
+  // constant, so Vulkan ignores this and uses the size baked into the module.
   vk::SpecializationMapEntry specialization_map_entry[1];
 
   uint32_t workgroup_size_x = max_wg_size[0];

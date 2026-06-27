@@ -44,7 +44,7 @@ class ComputePipelineDescriptor final
   ///
   ComputePipelineDescriptor& SetWorkgroupSize(std::array<uint32_t, 3> size);
 
-  const std::array<uint32_t, 3>& GetWorkgroupSize() const;
+  std::array<uint32_t, 3> GetWorkgroupSize() const;
 
   // Comparable<ComputePipelineDescriptor>
   std::size_t GetHash() const override;

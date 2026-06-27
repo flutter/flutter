@@ -68,8 +68,7 @@ ComputePipelineDescriptor& ComputePipelineDescriptor::SetWorkgroupSize(
   return *this;
 }
 
-const std::array<uint32_t, 3>& ComputePipelineDescriptor::GetWorkgroupSize()
-    const {
+std::array<uint32_t, 3> ComputePipelineDescriptor::GetWorkgroupSize() const {
   return workgroup_size_;
 }
 

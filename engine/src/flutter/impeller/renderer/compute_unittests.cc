@@ -11,6 +11,7 @@
 #include "impeller/fixtures/stage2.comp.h"
 #include "impeller/playground/compute_playground_test.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/compute_3d_test.comp.h"
 #include "impeller/renderer/compute_pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/prefix_sum_test.comp.h"
@@ -92,7 +93,8 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   CS::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(
-      pass->Compute(WorkgroupCount(kCount, CS::kWorkgroupSize[0])).ok());
+      pass->Compute({WorkgroupCount(kCount, CS::kWorkgroupSize[0]), 1, 1})
+          .ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -164,7 +166,7 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
 
   // The prefix sum is computed within a single workgroup whose size is sized to
   // the device (a specialization constant), so dispatch exactly one.
-  ASSERT_TRUE(pass->Compute(1).ok());
+  ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -223,7 +225,8 @@ TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
   CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(
-      pass->Compute(WorkgroupCount(kCount, CS::kWorkgroupSize[0])).ok());
+      pass->Compute({WorkgroupCount(kCount, CS::kWorkgroupSize[0]), 1, 1})
+          .ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -242,6 +245,64 @@ TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
                              output_buffer->OnGetContents());
                      EXPECT_TRUE(output);
                      EXPECT_EQ(output->data[kCount - 1], kCount - 1);
+                     latch.Signal();
+                   })
+          .ok());
+
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, 3DWorkgroupDispatchIsCorrect) {
+  using CS = Compute3DTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  using PipelineBuilder = ComputePipelineBuilder<CS>;
+  auto pipeline_desc = PipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto pass = cmd_buffer->CreateComputePass();
+  ASSERT_TRUE(pass && pass->IsValid());
+
+  // The shader's local size is (2, 3, 4). Dispatching (3, 2, 1) workgroups
+  // covers a (6, 6, 4) invocation grid, which exercises all three dimensions
+  // and confirms the reflected local size is honored on every axis.
+  static_assert(CS::kWorkgroupSize[0] == 2 && CS::kWorkgroupSize[1] == 3 &&
+                CS::kWorkgroupSize[2] == 4);
+  constexpr std::array<uint32_t, 3> kWorkgroups = {3, 2, 1};
+  constexpr uint32_t kWidth = kWorkgroups[0] * CS::kWorkgroupSize[0];
+  constexpr uint32_t kHeight = kWorkgroups[1] * CS::kWorkgroupSize[1];
+  constexpr uint32_t kDepth = kWorkgroups[2] * CS::kWorkgroupSize[2];
+  constexpr size_t kCount = kWidth * kHeight * kDepth;
+
+  pass->SetPipeline(compute_pipeline);
+
+  auto output_buffer = CreateHostVisibleDeviceBuffer<CS::OutputData<kCount>>(
+      context, "Output Buffer");
+  CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
+
+  ASSERT_TRUE(pass->Compute(kWorkgroups).ok());
+  ASSERT_TRUE(pass->EncodeCommands());
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd_buffer},
+                   [&latch, output_buffer](CommandBuffer::Status status) {
+                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+
+                     CS::OutputData<kCount>* output =
+                         reinterpret_cast<CS::OutputData<kCount>*>(
+                             output_buffer->OnGetContents());
+                     EXPECT_TRUE(output);
+                     for (uint32_t i = 0; i < kCount; i++) {
+                       EXPECT_EQ(output->data[i], i);
+                     }
                      latch.Signal();
                    })
           .ok());
@@ -285,7 +346,7 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
     // Single workgroup; see CanComputePrefixSum.
-    pass->Compute(1);
+    pass->Compute({1, 1, 1});
     pass->EncodeCommands();
     host_buffer->Reset();
     return context->GetCommandQueue()->Submit({cmd_buffer}).ok();
@@ -349,7 +410,8 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     CS1::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer_1));
 
     ASSERT_TRUE(
-        pass->Compute(WorkgroupCount(kCount1, CS1::kWorkgroupSize[0])).ok());
+        pass->Compute({WorkgroupCount(kCount1, CS1::kWorkgroupSize[0]), 1, 1})
+            .ok());
     pass->AddBufferMemoryBarrier();
   }
 
@@ -359,7 +421,8 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     CS1::BindInput(*pass, DeviceBuffer::AsBufferView(output_buffer_1));
     CS2::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer_2));
     ASSERT_TRUE(
-        pass->Compute(WorkgroupCount(kCount2, CS2::kWorkgroupSize[0])).ok());
+        pass->Compute({WorkgroupCount(kCount2, CS2::kWorkgroupSize[0]), 1, 1})
+            .ok());
   }
 
   ASSERT_TRUE(pass->EncodeCommands());
@@ -442,7 +505,8 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
   CS::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
   ASSERT_TRUE(
-      pass->Compute(WorkgroupCount(kCount, CS::kWorkgroupSize[0])).ok());
+      pass->Compute({WorkgroupCount(kCount, CS::kWorkgroupSize[0]), 1, 1})
+          .ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
   fml::AutoResetWaitableEvent latch;
@@ -523,7 +587,9 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
 
   // Intentionally making the workgroup count zero in one dimension. No GPU will
   // tolerate this.
-  EXPECT_FALSE(pass->Compute(0, 1, 1).ok());
+  auto status = pass->Compute({0, 1, 1});
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(status.code(), fml::StatusCode::kCancelled);
   pass->EncodeCommands();
 }
 
