@@ -882,6 +882,51 @@ TEST_F(FlutterWindowTest, NonPrimaryMouseButtonCapturesPointer) {
   EXPECT_EQ(GetCapture(), nullptr);
 }
 
+TEST_F(FlutterWindowTest, MouseButtonCaptureReleasedAfterAllButtonsReleased) {
+  MockFlutterWindow win32window;
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  HWND window_handle = win32window.FlutterWindow::GetWindowHandle();
+  ASSERT_NE(window_handle, nullptr);
+  ReleaseCapture();
+  ASSERT_EQ(GetCapture(), nullptr);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMouseSecondary, 0, 0))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_RBUTTONDOWN, MK_RBUTTON,
+                                  MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_LBUTTONDOWN, MK_LBUTTON | MK_RBUTTON,
+                                  MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                                    kDefaultPointerDeviceId,
+                                    kFlutterPointerButtonMouseSecondary))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_RBUTTONUP, MK_LBUTTON, MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                                    kDefaultPointerDeviceId,
+                                    kFlutterPointerButtonMousePrimary))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_LBUTTONUP, 0, MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), nullptr);
+}
+
 TEST_F(FlutterWindowTest, OnTouchPointerDown) {
   auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
 

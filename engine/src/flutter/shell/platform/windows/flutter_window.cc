@@ -761,16 +761,18 @@ FlutterWindow::HandleMessage(UINT const message,
         break;
       }
 
-      flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
-      if (flutter_button == 0) {
-        ReleaseCapture();
-      }
       button_pressed = message;
       if (message == WM_XBUTTONUP) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
       }
       x_pos = GET_X_LPARAM(lparam);
       y_pos = GET_Y_LPARAM(lparam);
+      flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
+
+      if ((wparam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON | MK_XBUTTON1 |
+                     MK_XBUTTON2)) == 0) {
+        ReleaseCapture();
+      }
 
       OnPointerUp(static_cast<double>(x_pos), static_cast<double>(y_pos),
                   device_kind, kDefaultPointerDeviceId, flutter_button);
