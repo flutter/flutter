@@ -16,6 +16,6 @@ void main() {
   // it exactly covers the output buffer with no bounds check needed.
   uvec3 grid = gl_NumWorkGroups * gl_WorkGroupSize;
   uvec3 id = gl_GlobalInvocationID;
-  uint flat = id.z * grid.x * grid.y + id.y * grid.x + id.x;
-  output_data.data[flat] = flat;
+  uint flat_index = id.z * grid.x * grid.y + id.y * grid.x + id.x;
+  output_data.data[flat_index] = flat_index;
 }
