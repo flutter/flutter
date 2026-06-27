@@ -444,7 +444,7 @@ TEST_P(GaussianBlurFilterContentsTest,
       // when comparing results with rrect_blur. That's why this is not
       // Rect::MakeXYWH(98.f, 78.f, 204.0f, 204.f).
       EXPECT_TRUE(RectNear(contents_coverage.value(),
-                           Rect::MakeXYWH(94.f, 74.f, 212.0f, 212.f)));
+                           Rect::MakeXYWH(92.f, 72.f, 216.0f, 216.f)));
     }
   }
 }
@@ -605,28 +605,28 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesComplex) {
                                .blur_radius = blur_radius,
                                .step_size = 1};
   KernelSamples kernel_samples = GenerateBlurInfo(parameters);
-  EXPECT_EQ(kernel_samples.sample_count, 33);
+  EXPECT_EQ(kernel_samples.sample_count, 57);
   GaussianBlurPipeline::FragmentShader::KernelSamples fast_kernel_samples =
       LerpHackKernelSamples(kernel_samples);
-  EXPECT_EQ(fast_kernel_samples.sample_count, 17);
-  float data[33];
+  EXPECT_EQ(fast_kernel_samples.sample_count, 29);
+  float data[57];
   srand(0);
-  for (int i = 0; i < 33; i++) {
+  for (int i = 0; i < 57; i++) {
     data[i] = 255.0 * static_cast<double>(IMPELLER_RAND()) / RAND_MAX;
   }
 
   auto sampler = [data](Point point) -> Scalar {
     FML_CHECK(point.y == 0.0f);
-    FML_CHECK(point.x >= -16);
-    FML_CHECK(point.x <= 16);
+    FML_CHECK(point.x >= -28);
+    FML_CHECK(point.x <= 28);
     Scalar fint_part;
     Scalar fract = fabsf(modf(point.x, &fint_part));
     if (fract == 0) {
-      int32_t int_part = static_cast<int32_t>(fint_part) + 16;
+      int32_t int_part = static_cast<int32_t>(fint_part) + 28;
       return data[int_part];
     } else {
-      int32_t left = static_cast<int32_t>(floor(point.x)) + 16;
-      int32_t right = static_cast<int32_t>(ceil(point.x)) + 16;
+      int32_t left = static_cast<int32_t>(floor(point.x)) + 28;
+      int32_t right = static_cast<int32_t>(ceil(point.x)) + 28;
       if (point.x < 0) {
         return fract * data[left] + (1.0 - fract) * data[right];
       } else {
