@@ -259,8 +259,9 @@ struct ShaderStageIOSlot {
     if (columns != 1u || vec_size < 1u || vec_size > 4u) {
       return VertexAttributeFormat::kInvalid;
     }
-    auto pick = [this](VertexAttributeFormat x1, VertexAttributeFormat x2,
-                       VertexAttributeFormat x3, VertexAttributeFormat x4) {
+    auto pick = [vec_size = vec_size](
+                    VertexAttributeFormat x1, VertexAttributeFormat x2,
+                    VertexAttributeFormat x3, VertexAttributeFormat x4) {
       switch (vec_size) {
         case 1:
           return x1;
