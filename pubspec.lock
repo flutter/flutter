@@ -275,22 +275,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  device_info:
-    dependency: "direct main"
-    description:
-      name: device_info
-      sha256: f4a8156cb7b7480d969cb734907d18b333c8f0bc0b1ad0b342cdcecf30d62c48
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.3"
-  device_info_platform_interface:
-    dependency: "direct main"
-    description:
-      name: device_info_platform_interface
-      sha256: b148e0bf9640145d09a4f8dea96614076f889e7f7f8b5ecab1c7e5c2dbc73c1b
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   devtools_shared:
     dependency: transitive
     description:
@@ -510,10 +494,10 @@ packages:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: "42f4f29bf23a7064ebd7aa0b340b66908a3311e227427854575516c98755a3a3"
+      sha256: a67ab8106545fcffcf5c43edf84b4be222fc95a9fbec8baef1bcaf4534540cfc
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "1.5.0"
   html:
     dependency: "direct main"
     description:
@@ -774,10 +758,10 @@ packages:
     dependency: "direct main"
     description:
       name: path_provider
-      sha256: "50c5dd5b6e1aaf6fb3a78b33f6aa3afca52bf903a8a5298f53101fdaee55bbcd"
+      sha256: a7f4874f987173da295a61c181b8ee71dab59b332a486b391babf26a1b884825
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.5"
+    version: "2.1.6"
   path_provider_android:
     dependency: "direct main"
     description:
@@ -806,10 +790,10 @@ packages:
     dependency: "direct main"
     description:
       name: path_provider_platform_interface
-      sha256: "88f5779f72ba699763fa3a3b06aa4bf6de76c8e5de842cf6f29e2e06476c2334"
+      sha256: "484838772624c3a4b94f1e44a3e19897fee738f2d5c4ce448443b0417f7c9dda"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.3"
   path_provider_windows:
     dependency: "direct main"
     description:
@@ -818,14 +802,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  pedantic:
-    dependency: "direct main"
-    description:
-      name: pedantic
-      sha256: "67fc27ed9639506c856c840ccce7594d0bdcd91bc8d53d6e52359449a1d50602"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.11.1"
   petitparser:
     dependency: "direct main"
     description:
@@ -1115,10 +1091,10 @@ packages:
     dependency: transitive
     description:
       name: unified_analytics
-      sha256: "406724e9231f8e30119673133c1087f9b24e2a75ba7111ea071253d57bb8f3b9"
+      sha256: "0988c50d794f3cd96f6df92b4b35b7c333bbf869df304fc6062a45ebc7eb0776"
       url: "https://pub.dev"
     source: hosted
-    version: "8.0.14"
+    version: "8.0.15"
   url_launcher:
     dependency: "direct main"
     description:
@@ -1315,10 +1291,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter
-      sha256: a3da219916aba44947d3a5478b1927876a09781174b5a2b67fa5be0555154bf9
+      sha256: e4d3474277c5043f5f3100ed27d94ad693abfd5c602b0221c719a4497e4ba1e4
       url: "https://pub.dev"
     source: hosted
-    version: "4.13.1"
+    version: "4.14.0"
   webview_flutter_android:
     dependency: "direct main"
     description:

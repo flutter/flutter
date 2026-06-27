@@ -1064,6 +1064,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   }
 
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void putImageData(DomImageData imagedata, int dx, int dy);
   external void lineTo(num x, num y);
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
