@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
@@ -93,7 +94,8 @@ class FlutterWebPlatform extends PlatformPlugin {
        _testHostDartJs = testHostDartJs,
        _chromiumLauncher = chromiumLauncher,
        _logger = logger,
-       _artifacts = artifacts {
+       _artifacts = artifacts,
+       _processManager = processManager {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
@@ -141,6 +143,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   final Artifacts? _artifacts;
+  final ProcessManager _processManager;
   final bool updateGoldens;
   final _webSocketHandler = OneOffHandler();
   final _closeMemo = AsyncMemoizer<void>();
@@ -661,6 +664,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
+      processManager: _processManager,
       webBrowserFlags: <String>[
         '--disable-dev-shm-usage',
       ],
@@ -731,7 +735,7 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger) {
+  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger, this._processManager) {
     _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager created for ${_runtime.name}.');
     unawaited(
       _browser.onExit.then((int exitCode) {
@@ -786,12 +790,14 @@ class BrowserManager {
 
     _environment = _loadBrowserEnvironment();
     _channel.stream.listen(_onMessage, onDone: close);
+    _startProcessMonitor();
   }
 
   /// The browser instance that this is connected to via [_channel].
   final Chromium _browser;
   final Runtime _runtime;
   final Logger _logger;
+  final ProcessManager _processManager;
 
   /// The channel used to communicate with the browser.
   ///
@@ -858,6 +864,7 @@ class BrowserManager {
     bool headless = true,
     List<String> webBrowserFlags = const <String>[],
     required Logger logger,
+    required ProcessManager processManager,
   }) async {
     final Chromium chrome = await chromiumLauncher.launch(
       url.toString(),
@@ -947,7 +954,7 @@ class BrowserManager {
           if (completer.isCompleted) {
             return;
           }
-          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger));
+          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger, processManager));
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();
@@ -1100,6 +1107,7 @@ class BrowserManager {
       _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.close called.');
       _closed = true;
       _timer.cancel();
+      _processMonitorTimer?.cancel();
       if (_pauseCompleter != null) {
         _pauseCompleter!.complete();
       }
@@ -1122,6 +1130,108 @@ class BrowserManager {
       );
       return closeFuture;
     });
+  }
+
+  Timer? _processMonitorTimer;
+
+  void _startProcessMonitor() {
+    if (!Platform.isLinux && !Platform.isMacOS) {
+      return;
+    }
+    _processMonitorTimer = Timer.periodic(const Duration(seconds: 10), (Timer timer) async {
+      if (_closed) {
+        timer.cancel();
+        return;
+      }
+      await _logProcessTree();
+    });
+  }
+
+  Future<void> _logProcessTree() async {
+    final int rootPid = _browser.pid;
+    try {
+      final ProcessResult result = await _processManager.run(<String>['ps', '-ax', '-o', 'pid,ppid,comm,%cpu,%mem,rss,vsz']);
+      if (result.exitCode != 0) {
+        _logger.printStatus('[PROCESS_MONITOR] Failed to run ps: ${result.stderr}');
+        return;
+      }
+      final String output = result.stdout as String;
+      final List<String> lines = output.split('\n');
+      
+      final Map<int, List<Map<String, dynamic>>> parentToChildren = {};
+      final Map<int, Map<String, dynamic>> allProcesses = {};
+      
+      for (int i = 1; i < lines.length; i++) {
+        final String line = lines[i].trim();
+        if (line.isEmpty) {
+          continue;
+        }
+        final List<String> parts = line.split(RegExp(r'\s+'));
+        if (parts.length < 7) {
+          continue;
+        }
+        final int? pid = int.tryParse(parts[0]);
+        final int? ppid = int.tryParse(parts[1]);
+        if (pid == null || ppid == null) {
+          continue;
+        }
+        final String comm = parts[2];
+        final double? cpu = double.tryParse(parts[3]);
+        final double? mem = double.tryParse(parts[4]);
+        final int? rss = int.tryParse(parts[5]);
+        final int? vsz = int.tryParse(parts[6]);
+        
+        final proc = {
+          'pid': pid,
+          'ppid': ppid,
+          'comm': comm,
+          'cpu': cpu,
+          'mem': mem,
+          'rss': rss,
+          'vsz': vsz,
+        };
+        
+        allProcesses[pid] = proc;
+        parentToChildren.putIfAbsent(ppid, () => []).add(proc);
+      }
+      
+      final List<Map<String, dynamic>> descendants = [];
+      void collectDescendants(int pid) {
+        final children = parentToChildren[pid];
+        if (children != null) {
+          for (final child in children) {
+            descendants.add(child);
+            collectDescendants(child['pid'] as int);
+          }
+        }
+      }
+      
+      final rootProc = allProcesses[rootPid];
+      if (rootProc != null) {
+        descendants.add(rootProc);
+      }
+      collectDescendants(rootPid);
+      
+      if (descendants.isEmpty) {
+        _logger.printStatus('[PROCESS_MONITOR] No processes found for PID $rootPid');
+        return;
+      }
+      
+      _logger.printStatus('[PROCESS_MONITOR] Process tree for Chrome (Root PID $rootPid):');
+      _logger.printStatus('[PROCESS_MONITOR]   PID   PPID COMMAND         %CPU %MEM   RSS(KB)   VSZ(KB)');
+      for (final proc in descendants) {
+        final pidStr = proc['pid'].toString().padLeft(6);
+        final ppidStr = proc['ppid'].toString().padLeft(6);
+        final commStr = (proc['comm'] as String).padRight(15);
+        final cpuStr = proc['cpu'].toString().padLeft(5);
+        final memStr = proc['mem'].toString().padLeft(5);
+        final rssStr = proc['rss'].toString().padLeft(9);
+        final vszStr = proc['vsz'].toString().padLeft(9);
+        _logger.printStatus('[PROCESS_MONITOR] $pidStr $ppidStr $commStr $cpuStr $memStr $rssStr $vszStr');
+      }
+    } catch (e) {
+      _logger.printStatus('[PROCESS_MONITOR] Error monitoring processes: $e');
+    }
   }
 }
 
