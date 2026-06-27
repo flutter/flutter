@@ -646,6 +646,170 @@ void main() {
   });
 
   group('material handles', () {
+    testWidgets('TextSelectionOverlay crash repro - degenerate layout (preferredLineHeight == 0)', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController(text: 'You make wine from sour grapes');
+      final focusNode = FocusNode();
+
+      var scaleFactor = 1.0;
+      late StateSetter setState;
+
+      // Build the widget tree with a TextField whose style we can dynamically change.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter localSetState) {
+                  setState = localSetState;
+                  return SizedBox(
+                    width: 300,
+                    height: 200,
+                    child: MediaQuery(
+                      data: MediaQuery.of(
+                        context,
+                      ).copyWith(textScaler: TextScaler.linear(scaleFactor)),
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        maxLines: null,
+                        style: const TextStyle(fontSize: 14.0),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // 1. Focus the text field to allow selection.
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // 2. Programmatically select a range of text to show the selection handles.
+      controller.selection = const TextSelection(baseOffset: 4, extentOffset: 15);
+      await tester.pumpAndSettle();
+
+      // 3. Find the RenderEditable to get the handle coordinates.
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+      expect(endpoints.length, 2, reason: 'Selection handles should be visible.');
+
+      // Calculate the global coordinate of the end handle.
+      final Offset handleLocalPos = endpoints[1].point;
+      final Offset handleGlobalPos =
+          renderEditable.localToGlobal(handleLocalPos) + const Offset(1.0, 1.0);
+
+      // 4. Start the drag gesture on the end handle.
+      final TestGesture gesture = await tester.startGesture(handleGlobalPos);
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // 5. Simulate a transient degenerate layout state mid-drag.
+      // By setting scaleFactor to 0.0, the RenderEditable's preferredLineHeight
+      // will become 0.0 on the next layout pass.
+      setState(() {
+        scaleFactor = 0.0;
+      });
+      await tester.pump();
+
+      // 6. Move the drag handle. This triggers the drag update callback which calls
+      // TextSelectionOverlay._getHandleDy. With preferredLineHeight == 0.0, this performs
+      // division by zero (distanceDragged / 0.0) resulting in Infinity.
+      // Calling .floor() on Infinity throws the fatal "Unsupported operation: Infinity or NaN toInt".
+      final Offset newGlobalPos = handleGlobalPos + const Offset(50.0, 0.0);
+
+      // We expect this to not throw.
+      await gesture.moveTo(newGlobalPos);
+      await tester.pump();
+
+      // Clean up the gesture.
+      await gesture.up();
+      await tester.pump();
+    });
+
+    testWidgets('TextSelectionOverlay crash repro - degenerate transform (NaN coordinates)', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController(text: 'You make wine from sour grapes');
+      final focusNode = FocusNode();
+
+      var scale = 1.0;
+      late StateSetter setState;
+
+      // Build the widget tree with a Transform.scale that we can set to an extremely
+      // small value to produce a near-singular/degenerate transform matrix.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter localSetState) {
+                  setState = localSetState;
+                  return Transform.scale(
+                    scale: scale,
+                    child: SizedBox(
+                      width: 300,
+                      height: 200,
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        maxLines: null,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // 1. Focus and select text.
+      focusNode.requestFocus();
+      await tester.pump();
+      controller.selection = const TextSelection(baseOffset: 4, extentOffset: 15);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+      final Offset handleGlobalPos =
+          renderEditable.localToGlobal(endpoints[1].point) + const Offset(1.0, 1.0);
+
+      // 2. Start the drag gesture.
+      final TestGesture gesture = await tester.startGesture(handleGlobalPos);
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // 3. Trigger a degenerate transform mid-drag.
+      // Using a value close to subnormal limits can cause floating-point inversion
+      // to produce non-finite (NaN or Infinity) coordinates in globalToLocal.
+      setState(() {
+        scale = 1e-320; // Extremely small, near-singular scale
+      });
+      await tester.pump();
+
+      final Offset newGlobalPos = handleGlobalPos + const Offset(50.0, 0.0);
+
+      // 4. Move the drag handle. globalToLocal returns non-finite coordinates,
+      // making distanceDragged NaN, leading to NaN.floor() which throws.
+      await gesture.moveTo(newGlobalPos);
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pump();
+    });
     testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
         RepaintBoundary(
@@ -770,80 +934,76 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
   );
 
-  testWidgets(
-    'does not crash when long press is cancelled after unmounting',
-    (WidgetTester tester) async {
-      // Regression test for b/425840577.
-      final scrollController = ScrollController();
-      addTearDown(scrollController.dispose);
+  testWidgets('does not crash when long press is cancelled after unmounting', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for b/425840577.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: CustomScrollView(
-              controller: scrollController,
-              slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, int index) => index == 0 ? const TextField() : const SizedBox(height: 50),
-                    childCount: 200,
-                    addAutomaticKeepAlives: false,
-                  ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, int index) => index == 0 ? const TextField() : const SizedBox(height: 50),
+                  childCount: 200,
+                  addAutomaticKeepAlives: false,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
-      // gesture is not accepted and is cancelled when the recognizer is disposed.
-      await tester.startGesture(tester.getCenter(find.byType(TextField)));
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pumpAndSettle();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
+    // gesture is not accepted and is cancelled when the recognizer is disposed.
+    await tester.startGesture(tester.getCenter(find.byType(TextField)));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
 
-      // While attempting to long press, scroll the TextField out of view
-      // to dispose of it and its gesture recognizers.
-      scrollController.jumpTo(8000.0);
-      await tester.pump();
-      expect(state.mounted, isFalse);
-      // Should reach the end of the test without any failures.
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    // While attempting to long press, scroll the TextField out of view
+    // to dispose of it and its gesture recognizers.
+    scrollController.jumpTo(8000.0);
+    await tester.pump();
+    expect(state.mounted, isFalse);
+    // Should reach the end of the test without any failures.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   // Regression test for https://github.com/flutter/flutter/issues/37032.
-  testWidgets(
-    "selection handle's GestureDetector should not cover the entire screen",
-    (WidgetTester tester) async {
-      final controller = TextEditingController(text: 'a');
-      addTearDown(controller.dispose);
+  testWidgets("selection handle's GestureDetector should not cover the entire screen", (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'a');
+    addTearDown(controller.dispose);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: TextField(autofocus: true, controller: controller)),
-        ),
-      );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: TextField(autofocus: true, controller: controller)),
+      ),
+    );
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      final Finder gestureDetector = find.descendant(
-        of: find.byType(CompositedTransformFollower),
-        matching: find.descendant(
-          of: find.byType(FadeTransition),
-          matching: find.byType(RawGestureDetector),
-        ),
-      );
+    final Finder gestureDetector = find.descendant(
+      of: find.byType(CompositedTransformFollower),
+      matching: find.descendant(
+        of: find.byType(FadeTransition),
+        matching: find.byType(RawGestureDetector),
+      ),
+    );
 
-      expect(gestureDetector, findsOneWidget);
-      // The GestureDetector's size should not exceed that of the TextField.
-      final Rect hitRect = tester.getRect(gestureDetector);
-      final Rect textFieldRect = tester.getRect(find.byType(TextField));
+    expect(gestureDetector, findsOneWidget);
+    // The GestureDetector's size should not exceed that of the TextField.
+    final Rect hitRect = tester.getRect(gestureDetector);
+    final Rect textFieldRect = tester.getRect(find.byType(TextField));
 
-      expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
-      expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  );
+    expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
+    expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 }
