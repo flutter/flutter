@@ -161,13 +161,11 @@ static std::shared_ptr<impeller::Texture> GetTextureFromImage(
   if (Dart_IsError(inner) || Dart_IsNull(inner)) {
     return nullptr;
   }
-  intptr_t peer = 0;
-  Dart_Handle result = Dart_GetNativeInstanceField(
-      inner, tonic::DartWrappable::kPeerIndex, &peer);
-  if (Dart_IsError(result) || peer == 0) {
+  auto* canvas_image =
+      tonic::DartConverter<flutter::CanvasImage*>::FromDart(inner);
+  if (!canvas_image) {
     return nullptr;
   }
-  auto* canvas_image = reinterpret_cast<flutter::CanvasImage*>(peer);
   sk_sp<flutter::DlImage> dl_image = canvas_image->image();
   if (!dl_image) {
     return nullptr;
@@ -309,14 +307,15 @@ Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
   const intptr_t length = sizeof(values) / sizeof(values[0]);
   Dart_Handle list = Dart_NewTypedData(Dart_TypedData_kInt32, length);
   if (Dart_IsError(list)) {
-    return Dart_NewTypedData(Dart_TypedData_kInt32, 0);
+    return list;
   }
   Dart_TypedData_Type type;
   void* data = nullptr;
   intptr_t data_length = 0;
-  if (Dart_IsError(
-          Dart_TypedDataAcquireData(list, &type, &data, &data_length))) {
-    return Dart_NewTypedData(Dart_TypedData_kInt32, 0);
+  Dart_Handle acquire_result =
+      Dart_TypedDataAcquireData(list, &type, &data, &data_length);
+  if (Dart_IsError(acquire_result)) {
+    return acquire_result;
   }
   std::memcpy(data, values, sizeof(values));
   Dart_TypedDataReleaseData(list);
