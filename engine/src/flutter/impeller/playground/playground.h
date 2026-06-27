@@ -37,18 +37,14 @@ class Playground {
  public:
   using SinglePassCallback = std::function<bool(RenderPass& pass)>;
 
-  explicit Playground(PlaygroundSwitches switches);
+  explicit Playground(PlaygroundBackend backend,
+                      const PlaygroundSwitches& switches);
 
   virtual ~Playground();
 
   static bool ShouldOpenNewPlaygrounds();
 
-  void SetupContext(PlaygroundBackend backend,
-                    const PlaygroundSwitches& switches);
-
-  void SetupWindow();
-
-  void TeardownWindow();
+  void Teardown();
 
   bool IsPlaygroundEnabled() const;
 
@@ -120,19 +116,64 @@ class Playground {
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
  protected:
-  const PlaygroundSwitches switches_;
-
   virtual bool ShouldKeepRendering() const;
+
+  /// @brief Make sure that when the context is later created that it
+  ///        will not be shared with any other playgrounds.
+  ///
+  /// Must be called before any other method except for the Ensure family
+  /// of methods.
+  virtual void EnsureContextIsUnique();
+
+  /// @brief Returns true if the platform can support wide gamuts.
+  bool PlatformSupportsWideGamutTests() const;
+
+  /// @brief Make sure that when the context is later created that it
+  ///        will support wide gamuts if the platform supports it.
+  ///        Returns whether the platform supports wide gamut.
+  ///
+  /// Must be called before any other method except for the Ensure family
+  /// of methods.
+  ///
+  /// Callers should abort (such as via GTEST_SKIP) if the method returns
+  /// false if their behavior depends on the wide gamut support.
+  ///
+  /// @see PlatformSupportsWideGamut()
+  [[nodiscard]] virtual bool EnsureContextSupportsWideGamut();
+
+  /// @brief Make sure that when the context is later created that it
+  ///        will support the experimental AA lines flag.
+  ///
+  /// Must be called before any other method except for the Ensure family
+  /// of methods.
+  virtual void EnsureContextSupportsAntialiasLines();
+
+  /// @brief  Return an unmodifiable reference to the current switches.
+  ///         The switches might change at the start of a test as it
+  ///         has a brief opportunity to call any of the Ensure* methods
+  ///         that define the environment it expects, but should be
+  ///         stable by the time any subsequent methods that might perform
+  ///         work are called.
+  const PlaygroundSwitches& GetSwitches() const { return switches_; }
 
   void SetWindowSize(ISize size);
 
  private:
+  const PlaygroundBackend backend_;
+  PlaygroundSwitches switches_;
+
   fml::TimeDelta start_time_;
-  std::unique_ptr<PlaygroundImpl> impl_;
-  std::shared_ptr<Context> context_;
+  mutable std::unique_ptr<PlaygroundImpl> impl_;
+  mutable std::shared_ptr<Context> context_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
   std::shared_ptr<HostBuffer> host_buffer_;
+
+  std::unique_ptr<PlaygroundImpl>& GetImpl() const;
+
+  void SetupContext() const;
+
+  void SetupWindow();
 
   void SetCursorPosition(Point pos);
 

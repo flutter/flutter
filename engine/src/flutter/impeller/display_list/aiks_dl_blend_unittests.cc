@@ -398,6 +398,12 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
 
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with its own unique context.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
   auto texture = CreateTextureForFixture("airplane.jpg",
@@ -430,6 +436,12 @@ TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
 
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with its own unique context.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
   auto texture = CreateTextureForFixture("airplane.jpg",

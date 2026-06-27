@@ -164,6 +164,12 @@ TEST_P(AiksTest, DrawAtlasWithColorAdvancedAndTransform) {
 }
 
 TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with its own unique context.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   DisplayListBuilder builder;
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);

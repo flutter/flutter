@@ -43,7 +43,7 @@ std::shared_ptr<ContentContext> EntityPlayground::GetContentContext() const {
 }
 
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
-  if (!switches_.enable_playground) {
+  if (!IsPlaygroundEnabled()) {
     return true;
   }
 
@@ -63,7 +63,7 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
 }
 
 bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
-  if (!switches_.enable_playground) {
+  if (!IsPlaygroundEnabled()) {
     return true;
   }
 

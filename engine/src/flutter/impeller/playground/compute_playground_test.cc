@@ -10,7 +10,8 @@
 namespace impeller {
 
 ComputePlaygroundTest::ComputePlaygroundTest()
-    : Playground(PlaygroundSwitches{flutter::testing::GetArgsForProcess()}) {}
+    : Playground(GetParam(),
+                 PlaygroundSwitches{flutter::testing::GetArgsForProcess()}) {}
 
 ComputePlaygroundTest::~ComputePlaygroundTest() = default;
 
@@ -25,14 +26,7 @@ void ComputePlaygroundTest::SetUp() {
     return;
   }
 
-  SetupContext(GetParam(), switches_);
-  SetupWindow();
-
   start_time_ = fml::TimePoint::Now().ToEpochDelta();
-}
-
-void ComputePlaygroundTest::TearDown() {
-  TeardownWindow();
 }
 
 // |Playground|
