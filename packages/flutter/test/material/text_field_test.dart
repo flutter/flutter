@@ -2135,6 +2135,7 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/188666
   );
 
   testWidgets('Swapping controllers should update selection', (WidgetTester tester) async {
@@ -12781,6 +12782,7 @@ void main() {
     variant: TargetPlatformVariant.all(
       excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS},
     ),
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/188666
   );
 
   testWidgets(
