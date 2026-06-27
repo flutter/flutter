@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'checkbox.dart';
 /// @docImport 'radio.dart';
 /// @docImport 'switch.dart';
@@ -24,7 +22,7 @@ import 'button.dart';
 ///
 /// See also:
 ///
-///  * [kMinInteractiveDimension]
+///  * [kMinInteractiveDimension](https://api.flutter.dev/flutter/material/kMinInteractiveDimension-constant.html)
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
 const double kMinInteractiveDimensionCupertino = 44.0;
 

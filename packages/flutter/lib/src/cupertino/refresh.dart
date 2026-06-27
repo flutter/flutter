@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'app.dart';
 /// @docImport 'nav_bar.dart';
 library;
@@ -280,8 +278,8 @@ typedef RefreshCallback = Future<void> Function();
 ///  * [CustomScrollView], a typical sliver holding scroll view this control
 ///    should go into.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/refresh-content-controls/>
-///  * [RefreshIndicator], a Material Design version of the pull-to-refresh
-///    paradigm. This widget works differently than [RefreshIndicator] because
+///  * [RefreshIndicator](https://api.flutter.dev/flutter/material/RefreshIndicator-class.html), a Material Design version of the pull-to-refresh
+///    paradigm. This widget works differently than [RefreshIndicator](https://api.flutter.dev/flutter/material/RefreshIndicator-class.html) because
 ///    instead of being an overlay on top of the scrollable, the
 ///    [CupertinoSliverRefreshControl] is part of the scrollable and actively occupies
 ///    scrollable space.

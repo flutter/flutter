@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
@@ -161,7 +158,10 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder
 /// rounded rectangle border around the text field. If you set the [decoration]
 /// property to null, the decoration will be removed entirely.
 ///
-/// {@macro flutter.material.textfield.wantKeepAlive}
+/// When the widget has focus, it will prevent itself from disposing via its
+/// underlying [EditableText]'s [AutomaticKeepAliveClientMixin.wantKeepAlive] in
+/// order to avoid losing the selection. Removing the focus will allow it to be
+/// disposed.
 ///
 /// Remember to call [TextEditingController.dispose] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
@@ -602,7 +602,16 @@ class CupertinoTextField extends StatefulWidget {
   )
   final ToolbarOptions? toolbarOptions;
 
-  /// {@macro flutter.material.InputDecorator.textAlignVertical}
+  /// How the text should be aligned vertically.
+  ///
+  /// Determines the alignment of the baseline within the available space of
+  /// the input (typically a TextField). For example, TextAlignVertical.top will
+  /// place the baseline such that the text, and any attached decoration like
+  /// prefix and suffix, is as close to the top of the input as possible without
+  /// overflowing. The heights of the prefix and suffix are similarly included
+  /// for other alignment values. If the height is greater than the height
+  /// available, then the prefix and suffix will be allowed to overflow first
+  /// before the text scrolls.
   final TextAlignVertical? textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.textDirection}
@@ -772,19 +781,53 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
-  /// {@macro flutter.material.textfield.onTap}
+  /// Called for the first tap in a series of taps.
+  ///
+  /// The text field builds a [GestureDetector] to handle input events like tap,
+  /// to trigger focus requests, to move the caret, adjust the selection, etc.
+  /// Handling some of those events by wrapping the text field with a competing
+  /// GestureDetector is problematic.
+  ///
+  /// To unconditionally handle taps, without interfering with the text field's
+  /// internal gesture detector, provide this callback.
+  ///
+  /// If the text field is created with [enabled] false, taps will not be
+  /// recognized.
+  ///
+  /// To be notified when the text field gains or loses the focus, provide a
+  /// [focusNode] and add a listener to that.
+  ///
+  /// To listen to arbitrary pointer events without competing with the
+  /// text field's internal gesture detector, use a [Listener].
   final GestureTapCallback? onTap;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
-  /// {@macro flutter.material.Material.clipBehavior}
+  /// The content will be clipped (or not) according to this option.
+  ///
+  /// See the enum [Clip] for details of all possible options and their common
+  /// use cases.
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// {@macro flutter.material.textfield.restorationId}
+  /// Restoration ID to save and restore the state of the text field.
+  ///
+  /// If non-null, the text field will persist and restore its current scroll
+  /// offset and - if no [controller] has been provided - the content of the
+  /// text field. If a [controller] has been provided, it is the responsibility
+  /// of the owner of that controller to persist and restore it, e.g. by using
+  /// a [RestorableTextEditingController].
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
   final String? restorationId;
 
   /// {@macro flutter.widgets.editableText.scribbleEnabled}
@@ -852,7 +895,7 @@ class CupertinoTextField extends StatefulWidget {
   /// See also:
   ///  * [SpellCheckConfiguration.misspelledTextStyle], the style configured to
   ///    mark misspelled words with.
-  ///  * [TextField.materialMisspelledTextStyle], the style configured
+  ///  * [TextField.materialMisspelledTextStyle](https://api.flutter.dev/flutter/material/TextField/materialMisspelledTextStyle-constant.html), the style configured
   ///    to mark misspelled words with in the Material style.
   static const TextStyle cupertinoMisspelledTextStyle = TextStyle(
     decoration: TextDecoration.underline,

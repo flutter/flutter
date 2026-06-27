@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -158,7 +155,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          onShare: null, // See https://github.com/flutter/flutter/issues/141775.
        );
 
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.anchors}
+  /// The location on which to anchor the menu.
   final TextSelectionToolbarAnchors anchors;
 
   /// The children of the toolbar, typically buttons.

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'button.dart';
 /// @docImport 'list_section.dart';
 /// @docImport 'switch.dart';
@@ -49,7 +47,7 @@ enum _CupertinoListTileType { base, notched }
 
 /// An iOS-style list tile.
 ///
-/// The [CupertinoListTile] is a Cupertino equivalent of Material [ListTile].
+/// The [CupertinoListTile] is a Cupertino equivalent of Material [ListTile](https://api.flutter.dev/flutter/material/ListTile-class.html).
 /// It comes in two forms, an old-fashioned edge-to-edge variant known from iOS
 /// Settings app and in a new, "Inset Grouped" form, known from either iOS Notes
 /// or Reminders app. The first is constructed using default constructor, and
@@ -89,7 +87,7 @@ enum _CupertinoListTileType { base, notched }
 ///
 ///  * [CupertinoListSection], an iOS-style list that is a typical container for
 ///    [CupertinoListTile].
-///  * [ListTile], a Material Design list tile.
+///  * [ListTile](https://api.flutter.dev/flutter/material/ListTile-class.html), a Material Design list tile.
 class CupertinoListTile extends StatefulWidget {
   /// Creates an edge-to-edge iOS-style list tile like the tiles in iOS Settings
   /// app.

@@ -7,8 +7,6 @@
 // bool _lights = false;
 // void setState(VoidCallback fn) { }
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'list_tile.dart';
 library;
 
@@ -277,16 +275,18 @@ class CupertinoSwitch extends StatefulWidget {
   /// (or [Color.fromARGB(255, 255, 255, 255)] in high contrast) when null.
   final Color? offLabelColor;
 
-  /// {@macro flutter.material.switch.activeThumbImage}
+  /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider? activeThumbImage;
 
-  /// {@macro flutter.material.switch.onActiveThumbImageError}
+  /// An optional error callback for errors emitted when loading
+  /// [activeThumbImage].
   final ImageErrorListener? onActiveThumbImageError;
 
-  /// {@macro flutter.material.switch.inactiveThumbImage}
+  /// An image to use on the thumb of this switch when the switch is off.
   final ImageProvider? inactiveThumbImage;
 
-  /// {@macro flutter.material.switch.onInactiveThumbImageError}
+  /// An optional error callback for errors emitted when loading
+  /// [inactiveThumbImage].
   final ImageErrorListener? onInactiveThumbImageError;
 
   /// The outline color of this [CupertinoSwitch]'s track.

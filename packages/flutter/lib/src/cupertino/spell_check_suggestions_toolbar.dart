@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show SelectionChangedCause, SuggestionSpan;
 import 'package:flutter/widgets.dart';
@@ -23,7 +20,7 @@ const int _kMaxSuggestions = 3;
 /// readjusts to fit above bottom view insets.
 ///
 /// See also:
-///  * [SpellCheckSuggestionsToolbar], which is similar but for both the
+///  * [SpellCheckSuggestionsToolbar](https://api.flutter.dev/flutter/material/SpellCheckSuggestionsToolbar-class.html), which is similar but for both the
 ///    Material and Cupertino libraries.
 class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Constructs a [CupertinoSpellCheckSuggestionsToolbar].

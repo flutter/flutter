@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'slider.dart';
 /// @docImport 'switch.dart';
 library;
@@ -81,7 +79,7 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 ///
 /// See also:
 ///
-///  * [Checkbox], the Material Design equivalent.
+///  * [Checkbox](https://api.flutter.dev/flutter/material/Checkbox-class.html), the Material Design equivalent.
 ///  * [CupertinoSwitch], a widget with semantics similar to [CupertinoCheckbox].
 ///  * [CupertinoSlider], for selecting a value in a range.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/components/selection-and-input/toggles/>
