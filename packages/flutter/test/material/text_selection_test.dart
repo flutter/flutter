@@ -741,11 +741,12 @@ void main() {
       final controller = TextEditingController(text: 'You make wine from sour grapes');
       final focusNode = FocusNode();
 
-      var scale = 1.0;
+      var scaleY = 1.0;
       late StateSetter setState;
 
-      // Build the widget tree with a Transform.scale that we can set to an extremely
-      // small value to produce a near-singular/degenerate transform matrix.
+      // Build the widget tree with a Transform that scales only the height (Y-axis).
+      // Collapsing only the height axis to a subnormal value (like 1e-310) mirrors
+      // a horizontal fold and causes the inverse Y coordinate to overflow to Infinity.
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -753,8 +754,9 @@ void main() {
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter localSetState) {
                   setState = localSetState;
-                  return Transform.scale(
-                    scale: scale,
+                  return Transform(
+                    transform: Matrix4.diagonal3Values(1.0, scaleY, 1.0),
+                    alignment: Alignment.center,
                     child: SizedBox(
                       width: 300,
                       height: 200,
@@ -793,10 +795,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       // 3. Trigger a degenerate transform mid-drag.
-      // Using a value close to subnormal limits can cause floating-point inversion
-      // to produce non-finite (NaN or Infinity) coordinates in globalToLocal.
+      // Set the height scale (Y-axis) to a subnormal value (1e-310) to trigger
+      // coordinate inversion overflow.
       setState(() {
-        scale = 1e-320; // Extremely small, near-singular scale
+        scaleY = 1e-310;
       });
       await tester.pump();
 
@@ -805,6 +807,7 @@ void main() {
       // 4. Move the drag handle. globalToLocal returns non-finite coordinates,
       // making distanceDragged NaN, leading to NaN.floor() which throws.
       await gesture.moveTo(newGlobalPos);
+      await gesture.moveTo(newGlobalPos + const Offset(10.0, 0.0));
       await tester.pump();
 
       await gesture.up();
