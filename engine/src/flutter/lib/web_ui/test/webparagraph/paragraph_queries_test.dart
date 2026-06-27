@@ -292,4 +292,42 @@ Future<void> testMain() async {
     expect(paragraph.longestLine, closeTo(5.556640625, EPSILON));
     expect(paragraph.numberOfLines, 1);
   });
+
+  test('Paragraph print', () {
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      textDirection: ui.TextDirection.rtl,
+      height: 1.0,
+    );
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('اللغة العربية لغة عالمية غبية');
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.Offset> centers = [];
+    for (var i = 0; i < 55; ++i) {
+      final List<ui.TextBox> boxes = paragraph.getBoxesForRange(i, i + 1);
+      if (boxes.isNotEmpty) {
+        for (final box in boxes) {
+          print('getRectsForRange($i, ${i + 1}): $box');
+          centers.add(box.toRect().center);
+        }
+      } else {
+        print('getRectsForRange($i, ${i + 1}): empty');
+      }
+    }
+    for (final point in centers) {
+      final ui.TextPosition pos = paragraph.getPositionForOffset(point);
+      print(
+        'getGlyphPositionAtCoordinate($point): ${pos.offset}, ${pos.affinity == ui.TextAffinity.upstream ? "up" : "down"}',
+      );
+    }
+    for (final point in centers) {
+      final ui.GlyphInfo? glyph = paragraph.getClosestGlyphInfoForOffset(point);
+      print('getClosestGlyphClusterAt($point): $glyph');
+    }
+  });
 }
