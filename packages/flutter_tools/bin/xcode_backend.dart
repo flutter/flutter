@@ -17,6 +17,29 @@ void main(List<String> arguments) {
   ).run();
 }
 
+enum XcodeBuildCommand {
+  build('build', true),
+  prepare('prepare', true),
+  thin('thin'),
+  embed('embed', true),
+  embedAndThin('embed_and_thin', true),
+  buildAddToApp('build-add-to-app'),
+  testVmServiceBonjourService('test_vm_service_bonjour_service');
+
+  const XcodeBuildCommand(this.command, [this.requiresGeneratedXcconfigImport = false]);
+  final String command;
+  final bool requiresGeneratedXcconfigImport;
+
+  static XcodeBuildCommand? tryParse(String command) {
+    for (final XcodeBuildCommand value in values) {
+      if (value.command == command) {
+        return value;
+      }
+    }
+    return null;
+  }
+}
+
 /// Container for script arguments and environment variables.
 ///
 /// All interactions with the platform are broken into individual methods that
@@ -36,14 +59,6 @@ class Context {
       'Your Xcode project is incompatible with this version of Flutter. '
       'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
 
-  // "build-add-to-app" uses its own xcconfig
-  static const Set<String> _commandsRequiringGeneratedSettings = <String>{
-    'build',
-    'prepare',
-    'embed',
-    'embed_and_thin',
-  };
-
   void run() {
     if (arguments.isEmpty) {
       // Named entry points were introduced in Flutter v0.0.7.
@@ -51,27 +66,27 @@ class Context {
       exit(-1);
     }
 
-    final String subCommand = validateCommand(arguments[0]);
+    final XcodeBuildCommand subCommand = validateCommand(arguments[0]);
     final String? platformName = arguments.length < 2 ? null : arguments[1];
     final TargetPlatform platform = parsePlatform(platformName);
-    if (_commandsRequiringGeneratedSettings.contains(subCommand)) {
+    if (subCommand.requiresGeneratedXcconfigImport) {
       validateGeneratedBuildSettings(platform);
     }
     switch (subCommand) {
-      case 'build':
+      case XcodeBuildCommand.build:
         buildApp(platform, 'build');
-      case 'prepare':
+      case XcodeBuildCommand.prepare:
         unpackFor(platform, 'prepare');
-      case 'build-add-to-app':
+      case XcodeBuildCommand.buildAddToApp:
         buildForNativeApp(platform);
-      case 'thin':
+      case XcodeBuildCommand.thin:
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
-      case 'embed':
-      case 'embed_and_thin':
+      case XcodeBuildCommand.embed:
+      case XcodeBuildCommand.embedAndThin:
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks(platform);
-      case 'test_vm_service_bonjour_service':
+      case XcodeBuildCommand.testVmServiceBonjourService:
         // Exposed for integration testing only.
         addVmServiceBonjourService();
     }
@@ -110,20 +125,14 @@ class Context {
 
   /// Validates the command argument matches one of the possible commands.
   /// Returns null if not.
-  String validateCommand(String command) {
-    switch (command) {
-      case 'build':
-      case 'prepare':
-      case 'thin':
-      case 'embed':
-      case 'embed_and_thin':
-      case 'build-add-to-app':
-      case 'test_vm_service_bonjour_service':
-        return command;
-      default:
-        echoXcodeError(incompatibleErrorMessage);
-        exit(-1);
+  XcodeBuildCommand validateCommand(String command) {
+    final XcodeBuildCommand? parsedCommand = XcodeBuildCommand.tryParse(command);
+    if (parsedCommand == null) {
+      echoXcodeError(incompatibleErrorMessage);
+      exit(-1);
     }
+
+    return parsedCommand;
   }
 
   /// Converts the [platformName] argument to a [TargetPlatform]. If there is
