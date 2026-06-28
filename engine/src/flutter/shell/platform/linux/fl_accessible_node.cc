@@ -152,7 +152,7 @@ static void fl_accessible_node_set_property(GObject* object,
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(object);
   switch (prop_id) {
     case PROP_ENGINE:
-      g_weak_ref_init(&priv->engine, g_value_get_object(value));
+      g_weak_ref_set(&priv->engine, g_value_get_object(value));
       break;
     case PROP_VIEW_ID:
       priv->view_id = g_value_get_int64(value);
@@ -549,6 +549,7 @@ static void fl_accessible_node_action_interface_init(AtkActionIface* iface) {
 
 static void fl_accessible_node_init(FlAccessibleNode* self) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
+  g_weak_ref_init(&priv->engine, nullptr);
   g_weak_ref_init(&priv->parent, nullptr);
   priv->actions = g_ptr_array_new();
   priv->children = g_ptr_array_new_with_free_func(g_object_unref);
