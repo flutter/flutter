@@ -197,6 +197,15 @@ void main() {
       );
     });
 
+    testUsingContext('warns when Swift Package Manager is disabled', () async {
+      final configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>['config', '--no-enable-swift-package-manager']);
+
+      expect(testLogger.warningText, contains(kSwiftPackageManagerDisabledWarning));
+    });
+
     testUsingContext(
       'displays which config settings are available on stable',
       () async {

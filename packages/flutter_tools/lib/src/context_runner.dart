@@ -222,6 +222,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         flutterVersion: globals.flutterVersion,
         featuresConfig: FlutterFeaturesConfig(
           globalConfig: globals.config,
+          logger: globals.logger,
           platform: globals.platform,
           projectManifest: FlutterManifest.createFromPath(
             globals.fs.path.join(

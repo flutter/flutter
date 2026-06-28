@@ -197,6 +197,9 @@ class ConfigCommand extends FlutterCommand {
         final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
+        if (feature == swiftPackageManager && !keyValue) {
+          globals.printWarning(kSwiftPackageManagerDisabledWarning);
+        }
       }
     }
 
