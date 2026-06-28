@@ -448,6 +448,13 @@ class _DummyTapRecognizer extends GestureArenaMember {
 ///
 /// [TapRegion] is aware of the [Route]s in the [Navigator], so that [onTapOutside]
 /// or [onTapUpOutside] isn't called after the user navigates to a different page.
+///
+/// {@tool dartpad}
+/// This example shows a [TapRegion] that updates a status message when taps
+/// are detected inside or outside of the outlined area.
+///
+/// ** See code in examples/api/lib/widgets/tap_region/tap_region.0.dart **
+/// {@end-tool}
 class TapRegion extends SingleChildRenderObjectWidget {
   /// Creates a const [TapRegion].
   ///
