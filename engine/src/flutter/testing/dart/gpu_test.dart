@@ -1176,6 +1176,44 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('GpuContext.maxSamplerAnisotropy reports at least 1', () async {
+    expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy', () async {
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    // Although this is a non-texture uniform slot, it'll work fine for the
+    // purposes of testing this error.
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
+
+    try {
+      state.renderPass.bindTexture(
+        vertInfo,
+        texture,
+        sampler: gpu.SamplerOptions(maxAnisotropy: 0),
+      );
+      fail('Exception not thrown for a maxAnisotropy less than 1.');
+    } catch (e) {
+      expect(e.toString(), contains('maxAnisotropy must be at least 1'));
+    }
+
+    // Anisotropic filtering requires all filters to be linear.
+    try {
+      state.renderPass.bindTexture(
+        vertInfo,
+        texture,
+        sampler: gpu.SamplerOptions(maxAnisotropy: 16),
+      );
+      fail('Exception not thrown for anisotropy with non-linear filters.');
+    } catch (e) {
+      expect(e.toString(), contains('must all be linear'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Performs no draw calls. Just clears the render target to a solid green color.
   test('Can render clear color', () async {
     final RenderPassState state = createSimpleRenderPass(clearColor: Colors.lime);
