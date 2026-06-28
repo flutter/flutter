@@ -455,6 +455,14 @@ class _DummyTapRecognizer extends GestureArenaMember {
 ///
 /// ** See code in examples/api/lib/widgets/tap_region/tap_region.0.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows two [TapRegion]s sharing a [groupId]. Tapping inside
+/// either box triggers [onTapInside] for both, and tapping outside triggers
+/// [onTapOutside] for both, because grouped regions are treated as one.
+///
+/// ** See code in examples/api/lib/widgets/tap_region/tap_region.1.dart **
+/// {@end-tool}
 class TapRegion extends SingleChildRenderObjectWidget {
   /// Creates a const [TapRegion].
   ///
