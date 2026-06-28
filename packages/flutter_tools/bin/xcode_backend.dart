@@ -110,7 +110,7 @@ class Context {
     if (missingSettings.isEmpty) {
       return;
     }
-    final String includeDirective = platform == TargetPlatform.macos
+    final includeDirective = platform == TargetPlatform.macos
         ? '#include "ephemeral/Flutter-Generated.xcconfig"'
         : '#include "Generated.xcconfig"';
     echoXcodeError(
