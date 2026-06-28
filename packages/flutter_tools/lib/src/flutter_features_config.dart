@@ -4,6 +4,7 @@
 
 import 'base/common.dart';
 import 'base/config.dart';
+import 'base/logger.dart';
 import 'base/platform.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
@@ -18,19 +19,23 @@ interface class FlutterFeaturesConfig {
   /// are normally in the user's `%HOME` directory (varies by system), while
   /// [projectManifest] reads values from the _current_ Flutter project's
   /// `pubspec.yaml`
-  const FlutterFeaturesConfig({
+  FlutterFeaturesConfig({
     required Config globalConfig,
+    required Logger logger,
     required Platform platform,
     required FlutterManifest? projectManifest,
   }) : _globalConfig = globalConfig,
+       _logger = logger,
        _platform = platform,
        _projectManifest = projectManifest;
 
   final Config _globalConfig;
+  final Logger _logger;
   final Platform _platform;
 
   // Can be null if no manifest file exists in the current directory.
   final FlutterManifest? _projectManifest;
+  bool _hasWarnedAboutSwiftPackageManagerBeingDisabled = false;
 
   /// Returns whether [feature] has been turned on/off from configuration.
   ///
@@ -102,7 +107,14 @@ interface class FlutterFeaturesConfig {
   /// ENABLE_FOO=any-other-value flutter some-command
   /// ```
   bool? isEnabled(Feature feature) {
-    return _isEnabledByConfigValue(feature) ?? _isEnabledByPlatformEnvironment(feature);
+    final bool? configValue = _isEnabledByConfigValue(feature);
+    if (feature == swiftPackageManager &&
+        configValue == false &&
+        !_hasWarnedAboutSwiftPackageManagerBeingDisabled) {
+      _logger.printWarning(kSwiftPackageManagerDisabledWarning);
+      _hasWarnedAboutSwiftPackageManagerBeingDisabled = true;
+    }
+    return configValue ?? _isEnabledByPlatformEnvironment(feature);
   }
 
   bool? _isEnabledByConfigValue(Feature feature) {

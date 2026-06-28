@@ -229,6 +229,10 @@ const recordUse = Feature(
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
+/// Warning printed when Swift Package Manager is disabled in configuration.
+const kSwiftPackageManagerDisabledWarning =
+    'Disabling Swift Package Manager will not be allowed in a future version of Flutter.';
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',

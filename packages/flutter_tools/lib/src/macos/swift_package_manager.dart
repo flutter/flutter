@@ -12,6 +12,7 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../base/version.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../plugins.dart';
 import '../xcode_project.dart';
 import 'swift_packages.dart';
@@ -27,7 +28,7 @@ const kFlutterGeneratedFrameworkSwiftPackageTargetName = 'FlutterFramework';
 const kDisableSwiftPMInstructions =
     'You can also disable Swift Package Manager for the project by following these instructions:\n'
     '  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager\n'
-    'Disabling Swift Package Manager will not be allowed in a future version of Flutter.\n';
+    '$kSwiftPackageManagerDisabledWarning\n';
 
 /// Swift Package Manager is a dependency management solution for iOS and macOS
 /// applications.
