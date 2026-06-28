@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for [TapRegion].
 
@@ -13,7 +13,12 @@ class TapRegionExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: TapRegionExample());
+    return WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      builder: (BuildContext context, Widget? child) {
+        return const TapRegionExample();
+      },
+    );
   }
 }
 
@@ -29,8 +34,9 @@ class _TapRegionExampleState extends State<TapRegionExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    return ColoredBox(
+      color: const Color(0xFFFFFFFF),
+      child: Center(
         child: Column(
           mainAxisAlignment: .center,
           children: <Widget>[
@@ -49,7 +55,7 @@ class _TapRegionExampleState extends State<TapRegionExample> {
                 width: 200,
                 height: 200,
                 decoration: BoxDecoration(
-                  border: .all(width: 2, color: Colors.blue),
+                  border: .all(width: 2, color: const Color(0xFF2196F3)),
                 ),
                 child: const Center(child: Text('Tap Region')),
               ),

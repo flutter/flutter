@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for [TapRegion] demonstrating [TapRegion.groupId].
 
@@ -13,7 +13,12 @@ class TapRegionGroupExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: TapRegionGroupExample());
+    return WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      builder: (BuildContext context, Widget? child) {
+        return TapRegionGroupExample();
+      },
+    );
   }
 }
 
@@ -30,8 +35,9 @@ class _TapRegionGroupExampleState extends State<TapRegionGroupExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    return ColoredBox(
+      color: const Color(0xFFFFFFFF),
+      child: Center(
         child: Column(
           mainAxisAlignment: .center,
           children: <Widget>[
@@ -54,7 +60,7 @@ class _TapRegionGroupExampleState extends State<TapRegionGroupExample> {
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
-                      border: .all(width: 2, color: Colors.blue),
+                      border: .all(width: 2, color: const Color(0xFF2196F3)),
                     ),
                     child: const Center(child: Text('Box 1')),
                   ),
@@ -76,7 +82,7 @@ class _TapRegionGroupExampleState extends State<TapRegionGroupExample> {
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
-                      border: .all(width: 2, color: Colors.green),
+                      border: .all(width: 2, color: const Color(0xFF4CAF50)),
                     ),
                     child: const Center(child: Text('Box 2')),
                   ),
