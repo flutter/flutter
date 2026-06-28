@@ -47,14 +47,10 @@ class _TapRegionGroupExampleState extends State<TapRegionGroupExample> {
                 TapRegion(
                   groupId: 'panel-group',
                   onTapInside: (PointerDownEvent event) {
-                    setState(() {
-                      _box1Status = 'inside';
-                    });
+                    setState(() => _box1Status = 'inside');
                   },
                   onTapOutside: (PointerDownEvent event) {
-                    setState(() {
-                      _box1Status = 'outside';
-                    });
+                    setState(() => _box1Status = 'outside');
                   },
                   child: Container(
                     width: 150,
@@ -69,14 +65,10 @@ class _TapRegionGroupExampleState extends State<TapRegionGroupExample> {
                 TapRegion(
                   groupId: 'panel-group',
                   onTapInside: (PointerDownEvent event) {
-                    setState(() {
-                      _box2Status = 'inside';
-                    });
+                    setState(() => _box2Status = 'inside');
                   },
                   onTapOutside: (PointerDownEvent event) {
-                    setState(() {
-                      _box2Status = 'outside';
-                    });
+                    setState(() => _box2Status = 'outside');
                   },
                   child: Container(
                     width: 150,

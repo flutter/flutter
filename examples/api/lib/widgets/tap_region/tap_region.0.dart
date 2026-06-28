@@ -42,14 +42,10 @@ class _TapRegionExampleState extends State<TapRegionExample> {
           children: <Widget>[
             TapRegion(
               onTapInside: (PointerDownEvent event) {
-                setState(() {
-                  _status = 'Tapped inside!';
-                });
+                setState(() => _status = 'Tapped inside!');
               },
               onTapOutside: (PointerDownEvent event) {
-                setState(() {
-                  _status = 'Tapped outside!';
-                });
+                setState(() => _status = 'Tapped outside!');
               },
               child: Container(
                 width: 200,
