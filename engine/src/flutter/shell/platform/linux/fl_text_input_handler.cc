@@ -336,6 +336,12 @@ static void update_im_cursor_position(FlTextInputHandler* self) {
     return;
   }
 
+  // Cannot compute a position without a widget (e.g. after the view is
+  // disposed).
+  if (self->widget == nullptr) {
+    return;
+  }
+
   // Transform the x, y positions of the cursor from local coordinates to
   // Flutter view coordinates.
   gint x = self->composing_rect.x * self->editabletext_transform[0][0] +
