@@ -1934,6 +1934,14 @@ class Transform extends SingleChildRenderObjectWidget {
 /// The [CompositedTransformTarget] must come earlier in the paint order than
 /// any linked [CompositedTransformFollower]s.
 ///
+/// {@tool dartpad}
+/// This example shows text wrapped in a [CompositedTransformTarget]. Clicking
+/// the target text shows a [CompositedTransformFollower] box anchored to the bottom
+/// of the target text.
+///
+/// ** See code in examples/api/lib/widgets/composited_transform/composited_transform_follower.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CompositedTransformFollower], the widget that can target this one.
@@ -1984,6 +1992,14 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// hittable. If the parent covers the screen, this is trivially achievable, so
 /// this widget is usually used as the root of an [OverlayEntry] in an app-wide
 /// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
+///
+/// {@tool dartpad}
+/// This example shows text wrapped in a [CompositedTransformTarget]. Clicking
+/// the target text shows a [CompositedTransformFollower] box anchored to the bottom
+/// of the target text.
+///
+/// ** See code in examples/api/lib/widgets/composited_transform/composited_transform_follower.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
