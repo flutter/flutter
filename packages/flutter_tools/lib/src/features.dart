@@ -114,7 +114,7 @@ abstract class FeatureFlags {
     lldbDebugging,
     uiSceneMigration,
     riscv64,
-    macosArm64Only,
+    macOSArm64Only,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -312,7 +312,7 @@ const riscv64 = Feature(
 );
 
 /// Whether to only build for arm64 when targeting macOS.
-const macosArm64Only = Feature(
+const macOSArm64Only = Feature(
   name: 'building arm64 architecture only for non-debug macOS builds',
   extraHelpText:
       'If enabled, macOS release and profile builds generate Apple Silicon binaries instead of universal binaries. '
