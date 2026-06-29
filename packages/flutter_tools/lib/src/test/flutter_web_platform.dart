@@ -587,8 +587,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (_logger.isVerbose) {
       _logger.printTrace('Loading test suite $relativePath.');
     }
-    _logger.printStatus('[CHROME_DIAGNOSTIC] Loading test suite $relativePath.');
-
     final PoolResource lockResource = await _suiteLock.request();
 
     final Runtime browser = platform.runtime;
@@ -606,7 +604,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (_logger.isVerbose) {
       _logger.printTrace('Running test suite $relativePath.');
     }
-    _logger.printStatus('[CHROME_DIAGNOSTIC] Running test suite $relativePath.');
 
     final RunnerSuite suite = await _browserManager!.load(
       relativePath,
@@ -618,7 +615,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         if (_logger.isVerbose) {
           _logger.printTrace('Test suite $relativePath finished.');
         }
-        _logger.printStatus('[CHROME_DIAGNOSTIC] Test suite $relativePath finished.');
       },
     );
 
@@ -640,7 +636,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     final completer = Completer<WebSocketChannel>.sync();
     final String path = _webSocketHandler.create(
       webSocketHandler((WebSocketChannel webSocket, _) {
-        _logger.printStatus('[CHROME_DIAGNOSTIC] WebSocket connection established from Chrome.');
         completer.complete(webSocket);
       }),
     );
@@ -655,7 +650,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         );
 
     _logger.printTrace('Serving tests at $hostUrl');
-    _logger.printStatus('[CHROME_DIAGNOSTIC] Serving tests at $hostUrl');
 
     return BrowserManager.start(
       _chromiumLauncher,
@@ -665,32 +659,23 @@ class FlutterWebPlatform extends PlatformPlugin {
       headless: !_config.pauseAfterLoad,
       logger: _logger,
       processManager: _processManager,
-      webBrowserFlags: <String>[
-        '--disable-dev-shm-usage',
-      ],
     );
   }
 
   @override
   Future<void> closeEphemeral() async {
-    _logger.printStatus(
-      '[CHROME_DIAGNOSTIC] closeEphemeral called. _browserManager is null: ${_browserManager == null}',
-    );
     if (_browserManager != null) {
       await _browserManager!.close();
     }
-    _logger.printStatus('[CHROME_DIAGNOSTIC] closeEphemeral finished.');
   }
 
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
-    _logger.printStatus('[CHROME_DIAGNOSTIC] FlutterWebPlatform.close called.');
     await Future.wait<void>(<Future<dynamic>>[
       if (_browserManager != null) _browserManager!.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);
-    _logger.printStatus('[CHROME_DIAGNOSTIC] FlutterWebPlatform.close finished.');
   });
 }
 
@@ -735,13 +720,18 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger, this._processManager) {
-    _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager created for ${_runtime.name}.');
+  BrowserManager._(
+    this._browser,
+    this._runtime,
+    WebSocketChannel webSocket,
+    this._logger,
+    this._processManager,
+  ) {
     unawaited(
       _browser.onExit.then((int exitCode) {
         if (!_closed) {
           _logger.printError(
-            '[CHROME_DIAGNOSTIC] Chrome browser process (PID: ${_browser.pid}) '
+            'Chrome browser process (PID: ${_browser.pid}) '
             'exited unexpectedly with code $exitCode during test execution.',
           );
         }
@@ -755,9 +745,6 @@ class BrowserManager {
     // Start this canceled because we don't want it to start ticking until we
     // get some response from the iframe.
     _timer = RestartableTimer(const Duration(seconds: 3), () {
-      _logger.printStatus(
-        '[CHROME_DIAGNOSTIC] No messages received from Chrome for 3 seconds. Browser may be deadlocked or doing heavy synchronous work. Disabling test timeouts.',
-      );
       _isDebugging = true;
       for (final RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
@@ -769,15 +756,11 @@ class BrowserManager {
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
         return stream.map((Object? message) {
-          _logger.printStatus('[CHROME_DIAGNOSTIC] WebSocket message received: $message');
           if (!_closed) {
             _timer.reset();
           }
           if (_isDebugging) {
             _isDebugging = false;
-            _logger.printStatus(
-              '[CHROME_DIAGNOSTIC] Messages resumed from Chrome. Re-enabling test timeouts.',
-            );
           }
           for (final RunnerSuiteController controller in _controllers) {
             controller.setDebugging(false);
@@ -790,7 +773,6 @@ class BrowserManager {
 
     _environment = _loadBrowserEnvironment();
     _channel.stream.listen(_onMessage, onDone: close);
-    _startProcessMonitor();
   }
 
   /// The browser instance that this is connected to via [_channel].
@@ -871,76 +853,38 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
-    unawaited(Future<void>(() async {
-      try {
-        final ChromeTab? tab = await chrome.chromeConnection.getTab(
-          (ChromeTab tab) => tab.url.contains('index.html'),
-          retryFor: const Duration(seconds: 5),
-        );
-        if (tab != null) {
-          final WipConnection connection = await tab.connect();
-          await connection.runtime.enable();
-          logger.printStatus('[CHROME_DIAGNOSTIC] Connected to tab ${tab.id} for console logging.');
-          connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
-            logger.printStatus('[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}');
-          });
-          connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
-            logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
-          });
-        } else {
-          logger.printStatus('[CHROME_DIAGNOSTIC] Could not find test tab for console logging.');
-        }
-      } on Object catch (e) {
-        logger.printStatus('[CHROME_DIAGNOSTIC] Failed to setup console logging: $e');
-      }
-    }));
-    final completer = Completer<BrowserManager>();
-
-    final diagnosticTimer = Timer.periodic(const Duration(seconds: 5), (Timer timer) async {
-      var exitCode = -1;
-      try {
-        exitCode = await chrome.onExit.timeout(Duration.zero, onTimeout: () => -1);
-      } on Object catch (_) {
-        // Ignored
-      }
-      final isRunning = exitCode == -1;
-
-      logger.printStatus(
-        '[CHROME_DIAGNOSTIC] Waiting for WebSocket connection. '
-        'Chrome PID: ${chrome.pid}. Running: $isRunning.',
-      );
-
-      if (isRunning) {
-        try {
-          final List<dynamic> tabs = await chrome.chromeConnection.getTabs();
-          logger.printStatus('[CHROME_DIAGNOSTIC] DevTools is responsive. Tabs: $tabs');
-        } on Object catch (e) {
-          logger.printStatus('[CHROME_DIAGNOSTIC] DevTools is UNRESPONSIVE: $e');
-        }
-      } else {
-        logger.printStatus(
-          '[CHROME_DIAGNOSTIC] Chrome process has already exited with code $exitCode.',
-        );
-        timer.cancel();
-      }
-    });
-
     unawaited(
-      completer.future.whenComplete(() {
-        diagnosticTimer.cancel();
+      Future<void>(() async {
+        try {
+          final ChromeTab? tab = await chrome.chromeConnection.getTab(
+            (ChromeTab tab) => tab.url.contains('index.html'),
+            retryFor: const Duration(seconds: 5),
+          );
+          if (tab != null) {
+            final WipConnection connection = await tab.connect();
+            await connection.runtime.enable();
+            connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+              logger.printStatus(
+                '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
+              );
+            });
+            connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
+              logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
+            });
+          }
+        } on Object catch (_) {}
       }),
     );
+    final completer = Completer<BrowserManager>();
 
     unawaited(
       chrome.onExit
           .then<Object?>((int? browserExitCode) {
-            diagnosticTimer.cancel();
             throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
           })
           .then(
             (Object? obj) => obj,
             onError: (Object error, StackTrace stackTrace) {
-              diagnosticTimer.cancel();
               if (!completer.isCompleted) {
                 completer.completeError(error, stackTrace);
               }
@@ -958,7 +902,6 @@ class BrowserManager {
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();
-          diagnosticTimer.cancel();
           if (!completer.isCompleted) {
             completer.completeError(error, stackTrace);
           }
@@ -1024,9 +967,6 @@ class BrowserManager {
       ),
     );
 
-    _logger.printStatus(
-      '[CHROME_DIAGNOSTIC] BrowserManager.load: sending loadSuite command for $path',
-    );
     _channel.sink.add(<String, Object>{
       'command': 'loadSuite',
       'url': url.toString(),
@@ -1035,7 +975,6 @@ class BrowserManager {
     });
 
     try {
-      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.load: deserializing suite for $path');
       controller = deserializeSuite(
         path,
         SuitePlatform(Runtime.chrome),
@@ -1046,13 +985,7 @@ class BrowserManager {
       );
 
       _controllers.add(controller);
-      _logger.printStatus(
-        '[CHROME_DIAGNOSTIC] BrowserManager.load: awaiting controller.suite for $path',
-      );
       final RunnerSuite suite = await controller.suite;
-      _logger.printStatus(
-        '[CHROME_DIAGNOSTIC] BrowserManager.load: controller.suite completed successfully for $path',
-      );
       return suite;
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
@@ -1104,134 +1037,16 @@ class BrowserManager {
   /// the browser.
   Future<dynamic> close() {
     return _closeMemoizer.runOnce(() {
-      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.close called.');
       _closed = true;
       _timer.cancel();
-      _processMonitorTimer?.cancel();
       if (_pauseCompleter != null) {
         _pauseCompleter!.complete();
       }
       _pauseCompleter = null;
       _controllers.clear();
-      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.close: closing browser.');
       final Future<dynamic> closeFuture = _browser.close();
-      unawaited(
-        closeFuture
-            .then((_) {
-              _logger.printStatus(
-                '[CHROME_DIAGNOSTIC] BrowserManager.close: browser closed successfully.',
-              );
-            })
-            .catchError((Object error) {
-              _logger.printStatus(
-                '[CHROME_DIAGNOSTIC] BrowserManager.close: browser close error: $error',
-              );
-            }),
-      );
       return closeFuture;
     });
-  }
-
-  Timer? _processMonitorTimer;
-
-  void _startProcessMonitor() {
-    if (!Platform.isLinux && !Platform.isMacOS) {
-      return;
-    }
-    _processMonitorTimer = Timer.periodic(const Duration(seconds: 10), (Timer timer) async {
-      if (_closed) {
-        timer.cancel();
-        return;
-      }
-      await _logProcessTree();
-    });
-  }
-
-  Future<void> _logProcessTree() async {
-    final int rootPid = _browser.pid;
-    try {
-      final ProcessResult result = await _processManager.run(<String>['ps', '-ax', '-o', 'pid,ppid,comm,%cpu,%mem,rss,vsz']);
-      if (result.exitCode != 0) {
-        _logger.printStatus('[PROCESS_MONITOR] Failed to run ps: ${result.stderr}');
-        return;
-      }
-      final String output = result.stdout as String;
-      final List<String> lines = output.split('\n');
-      
-      final Map<int, List<Map<String, dynamic>>> parentToChildren = {};
-      final Map<int, Map<String, dynamic>> allProcesses = {};
-      
-      for (int i = 1; i < lines.length; i++) {
-        final String line = lines[i].trim();
-        if (line.isEmpty) {
-          continue;
-        }
-        final List<String> parts = line.split(RegExp(r'\s+'));
-        if (parts.length < 7) {
-          continue;
-        }
-        final int? pid = int.tryParse(parts[0]);
-        final int? ppid = int.tryParse(parts[1]);
-        if (pid == null || ppid == null) {
-          continue;
-        }
-        final String comm = parts[2];
-        final double? cpu = double.tryParse(parts[3]);
-        final double? mem = double.tryParse(parts[4]);
-        final int? rss = int.tryParse(parts[5]);
-        final int? vsz = int.tryParse(parts[6]);
-        
-        final proc = {
-          'pid': pid,
-          'ppid': ppid,
-          'comm': comm,
-          'cpu': cpu,
-          'mem': mem,
-          'rss': rss,
-          'vsz': vsz,
-        };
-        
-        allProcesses[pid] = proc;
-        parentToChildren.putIfAbsent(ppid, () => []).add(proc);
-      }
-      
-      final List<Map<String, dynamic>> descendants = [];
-      void collectDescendants(int pid) {
-        final children = parentToChildren[pid];
-        if (children != null) {
-          for (final child in children) {
-            descendants.add(child);
-            collectDescendants(child['pid'] as int);
-          }
-        }
-      }
-      
-      final rootProc = allProcesses[rootPid];
-      if (rootProc != null) {
-        descendants.add(rootProc);
-      }
-      collectDescendants(rootPid);
-      
-      if (descendants.isEmpty) {
-        _logger.printStatus('[PROCESS_MONITOR] No processes found for PID $rootPid');
-        return;
-      }
-      
-      _logger.printStatus('[PROCESS_MONITOR] Process tree for Chrome (Root PID $rootPid):');
-      _logger.printStatus('[PROCESS_MONITOR]   PID   PPID COMMAND         %CPU %MEM   RSS(KB)   VSZ(KB)');
-      for (final proc in descendants) {
-        final pidStr = proc['pid'].toString().padLeft(6);
-        final ppidStr = proc['ppid'].toString().padLeft(6);
-        final commStr = (proc['comm'] as String).padRight(15);
-        final cpuStr = proc['cpu'].toString().padLeft(5);
-        final memStr = proc['mem'].toString().padLeft(5);
-        final rssStr = proc['rss'].toString().padLeft(9);
-        final vszStr = proc['vsz'].toString().padLeft(9);
-        _logger.printStatus('[PROCESS_MONITOR] $pidStr $ppidStr $commStr $cpuStr $memStr $rssStr $vszStr');
-      }
-    } catch (e) {
-      _logger.printStatus('[PROCESS_MONITOR] Error monitoring processes: $e');
-    }
   }
 }
 
