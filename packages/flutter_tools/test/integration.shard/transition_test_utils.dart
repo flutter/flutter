@@ -325,7 +325,7 @@ Future<ProcessTestResult> runFlutter(
             // Start a timer to kill the process if it still hasn't exited after 5 seconds.
             final timer = Timer(const Duration(seconds: 5), () {
               debugPrint('${stamp()} (process still did not quit, killing forcefully)');
-              process.kill();
+              process.kill(ProcessSignal.sigkill);
             });
             process.exitCode.whenComplete(timer.cancel);
             return -1; // discarded
