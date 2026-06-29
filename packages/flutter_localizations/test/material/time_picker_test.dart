@@ -951,6 +951,7 @@ void main() {
         matchesGoldenFile('time_picker.dialog.separator.alignment.non_english_locale.png'),
       );
     },
+    skip: true, // https://github.com/flutter/flutter/issues/188758
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/162229.
