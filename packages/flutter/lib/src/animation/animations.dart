@@ -379,7 +379,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     @Deprecated(
       'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
       'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
-      'This feature was deprecated after v3.45.0-0.1.pre.',
+      'This feature was deprecated after v3.46.0-0.2.pre.',
     )
     Curve? reverseCurve,
   }) : _proxy = AsymmetricCurvedAnimation(parent: parent, curve: curve, reverseCurve: reverseCurve);
@@ -428,13 +428,13 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   @Deprecated(
     'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
     'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
-    'This feature was deprecated after v3.45.0-0.1.pre.',
+    'This feature was deprecated after v3.46.0-0.2.pre.',
   )
   Curve? get reverseCurve => _proxy.reverseCurve;
   @Deprecated(
     'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
     'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
-    'This feature was deprecated after v3.45.0-0.1.pre.',
+    'This feature was deprecated after v3.46.0-0.2.pre.',
   )
   set reverseCurve(Curve? value) => _proxy.reverseCurve = value;
 
