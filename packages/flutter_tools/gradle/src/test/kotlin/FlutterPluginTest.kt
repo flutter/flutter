@@ -26,6 +26,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.process.ExecOperations
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
@@ -119,7 +120,7 @@ class FlutterPluginTest {
         // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
         every { project.extraProperties } returns mockk()
         every { project.file(flutterExtension.source!!) } returns mockk()
-        val flutterPlugin = FlutterPlugin()
+        val flutterPlugin = FlutterPlugin(mockk<ExecOperations>())
         flutterPlugin.apply(project)
 
         verify { project.tasks.register("generateLockfiles", any()) }
@@ -304,7 +305,7 @@ class FlutterPluginTest {
         every {
             taskContainer.named(any<String>())
         } returns mockTaskProvider
-        val flutterPlugin = FlutterPlugin()
+        val flutterPlugin = FlutterPlugin(mockk<ExecOperations>())
         flutterPlugin.apply(project)
 
         copyTaskActionCaptor.captured.execute(copyTask)
