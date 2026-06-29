@@ -76,43 +76,32 @@ void main() {
   ) async {
     var longPresses = 0;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Navigator(
-          onGenerateRoute: (RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              transitionDuration: Duration.zero,
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) {
-                    return GestureDetector(
-                      onLongPress: () {
-                        longPresses++;
-                        Navigator.of(context).push<void>(
-                          RawDialogRoute<void>(
-                            transitionDuration: Duration.zero,
-                            pageBuilder:
-                                (
-                                  BuildContext context,
-                                  Animation<double> animation,
-                                  Animation<double> secondaryAnimation,
-                                ) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Center(child: Text('Popup')),
-                                  );
-                                },
-                          ),
-                        );
-                      },
-                      child: const Center(child: Text('Show dialog')),
-                    );
-                  },
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onLongPress: () {
+                longPresses++;
+                Navigator.of(context).push<void>(
+                  PageRouteBuilder<void>(
+                    transitionDuration: Duration.zero,
+                    pageBuilder:
+                        (
+                          BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                        ) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Center(child: Text('Popup')),
+                          );
+                        },
+                  ),
+                );
+              },
+              child: const Center(child: Text('Show dialog')),
             );
           },
         ),
