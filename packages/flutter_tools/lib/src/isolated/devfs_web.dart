@@ -381,12 +381,10 @@ class WebDevFS implements DevFS {
           assetPathsToEvict: _assetPathsToEvict,
           shaderPathsToEvict: _shaderPathsToEvict,
           bundleFirstUpload: bundleFirstUpload,
-          invalidatedFiles: invalidatedFiles,
           syncAllAssetsOnFirstUpload: true,
           onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
         syncedBytes += bundleSyncedBytes;
-        _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
       } on Exception catch (err, stackTrace) {
         logger.printError('Error updating bundle: $err');
         logger.printTrace('$stackTrace');
@@ -440,10 +438,7 @@ class WebDevFS implements DevFS {
     // Only update the last compiled time if we successfully compiled.
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
-    sources = <Uri>{
-      ...compilerOutput.sources,
-      ..._assetTransformer.dependencies.values.expand((Set<Uri> uris) => uris),
-    }.toList();
+    sources = compilerOutput.sources;
     late File codeFile;
     File manifestFile;
     File sourcemapFile;
