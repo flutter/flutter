@@ -69,7 +69,7 @@ class ToolExtensionProvider implements RpcRegistrar {
         if (handler == null) {
           final errorResponse = Response.error(
             id: parsedMessage.id,
-            error: RpcError.methodNotFound(message: 'Method not found: ${parsedMessage.method}'),
+            error: RpcError.methodNotFound(method: parsedMessage.method),
           );
           _toolSendPort.send(errorResponse.toMap());
           return;
@@ -86,7 +86,7 @@ class ToolExtensionProvider implements RpcRegistrar {
         } on Object catch (e, st) {
           final errorResponse = Response.error(
             id: parsedMessage.id,
-            error: RpcError.internal(message: 'Internal error: $e', data: st.toString()),
+            error: RpcError.internal(error: e, data: st.toString()),
           );
           _toolSendPort.send(errorResponse.toMap());
         }
@@ -98,7 +98,7 @@ class ToolExtensionProvider implements RpcRegistrar {
       if (id != null) {
         final errorResponse = Response.error(
           id: id,
-          error: RpcError.parse(message: 'Parse error: $e'),
+          error: RpcError.parse(error: e),
         );
         _toolSendPort.send(errorResponse.toMap());
       }

@@ -181,24 +181,24 @@ class RpcError {
   }
 
   /// Creates a parse error [RpcError].
-  const RpcError.parse({required String message, Object? data})
-    : this(code: parseErrorCode, message: message, data: data);
+  const RpcError.parse({required Object error, Object? data})
+    : this(code: parseErrorCode, message: 'Parse error: $error', data: data);
 
   /// Creates an invalid request [RpcError].
-  const RpcError.invalidRequest({required String message, Object? data})
-    : this(code: invalidRequestCode, message: message, data: data);
+  const RpcError.invalidRequest({required String details, Object? data})
+    : this(code: invalidRequestCode, message: 'Invalid request: $details', data: data);
 
   /// Creates a method not found [RpcError].
-  const RpcError.methodNotFound({required String message, Object? data})
-    : this(code: methodNotFoundCode, message: message, data: data);
+  const RpcError.methodNotFound({required String method, Object? data})
+    : this(code: methodNotFoundCode, message: 'Method not found: $method', data: data);
 
   /// Creates an invalid params [RpcError].
-  const RpcError.invalidParams({required String message, Object? data})
-    : this(code: invalidParamsCode, message: message, data: data);
+  const RpcError.invalidParams({required String parameter, Object? data})
+    : this(code: invalidParamsCode, message: 'Invalid params: $parameter', data: data);
 
   /// Creates an internal error [RpcError].
-  const RpcError.internal({required String message, Object? data})
-    : this(code: internalErrorCode, message: message, data: data);
+  const RpcError.internal({required Object error, Object? data})
+    : this(code: internalErrorCode, message: 'Internal error: $error', data: data);
 
   /// The error code.
   final int code;

@@ -183,6 +183,33 @@ void main() {
   });
 
   group('RpcError', () {
+    test('named constructors produce expected messages and codes', () {
+      const parseError = RpcError.parse(error: 'invalid JSON', data: 'foo');
+      expect(parseError.code, -32700);
+      expect(parseError.message, 'Parse error: invalid JSON');
+      expect(parseError.data, 'foo');
+
+      const invalidRequest = RpcError.invalidRequest(details: 'missing method', data: 'bar');
+      expect(invalidRequest.code, -32600);
+      expect(invalidRequest.message, 'Invalid request: missing method');
+      expect(invalidRequest.data, 'bar');
+
+      const methodNotFound = RpcError.methodNotFound(method: 'foo.bar', data: 'baz');
+      expect(methodNotFound.code, -32601);
+      expect(methodNotFound.message, 'Method not found: foo.bar');
+      expect(methodNotFound.data, 'baz');
+
+      const invalidParams = RpcError.invalidParams(parameter: 'id', data: 'qux');
+      expect(invalidParams.code, -32602);
+      expect(invalidParams.message, 'Invalid params: id');
+      expect(invalidParams.data, 'qux');
+
+      const internalError = RpcError.internal(error: 'crash', data: 'quux');
+      expect(internalError.code, -32603);
+      expect(internalError.message, 'Internal error: crash');
+      expect(internalError.data, 'quux');
+    });
+
     test('fromMap() throws FormatException on invalid input', () {
       // Missing code
       expect(

@@ -71,6 +71,7 @@ void main() {
       expect(response.result, isNull);
       expect(response.error, isNotNull);
       expect(response.error!.code, -32601);
+      expect(response.error!.message, 'Method not found: unknown.method');
     });
 
     test('duplicate registration throws StateError', () {
@@ -105,7 +106,25 @@ void main() {
       expect(response.result, isNull);
       expect(response.error, isNotNull);
       expect(response.error!.code, -32603);
-      expect(response.error!.message, contains('Exception: something went wrong'));
+      expect(response.error!.message, 'Internal error: Exception: something went wrong');
+    });
+
+    test('invalid request map from host sends parse error', () async {
+      provider.initialize();
+      final providerSendPort = (await queue.next)! as SendPort;
+
+      // This map is invalid because it has an ID but is neither a request, response, nor notification.
+      final invalidMap = <String, Object?>{'id': 123};
+      providerSendPort.send(invalidMap);
+
+      final Object? responseMsg = await queue.next;
+      final response = Message.fromMap(responseMsg! as Map<String, Object?>) as Response;
+
+      expect(response.id, 123);
+      expect(response.result, isNull);
+      expect(response.error, isNotNull);
+      expect(response.error!.code, -32700);
+      expect(response.error!.message, startsWith('Parse error:'));
     });
 
     test('sendNotification pushes notification to host', () async {
