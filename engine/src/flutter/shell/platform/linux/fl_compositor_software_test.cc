@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <thread>
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/common/constants.h"
@@ -13,14 +14,23 @@
 
 #include <gdk/gdkwayland.h>
 
-TEST(FlCompositorSoftwareTest, Render) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+class FlCompositorSoftwareTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    task_runner = fl_task_runner_new(engine);
+    compositor = fl_compositor_software_new(task_runner);
+  }
 
-  g_autoptr(FlCompositorSoftware) compositor =
-      fl_compositor_software_new(task_runner);
+  ~FlCompositorSoftwareTest() {
+    g_clear_object(&compositor);
+    g_clear_object(&task_runner);
+  }
 
+  FlTaskRunner* task_runner = nullptr;
+  FlCompositorSoftware* compositor = nullptr;
+};
+
+TEST_F(FlCompositorSoftwareTest, Render) {
   // Present layer from a thread.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
@@ -58,14 +68,7 @@ TEST(FlCompositorSoftwareTest, Render) {
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorSoftwareTest, Resize) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-
-  g_autoptr(FlCompositorSoftware) compositor =
-      fl_compositor_software_new(task_runner);
-
+TEST_F(FlCompositorSoftwareTest, Resize) {
   // Present a layer that is the old size.
   constexpr size_t width1 = 90;
   constexpr size_t height1 = 90;
