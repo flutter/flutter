@@ -846,6 +846,20 @@ class IOSDevice extends Device {
   }
 
   Future<void> _addLogInterceptors(SharedIOSDeviceLogReader deviceLogReader) async {
+    final String? uisceneWarning = globals.userMessages.uiSceneMigrationWarning;
+    if (uisceneWarning != null) {
+      final uisceneWarningInterceptor = LogInterceptor(
+        identifier: 'uiscene_requirement',
+        pattern: RegExp(
+          '`UIScene` lifecycle will soon be required|This process does not adopt UIScene lifecycle',
+        ),
+        action: () {
+          globals.printWarning(uisceneWarning);
+        },
+        excludeFromStream: true,
+      );
+      deviceLogReader.addLogInterceptor(uisceneWarningInterceptor);
+    }
     final uisceneCrashInterceptor = LogInterceptor(
       identifier: 'uiscene_crash',
       pattern: RegExp(r'UIScene life\s?cycle is required'),
