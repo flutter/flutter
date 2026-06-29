@@ -63,7 +63,7 @@ void main() {
       expect(lipoResult.exitCode, 0);
       final lipoOutput = lipoResult.stdout as String;
 
-      expect(lipoOutput, 'arm64');
+      expect(lipoOutput.trim(), 'arm64');
     },
     skip: !platform.isMacOS, // [intended] macOS builds only work on macos.
   );

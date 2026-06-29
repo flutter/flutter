@@ -237,9 +237,17 @@ Future<void> buildMacOS({
   // Get EXCLUDED_ARCHS from Xcode project build settings
   // This allows developers to exclude specific architectures (e.g., x86_64)
   // when dependencies don't support them
-  final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
+  final String? excludedArches = buildSettings['EXCLUDED_ARCHS']?.trim();
 
   try {
+    if (archs != null && excludedArches != null && excludedArches.contains('arm64')) {
+      throwToolExit(
+        'No Valid Target Arch: '
+        'You have enabled the macOSArm64Only feature flag but '
+        "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
+        'Consider removing arm64 from EXCLUDED_ARCHS.',
+      );
+    }
     final List<String> xcodebuildCommandArgs = await globals.xcode!
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
@@ -268,8 +276,7 @@ Future<void> buildMacOS({
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
         // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
         // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
-        if (excludedArches != null && excludedArches.trim().isNotEmpty)
-          'EXCLUDED_ARCHS=$excludedArches',
+        if (excludedArches != null && excludedArches.isNotEmpty) 'EXCLUDED_ARCHS=$excludedArches',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
         if (archs != null) 'ARCHS=$archs',
       ],

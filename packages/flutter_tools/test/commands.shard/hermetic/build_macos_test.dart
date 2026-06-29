@@ -1404,6 +1404,54 @@ STDERR STUFF
   );
 
   testUsingContext(
+    'Fails when isMacOSArm64OnlyEnabled is true and arm64 is in EXCLUDED_ARCHS',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      await expectLater(
+        createTestCommandRunner(command).run(<String>['build', 'macos', '--release', '--no-pub']),
+        throwsToolExit(
+          message: 'No Valid Target Arch: '
+              'You have enabled the macOSArm64Only feature flag but '
+              "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
+              'Consider removing arm64 from EXCLUDED_ARCHS.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'EXCLUDED_ARCHS': 'arm64'},
+      ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
     'Does not pass EXCLUDED_ARCHS when not set in Xcode project',
     () async {
       createMinimalMockProjectFiles();
