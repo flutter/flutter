@@ -527,9 +527,17 @@ TypographerContextSkia::CollectNewGlyphs(
 
         // Treat placeholder glyphs as missing so they are forced to be packed
         // into the atlas.
-        if (!font_glyph_bounds.has_value() ||
-            font_glyph_bounds.value().is_placeholder) {
-          new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
+        auto it = std::find_if(
+            new_glyphs.begin(), new_glyphs.end(),
+            [&pair](const FontGlyphPair& existing) {
+              return ScaledFont::Equal{}(pair.scaled_font,
+                                         existing.scaled_font) &&
+                     SubpixelGlyph::Equal{}(pair.glyph, existing.glyph);
+            });
+
+        if (it == new_glyphs.end()) {
+          new_glyphs.push_back(pair);
+
           auto glyph_bounds = ComputeGlyphSize(
               sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
           glyph_sizes.push_back(glyph_bounds);
