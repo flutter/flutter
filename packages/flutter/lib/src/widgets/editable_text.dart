@@ -4017,7 +4017,8 @@ class EditableTextState extends State<EditableText>
     if (_batchEditDepth > 0 || !_hasInputConnection) {
       return;
     }
-    final TextEditingValue localValue = _value;
+    // Never report a caret inside a surrogate pair to the IME, the IME might incorrectly split inside the pair.
+    final TextEditingValue localValue = _snapSelectionOffSurrogatePairs(_value);
     if (localValue == _lastKnownRemoteTextEditingValue) {
       return;
     }
@@ -4107,7 +4108,8 @@ class EditableTextState extends State<EditableText>
       return;
     }
     if (!_hasInputConnection) {
-      final TextEditingValue localValue = _value;
+      // Never report a caret inside a surrogate pair to the IME, the IME might incorrectly split inside the pair.
+      final TextEditingValue localValue = _snapSelectionOffSurrogatePairs(_value);
 
       // When _needsAutofill == true && currentAutofillScope == null, autofill
       // is allowed but saving the user input from the text field is
@@ -4185,11 +4187,13 @@ class EditableTextState extends State<EditableText>
         TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
+    // Never report a caret inside a surrogate pair to the IME, the IME might incorrectly split inside the pair.
+    final TextEditingValue localValue = _snapSelectionOffSurrogatePairs(_value);
     newConnection
       ..show()
       ..updateStyle(_getTextInputStyle(context))
-      ..setEditingState(_value);
-    _lastKnownRemoteTextEditingValue = _value;
+      ..setEditingState(localValue);
+    _lastKnownRemoteTextEditingValue = localValue;
   }
 
   @override
@@ -4697,6 +4701,52 @@ class EditableTextState extends State<EditableText>
         ),
       );
     }
+  }
+
+  /// Returns [offset] moved forward to just past a UTF-16 surrogate pair if it falls between the
+  /// pair's two code units; otherwise returns it unchanged. The returned offset is never inside a
+  /// surrogate pair.
+  ///
+  /// The pair is left by its trailing edge (offset + 1), not its leading edge (offset - 1), so a
+  /// caret that lands inside an emoji's glyph ends up *after* the emoji rather than before it. That
+  /// matches where a tap inside a trailing emoji was aiming and keeps a following backspace able to
+  /// delete the emoji; in a right-to-left field the leading edge is on the visual right, where
+  /// snapping there would strand the caret before the emoji instead. Either edge keeps the pair from
+  /// being split, so this choice only affects where the caret lands. offset + 1 is always valid
+  /// here: a low surrogate at [offset] guarantees offset < text.length.
+  static int _offsetOffSurrogatePair(String text, int offset) {
+    if (offset <= 0 || offset >= text.length) {
+      return offset;
+    }
+    final int prev = text.codeUnitAt(offset - 1);
+    final int next = text.codeUnitAt(offset);
+    // High surrogates occupy U+D800..U+DBFF and low surrogates U+DC00..U+DFFF; a high unit
+    // immediately followed by a low unit forms one code point, so [offset] sits inside that pair.
+    final bool insidePair = prev >= 0xD800 && prev <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF;
+    return insidePair ? offset + 1 : offset;
+  }
+
+  /// Snaps both selection endpoints off any surrogate-pair interior. A selection endpoint that
+  /// sits between the two halves of a surrogate pair lets a later edit split the pair into lone
+  /// surrogates, which corrupts the text as it crosses the platform input channel (each lone half
+  /// is encoded as '?') and throws "string is not well-formed UTF-16" from ParagraphBuilder when
+  /// the text is painted.
+  ///
+  /// See https://github.com/flutter/flutter/issues/188713.
+  static TextEditingValue _snapSelectionOffSurrogatePairs(TextEditingValue value) {
+    final TextSelection selection = value.selection;
+    if (!selection.isValid) {
+      return value;
+    }
+    final String text = value.text;
+    final int base = _offsetOffSurrogatePair(text, selection.baseOffset);
+    final int extent = _offsetOffSurrogatePair(text, selection.extentOffset);
+    if (base == selection.baseOffset && extent == selection.extentOffset) {
+      return value;
+    }
+    return value.copyWith(
+      selection: selection.copyWith(baseOffset: base, extentOffset: extent),
+    );
   }
 
   @pragma('vm:notify-debugger-on-exception')
