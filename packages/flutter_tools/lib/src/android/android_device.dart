@@ -577,12 +577,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -685,6 +683,11 @@ class AndroidDevice extends Device {
         if (debuggingOptions.disableServiceAuthCodes) ...<String>[
           '--ez',
           'disable-service-auth-codes',
+          'true',
+        ],
+        if (debuggingOptions.disableServiceOriginCheck) ...<String>[
+          '--ez',
+          'disable-service-origin-check',
           'true',
         ],
         if (debuggingOptions.dartFlags.isNotEmpty) ...<String>[

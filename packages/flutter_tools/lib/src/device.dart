@@ -942,6 +942,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
+    this.disableServiceOriginCheck = false,
     this.enableDds = true,
     this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
@@ -1031,6 +1032,7 @@ class DebuggingOptions {
        startPaused = false,
        dartFlags = '',
        disableServiceAuthCodes = false,
+       disableServiceOriginCheck = false,
        enableDds = false,
        cacheStartupProfile = false,
        enableSoftwareRendering = false,
@@ -1065,6 +1067,7 @@ class DebuggingOptions {
     required this.dartFlags,
     required this.dartEntrypointArgs,
     required this.disableServiceAuthCodes,
+    required this.disableServiceOriginCheck,
     required this.enableDds,
     required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
@@ -1123,6 +1126,7 @@ class DebuggingOptions {
   final String dartFlags;
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
+  final bool disableServiceOriginCheck;
   final bool enableDds;
   final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
@@ -1221,6 +1225,7 @@ class DebuggingOptions {
       if (enableDartProfiling) '--enable-dart-profiling',
       if (profileStartup) '--profile-startup',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (disableServiceOriginCheck) '--disable-service-origin-check',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
@@ -1265,6 +1270,7 @@ class DebuggingOptions {
     'dartFlags': dartFlags,
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
+    'disableServiceOriginCheck': disableServiceOriginCheck,
     'enableDds': enableDds,
     'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
@@ -1337,6 +1343,7 @@ class DebuggingOptions {
         dartFlags: json['dartFlags']! as String,
         dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
         disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+        disableServiceOriginCheck: json['disableServiceOriginCheck'] as bool? ?? false,
         enableDds: json['enableDds']! as bool,
         cacheStartupProfile: json['cacheStartupProfile']! as bool,
         enableSoftwareRendering: json['enableSoftwareRendering']! as bool,

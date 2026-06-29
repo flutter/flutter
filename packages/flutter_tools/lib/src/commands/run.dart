@@ -89,6 +89,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             '(Not recommended! This can open your device to remote code execution attacks!)',
       )
       ..addFlag(
+        'disable-service-origin-check',
+        negatable: false,
+        hide: !verboseHelp,
+        help:
+            'Allow connections to the VM service from any origin. '
+            '(Not recommended. This can open your device to remote code execution attacks.)',
+      )
+      ..addFlag(
         'start-paused',
         defaultsTo: startPausedDefault,
         help: 'Start in a paused mode and wait for a debugger to connect.',
@@ -250,6 +258,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get disableServiceOriginCheck => boolArg('disable-service-origin-check');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
   String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
@@ -334,6 +343,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableServiceOriginCheck: boolArg('disable-service-origin-check'),
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),

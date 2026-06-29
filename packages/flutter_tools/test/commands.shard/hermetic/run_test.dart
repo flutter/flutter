@@ -1694,6 +1694,7 @@ server:
           'run',
           '--start-paused',
           '--disable-service-auth-codes',
+          '--disable-service-origin-check',
           '--use-test-fonts',
           '--trace-skia',
           '--trace-systrace',
@@ -1719,6 +1720,7 @@ server:
 
       expect(options.startPaused, true);
       expect(options.disableServiceAuthCodes, true);
+      expect(options.disableServiceOriginCheck, true);
       expect(options.useTestFonts, true);
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
