@@ -522,8 +522,6 @@ TypographerContextSkia::CollectNewGlyphs(
             frame.origin_transform);
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
                                      frame.properties);
-        const auto& font_glyph_bounds =
-            font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
         FontGlyphPair font_glyph_pair{scaled_font, subpixel_glyph};
 
