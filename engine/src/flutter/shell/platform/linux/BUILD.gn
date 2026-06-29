@@ -103,7 +103,11 @@ source_set("flutter_linux_sources") {
              "fl_window_state_monitor.h",
            ]
 
-  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:wayland_client",
+    "//flutter/shell/platform/linux/config:wayland_egl",
+  ]
 
   public_configs = [ ":disable_warnings" ]
 

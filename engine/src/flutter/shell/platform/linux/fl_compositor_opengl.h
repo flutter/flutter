@@ -65,6 +65,18 @@ void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* compositor,
                                          size_t* height);
 
 /**
+ * fl_compositor_opengl_get_framebuffer:
+ * @compositor: an #FlCompositorOpenGL.
+ *
+ * Get the framebuffer containing the last composited frame, or %NULL if no
+ * frame has been composited.
+ *
+ * Returns: (nullable): an #FlFramebuffer.
+ */
+FlFramebuffer* fl_compositor_opengl_get_framebuffer(
+    FlCompositorOpenGL* compositor);
+
+/**
  * fl_compositor_opengl_render:
  * @compositor: an #FlCompositorOpenGL.
  * @cr: a Cairo rendering context.

@@ -237,6 +237,10 @@ void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* self,
   }
 }
 
+FlFramebuffer* fl_compositor_opengl_get_framebuffer(FlCompositorOpenGL* self) {
+  return self->framebuffer;
+}
+
 gboolean fl_compositor_opengl_render(FlCompositorOpenGL* self,
                                      cairo_t* cr,
                                      GdkWindow* window) {
