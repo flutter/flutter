@@ -26,7 +26,6 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import java.io.File
@@ -259,8 +258,10 @@ class FlutterPlugin : Plugin<Project> {
         )
     }
 
-    private fun getExecutableNameForPlatform(baseExecutableName: String): String =
-        if (OperatingSystem.current().isWindows) "$baseExecutableName.bat" else baseExecutableName
+    private fun getExecutableNameForPlatform(baseExecutableName: String): String {
+        val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
+        return if (isWindows) "$baseExecutableName.bat" else baseExecutableName
+    }
 
     private fun resolveFlutterSdkProperty(defaultValue: String?): String? {
         val propertyName = "flutter.sdk"
