@@ -79,7 +79,7 @@ class Allocation {
   ///
   /// @param[in]  x     The size.
   ///
-  /// @return     The next power of two of x.
+  /// @return     The smallest power of two that is greater than or equal to x.
   ///
   static absl::StatusOr<uint64_t> NextPowerOfTwoSize(uint64_t x);
 
