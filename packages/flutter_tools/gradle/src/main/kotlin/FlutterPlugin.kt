@@ -261,7 +261,7 @@ class FlutterPlugin @Inject constructor(
     }
 
     private fun getExecutableNameForPlatform(baseExecutableName: String): String {
-        val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
+        val isWindows = System.getProperty("os.name")?.startsWith("Windows", ignoreCase = true) == true
         return if (isWindows) "$baseExecutableName.bat" else baseExecutableName
     }
 
