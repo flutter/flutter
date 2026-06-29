@@ -39,6 +39,7 @@ class TestTextField extends StatefulWidget {
     this.style,
     this.controller,
     this.onSubmitted,
+    this.showSelectionHandles = false,
   });
 
   final Iterable<String>? autofillHints;
@@ -56,6 +57,7 @@ class TestTextField extends StatefulWidget {
   final TextStyle? style;
   final TextEditingController? controller;
   final ValueChanged<String>? onSubmitted;
+  final bool showSelectionHandles;
 
   @override
   State<TestTextField> createState() => _TestTextFieldState();
@@ -123,6 +125,7 @@ class _TestTextFieldState extends State<TestTextField>
           showCursor: widget.showCursor,
           style: widget.style ?? const TextStyle(), // required by editable text.
           controller: _effectiveController, // required by editable text.
+          showSelectionHandles: widget.showSelectionHandles,
         ),
       ),
     );
