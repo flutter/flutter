@@ -30,7 +30,6 @@ final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
-  '--disable-dev-shm-usage',
   '--disable-default-apps',
   '--disable-extensions',
   '--disable-popup-blocking',
