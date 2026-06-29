@@ -8,7 +8,7 @@ jobs:
   revert:
     name: Revert PR
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'revert_wf'
+    if: github.event.label.name == 'revert'
     steps:
       - name: Handle Not Merged PR
         if: github.event.pull_request.merged != true
@@ -16,7 +16,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "Only merged pull requests can be reverted."
-          gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label "revert_wf"
+          gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label "revert"
           exit 0
 
       - name: Find Reason for Revert
@@ -30,7 +30,7 @@ jobs:
 
           if [ -z "$REASON" ]; then
             gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "A reason for requesting a revert of ${{ github.repository }}/${{ github.event.pull_request.number }} could not be found or the reason was not properly formatted. Begin a comment with **'Reason for revert:'** to tell the bot why this issue is being reverted."
-            gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label "revert_wf"
+            gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label "revert"
             echo "found=false" >> $GITHUB_OUTPUT
             exit 1
           else
@@ -56,7 +56,7 @@ jobs:
 
       - name: Checkout Fork
         if: steps.find-reason.outputs.found == 'true'
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           repository: flutteractionsbot/flutter
           path: flutter
@@ -90,7 +90,7 @@ jobs:
           else
             echo "success=false" >> $GITHUB_OUTPUT
             gh pr comment $PR_NUMBER -R flutter/flutter -b "Failed to revert commit $MERGE_COMMIT cleanly. Please resolve conflicts manually."
-            gh pr edit $PR_NUMBER -R ${{ github.repository }} --remove-label "revert_wf"
+            gh pr edit $PR_NUMBER -R ${{ github.repository }} --remove-label "revert"
             exit 1
           fi
 
@@ -128,4 +128,4 @@ jobs:
             --head flutteractionsbot:$BRANCH_NAME)
 
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "Successfully created revert PR: $NEW_PR_URL"
-          gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label "revert_wf"
+          gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label "revert"
