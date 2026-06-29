@@ -26,50 +26,10 @@ jobs:
         if: env.ACT
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Check Engine Changes
-        id: check_engine
-        run: |
-          # 1. Determine local base tracking SHA
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_REF="${{ github.event.pull_request.base.sha }}"
-          elif [ "${{ github.event_name }}" = "merge_group" ]; then
-            BASE_REF="${{ github.event.merge_group.base_sha }}"
-          else
-            BASE_REF="origin/master"
-          fi
-
-          echo "Comparing against base SHA: $BASE_REF"
-
-          # 2. Get the changed files using the helper script
-          CHANGED_FILES=$(.github/scripts/git_files_changed.sh "$BASE_REF")
-          echo "Changed files in this branch:"
-          echo "$CHANGED_FILES"
-
-          # 3. Check if any file matches engine pattern using the helper script:
-          if [ "$(echo "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
-            echo "Engine file changed - forced to wait for Linux linux_host_engine"
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Wait for test check-in
-        if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
-        uses: lewagon/wait-on-check-action@9312864dfbc9fd208e9c0417843430751c042800
+      - name: Wait for Engine Build
+        uses: ./.github/actions/wait-for-engine-build
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          check-name: 'Linux linux_host_engine'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 30 # seconds
-          checks-discovery-timeout: 3600 # Wait up to 1 hour for LUCI to register the check
-          allowed-conclusions: success,neutral
-          verbose: false
-
-      - name: Redirect engine.version
-        if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
-        run: |
-          echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV
-          echo "FLUTTER_PREBUILT_ENGINE_VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: ./.github/actions/composite-flutter-setup
 
