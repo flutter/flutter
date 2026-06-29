@@ -262,6 +262,7 @@
 /dev/devicelab/bin/tasks/entrypoint_dart_registrant.dart @aaclarke @flutter/plugin
 /dev/devicelab/bin/tasks/flavors_test_linux.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/flavors_test_macos.dart @vashworth @flutter/desktop
+/dev/devicelab/bin/tasks/flavors_test_windows.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_macos__start_up.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @yaakovschectman @flutter/desktop

@@ -2143,12 +2143,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
   NSTimeInterval time = [NSProcessInfo processInfo].systemUptime;
   BOOL isRunningOnMac = NO;
-  if (@available(iOS 14.0, *)) {
-    // This "stationary pointer" heuristic is not reliable when running within macOS.
-    // We instead receive a scroll cancel event directly from AppKit.
-    // See gestureRecognizer:shouldReceiveEvent:
-    isRunningOnMac = [NSProcessInfo processInfo].iOSAppOnMac;
-  }
+  // This "stationary pointer" heuristic is not reliable when running within macOS.
+  // We instead receive a scroll cancel event directly from AppKit.
+  // See gestureRecognizer:shouldReceiveEvent:
+  isRunningOnMac = [NSProcessInfo processInfo].iOSAppOnMac;
   if (!isRunningOnMac && CGPointEqualToPoint(oldLocation, _mouseState.location) &&
       time > self.scrollInertiaEventStartline) {
     // iPadOS reports trackpad movements events with high (sub-pixel) precision. When an event

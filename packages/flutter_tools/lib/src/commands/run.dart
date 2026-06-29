@@ -224,6 +224,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        'ios-profile-debugger',
+        negatable: false,
+        help:
+            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -300,6 +306,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
         ? boolArg('cross-origin-isolation')
         : null;
+    final bool? iosProfileDebugger = argResults!.wasParsed('ios-profile-debugger')
+        ? boolArg('ios-profile-debugger')
+        : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -329,6 +338,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
         testFlag: testFlag,
+        iosProfileDebugger: iosProfileDebugger,
         traceSystrace: traceSystrace,
       );
     } else {
@@ -395,6 +405,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableHcpp: enableHcpp,
         webDevServerConfig: webDevServerConfig,
         testFlag: testFlag,
+        iosProfileDebugger: iosProfileDebugger,
       );
     }
   }
@@ -746,7 +757,7 @@ class RunCommand extends RunCommandBase {
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
       globals.printWarning(
-        '--flavor is only supported for Android, Linux, macOS, and iOS devices. '
+        '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
       );

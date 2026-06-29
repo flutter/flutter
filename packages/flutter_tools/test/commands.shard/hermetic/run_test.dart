@@ -347,7 +347,7 @@ void main() {
           expect(
             logger.warningText,
             contains(
-              '--flavor is only supported for Android, Linux, macOS, and iOS devices. '
+              '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
               'Flavor-related features may not function properly and could '
               'behave differently in a future release.',
             ),
@@ -2092,6 +2092,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool? forcedWebEnableHotReload,
   }) async {
     return const BuildInfo(
       BuildMode.debug,
