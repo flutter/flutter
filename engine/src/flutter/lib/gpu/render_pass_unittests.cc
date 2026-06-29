@@ -4,8 +4,9 @@
 
 #include "flutter/lib/gpu/render_pass.h"
 
-#include "flutter/fml/memory/ref_ptr.h"
 #include "gtest/gtest.h"
+
+#include "fml/memory/ref_ptr.h"
 
 namespace flutter::gpu {
 namespace {
