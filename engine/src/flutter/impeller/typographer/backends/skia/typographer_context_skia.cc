@@ -525,31 +525,34 @@ TypographerContextSkia::CollectNewGlyphs(
         const auto& font_glyph_bounds =
             font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
+        FontGlyphPair font_glyph_pair{scaled_font, subpixel_glyph};
+
         // Treat placeholder glyphs as missing so they are forced to be packed
         // into the atlas.
         auto it = std::find_if(
             new_glyphs.begin(), new_glyphs.end(),
-            [&pair](const FontGlyphPair& existing) {
-              return ScaledFont::Equal{}(pair.scaled_font,
+            [&font_glyph_pair](const FontGlyphPair& existing) {
+              return ScaledFont::Equal{}(font_glyph_pair.scaled_font,
                                          existing.scaled_font) &&
-                     SubpixelGlyph::Equal{}(pair.glyph, existing.glyph);
+                     SubpixelGlyph::Equal{}(font_glyph_pair.glyph,
+                                            existing.glyph);
             });
 
         if (it == new_glyphs.end()) {
-          new_glyphs.push_back(pair);
-
-          auto glyph_bounds = ComputeGlyphSize(
-              sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
-          glyph_sizes.push_back(glyph_bounds);
-
-          auto frame_bounds = FrameBounds{
-              Rect::MakeLTRB(0, 0, 0, 0),  //
-              glyph_bounds,                //
-              /*placeholder=*/true         //
-          };
-
-          font_glyph_atlas->AppendGlyph(subpixel_glyph, frame_bounds);
+          new_glyphs.push_back(font_glyph_pair);
         }
+
+        auto glyph_bounds = ComputeGlyphSize(
+            sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
+        glyph_sizes.push_back(glyph_bounds);
+
+        auto frame_bounds = FrameBounds{
+            Rect::MakeLTRB(0, 0, 0, 0),  //
+            glyph_bounds,                //
+            /*placeholder=*/true         //
+        };
+
+        font_glyph_atlas->AppendGlyph(subpixel_glyph, frame_bounds);
       }
     }
   }
