@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:android_driver_extensions/extension.dart';
-import 'package:android_hardware_smoke_test/constants.dart';
 import 'package:android_hardware_smoke_test/main.dart' as app;
-import 'package:flutter/services.dart';
+import 'package:android_hardware_smoke_test/src/messages.g.dart';
+import 'package:android_hardware_smoke_test/vm_service_keys.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
@@ -19,7 +18,7 @@ void main() {
     // Thin handler to bridge driver's requestData and MainApp's test_channel.
     handler: (String? request) async {
       if (request == null) {
-        return json.encode(<String, Object?>{'message': 'Error: request was null'});
+        return json.encode(<String, Object?>{keyMessage: 'Error: request was null'});
       }
 
       final Map<String, Object?> payload = (json.decode(request) as Map<Object?, Object?>)
@@ -27,27 +26,35 @@ void main() {
 
       // Handle host-side graphics backend self-discovery query
       if (payload[keyCommand] == commandGetGoldenVariant) {
-        final String? variant = await const MethodChannel(
-          nativeSupportChannelName,
-        ).invokeMethod<String>(methodImpellerBackend);
+        final String? variant = await NativeSupportApi().getImpellerBackend();
         return json.encode(<String, Object?>{keyGoldenVariant: variant});
       }
 
-      // The request is encoded JSON, but there is no need to decode it here.
-      final ByteData message = const StringCodec().encodeMessage(request)!;
-      final completer = Completer<String>();
+      final scenarioName = payload[keyTestScenario]! as String;
+      final TestScenario scenario = TestScenario.values.byName(scenarioName);
 
-      // ignore: deprecated_member_use
-      ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        testChannelName,
-        message,
-        (ByteData? replyData) {
-          final reply = const JSONMessageCodec().decodeMessage(replyData) as Map<Object?, Object?>?;
-          completer.complete(json.encode(reply));
-        },
+      final bool performAppSideGoldenCompare =
+          payload[keyPerformAppSideGoldenCompare] as bool? ?? true;
+      final bool captureScreenshot = payload[keyCaptureScreenshot] as bool? ?? true;
+
+      // Call the coordinator directly!
+      final RenderReply reply = await app.SmokeTestCoordinator.instance.renderTest(
+        RenderRequest(
+          scenario: scenario,
+          performAppSideGoldenCompare: performAppSideGoldenCompare,
+          captureScreenshot: captureScreenshot,
+        ),
       );
 
-      return completer.future;
+      return json.encode(<String, Object?>{
+        keyMessage: reply.message,
+        keyReason: reply.reason,
+        keyX: reply.x,
+        keyY: reply.y,
+        keyWidth: reply.width,
+        keyHeight: reply.height,
+        keyImageBytes: reply.imageBytes != null ? base64.encode(reply.imageBytes!) : null,
+      });
     },
   );
 

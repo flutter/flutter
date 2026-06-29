@@ -4,10 +4,11 @@
 
 import 'dart:ui' as ui;
 
-import 'package:android_hardware_smoke_test/constants.dart';
 import 'package:android_hardware_smoke_test/image_drawing_canvas.dart';
 import 'package:android_hardware_smoke_test/main.dart';
 import 'package:android_hardware_smoke_test/platform_view.dart';
+import 'package:android_hardware_smoke_test/src/messages.g.dart';
+import 'package:android_hardware_smoke_test/test_scenario_extension.dart';
 import 'package:android_hardware_smoke_test/text_drawing_canvas.dart';
 import 'package:android_hardware_smoke_test/vector_drawings_canvas.dart';
 import 'package:flutter/material.dart';
@@ -24,16 +25,15 @@ void main() {
     testImage = await createTestImage(width: 10, height: 10);
     mockHcppSupported = true;
 
-    // Mock the native platform MethodChannel to prevent MissingPluginException during tests
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel(nativeSupportChannelName),
-      (MethodCall methodCall) async {
-        if (methodCall.method == methodImpellerBackend) {
-          return 'vulkan';
-        }
-        return null;
-      },
-    );
+    // Mock the NativeSupportApi Host API call
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockDecodedMessageHandler<Object?>(
+          const BasicMessageChannel<Object?>(
+            'dev.flutter.pigeon.android_hardware_smoke_test.NativeSupportApi.getImpellerBackend',
+            StandardMessageCodec(),
+          ),
+          (Object? message) async => <Object?>['vulkan'],
+        );
 
     // Mock the built-in system platform views channel.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -76,28 +76,21 @@ void main() {
     // Inject a mock imageLoader returning a clone of our pre-created testImage
     await tester.pumpWidget(MyApp(imageLoader: () async => testImage.clone()));
 
-    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-      keyTestName: kImageTest,
-      keyPerformAppSideGoldenCompare: false,
-      keyCaptureScreenshot: false,
-    })!;
-
-    // Send the message to invoke the app's channel handler
-    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
-        .handlePlatformMessage(testChannelName, encodedMessage, null);
+    // Directly call the coordinator API!
+    final Future<RenderReply> replyFuture = SmokeTestCoordinator.instance.renderTest(
+      RenderRequest(
+        scenario: TestScenario.image,
+        performAppSideGoldenCompare: false,
+        captureScreenshot: false,
+      ),
+    );
 
     // Pump frames to resolve the image load and post-frame callback in fake time
     await tester.pump(); // Triggers build with loaded image
     await tester.pump(); // Triggers post-frame callback
 
-    final ByteData? responseBytes = await responseFuture;
-    expect(responseBytes, isNotNull);
-    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
-    expect(replyMap[keyMessage], equals('Rendered $kImageTest'));
-    expect(replyMap[keyImageBytes], isNull);
+    final RenderReply reply = await replyFuture;
+    expect(reply.message, equals('Rendered ${TestScenario.image.testName}'));
 
     final ImageDrawingCanvas canvasWidget = tester.widget<ImageDrawingCanvas>(
       find.byType(ImageDrawingCanvas),
@@ -108,25 +101,19 @@ void main() {
   testWidgets('textTest message channel handler - success behavior', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-      keyTestName: kTextTest,
-      keyPerformAppSideGoldenCompare: false,
-      keyCaptureScreenshot: false,
-    })!;
-
-    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
-        .handlePlatformMessage(testChannelName, encodedMessage, null);
+    final Future<RenderReply> replyFuture = SmokeTestCoordinator.instance.renderTest(
+      RenderRequest(
+        scenario: TestScenario.text,
+        performAppSideGoldenCompare: false,
+        captureScreenshot: false,
+      ),
+    );
 
     await tester.pump();
     await tester.pump();
 
-    final ByteData? responseBytes = await responseFuture;
-    expect(responseBytes, isNotNull);
-    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
-    expect(replyMap[keyMessage], equals('Rendered $kTextTest'));
+    final RenderReply reply = await replyFuture;
+    expect(reply.message, equals('Rendered ${TestScenario.text.testName}'));
 
     expect(find.byType(TextDrawingCanvas), findsOneWidget);
   });
@@ -141,26 +128,19 @@ void main() {
       ),
     );
 
-    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-      keyTestName: kImageTest,
-      keyPerformAppSideGoldenCompare: false,
-      keyCaptureScreenshot: false,
-    })!;
-
-    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
-        .handlePlatformMessage(testChannelName, encodedMessage, null);
+    final Future<RenderReply> replyFuture = SmokeTestCoordinator.instance.renderTest(
+      RenderRequest(
+        scenario: TestScenario.image,
+        performAppSideGoldenCompare: false,
+        captureScreenshot: false,
+      ),
+    );
 
     // Pump a frame to let the handler complete
     await tester.pump();
 
-    final ByteData? responseBytes = await responseFuture;
-    expect(responseBytes, isNotNull);
-    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
-    expect(replyMap[keyMessage], contains('Failed to load image asset'));
-    expect(replyMap[keyImageBytes], isNull);
+    final RenderReply reply = await replyFuture;
+    expect(reply.message, contains('Failed to load image asset'));
   });
 
   testWidgets('advancedBlendTest message channel handler - success behavior', (
@@ -168,30 +148,24 @@ void main() {
   ) async {
     await tester.pumpWidget(const MyApp());
 
-    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-      keyTestName: kAdvancedBlendTest,
-      keyPerformAppSideGoldenCompare: false,
-      keyCaptureScreenshot: false,
-    })!;
-
-    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
-        .handlePlatformMessage(testChannelName, encodedMessage, null);
+    final Future<RenderReply> replyFuture = SmokeTestCoordinator.instance.renderTest(
+      RenderRequest(
+        scenario: TestScenario.advancedBlend,
+        performAppSideGoldenCompare: false,
+        captureScreenshot: false,
+      ),
+    );
 
     await tester.pump();
     await tester.pump();
 
-    final ByteData? responseBytes = await responseFuture;
-    expect(responseBytes, isNotNull);
-    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
-    expect(replyMap[keyMessage], equals('Rendered $kAdvancedBlendTest'));
+    final RenderReply reply = await replyFuture;
+    expect(reply.message, equals('Rendered ${TestScenario.advancedBlend.testName}'));
 
     final VectorDrawingsCanvas canvasWidget = tester.widget<VectorDrawingsCanvas>(
       find.byType(VectorDrawingsCanvas),
     );
-    expect(canvasWidget.message, equals(kAdvancedBlendTest));
+    expect(canvasWidget.scenario, equals(TestScenario.advancedBlend));
   });
 
   testWidgets('backdropFilterBlurTest message channel handler - success behavior', (
@@ -199,60 +173,48 @@ void main() {
   ) async {
     await tester.pumpWidget(const MyApp());
 
-    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-      keyTestName: kBackdropFilterBlurTest,
-      keyPerformAppSideGoldenCompare: false,
-      keyCaptureScreenshot: false,
-    })!;
-
-    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
-        .handlePlatformMessage(testChannelName, encodedMessage, null);
+    final Future<RenderReply> replyFuture = SmokeTestCoordinator.instance.renderTest(
+      RenderRequest(
+        scenario: TestScenario.backdropFilterBlur,
+        performAppSideGoldenCompare: false,
+        captureScreenshot: false,
+      ),
+    );
 
     await tester.pump();
     await tester.pump();
 
-    final ByteData? responseBytes = await responseFuture;
-    expect(responseBytes, isNotNull);
-    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
-    expect(replyMap[keyMessage], equals('Rendered $kBackdropFilterBlurTest'));
+    final RenderReply reply = await replyFuture;
+    expect(reply.message, equals('Rendered ${TestScenario.backdropFilterBlur.testName}'));
 
     // Verify BackdropFilter widget is present in the tree
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
-  for (final testName in <String>[
-    kPlatformViewTextureLayerTest,
-    kPlatformViewHybridCompositionTest,
-    kPlatformViewHybridCompositionPlusPlusTest,
+  for (final scenario in <TestScenario>[
+    TestScenario.platformViewTextureLayer,
+    TestScenario.platformViewHybridComposition,
+    TestScenario.platformViewHybridCompositionPlusPlus,
   ]) {
+    final String testName = scenario.testName;
     testWidgets('$testName message channel handler - success behavior', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const MyApp());
 
-      final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-        keyTestName: testName,
-        keyPerformAppSideGoldenCompare: false,
-        keyCaptureScreenshot: false,
-      })!;
-
-      final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-          .instance
-          .defaultBinaryMessenger
-          .handlePlatformMessage(testChannelName, encodedMessage, null);
+      final Future<RenderReply> replyFuture = SmokeTestCoordinator.instance.renderTest(
+        RenderRequest(
+          scenario: scenario,
+          performAppSideGoldenCompare: false,
+          captureScreenshot: false,
+        ),
+      );
 
       await tester.pump();
       await tester.pump();
 
-      final ByteData? responseBytes = await responseFuture;
-      expect(responseBytes, isNotNull);
-      final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-      final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>)
-          .cast<String, Object?>();
-      expect(replyMap[keyMessage], equals('Rendered $testName'));
+      final RenderReply reply = await replyFuture;
+      expect(reply.message, equals('Rendered $testName'));
 
       // Verify AndroidPlatformView widget is present in the tree
       expect(find.byType(AndroidPlatformView), findsOneWidget);
@@ -260,11 +222,12 @@ void main() {
       final AndroidPlatformView view = tester.widget<AndroidPlatformView>(
         find.byType(AndroidPlatformView),
       );
-      final PlatformViewMode expectedMode = switch (testName) {
-        kPlatformViewTextureLayerTest => PlatformViewMode.textureLayer,
-        kPlatformViewHybridCompositionTest => PlatformViewMode.hybridComposition,
-        kPlatformViewHybridCompositionPlusPlusTest => PlatformViewMode.hybridCompositionPlusPlus,
-        _ => fail('Unexpected testName: $testName'),
+      final PlatformViewMode expectedMode = switch (scenario) {
+        TestScenario.platformViewTextureLayer => PlatformViewMode.textureLayer,
+        TestScenario.platformViewHybridComposition => PlatformViewMode.hybridComposition,
+        TestScenario.platformViewHybridCompositionPlusPlus =>
+          PlatformViewMode.hybridCompositionPlusPlus,
+        _ => fail('Unexpected scenario: $scenario'),
       };
       expect(view.mode, equals(expectedMode));
     });
@@ -277,27 +240,20 @@ void main() {
 
       await tester.pumpWidget(const MyApp());
 
-      final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
-        keyTestName: kPlatformViewHybridCompositionPlusPlusTest,
-        keyPerformAppSideGoldenCompare: false,
-        keyCaptureScreenshot: false,
-      })!;
-
-      final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
-          .instance
-          .defaultBinaryMessenger
-          .handlePlatformMessage(testChannelName, encodedMessage, null);
+      final Future<RenderReply> replyFuture = SmokeTestCoordinator.instance.renderTest(
+        RenderRequest(
+          scenario: TestScenario.platformViewHybridCompositionPlusPlus,
+          performAppSideGoldenCompare: false,
+          captureScreenshot: false,
+        ),
+      );
 
       await tester.pump();
       await tester.pump();
 
-      final ByteData? responseBytes = await responseFuture;
-      expect(responseBytes, isNotNull);
-      final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
-      final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>)
-          .cast<String, Object?>();
-      expect(replyMap[keyMessage], equals('Skipped'));
-      expect(replyMap[keyReason], contains('HCPP is not supported on this device/configuration'));
+      final RenderReply reply = await replyFuture;
+      expect(reply.message, equals('Skipped'));
+      expect(reply.reason, contains('HCPP is not supported on this device/configuration'));
 
       // Verify AndroidPlatformView widget is NOT present in the tree
       expect(find.byType(AndroidPlatformView), findsNothing);

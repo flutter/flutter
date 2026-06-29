@@ -13,9 +13,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-
-import 'constants.dart';
 import 'pixel_exact_local_file_comparator.dart';
+
+const String _platformViewPrefix = 'platformView';
+const String _keyMessage = 'message';
+const String _keyX = 'x';
+const String _keyY = 'y';
+const String _keyWidth = 'width';
+const String _keyHeight = 'height';
+const String _keyImageBytes = 'imageBytes';
 
 /// Captures the image bytes of the widget associated with [targetKey] and either compares it to a golden file or returns the bytes to the test driver for host-side comparison, depending on the value of [performAppSideGoldenCompare].
 ///
@@ -34,7 +40,7 @@ Future<void> handleGoldenRequest(
   try {
     final String? goldenVariantValue = await goldenVariant;
 
-    if (testName.startsWith(platformViewPrefix)) {
+    if (testName.startsWith(_platformViewPrefix)) {
       // Platform views cannot be captured using RepaintBoundary.toImage() since they reside in separate
       // native surface layers. Instead, we wait for layout to settle, calculate the widget's physical
       // coordinates on screen, and return them so the runner can perform a compositor-level capture.
@@ -69,11 +75,11 @@ Future<void> handleGoldenRequest(
       final int h = (size.height * devicePixelRatio).round();
 
       completer.complete(<String, Object?>{
-        keyMessage: 'Rendered $testName',
-        keyX: x,
-        keyY: y,
-        keyWidth: w,
-        keyHeight: h,
+        _keyMessage: 'Rendered $testName',
+        _keyX: x,
+        _keyY: y,
+        _keyWidth: w,
+        _keyHeight: h,
       });
       return;
     }
@@ -86,17 +92,17 @@ Future<void> handleGoldenRequest(
         resultImageBytes,
         goldenVariantValue,
       );
-      completer.complete(<String, Object?>{keyMessage: failureMessage ?? 'Rendered $testName'});
+      completer.complete(<String, Object?>{_keyMessage: failureMessage ?? 'Rendered $testName'});
     } else {
       completer.complete(<String, Object?>{
-        keyMessage: 'Rendered $testName',
-        keyImageBytes: base64.encode(resultImageBytes),
+        _keyMessage: 'Rendered $testName',
+        _keyImageBytes: base64.encode(resultImageBytes),
       });
     }
   } catch (e, stackTrace) {
     // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      keyMessage: 'Error occurred during golden request handling: $e\n$stackTrace',
+      _keyMessage: 'Error occurred during golden request handling: $e\n$stackTrace',
     });
   }
 }

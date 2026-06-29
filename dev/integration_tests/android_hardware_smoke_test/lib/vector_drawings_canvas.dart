@@ -3,28 +3,27 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'constants.dart';
+
+import 'src/messages.g.dart';
 
 /// A custom widget wrapping a CustomPaint canvas to render different vector
-/// drawings (rectangles, paths, and blends) based on the active test scenario command.
+/// drawings (rectangles, paths, and blends) based on the active test scenario.
 class VectorDrawingsCanvas extends StatelessWidget {
-  const VectorDrawingsCanvas({super.key, required this.message});
+  const VectorDrawingsCanvas({super.key, required this.scenario});
 
-  /// The active test scenario command identifier (e.g., 'blueRectangleTest').
-  final String message;
+  /// The active test scenario.
+  final TestScenario? scenario;
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _VectorDrawingsPainter(message: message));
+    return CustomPaint(painter: _VectorDrawingsPainter(scenario: scenario));
   }
 }
 
 class _VectorDrawingsPainter extends CustomPainter {
-  _VectorDrawingsPainter({required String message})
-    : _message = message,
-      assert(message.isNotEmpty);
+  _VectorDrawingsPainter({required TestScenario? scenario}) : _scenario = scenario;
 
-  final String _message;
+  final TestScenario? _scenario;
 
   void _renderBlueRectangleTest(Canvas canvas, Size size) {
     final paint = Paint()
@@ -68,23 +67,26 @@ class _VectorDrawingsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    switch (_message) {
-      case kBlueRectangleTest:
+    switch (_scenario) {
+      case TestScenario.blueRectangle:
         _renderBlueRectangleTest(canvas, size);
-        return;
-      case kTrianglePathTest:
+      case TestScenario.trianglePath:
         _renderTrianglePathTest(canvas, size);
-        return;
-      case kAdvancedBlendTest:
+      case TestScenario.advancedBlend:
         _renderAdvancedBlendTest(canvas, size);
-        return;
-      default:
+      case TestScenario.text:
+      case TestScenario.image:
+      case TestScenario.backdropFilterBlur:
+      case TestScenario.platformViewTextureLayer:
+      case TestScenario.platformViewHybridComposition:
+      case TestScenario.platformViewHybridCompositionPlusPlus:
+      case null:
         _renderDefault(canvas, size);
     }
   }
 
   @override
   bool shouldRepaint(covariant _VectorDrawingsPainter oldDelegate) {
-    return _message != oldDelegate._message;
+    return _scenario != oldDelegate._scenario;
   }
 }
