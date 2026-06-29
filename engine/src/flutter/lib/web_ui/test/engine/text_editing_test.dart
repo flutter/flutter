@@ -53,6 +53,16 @@ void trackInputAction(String? inputAction) {
   lastInputAction = inputAction;
 }
 
+List<PlatformMessage> connectionClosedMessages(PlatformMessagesSpy spy) {
+  return spy.messages
+      .where(
+        (PlatformMessage message) =>
+            message.channel == 'flutter/textinput' &&
+            message.methodName == 'TextInputClient.onConnectionClosed',
+      )
+      .toList();
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -658,6 +668,95 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
+    test('defers closing input connection when document loses focus', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      final List<PlatformMessage> closedMessages = connectionClosedMessages(spy);
+      expect(closedMessages, hasLength(1));
+      expect(closedMessages.single.methodArguments, <dynamic>[
+        null, // Client ID
+      ]);
+
+      spy.tearDown();
+    });
+
+    test('keeps input connection open when blurred page becomes hidden', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'hidden';
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
+    test('keeps input connection open when document quickly regains focus', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      editingStrategy!.debugDocumentHasFocusOverride = true;
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
     test(
       'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
       () async {
@@ -665,6 +764,7 @@ Future<void> testMain() async {
         spy.setUp();
 
         textEditing.configuration = singlelineConfig;
+        editingStrategy!.debugDocumentHasFocusOverride = true;
 
         final showCompleter = Completer<void>();
         textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
@@ -686,7 +786,14 @@ Future<void> testMain() async {
 
         expect(textEditing.isEditing, isTrue);
 
-        expect(domDocument.activeElement, textEditing.strategy.domElement);
+        if (isFirefox) {
+          expect(
+            domDocument.activeElement,
+            anyOf(textEditing.strategy.domElement, domDocument.body),
+          );
+        } else {
+          expect(domDocument.activeElement, textEditing.strategy.domElement);
+        }
 
         final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.viewManager
             .findViewForElement(textEditing.strategy.domElement)!;

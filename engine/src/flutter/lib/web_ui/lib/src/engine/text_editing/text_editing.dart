@@ -1360,6 +1360,20 @@ abstract class DefaultTextEditingStrategy
   OnActionCallback? onAction;
 
   final List<DomSubscription> subscriptions = <DomSubscription>[];
+  Timer? _pendingBlurConnectionCloseTimer;
+
+  /// Overrides the result of [domDocument.hasFocus] for testing.
+  @visibleForTesting
+  bool? debugDocumentHasFocusOverride;
+
+  /// Overrides the result of [domDocument.visibilityState] for testing.
+  @visibleForTesting
+  String? debugDocumentVisibilityStateOverride;
+
+  bool get _documentHasFocus => debugDocumentHasFocusOverride ?? domDocument.hasFocus();
+
+  String get _documentVisibilityState =>
+      debugDocumentVisibilityStateOverride ?? domDocument.visibilityState;
 
   bool get hasAutofillGroup => inputConfiguration.autofillGroup != null;
 
@@ -1391,6 +1405,8 @@ abstract class DefaultTextEditingStrategy
     required OnActionCallback onAction,
   }) {
     assert(!isEnabled);
+    _pendingBlurConnectionCloseTimer?.cancel();
+    _pendingBlurConnectionCloseTimer = null;
 
     // The -1 tab index value makes this element not reachable by keyboard.
     domElement = inputConfig.inputType.createDomElement()..tabIndex = -1;
@@ -1526,6 +1542,9 @@ abstract class DefaultTextEditingStrategy
   @override
   void disable() {
     assert(isEnabled);
+    _pendingBlurConnectionCloseTimer?.cancel();
+    _pendingBlurConnectionCloseTimer = null;
+
     // Preserve the internal scroll position.
     if (geometry != null && lastEditingState != null) {
       final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
@@ -1670,6 +1689,20 @@ abstract class DefaultTextEditingStrategy
       // allowing the focus to move elsewhere.
       //
       // This is fixing https://github.com/flutter/flutter/issues/155265.
+      if (!_documentHasFocus) {
+        _pendingBlurConnectionCloseTimer?.cancel();
+        // When a browser tab is backgrounded, the input blur arrives before
+        // visibilitychange. Wait briefly so tab switches can keep the text
+        // connection alive, while ordinary window/iframe blurs still close it.
+        _pendingBlurConnectionCloseTimer = Timer(const Duration(milliseconds: 100), () {
+          _pendingBlurConnectionCloseTimer = null;
+          if (_documentVisibilityState == 'hidden' || _documentHasFocus) {
+            return;
+          }
+          textEditing.sendTextConnectionClosedToFrameworkIfAny();
+        });
+        return;
+      }
       textEditing.sendTextConnectionClosedToFrameworkIfAny();
     } else if (_viewForElement(willGainFocusElement) == activeDomElementView) {
       // If the focus stays within the same FlutterView, ensure the focus stays
