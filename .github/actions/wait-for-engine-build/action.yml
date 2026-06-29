@@ -18,12 +18,19 @@ runs:
     - name: Check Engine Changes
       id: check_engine
       shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+        PUSH_BEFORE_SHA: ${{ github.event.before }}
       run: |
         # 1. Determine local base tracking SHA
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          BASE_REF="${{ github.event.pull_request.base.sha }}"
-        elif [ "${{ github.event_name }}" = "merge_group" ]; then
-          BASE_REF="${{ github.event.merge_group.base_sha }}"
+        if [ "$EVENT_NAME" = "pull_request" ]; then
+          BASE_REF="$PR_BASE_SHA"
+        elif [ "$EVENT_NAME" = "merge_group" ]; then
+          BASE_REF="$MERGE_GROUP_BASE_SHA"
+        elif [ "$EVENT_NAME" = "push" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+          BASE_REF="$PUSH_BEFORE_SHA"
         else
           BASE_REF="origin/master"
         fi
@@ -36,7 +43,7 @@ runs:
         echo "$CHANGED_FILES"
 
         # 3. Check if any file matches engine pattern using the helper script:
-        if [ "$(echo "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
+        if [ "$(printf '%s\n' "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
           echo "Engine file changed - forced to wait for check-name: '${{ inputs.check-name }}', check-regexp: '${{ inputs.check-regexp }}'"
           echo "changed=true" >> "$GITHUB_OUTPUT"
         else
