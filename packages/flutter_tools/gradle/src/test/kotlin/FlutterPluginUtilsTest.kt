@@ -1755,10 +1755,15 @@ class FlutterPluginUtilsTest {
                                     )
                             )
 
-                        executeDetectApplyingKotlinGradlePlugin(testProject)
-
                         val appPluginManager = testProject.appPluginManager
                         val plugin1Manager = testProject.plugin1Manager
+
+                        executeDetectApplyingKotlinGradlePlugin(testProject)
+
+                        // No warnings should be logged because AGP version is < 9.
+                        verify(exactly = 0) { mockLogger.error(any()) }
+
+                        // KGP is still applied in case the entire project has been migrated.
                         verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
                         verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                     }
