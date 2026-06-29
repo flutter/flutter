@@ -1,7 +1,7 @@
 name: _flutter_packages
 
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 
 workspace:
   - dev/a11y_assessments
@@ -105,8 +105,6 @@ dependencies:
   crypto: 3.0.7
   csslib: 1.0.2
   cupertino_icons: 1.0.9
-  device_info: 2.0.3
-  device_info_platform_interface: 2.0.1
   fake_async: ^1.3.3
   ffi: 2.2.0
   file: 7.0.1
@@ -218,11 +216,10 @@ dependencies:
   file_testing: 3.0.2
   flutter_lints: 6.0.0
   lints: 6.1.0
-  pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.4
 
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: krp65v
+# PUBSPEC CHECKSUM: in3p1o

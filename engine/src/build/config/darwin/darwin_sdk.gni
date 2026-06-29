@@ -49,7 +49,7 @@ declare_args() {
   ios_use_simulator = true
 
   # Version of iOS that we're targeting.
-  ios_deployment_target = "13.0"
+  ios_deployment_target = "15.0"
 
   # The path to the iOS device platform.
   ios_device_platform_path = ""
