@@ -94,8 +94,7 @@ class FlutterWebPlatform extends PlatformPlugin {
        _testHostDartJs = testHostDartJs,
        _chromiumLauncher = chromiumLauncher,
        _logger = logger,
-       _artifacts = artifacts,
-       _processManager = processManager {
+       _artifacts = artifacts {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
@@ -143,7 +142,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   final Artifacts? _artifacts;
-  final ProcessManager _processManager;
   final bool updateGoldens;
   final _webSocketHandler = OneOffHandler();
   final _closeMemo = AsyncMemoizer<void>();
@@ -658,7 +656,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
-      processManager: _processManager,
     );
   }
 
@@ -720,13 +717,7 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(
-    this._browser,
-    this._runtime,
-    WebSocketChannel webSocket,
-    this._logger,
-    this._processManager,
-  ) {
+  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger) {
     unawaited(
       _browser.onExit.then((int exitCode) {
         if (!_closed) {
@@ -779,7 +770,6 @@ class BrowserManager {
   final Chromium _browser;
   final Runtime _runtime;
   final Logger _logger;
-  final ProcessManager _processManager;
 
   /// The channel used to communicate with the browser.
   ///
@@ -846,7 +836,6 @@ class BrowserManager {
     bool headless = true,
     List<String> webBrowserFlags = const <String>[],
     required Logger logger,
-    required ProcessManager processManager,
   }) async {
     final Chromium chrome = await chromiumLauncher.launch(
       url.toString(),
@@ -898,7 +887,7 @@ class BrowserManager {
           if (completer.isCompleted) {
             return;
           }
-          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger, processManager));
+          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger));
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();
