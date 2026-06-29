@@ -402,9 +402,11 @@ abstract base class PreviewThemeData {
   Widget apply(BuildContext context, Widget child);
 }
 
-/// A [PreviewThemeData] that applies multiple themes in sequence.
+/// A [PreviewThemeData] that applies multiple themes in sequence, where the
+/// first theme in the list is the outermost wrapper.
 final class MultiPreviewThemeData extends PreviewThemeData {
-  /// Creates a [MultiPreviewThemeData] that applies [themes] in sequence.
+  /// Creates a [MultiPreviewThemeData] that applies [themes] in sequence,
+  /// nesting them from first (outermost) to last (innermost).
   const MultiPreviewThemeData(this.themes);
 
   /// The list of themes to apply.
@@ -413,7 +415,7 @@ final class MultiPreviewThemeData extends PreviewThemeData {
   @override
   Widget apply(BuildContext context, Widget child) {
     var result = child;
-    for (final PreviewThemeData theme in themes) {
+    for (final PreviewThemeData theme in themes.reversed) {
       result = theme.apply(context, result);
     }
     return result;
