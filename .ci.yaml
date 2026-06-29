@@ -6340,6 +6340,27 @@ targets:
       - engine/**
       - DEPS
 
+  - name: Windows flavors_test_windows
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: flavors_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Windows_arm64 plugin_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
