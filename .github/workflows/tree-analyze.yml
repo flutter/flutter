@@ -67,7 +67,9 @@ jobs:
 
       - name: Redirect engine.version
         if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
-        run: echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV
+        run: |
+          echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV
+          echo "FLUTTER_PREBUILT_ENGINE_VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
 
       - uses: ./.github/actions/composite-flutter-setup
 

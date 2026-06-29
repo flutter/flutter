@@ -2092,6 +2092,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool? forcedWebEnableHotReload,
   }) async {
     return const BuildInfo(
       BuildMode.debug,

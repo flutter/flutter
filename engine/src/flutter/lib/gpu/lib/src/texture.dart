@@ -86,6 +86,52 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableShaderWriteUsage = false,
       mipLevelCount = 1;
 
+  /// Wraps the GPU texture that backs [image] as a Flutter GPU [Texture],
+  /// without copying any pixel data.
+  ///
+  /// The returned texture shares its storage with [image], so it stays valid
+  /// for as long as either the returned texture or [image] is alive. It is
+  /// intended for sampling (for example as a material texture) and reflects
+  /// the usage of the underlying texture, so it is not guaranteed to be usable
+  /// as a render pass attachment.
+  ///
+  /// [image] must be backed by a GPU texture. Use an image produced by the
+  /// asynchronous `RepaintBoundary.toImage` (or `Picture.toImage`). An image
+  /// from `toImageSync` rasterizes asynchronously and may not have a texture
+  /// yet when this is called. Throws if [image] has no compatible texture.
+  factory Texture.fromImage(GpuContext gpuContext, ui.Image image) {
+    final Int32List info = _imageTextureInfo(gpuContext, image);
+    if (info.length != 10) {
+      throw Exception(
+        'Texture.fromImage could not wrap the image because it is not backed '
+        'by a compatible GPU texture. Use an image from the asynchronous '
+        'RepaintBoundary.toImage rather than toImageSync.',
+      );
+    }
+    return Texture._fromImage(gpuContext, image, info);
+  }
+
+  /// Builds the wrapper from the metadata returned by [_imageTextureInfo] and
+  /// associates it with the image's backing texture. The field layout must
+  /// match `InternalFlutterGpu_Texture_ImageTextureInfo` on the native side.
+  Texture._fromImage(GpuContext gpuContext, ui.Image image, Int32List info)
+    : _gpuContext = gpuContext,
+      storageMode = StorageMode.values[info[0]],
+      format = PixelFormat.values[info[1]],
+      width = info[2],
+      height = info[3],
+      sampleCount = info[4],
+      textureType = TextureType.values[info[5]],
+      enableRenderTargetUsage = info[6] != 0,
+      enableShaderReadUsage = info[7] != 0,
+      enableShaderWriteUsage = info[8] != 0,
+      mipLevelCount = info[9] {
+    _valid = _initializeFromImage(gpuContext, image);
+    if (!_valid) {
+      throw Exception("Texture.fromImage failed to wrap the image texture");
+    }
+  }
+
   GpuContext _gpuContext;
 
   final StorageMode storageMode;
@@ -253,4 +299,17 @@ base class Texture extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Texture_AsImage',
   )
   external ui.Image _asImage();
+
+  @Native<Handle Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Texture_ImageTextureInfo',
+  )
+  external static Int32List _imageTextureInfo(
+    GpuContext gpuContext,
+    ui.Image image,
+  );
+
+  @Native<Bool Function(Handle, Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Texture_InitializeFromImage',
+  )
+  external bool _initializeFromImage(GpuContext gpuContext, ui.Image image);
 }
