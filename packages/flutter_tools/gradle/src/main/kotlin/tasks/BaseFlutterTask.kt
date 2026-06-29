@@ -10,6 +10,8 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFiles
 import java.io.File
+import javax.inject.Inject
+import org.gradle.process.ExecOperations
 
 // IMPORTANT: Do not add logic to the methods in this class directly,
 // instead add logic to [BaseFlutterTaskHelper].
@@ -19,6 +21,9 @@ import java.io.File
  * so this class delegates all logic to [BaseFlutterTaskHelper].
  */
 open class BaseFlutterTask : DefaultTask() {
+    @get:Inject
+    open val execOperations: ExecOperations
+        get() = throw UnsupportedOperationException()
     @Internal
     var flutterRoot: File? = null
 
