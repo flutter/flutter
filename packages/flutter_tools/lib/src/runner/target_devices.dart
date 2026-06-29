@@ -24,6 +24,8 @@ const _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
 
 String _chooseDeviceOptionMessage(int option, String name, String deviceId) =>
     '[$option]: $name ($deviceId)';
+String _skipPromptHintMessage(String deviceId) =>
+    'To skip this prompt next time, specify the device with "-d $deviceId".';
 String _foundMultipleSpecifiedDevicesMessage(String deviceId) =>
     'Found multiple devices with name or id matching $deviceId:';
 String _foundSpecifiedDevicesMessage(int count, String deviceId) =>
@@ -347,7 +349,9 @@ class TargetDevices {
     if (userInput.toLowerCase() == 'q') {
       throwToolExit('');
     }
-    return devices[int.parse(userInput) - 1];
+    final Device chosenDevice = devices[int.parse(userInput) - 1];
+    _logger.printStatus(_skipPromptHintMessage(chosenDevice.id));
+    return chosenDevice;
   }
 
   void _displayDeviceOptions(List<Device> devices) {
@@ -721,6 +725,8 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     // Update the [DeviceManager.specifiedDeviceId] so that the user will not
     // be prompted again.
     _deviceManager.specifiedDeviceId = chosenDevice.id;
+
+    _logger.printStatus(_skipPromptHintMessage(chosenDevice.id));
 
     return <Device>[chosenDevice];
   }
