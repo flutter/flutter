@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../flutter/test/widgets/widgets_app_tester.dart';
+
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
   final binding = LiveTestWidgetsFlutterBinding();
@@ -78,43 +80,32 @@ void main() {
   ) async {
     var longPresses = 0;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Navigator(
-          onGenerateRoute: (RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              transitionDuration: Duration.zero,
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) {
-                    return GestureDetector(
-                      onLongPress: () {
-                        longPresses++;
-                        Navigator.of(context).push<void>(
-                          RawDialogRoute<void>(
-                            transitionDuration: Duration.zero,
-                            pageBuilder:
-                                (
-                                  BuildContext context,
-                                  Animation<double> animation,
-                                  Animation<double> secondaryAnimation,
-                                ) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Center(child: Text('Popup')),
-                                  );
-                                },
-                          ),
-                        );
-                      },
-                      child: const Center(child: Text('Show dialog')),
-                    );
-                  },
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onLongPress: () {
+                longPresses++;
+                Navigator.of(context).push<void>(
+                  PageRouteBuilder<void>(
+                    transitionDuration: Duration.zero,
+                    pageBuilder:
+                        (
+                          BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                        ) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Center(child: Text('Popup')),
+                          );
+                        },
+                  ),
+                );
+              },
+              child: const Center(child: Text('Show dialog')),
             );
           },
         ),
