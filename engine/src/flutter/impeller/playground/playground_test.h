@@ -29,6 +29,8 @@ class PlaygroundTest : public Playground,
 
   void SetUp() override;
 
+  void TearDown() override;
+
   PlaygroundBackend GetBackend() const;
 
   // |Playground|

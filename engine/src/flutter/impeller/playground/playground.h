@@ -13,11 +13,12 @@
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/core/texture.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/point.h"
 #include "impeller/playground/image/compressed_image.h"
 #include "impeller/playground/image/decompressed_image.h"
 #include "impeller/playground/switches.h"
-#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
@@ -44,8 +45,6 @@ class Playground {
 
   static bool ShouldOpenNewPlaygrounds();
 
-  void Teardown();
-
   bool IsPlaygroundEnabled() const;
 
   Point GetCursorPosition() const;
@@ -63,6 +62,10 @@ class Playground {
   std::shared_ptr<Context> GetContext() const;
 
   std::shared_ptr<Context> MakeContext() const;
+
+  std::shared_ptr<ContentContext> GetContentContext() const;
+
+  std::shared_ptr<TypographerContext> GetTypographerContext() const;
 
   using RenderCallback = std::function<bool(RenderTarget& render_target)>;
 
@@ -116,6 +119,13 @@ class Playground {
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
  protected:
+  // This method could override testing::Test::TearDown() directly, but
+  // since we don't inherit from that Test class the override would not
+  // be recognized. Instead we make this method available to subclasses
+  // that do inherit from testing::Test so that they can redirect to
+  // it during test teardown.
+  void TearDownContextData();
+
   virtual bool ShouldKeepRendering() const;
 
   /// @brief Make sure that when the context is later created that it
@@ -156,6 +166,9 @@ class Playground {
   ///         work are called.
   const PlaygroundSwitches& GetSwitches() const { return switches_; }
 
+  void SetTypographerContext(
+      std::shared_ptr<TypographerContext> typographer_context);
+
   void SetWindowSize(ISize size);
 
  private:
@@ -165,6 +178,8 @@ class Playground {
   fml::TimeDelta start_time_;
   mutable std::unique_ptr<PlaygroundImpl> impl_;
   mutable std::shared_ptr<Context> context_;
+  mutable std::shared_ptr<ContentContext> content_context_;
+  mutable std::shared_ptr<TypographerContext> typographer_context_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
   std::shared_ptr<HostBuffer> host_buffer_;

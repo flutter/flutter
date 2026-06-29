@@ -31,6 +31,7 @@
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui.h"
 
@@ -140,6 +141,28 @@ std::shared_ptr<Context> Playground::MakeContext() const {
   return context_;
 }
 
+std::shared_ptr<ContentContext> Playground::GetContentContext() const {
+  if (!content_context_) {
+    content_context_ =
+        std::make_shared<ContentContext>(GetContext(), GetTypographerContext());
+  }
+  return content_context_;
+}
+
+std::shared_ptr<TypographerContext> Playground::GetTypographerContext() const {
+  if (!typographer_context_) {
+    typographer_context_ = TypographerContextSkia::Make();
+  }
+  return typographer_context_;
+}
+
+void Playground::SetTypographerContext(
+    std::shared_ptr<TypographerContext> typographer_context) {
+  FML_CHECK(!typographer_context_)
+      << "SetTypographerContext called after it has already been initialized";
+  typographer_context_ = std::move(typographer_context);
+}
+
 bool Playground::SupportsBackend(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
@@ -199,7 +222,12 @@ bool Playground::IsPlaygroundEnabled() const {
   return switches_.enable_playground;
 }
 
-void Playground::Teardown() {
+void Playground::TearDownContextData() {
+  if (content_context_) {
+    FML_CHECK(context_);
+    [[maybe_unused]] auto result = context_->FlushCommandBuffers();
+    content_context_.reset();
+  }
   if (host_buffer_) {
     host_buffer_.reset();
   }

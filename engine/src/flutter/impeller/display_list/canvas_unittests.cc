@@ -70,8 +70,8 @@ std::unique_ptr<Canvas> CreateTestCanvas(
 }
 
 TEST_P(AiksTest, TransformMultipliesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
-  auto canvas = CreateTestCanvas(context);
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  auto canvas = CreateTestCanvas(*context);
 
   ASSERT_MATRIX_NEAR(canvas->GetCurrentTransform(), Matrix());
 
@@ -111,8 +111,8 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 }
 
 TEST_P(AiksTest, CanvasCanPushPopCTM) {
-  ContentContext context(GetContext(), nullptr);
-  auto canvas = CreateTestCanvas(context);
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  auto canvas = CreateTestCanvas(*context);
 
   ASSERT_EQ(canvas->GetSaveCount(), 1u);
   ASSERT_EQ(canvas->Restore(), false);
@@ -129,8 +129,8 @@ TEST_P(AiksTest, CanvasCanPushPopCTM) {
 }
 
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
-  ContentContext context(GetContext(), nullptr);
-  auto canvas = CreateTestCanvas(context);
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  auto canvas = CreateTestCanvas(*context);
 
   Matrix identity;
   ASSERT_MATRIX_NEAR(canvas->GetCurrentTransform(), identity);
@@ -140,11 +140,11 @@ TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
 }
 
 TEST_P(AiksTest, BackdropCountDownNormal) {
-  ContentContext context(GetContext(), nullptr);
-  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  if (!context->GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
+  auto canvas = CreateTestCanvas(*context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
   // 3 backdrop filters
   canvas->SetBackdropData({}, 3);
@@ -172,17 +172,14 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
                     /*total_content_depth=*/1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
-
-  canvas.reset();
-  EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
-  ContentContext context(GetContext(), nullptr);
-  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  if (!context->GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
+  auto canvas = CreateTestCanvas(*context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
   // 3 backdrop filters all with same id.
   std::unordered_map<int64_t, BackdropData> data;
@@ -215,17 +212,14 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
                     /*backdrop_id=*/1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
-
-  canvas.reset();
-  EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
-  ContentContext context(GetContext(), nullptr);
-  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  if (!context->GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
+  auto canvas = CreateTestCanvas(*context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
   // 3 backdrop filters, 2 with same id.
   std::unordered_map<int64_t, BackdropData> data;
@@ -252,20 +246,17 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
                     ContentBoundsPromise::kContainsContents, 1, false, 1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
-
-  canvas.reset();
-  EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
 // We only know the total number of backdrop filters, not the number of backdrop
 // filters in the root pass. If we reach a count of 0 while in a nested
 // saveLayer, we should not restore to the onscreen.
 TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
-  ContentContext context(GetContext(), nullptr);
-  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  if (!context->GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
+  auto canvas = CreateTestCanvas(*context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
   canvas->SetBackdropData({}, 2);
@@ -290,15 +281,12 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
   canvas->Restore();
   EXPECT_TRUE(canvas->RequiresReadback());
-
-  canvas.reset();
-  EXPECT_TRUE(context.GetContext()->FlushCommandBuffers());
 }
 
 TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
-    Canvas canvas(context, render_target, true, false);
+    std::shared_ptr<ContentContext> context = GetContentContext();
+    Canvas canvas(*context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
         flutter::DlPoint(0, 0),
@@ -329,8 +317,9 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
 
     Paint paint;
     paint.color_source = gradient.get();
-    canvas.DrawVertices(std::make_shared<DlVerticesGeometry>(vertices, context),
-                        BlendMode::kSrcOver, paint);
+    canvas.DrawVertices(
+        std::make_shared<DlVerticesGeometry>(vertices, *context),
+        BlendMode::kSrcOver, paint);
 
     canvas.EndReplay();
     return true;
@@ -353,8 +342,8 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       runtime_effect, {}, uniform_data);
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
-    Canvas canvas(context, render_target, true, false);
+    std::shared_ptr<ContentContext> context = GetContentContext();
+    Canvas canvas(*context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
         flutter::DlPoint(100, 100),
@@ -378,8 +367,9 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
 
     Paint paint;
     paint.color_source = color_source.get();
-    canvas.DrawVertices(std::make_shared<DlVerticesGeometry>(vertices, context),
-                        BlendMode::kSrcOver, paint);
+    canvas.DrawVertices(
+        std::make_shared<DlVerticesGeometry>(vertices, *context),
+        BlendMode::kSrcOver, paint);
 
     canvas.EndReplay();
     return true;
@@ -389,8 +379,8 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
 }
 
 TEST_P(AiksTest, SupportsBlitToOnscreen) {
-  ContentContext context(GetContext(), nullptr);
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
+  std::shared_ptr<ContentContext> context = GetContentContext();
+  auto canvas = CreateTestCanvas(*context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
   if (GetBackend() != PlaygroundBackend::kMetal &&
@@ -422,8 +412,8 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
   }
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
-    Canvas canvas(context, render_target, true, false);
+    std::shared_ptr<ContentContext> context = GetContentContext();
+    Canvas canvas(*context, render_target, true, false);
     // Somehow there's a scaling factor between PlaygroundPoint and Canvas.
     Matrix ctm = Matrix::MakeScale(Vector2(1, 1) * 0.5);
     Matrix i_ctm = ctm.Invert();
@@ -471,35 +461,35 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
 }
 
 TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  std::shared_ptr<ContentContext> context = GetContentContext();
 
   TextureDescriptor desc;
   desc.size = {100, 100};
-  desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  desc.format = context->GetDeviceCapabilities().GetDefaultColorFormat();
   auto texture =
-      context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
+      context->GetContext()->GetResourceAllocator()->CreateTexture(desc);
 
   auto dl_image = impeller::DlImageImpeller::Make(texture);
 
-  context.SetTextureCachingEnabled(true);
-  auto cached_tex1 = dl_image->GetCachedTexture(context);
+  context->SetTextureCachingEnabled(true);
+  auto cached_tex1 = dl_image->GetCachedTexture(*context);
   ASSERT_EQ(cached_tex1, texture);
 
-  auto cached_tex2 = context.GetCachedTexture(dl_image.get());
+  auto cached_tex2 = context->GetCachedTexture(dl_image.get());
   ASSERT_EQ(cached_tex2, texture);
 
-  context.RemoveCachedTexture(dl_image.get());
-  auto cached_tex3 = context.GetCachedTexture(dl_image.get());
+  context->RemoveCachedTexture(dl_image.get());
+  auto cached_tex3 = context->GetCachedTexture(dl_image.get());
   ASSERT_EQ(cached_tex3, nullptr);
 
-  auto cached_tex4 = dl_image->GetCachedTexture(context);
+  auto cached_tex4 = dl_image->GetCachedTexture(*context);
   ASSERT_EQ(cached_tex4, texture);
 
-  context.ClearCachedTextures();
-  auto cached_tex5 = context.GetCachedTexture(dl_image.get());
+  context->ClearCachedTextures();
+  auto cached_tex5 = context->GetCachedTexture(dl_image.get());
   ASSERT_EQ(cached_tex5, nullptr);
 
-  context.SetTextureCachingEnabled(false);
+  context->SetTextureCachingEnabled(false);
 }
 
 /// Verifies blend mode compatibility with SDF rendering.

@@ -45,6 +45,10 @@ void PlaygroundTest::SetUp() {
   }
 }
 
+void PlaygroundTest::TearDown() {
+  Playground::TearDownContextData();
+}
+
 PlaygroundBackend PlaygroundTest::GetBackend() const {
   return GetParam();
 }

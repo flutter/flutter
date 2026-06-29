@@ -24,6 +24,8 @@ class ComputePlaygroundTest
 
   void SetUp() override;
 
+  void TearDown() override;
+
   // |Playground|
   std::unique_ptr<fml::Mapping> OpenAssetAsMapping(
       std::string asset_name) const override;

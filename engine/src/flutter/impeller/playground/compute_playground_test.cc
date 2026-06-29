@@ -29,6 +29,10 @@ void ComputePlaygroundTest::SetUp() {
   start_time_ = fml::TimePoint::Now().ToEpochDelta();
 }
 
+void ComputePlaygroundTest::TearDown() {
+  Playground::TearDownContextData();
+}
+
 // |Playground|
 std::unique_ptr<fml::Mapping> ComputePlaygroundTest::OpenAssetAsMapping(
     std::string asset_name) const {

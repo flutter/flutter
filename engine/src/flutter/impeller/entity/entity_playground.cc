@@ -10,37 +10,9 @@
 
 namespace impeller {
 
-EntityPlayground::EntityPlayground()
-    : typographer_context_(TypographerContextSkia::Make()) {}
+EntityPlayground::EntityPlayground() = default;
 
 EntityPlayground::~EntityPlayground() = default;
-
-void EntityPlayground::TearDown() {
-  if (content_context_) {
-    [[maybe_unused]] auto result =
-        content_context_->GetContext()->FlushCommandBuffers();
-    content_context_.reset();
-  }
-  PlaygroundTest::TearDown();
-}
-
-void EntityPlayground::SetTypographerContext(
-    std::shared_ptr<TypographerContext> typographer_context) {
-  typographer_context_ = std::move(typographer_context);
-}
-
-std::shared_ptr<TypographerContext> EntityPlayground::GetTypographerContext()
-    const {
-  return typographer_context_;
-}
-
-std::shared_ptr<ContentContext> EntityPlayground::GetContentContext() const {
-  if (!content_context_) {
-    content_context_ =
-        std::make_shared<ContentContext>(GetContext(), typographer_context_);
-  }
-  return content_context_;
-}
 
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
   if (!IsPlaygroundEnabled()) {
@@ -67,16 +39,16 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
     return true;
   }
 
-  ContentContext content_context(GetContext(), typographer_context_);
-  if (!content_context.IsValid()) {
+  auto content_context = GetContentContext();
+  if (!content_context->IsValid()) {
     return false;
   }
   SinglePassCallback pass_callback = [&](RenderPass& pass) -> bool {
-    content_context.GetRenderTargetCache()->Start();
-    bool result = callback(content_context, pass);
-    content_context.GetRenderTargetCache()->End();
-    content_context.GetTransientsDataBuffer().Reset();
-    content_context.GetTransientsIndexesBuffer().Reset();
+    content_context->GetRenderTargetCache()->Start();
+    bool result = callback(*content_context, pass);
+    content_context->GetRenderTargetCache()->End();
+    content_context->GetTransientsDataBuffer().Reset();
+    content_context->GetTransientsIndexesBuffer().Reset();
     return result;
   };
   return Playground::OpenPlaygroundHere(pass_callback);
