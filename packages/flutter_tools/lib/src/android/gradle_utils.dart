@@ -33,7 +33,7 @@ import 'android_sdk.dart';
 //  * Gradle warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * Gradle test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://gradle.org/releases
-const templateDefaultGradleVersion = '9.1.0';
+const templateDefaultGradleVersion = '9.3.1';
 
 // When bumping, also update:
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
@@ -41,15 +41,15 @@ const templateDefaultGradleVersion = '9.1.0';
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/FlutterPluginUtilsTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const templateAndroidGradlePluginVersion = '9.0.1';
-const templateAndroidGradlePluginVersionForModule = '9.0.1';
+const templateAndroidGradlePluginVersion = '9.1.0';
+const templateAndroidGradlePluginVersionForModule = '9.1.0';
 
 // When bumping, also update:
 //  * KGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * KGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * KGP jvm constant in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://kotlinlang.org/docs/releases.html#release-details
-const templateKotlinGradlePluginVersion = '2.3.20';
+const templateKotlinGradlePluginVersion = '2.4.0';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
