@@ -19,6 +19,7 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/features.dart';
@@ -30,14 +31,14 @@ import 'src/runner/flutter_command_runner.dart';
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
   List<String> args,
-  List<FlutterCommand> Function() commands, {
+  List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
+  required ShutdownHooks shutdownHooks,
+  String? flutterVersion,
   bool muteCommandLogging = false,
+  Map<Type, Generator>? overrides,
+  bool? reportCrashes,
   bool verbose = false,
   bool verboseHelp = false,
-  bool? reportCrashes,
-  String? flutterVersion,
-  Map<Type, Generator>? overrides,
-  required ShutdownHooks shutdownHooks,
 }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -55,8 +56,33 @@ Future<int> run(
     globals.terminal.applyFeatureFlags(featureFlags);
 
     reportCrashes ??= !await globals.isRunningOnBot;
-    final runner = FlutterCommandRunner(verboseHelp: verboseHelp);
-    commands().forEach(runner.addCommand);
+    final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
+      analytics: globals.analytics,
+      androidSdk: globals.androidSdk,
+      androidStudio: globals.androidStudio,
+      botDetector: globals.botDetector,
+      buildSystem: globals.buildSystem,
+      cache: globals.cache,
+      config: globals.config,
+      crashReporter: globals.crashReporter,
+      fs: globals.fs,
+      git: globals.git,
+      logger: globals.logger,
+      nativeAssetsBuilder: globals.nativeAssetsBuilder,
+      persistentToolState: globals.persistentToolState,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      shutdownHooks: shutdownHooks,
+      terminal: globals.terminal,
+      userMessages: globals.userMessages,
+    );
+    final runner = FlutterCommandRunner(
+      androidContext: toolDeps.androidContext,
+      appleContext: toolDeps.appleContext,
+      toolContext: toolDeps.toolContext,
+      verboseHelp: verboseHelp,
+    );
+    commands(toolDeps).forEach(runner.addCommand);
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();

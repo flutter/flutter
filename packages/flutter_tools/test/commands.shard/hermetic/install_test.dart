@@ -8,9 +8,13 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:test/fake.dart';
@@ -31,10 +35,18 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync(recursive: true);
     });
 
+    InstallCommand createInstallCommand({required bool verboseHelp}) {
+      return InstallCommand(
+        deviceManager: testDeviceManager,
+        toolContext: FakeToolContext(fs: fileSystem, logger: testLogger, platform: FakePlatform()),
+        verboseHelp: verboseHelp,
+      );
+    }
+
     testUsingContext(
       'returns 0 when Android is connected and ready for an install',
       () async {
-        final command = InstallCommand(verboseHelp: false);
+        final InstallCommand command = createInstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
         final device = FakeAndroidDevice();
@@ -49,10 +61,33 @@ void main() {
       },
     );
 
+    test('resolves dependencies from ToolContext and parameters', () {
+      final mockFileSystem = MemoryFileSystem.test();
+      final mockLogger = BufferLogger.test();
+      final mockDeviceManager = FakeDeviceManager();
+      final mockPlatform = FakePlatform();
+
+      final toolContext = FakeToolContext(
+        fs: mockFileSystem,
+        logger: mockLogger,
+        platform: mockPlatform,
+      );
+
+      final command = InstallCommand(
+        deviceManager: mockDeviceManager,
+        toolContext: toolContext,
+        verboseHelp: false,
+      );
+
+      expect(command.fileSystem, same(mockFileSystem));
+      expect(command.logger, same(mockLogger));
+      expect(command.deviceManager, same(mockDeviceManager));
+    });
+
     testUsingContext(
       'returns 1 when targeted device is not Android with --device-user',
       () async {
-        final command = InstallCommand(verboseHelp: false);
+        final InstallCommand command = createInstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
         final device = FakeIOSDevice();
@@ -74,7 +109,7 @@ void main() {
     testUsingContext(
       'returns 0 when iOS is connected and ready for an install',
       () async {
-        final command = InstallCommand(verboseHelp: false);
+        final InstallCommand command = createInstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
         final device = FakeIOSDevice();
@@ -92,7 +127,7 @@ void main() {
     testUsingContext(
       'fails when prebuilt binary not found',
       () async {
-        final command = InstallCommand(verboseHelp: false);
+        final InstallCommand command = createInstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
         final device = FakeAndroidDevice();
@@ -115,7 +150,7 @@ void main() {
     testUsingContext(
       'succeeds using prebuilt binary',
       () async {
-        final command = InstallCommand(verboseHelp: false);
+        final InstallCommand command = createInstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
         final device = FakeAndroidDevice();
@@ -137,7 +172,7 @@ void main() {
       'Passes flavor to application package.',
       () async {
         const flavor = 'free';
-        final command = InstallCommand(verboseHelp: false);
+        final InstallCommand command = createInstallCommand(verboseHelp: false);
         final fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
         command.applicationPackages = fakeAppFactory;
 
@@ -207,4 +242,19 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   bool get ephemeral => true;
+}
+
+class FakeDeviceManager extends Fake implements DeviceManager {}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({required this.fs, required this.logger, required this.platform});
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
 }

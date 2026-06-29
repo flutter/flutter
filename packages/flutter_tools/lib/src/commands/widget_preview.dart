@@ -98,6 +98,7 @@ class WidgetPreviewCommand extends FlutterCommand {
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   FileSystem get fs;
+  @override
   Logger get logger;
   FlutterProjectFactory get projectFactory;
 
@@ -232,16 +233,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final Cache cache;
 
+  @override
   final Platform platform;
 
   final ShutdownHooks shutdownHooks;
 
+  @override
   final OperatingSystemUtils os;
 
+  @override
   final ProcessManager processManager;
 
+  @override
   final Artifacts artifacts;
 
+  @override
   final Terminal terminal;
 
   late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);

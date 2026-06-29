@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
+import '../context/tool_context.dart';
 import '../debug_adapters/server.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// This command will start up a Debug Adapter that communicates using the Debug Adapter Protocol (DAP).
@@ -23,7 +23,9 @@ import '../runner/flutter_command.dart';
 /// The DAP specification can be found at
 /// https://microsoft.github.io/debug-adapter-protocol/.
 class DebugAdapterCommand extends FlutterCommand {
-  DebugAdapterCommand({bool verboseHelp = false}) : hidden = !verboseHelp {
+  DebugAdapterCommand({required ToolContext toolContext, bool verboseHelp = false})
+    : hidden = !verboseHelp,
+      super(toolContext: toolContext) {
     usesIpv6Flag(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     argParser.addFlag(
@@ -53,15 +55,15 @@ class DebugAdapterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final server = DapServer(
-      globals.stdio.stdin,
-      globals.stdio.stdout.nonBlocking,
-      fileSystem: globals.fs,
-      platform: globals.platform,
+      stdio.stdin,
+      stdio.stdout.nonBlocking,
+      fileSystem: fileSystem,
+      platform: platform,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),
       onError: (Object? e) {
-        globals.printError(
+        logger.printError(
           'Input could not be parsed as a Debug Adapter Protocol message.\n'
           'The "flutter debug-adapter" command is intended for use by tooling '
           'that communicates using the Debug Adapter Protocol.\n\n'

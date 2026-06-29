@@ -8,10 +8,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -38,7 +41,7 @@ void main() {
 
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
+          createScreenshotCommand(),
         ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(
           isException.having(
@@ -53,7 +56,7 @@ void main() {
     testUsingContext('rasterizer and skia screenshots require VM Service uri', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
+          createScreenshotCommand(),
         ).run(<String>['screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
@@ -61,9 +64,7 @@ void main() {
 
     testUsingContext('device screenshots require device', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
-        ).run(<String>['screenshot']),
+        () => createTestCommandRunner(createScreenshotCommand()).run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
@@ -71,7 +72,7 @@ void main() {
     testUsingContext('device screenshots cannot provided VM Service', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test()),
+          createScreenshotCommand(),
         ).run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
         throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
@@ -147,52 +148,64 @@ void main() {
       testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
     });
 
-    testUsingContext(
-      'should not throw for a single device',
-      () async {
-        final command = ScreenshotCommand(fs: MemoryFileSystem.test());
+    testUsingContext('should not throw for a single device', () async {
+      final ScreenshotCommand command = createScreenshotCommand();
 
-        final deviceUnsupportedForProject = _ScreenshotDevice(
-          id: '123',
-          name: 'Device 1',
-          isSupportedForProject: false,
-        );
+      final deviceUnsupportedForProject = _ScreenshotDevice(
+        id: '123',
+        name: 'Device 1',
+        isSupportedForProject: false,
+      );
 
-        testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
+      testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
 
-        await createTestCommandRunner(command).run(<String>['screenshot']);
-      },
-      overrides: <Type, Generator>{DeviceManager: () => testDeviceManager},
-    );
+      await createTestCommandRunner(command).run(<String>['screenshot']);
+    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
 
-    testUsingContext(
-      'should tool exit for multiple devices',
-      () async {
-        final command = ScreenshotCommand(fs: MemoryFileSystem.test());
+    testUsingContext('should tool exit for multiple devices', () async {
+      final ScreenshotCommand command = createScreenshotCommand();
 
-        final devicesUnsupportedForProject = <_ScreenshotDevice>[
-          _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
-          _ScreenshotDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
-        ];
+      final devicesUnsupportedForProject = <_ScreenshotDevice>[
+        _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
+        _ScreenshotDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
+      ];
 
-        testDeviceManager.devices = devicesUnsupportedForProject;
+      testDeviceManager.devices = devicesUnsupportedForProject;
 
-        await expectLater(
-          () => createTestCommandRunner(command).run(<String>['screenshot']),
-          throwsToolExit(message: 'Must have a connected device for screenshot type device'),
-        );
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['screenshot']),
+        throwsToolExit(message: 'Must have a connected device for screenshot type device'),
+      );
 
-        expect(
-          testLogger.statusText,
-          contains('''
+      expect(
+        testLogger.statusText,
+        contains('''
 More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.
 
 Device 1 (mobile) • 123 • android • 1.2.3
 Device 2 (mobile) • 456 • android • 1.2.3
 '''),
-        );
+      );
+    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
+  });
+
+  group('ScreenshotCommand DI', () {
+    testUsingContext(
+      'resolves dependencies from the injected ToolContext rather than the Zone',
+      () async {
+        final FileSystem mockFs = MemoryFileSystem.test();
+        final Logger mockLogger = BufferLogger.test();
+        final Platform mockPlatform = FakePlatform();
+
+        final toolContext = FakeToolContext(fs: mockFs, logger: mockLogger, platform: mockPlatform);
+
+        final command = ScreenshotCommand(toolContext: toolContext);
+
+        expect(command.fileSystem, same(mockFs));
+        expect(command.logger, same(mockLogger));
+        expect(command.platform, same(mockPlatform));
+        expect(command.fileSystemUtils, isNot(same(globals.fsUtils)));
       },
-      overrides: <Type, Generator>{DeviceManager: () => testDeviceManager},
     );
   });
 }
@@ -261,4 +274,27 @@ class _TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
+}
+
+ScreenshotCommand createScreenshotCommand({FileSystem? fs, Logger? logger, Platform? platform}) {
+  return ScreenshotCommand(
+    toolContext: FakeToolContext(
+      fs: fs ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      platform: platform ?? FakePlatform(),
+    ),
+  );
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({required this.fs, required this.logger, required this.platform});
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
 }

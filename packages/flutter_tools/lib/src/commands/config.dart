@@ -6,15 +6,23 @@ import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
+import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand({bool verboseHelp = false}) {
+  ConfigCommand({
+    required AndroidContext androidContext,
+    required ToolContext toolContext,
+    bool verboseHelp = false,
+  }) : _androidContext = androidContext,
+       super(toolContext: toolContext) {
     argParser.addFlag(
       'list',
       help: 'List all settings and their current values.',
@@ -67,7 +75,7 @@ class ConfigCommand extends FlutterCommand {
       if (configSetting == null) {
         continue;
       }
-      final String channel = globals.flutterVersion.channel;
+      final String channel = flutterVersion.channel;
       argParser.addFlag(
         configSetting,
         help: feature.generateHelpMessage(),
@@ -80,6 +88,8 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
     );
   }
+
+  final AndroidContext _androidContext;
 
   @override
   final name = 'config';
@@ -122,7 +132,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('list')) {
-      globals.printStatus(settingsText);
+      logger.printStatus(settingsText);
       return FlutterCommandResult.success();
     }
 
@@ -135,18 +145,18 @@ class ConfigCommand extends FlutterCommand {
       for (final Feature feature in featureFlags.allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
-          globals.config.removeValue(configSetting);
+          config.removeValue(configSetting);
         }
       }
-      globals.printStatus(requireReloadTipText);
+      logger.printStatus(requireReloadTipText);
       return FlutterCommandResult.success();
     }
 
     if (argResults!.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+      logger.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
 
-      await globals.analytics.setTelemetry(value);
+      await analytics.setTelemetry(value);
     }
 
     if (argResults!.wasParsed('android-sdk')) {
@@ -162,19 +172,23 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults!.wasParsed('clear-ios-signing-settings')) {
-      XcodeCodeSigningSettings.resetSettings(globals.config, globals.logger);
+      XcodeCodeSigningSettings.resetSettings(config, logger);
     }
 
     if (argResults!.wasParsed('select-ios-signing-settings')) {
       final settings = XcodeCodeSigningSettings(
-        config: globals.config,
-        logger: globals.logger,
-        platform: globals.platform,
-        processUtils: globals.processUtils,
-        fileSystem: globals.fs,
-        fileSystemUtils: globals.fsUtils,
-        terminal: globals.terminal,
-        plistParser: globals.plistParser,
+        config: config,
+        logger: logger,
+        platform: platform,
+        processUtils: processUtils,
+        fileSystem: fileSystem,
+        fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: platform),
+        terminal: terminal,
+        plistParser: PlistParser(
+          fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
       );
 
       await settings.selectSettings();
@@ -182,7 +196,7 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults!.wasParsed('build-dir')) {
       final String buildDir = stringArg('build-dir')!;
-      if (globals.fs.path.isAbsolute(buildDir)) {
+      if (fileSystem.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
       _updateConfig('build-dir', buildDir);
@@ -195,15 +209,15 @@ class ConfigCommand extends FlutterCommand {
       }
       if (argResults!.wasParsed(configSetting)) {
         final bool keyValue = boolArg(configSetting);
-        globals.config.setValue(configSetting, keyValue);
-        globals.printStatus('Setting "$configSetting" value to "$keyValue".');
+        config.setValue(configSetting, keyValue);
+        logger.printStatus('Setting "$configSetting" value to "$keyValue".');
       }
     }
 
     if (argResults == null || argResults!.arguments.isEmpty) {
-      globals.printStatus(usage);
+      logger.printStatus(usage);
     } else {
-      globals.printStatus('\n$requireReloadTipText');
+      logger.printStatus('\n$requireReloadTipText');
     }
 
     return FlutterCommandResult.success();
@@ -212,41 +226,41 @@ class ConfigCommand extends FlutterCommand {
   Future<void> handleMachine() async {
     // Get all the current values.
     final results = <String, Object?>{};
-    for (final String key in globals.config.keys) {
-      results[key] = globals.config.getValue(key);
+    for (final String key in config.keys) {
+      results[key] = config.getValue(key);
     }
 
     // Ensure we send any calculated ones, if overrides don't exist.
-    final AndroidStudio? androidStudio = globals.androidStudio;
+    final AndroidStudio? androidStudio = _androidContext.androidStudio;
     if (results['android-studio-dir'] == null && androidStudio != null) {
       results['android-studio-dir'] = androidStudio.directory;
     }
-    final AndroidSdk? androidSdk = globals.androidSdk;
+    final AndroidSdk? androidSdk = _androidContext.androidSdk;
     if (results['android-sdk'] == null && androidSdk != null) {
       results['android-sdk'] = androidSdk.directory.path;
     }
-    final Java? java = globals.java;
+    final Java? java = _androidContext.java;
     if (results['jdk-dir'] == null && java != null) {
       results['jdk-dir'] = java.javaHome;
     }
 
-    globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));
+    logger.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
   void _updateConfig(String keyName, String keyValue) {
     if (keyValue.isEmpty) {
-      globals.config.removeValue(keyName);
-      globals.printStatus('Removing "$keyName" value.');
+      config.removeValue(keyName);
+      logger.printStatus('Removing "$keyName" value.');
     } else {
-      globals.config.setValue(keyName, keyValue);
-      globals.printStatus('Setting "$keyName" value to "$keyValue".');
+      config.setValue(keyName, keyValue);
+      logger.printStatus('Setting "$keyName" value to "$keyValue".');
     }
   }
 
   /// List all config settings. for feature flags, include whether they are available.
   String get settingsText {
     final featuresByName = <String, Feature>{};
-    final String channel = globals.flutterVersion.channel;
+    final String channel = flutterVersion.channel;
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting != null) {
@@ -255,10 +269,10 @@ class ConfigCommand extends FlutterCommand {
     }
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
-      ...globals.config.keys,
+      ...config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
-      Object? value = globals.config.getValue(key);
+      Object? value = config.getValue(key);
       value ??= '(Not set)';
       final buffer = StringBuffer('  $key: $value');
       if (featuresByName.containsKey(key)) {
@@ -281,7 +295,7 @@ class ConfigCommand extends FlutterCommand {
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
-    return 'Analytics reporting is currently ${globals.analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
+    return 'Analytics reporting is currently ${analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Raising the reload tip for setting changes.

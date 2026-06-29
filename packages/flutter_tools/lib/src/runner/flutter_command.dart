@@ -4,27 +4,41 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
+import '../base/terminal.dart';
+import '../base/time.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
+import '../doctor.dart';
+import '../emulator.dart';
 import '../features.dart';
+import '../git.dart';
 import '../globals.dart' as globals;
+import '../persistent_tool_state.dart';
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
@@ -162,6 +176,34 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
+  // ignore: prefer_initializing_formals
+  FlutterCommand({ToolContext? toolContext}) : _toolContext = toolContext;
+
+  final ToolContext? _toolContext;
+
+  Artifacts get artifacts => _toolContext?.artifacts ?? globals.artifacts!;
+  Config get config => _toolContext?.config ?? globals.config;
+  DeviceManager get deviceManager => globals.deviceManager!;
+  Doctor? get doctor => globals.doctor;
+  EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
+  FileSystem get fileSystem => _toolContext?.fs ?? globals.fs;
+  FileSystemUtils get fileSystemUtils => _toolContext != null
+      ? FileSystemUtils(fileSystem: fileSystem, platform: platform)
+      : globals.fsUtils;
+  Git get git => _toolContext?.git ?? globals.git;
+  FlutterVersion get flutterVersion => _toolContext?.flutterVersion ?? globals.flutterVersion;
+  Logger get logger => _toolContext?.logger ?? globals.logger;
+  OperatingSystemUtils get os => _toolContext?.os ?? globals.os;
+  PersistentToolState get persistentToolState =>
+      _toolContext?.persistentToolState ?? globals.persistentToolState!;
+  Platform get platform => _toolContext?.platform ?? globals.platform;
+  ProcessManager get processManager => _toolContext?.processManager ?? globals.processManager;
+  ProcessUtils get processUtils => _toolContext?.processUtils ?? globals.processUtils;
+  Stdio get stdio => _toolContext?.stdio ?? globals.stdio;
+  UserMessages get userMessages => _toolContext?.userMessages ?? globals.userMessages;
+  SystemClock get systemClock => _toolContext?.systemClock ?? globals.systemClock;
+  Terminal get terminal => _toolContext?.terminal ?? globals.terminal;
+
   /// The currently executing command (or sub-command).
   ///
   /// Will be `null` until the top-most command has begun execution.

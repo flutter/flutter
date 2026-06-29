@@ -7,12 +7,18 @@ import 'dart:async';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
-  LogsCommand({required this.sigint, required this.sigterm}) {
+  LogsCommand({
+    required DeviceManager deviceManager,
+    required this.sigint,
+    required this.sigterm,
+    required ToolContext toolContext,
+  }) : _deviceManager = deviceManager,
+       super(toolContext: toolContext) {
     argParser.addFlag(
       'clear',
       negatable: false,
@@ -22,6 +28,11 @@ class LogsCommand extends FlutterCommand {
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
+
+  final DeviceManager _deviceManager;
+
+  @override
+  DeviceManager get deviceManager => _deviceManager;
 
   @override
   final name = 'logs';
@@ -64,7 +75,7 @@ class LogsCommand extends FlutterCommand {
 
     final DeviceLogReader logReader = await cachedDevice.getLogReader(app: app);
 
-    globals.printStatus('Showing $logReader logs:');
+    logger.printStatus('Showing $logReader logs:');
 
     final exitCompleter = Completer<int>();
 
@@ -79,7 +90,7 @@ class LogsCommand extends FlutterCommand {
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => globals.printStatus(message, wrap: false),
+      (String message) => logger.printStatus(message, wrap: false),
       onDone: () => maybeComplete(),
       onError: (dynamic error) => maybeComplete(error is int ? error : 1),
     );
@@ -88,7 +99,7 @@ class LogsCommand extends FlutterCommand {
     sigint.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       maybeComplete();
-      globals.printStatus('');
+      logger.printStatus('');
     });
     sigterm.watch().listen((ProcessSignal signal) {
       subscription.cancel();

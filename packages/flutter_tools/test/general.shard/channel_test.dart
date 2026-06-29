@@ -4,11 +4,19 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -41,7 +49,7 @@ void main() {
               '  origin/beta',
         ),
       ]);
-      final command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
       expect(testLogger.errorText, hasLength(0));
@@ -54,7 +62,7 @@ void main() {
     testUsingContext(
       'usage (--help) explains how to use channel',
       () async {
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
 
         // Required because otherwise command.usage fails as it is not hooked up.
         createTestCommandRunner(command);
@@ -76,6 +84,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         ProcessManager: () => FakeProcessManager.empty(),
         FileSystem: () => MemoryFileSystem.test(),
       },
@@ -87,6 +96,7 @@ void main() {
         await simpleChannelTest(<String>['channel']);
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => MemoryFileSystem.test(),
       },
@@ -98,6 +108,7 @@ void main() {
         await simpleChannelTest(<String>['channel', '-v']);
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => MemoryFileSystem.test(),
       },
@@ -106,7 +117,7 @@ void main() {
     testUsingContext(
       'sorted by stability',
       () async {
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         fakeProcessManager.addCommand(
@@ -192,6 +203,7 @@ void main() {
         }
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => MemoryFileSystem.test(),
       },
@@ -212,7 +224,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -226,6 +238,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => MemoryFileSystem.test(),
         FlutterVersion: () => FakeFlutterVersion(branch: 'beta'),
@@ -245,7 +258,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -262,6 +275,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => MemoryFileSystem.test(),
         FlutterVersion: () => FakeFlutterVersion(branch: 'foo'),
@@ -282,7 +296,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -296,6 +310,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => MemoryFileSystem.test(),
         FlutterVersion: () => FakeFlutterVersion(branch: 'beta'),
@@ -316,7 +331,7 @@ void main() {
           ),
         ]);
 
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -343,6 +358,7 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => fakeProcessManager,
       },
@@ -362,7 +378,7 @@ void main() {
           ),
         ]);
 
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -381,6 +397,7 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => fakeProcessManager,
       },
@@ -416,7 +433,7 @@ void main() {
         }
       ''');
 
-        final command = ChannelCommand();
+        final ChannelCommand command = createChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -426,9 +443,97 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () => null,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => fakeProcessManager,
       },
     );
+
+    testUsingContext(
+      'resolves dependencies from the injected ToolContext rather than the Zone',
+      () async {
+        final contextLogger = BufferLogger.test();
+        final fileSystem = MemoryFileSystem.test();
+        final localFakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', 'branch', '-r'],
+            stdout:
+                'origin/beta\n'
+                'origin/master\n'
+                'origin/main\n'
+                'origin/stable\n',
+          ),
+        ]);
+        final processUtils = ProcessUtils(
+          processManager: localFakeProcessManager,
+          logger: contextLogger,
+        );
+        final git = Git(currentPlatform: const LocalPlatform(), runProcessWith: processUtils);
+
+        final toolContext = FakeToolContext(
+          fs: fileSystem,
+          logger: contextLogger,
+          platform: const LocalPlatform(),
+          processManager: localFakeProcessManager,
+          processUtils: processUtils,
+          git: git,
+          flutterVersion: FakeFlutterVersion(),
+        );
+
+        final command = ChannelCommand(toolContext: toolContext);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await runner.run(<String>['channel']);
+
+        // Verify that the output went to the injected logger, not the Zone's testLogger
+        expect(contextLogger.statusText, contains('Flutter channels:'));
+        expect(contextLogger.statusText, contains('* master'));
+        expect(testLogger.statusText, isEmpty);
+        expect(localFakeProcessManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{AndroidSdk: () => null},
+    );
   });
+}
+
+ChannelCommand createChannelCommand({bool verboseHelp = false}) {
+  return ChannelCommand(
+    toolContext: FakeToolContext(
+      fs: context.get<FileSystem>() ?? globals.fs,
+      logger: context.get<Logger>() ?? globals.logger,
+      platform: context.get<Platform>() ?? globals.platform,
+      processManager: context.get<ProcessManager>() ?? globals.processManager,
+      processUtils: context.get<ProcessUtils>() ?? globals.processUtils,
+      git: context.get<Git>() ?? globals.git,
+      flutterVersion: context.get<FlutterVersion>() ?? globals.flutterVersion,
+    ),
+    verboseHelp: verboseHelp,
+  );
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({
+    required this.fs,
+    required this.logger,
+    required this.platform,
+    required this.processManager,
+    required this.processUtils,
+    required this.git,
+    required this.flutterVersion,
+  });
+
+  @override
+  final FileSystem fs;
+  @override
+  final Logger logger;
+  @override
+  final Platform platform;
+  @override
+  final ProcessManager processManager;
+  @override
+  final ProcessUtils processUtils;
+  @override
+  final Git git;
+  @override
+  final FlutterVersion flutterVersion;
 }
