@@ -107,12 +107,28 @@ Widget testWrapper(Widget child) {
   return child;
 }
 
+final class MyMaterialPreviewThemeData extends PreviewThemeData {
+  const MyMaterialPreviewThemeData({this.light, this.dark});
+  final ThemeData? light;
+  final ThemeData? dark;
+  @override
+  Widget apply(BuildContext context, Widget child) => child;
+}
+
+final class MyCupertinoPreviewThemeData extends PreviewThemeData {
+  const MyCupertinoPreviewThemeData({this.light, this.dark});
+  final CupertinoThemeData? light;
+  final CupertinoThemeData? dark;
+  @override
+  Widget apply(BuildContext context, Widget child) => child;
+}
+
 PreviewThemeData theming() => MultiPreviewThemeData([
-  MaterialPreviewThemeData(
+  MyMaterialPreviewThemeData(
     light: ThemeData(colorScheme: ColorScheme.light(primary: Colors.red)),
     dark: ThemeData(colorScheme: ColorScheme.dark(primary: Colors.blue)),
   ),
-  CupertinoPreviewThemeData(
+  MyCupertinoPreviewThemeData(
     light: CupertinoThemeData(primaryColor: Colors.yellow),
     dark: CupertinoThemeData(primaryColor: Colors.purple),
   ),

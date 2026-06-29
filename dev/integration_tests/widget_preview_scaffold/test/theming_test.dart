@@ -63,21 +63,59 @@ WidgetPreviewerWidgetScaffolding previewForBrightness({
   );
 }
 
-final MaterialPreviewThemeData materialPreviewTheme = MaterialPreviewThemeData(
-  light: ThemeData.light().copyWith(primaryColor: Colors.red),
-  dark: ThemeData.dark().copyWith(primaryColor: Colors.blue),
-);
+final class TestMaterialPreviewThemeData extends PreviewThemeData {
+  const TestMaterialPreviewThemeData({this.light, this.dark});
 
-final CupertinoPreviewThemeData cupertinoPreviewTheme = CupertinoPreviewThemeData(
-  light: CupertinoThemeData(
-    brightness: Brightness.light,
-    primaryColor: Colors.yellow,
-  ),
-  dark: CupertinoThemeData(
-    brightness: Brightness.dark,
-    primaryColor: Colors.green,
-  ),
-);
+  final ThemeData? light;
+  final ThemeData? dark;
+
+  @override
+  Widget apply(BuildContext context, Widget child) {
+    final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+    final ThemeData? theme = brightness == Brightness.light ? light : dark;
+    if (theme != null) {
+      return Theme(data: theme, child: child);
+    }
+    return child;
+  }
+}
+
+final class TestCupertinoPreviewThemeData extends PreviewThemeData {
+  const TestCupertinoPreviewThemeData({this.light, this.dark});
+
+  final CupertinoThemeData? light;
+  final CupertinoThemeData? dark;
+
+  @override
+  Widget apply(BuildContext context, Widget child) {
+    final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+    final CupertinoThemeData? theme = brightness == Brightness.light
+        ? light
+        : dark;
+    if (theme != null) {
+      return CupertinoTheme(data: theme, child: child);
+    }
+    return child;
+  }
+}
+
+final TestMaterialPreviewThemeData materialPreviewTheme =
+    TestMaterialPreviewThemeData(
+      light: ThemeData.light().copyWith(primaryColor: Colors.red),
+      dark: ThemeData.dark().copyWith(primaryColor: Colors.blue),
+    );
+
+final TestCupertinoPreviewThemeData cupertinoPreviewTheme =
+    TestCupertinoPreviewThemeData(
+      light: CupertinoThemeData(
+        brightness: Brightness.light,
+        primaryColor: Colors.yellow,
+      ),
+      dark: CupertinoThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Colors.green,
+      ),
+    );
 
 final PreviewThemeData previewThemeData = MultiPreviewThemeData([
   materialPreviewTheme,

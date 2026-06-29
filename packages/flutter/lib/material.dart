@@ -139,7 +139,6 @@ export 'src/material/paginated_data_table.dart';
 export 'src/material/popup_menu.dart';
 export 'src/material/popup_menu_theme.dart';
 export 'src/material/predictive_back_page_transitions_builder.dart';
-export 'src/material/preview_theme.dart';
 export 'src/material/progress_indicator.dart';
 export 'src/material/progress_indicator_theme.dart';
 export 'src/material/radio.dart';
