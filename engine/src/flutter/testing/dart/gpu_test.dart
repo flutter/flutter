@@ -898,14 +898,14 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.fromImage wraps a ui.Image without a copy', () async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     canvas.drawPaint(ui.Paint()..color = const ui.Color(0xFF00FF00));
     final ui.Picture picture = recorder.endRecording();
     final ui.Image image = await picture.toImage(16, 24);
     picture.dispose();
 
-    final gpu.Texture texture = gpu.Texture.fromImage(gpu.gpuContext, image);
+    final texture = gpu.Texture.fromImage(gpu.gpuContext, image);
     expect(texture.width, 16);
     expect(texture.height, 24);
     expect(texture.sampleCount, 1);
@@ -926,14 +926,14 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.fromImage shares storage with the source image', () async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     canvas.drawPaint(ui.Paint()..color = const ui.Color(0xFFFF0000));
     final ui.Picture picture = recorder.endRecording();
     final ui.Image image = await picture.toImage(8, 8);
     picture.dispose();
 
-    final gpu.Texture texture = gpu.Texture.fromImage(gpu.gpuContext, image);
+    final texture = gpu.Texture.fromImage(gpu.gpuContext, image);
     // Disposing the source image must not invalidate the wrapper, which holds
     // its own reference to the shared texture. Reading the texture back as an
     // image exercises the native texture (not the cached Dart fields).
