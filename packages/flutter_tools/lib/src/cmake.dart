@@ -105,6 +105,18 @@ set(FLUTTER_VERSION_MAJOR ${version.major} PARENT_SCOPE)
 set(FLUTTER_VERSION_MINOR ${version.minor} PARENT_SCOPE)
 set(FLUTTER_VERSION_PATCH ${version.patch} PARENT_SCOPE)
 set(FLUTTER_VERSION_BUILD ${buildVersion ?? 0} PARENT_SCOPE)
+''');
+
+  // Expose the selected flavor (if any) as a CMake variable. The default
+  // template does not use it, but projects can read FLUTTER_APP_FLAVOR to
+  // customize flavor-specific resources (e.g. the app icon or window title via
+  // configure_file). This mirrors how the version information is passed through.
+  final String? flavor = buildInfo.flavor;
+  if (flavor != null && flavor.isNotEmpty) {
+    buffer.writeln('set(FLUTTER_APP_FLAVOR "${_escapeBackslashes(flavor)}" PARENT_SCOPE)');
+  }
+
+  buffer.write('''
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
