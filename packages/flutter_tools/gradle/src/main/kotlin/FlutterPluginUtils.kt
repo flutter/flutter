@@ -571,8 +571,7 @@ object FlutterPluginUtils {
             }
         }
 
-        // If no legacy KGP declarations were found, we have nothing to log.
-        // Exit early to avoid registering a redundant projectsEvaluated listener.
+        // If no legacy KGP declarations were found, there is nothing to log.
         if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
             return
         }
