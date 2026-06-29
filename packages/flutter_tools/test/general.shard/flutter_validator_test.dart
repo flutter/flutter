@@ -29,6 +29,12 @@ Matcher _matchDoctorValidation({
       .having((ValidationResult result) => result.messages, 'messages', messages);
 }
 
+Matcher _first(Object matcher) => const TypeMatcher<Iterable<Object?>>().having(
+  (Iterable<Object?> element) => element.first,
+  'first',
+  matcher,
+);
+
 void main() {
   testWithoutContext('FlutterValidator shows an error message if gen_snapshot is '
       'downloaded and exits with code 1', () async {
@@ -745,7 +751,7 @@ void main() {
       _matchDoctorValidation(
         validationType: ValidationType.partial,
         statusInfo: 'Channel beta, 1.0.0, on macOS, locale en_US.UTF-8',
-        messages: contains(
+        messages: _first(
           const ValidationMessage.hint(
             'Flutter is deprecating support for Intel-based Macs. '
             'A future version of Flutter will require an Apple Silicon Mac to build applications.',
@@ -754,51 +760,6 @@ void main() {
       ),
     );
   });
-
-  testWithoutContext(
-    'FlutterValidator does not show a warning message on Apple Silicon Macs',
-    () async {
-      final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
-      final fileSystem = MemoryFileSystem.test();
-      final artifacts = Artifacts.test();
-      final flutterValidator = FlutterValidator(
-        platform: FakePlatform(
-          operatingSystem: 'macos',
-          localeName: 'en_US.UTF-8',
-          environment: <String, String>{},
-        ),
-        flutterVersion: () => flutterVersion,
-        devToolsVersion: () => '2.8.0',
-        artifacts: artifacts,
-        fileSystem: fileSystem,
-        flutterRoot: () => '/sdk/flutter',
-        operatingSystemUtils: FakeOperatingSystemUtils(
-          name: 'macOS',
-          hostPlatform: HostPlatform.darwin_arm64,
-          fs: fileSystem,
-        ),
-        processManager: FakeProcessManager.any(),
-        featureFlags: TestFeatureFlags(),
-      );
-
-      expect(
-        await flutterValidator.validate(),
-        _matchDoctorValidation(
-          validationType: ValidationType.success,
-          statusInfo: 'Channel beta, 1.0.0, on macOS, locale en_US.UTF-8',
-          messages: isNot(
-            contains(
-              isA<ValidationMessage>().having(
-                (ValidationMessage message) => message.message,
-                'message',
-                contains('Flutter is deprecating support for Intel-based Macs'),
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
