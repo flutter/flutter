@@ -80,7 +80,7 @@ bool AndroidImageGenerator::GetPixels(const SkImageInfo& info,
   // preprocessed out in Skia. This will allow for avoiding this copy in
   // cases where the result image doesn't need to be resized.
   size_t pixels_size = info.computeByteSize(row_bytes);
-  if (pixels_size < software_decoded_data_->size() || pixels_size == SIZE_MAX) {
+  if (pixels_size == SIZE_MAX || pixels_size < software_decoded_data_->size()) {
     return false;
   }
   memcpy(pixels, software_decoded_data_->data(),
