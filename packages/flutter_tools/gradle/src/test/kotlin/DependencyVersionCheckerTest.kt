@@ -43,7 +43,7 @@ import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
-import org.gradle.internal.extensions.core.extra
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -65,7 +65,7 @@ class DependencyVersionCheckerTest {
     fun `Template versions are considered supported`() {
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions()
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
         val mockLogger = mockProject.logger
         every { mockLogger.error(any()) } returns Unit
@@ -85,7 +85,7 @@ class DependencyVersionCheckerTest {
         val exampleErrorAgpVersion = AndroidPluginVersion(8, 5, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleErrorAgpVersion)
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
 
         val dependencyValidationException =
@@ -107,7 +107,7 @@ class DependencyVersionCheckerTest {
         val exampleWarnAgpVersion = AndroidPluginVersion(8, 10, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleWarnAgpVersion)
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
         val mockLogger = mockProject.logger
         every { mockLogger.error(any()) } returns Unit
@@ -131,7 +131,7 @@ class DependencyVersionCheckerTest {
         val exampleErrorKgpVersion = "1.9.20"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleErrorKgpVersion)
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
 
         val dependencyValidationException =
@@ -155,7 +155,7 @@ class DependencyVersionCheckerTest {
         val exampleWarnKgpVersion = "2.2.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleWarnKgpVersion)
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
         val mockLogger = mockProject.logger
         every { mockLogger.error(any()) } returns Unit
@@ -181,7 +181,7 @@ class DependencyVersionCheckerTest {
         val exampleErrorJavaVersion = JavaVersion.VERSION_16
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleErrorJavaVersion)
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) } returns Unit
         val mockLogger = mockProject.logger
@@ -206,7 +206,7 @@ class DependencyVersionCheckerTest {
         val exampleErrorGradleVersion = "8.6.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleErrorGradleVersion)
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
 
         val dependencyValidationException =
@@ -229,7 +229,7 @@ class DependencyVersionCheckerTest {
         val exampleWarnGradleVersion = "8.12.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
         val mockLogger = mockProject.logger
         every { mockLogger.error(any()) } returns Unit
@@ -262,7 +262,7 @@ class DependencyVersionCheckerTest {
                     )
             )
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         every {
             mockExtraPropertiesExtension.set(
                 OUT_OF_SUPPORT_RANGE_PROPERTY,
@@ -311,7 +311,7 @@ class DependencyVersionCheckerTest {
                     )
             )
 
-        val mockExtraPropertiesExtension = mockProject.extra
+        val mockExtraPropertiesExtension = mockProject.extensions.extraProperties
         val mockLogger = mockProject.logger
         every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
         every { mockLogger.error(any()) } returns Unit
@@ -450,7 +450,7 @@ private object MockProjectFactory {
 
         // Extra properties extension
         val mockExtraPropertiesExtension = mockk<ExtraPropertiesExtension>()
-        every { mockProject.extra } returns mockExtraPropertiesExtension
+        every { mockProject.extensions.extraProperties } returns mockExtraPropertiesExtension
 
         // Project path
         every { mockProject.rootDir.path } returns FAKE_PROJECT_ROOT_DIR
