@@ -7,6 +7,14 @@ import '../dom.dart';
 import '../util.dart';
 import 'rasterizer.dart';
 
+// Local diagnostic hook for Mobile Safari Skwasm presentation sizing.
+//
+// This is intentionally compile-time gated so the default engine output is
+// unchanged unless a diagnostic build opts in.
+const bool _debugLogRenderCanvasSizing = bool.fromEnvironment(
+  'FLUTTER_WEB_DEBUG_RENDER_CANVAS_SIZING',
+);
+
 /// A visible (on-screen) canvas that can display bitmaps.
 ///
 /// In a typical frame, the content will be rendered in an OffscreenCanvas, and
@@ -61,9 +69,12 @@ class RenderCanvas extends DisplayCanvas {
     final double logicalWidth = _pixelWidth / devicePixelRatio;
     final double logicalHeight = _pixelHeight / devicePixelRatio;
     final DomCSSStyleDeclaration style = canvasElement.style;
+    _debugLogSizing('updateLogicalSize:before');
     style.width = '${logicalWidth}px';
     style.height = '${logicalHeight}px';
     _currentDevicePixelRatio = devicePixelRatio;
+    _debugLogSizing('updateLogicalSize:after');
+    _debugLogSizingOnNextFrame('updateLogicalSize:nextFrame');
   }
 
   /// Render the given [bitmap] with this [RenderCanvas].
@@ -71,8 +82,13 @@ class RenderCanvas extends DisplayCanvas {
   /// The canvas will be resized to accomodate the bitmap immediately before
   /// rendering it.
   void render(DomImageBitmap bitmap) {
-    _ensureSize(BitmapSize(bitmap.width, bitmap.height));
+    final BitmapSize size = BitmapSize(bitmap.width, bitmap.height);
+    _debugLogSizing('render:beforeEnsureSize', requestedSize: size);
+    _ensureSize(size);
+    _debugLogSizing('render:afterEnsureSize', requestedSize: size);
     renderContext.transferFromImageBitmap(bitmap);
+    _debugLogSizing('render:afterTransferFromImageBitmap', requestedSize: size);
+    _debugLogSizingOnNextFrame('render:nextFrameAfterTransfer');
   }
 
   void renderWithNoBitmapSupport(
@@ -80,7 +96,9 @@ class RenderCanvas extends DisplayCanvas {
     int sourceHeight,
     BitmapSize size,
   ) {
+    _debugLogSizing('renderNoBitmap:beforeEnsureSize', requestedSize: size);
     _ensureSize(size);
+    _debugLogSizing('renderNoBitmap:afterEnsureSize', requestedSize: size);
     renderContext2d.drawImage(
       imageSource,
       0,
@@ -92,17 +110,23 @@ class RenderCanvas extends DisplayCanvas {
       size.width,
       size.height,
     );
+    _debugLogSizing('renderNoBitmap:afterDrawImage', requestedSize: size);
+    _debugLogSizingOnNextFrame('renderNoBitmap:nextFrameAfterDrawImage');
   }
 
   /// Ensures that this canvas can draw a frame of the given [size].
   void _ensureSize(BitmapSize size) {
+    _debugLogSizing('ensureSize:entry', requestedSize: size);
     // Check if the frame is the same size as before, and if so, we don't need
     // to resize the canvas.
     if (size.width == _pixelWidth && size.height == _pixelHeight) {
       // The existing canvas doesn't need to be resized (unless the device pixel
       // ratio changed).
       if (EngineFlutterDisplay.instance.devicePixelRatio != _currentDevicePixelRatio) {
+        _debugLogSizing('ensureSize:sameSizeDprChanged', requestedSize: size);
         _updateLogicalHtmlCanvasSize();
+      } else {
+        _debugLogSizing('ensureSize:sameSizeReturn', requestedSize: size);
       }
       return;
     }
@@ -111,11 +135,53 @@ class RenderCanvas extends DisplayCanvas {
     // the frame. We cannot allow the canvas to be larger than the screen
     // because then when we call `transferFromImageBitmap()` the bitmap will
     // be scaled to cover the entire canvas.
+    _debugLogSizing('ensureSize:resizeBeforeCanvasAttrs', requestedSize: size);
     _pixelWidth = size.width;
     _pixelHeight = size.height;
     canvasElement.width = _pixelWidth.toDouble();
     canvasElement.height = _pixelHeight.toDouble();
+    _debugLogSizing('ensureSize:resizeAfterCanvasAttrs', requestedSize: size);
     _updateLogicalHtmlCanvasSize();
+  }
+
+  void _debugLogSizing(String phase, {BitmapSize? requestedSize}) {
+    if (!_debugLogRenderCanvasSizing) {
+      return;
+    }
+
+    final DomVisualViewport? viewport = domWindow.visualViewport;
+    final DomElement? documentElement = domDocument.documentElement;
+    final DomCSSStyleDeclaration inlineStyle = canvasElement.style;
+    final DomCSSStyleDeclaration computedStyle = domWindow.getComputedStyle(canvasElement);
+    final DomRect canvasRect = canvasElement.getBoundingClientRect();
+    final DomRect hostRect = hostElement.getBoundingClientRect();
+
+    domWindow.console.debug(
+      '[flutter-web RenderCanvas sizing] '
+      'phase=$phase '
+      'requested=${requestedSize?.width}x${requestedSize?.height} '
+      'pixel=${_pixelWidth}x$_pixelHeight '
+      'canvasAttr=${canvasElement.width}x${canvasElement.height} '
+      'engineDpr=${EngineFlutterDisplay.instance.devicePixelRatio} '
+      'currentDpr=$_currentDevicePixelRatio '
+      'windowDpr=${domWindow.devicePixelRatio} '
+      'visualViewport=${viewport?.width}x${viewport?.height}@${viewport?.scale} '
+      'documentElement=${documentElement?.clientWidth}x${documentElement?.clientHeight} '
+      'inlineStyle=${inlineStyle.width}/${inlineStyle.height} '
+      'computedStyle=${computedStyle.width}/${computedStyle.height} '
+      'canvasRect=${canvasRect.width}x${canvasRect.height}@${canvasRect.x},${canvasRect.y} '
+      'hostRect=${hostRect.width}x${hostRect.height}@${hostRect.x},${hostRect.y} '
+      'isConnected=${canvasElement.isConnected}',
+    );
+  }
+
+  void _debugLogSizingOnNextFrame(String phase) {
+    if (!_debugLogRenderCanvasSizing) {
+      return;
+    }
+    domWindow.requestAnimationFrame((_) {
+      _debugLogSizing(phase);
+    });
   }
 
   @override
