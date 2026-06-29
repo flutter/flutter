@@ -77,7 +77,7 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isRiscv64SupportEnabled => isEnabled(riscv64);
 
   @override
-  bool get isMacOSArm64OnlyEnabled => isEnabled(macosArm64Only);
+  bool get isMacOSArm64OnlyEnabled => isEnabled(macOSArm64Only);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
