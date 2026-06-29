@@ -14,8 +14,9 @@ import 'package:flutter/widgets.dart';
 ///
 /// This widget does not provide a concrete implementation of text selection handles
 /// out of the box, and instead uses [testTextSelectionHandleControls] as a default.
-/// A more robust implementation of text selection handles can be provided by
-/// setting [selectionControls].
+/// Selection handles are not shown by default unless [showSelectionHandles] is set
+/// to true. A more robust implementation of text selection handles can be provided
+/// by setting [selectionControls].
 ///
 /// This input field manages its own internal [TextEditingController]
 /// and [FocusNode] unless provided one. This field also provides defaults
