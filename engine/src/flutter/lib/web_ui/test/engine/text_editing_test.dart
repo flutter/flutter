@@ -659,6 +659,7 @@ Future<void> testMain() async {
       expect(domDocument.activeElement, textEditing.strategy.domElement);
 
       final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.debugDocumentHasFocusOverride = true;
       editingStrategy!.handleBlur(event);
 
       expect(spy.messages, hasLength(1));
