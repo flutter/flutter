@@ -636,7 +636,7 @@ class TestFeatureFlags implements FeatureFlags {
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
-      macosArm64Only => isMacOSArm64OnlyEnabled,
+      macOSArm64Only => isMacOSArm64OnlyEnabled,
       recordUse => isRecordUseEnabled,
       _ => false,
     };
@@ -663,7 +663,7 @@ class TestFeatureFlags implements FeatureFlags {
     lldbDebugging,
     uiSceneMigration,
     riscv64,
-    macosArm64Only,
+    macOSArm64Only,
   ];
 
   @override

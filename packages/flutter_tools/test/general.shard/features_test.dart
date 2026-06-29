@@ -426,7 +426,7 @@ void main() {
   group('macosArm64Only', () {
     test('is available on all channels, disabled by default', () {
       expect(
-        macosArm64Only,
+        macOSArm64Only,
         allOf(<Matcher>[
           _onChannelIs('master', available: true, enabledByDefault: false),
           _onChannelIs('stable', available: true, enabledByDefault: false),
@@ -436,12 +436,12 @@ void main() {
     });
 
     test('can be configured', () {
-      expect(macosArm64Only.configSetting, 'enable-macos-arm64-only');
-      expect(macosArm64Only.environmentOverride, 'FLUTTER_MACOS_ARM64_ONLY');
+      expect(macOSArm64Only.configSetting, 'enable-macos-arm64-only');
+      expect(macOSArm64Only.environmentOverride, 'FLUTTER_MACOS_ARM64_ONLY');
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: macosArm64Only);
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: macOSArm64Only);
       expect(checkFlags.isMacOSArm64OnlyEnabled, isTrue);
     });
   });
