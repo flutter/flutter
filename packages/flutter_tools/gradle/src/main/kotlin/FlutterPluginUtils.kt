@@ -550,7 +550,6 @@ object FlutterPluginUtils {
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
         val agpVersion = VersionFetcher.getAGPVersion(project)
-        val isBuiltInKotlin = isBuiltInKotlinEnabled(project, agpVersion)
         var shouldLogForApp = false
         project.rootProject.subprojects {
             val pluginState = getSubprojectPluginState(this) ?: return@subprojects
@@ -558,7 +557,7 @@ object FlutterPluginUtils {
             // Ensures applying AGP exists in the build file configuration.
             if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
-            if (!isBuiltInKotlin && !pluginState.hasKgpPlugin) {
+            if (!isBuiltInKotlinEnabled(project, agpVersion) && !pluginState.hasKgpPlugin) {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
