@@ -152,7 +152,7 @@ bool FlutterWindowsView::OnEmptyFrameGenerated() {
     return true;
   }
 
-  if (!ResizeRenderSurface(resize_target_height_, resize_target_width_)) {
+  if (!ResizeRenderSurface(resize_target_width_, resize_target_height_)) {
     return false;
   }
 
@@ -208,6 +208,9 @@ void FlutterWindowsView::ForceRedraw() {
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   if (IsSizedToContent()) {
     // No resize synchronization needed for views sized to content.
+    // Still send metrics so the engine renders at the correct viewport size
+    // (e.g. after the child window is resized to the host's client area).
+    SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
   }
 
@@ -933,6 +936,11 @@ bool FlutterWindowsView::NeedsVsync() const {
 
 bool FlutterWindowsView::IsSizedToContent() const {
   return is_sized_to_content_;
+}
+
+void FlutterWindowsView::SetSizedToContent(bool sized_to_content) {
+  is_sized_to_content_ = sized_to_content;
+  engine_->SendWindowMetricsEvent(CreateWindowMetricsEvent());
 }
 
 BoxConstraints FlutterWindowsView::GetConstraints() const {

@@ -88,12 +88,12 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
     // The meta viewport is always removed by the for method above, so we don't
     // need to do anything else here, other than create it again.
+    // These viewport settings are chosen to be accessibility-friendly, notably,
+    // `user-scalable=no` is not used to comply with WCAG 2 rules.
     final DomHTMLMetaElement viewportMeta = createDomHTMLMetaElement()
       ..setAttribute('flt-viewport', '')
       ..name = 'viewport'
-      ..content =
-          'width=device-width, initial-scale=1.0, '
-          'maximum-scale=1.0, user-scalable=no';
+      ..content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0';
 
     domDocument.head!.append(viewportMeta);
 

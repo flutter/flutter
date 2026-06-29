@@ -21,6 +21,7 @@ import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/tools/shader_compiler.dart';
@@ -1207,12 +1208,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
+      final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
+      final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
         fileSystem: globals.fs,
+        targetModel: targetModel,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
@@ -1302,6 +1306,21 @@ abstract class ResidentRunner extends ResidentHandlers {
       return;
     }
     globals.printStatus('Lost connection to device.');
+
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    for (final FlutterDevice device in flutterDevices) {
+      final Device? rawDevice = device.device;
+      if (rawDevice is IOSDevice &&
+          debuggingOptions.buildInfo.isProfile &&
+          !(debuggingOptions.iosProfileDebugger ??
+              (xcodeVersion == null || xcodeVersion.major < 26))) {
+        globals.printStatus(
+          'If the application crashed, you can attach a debugger to get a more complete '
+          'stack trace by running again with the "--ios-profile-debugger" flag.',
+        );
+      }
+    }
+
     _finished.complete(0);
   }
 
@@ -1505,8 +1524,21 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
 
       // 3. Perform the standard, cross-platform eviction calls.
+      final supportsShaderReload = device.targetPlatform != TargetPlatform.web_javascript;
       for (final String assetPath in devFS.assetPathsToEvict) {
-        futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        // Flutter GPU shader bundles reload the compiled ShaderLibrary in place
+        // via the `ext.ui.gpu.reinitializeShaderLibrary` extension. It is
+        // registered lazily on the first `ShaderLibrary.fromAsset` and the engine
+        // no-ops if nothing is registered at the asset key, so dispatch is gated
+        // only by the `.shaderbundle` suffix. The extension is unavailable on the
+        // web engine, where the bundle falls back to the generic asset eviction.
+        if (supportsShaderReload && assetPath.endsWith('.shaderbundle')) {
+          futures.add(
+            vmService.flutterReinitializeShaderLibrary(assetPath, isolateId: firstUiIsolate.id!),
+          );
+        } else {
+          futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        }
       }
       // Shaders are not supported during hot reload on the web yet. Attempting
       // to evict shaders will call the `ext.ui.window.reinitializeShader` service

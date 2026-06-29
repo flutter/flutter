@@ -27,6 +27,7 @@
 
 #include "gtest/gtest.h"
 #include "third_party/imgui/imgui.h"
+#include "third_party/tonic/dart_microtask_queue.h"
 
 namespace impeller {
 namespace testing {
@@ -37,6 +38,20 @@ static void InstantiateTestShaderLibrary(Context::BackendType backend_type) {
   auto library = flutter::gpu::ShaderLibrary::MakeFromFlatbuffer(
       backend_type, std::move(fixture));
   flutter::gpu::ShaderLibrary::SetOverride(library);
+}
+
+// Drains the microtask queue so async Dart entry points run to completion.
+// Returns false if a microtask produced an unhandled error. Must be called
+// inside an isolate scope. The fixture entry points are now async (shader
+// loading returns a Future), and on native everything they await is already
+// available, so the work finishes as microtasks with no message loop needed.
+static bool DrainMicrotasks() {
+  auto* queue = tonic::DartMicrotaskQueue::GetForCurrentThread();
+  if (queue == nullptr) {
+    return true;
+  }
+  queue->RunMicrotasks();
+  return queue->GetLastError() == tonic::kNoError;
 }
 
 class RendererDartTest : public PlaygroundTest,
@@ -94,7 +109,7 @@ class RendererDartTest : public PlaygroundTest,
                                 tonic::ToDart(dart_function_name), 2, args))) {
             return false;
           }
-          return true;
+          return DrainMicrotasks();
         });
     if (!success) {
       FML_LOG(ERROR) << "Failed to invoke dart test function:"
@@ -120,7 +135,7 @@ class RendererDartTest : public PlaygroundTest,
                             tonic::ToDart(dart_function_name), 0, nullptr))) {
         return false;
       }
-      return true;
+      return DrainMicrotasks();
     });
   }
 
@@ -139,7 +154,7 @@ class RendererDartTest : public PlaygroundTest,
                                 tonic::ToDart(dart_function_name), 2, args))) {
             return false;
           }
-          return true;
+          return DrainMicrotasks();
         });
   }
 
