@@ -18,12 +18,10 @@ class ToolExtensionProvider implements RpcRegistrar {
 
   final SendPort _toolSendPort;
   final ReceivePort _receivePort = ReceivePort();
-  final Map<String, FutureOr<Response> Function(Map<String, Object?> params)> _handlers =
-      <String, FutureOr<Response> Function(Map<String, Object?> params)>{};
+  final _handlers = <String, ToolExtensionHandler>{};
   StreamSubscription<Object?>? _subscription;
 
-  final StreamController<Notification> _notificationsController =
-      StreamController<Notification>.broadcast();
+  final _notificationsController = StreamController<Notification>.broadcast();
 
   /// A stream of notifications sent from the host Flutter tool to this extension.
   Stream<Notification> get notifications => _notificationsController.stream;
@@ -32,10 +30,7 @@ class ToolExtensionProvider implements RpcRegistrar {
   ///
   /// Throws a [StateError] if a handler for [method] is already registered.
   @override
-  void registerRpc(
-    String method,
-    FutureOr<Response> Function(Map<String, Object?> params) handler,
-  ) {
+  void registerRpc(String method, ToolExtensionHandler handler) {
     if (_handlers.containsKey(method)) {
       throw StateError('A handler for "$method" is already registered.');
     }
@@ -70,15 +65,11 @@ class ToolExtensionProvider implements RpcRegistrar {
     try {
       final Message parsedMessage = Message.fromMap(message);
       if (parsedMessage is Request) {
-        final FutureOr<Response> Function(Map<String, Object?> params)? handler =
-            _handlers[parsedMessage.method];
+        final ToolExtensionHandler? handler = _handlers[parsedMessage.method];
         if (handler == null) {
           final errorResponse = Response.error(
-            id: parsedMessage.id!,
-            error: RpcError(
-              code: -32601, // Method not found
-              message: 'Method not found: ${parsedMessage.method}',
-            ),
+            id: parsedMessage.id,
+            error: RpcError.methodNotFound(message: 'Method not found: ${parsedMessage.method}'),
           );
           _toolSendPort.send(errorResponse.toMap());
           return;
@@ -89,17 +80,13 @@ class ToolExtensionProvider implements RpcRegistrar {
           final Response response = await handler(params);
           // Ensure the response ID matches the request ID.
           final matchedResponse = response.error != null
-              ? Response.error(error: response.error, id: parsedMessage.id!)
-              : Response.result(id: parsedMessage.id!, result: response.result);
+              ? Response.error(error: response.error, id: parsedMessage.id)
+              : Response.result(id: parsedMessage.id, result: response.result);
           _toolSendPort.send(matchedResponse.toMap());
         } on Object catch (e, st) {
           final errorResponse = Response.error(
-            id: parsedMessage.id!,
-            error: RpcError(
-              code: -32603, // Internal error
-              message: 'Internal error: $e',
-              data: st.toString(),
-            ),
+            id: parsedMessage.id,
+            error: RpcError.internal(message: 'Internal error: $e', data: st.toString()),
           );
           _toolSendPort.send(errorResponse.toMap());
         }
@@ -111,10 +98,7 @@ class ToolExtensionProvider implements RpcRegistrar {
       if (id != null) {
         final errorResponse = Response.error(
           id: id,
-          error: RpcError(
-            code: -32700, // Parse error
-            message: 'Parse error: $e',
-          ),
+          error: RpcError.parse(message: 'Parse error: $e'),
         );
         _toolSendPort.send(errorResponse.toMap());
       }

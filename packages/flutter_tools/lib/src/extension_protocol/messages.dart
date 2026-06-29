@@ -108,10 +108,10 @@ class Notification extends Message {
 /// Represents a response to a [Request].
 class Response extends Message {
   /// Creates a successful [Response] with the given [result].
-  const Response.result({required Object id, required this.result}) : error = null, super(id: id);
+  const Response.result({super.id, required this.result}) : error = null;
 
   /// Creates an error [Response] with the given [error].
-  const Response.error({required this.error, required Object id}) : result = null, super(id: id);
+  const Response.error({required this.error, super.id}) : result = null;
 
   /// Parses a [Response] from a JSON-compatible map.
   ///
@@ -180,6 +180,26 @@ class RpcError {
     throw const FormatException('Invalid RpcError message');
   }
 
+  /// Creates a parse error [RpcError].
+  const RpcError.parse({required String message, Object? data})
+    : this(code: parseErrorCode, message: message, data: data);
+
+  /// Creates an invalid request [RpcError].
+  const RpcError.invalidRequest({required String message, Object? data})
+    : this(code: invalidRequestCode, message: message, data: data);
+
+  /// Creates a method not found [RpcError].
+  const RpcError.methodNotFound({required String message, Object? data})
+    : this(code: methodNotFoundCode, message: message, data: data);
+
+  /// Creates an invalid params [RpcError].
+  const RpcError.invalidParams({required String message, Object? data})
+    : this(code: invalidParamsCode, message: message, data: data);
+
+  /// Creates an internal error [RpcError].
+  const RpcError.internal({required String message, Object? data})
+    : this(code: internalErrorCode, message: message, data: data);
+
   /// The error code.
   final int code;
 
@@ -189,8 +209,15 @@ class RpcError {
   /// A message describing the error.
   final String message;
 
+  // Standard JSON-RPC 2.0 error codes.
+  static const int parseErrorCode = -32700;
+  static const int invalidRequestCode = -32600;
+  static const int methodNotFoundCode = -32601;
+  static const int invalidParamsCode = -32602;
+  static const int internalErrorCode = -32603;
+
   /// Converts this error to a JSON-compatible map.
   Map<String, Object?> toMap() {
-    return <String, Object?>{'code': code, 'message': message, if (data != null) 'data': data};
+    return <String, Object?>{'code': code, 'message': message, 'data': ?data};
   }
 }

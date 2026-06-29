@@ -12,37 +12,33 @@ void testExtensionEntryPoint(SendPort hostSendPort) {
   final provider = ToolExtensionProvider(hostSendPort);
   Map<String, Object?>? lastNotification;
 
-  provider.notifications.listen((Notification n) {
-    lastNotification = <String, Object?>{'method': n.method, 'params': n.params};
-    if (n.method == 'ping') {
-      provider.sendNotification(Notification(method: 'pong', params: n.params));
-    }
-  });
-
-  provider.registerRpc('echo', (Map<String, Object?> params) {
-    return Response.result(id: '', result: params);
-  });
-  provider.registerRpc('nullResult', (Map<String, Object?> params) {
-    return const Response.result(id: '', result: null);
-  });
-  provider.registerRpc('error', (Map<String, Object?> params) {
-    return const Response.error(
-      id: '',
-      error: RpcError(code: 999, message: 'custom error'),
-    );
-  });
-  provider.registerRpc('throw', (Map<String, Object?> params) {
-    throw Exception('thrown exception');
-  });
-  provider.registerRpc('slow', (Map<String, Object?> params) async {
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-    return const Response.result(id: '', result: 'slow ok');
-  });
-  provider.registerRpc('getLastNotification', (Map<String, Object?> params) {
-    return Response.result(id: '', result: lastNotification);
-  });
-
-  provider.initialize();
+  provider
+    ..notifications.listen((Notification n) {
+      lastNotification = <String, Object?>{'method': n.method, 'params': n.params};
+      if (n.method == 'ping') {
+        provider.sendNotification(Notification(method: 'pong', params: n.params));
+      }
+    })
+    ..registerRpc('echo', (Map<String, Object?> params) {
+      return Response.result(result: params);
+    })
+    ..registerRpc('nullResult', (Map<String, Object?> params) {
+      return const Response.result(result: null);
+    })
+    ..registerRpc('error', (Map<String, Object?> params) {
+      return const Response.error(error: RpcError(code: 999, message: 'custom error'));
+    })
+    ..registerRpc('throw', (Map<String, Object?> params) {
+      throw Exception('thrown exception');
+    })
+    ..registerRpc('slow', (Map<String, Object?> params) async {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      return const Response.result(result: 'slow ok');
+    })
+    ..registerRpc('getLastNotification', (Map<String, Object?> params) {
+      return Response.result(result: lastNotification);
+    })
+    ..initialize();
 
   // Send a test notification
   provider.sendNotification(
@@ -71,11 +67,9 @@ void main() {
 
     test('start and handshake success', () async {
       await manager.start(testExtensionEntryPoint);
-      final Object? result = await manager.callMethod(
-        'echo',
-        params: const <String, Object?>{'val': 1},
-      );
-      expect(result, const <String, Object?>{'val': 1});
+      const params = <String, Object?>{'val': 1};
+      final Object? result = await manager.callMethod('echo', params: params);
+      expect(result, params);
     });
 
     test('handshake timeout', () async {
@@ -118,17 +112,9 @@ void main() {
         () => manager.callMethod('throw'),
         throwsA(
           isA<RpcException>()
-              .having((RpcException e) => e.error.code, 'code', -32603)
+              .having((RpcException e) => e.error.code, 'code', RpcError.internalErrorCode)
               .having((RpcException e) => e.error.message, 'message', contains('thrown exception')),
         ),
-      );
-    });
-
-    test('callMethod timeout', () async {
-      await manager.start(testExtensionEntryPoint);
-      expect(
-        () => manager.callMethod('slow', timeout: const Duration(milliseconds: 50)),
-        throwsA(isA<TimeoutException>()),
       );
     });
 

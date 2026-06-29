@@ -5,12 +5,14 @@
 import 'dart:async';
 import 'messages.dart';
 
+typedef ToolExtensionHandler = FutureOr<Response> Function(Map<String, Object?> params);
+
 /// An interface for registering RPC handlers for an extension service.
 abstract interface class RpcRegistrar {
   /// Registers a handler for the given RPC [method].
   ///
   /// The [handler] is invoked when the tool calls the [method] on the extension.
-  void registerRpc(String method, FutureOr<Response> Function(Map<String, Object?> params) handler);
+  void registerRpc(String method, ToolExtensionHandler handler);
 }
 
 /// Base class for services provided by a Flutter Tool Extension.

@@ -12,18 +12,14 @@ import 'messages.dart';
 /// This class is used by the host Flutter tool to start or connect to an extension
 /// isolate, send requests, and receive notifications.
 class ToolExtensionManager {
-  /// Creates a [ToolExtensionManager].
-  ToolExtensionManager();
-
   Isolate? _isolate;
   SendPort? _extensionSendPort;
   final ReceivePort _receivePort = ReceivePort();
-  final Map<Object, Completer<Response>> _pendingRequests = <Object, Completer<Response>>{};
-  final StreamController<Notification> _notificationsController =
-      StreamController<Notification>.broadcast();
+  final _pendingRequests = <Object, Completer<Response>>{};
+  final _notificationsController = StreamController<Notification>.broadcast();
   StreamSubscription<Object?>? _subscription;
   int _requestIdCounter = 0;
-  final Completer<SendPort> _handshakeCompleter = Completer<SendPort>();
+  final _handshakeCompleter = Completer<SendPort>();
 
   /// A stream of notifications sent from the extension to the host tool.
   Stream<Notification> get notifications => _notificationsController.stream;
@@ -92,13 +88,8 @@ class ToolExtensionManager {
   /// Sends a request to the extension and waits for a response.
   ///
   /// Throws an [RpcException] if the extension returns an error response.
-  /// Throws a [TimeoutException] if the response is not received within [timeout].
   /// Throws a [StateError] if the manager is not connected to an extension.
-  Future<Object?> callMethod(
-    String method, {
-    Map<String, Object?>? params,
-    Duration timeout = const Duration(seconds: 5),
-  }) async {
+  Future<Object?> callMethod(String method, {Map<String, Object?>? params}) async {
     final SendPort? port = _extensionSendPort;
     if (port == null) {
       throw StateError('Manager is not connected to an extension.');
@@ -112,14 +103,11 @@ class ToolExtensionManager {
     port.send(request.toMap());
 
     try {
-      final Response response = await completer.future.timeout(timeout);
+      final Response response = await completer.future;
       if (response.error != null) {
         throw RpcException(response.error!);
       }
       return response.result;
-    } on TimeoutException {
-      _pendingRequests.remove(id);
-      throw TimeoutException('Request $id ($method) timed out after ${timeout.inSeconds}s');
     } on Object {
       _pendingRequests.remove(id);
       rethrow;
