@@ -1369,6 +1369,8 @@ void main() {
     final controller = TextEditingController(text: 'The quick fox jumps over the fence.');
     final focusNode = FocusNode();
     final selectionControls = _MockTextSelectionHandleControls();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
 
     var scaleY = 1.0;
     late StateSetter setState;
