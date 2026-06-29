@@ -7008,7 +7008,6 @@ targets:
   - name: Windows texture_impeller_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7022,7 +7021,6 @@ targets:
   - name: Windows hello_world_windows_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7036,7 +7034,6 @@ targets:
   - name: Windows_arm64 hello_world_windows_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >

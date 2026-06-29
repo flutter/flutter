@@ -133,7 +133,9 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
   @override
   Future<ByteData?> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
-    assert(!_disposed, 'Cannot call toByteData on a disposed image.');
+    if (_disposed) {
+      throw StateError('Cannot call toByteData on a disposed image.');
+    }
 
     // Clone the image to prevent use-after-free vulnerabilities.
     // If the image is disposed by the user during asynchronous bounds of this method,
@@ -141,6 +143,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
     // pointers fully alive and valid until this method completes.
     final EngineImage cloneImage = clone();
     try {
+      final ImageSource? source = cloneImage.imageSource;
+      final bool isSourceDetached =
+          source == null ||
+          (source is ImageBitmapImageSource && source.imageBitmap.width == 0) ||
+          (source is VideoFrameImageSource && source.videoFrame.displayWidth == 0);
+
       // Direct pixel extraction based on the type of ImageSource.
       switch (cloneImage.imageSource) {
         case final ImageElementImageSource s:
@@ -172,9 +180,11 @@ class EngineImage implements ui.Image, StackTraceDebugger {
           if (videoFrame.displayWidth == 0) {
             break;
           }
-          if (videoFrame.format != 'I420' &&
-              videoFrame.format != 'I422' &&
-              videoFrame.format != 'I444') {
+          final String? formatStr = videoFrame.format;
+          if (formatStr == 'RGBA' ||
+              formatStr == 'RGBX' ||
+              formatStr == 'BGRA' ||
+              formatStr == 'BGRX') {
             return await readPixelsFromVideoFrame(videoFrame, format);
           }
         case null:
@@ -182,7 +192,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       }
 
       // Asynchronous, non-blocking PNG encoding fallback using OffscreenCanvas.
-      if (format == ui.ImageByteFormat.png) {
+      //
+      // Extracting raw pixels from a GPU-backed image (where imageSource is null)
+      // requires a synchronous readPixels call, which causes a severe WebGL GPU
+      // stall and blocks the browser main thread. Thus, we only use this fallback
+      // for CPU-backed images (where imageSource is not null).
+      if (format == ui.ImageByteFormat.png && !isSourceDetached) {
         final ByteData? rawData = await renderer.pictureToImageSurface.rasterizeImage(
           cloneImage,
           ui.ImageByteFormat.rawStraightRgba,
@@ -214,6 +229,45 @@ class EngineImage implements ui.Image, StackTraceDebugger {
         final arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;
 
         // Reclaim browser resources eagerly by zeroing the offscreen canvas.
+        offscreenCanvas.width = 0;
+        offscreenCanvas.height = 0;
+        return ByteData.view(arrayBuffer.toDart);
+      }
+
+      // On backends which do not support encoding to PNG directly from a surface,
+      // we draw the image to a picture, resize the offscreen surface, and
+      // rasterize the picture to a DomImageBitmap. The resulting bitmap is then
+      // transferred to an OffscreenCanvas and encoded to a PNG blob asynchronously,
+      // avoiding main-thread GPU stalls.
+      if (format == ui.ImageByteFormat.png &&
+          isSourceDetached &&
+          !renderer.pictureToImageSurface.supportsPngEncoding) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        canvas.drawImage(cloneImage, ui.Offset.zero, ui.Paint());
+        final ui.Picture picture = recorder.endRecording();
+
+        await renderer.pictureToImageSurface.setSize(
+          BitmapSize(cloneImage.width, cloneImage.height),
+        );
+
+        final List<DomImageBitmap> bitmaps =
+            await (renderer.pictureToImageSurface as OffscreenSurface).rasterizeToImageBitmaps(
+              <ui.Picture>[picture],
+            );
+        final DomImageBitmap bitmap = bitmaps.single;
+
+        final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
+          bitmap.width,
+          bitmap.height,
+        );
+        final context =
+            offscreenCanvas.getContext('bitmaprenderer')! as DomImageBitmapRenderingContext;
+        context.transferFromImageBitmap(bitmap);
+        final DomBlob blob = await offscreenCanvas.convertToBlob();
+        final arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;
+
+        context.transferFromImageBitmap(null);
         offscreenCanvas.width = 0;
         offscreenCanvas.height = 0;
         return ByteData.view(arrayBuffer.toDart);

@@ -25,6 +25,9 @@ abstract class CkSurface extends Surface {
 
   final CanvasProvider _canvasProvider;
 
+  @override
+  bool get supportsPngEncoding => true;
+
   BitmapSize _currentSize = const BitmapSize(1, 1);
 
   /// The underlying Skia surface object.
@@ -235,12 +238,14 @@ abstract class CkSurface extends Surface {
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
     await _initialized.future;
 
-    final engineImage = image as EngineImage;
-    assert(
-      engineImage.backendImage is CkImageDelegate,
-      'The image being rasterized must be a CanvasKit image.',
-    );
-    final SkImage skImage = (engineImage.backendImage as CkImageDelegate).skImage;
+    final EngineImage engineImage;
+    final SkImage skImage;
+    if (image case EngineImage(backendImage: CkImageDelegate(skImage: final imageRef))) {
+      engineImage = image;
+      skImage = imageRef;
+    } else {
+      throw ArgumentError('The image being rasterized must be a CanvasKit image.');
+    }
 
     final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba
         ? canvasKit.AlphaType.Unpremul

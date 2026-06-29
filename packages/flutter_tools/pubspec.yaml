@@ -3,7 +3,7 @@ description: Tools for building Flutter applications
 homepage: https://flutter.dev
 
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -14,7 +14,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.3.0
-  dwds: 27.1.1
+  dwds: 27.1.2
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
@@ -53,11 +53,11 @@ dependencies:
   http_multi_server: 3.2.2
   convert: 3.1.2
   async: 2.13.1
-  unified_analytics: 8.0.14
+  unified_analytics: 8.0.15
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 1.4.0
+  hooks_runner: 1.5.0
   hooks: 2.0.2
   code_assets: 1.2.1
   data_assets: 0.20.0
@@ -127,4 +127,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: kb3ib5
+# PUBSPEC CHECKSUM: blemjp
