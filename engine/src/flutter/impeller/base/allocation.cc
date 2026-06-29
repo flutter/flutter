@@ -40,7 +40,7 @@ bool Allocation::Truncate(Bytes length, bool npot) {
 }
 
 absl::StatusOr<uint64_t> Allocation::NextPowerOfTwoSize(uint64_t x) {
-  if (x > static_cast<uint64_t>(1) << 63) {
+  if (x > (static_cast<uint64_t>(1) << 63)) {
     return absl::InvalidArgumentError("Out of range");
   }
   if (x == 0) {

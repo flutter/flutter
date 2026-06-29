@@ -31,6 +31,11 @@ TEST(AllocationTest, ReserveNPOTPotentialOverflow) {
   // Try allocations with sizes around the maximum 32-bit value.
   allocate_and_write((1ULL << 32) + 1);
   allocate_and_write((1ULL << 32) - 1);
+
+  // Test that an allocation size that is out of range fails immediately.
+  Allocation max_allocation;
+  EXPECT_FALSE(
+      max_allocation.Truncate(Bytes{std::numeric_limits<uint64_t>::max()}));
 }
 
 TEST(AllocationTest, NextPowerOfTwoSize) {
