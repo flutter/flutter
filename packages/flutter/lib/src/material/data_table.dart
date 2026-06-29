@@ -556,8 +556,9 @@ class DataTable extends StatelessWidget {
   /// If null, the default Material design arrow icon ([Icons.arrow_upward]) is
   /// used with a framework default size of 16.0.
   ///
-  /// Any custom widget provided here will be rendered exactly as-is without
-  /// layout size modifications from the framework.
+  /// If this widget is an [Icon], the framework will automatically apply the
+  /// default size of 16.0 unless a custom size is explicitly specified on the
+  /// icon itself.
   final Widget? sortIconWidget;
 
   /// Invoked when the user selects or unselects every row, using the
