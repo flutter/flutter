@@ -29,11 +29,13 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web/module_metadata.dart';
 import '../web/web_constants.dart';
 import 'test_compiler.dart';
 import 'test_golden_comparator.dart';
@@ -66,6 +68,10 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
   };
 }
 
+/// Unsupported for general Flutter developers.
+///
+/// This is only used by the Flutter Framework tests.
+/// See: https://github.com/flutter/flutter/pull/65984.
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(
     this._server,
@@ -323,28 +329,66 @@ class FlutterWebPlatform extends PlatformPlugin {
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
     if (request.url.path.endsWith('main.dart.browser_test.dart.js')) {
       return shelf.Response.ok(
-        generateTestBootstrapFileContents(
-          '/main.dart.bootstrap.js',
-          'require.js',
-          'dart_stack_trace_mapper.js',
+        generateDDCLibraryBundleBootstrapScript(
+          entrypoint: 'main.dart',
+          ddcModuleLoaderUrl: 'ddc_module_loader.js',
+          mapperUrl: 'dart_stack_trace_mapper.js',
+          generateLoadingIndicator: false,
+          isWindows: globals.platform.isWindows,
         ),
         headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
     }
-    if (request.url.path.endsWith('main.dart.bootstrap.js')) {
+    if (request.url.path.endsWith('main_module.bootstrap.js')) {
+      final String? mergedMetadata = webMemoryFS.mergedMetadata;
+      if (mergedMetadata == null) {
+        final error =
+            'Failed to generate ${request.url.path}. '
+            'Missing a merged metadata file needed to construct the scripts to load.';
+        _logger.printError(error);
+        return shelf.Response.internalServerError(body: error);
+      }
+      final scripts = <Map<String, String>>[];
+      for (final String rawMetadata in LineSplitter.split(mergedMetadata)) {
+        final metadata = ModuleMetadata.fromJson(jsonDecode(rawMetadata) as Map<String, Object?>);
+        final String srcUri = metadata.moduleUri;
+        // Strip the leading '/' from the paths. The requests will have it added
+        // when they are created in the browser.
+        final String relativeSrcUri = srcUri.startsWith('/') ? srcUri.substring(1) : srcUri;
+        scripts.add({'src': relativeSrcUri, 'id': metadata.name});
+      }
+
+      String mainModuleSrc = generateDDCLibraryBundleMainModule(
+        entrypoint: 'main.dart',
+        nativeNullAssertions: true,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: await globals.botDetector.isRunningOnBot,
+      );
+
+      mainModuleSrc +=
+          '''
+var scripts = ${const JsonEncoder.withIndent(" ").convert(scripts)};
+window.\$dartLoader.loadConfig.loadScriptFn = function(loader) {
+  loader.addScriptsToQueue(scripts, null);
+  loader.loadEnqueuedModules();
+};
+window.\$dartLoader.loader.nextAttempt();
+''';
       return shelf.Response.ok(
-        generateMainModule(
-          nativeNullAssertions: true,
-          bootstrapModule: 'main.dart.bootstrap',
-          entrypoint: '/main.dart.js',
-        ),
+        mainModuleSrc,
         headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
     }
-    if (request.url.path.endsWith('.dart.js')) {
-      final String path = request.url.path.split('.dart.js')[0];
+    if (request.url.path.endsWith('on_load_end_bootstrap.js')) {
       return shelf.Response.ok(
-        webMemoryFS.files['$path.dart.lib.js'],
+        generateDDCLibraryBundleOnLoadEndBootstrap(),
+        headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
+      );
+    }
+    if (request.url.path.endsWith('.dart.lib.js')) {
+      final String path = request.url.path;
+      return shelf.Response.ok(
+        webMemoryFS.files[path],
         headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
     }
@@ -503,19 +547,19 @@ class FlutterWebPlatform extends PlatformPlugin {
   String _makeBuildConfigString() {
     return useWasm
         ? '''
-      {
-        compileTarget: "dart2wasm",
-        renderer: "${webRenderer.name}",
-        mainWasmPath: "main.dart.wasm",
-        jsSupportRuntimePath: "main.dart.mjs",
-      }
+        {
+          compileTarget: "dart2wasm",
+          renderer: "${webRenderer.name}",
+          mainWasmPath: "main.dart.wasm",
+          jsSupportRuntimePath: "main.dart.mjs",
+        }
 '''
         : '''
-      {
-        compileTarget: "dartdevc",
-        renderer: "${webRenderer.name}",
-        mainJsPath: "main.dart.browser_test.dart.js",
-      }
+        {
+          compileTarget: "dartdevc",
+          renderer: "${webRenderer.name}",
+          mainJsPath: "/main.dart.browser_test.dart.js",
+        }
 ''';
   }
 
@@ -529,27 +573,28 @@ class FlutterWebPlatform extends PlatformPlugin {
       final bumpStackTraceLimit = useWasm ? 'Error.stackTraceLimit = Infinity;' : '';
       return shelf.Response.ok(
         '''
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${htmlEscape.convert(test)} Test</title>
-          <script src="flutter.js"></script>
-          <script>
-            $bumpStackTraceLimit
-            _flutter.buildConfig = {
-              builds: [
-                ${_makeBuildConfigString()}
-              ]
-            }
-            window.testSelector = "$test";
-            _flutter.loader.load({
-              config: {
-                canvasKitBaseUrl: "/canvaskit/",
-              }
-            });
-          </script>
-        </head>
-        </html>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${htmlEscape.convert(test)} Test</title>
+  <script src="/flutter.js"></script>
+  <script>
+    $bumpStackTraceLimit
+    _flutter.buildConfig = {
+      builds: [
+        ${_makeBuildConfigString()}
+      ]
+    }
+    window.testSelector = "$test";
+    _flutter.loader.load({
+      config: {
+        canvasKitBaseUrl: "/canvaskit/",
+      }
+    });
+  </script>
+</head>
+</html>
       ''',
         headers: <String, String>{
           'Content-Type': 'text/html',
