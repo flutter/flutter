@@ -40,6 +40,7 @@ impeller_component("base_unittests") {
   testonly = true
   sources = [
     "allocation_size_unittests.cc",
+    "allocation_unittests.cc",
     "base_unittests.cc",
   ]
   deps = [
