@@ -67,6 +67,17 @@ In the meantime, we recommend these temporary workarounds:
   profile mode via --release or --profile flags.
 ════════════════════════════════════════════════════════════════════════════════''';
 
+/// The error message shown when an iOS app fails to launch because it has not
+/// been migrated to the UIScene lifecycle.
+const String kUISceneMigrationRequiredError = '''
+════════════════════════════════════════════════════════════════════════════════
+Your iOS app has not been migrated to the UIScene lifecycle.
+UIScene lifecycle is required on iOS 27 and later.
+
+To migrate your app, please follow the migration guide at:
+  https://flutter.dev/to/uiscene-migration
+════════════════════════════════════════════════════════════════════════════════''';
+
 enum IOSDeploymentMethod {
   iosDeployLaunch,
   iosDeployLaunchAndAttach,
@@ -851,6 +862,16 @@ class IOSDevice extends Device {
       );
       deviceLogReader.addLogInterceptor(uisceneWarningInterceptor);
     }
+
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(uisceneCrashInterceptor);
 
     final LogInterceptor? jitCrashInterceptor = await _jitCrashInterceptor();
     if (jitCrashInterceptor != null) {

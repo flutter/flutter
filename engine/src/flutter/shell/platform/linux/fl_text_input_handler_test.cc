@@ -586,6 +586,10 @@ TEST_F(FlTextInputHandlerTest, SurroundingText) {
 }
 
 TEST_F(FlTextInputHandlerTest, SetMarkedTextRect) {
+  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  g_object_ref_sink(window);
+  fl_text_input_handler_set_widget(handler, window);
+
   g_signal_emit_by_name(fl_text_input_handler_get_im_context(handler),
                         "preedit-start", nullptr);
 
@@ -668,6 +672,36 @@ TEST_F(FlTextInputHandlerTest, SetMarkedTextRect) {
         EXPECT_TRUE(fl_value_equal(fl_method_success_response_get_result(
                                        FL_METHOD_SUCCESS_RESPONSE(response)),
                                    expected_result));
+      },
+      &called);
+  EXPECT_TRUE(called);
+
+  fl_text_input_handler_set_widget(handler, nullptr);
+  g_object_unref(window);
+}
+
+// Updating the marked text rect with no widget set (e.g. after the view is
+// disposed) must not crash. https://github.com/flutter/flutter/issues/188657
+TEST_F(FlTextInputHandlerTest, SetMarkedTextRectWithoutWidget) {
+  g_signal_emit_by_name(fl_text_input_handler_get_im_context(handler),
+                        "preedit-start", nullptr);
+
+  EXPECT_CALL(mock_gtk, gtk_widget_translate_coordinates).Times(0);
+
+  g_autoptr(FlValue) rect = build_map({
+      {"x", fl_value_new_float(1)},
+      {"y", fl_value_new_float(2)},
+      {"width", fl_value_new_float(3)},
+      {"height", fl_value_new_float(4)},
+  });
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_invoke_json_method(
+      messenger, "flutter/textinput", "TextInput.setMarkedTextRect", rect,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
+        EXPECT_TRUE(FL_IS_METHOD_SUCCESS_RESPONSE(response));
       },
       &called);
   EXPECT_TRUE(called);
