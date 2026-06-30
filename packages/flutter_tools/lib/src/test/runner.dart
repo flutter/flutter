@@ -92,6 +92,9 @@ interface class FlutterTestRunner {
     ];
 
     if (web) {
+      // Unsupported for general Flutter developers.
+      // This is only used by the Flutter Framework tests.
+      // See: https://github.com/flutter/flutter/pull/65984.
       final String tempBuildDir = globals.fs.systemTempDirectory
           .createTempSync('flutter_test.')
           .absolute
