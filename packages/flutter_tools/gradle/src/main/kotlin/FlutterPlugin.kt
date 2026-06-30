@@ -327,15 +327,15 @@ class FlutterPlugin : Plugin<Project> {
                     // Look it up tolerantly (findByName, not named) so this task degrades to a no-op
                     // with empty output instead of failing to be created when there is no Flutter
                     // build for the variant. See https://github.com/flutter/flutter/issues/188785.
-                    val compileTask = projectToAddTasksTo.tasks.findByName(compileTaskName) as? FlutterTask
-                    if (compileTask != null) {
-                        dependsOn(compileTask)
-                        intermediateDir.set(
-                            projectToAddTasksTo.layout.dir(
-                                projectToAddTasksTo.provider { compileTask.outputDirectory!! }
-                            )
+                    dependsOn(projectToAddTasksTo.tasks.matching { it.name == compileTaskName })
+                    intermediateDir.set(
+                        projectToAddTasksTo.layout.dir(
+                            projectToAddTasksTo.provider {
+                                val compileTask = projectToAddTasksTo.tasks.findByName(compileTaskName) as? FlutterTask
+                                compileTask?.outputDirectory
+                            }
                         )
-                    }
+                    )
                     this.targetPlatforms.set(targetPlatformsList)
                 }
             variant.sources.jniLibs?.addGeneratedSourceDirectory(
