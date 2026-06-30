@@ -221,8 +221,11 @@ Future<void> buildMacOS({
     _ => throw UnimplementedError('Unsupported platform'),
   };
 
-  // Determine the build destination
+  // Determine the build destination specifier for xcodebuild.
+  // This does not prevent some versions of xcodebuild from building a fat binary
+  // even if set to 'platform=macOS,arch=arm64';
   final String destination;
+  // The archtectures to specify in xcode project's build setting.
   final String? archs;
   if (buildInfo.isDebug) {
     // Debug builds default to current host architecture
@@ -237,10 +240,13 @@ Future<void> buildMacOS({
   // Get EXCLUDED_ARCHS from Xcode project build settings
   // This allows developers to exclude specific architectures (e.g., x86_64)
   // when dependencies don't support them
-  final String? excludedArches = buildSettings['EXCLUDED_ARCHS']?.trim();
+  final String? excludedArchs = switch (buildSettings['EXCLUDED_ARCHS']?.trim()) {
+    null || '' => null,
+    final String excludedArches => excludedArches,
+  };
 
   try {
-    if (archs != null && excludedArches != null && excludedArches.contains('arm64')) {
+    if (archs != null && excludedArchs != null && excludedArchs.contains('arm64')) {
       throwToolExit(
         'No Valid Target Arch: '
         'You have enabled the macOSArm64Only feature flag but '
@@ -276,7 +282,7 @@ Future<void> buildMacOS({
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
         // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
         // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
-        if (excludedArches != null && excludedArches.isNotEmpty) 'EXCLUDED_ARCHS=$excludedArches',
+        if (excludedArchs != null) 'EXCLUDED_ARCHS=$excludedArchs',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
         if (archs != null) 'ARCHS=$archs',
       ],
