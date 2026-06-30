@@ -53,6 +53,7 @@ object FlutterPluginUtils {
         val installedNdkVersions: Set<String>,
         val sdkManagerPath: String?
     )
+
     internal const val PROP_FORCE_VERSION_CODE_IGNORING_ABI = "force-version-code-ignoring-abi"
 
     /**
