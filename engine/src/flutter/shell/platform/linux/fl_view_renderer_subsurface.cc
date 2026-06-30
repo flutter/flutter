@@ -326,7 +326,8 @@ static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
       eglDestroyContext(self->egl_display, self->egl_context);
       self->egl_context = EGL_NO_CONTEXT;
     }
-    eglTerminate(self->egl_display);
+    // The EGL display is shared with the engine (same Wayland display), so it
+    // must not be terminated here.
     self->egl_display = EGL_NO_DISPLAY;
   }
   if (self->egl_window != nullptr) {
@@ -355,6 +356,48 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
   // Flutter content is shown directly by the subsurface; only paint the
   // background behind it.
   paint_background(self, cr);
+
+  // The compositor is created when the widget is realized; if it is not yet
+  // available there is nothing to present to the subsurface.
+  if (self->compositor == nullptr || self->egl_surface == EGL_NO_SURFACE) {
+    return TRUE;
+  }
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  FlFramebuffer* framebuffer =
+      fl_compositor_opengl_get_framebuffer(self->compositor);
+  if (framebuffer == nullptr || !fl_framebuffer_get_shareable(framebuffer)) {
+    return TRUE;
+  }
+
+  size_t width = fl_framebuffer_get_width(framebuffer);
+  size_t height = fl_framebuffer_get_height(framebuffer);
+
+  // Blit the composited frame to the subsurface window surface using the
+  // subsurface's own EGL context. This is done on the GTK thread so the
+  // engine's rendering context on the raster thread is never disturbed.
+  eglMakeCurrent(self->egl_display, self->egl_surface, self->egl_surface,
+                 self->egl_context);
+
+  EGLint surface_width, surface_height;
+  eglQuerySurface(self->egl_display, self->egl_surface, EGL_WIDTH,
+                  &surface_width);
+  eglQuerySurface(self->egl_display, self->egl_surface, EGL_HEIGHT,
+                  &surface_height);
+  if (static_cast<size_t>(surface_width) != width ||
+      static_cast<size_t>(surface_height) != height) {
+    wl_egl_window_resize(self->egl_window, width, height, 0, 0);
+  }
+
+  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(sibling));
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+  glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  eglSwapBuffers(self->egl_display, self->egl_surface);
+  eglMakeCurrent(self->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                 EGL_NO_CONTEXT);
 
   return TRUE;
 }
@@ -415,42 +458,11 @@ static void fl_view_renderer_subsurface_present_layers(
   {
     g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
-    // Composite the layers into the engine's shareable framebuffer.
+    // Composite the layers into the engine's shareable framebuffer. The frame
+    // is blitted to the subsurface later, on the GTK thread, so the engine's
+    // rendering context is not disturbed here.
     fl_compositor_opengl_present_layers(self->compositor, layers, layers_count);
     fl_compositor_opengl_get_frame_size(self->compositor, &width, &height);
-
-    FlFramebuffer* framebuffer =
-        fl_compositor_opengl_get_framebuffer(self->compositor);
-    if (framebuffer != nullptr && fl_framebuffer_get_shareable(framebuffer)) {
-      // Make the subsurface context current and blit the composited frame to
-      // its window surface.
-      eglMakeCurrent(self->egl_display, self->egl_surface, self->egl_surface,
-                     self->egl_context);
-
-      EGLint surface_width, surface_height;
-      eglQuerySurface(self->egl_display, self->egl_surface, EGL_WIDTH,
-                      &surface_width);
-      eglQuerySurface(self->egl_display, self->egl_surface, EGL_HEIGHT,
-                      &surface_height);
-      if (static_cast<size_t>(surface_width) != width ||
-          static_cast<size_t>(surface_height) != height) {
-        wl_egl_window_resize(self->egl_window, width, height, 0, 0);
-      }
-
-      g_autoptr(FlFramebuffer) sibling =
-          fl_framebuffer_create_sibling(framebuffer);
-      glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(sibling));
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-      glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-                        GL_COLOR_BUFFER_BIT, GL_NEAREST);
-      eglSwapBuffers(self->egl_display, self->egl_surface);
-      eglMakeCurrent(self->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                     EGL_NO_CONTEXT);
-
-      // Restore the engine's context for the next frame.
-      fl_opengl_manager_make_current(
-          fl_engine_get_opengl_manager(self->engine));
-    }
   }
 
   // Wake the GTK thread if it is waiting for this resize.
