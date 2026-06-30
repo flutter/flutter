@@ -587,8 +587,6 @@ object FlutterPluginUtils {
         }
 
         project.gradle.projectsEvaluated {
-            // Safe to query AGP version after all projects are evaluated.
-            val agpVersion = VersionFetcher.getAGPVersion(project)
             if (agpVersion == null || agpVersion.major < 9) {
                 return@projectsEvaluated
             }
