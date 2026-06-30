@@ -1276,7 +1276,7 @@ void main() {
   testWidgets('dragging selection handle does not crash when RenderObject is degenerate', (
     WidgetTester tester,
   ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/188672
+    // Regression test for https://github.com/flutter/flutter/issues/187644
     final controller = TextEditingController(text: 'The quick fox jumps over the fence.');
     final focusNode = FocusNode();
     final selectionControls = _MockTextSelectionHandleControls();
