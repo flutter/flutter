@@ -67,7 +67,8 @@ In the meantime, we recommend these temporary workarounds:
   profile mode via --release or --profile flags.
 ════════════════════════════════════════════════════════════════════════════════''';
 
-@visibleForTesting
+/// The error message shown when an iOS app fails to launch because it has not
+/// been migrated to the UIScene lifecycle.
 const String kUISceneMigrationRequiredError = '''
 ════════════════════════════════════════════════════════════════════════════════
 Your iOS app has not been migrated to the UIScene lifecycle.
