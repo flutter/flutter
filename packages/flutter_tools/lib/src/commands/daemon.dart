@@ -1311,7 +1311,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
 
-    device.dds.shutdown();
+    await device.dds.shutdown();
   }
 
   @override

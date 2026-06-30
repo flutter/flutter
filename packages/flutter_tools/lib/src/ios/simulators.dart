@@ -783,6 +783,7 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
       'senderImagePath ENDSWITH "/Flutter"',
       'senderImagePath ENDSWITH "/libswiftCore.dylib"',
       'processImageUUID == senderImageUUID',
+      'eventMessage CONTAINS "UIScene life cycle is required"',
       'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
       'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
     ]),
@@ -824,7 +825,17 @@ Future<Process?> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
-  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '');
+  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '') {
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    addLogInterceptor(uisceneCrashInterceptor);
+  }
 
   final IOSSimulator device;
 
