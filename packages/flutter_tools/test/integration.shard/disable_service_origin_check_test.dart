@@ -40,46 +40,50 @@ void main() {
         ...getLocalEngineArguments(),
       ], workingDirectory: tempDir.path);
 
-      final StreamSubscription<String> subErr = transformToLines(
-        process.stderr,
-      ).listen((String line) {});
+      try {
+        final StreamSubscription<String> subErr = transformToLines(
+          process.stderr,
+        ).listen((String line) {});
 
-      final StreamSubscription<String> sub;
-      sub = transformToLines(process.stdout).listen((String line) {
-        if (line.contains('is available at: http://127.0.0.1:')) {
-          final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
-          final RegExpMatch? match = exp.firstMatch(line);
-          if (match != null) {
-            final Uri uri = Uri.parse(match.group(1)!);
-            completer.complete(uri);
+        final StreamSubscription<String> sub;
+        sub = transformToLines(process.stdout).listen((String line) {
+          if (line.contains('is available at: http://127.0.0.1:')) {
+            final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
+            final RegExpMatch? match = exp.firstMatch(line);
+            if (match != null) {
+              final Uri uri = Uri.parse(match.group(1)!);
+              if (!completer.isCompleted) {
+                completer.complete(uri);
+              }
+            }
           }
-        }
-      });
+        });
 
-      final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
-      await sub.cancel();
-      await subErr.cancel();
+        final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
+        await sub.cancel();
+        await subErr.cancel();
 
-      final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
+        final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
 
-      // Connecting with a localhost origin should succeed.
-      final WebSocket wsLocal = await WebSocket.connect(
-        wsUri.toString(),
-        headers: <String, dynamic>{'Origin': 'http://localhost'},
-      );
-      await wsLocal.close();
-
-      // Connecting with a non-localhost origin should fail.
-      await expectLater(
-        WebSocket.connect(
+        // Connecting with a localhost origin should succeed.
+        final WebSocket wsLocal = await WebSocket.connect(
           wsUri.toString(),
-          headers: <String, dynamic>{'Origin': 'http://evil.com'},
-        ),
-        throwsA(isA<WebSocketException>()),
-      );
+          headers: <String, dynamic>{'Origin': 'http://localhost'},
+        );
+        await wsLocal.close();
 
-      process.kill();
-      await process.exitCode;
+        // Connecting with a non-localhost origin should fail.
+        await expectLater(
+          WebSocket.connect(
+            wsUri.toString(),
+            headers: <String, dynamic>{'Origin': 'http://evil.com'},
+          ),
+          throwsA(isA<WebSocketException>()),
+        );
+      } finally {
+        process.kill();
+        await process.exitCode;
+      }
     },
   );
 
@@ -99,37 +103,41 @@ void main() {
         ...getLocalEngineArguments(),
       ], workingDirectory: tempDir.path);
 
-      final StreamSubscription<String> subErr = transformToLines(
-        process.stderr,
-      ).listen((String line) {});
+      try {
+        final StreamSubscription<String> subErr = transformToLines(
+          process.stderr,
+        ).listen((String line) {});
 
-      final StreamSubscription<String> sub;
-      sub = transformToLines(process.stdout).listen((String line) {
-        if (line.contains('is available at: http://127.0.0.1:')) {
-          final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
-          final RegExpMatch? match = exp.firstMatch(line);
-          if (match != null) {
-            final Uri uri = Uri.parse(match.group(1)!);
-            completer.complete(uri);
+        final StreamSubscription<String> sub;
+        sub = transformToLines(process.stdout).listen((String line) {
+          if (line.contains('is available at: http://127.0.0.1:')) {
+            final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
+            final RegExpMatch? match = exp.firstMatch(line);
+            if (match != null) {
+              final Uri uri = Uri.parse(match.group(1)!);
+              if (!completer.isCompleted) {
+                completer.complete(uri);
+              }
+            }
           }
-        }
-      });
+        });
 
-      final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
-      await sub.cancel();
-      await subErr.cancel();
+        final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
+        await sub.cancel();
+        await subErr.cancel();
 
-      final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
+        final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
 
-      // Connecting with a non-localhost origin should succeed.
-      final WebSocket ws = await WebSocket.connect(
-        wsUri.toString(),
-        headers: <String, dynamic>{'Origin': 'http://evil.com'},
-      );
-      await ws.close();
-
-      process.kill();
-      await process.exitCode;
+        // Connecting with a non-localhost origin should succeed.
+        final WebSocket ws = await WebSocket.connect(
+          wsUri.toString(),
+          headers: <String, dynamic>{'Origin': 'http://evil.com'},
+        );
+        await ws.close();
+      } finally {
+        process.kill();
+        await process.exitCode;
+      }
     },
   );
 }
