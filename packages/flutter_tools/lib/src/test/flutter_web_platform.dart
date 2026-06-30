@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io'; // flutter_ignore: dart_io_import
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
