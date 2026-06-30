@@ -1227,11 +1227,19 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
   [engineMock handleDidChangeOcclusionState:didChangeOcclusionState];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
 
+  // Becoming active resumes the app even though the occlusion state still reads
+  // not-visible at this point. macOS does not reliably deliver a
+  // DidChangeOcclusionState(visible) notification on every occlusion->visible
+  // transition (e.g. a same-screen Cmd-Tab / Mission Control return), so relying
+  // on the stale visibility here would leave the app stuck in kHidden with a
+  // frozen UI. Regression test for https://github.com/flutter/flutter/issues/155977.
   [engineMock handleWillBecomeActive:willBecomeActive];
-  EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
+  EXPECT_EQ(sentState, flutter::AppLifecycleState::kResumed);
 
+  // The app is now active and considered visible, so resigning active makes it
+  // inactive (not hidden) until a real occlusion notification hides it.
   [engineMock handleWillResignActive:willResignActive];
-  EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
+  EXPECT_EQ(sentState, flutter::AppLifecycleState::kInactive);
 
   [mockApplication stopMocking];
 }

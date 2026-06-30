@@ -1654,11 +1654,18 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
  */
 - (void)handleWillBecomeActive:(NSNotification*)notification {
   _active = YES;
-  if (!_visible) {
-    [self setApplicationState:flutter::AppLifecycleState::kHidden];
-  } else {
-    [self setApplicationState:flutter::AppLifecycleState::kResumed];
-  }
+  // An application that is becoming active is frontmost and visible to the user,
+  // so it should resume. `_visible` is only updated by handleDidChangeOcclusionState,
+  // and macOS does not reliably deliver a DidChangeOcclusionState(visible)
+  // notification on every occlusion->visible transition (e.g. returning to the app
+  // on the same screen via Cmd-Tab or Mission Control). When that notification is
+  // missed, `_visible` stays stale-NO, this method sends kHidden, and the framework
+  // keeps frames disabled and animations muted — the UI appears frozen until the
+  // app is occluded and revealed again in a way that does fire the notification.
+  // Becoming active is itself an authoritative "visible" signal, so honor it here.
+  // https://github.com/flutter/flutter/issues/155977
+  _visible = YES;
+  [self setApplicationState:flutter::AppLifecycleState::kResumed];
 }
 
 /**
