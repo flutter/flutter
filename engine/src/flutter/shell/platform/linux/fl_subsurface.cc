@@ -96,6 +96,14 @@ FlSubsurface* fl_subsurface_new(GtkWidget* widget) {
       self->subcompositor, self->surface, parent_surface);
   wl_subsurface_set_sync(self->subsurface);
 
+  // Give the subsurface an empty input region so pointer, touch and keyboard
+  // events pass through to the parent (GTK) surface, which handles all input
+  // for the view.
+  struct wl_region* input_region =
+      wl_compositor_create_region(self->compositor);
+  wl_surface_set_input_region(self->surface, input_region);
+  wl_region_destroy(input_region);
+
   gint x, y;
   gtk_widget_translate_coordinates(widget, toplevel, 0, 0, &x, &y);
   wl_subsurface_set_position(self->subsurface, x, y);
