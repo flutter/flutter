@@ -39,6 +39,7 @@ const templateDefaultGradleVersion = '9.1.0';
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * AGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
+//  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/FlutterPluginUtilsTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
 const templateAndroidGradlePluginVersion = '9.0.1';
 const templateAndroidGradlePluginVersionForModule = '9.0.1';
