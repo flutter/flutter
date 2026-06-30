@@ -961,6 +961,46 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         contains('The iOS deployment target is too low. Xcode requires at least 15.0.'),
       );
     });
+
+    testWithoutContext(
+      'iOS deployment target too low shows fallback message if version cannot be parsed',
+      () async {
+        final buildResult = XcodeBuildResult(
+          success: false,
+          stdout: '',
+          xcodeBuildExecution: XcodeBuildExecution(
+            buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+            appDirectory: '/blah/blah',
+            environmentType: EnvironmentType.physical,
+            buildSettings: buildSettings,
+          ),
+          xcResult: XCResult.test(
+            issues: <XCResultIssue>[
+              XCResultIssue.test(
+                message:
+                    "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x.",
+                subType: 'Error',
+              ),
+            ],
+          ),
+        );
+        final fs = MemoryFileSystem.test();
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          logger: logger,
+          analytics: fakeAnalytics,
+          fileSystem: fs,
+          platform: FlutterDarwinPlatform.ios,
+          project: FakeFlutterProject(fileSystem: fs),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            'The iOS deployment target is too low. Xcode requires at least the minimum supported version.',
+          ),
+        );
+      },
+    );
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {

@@ -1136,12 +1136,14 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       unableToFindArmDestination: true,
     );
-  } else if (message.contains('IPHONEOS_DEPLOYMENT_TARGET')) {
+  } else if (message.contains("deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to") &&
+      message.contains('but the range of supported deployment target versions is')) {
     final String? minVersion = _parseMinDeploymentTarget(message);
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
       iOSMinDeploymentTarget: minVersion,
+      hasIOSMinDeploymentTargetIssue: true,
     );
   }
   return _XCResultIssueHandlingResult(
@@ -1167,6 +1169,7 @@ Future<bool> _handleIssues(
   var issueDetected = false;
   var modifiedPrecompiledSource = false;
   var unableToFindArmDestination = false;
+  var hasIOSMinDeploymentTargetIssue = false;
   String? missingPlatform;
   String? iOSMinDeploymentTarget;
   final duplicateModules = <String>[];
@@ -1197,6 +1200,9 @@ Future<bool> _handleIssues(
       unableToFindArmDestination = handlingResult.unableToFindArmDestination;
       if (handlingResult.iOSMinDeploymentTarget != null) {
         iOSMinDeploymentTarget = handlingResult.iOSMinDeploymentTarget;
+      }
+      if (handlingResult.hasIOSMinDeploymentTargetIssue) {
+        hasIOSMinDeploymentTargetIssue = true;
       }
       issueDetected = true;
     }
@@ -1301,7 +1307,7 @@ Future<bool> _handleIssues(
         '════════════════════════════════════════════════════════════════════════════════',
       );
     }
-  } else if (iOSMinDeploymentTarget != null) {
+  } else if (hasIOSMinDeploymentTargetIssue) {
     logger.printError(_iOSDeploymentTargetTooLowMessage(iOSMinDeploymentTarget), emphasis: true);
   }
   return issueDetected;
@@ -1504,18 +1510,20 @@ String? _parseMinDeploymentTarget(String message) {
   return pattern.firstMatch(message)?.group(1);
 }
 
-String _iOSDeploymentTargetTooLowMessage(String minVersion) =>
-    '''
+String _iOSDeploymentTargetTooLowMessage(String? minVersion) {
+  final String versionText = minVersion ?? 'the minimum supported version';
+  return '''
 ════════════════════════════════════════════════════════════════════════════════
-The iOS deployment target is too low. Xcode requires at least $minVersion.
+The iOS deployment target is too low. Xcode requires at least $versionText.
 
 To upgrade your iOS deployment target, follow these steps:
   1. Open the project in Xcode:
      open ios/Runner.xcworkspace
   2. Select the "Runner" project in the project navigator.
   3. Select the "Runner" TARGET, and in the "General" tab:
-     Update "Minimum Deployments" to at least $minVersion.
+     Update "Minimum Deployments" to at least $versionText.
 ════════════════════════════════════════════════════════════════════════════════''';
+}
 
 // The result of [_handleXCResultIssue].
 class _XCResultIssueHandlingResult {
@@ -1528,6 +1536,7 @@ class _XCResultIssueHandlingResult {
     this.modifiedPrecompiledSource = false,
     this.unableToFindArmDestination = false,
     this.iOSMinDeploymentTarget,
+    this.hasIOSMinDeploymentTargetIssue = false,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1553,6 +1562,8 @@ class _XCResultIssueHandlingResult {
   final bool unableToFindArmDestination;
 
   final String? iOSMinDeploymentTarget;
+
+  final bool hasIOSMinDeploymentTargetIssue;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';

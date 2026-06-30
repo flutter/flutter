@@ -1494,4 +1494,91 @@ STDERR STUFF
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
+
+  testUsingContext(
+    'macOS deployment target too low shows fallback message if version cannot be parsed',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: fakeProcessManager,
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      createMinimalMockProjectFiles();
+
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            flutterProject.macos.xcodeWorkspace!.path,
+            '-configuration',
+            'Debug',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            flutterBuildDir.absolute.path,
+            '-destination',
+            'platform=macOS,arch=x86_64',
+            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          exitCode: 1,
+          stdout:
+              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x. (in target 'Runner' from project 'Runner')",
+        ),
+      );
+
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(
+        testLogger.errorText,
+        contains(
+          'The macOS deployment target is too low. Xcode requires at least the minimum supported version.',
+        ),
+      );
+      expect(
+        testLogger.errorText,
+        contains('Select the "Runner" TARGET, and in the "General" tab:'),
+      );
+      expect(
+        testLogger.errorText,
+        contains('Update "Minimum Deployments" to at least the minimum supported version.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
 }
