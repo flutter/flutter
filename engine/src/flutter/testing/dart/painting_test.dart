@@ -297,8 +297,8 @@ Image _backdropBlurWithTileMode(TileMode? tileMode) {
 Future<Image> _backdropShaderWithFilterQuality(FilterQuality filterQuality) async {
   const int width = 16;
   const int height = 4;
-  const double widthAsDouble = 16.0;
-  const double heightAsDouble = 4.0;
+  double widthAsDouble = width.toDouble();
+  double heightAsDouble = height.toDouble();
   const double stripeWidth = 1.0;
 
   final FragmentProgram program = await FragmentProgram.fromAsset(
