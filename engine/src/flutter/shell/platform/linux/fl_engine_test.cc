@@ -125,7 +125,7 @@ TEST_F(FlEngineTest, MousePointer) {
   StartEngine();
   fl_engine_send_mouse_pointer_event(engine, 1, kDown, 1234567890, 800, 600,
                                      kFlutterPointerDeviceKindMouse, 1.2, -3.4,
-                                     kFlutterPointerButtonMouseSecondary, {});
+                                     kFlutterPointerButtonMouseSecondary, 0, 0);
 
   EXPECT_TRUE(called);
 }
@@ -148,12 +148,9 @@ TEST_F(FlEngineTest, MousePointerDeviceState) {
       }));
 
   StartEngine();
-  FlPointerDeviceState device_state = {};
-  device_state.pressure = 0.5;
-  device_state.rotation = 90.0;
   fl_engine_send_mouse_pointer_event(
       engine, 1, kDown, 1234567890, 800, 600, kFlutterPointerDeviceKindMouse,
-      1.2, -3.4, kFlutterPointerButtonMouseSecondary, device_state);
+      1.2, -3.4, kFlutterPointerButtonMouseSecondary, 90.0, 0.5);
 
   EXPECT_TRUE(device_state_sent);
 }

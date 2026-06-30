@@ -1202,7 +1202,8 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
                                         double scroll_delta_x,
                                         double scroll_delta_y,
                                         int64_t buttons,
-                                        FlPointerDeviceState device_state) {
+                                        double rotation,
+                                        double pressure) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
   if (self->engine == nullptr) {
@@ -1228,12 +1229,12 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   // documentation defines pressure as normalized from 0.0 to 1.0, which matches
   // Flutter's expected pressure range.
   // See: https://refspecs.linuxbase.org/gtk/2.6/gdk/gdk-Input-Devices.html
-  fl_event.pressure = device_state.pressure;
+  fl_event.pressure = pressure;
   fl_event.pressure_min = 0.0;
   fl_event.pressure_max = 1.0;
   // GTK reports rotation in degrees, so convert it to radians for
   // FlutterPointerEvent.rotation.
-  fl_event.rotation = device_state.rotation * G_PI / 180.0;
+  fl_event.rotation = rotation * G_PI / 180.0;
   if (self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1) !=
       kSuccess) {
     g_warning("Failed to send pointer event");
