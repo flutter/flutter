@@ -26,17 +26,34 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
  */
 
 /**
+ * FlCompositorOpenGLFrameSharing:
+ * @FL_COMPOSITOR_OPENGL_FRAME_SHARING_EGL_IMAGE: the rendered frame is shared
+ * with the consuming context using an EGLImage. Used when the consumer renders
+ * with a separate, non-shared EGL context (e.g. GTK's GL context on Wayland).
+ * @FL_COMPOSITOR_OPENGL_FRAME_SHARING_SHARED_CONTEXT: the consuming context
+ * shares resources with the engine context, so the frame's texture is accessed
+ * directly without an EGLImage.
+ * @FL_COMPOSITOR_OPENGL_FRAME_SHARING_CPU_COPY: the rendered frame is copied to
+ * CPU memory. Used when the contexts cannot share textures (e.g. GLX on X11).
+ */
+typedef enum {
+  FL_COMPOSITOR_OPENGL_FRAME_SHARING_EGL_IMAGE,
+  FL_COMPOSITOR_OPENGL_FRAME_SHARING_SHARED_CONTEXT,
+  FL_COMPOSITOR_OPENGL_FRAME_SHARING_CPU_COPY,
+} FlCompositorOpenGLFrameSharing;
+
+/**
  * fl_compositor_opengl_new:
  * @opengl_manager: an #FlOpenGLManager
- * @shareable: %TRUE if the can use a framebuffer that is shared between
- * contexts.
+ * @frame_sharing: how rendered frames are shared with the consuming context.
  *
  * Creates a new OpenGL compositor.
  *
  * Returns: a new #FlCompositorOpenGL.
  */
-FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
-                                             gboolean shareable);
+FlCompositorOpenGL* fl_compositor_opengl_new(
+    FlOpenGLManager* opengl_manager,
+    FlCompositorOpenGLFrameSharing frame_sharing);
 
 /**
  * fl_compositor_opengl_present_layers:

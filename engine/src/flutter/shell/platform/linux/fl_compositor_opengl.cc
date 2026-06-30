@@ -16,8 +16,8 @@
 struct _FlCompositorOpenGL {
   GObject parent_instance;
 
-  // TRUE if can share framebuffers between contexts.
-  gboolean shareable;
+  // How rendered frames are shared with the consuming context.
+  FlCompositorOpenGLFrameSharing frame_sharing;
 
   // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
@@ -25,7 +25,8 @@ struct _FlCompositorOpenGL {
   // Last rendered frame.
   FlFramebuffer* framebuffer;
 
-  // Last rendered frame pixels (only set if shareable is FALSE).
+  // Last rendered frame pixels (only set if frame_sharing is
+  // FL_COMPOSITOR_OPENGL_FRAME_SHARING_CPU_COPY).
   uint8_t* pixels;
 
   // Shader program used to composite layers.
@@ -52,12 +53,13 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
 
-FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
-                                             gboolean shareable) {
+FlCompositorOpenGL* fl_compositor_opengl_new(
+    FlOpenGLManager* opengl_manager,
+    FlCompositorOpenGLFrameSharing frame_sharing) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
 
-  self->shareable = shareable;
+  self->frame_sharing = frame_sharing;
   self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
   self->shader = fl_compositor_opengl_shader_new(opengl_manager);
 
@@ -128,11 +130,16 @@ gboolean fl_compositor_opengl_present_layers(FlCompositorOpenGL* self,
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
     g_clear_object(&self->framebuffer);
+    // An EGLImage is only required when the frame is shared with a separate,
+    // non-shared context. Frames consumed by a shared context use the
+    // framebuffer's texture directly.
+    gboolean use_egl_image =
+        self->frame_sharing == FL_COMPOSITOR_OPENGL_FRAME_SHARING_EGL_IMAGE;
     self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, self->shareable);
+        fl_framebuffer_new(general_format, width, height, use_egl_image);
 
-    // If not shareable make buffer to copy frame pixels into.
-    if (!self->shareable) {
+    // If the frame is copied via the CPU make a buffer to copy the pixels into.
+    if (self->frame_sharing == FL_COMPOSITOR_OPENGL_FRAME_SHARING_CPU_COPY) {
       size_t data_length = width * height * 4;
       self->pixels =
           static_cast<uint8_t*>(g_realloc(self->pixels, data_length));
@@ -211,7 +218,7 @@ gboolean fl_compositor_opengl_present_layers(FlCompositorOpenGL* self,
   glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
                       saved_dst_alpha);
 
-  if (!self->shareable) {
+  if (self->frame_sharing == FL_COMPOSITOR_OPENGL_FRAME_SHARING_CPU_COPY) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER,
                       fl_framebuffer_get_id(self->framebuffer));
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);

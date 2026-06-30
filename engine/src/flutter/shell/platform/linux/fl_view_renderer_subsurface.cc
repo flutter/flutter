@@ -66,18 +66,15 @@ static void update_subsurface_position(FlViewRendererSubsurface* self) {
 
 // Sets up the EGL context and window surface for the subsurface.
 static gboolean setup_egl(FlViewRendererSubsurface* self,
-                          struct wl_display* display,
                           size_t width,
                           size_t height,
                           gint scale) {
-  self->egl_display =
-      eglGetPlatformDisplayEXT(EGL_PLATFORM_WAYLAND_EXT, display, nullptr);
+  // Share the engine's EGL display and render context so the engine's frame
+  // texture can be accessed directly, without using EGLImage.
+  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
+  self->egl_display = fl_opengl_manager_get_display(opengl_manager);
   if (self->egl_display == EGL_NO_DISPLAY) {
     g_warning("Failed to get EGL display for subsurface");
-    return FALSE;
-  }
-  if (!eglInitialize(self->egl_display, nullptr, nullptr)) {
-    g_warning("Failed to initialize EGL for subsurface");
     return FALSE;
   }
 
@@ -106,8 +103,9 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
 
   static const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
                                               EGL_NONE};
-  self->egl_context = eglCreateContext(self->egl_display, self->egl_config,
-                                       EGL_NO_CONTEXT, context_attributes);
+  self->egl_context = eglCreateContext(
+      self->egl_display, self->egl_config,
+      fl_opengl_manager_get_context(opengl_manager), context_attributes);
   if (self->egl_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL context for subsurface");
     return FALSE;
@@ -203,7 +201,6 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
     g_warning("FlViewRendererSubsurface requires a Wayland display");
     return;
   }
-  struct wl_display* display = gdk_wayland_display_get_wl_display(gdk_display);
 
   // Create a subsurface on the toplevel's surface.
   self->subsurface = fl_subsurface_new(widget);
@@ -214,14 +211,15 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
   GtkAllocation allocation;
   gtk_widget_get_allocation(widget, &allocation);
   gint scale_factor = gtk_widget_get_scale_factor(widget);
-  if (!setup_egl(self, display, allocation.width, allocation.height,
-                 scale_factor)) {
+  if (!setup_egl(self, allocation.width, allocation.height, scale_factor)) {
     return;
   }
 
-  // Wayland uses EGL so the engine frame can be shared via EGLImage.
+  // The subsurface's EGL context shares resources with the engine, so the
+  // engine's frame texture is accessed directly without using EGLImage.
   self->compositor = fl_compositor_opengl_new(
-      fl_engine_get_opengl_manager(self->engine), TRUE);
+      fl_engine_get_opengl_manager(self->engine),
+      FL_COMPOSITOR_OPENGL_FRAME_SHARING_SHARED_CONTEXT);
 }
 
 // Implements GtkWidget::unrealize.
@@ -271,7 +269,7 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
 
   FlFramebuffer* framebuffer =
       fl_compositor_opengl_get_framebuffer(self->compositor);
-  if (framebuffer == nullptr || !fl_framebuffer_get_shareable(framebuffer)) {
+  if (framebuffer == nullptr) {
     return TRUE;
   }
 
@@ -294,16 +292,21 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
     wl_egl_window_resize(self->egl_window, width, height, 0, 0);
   }
 
-  // Blit the composited frame into the subsurface. The sibling framebuffer is
-  // explicitly released before the context is cleared, as destroying it makes
-  // OpenGL calls that require a current context.
-  FlFramebuffer* sibling = fl_framebuffer_create_sibling(framebuffer);
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(sibling));
+  // The subsurface context shares resources with the engine, so the engine's
+  // frame texture can be read directly. Attach it to a framebuffer and blit it
+  // to the subsurface window surface. The framebuffer is created and deleted
+  // while the context is current.
+  GLuint read_framebuffer;
+  glGenFramebuffers(1, &read_framebuffer);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, read_framebuffer);
+  glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                         GL_TEXTURE_2D,
+                         fl_framebuffer_get_texture_id(framebuffer), 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
                     GL_COLOR_BUFFER_BIT, GL_NEAREST);
   eglSwapBuffers(self->egl_display, self->egl_surface);
-  g_object_unref(sibling);
+  glDeleteFramebuffers(1, &read_framebuffer);
 
   eglMakeCurrent(self->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                  EGL_NO_CONTEXT);
@@ -361,9 +364,9 @@ static void fl_view_renderer_subsurface_present_layers(
   {
     g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
-    // Composite the layers into the engine's shareable framebuffer. The frame
-    // is blitted to the subsurface later, on the GTK thread, so the engine's
-    // rendering context is not disturbed here.
+    // Composite the layers into the engine's framebuffer. The frame is blitted
+    // to the subsurface later, on the GTK thread, so the engine's rendering
+    // context is not disturbed here.
     fl_compositor_opengl_present_layers(self->compositor, layers, layers_count);
   }
 

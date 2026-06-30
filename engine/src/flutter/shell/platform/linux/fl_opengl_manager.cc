@@ -114,3 +114,11 @@ gboolean fl_opengl_manager_clear_current(FlOpenGLManager* self) {
   return eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                         EGL_NO_CONTEXT) == EGL_TRUE;
 }
+
+gpointer fl_opengl_manager_get_display(FlOpenGLManager* self) {
+  return self->display;
+}
+
+gpointer fl_opengl_manager_get_context(FlOpenGLManager* self) {
+  return self->render_context;
+}

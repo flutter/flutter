@@ -24,7 +24,8 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   void SetUp() override {
     opengl_manager = fl_opengl_manager_new();
     renderable = fl_mock_renderable_new();
-    compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
+    compositor = fl_compositor_opengl_new(
+        opengl_manager, FL_COMPOSITOR_OPENGL_FRAME_SHARING_CPU_COPY);
     fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   }
 

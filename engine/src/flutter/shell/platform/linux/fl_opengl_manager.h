@@ -64,6 +64,29 @@ gboolean fl_opengl_manager_make_platform_current(FlOpenGLManager* manager);
  */
 gboolean fl_opengl_manager_clear_current(FlOpenGLManager* manager);
 
+/**
+ * fl_opengl_manager_get_display:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the EGL display the engine renders to. This can be used to create
+ * additional EGL contexts that share resources with the engine.
+ *
+ * Returns: an %EGLDisplay.
+ */
+gpointer fl_opengl_manager_get_display(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_get_context:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the EGL context the engine renders with. This can be used as a share
+ * context when creating additional EGL contexts so they can access textures
+ * rendered by the engine directly (without using EGLImage).
+ *
+ * Returns: an %EGLContext.
+ */
+gpointer fl_opengl_manager_get_context(FlOpenGLManager* manager);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_OPENGL_MANAGER_H_

@@ -126,12 +126,14 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
   // If using Wayland, then EGL is in use and we can access the frame
   // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
   // then we have to copy the texture via the CPU.
-  gboolean shareable =
-      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
+  FlCompositorOpenGLFrameSharing frame_sharing =
+      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)))
+          ? FL_COMPOSITOR_OPENGL_FRAME_SHARING_EGL_IMAGE
+          : FL_COMPOSITOR_OPENGL_FRAME_SHARING_CPU_COPY;
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   self->compositor = fl_compositor_opengl_new(
-      fl_engine_get_opengl_manager(self->engine), shareable);
+      fl_engine_get_opengl_manager(self->engine), frame_sharing);
 }
 
 // Implements GtkWidget::draw.
