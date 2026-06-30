@@ -5,7 +5,7 @@ publish_to: none
 
 resolution: workspace
 environment:
-  sdk: ^3.13.0-0
+  sdk: '>=3.5.0-0 <4.0.0'
 
 
 dependencies:
@@ -14,7 +14,7 @@ dependencies:
   hooks: ^2.0.0
   data_assets: ^0.20.0
   record_use: 0.6.0
-  meta: 1.18.2
+  meta: any
 
 dev_dependencies:
   flutter_test:
@@ -23,4 +23,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: gl7kb7
+# PUBSPEC CHECKSUM: ka5c8a

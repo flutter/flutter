@@ -228,13 +228,13 @@ class PlatformViewEmbedder {
                   '${rrect.bottom}px ${rrect.left}px '
                   'round ${rrect.blRadiusX}px)';
             } else {
-              final path = ui.Path() as LazyPath;
+              final path = ui.Path() as EnginePath;
               path.addRRect(mutator.rrect!);
-              clipView.style.clipPath = 'path("${path.builtPath.toSvgString()}")';
+              clipView.style.clipPath = 'path("${path.backendPath.toSvgString()}")';
               path.collect();
             }
           } else if (mutator.path != null) {
-            clipView.style.clipPath = 'path("${mutator.path!.builtPath.toSvgString()}")';
+            clipView.style.clipPath = 'path("${mutator.path!.backendPath.toSvgString()}")';
           }
           _resetAnchor(clipView);
           head = clipView;
@@ -687,7 +687,7 @@ class Mutator {
   const Mutator.clipRect(ui.Rect rect) : this._(MutatorType.clipRect, rect, null, null, null, null);
   const Mutator.clipRRect(ui.RRect rrect)
     : this._(MutatorType.clipRRect, null, rrect, null, null, null);
-  const Mutator.clipPath(LazyPath path)
+  const Mutator.clipPath(EnginePath path)
     : this._(MutatorType.clipPath, null, null, path, null, null);
   const Mutator.transform(Matrix4 matrix)
     : this._(MutatorType.transform, null, null, null, matrix, null);
@@ -698,7 +698,7 @@ class Mutator {
   final MutatorType type;
   final ui.Rect? rect;
   final ui.RRect? rrect;
-  final LazyPath? path;
+  final EnginePath? path;
   final Matrix4? matrix;
   final int? alpha;
 
@@ -756,7 +756,7 @@ class MutatorsStack extends Iterable<Mutator> {
     pushClipRRect(rsuperellipse.toApproximateRRect());
   }
 
-  void pushClipPath(LazyPath path) {
+  void pushClipPath(EnginePath path) {
     _mutators.add(Mutator.clipPath(path));
   }
 

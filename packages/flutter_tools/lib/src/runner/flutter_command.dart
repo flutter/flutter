@@ -1366,6 +1366,9 @@ abstract class FlutterCommand extends Command<void> {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    // TODO(nshahan): Delete when fully migrated to new module system,
+    // https://github.com/flutter/flutter/issues/142060.
+    bool? forcedWebEnableHotReload,
   }) async {
     final bool trackWidgetCreation =
         argParser.options.containsKey('track-widget-creation') && boolArg('track-widget-creation');
@@ -1404,8 +1407,9 @@ abstract class FlutterCommand extends Command<void> {
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
     final bool webEnableHotReload =
-        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload);
+        forcedWebEnableHotReload ??
+        (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+            boolArg(FlutterOptions.kWebExperimentalHotReload));
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&

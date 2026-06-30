@@ -285,9 +285,6 @@ careers.
 
 The `blocked` label can be used to indicate that a particular issue is unable to make progress until some other problem is resolved. This is particularly useful if you use your own list of assigned issues to drive your work.
 
-The `good first issue` label should be used on issues that seem like friendly introductions to contributing to Flutter. They should be relatively well-understood issues that are not controversial, do not require a design doc, and do not require a deep understanding of our stack, but are sufficiently involved that they at least require a basic test to be added.
-
-
 ## Milestones
 
 We do not use GitHub milestones to track work.
