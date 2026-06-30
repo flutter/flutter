@@ -1347,8 +1347,7 @@ void main() {
 
     final Offset newGlobalPos = handleGlobalPos + const Offset(50.0, 0.0);
 
-    // Move the drag handle. globalToLocal returns non-finite coordinates,
-    // making distanceDragged NaN, leading to NaN.floor() which throws.
+    // Move the drag handle, this should not crash.
     await gesture.moveTo(newGlobalPos);
     await gesture.moveTo(newGlobalPos + const Offset(10.0, 0.0));
     await tester.pump();
@@ -1357,6 +1356,97 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'dragging selection handle does not crash when layout is degenerate (preferredLineHeight == 0)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/187644
+      final controller = TextEditingController(text: 'The quick fox jumps over the fence.');
+      final focusNode = FocusNode();
+      final selectionControls = _MockTextSelectionHandleControls();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+
+      var scaleFactor = 1.0;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter localSetState) {
+                setState = localSetState;
+                return SizedBox(
+                  width: 300,
+                  height: 200,
+                  child: MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: TextScaler.linear(scaleFactor)),
+                    child: TestTextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      maxLines: null,
+                      style: const TextStyle(fontSize: 14.0, height: 1.0),
+                      showSelectionHandles: true,
+                      selectionControls: selectionControls,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Focus the text field to allow selection.
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // Programmatically select a range of text to show the selection handles.
+      controller.selection = const TextSelection(baseOffset: 14, extentOffset: 19);
+      await tester.pumpAndSettle();
+
+      // Find the RenderEditable to get the handle coordinates.
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+      expect(endpoints.length, 2);
+
+      // Calculate the global coordinate of the end handle.
+      final Offset handleLocalPos = endpoints[1].point;
+      final Offset handleGlobalPos = renderEditable.localToGlobal(handleLocalPos);
+
+      // Start the drag gesture on the end handle.
+      final TestGesture gesture = await tester.startGesture(handleGlobalPos);
+      await tester.pump();
+
+      // Simulate a transient degenerate layout state mid-drag.
+      // By setting scaleFactor to 0.0, the RenderEditable's preferredLineHeight
+      // will become 0.0 on the next layout pass.
+      setState(() {
+        scaleFactor = 0.0;
+      });
+      await tester.pump();
+
+      // Move the drag handle. This triggers the drag update callback which
+      // should not crash.
+      final Offset newGlobalPos = handleGlobalPos + const Offset(50.0, 0.0);
+
+      // We expect this to not throw.
+      await gesture.moveTo(newGlobalPos);
+      await gesture.moveTo(newGlobalPos + const Offset(20.0, 0.0));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      // Clean up the gesture.
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+  );
 
   group('SelectionOverlay', () {
     Future<SelectionOverlay> pumpApp(
