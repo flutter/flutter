@@ -642,11 +642,9 @@ class DevFS {
           assetPathsToEvict: assetPathsToEvict,
           shaderPathsToEvict: shaderPathsToEvict,
           bundleFirstUpload: bundleFirstUpload,
-          invalidatedFiles: invalidatedFiles,
           onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
         syncedBytes += bundleSyncedBytes;
-        _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
       } on Exception catch (err, stackTrace) {
         _logger.printError('Error updating bundle: $err');
         _logger.printTrace('$stackTrace');
@@ -665,10 +663,7 @@ class DevFS {
     _previousCompiled = lastCompiled;
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
-    sources = <Uri>{
-      ...compilerOutput.sources,
-      ..._assetTransformer.dependencies.values.expand((Set<Uri> uris) => uris),
-    }.toList();
+    sources = compilerOutput.sources;
     //
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.
@@ -722,30 +717,23 @@ class DevFS {
     required Set<String> assetPathsToEvict,
     required Set<String> shaderPathsToEvict,
     required bool bundleFirstUpload,
-    List<Uri> invalidatedFiles = const <Uri>[],
     bool syncAllAssetsOnFirstUpload = false,
     void Function()? onFontManifestUpdated,
   }) async {
+    if (bundleFirstUpload && !syncAllAssetsOnFirstUpload) {
+      for (final AssetBundleEntry entry in bundle.entries.values) {
+        entry.content.markClean();
+      }
+      return 0;
+    }
+
     final String assetBuildDirPrefix = _asUriPath(fileSystem, assetDirectory);
     final pendingAssetBuilds = <Future<void>>[];
     var syncedBytes = 0;
 
-    final Set<Uri> invalidatedSet = invalidatedFiles.toSet();
     final syncedEntries = <AssetBundleEntry>[];
     bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
-      final bool hasTransformers = entry.transformers.isNotEmpty;
-      final bool skipSync = bundleFirstUpload && !syncAllAssetsOnFirstUpload && !hasTransformers;
-
-      if (skipSync) {
-        entry.content.markClean();
-        return;
-      }
-
-      final bool isEntryModified = entry.content.isModified;
-      final Set<Uri>? deps = assetTransformer.dependencies[archivePath];
-      final bool hasInvalidatedDependencies = deps != null && deps.any(invalidatedSet.contains);
-
-      if (!bundleFirstUpload && !isEntryModified && !hasInvalidatedDependencies) {
+      if (!bundleFirstUpload && !entry.content.isModified) {
         return;
       }
       syncedEntries.add(entry);
@@ -778,14 +766,12 @@ class DevFS {
               }
               content = transformed;
             }
-            if (!bundleFirstUpload || syncAllAssetsOnFirstUpload) {
-              final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
-              if (compiled == null) {
-                throw DevFSShaderCompilationException(archivePath, 'Failed to compile shader');
-              }
-              dirtyEntries[deviceUri] = compiled;
-              syncedBytes += compiled.size;
+            final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
+            if (compiled == null) {
+              throw DevFSShaderCompilationException(archivePath, 'Failed to compile shader');
             }
+            dirtyEntries[deviceUri] = compiled;
+            syncedBytes += compiled.size;
             if (!bundleFirstUpload) {
               shaderPathsToEvict.add(archivePath);
             }
@@ -807,10 +793,8 @@ class DevFS {
             if (content == null) {
               throw AssetTransformationException(archivePath, 'Failed to transform asset');
             }
-            if (!bundleFirstUpload || syncAllAssetsOnFirstUpload) {
-              dirtyEntries[deviceUri] = content;
-              syncedBytes += content.size;
-            }
+            dirtyEntries[deviceUri] = content;
+            syncedBytes += content.size;
             if (!bundleFirstUpload) {
               assetPathsToEvict.add(archivePath);
             }

@@ -17,9 +17,9 @@ hooks:
 dependencies:
   hooks: 2.0.2
   logging: 1.3.0
-  native_toolchain_c: 0.19.1
+  native_toolchain_c: 0.19.2
 
 dev_dependencies:
   test: 1.29.0
 
-# PUBSPEC CHECKSUM: ofi7rs
+# PUBSPEC CHECKSUM: rdht57
