@@ -111,7 +111,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  static final _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
+  static final _kDeviceRegex = RegExp(r'^(\S+)\s+(no permissions|\S+)\s*(.*)');
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
   /// of devices and possible device issue diagnostics. Either argument can be null,
@@ -174,6 +174,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
             );
           case 'offline':
             diagnostics?.add('Device $deviceID is offline.');
+          case 'no permissions':
+            final udevMessage = _platform.isLinux ? '\nPlease check your udev rules.' : '';
+            diagnostics?.add('Device $deviceID has no permissions.$udevMessage');
           default:
             devices?.add(
               AndroidDevice(

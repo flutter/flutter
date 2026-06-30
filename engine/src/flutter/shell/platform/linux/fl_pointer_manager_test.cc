@@ -6,15 +6,13 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-TEST(FlPointerManagerTest, EnterLeave) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+class FlPointerManagerTest : public flutter::testing::LinuxTest {};
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, EnterLeave) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -51,13 +49,8 @@ TEST(FlPointerManagerTest, EnterLeave) {
   EXPECT_EQ(pointer_events[1].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, EnterEnter) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, EnterEnter) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -88,13 +81,8 @@ TEST(FlPointerManagerTest, EnterEnter) {
   EXPECT_EQ(pointer_events[0].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, EnterLeaveLeave) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, EnterLeaveLeave) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -134,13 +122,8 @@ TEST(FlPointerManagerTest, EnterLeaveLeave) {
   EXPECT_EQ(pointer_events[1].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, EnterButtonPress) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, EnterButtonPress) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -178,13 +161,8 @@ TEST(FlPointerManagerTest, EnterButtonPress) {
   EXPECT_EQ(pointer_events[1].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, NoEnterButtonPress) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, NoEnterButtonPress) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -221,13 +199,8 @@ TEST(FlPointerManagerTest, NoEnterButtonPress) {
   EXPECT_EQ(pointer_events[1].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonReleasePrimary) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonReleasePrimary) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -266,13 +239,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonReleasePrimary) {
   EXPECT_EQ(pointer_events[2].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonReleaseSecondary) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseSecondary) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -311,13 +279,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonReleaseSecondary) {
   EXPECT_EQ(pointer_events[2].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonReleaseMiddle) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseMiddle) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -356,13 +319,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonReleaseMiddle) {
   EXPECT_EQ(pointer_events[2].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonReleaseBack) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseBack) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -400,13 +358,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonReleaseBack) {
   EXPECT_EQ(pointer_events[2].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonReleaseForward) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseForward) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -444,13 +397,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonReleaseForward) {
   EXPECT_EQ(pointer_events[2].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -518,13 +466,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
   EXPECT_EQ(pointer_events[6].buttons, 0);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -567,13 +510,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
   EXPECT_EQ(pointer_events[2].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -616,13 +554,8 @@ TEST(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {
   EXPECT_EQ(pointer_events[2].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, NoButtonPressButtonRelease) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, NoButtonPressButtonRelease) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -645,13 +578,8 @@ TEST(FlPointerManagerTest, NoButtonPressButtonRelease) {
   EXPECT_EQ(pointer_events.size(), 0u);
 }
 
-TEST(FlPointerManagerTest, Motion) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, Motion) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -696,13 +624,8 @@ TEST(FlPointerManagerTest, Motion) {
   EXPECT_EQ(pointer_events[3].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, Drag) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, Drag) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
@@ -760,13 +683,8 @@ TEST(FlPointerManagerTest, Drag) {
   EXPECT_EQ(pointer_events[5].view_id, 42);
 }
 
-TEST(FlPointerManagerTest, DeviceKind) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlPointerManagerTest, DeviceKind) {
+  StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
   fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(

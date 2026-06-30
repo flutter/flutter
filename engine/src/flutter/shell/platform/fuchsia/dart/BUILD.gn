@@ -10,7 +10,7 @@ application_snapshot("kernel_compiler") {
 
   deps = [ "../flutter/kernel:kernel_platform_files($host_toolchain)" ]
 
-  package_config = rebase_path("$dart_src/.dart_tool/package_config.json")
+  package_config = "$dart_src/.dart_tool/package_config.json"
 
   training_args = [
     "--train",
@@ -38,7 +38,7 @@ application_snapshot("_list_libraries_kernel") {
   visibility = [ ":*" ]
   snapshot_kind = "kernel"
   main_dart = "$dart_src/pkg/vm/bin/list_libraries.dart"
-  package_config = rebase_path("$dart_src/.dart_tool/package_config.json")
+  package_config = "$dart_src/.dart_tool/package_config.json"
   training_args = []
   output = "$target_gen_dir/list_libraries.dart.dill"
 }
@@ -46,10 +46,10 @@ application_snapshot("_list_libraries_kernel") {
 application_snapshot("list_libraries") {
   deps = [ ":_list_libraries_kernel" ]
   main_dart = "$dart_src/pkg/vm/bin/list_libraries.dart"
-  package_config = rebase_path("$dart_src/.dart_tool/package_config.json")
+  package_config = "$dart_src/.dart_tool/package_config.json"
   training_args = [
     # train against the dill file which is generated for this snapshot.
-    rebase_path("$target_gen_dir/list_libraries.dart.dill"),
+    rebase_path("$target_gen_dir/list_libraries.dart.dill", root_build_dir),
   ]
 }
 
