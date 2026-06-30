@@ -44,6 +44,11 @@ FLUTTER_ASSERT_ARC
 static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
 static constexpr CGFloat kScrollViewContentSize = 2.0;
 
+// All known notch/Dynamic Island bars are >=44pt; non-notch (iPad, iPhone SE)
+// are <=32pt. 40pt sits safely in the gap between them.
+// See: https://github.com/flutter/flutter/issues/175520
+static constexpr CGFloat kNotchStatusBarThreshold = 40.0;
+
 static NSString* const kFlutterRestorationStateAppData = @"FlutterRestorationStateAppData";
 
 NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemanticsUpdate";
@@ -1539,14 +1544,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     // Only correct on non-notch devices where the status bar is the sole top
     // safe-area contributor. Notch/Dynamic Island devices have safeAreaInsets.top
     // driven by the physical cutout and must not be adjusted.
-    // All known notch/Dynamic Island bars are >=44pt; non-notch (iPad, iPhone SE)
-    // are <=32pt. 40pt sits safely in the gap between them.
-    // See: https://github.com/flutter/flutter/issues/175520
-    constexpr CGFloat kNotchStatusBarThreshold = 40.0;
     UIWindowScene* scene = (UIWindowScene*)self.view.window.windowScene;
-    if (scene.statusBarManager.isStatusBarHidden && _statusBarHeightBeforeHiding > 0 &&
-        _statusBarHeightBeforeHiding < kNotchStatusBarThreshold) {
-      topPadding = MAX(0.0, topPadding - _statusBarHeightBeforeHiding);
+    if (scene.statusBarManager.isStatusBarHidden && self.statusBarHeightBeforeHiding > 0 &&
+        self.statusBarHeightBeforeHiding < kNotchStatusBarThreshold) {
+      topPadding = MAX(0.0, topPadding - self.statusBarHeightBeforeHiding);
     }
   }
   _viewportMetrics.physical_padding_top = topPadding * scale;
@@ -1977,9 +1978,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         // causes UIKit to process the change. On iOS 26+, statusBarFrame.size.height
         // returns 0 once the bar is hidden, so this is the only reliable moment.
         UIWindowScene* scene = (UIWindowScene*)self.viewIfLoaded.window.windowScene;
-        _statusBarHeightBeforeHiding = scene.statusBarManager.statusBarFrame.size.height;
+        self.statusBarHeightBeforeHiding = scene.statusBarManager.statusBarFrame.size.height;
       } else {
-        _statusBarHeightBeforeHiding = 0;
+        self.statusBarHeightBeforeHiding = 0;
       }
     }
     self.flutterPrefersStatusBarHidden = hidden;
