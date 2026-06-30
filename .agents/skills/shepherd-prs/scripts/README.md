@@ -3,7 +3,7 @@
 The `shepherd.dart` tool is a self-contained Dart script designed to automate shepherding, updating, and landing both your own open Pull Requests and approved third-party contributor Pull Requests in the `flutter/flutter` repository.
 
 ## Location
-* **Script**: [shepherd.dart](scripts/shepherd.dart)
+* **Script**: [shepherd.dart](shepherd.dart)
 
 ## Prerequisites
 * **GitHub CLI (`gh`)**: Must be installed and authenticated.

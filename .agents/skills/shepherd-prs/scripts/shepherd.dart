@@ -636,7 +636,7 @@ class ShepherdService {
       for (final failure in failuresToRerun) {
         final int? attempt = retriesMap[failure.name];
         logs.add(
-          '$prPrefix WARNING: Check "${failure.name}" (attempt $attempt/$maxRetries) cannot be re-run via the API due to GitHub App permission policies. Please open https://github.com/${ghClient.owner}/${ghClient.repo}/pull/${pr.number} in your browser and click the "Re-run" button next to the check.',
+          '$prPrefix WARNING: Check "${failure.name}" (attempt $attempt/$maxRetries) cannot be re-run via the API due to GitHub App permission policies. Please click the "Details" link on the failed check in GitHub to open the LUCI build page, and click the "Retry Build" button.',
         );
       }
 

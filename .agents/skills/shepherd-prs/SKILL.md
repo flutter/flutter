@@ -14,7 +14,7 @@ description: >
 
 # Shepherding Pull Requests Skill
 
-This skill allows you to automate shepherding actions on approved PRs using the [shepherd.dart](scripts/shepherd.dart) script. For details on how the tool works, see the [README.md](README.md).
+This skill allows you to automate shepherding actions on approved PRs using the [shepherd.dart](scripts/shepherd.dart) script. For details on how the tool works, see the [README.md](scripts/README.md).
 
 ## Workflow and Interaction Guidelines
 
@@ -40,9 +40,9 @@ When running the `run` command, inspect the returned JSON logs and handle specif
 
 ### 2. Failed Checks & Manual Re-runs
 * Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the API.
-* When a PR has failed checks, the tool will log a warning instructing you to ask the user to manually trigger the re-run via the GitHub web UI.
+* When a PR has failed checks, the tool will log a warning instructing you to ask the user to manually trigger the re-run via the LUCI build page or the Flutter Build Dashboard.
 * *Action*:
-  1. Print the warning and link the user to the PR on GitHub, asking them to click the "Re-run" button for the failed check.
+  1. Print the warning and ask the user to click the "Details" link on the failed check in GitHub to go to the LUCI build page and click the "Retry Build" button.
   2. If the check run continues to fail after manual re-runs, inspect the failure logs using `gh pr view <number> --repo flutter/flutter` or through the checks details, and write a summary of the failure for the user.
 
 ### 3. Target Branch Correction
