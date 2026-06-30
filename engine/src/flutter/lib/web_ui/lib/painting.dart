@@ -690,8 +690,8 @@ class ImageFilter {
   factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) =>
       engine.renderer.composeImageFilters(outer: outer, inner: inner);
 
-  // ignore: avoid_unused_constructor_parameters
   factory ImageFilter.shader(
+    // ignore: avoid_unused_constructor_parameters
     FragmentShader shader, {
     // ignore: avoid_unused_constructor_parameters
     FilterQuality filterQuality = FilterQuality.none,
