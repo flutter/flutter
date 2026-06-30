@@ -775,14 +775,17 @@ class TextSelectionOverlay {
   /// is zero or coordinates are non-finite), indicating that the drag update should
   /// be skipped.
   double? _getHandleDy(double dragDy, double handleDy) {
-    if (renderObject.preferredLineHeight <= 0.0 || !dragDy.isFinite || !handleDy.isFinite) {
+    final double preferredLineHeight = renderObject.preferredLineHeight;
+    if (preferredLineHeight <= 0.0 ||
+        !preferredLineHeight.isFinite ||
+        !dragDy.isFinite ||
+        !handleDy.isFinite) {
       return null;
     }
     final double distanceDragged = dragDy - handleDy;
     final dragDirection = distanceDragged < 0.0 ? -1 : 1;
-    final int linesDragged =
-        dragDirection * (distanceDragged.abs() / renderObject.preferredLineHeight).floor();
-    return handleDy + linesDragged * renderObject.preferredLineHeight;
+    final int linesDragged = dragDirection * (distanceDragged.abs() / preferredLineHeight).floor();
+    return handleDy + linesDragged * preferredLineHeight;
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
