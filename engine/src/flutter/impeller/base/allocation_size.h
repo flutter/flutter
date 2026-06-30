@@ -137,7 +137,7 @@ class Bytes : public AllocationSize<1u> {
 
   // Allow implicit conversion from the base class to support arithmetic
   // operations.
-  constexpr Bytes(AllocationSize<1u> size) : AllocationSize(size) {}
+  explicit constexpr Bytes(AllocationSize<1u> size) : AllocationSize(size) {}
 };
 
 using KiloBytes = AllocationSize<1'000u>;
