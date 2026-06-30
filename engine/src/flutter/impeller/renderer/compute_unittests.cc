@@ -253,7 +253,7 @@ TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
 }
 
 TEST_P(ComputeTest, 3DWorkgroupDispatchIsCorrect) {
-  using CS = Compute3DTestComputeShader;
+  using CS = Compute3dTestComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
