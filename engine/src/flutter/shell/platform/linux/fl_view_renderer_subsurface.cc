@@ -161,7 +161,7 @@ static gboolean redraw_cb(gpointer user_data) {
 
   if (!self->have_first_frame) {
     self->have_first_frame = TRUE;
-    g_signal_emit_by_name(self, "first-frame");
+    fl_view_renderer_emit_first_frame(FL_VIEW_RENDERER(self));
   }
 
   GtkWidget* widget = GTK_WIDGET(self);

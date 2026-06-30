@@ -38,3 +38,9 @@ void fl_view_renderer_present_layers(FlViewRenderer* self,
     klass->present_layers(self, layers, layers_count);
   }
 }
+
+void fl_view_renderer_emit_first_frame(FlViewRenderer* self) {
+  g_return_if_fail(FL_IS_VIEW_RENDERER(self));
+
+  g_signal_emit(self, fl_view_renderer_signals[SIGNAL_FIRST_FRAME], 0);
+}

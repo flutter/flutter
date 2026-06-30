@@ -67,6 +67,15 @@ void fl_view_renderer_present_layers(FlViewRenderer* renderer,
                                      const FlutterLayer** layers,
                                      size_t layers_count);
 
+/**
+ * fl_view_renderer_emit_first_frame:
+ * @renderer: an #FlViewRenderer.
+ *
+ * Emits the "first-frame" signal. Subclasses call this once the first frame
+ * has been rendered.
+ */
+void fl_view_renderer_emit_first_frame(FlViewRenderer* renderer);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
