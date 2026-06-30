@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter_tools/extension_protocol.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:test/test.dart';
 
 void testExtensionEntryPoint(SendPort hostSendPort) {
@@ -20,14 +19,14 @@ void testExtensionEntryPoint(SendPort hostSendPort) {
         provider.sendNotification('pong', n.params);
       }
     })
-    ..registerRpc('echo', (rpc.Parameters params) {
+    ..registerRpc('echo', (Parameters params) {
       return params.asMap;
     })
     ..registerRpc('nullResult', () {
       return null;
     })
     ..registerRpc('error', () {
-      throw rpc.RpcException(999, 'custom error');
+      throw RpcException(999, 'custom error');
     })
     ..registerRpc('throw', () {
       throw Exception('thrown exception');
