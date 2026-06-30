@@ -147,6 +147,18 @@ extern bool InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap(
       ->SupportsFramebufferRenderMipmap();
 }
 
+extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext()
+      .GetCapabilities()
+      ->SupportsManuallyMippedTextures();
+}
+
+extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext().GetCapabilities()->GetMaxSamplerAnisotropy();
+}
+
 extern bool InternalFlutterGpu_Context_SupportsTextureCompression(
     flutter::gpu::Context* wrapper,
     int family) {

@@ -174,6 +174,12 @@ Details:  createItemModels creation requirements should not create capability it
 Function: createItemModels(for:itemModelSource:)
 Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
 Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-05-06 09:25:42.398 xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open log store at /Users/example/app/build/macos/Logs/Build
+2026-05-06 09:25:42.399 xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open Build log store: Error Domain=NSCocoaErrorDomain Code=4 "The file "LogStoreManifest.plist" doesn't exist." UserInfo={NSFilePath=/Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist, NSURL=file:///Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist, NSUnderlyingError=0x94bfe29d0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}. User info: {
+    NSFilePath = "/Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist";
+    NSURL = "file:///Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist";
+    NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"";
+    }.
 STDERR STUFF
 ''',
       onRun: (List<String> command) {
@@ -401,6 +407,9 @@ STDERR STUFF
       expect(testLogger.errorText, isNot(contains('DVTAssertions: Warning in')));
       expect(testLogger.errorText, isNot(contains('createItemModels')));
       expect(testLogger.errorText, isNot(contains('_NSMainThread:')));
+      expect(testLogger.errorText, isNot(contains('IDELogStore')));
+      expect(testLogger.errorText, isNot(contains('LogStoreManifest.plist')));
+      expect(testLogger.errorText, isNot(contains('NSUnderlyingError')));
       expect(
         testLogger.errorText,
         isNot(contains('Please file a bug at https://feedbackassistant')),

@@ -27,6 +27,7 @@ impeller_component("vulkan_unittests") {
     "blit_pass_vk_unittests.cc",
     "command_encoder_vk_unittests.cc",
     "command_pool_vk_unittests.cc",
+    "command_queue_vk_unittests.cc",
     "context_vk_unittests.cc",
     "descriptor_pool_vk_unittests.cc",
     "driver_info_vk_unittests.cc",

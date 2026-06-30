@@ -93,6 +93,13 @@ class Capabilities {
   ///        primitives.
   virtual bool Supports32BitPrimitiveIndices() const = 0;
 
+  /// @brief Whether a texture whose mip levels were uploaded by hand (rather
+  ///        than produced by `BlitPass::GenerateMipmap`) samples with correct
+  ///        per-level selection. True everywhere except OpenGL ES 2.0 without
+  ///        GL_APPLE_texture_max_level, where the sampled mip range cannot be
+  ///        bounded to the levels the texture declares.
+  virtual bool SupportsManuallyMippedTextures() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;
@@ -139,6 +146,13 @@ class Capabilities {
   ///        always supported. Metal and Vulkan support this; the GLES backend
   ///        does not yet, so it returns false there.
   virtual bool SupportsFramebufferRenderMipmap() const = 0;
+
+  /// @brief The maximum anisotropy clamp supported by device samplers.
+  ///
+  ///        A value of 1 means anisotropic filtering is not supported.
+  ///        Sampler descriptors with `max_anisotropy` greater than this value
+  ///        are clamped to it.
+  virtual uint32_t GetMaxSamplerAnisotropy() const = 0;
 
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
@@ -200,6 +214,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetMaximumRenderPassAttachmentSize(ISize size);
 
+  CapabilitiesBuilder& SetMaxSamplerAnisotropy(uint32_t value);
+
   CapabilitiesBuilder& SetMinimumUniformAlignment(size_t value);
 
   CapabilitiesBuilder& SetNeedsPartitionedHostBuffer(bool value);
@@ -229,6 +245,7 @@ class CapabilitiesBuilder {
   std::optional<PixelFormat> default_glyph_atlas_format_ = std::nullopt;
   std::optional<ISize> default_maximum_render_pass_attachment_size_ =
       std::nullopt;
+  uint32_t max_sampler_anisotropy_ = 1;
   size_t minimum_uniform_alignment_ = 256;
 
   CapabilitiesBuilder(const CapabilitiesBuilder&) = delete;
