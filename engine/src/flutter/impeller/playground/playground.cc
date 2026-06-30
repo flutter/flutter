@@ -102,7 +102,7 @@ void Playground::EnsureContextIsUnique() {
 }
 
 bool Playground::PlatformSupportsWideGamutTests() const {
-#ifdef __arm64__
+#if __arm64__ && FML_OS_MACOSX
   return backend_ == PlaygroundBackend::kMetal;
 #else
   return false;
@@ -143,12 +143,13 @@ std::shared_ptr<Context> Playground::MakeContext() const {
   return context_;
 }
 
-std::shared_ptr<ContentContext> Playground::GetContentContext() const {
+ContentContext& Playground::GetContentContext() const {
   if (!content_context_) {
     content_context_ =
-        std::make_shared<ContentContext>(GetContext(), GetTypographerContext());
+        std::make_unique<ContentContext>(GetContext(), GetTypographerContext());
+    FML_CHECK(content_context_) << "Failed to create ContentContext";
   }
-  return content_context_;
+  return *content_context_;
 }
 
 std::shared_ptr<TypographerContext> Playground::GetTypographerContext() const {

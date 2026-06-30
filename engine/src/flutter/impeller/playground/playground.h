@@ -63,7 +63,7 @@ class Playground {
 
   std::shared_ptr<Context> MakeContext() const;
 
-  std::shared_ptr<ContentContext> GetContentContext() const;
+  ContentContext& GetContentContext() const;
 
   std::shared_ptr<TypographerContext> GetTypographerContext() const;
 
@@ -176,10 +176,21 @@ class Playground {
   PlaygroundSwitches switches_;
 
   fml::TimeDelta start_time_;
+
+  // The following state variables are created lazily because not every
+  // playground instance uses them. Most, if not all, do use the |impl_|
+  // and |context_| implicitly, especially when running with the playground
+  // window enabled, but the content and typographer contexts are only used
+  // by a small portion of the unit tests.
+  //
+  // Since they are created lazily upon first reference, they are triggered
+  // by const getter methods and so need to be mutable for the first call
+  // when they get initialized.
   mutable std::unique_ptr<PlaygroundImpl> impl_;
   mutable std::shared_ptr<Context> context_;
-  mutable std::shared_ptr<ContentContext> content_context_;
+  mutable std::unique_ptr<ContentContext> content_context_;
   mutable std::shared_ptr<TypographerContext> typographer_context_;
+
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
   std::shared_ptr<HostBuffer> host_buffer_;

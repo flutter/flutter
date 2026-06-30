@@ -85,17 +85,17 @@ class GaussianBlurFilterContentsTest : public EntityPlayground {
   /// Create a texture that has been cleared to transparent black.
   std::shared_ptr<Texture> MakeTexture(ISize size) {
     std::shared_ptr<CommandBuffer> command_buffer =
-        GetContentContext()->GetContext()->CreateCommandBuffer();
+        GetContentContext().GetContext()->CreateCommandBuffer();
     if (!command_buffer) {
       return nullptr;
     }
 
-    auto render_target = GetContentContext()->MakeSubpass(
+    auto render_target = GetContentContext().MakeSubpass(
         "Clear Subpass", size, command_buffer,
         [](const ContentContext&, RenderPass&) { return true; });
 
     if (!GetContentContext()
-             ->GetContext()
+             .GetContext()
              ->GetCommandQueue()
              ->Submit(/*buffers=*/{command_buffer})
              .ok()) {
@@ -272,11 +272,11 @@ TEST_P(GaussianBlurFilterContentsTest, RenderCoverageMatchesGetCoverage) {
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -304,12 +304,12 @@ TEST_P(GaussianBlurFilterContentsTest,
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
 
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
@@ -337,14 +337,14 @@ TEST_P(GaussianBlurFilterContentsTest,
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   // Rotate around the top left corner, then push it over to (100, 100).
   entity.SetTransform(Matrix::MakeTranslation({400, 100, 0}) *
                       Matrix::MakeRotationZ(Degrees(90.0)));
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -389,11 +389,11 @@ TEST_P(GaussianBlurFilterContentsTest, TextureContentsWithDestinationRect) {
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture_contents)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -425,12 +425,12 @@ TEST_P(GaussianBlurFilterContentsTest,
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture_contents)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   entity.SetTransform(Matrix::MakeScale({2.0, 2.0, 1.0}));
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -467,11 +467,11 @@ TEST_P(GaussianBlurFilterContentsTest, TextureContentsWithEffectTransform) {
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture_contents)});
   contents->SetEffectTransform(effect_transform);
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
