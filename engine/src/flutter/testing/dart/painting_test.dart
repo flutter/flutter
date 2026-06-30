@@ -14,13 +14,6 @@ import 'impeller_enabled.dart';
 typedef CanvasCallback = void Function(Canvas canvas);
 
 void main() {
-  Picture makePicture(CanvasCallback callback) {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    callback(canvas);
-    return recorder.endRecording();
-  }
-
   test('Vertices checks', () {
     try {
       Vertices(VertexMode.triangles, const <Offset>[
@@ -104,7 +97,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/144211
     final sceneBuilder = SceneBuilder();
 
-    final Picture redClippedPicture = makePicture((Canvas canvas) {
+    final Picture redClippedPicture = _makePicture((Canvas canvas) {
       canvas.drawPaint(Paint()..color = const Color(0xFFFFFFFF));
       canvas.clipRect(const Rect.fromLTRB(10, 10, 200, 200));
       canvas.clipRect(const Rect.fromLTRB(11, 10, 300, 200));
@@ -115,7 +108,7 @@ void main() {
     final matrix = Float64List(16);
     sceneBuilder.pushBackdropFilter(ImageFilter.matrix(matrix));
 
-    final Picture whitePicture = makePicture((Canvas canvas) {
+    final Picture whitePicture = _makePicture((Canvas canvas) {
       canvas.drawPaint(Paint()..color = const Color(0xFFFFFFFF));
     });
     sceneBuilder.addPicture(Offset.zero, whitePicture);
@@ -136,100 +129,6 @@ void main() {
     redClippedPicture.dispose();
   });
 
-  Image backdropBlurWithTileMode(TileMode? tileMode) {
-    const double rectSize = 10;
-    const count = 50;
-    const double imgSize = rectSize * count;
-
-    final Picture blueGreenGridPicture = makePicture((Canvas canvas) {
-      const white = Color(0xFFFFFFFF);
-      const purple = Color(0xFFFF00FF);
-      const blue = Color(0xFF0000FF);
-      const green = Color(0xFF00FF00);
-      const yellow = Color(0xFFFFFF00);
-      const red = Color(0xFFFF0000);
-      canvas.drawColor(white, BlendMode.src);
-      for (var i = 0; i < count; i++) {
-        for (var j = 0; j < count; j++) {
-          final rectOdd = (i + j) & 1 == 0;
-          final fg = (i < count / 2)
-              ? ((j < count / 2) ? green : blue)
-              : ((j < count / 2) ? yellow : red);
-          canvas.drawRect(
-            Rect.fromLTWH(i * rectSize, j * rectSize, rectSize, rectSize),
-            Paint()..color = rectOdd ? fg : white,
-          );
-        }
-      }
-      canvas.drawRect(const Rect.fromLTWH(0, 0, imgSize, 1), Paint()..color = purple);
-      canvas.drawRect(const Rect.fromLTWH(0, 0, 1, imgSize), Paint()..color = purple);
-      canvas.drawRect(const Rect.fromLTWH(0, imgSize - 1, imgSize, 1), Paint()..color = purple);
-      canvas.drawRect(const Rect.fromLTWH(imgSize - 1, 0, 1, imgSize), Paint()..color = purple);
-    });
-
-    final sceneBuilder = SceneBuilder();
-    sceneBuilder.addPicture(Offset.zero, blueGreenGridPicture);
-    sceneBuilder.pushBackdropFilter(ImageFilter.blur(sigmaX: 20, sigmaY: 20, tileMode: tileMode));
-
-    final Scene scene = sceneBuilder.build();
-    final Image image = scene.toImageSync(imgSize.round(), imgSize.round());
-
-    scene.dispose();
-    blueGreenGridPicture.dispose();
-
-    return image;
-  }
-
-  Future<Image> backdropShaderWithFilterQuality(FilterQuality filterQuality) async {
-    const int width = 16;
-    const int height = 4;
-    const double widthAsDouble = 16.0;
-    const double heightAsDouble = 4.0;
-    const double stripeWidth = 1.0;
-
-    final FragmentProgram program = await FragmentProgram.fromAsset(
-      'filter_shader_fractional_texel.frag.iplr',
-    );
-    final FragmentShader shader = program.fragmentShader();
-
-    final Picture stripePicture = makePicture((Canvas canvas) {
-      for (int x = 0; x < width; x++) {
-        canvas.drawRect(
-          Rect.fromLTWH(x * stripeWidth, 0, stripeWidth, heightAsDouble),
-          Paint()..color = x.isEven ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
-        );
-      }
-    });
-
-    final Picture transparentPicture = makePicture((Canvas canvas) {
-      canvas.drawRect(
-        const Rect.fromLTWH(0, 0, widthAsDouble, heightAsDouble),
-        Paint()..color = const Color(0x00000000),
-      );
-    });
-
-    final sceneBuilder = SceneBuilder();
-    sceneBuilder.addPicture(Offset.zero, stripePicture);
-    sceneBuilder.pushBackdropFilter(ImageFilter.shader(shader, filterQuality: filterQuality));
-    sceneBuilder.addPicture(Offset.zero, transparentPicture);
-    sceneBuilder.pop();
-
-    final Scene scene = sceneBuilder.build();
-    final Image image = scene.toImageSync(width, height);
-
-    scene.dispose();
-    stripePicture.dispose();
-    transparentPicture.dispose();
-    shader.dispose();
-
-    return image;
-  }
-
-  Future<int> redAt(Image image, int x, int y) async {
-    final ByteData data = (await image.toByteData())!;
-    return data.getUint8((y * image.width + x) * 4);
-  }
-
   test('BackdropFilter with ImageFilter.shader honors FilterQuality', () async {
     // Regression test for https://github.com/flutter/flutter/issues/188365.
     if (!impellerEnabled) {
@@ -237,11 +136,11 @@ void main() {
       return;
     }
 
-    final Image nearest = await backdropShaderWithFilterQuality(FilterQuality.none);
-    final Image linear = await backdropShaderWithFilterQuality(FilterQuality.low);
+    final Image nearest = await _backdropShaderWithFilterQuality(FilterQuality.none);
+    final Image linear = await _backdropShaderWithFilterQuality(FilterQuality.low);
 
-    final int nearestSample = await redAt(nearest, 0, 1);
-    final int linearSample = await redAt(linear, 0, 1);
+    final int nearestSample = await _redAt(nearest, 0, 1);
+    final int linearSample = await _redAt(linear, 0, 1);
 
     expect(nearestSample, anyOf(0, 255));
     expect(linearSample, allOf(greaterThan(0), lessThan(255)));
@@ -252,7 +151,7 @@ void main() {
   });
 
   test('BackdropFilter with Blur honors TileMode.decal', () async {
-    final Image image = backdropBlurWithTileMode(TileMode.decal);
+    final Image image = _backdropBlurWithTileMode(TileMode.decal);
 
     final ImageComparer comparer = await ImageComparer.create();
     await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_decal_tile_mode.png');
@@ -261,7 +160,7 @@ void main() {
   });
 
   test('BackdropFilter with Blur honors TileMode.clamp', () async {
-    final Image image = backdropBlurWithTileMode(TileMode.clamp);
+    final Image image = _backdropBlurWithTileMode(TileMode.clamp);
 
     final ImageComparer comparer = await ImageComparer.create();
     await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_clamp_tile_mode.png');
@@ -270,7 +169,7 @@ void main() {
   });
 
   test('BackdropFilter with Blur honors TileMode.mirror', () async {
-    final Image image = backdropBlurWithTileMode(TileMode.mirror);
+    final Image image = _backdropBlurWithTileMode(TileMode.mirror);
 
     final ImageComparer comparer = await ImageComparer.create();
     await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_mirror_tile_mode.png');
@@ -279,7 +178,7 @@ void main() {
   });
 
   test('BackdropFilter with Blur honors TileMode.repeated', () async {
-    final Image image = backdropBlurWithTileMode(TileMode.repeated);
+    final Image image = _backdropBlurWithTileMode(TileMode.repeated);
 
     final ImageComparer comparer = await ImageComparer.create();
     await comparer.addGoldenImage(image, 'dart_ui_backdrop_filter_blur_repeated_tile_mode.png');
@@ -288,7 +187,7 @@ void main() {
   });
 
   test('BackdropFilter with Blur default TileMode acts as TileMode.mirror', () async {
-    final Image image = backdropBlurWithTileMode(null);
+    final Image image = _backdropBlurWithTileMode(null);
 
     final ImageComparer comparer = await ImageComparer.create();
     // It would be nice to compare the output here to the "mirror" golden
@@ -342,4 +241,105 @@ void main() {
       expect(colors[i], isNot(const Color(0xFF0000FF)));
     }
   });
+}
+
+Picture _makePicture(CanvasCallback callback) {
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  callback(canvas);
+  return recorder.endRecording();
+}
+
+Image _backdropBlurWithTileMode(TileMode? tileMode) {
+  const double rectSize = 10;
+  const count = 50;
+  const double imgSize = rectSize * count;
+
+  final Picture blueGreenGridPicture = _makePicture((Canvas canvas) {
+    const white = Color(0xFFFFFFFF);
+    const purple = Color(0xFFFF00FF);
+    const blue = Color(0xFF0000FF);
+    const green = Color(0xFF00FF00);
+    const yellow = Color(0xFFFFFF00);
+    const red = Color(0xFFFF0000);
+    canvas.drawColor(white, BlendMode.src);
+    for (var i = 0; i < count; i++) {
+      for (var j = 0; j < count; j++) {
+        final rectOdd = (i + j) & 1 == 0;
+        final fg = (i < count / 2)
+            ? ((j < count / 2) ? green : blue)
+            : ((j < count / 2) ? yellow : red);
+        canvas.drawRect(
+          Rect.fromLTWH(i * rectSize, j * rectSize, rectSize, rectSize),
+          Paint()..color = rectOdd ? fg : white,
+        );
+      }
+    }
+    canvas.drawRect(const Rect.fromLTWH(0, 0, imgSize, 1), Paint()..color = purple);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 1, imgSize), Paint()..color = purple);
+    canvas.drawRect(const Rect.fromLTWH(0, imgSize - 1, imgSize, 1), Paint()..color = purple);
+    canvas.drawRect(const Rect.fromLTWH(imgSize - 1, 0, 1, imgSize), Paint()..color = purple);
+  });
+
+  final sceneBuilder = SceneBuilder();
+  sceneBuilder.addPicture(Offset.zero, blueGreenGridPicture);
+  sceneBuilder.pushBackdropFilter(ImageFilter.blur(sigmaX: 20, sigmaY: 20, tileMode: tileMode));
+
+  final Scene scene = sceneBuilder.build();
+  final Image image = scene.toImageSync(imgSize.round(), imgSize.round());
+
+  scene.dispose();
+  blueGreenGridPicture.dispose();
+
+  return image;
+}
+
+Future<Image> _backdropShaderWithFilterQuality(FilterQuality filterQuality) async {
+  const int width = 16;
+  const int height = 4;
+  const double widthAsDouble = 16.0;
+  const double heightAsDouble = 4.0;
+  const double stripeWidth = 1.0;
+
+  final FragmentProgram program = await FragmentProgram.fromAsset(
+    'filter_shader_fractional_texel.frag.iplr',
+  );
+  final FragmentShader shader = program.fragmentShader();
+
+  final Picture stripePicture = _makePicture((Canvas canvas) {
+    for (int x = 0; x < width; x++) {
+      canvas.drawRect(
+        Rect.fromLTWH(x * stripeWidth, 0, stripeWidth, heightAsDouble),
+        Paint()..color = x.isEven ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+      );
+    }
+  });
+
+  final Picture transparentPicture = _makePicture((Canvas canvas) {
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, widthAsDouble, heightAsDouble),
+      Paint()..color = const Color(0x00000000),
+    );
+  });
+
+  final sceneBuilder = SceneBuilder();
+  sceneBuilder.addPicture(Offset.zero, stripePicture);
+  sceneBuilder.pushBackdropFilter(ImageFilter.shader(shader, filterQuality: filterQuality));
+  sceneBuilder.addPicture(Offset.zero, transparentPicture);
+  sceneBuilder.pop();
+
+  final Scene scene = sceneBuilder.build();
+  final Image image = scene.toImageSync(width, height);
+
+  scene.dispose();
+  stripePicture.dispose();
+  transparentPicture.dispose();
+  shader.dispose();
+
+  return image;
+}
+
+Future<int> _redAt(Image image, int x, int y) async {
+  final ByteData data = (await image.toByteData())!;
+  return data.getUint8((y * image.width + x) * 4);
 }
