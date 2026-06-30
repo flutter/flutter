@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -25,7 +25,7 @@ class ToolExtensionProvider implements RpcRegistrar {
   final _notificationsController = StreamController<Notification>.broadcast();
 
   StreamSubscription<Object?>? _subscription;
-  json_rpc.Peer? _peer;
+  rpc.Peer? _peer;
 
   /// A stream of notifications sent from the host Flutter tool to this extension.
   Stream<Notification> get notifications => _notificationsController.stream;
@@ -69,7 +69,7 @@ class ToolExtensionProvider implements RpcRegistrar {
     );
 
     final peerChannel = StreamChannel<Object?>(incomingController.stream, channel.sink);
-    final peer = json_rpc.Peer.withoutJson(peerChannel);
+    final peer = rpc.Peer.withoutJson(peerChannel);
     _peer = peer;
 
     // Register all cached methods.
@@ -99,7 +99,7 @@ class ToolExtensionProvider implements RpcRegistrar {
 
   /// Sends a notification to the host Flutter tool.
   void sendNotification(String method, [Object? parameters]) {
-    final json_rpc.Peer? peer = _peer;
+    final rpc.Peer? peer = _peer;
     if (peer == null) {
       throw StateError('Provider is not initialized.');
     }

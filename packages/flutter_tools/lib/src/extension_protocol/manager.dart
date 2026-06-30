@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -23,7 +23,7 @@ class ToolExtensionManager {
   StreamSubscription<Object?>? _peerSubscription;
   final _handshakeCompleter = Completer<SendPort>();
 
-  json_rpc.Peer? _peer;
+  rpc.Peer? _peer;
 
   /// A stream of notifications sent from the extension to the host tool.
   Stream<Notification> get notifications => _notificationsController.stream;
@@ -103,7 +103,7 @@ class ToolExtensionManager {
     );
 
     final peerChannel = StreamChannel<Object?>(incomingController.stream, channel.sink);
-    final peer = json_rpc.Peer.withoutJson(peerChannel);
+    final peer = rpc.Peer.withoutJson(peerChannel);
     _peer = peer;
 
     unawaited(peer.listen());
@@ -129,26 +129,21 @@ class ToolExtensionManager {
 
   /// Sends a request to the extension and waits for a response.
   ///
-  /// Throws an [RpcException] if the extension returns an error response.
+  /// Throws an [rpc.RpcException] if the extension returns an error response.
   /// Throws a [StateError] if the manager is not connected to an extension.
-  Future<Object?> callMethod(String method, {Map<String, Object?>? params}) async {
-    final json_rpc.Peer? peer = _peer;
+  Future<Object?> callMethod(String method, {Map<String, Object?>? params}) {
+    final rpc.Peer? peer = _peer;
     if (peer == null) {
       throw StateError('Manager is not connected to an extension.');
     }
-
-    try {
-      return await peer.sendRequest(method, params);
-    } on json_rpc.RpcException catch (e) {
-      throw RpcException(e.code, e.message, data: e.data);
-    }
+    return peer.sendRequest(method, params);
   }
 
   /// Sends a notification with the given [method] and [params] to the extension.
   ///
   /// Throws a [StateError] if the manager is not connected to an extension.
   void sendNotification(String method, {Map<String, Object?>? params}) {
-    final json_rpc.Peer? peer = _peer;
+    final rpc.Peer? peer = _peer;
     if (peer == null) {
       throw StateError('Manager is not connected to an extension.');
     }
@@ -168,22 +163,4 @@ class ToolExtensionManager {
     _peer = null;
     await _notificationsController.close();
   }
-}
-
-/// Exception thrown when an RPC call to an extension fails.
-class RpcException implements Exception {
-  /// Creates an [RpcException] with the given [code], [message], and optional [data].
-  RpcException(this.code, this.message, {this.data});
-
-  /// The error code.
-  final int code;
-
-  /// A message describing the error.
-  final String message;
-
-  /// Additional data about the error, if any.
-  final Object? data;
-
-  @override
-  String toString() => 'RpcException: [$code] $message (data: $data)';
 }

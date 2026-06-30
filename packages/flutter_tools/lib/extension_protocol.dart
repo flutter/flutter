@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+export 'package:json_rpc_2/json_rpc_2.dart' show Parameters, RpcException;
+
 export 'src/extension_protocol/manager.dart';
 export 'src/extension_protocol/provider.dart';
 export 'src/extension_protocol/service.dart';

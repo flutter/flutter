@@ -7,7 +7,7 @@ import 'dart:isolate';
 
 import 'package:async/async.dart';
 import 'package:flutter_tools/extension_protocol.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
@@ -44,7 +44,7 @@ void main() {
     });
 
     test('registerRpc and dispatcher success', () async {
-      provider.registerRpc('test.method', (json_rpc.Parameters params) {
+      provider.registerRpc('test.method', (rpc.Parameters params) {
         return <String, Object?>{'echo': params['input'].value};
       });
 
