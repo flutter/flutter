@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:flutter_tools/extension_protocol.dart';
 import 'package:test/test.dart';
@@ -37,6 +38,15 @@ void testExtensionEntryPoint(SendPort hostSendPort) {
     })
     ..registerRpc('getLastNotification', () {
       return lastNotification;
+    })
+    ..registerRpc('transferBytes', (Parameters params) {
+      final dynamic rawValue = params['data'].value;
+      if (rawValue is! TransferableTypedData) {
+        throw RpcException(1001, 'Expected TransferableTypedData');
+      }
+      final Uint8List bytes = rawValue.materialize().asUint8List();
+      final modified = Uint8List.fromList(bytes.map((int b) => b + 1).toList());
+      return TransferableTypedData.fromList(<Uint8List>[modified]);
     })
     ..initialize();
 
@@ -158,6 +168,24 @@ void main() {
       });
 
       await sub.cancel();
+    });
+
+    test('callMethod with TransferableTypedData parameter and return value', () async {
+      await manager.start(testExtensionEntryPoint);
+
+      final inputBytes = Uint8List.fromList(<int>[1, 2, 3, 4]);
+      final inputData = TransferableTypedData.fromList(<Uint8List>[inputBytes]);
+
+      final Object? result = await manager.callMethod(
+        'transferBytes',
+        params: <String, Object?>{'data': inputData},
+      );
+
+      expect(result, isA<TransferableTypedData>());
+      final outputData = result! as TransferableTypedData;
+      final Uint8List outputBytes = outputData.materialize().asUint8List();
+
+      expect(outputBytes, Uint8List.fromList(<int>[2, 3, 4, 5]));
     });
   });
 }
