@@ -776,10 +776,8 @@ class TextSelectionOverlay {
   /// be skipped.
   double? _getHandleDy(double dragDy, double handleDy) {
     final double preferredLineHeight = renderObject.preferredLineHeight;
-    if (preferredLineHeight <= 0.0 ||
-        !preferredLineHeight.isFinite ||
-        !dragDy.isFinite ||
-        !handleDy.isFinite) {
+    assert(preferredLineHeight.isFinite, 'Preferred line height is expected to always be finite.');
+    if (preferredLineHeight <= 0.0 || !dragDy.isFinite || !handleDy.isFinite) {
       return null;
     }
     final double distanceDragged = dragDy - handleDy;
