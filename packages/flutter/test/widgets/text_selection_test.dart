@@ -1352,6 +1352,7 @@ void main() {
     await gesture.moveTo(newGlobalPos);
     await gesture.moveTo(newGlobalPos + const Offset(10.0, 0.0));
     await tester.pump();
+    expect(tester.takeException(), isNull);
 
     await gesture.up();
     await tester.pumpAndSettle();
