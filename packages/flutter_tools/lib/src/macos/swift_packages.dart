@@ -219,8 +219,8 @@ class SwiftPackageSupportedPlatform {
 
   String format() {
     // platforms: [
-    //     .macOS("10.15"),
-    //     .iOS("13.0"),
+    //     .macOS("12.0"),
+    //     .iOS("15.0"),
     // ],
     return '${platform.displayName}("$version")';
   }

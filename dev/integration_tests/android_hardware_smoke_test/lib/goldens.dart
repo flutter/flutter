@@ -14,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import 'constants.dart';
 import 'pixel_exact_local_file_comparator.dart';
 
 /// Captures the image bytes of the widget associated with [targetKey] and either compares it to a golden file or returns the bytes to the test driver for host-side comparison, depending on the value of [performAppSideGoldenCompare].
@@ -31,71 +32,94 @@ Future<void> handleGoldenRequest(
   Future<void>? settleFuture,
 }) async {
   try {
-    final String? goldenVariantValue = await goldenVariant;
-
-    if (testName == 'platformViewTest') {
-      // Platform views cannot be captured using RepaintBoundary.toImage() since they reside in separate
-      // native surface layers. Instead, we wait for layout to settle, calculate the widget's physical
-      // coordinates on screen, and return them so the runner can perform a compositor-level capture.
-      if (settleFuture != null) {
-        await settleFuture;
-      }
-      for (var i = 0; i < 3; i++) {
-        await WidgetsBinding.instance.endOfFrame;
-      }
-
-      final BuildContext? context = targetKey.currentContext;
-      if (context == null || !context.mounted) {
-        throw StateError(
-          'Failed to capture coordinates for $testName: targetKey is not mounted in the widget tree.',
-        );
-      }
-      final RenderObject? renderObject = context.findRenderObject();
-      if (renderObject is! RenderBox) {
-        throw StateError(
-          'Failed to capture coordinates for $testName: the associated RenderObject is not a RenderBox.',
-        );
-      }
-
-      final Offset position = renderObject.localToGlobal(Offset.zero);
-      final Size size = renderObject.size;
-      // We can assume one window for these tests since they are android-only.
-      final double devicePixelRatio = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
-
-      final int x = (position.dx * devicePixelRatio).round();
-      final int y = (position.dy * devicePixelRatio).round();
-      final int w = (size.width * devicePixelRatio).round();
-      final int h = (size.height * devicePixelRatio).round();
-
-      completer.complete(<String, Object?>{
-        'message': 'Rendered $testName',
-        'x': x,
-        'y': y,
-        'width': w,
-        'height': h,
-      });
-      return;
-    }
-
-    final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
-
-    if (performAppSideGoldenCompare) {
-      final String? failureMessage = await compareGoldenOnDevice(
+    if (testName.startsWith(platformViewPrefix)) {
+      await _handlePlatformViewRequest(testName, completer, targetKey, settleFuture: settleFuture);
+    } else {
+      final String? goldenVariantValue = await goldenVariant;
+      await _handleStandardViewRequest(
         testName,
-        resultImageBytes,
+        completer,
+        performAppSideGoldenCompare,
+        targetKey,
         goldenVariantValue,
       );
-      completer.complete(<String, Object?>{'message': failureMessage ?? 'Rendered $testName'});
-    } else {
-      completer.complete(<String, Object?>{
-        'message': 'Rendered $testName',
-        'imageBytes': base64.encode(resultImageBytes),
-      });
     }
   } catch (e, stackTrace) {
     // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      'message': 'Error occurred during golden request handling: $e\n$stackTrace',
+      keyMessage: 'Error occurred during golden request handling: $e\n$stackTrace',
+    });
+  }
+}
+
+Future<void> _handlePlatformViewRequest(
+  String testName,
+  Completer<Map<String, Object?>> completer,
+  GlobalKey targetKey, {
+  Future<void>? settleFuture,
+}) async {
+  // Platform views cannot be captured using RepaintBoundary.toImage() since they reside in separate
+  // native surface layers. Instead, we wait for layout to settle, calculate the widget's physical
+  // coordinates on screen, and return them so the runner can perform a compositor-level capture.
+  if (settleFuture != null) {
+    await settleFuture;
+  }
+  for (var i = 0; i < 3; i++) {
+    await WidgetsBinding.instance.endOfFrame;
+  }
+
+  final BuildContext? context = targetKey.currentContext;
+  if (context == null || !context.mounted) {
+    throw StateError(
+      'Failed to capture coordinates for $testName: targetKey is not mounted in the widget tree.',
+    );
+  }
+  final RenderObject? renderObject = context.findRenderObject();
+  if (renderObject is! RenderBox) {
+    throw StateError(
+      'Failed to capture coordinates for $testName: the associated RenderObject is not a RenderBox.',
+    );
+  }
+
+  final Offset position = renderObject.localToGlobal(Offset.zero);
+  final Size size = renderObject.size;
+  // We can assume one window for these tests since they are android-only.
+  final double devicePixelRatio = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+
+  final int x = (position.dx * devicePixelRatio).round();
+  final int y = (position.dy * devicePixelRatio).round();
+  final int w = (size.width * devicePixelRatio).round();
+  final int h = (size.height * devicePixelRatio).round();
+
+  completer.complete(<String, Object?>{
+    keyMessage: 'Rendered $testName',
+    keyX: x,
+    keyY: y,
+    keyWidth: w,
+    keyHeight: h,
+  });
+}
+
+Future<void> _handleStandardViewRequest(
+  String testName,
+  Completer<Map<String, Object?>> completer,
+  bool performAppSideGoldenCompare,
+  GlobalKey targetKey,
+  String? goldenVariantValue,
+) async {
+  final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
+
+  if (performAppSideGoldenCompare) {
+    final String? failureMessage = await compareGoldenOnDevice(
+      testName,
+      resultImageBytes,
+      goldenVariantValue,
+    );
+    completer.complete(<String, Object?>{keyMessage: failureMessage ?? 'Rendered $testName'});
+  } else {
+    completer.complete(<String, Object?>{
+      keyMessage: 'Rendered $testName',
+      keyImageBytes: base64.encode(resultImageBytes),
     });
   }
 }
@@ -110,6 +134,11 @@ Future<String?> compareGoldenOnDevice(
   Uint8List resultImageBytes,
   String? goldenVariant,
 ) async {
+  // We use PixelExactLocalFileComparator which decodes and compares images at a raw pixel level.
+  // This is specific to **Instrumented Mode** (on-device comparison), where native screenshot
+  // encoders and Dart encoders produce encoding differences for the same pixel grid.
+  // It also supports reading reference goldens directly from the package's bundled assets using the
+  // `asset://` URI scheme, completely eliminating the need to copy asset goldens to temporary files.
   goldenFileComparator = const PixelExactLocalFileComparator();
 
   final io.Directory tempDir = await getTemporaryDirectory();
@@ -118,17 +147,13 @@ Future<String?> compareGoldenOnDevice(
       : '';
   final fileName = '$testName$variantSuffix.png';
   final goldenAssetPath = 'test_driver/goldens/$fileName';
-  final String tempGoldenPath = path.join(tempDir.path, 'goldens', fileName);
   final String tempResultPath = path.join(tempDir.path, 'results', fileName);
 
-  // In this context, `matchesGoldenFile` uses a NaiveLocalFileComparator.
-  // That comparator does not support reading bundled assets, so we need to create a temp file.
-  // To avoid the risk that the temp copy was modified somehow, we copy every time we execute a comparison.
-  await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
   // Write the result bytes to a temp file so they can be pulled off the device for debugging when a comparison fails.
   await _writeBytesToFile(tempResultPath, resultImageBytes);
+
   final dynamic comparisonResult = await matchesGoldenFile(
-    tempGoldenPath,
+    Uri(scheme: 'asset', path: goldenAssetPath),
   ).matchAsync(resultImageBytes);
   return comparisonResult as String?;
 }
@@ -141,22 +166,6 @@ Future<void> _writeBytesToFile(String filePath, Uint8List bytes) async {
     await file.create(recursive: true);
   }
   await file.writeAsBytes(bytes);
-}
-
-Future<void> _copyGoldenAssetToTemp(String goldenAssetPath, String tempGoldenPath) async {
-  try {
-    final ByteData byteData = await rootBundle.load(goldenAssetPath);
-    final Uint8List bytes = byteData.buffer.asUint8List(
-      byteData.offsetInBytes,
-      byteData.lengthInBytes,
-    );
-    await _writeBytesToFile(tempGoldenPath, bytes);
-  } catch (e) {
-    throw StateError(
-      'Failed to load golden asset "$goldenAssetPath" from package assets. '
-      'Ensure the golden image was generated and bundled correctly. Error: $e',
-    );
-  }
 }
 
 Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {

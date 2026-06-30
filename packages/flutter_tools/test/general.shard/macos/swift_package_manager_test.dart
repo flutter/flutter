@@ -71,7 +71,7 @@ void main() {
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("15.0")'
-                : '.macOS("10.15")';
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -166,7 +166,7 @@ $_doubleIndent
 
               final supportedPlatform = platform == FlutterDarwinPlatform.ios
                   ? '.iOS("15.0")'
-                  : '.macOS("10.15")';
+                  : '.macOS("12.0")';
               expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
               expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -221,7 +221,7 @@ $_doubleIndent
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("15.0")'
-                : '.macOS("10.15")';
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
               project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
@@ -320,7 +320,7 @@ let package = Package(
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("15.0")'
-                : '.macOS("10.15")';
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
               project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
@@ -474,7 +474,7 @@ let package = Package(
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("15.0")'
-                : '.macOS("10.15")';
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
               project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
