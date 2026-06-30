@@ -2,11 +2,11 @@
 name: shepherd-prs
 description: >
   Automate shepherding, updating, and landing both your own open PRs and approved third-party contributor PRs in the flutter/flutter repository.
-  
+
   When to use:
   - When you need to check the status of your open PRs or approved third-party PRs.
   - When you need to update stale branches or apply the 'autosubmit' label to land approved PRs.
-  
+
   When not to use:
   - Do not use for PRs that are not approved (unless they are your own and you want to check status).
   - Do not use for repositories other than flutter/flutter.
