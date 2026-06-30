@@ -619,8 +619,18 @@ class ScrollableState extends State<Scrollable>
     _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
     final ScrollPhysics? physicsFromWidget =
         widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
-    _physics = _configuration.getScrollPhysics(context);
-    _physics = physicsFromWidget?.applyTo(_physics) ?? _physics;
+    ScrollPhysics physics = _configuration.getScrollPhysics(context);
+    physics = physicsFromWidget?.applyTo(physics) ?? physics;
+
+    // Semantic scroll actions synthesize a fixed drag from the viewport size,
+    // which bounces past the edge with bouncing physics. Clamp them while a
+    // screen reader is active. Skip physics that block user scrolling so a
+    // non-scrollable view isn't made scrollable.
+    // https://github.com/flutter/flutter/issues/11665
+    if ((MediaQuery.maybeAccessibleNavigationOf(context) ?? false) && physics.allowUserScrolling) {
+      physics = ClampingScrollPhysics(parent: physics);
+    }
+    _physics = physics;
 
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
