@@ -136,9 +136,15 @@ void main() {
       return;
     }
 
+    // The helper draws a black/white striped backdrop and filters it with a
+    // shader that samples the backdrop at a fractional texel coordinate. Because
+    // the stripes are grayscale, checking a single color channel is enough to
+    // tell whether the sample came from a source texel or was interpolated.
     final Image nearest = await _backdropShaderWithFilterQuality(FilterQuality.none);
     final Image linear = await _backdropShaderWithFilterQuality(FilterQuality.low);
 
+    // Nearest-neighbor sampling should pick either black or white exactly.
+    // Linear sampling should blend the adjacent black and white stripes.
     final int nearestSample = await _redAt(nearest, 0, 1);
     final int linearSample = await _redAt(linear, 0, 1);
 
