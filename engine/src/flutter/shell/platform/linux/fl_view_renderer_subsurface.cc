@@ -37,7 +37,6 @@ struct _FlViewRendererSubsurface {
   // EGL state for the subsurface.
   struct wl_egl_window* egl_window;
   EGLDisplay egl_display;
-  EGLConfig egl_config;
   EGLContext egl_context;
   EGLSurface egl_surface;
 
@@ -91,9 +90,10 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
                                              EGL_ALPHA_SIZE,
                                              8,
                                              EGL_NONE};
+  EGLConfig egl_config;
   EGLint num_config;
-  if (!eglChooseConfig(self->egl_display, config_attributes, &self->egl_config,
-                       1, &num_config) ||
+  if (!eglChooseConfig(self->egl_display, config_attributes, &egl_config, 1,
+                       &num_config) ||
       num_config == 0) {
     g_warning("Failed to choose EGL config for subsurface");
     return FALSE;
@@ -104,7 +104,7 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
   static const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
                                               EGL_NONE};
   self->egl_context = eglCreateContext(
-      self->egl_display, self->egl_config,
+      self->egl_display, egl_config,
       fl_opengl_manager_get_context(opengl_manager), context_attributes);
   if (self->egl_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL context for subsurface");
@@ -120,7 +120,7 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
   }
 
   self->egl_surface = eglCreateWindowSurface(
-      self->egl_display, self->egl_config,
+      self->egl_display, egl_config,
       reinterpret_cast<EGLNativeWindowType>(self->egl_window), nullptr);
   if (self->egl_surface == EGL_NO_SURFACE) {
     g_warning("Failed to create EGL window surface for subsurface");
