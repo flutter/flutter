@@ -1273,95 +1273,6 @@ void main() {
     expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-  // testWidgets('TextSelectionOverlay crash repro - degenerate layout (preferredLineHeight == 0)', (
-  //   WidgetTester tester,
-  // ) async {
-  //   final controller = TextEditingController(text: 'You make wine from sour grapes');
-  //   final focusNode = FocusNode();
-
-  //   var scaleFactor = 1.0;
-  //   late StateSetter setState;
-
-  //   // Build the widget tree with a TextField whose style we can dynamically change.
-  //   await tester.pumpWidget(
-  //     MaterialApp(
-  //       home: Scaffold(
-  //         body: Center(
-  //           child: StatefulBuilder(
-  //             builder: (BuildContext context, StateSetter localSetState) {
-  //               setState = localSetState;
-  //               return SizedBox(
-  //                 width: 300,
-  //                 height: 200,
-  //                 child: MediaQuery(
-  //                   data: MediaQuery.of(
-  //                     context,
-  //                   ).copyWith(textScaler: TextScaler.linear(scaleFactor)),
-  //                   child: TextField(
-  //                     controller: controller,
-  //                     focusNode: focusNode,
-  //                     maxLines: null,
-  //                     style: const TextStyle(fontSize: 14.0),
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-
-  //   // 1. Focus the text field to allow selection.
-  //   focusNode.requestFocus();
-  //   await tester.pump();
-
-  //   // 2. Programmatically select a range of text to show the selection handles.
-  //   controller.selection = const TextSelection(baseOffset: 4, extentOffset: 15);
-  //   await tester.pumpAndSettle();
-
-  //   // 3. Find the RenderEditable to get the handle coordinates.
-  //   final RenderEditable renderEditable = tester.allRenderObjects
-  //       .whereType<RenderEditable>()
-  //       .first;
-
-  //   final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-  //     controller.selection,
-  //   );
-  //   expect(endpoints.length, 2, reason: 'Selection handles should be visible.');
-
-  //   // Calculate the global coordinate of the end handle.
-  //   final Offset handleLocalPos = endpoints[1].point;
-  //   final Offset handleGlobalPos =
-  //       renderEditable.localToGlobal(handleLocalPos) + const Offset(1.0, 1.0);
-
-  //   // 4. Start the drag gesture on the end handle.
-  //   final TestGesture gesture = await tester.startGesture(handleGlobalPos);
-  //   await tester.pump(const Duration(milliseconds: 50));
-
-  //   // 5. Simulate a transient degenerate layout state mid-drag.
-  //   // By setting scaleFactor to 0.0, the RenderEditable's preferredLineHeight
-  //   // will become 0.0 on the next layout pass.
-  //   setState(() {
-  //     scaleFactor = 0.0;
-  //   });
-  //   await tester.pump();
-
-  //   // 6. Move the drag handle. This triggers the drag update callback which calls
-  //   // TextSelectionOverlay._getHandleDy. With preferredLineHeight == 0.0, this performs
-  //   // division by zero (distanceDragged / 0.0) resulting in Infinity.
-  //   // Calling .floor() on Infinity throws the fatal "Unsupported operation: Infinity or NaN toInt".
-  //   final Offset newGlobalPos = handleGlobalPos + const Offset(50.0, 0.0);
-
-  //   // We expect this to not throw.
-  //   await gesture.moveTo(newGlobalPos);
-  //   await tester.pump();
-
-  //   // Clean up the gesture.
-  //   await gesture.up();
-  //   await tester.pump();
-  // });
-
   testWidgets('dragging selection handle does not crash when RenderObject is degenerate', (
     WidgetTester tester,
   ) async {
@@ -1420,7 +1331,7 @@ void main() {
 
     // Start a drag gesture.
     final TestGesture gesture = await tester.startGesture(handleGlobalPos);
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump();
 
     // Move the gesture slightly to exceed the touch slop and accept the gesture.
     await gesture.moveBy(const Offset(20.0, 0.0));
