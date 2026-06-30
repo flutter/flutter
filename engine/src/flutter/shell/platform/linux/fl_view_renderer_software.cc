@@ -17,9 +17,6 @@ struct _FlViewRendererSoftware {
   // Engine this widget is rendering.
   FlEngine* engine;
 
-  // Background color.
-  GdkRGBA* background_color;
-
   // TRUE if the view size should be controlled by Flutter.
   gboolean sized_to_content;
 
@@ -85,18 +82,6 @@ static gboolean redraw_cb(gpointer user_data) {
   return G_SOURCE_REMOVE;
 }
 
-static void paint_background(FlViewRendererSoftware* self, cairo_t* cr) {
-  // Don't bother drawing if fully transparent - the widget above this will
-  // already be drawn by GTK.
-  if (self->background_color->red == 0 && self->background_color->green == 0 &&
-      self->background_color->blue == 0 && self->background_color->alpha == 0) {
-    return;
-  }
-
-  gdk_cairo_set_source_rgba(cr, self->background_color);
-  cairo_paint(cr);
-}
-
 // Implements GtkWidget::realize.
 static void fl_view_renderer_software_realize(GtkWidget* widget) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(widget);
@@ -112,7 +97,7 @@ static void fl_view_renderer_software_realize(GtkWidget* widget) {
 static gboolean fl_view_renderer_software_draw(GtkWidget* widget, cairo_t* cr) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(widget);
 
-  paint_background(self, cr);
+  fl_view_renderer_paint_background(FL_VIEW_RENDERER(self), cr);
 
   // The compositor is created when the widget is realized; if it is not yet
   // available there is nothing to render beyond the background.
@@ -161,19 +146,6 @@ static gboolean fl_view_renderer_software_draw(GtkWidget* widget, cairo_t* cr) {
   return result;
 }
 
-// Implements FlViewRenderer::set_background_color.
-static void fl_view_renderer_software_set_background_color(
-    FlViewRenderer* renderer,
-    const GdkRGBA* color) {
-  FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(renderer);
-
-  gdk_rgba_free(self->background_color);
-  self->background_color = gdk_rgba_copy(color);
-
-  // Redraw so the new background color is shown.
-  gtk_widget_queue_draw(GTK_WIDGET(self));
-}
-
 // Implements FlViewRenderer::present_layers.
 static void fl_view_renderer_software_present_layers(
     FlViewRenderer* renderer,
@@ -204,7 +176,6 @@ static void fl_view_renderer_software_dispose(GObject* object) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(object);
 
   g_clear_object(&self->engine);
-  g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_clear_object(&self->compositor);
   g_clear_object(&self->task_runner);
   g_mutex_clear(&self->frame_mutex);
@@ -236,17 +207,11 @@ static void fl_view_renderer_software_class_init(
   widget_class->draw = fl_view_renderer_software_draw;
 
   FlViewRendererClass* renderer_class = FL_VIEW_RENDERER_CLASS(klass);
-  renderer_class->set_background_color =
-      fl_view_renderer_software_set_background_color;
   renderer_class->present_layers = fl_view_renderer_software_present_layers;
 }
 
 static void fl_view_renderer_software_init(FlViewRendererSoftware* self) {
   g_mutex_init(&self->frame_mutex);
-
-  GdkRGBA default_background = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  self->background_color = gdk_rgba_copy(&default_background);
 }
 
 FlViewRendererSoftware* fl_view_renderer_software_new(

@@ -32,11 +32,6 @@ struct _FlViewRendererClass {
   GtkDrawingAreaClass parent_class;
 
   /**
-   * Sets the background color drawn behind the Flutter frame.
-   */
-  void (*set_background_color)(FlViewRenderer* renderer, const GdkRGBA* color);
-
-  /**
    * Composites a frame into the renderer. May be called from any thread.
    */
   void (*present_layers)(FlViewRenderer* renderer,
@@ -53,6 +48,16 @@ struct _FlViewRendererClass {
  */
 void fl_view_renderer_set_background_color(FlViewRenderer* renderer,
                                            const GdkRGBA* color);
+
+/**
+ * fl_view_renderer_paint_background:
+ * @renderer: an #FlViewRenderer.
+ * @cr: a #cairo_t to paint to.
+ *
+ * Paints the background color behind the Flutter frame. Subclasses call this
+ * at the start of their draw implementation.
+ */
+void fl_view_renderer_paint_background(FlViewRenderer* renderer, cairo_t* cr);
 
 /**
  * fl_view_renderer_present_layers:

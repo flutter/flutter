@@ -28,9 +28,6 @@ struct _FlViewRendererSubsurface {
   // TRUE if have got the first frame to render.
   gboolean have_first_frame;
 
-  // Background color.
-  GdkRGBA* background_color;
-
   // Wayland subsurface the frame is rendered into.
   FlSubsurface* subsurface;
 
@@ -148,16 +145,6 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
   return TRUE;
 }
 
-static void paint_background(FlViewRendererSubsurface* self, cairo_t* cr) {
-  if (self->background_color->red == 0 && self->background_color->green == 0 &&
-      self->background_color->blue == 0 && self->background_color->alpha == 0) {
-    return;
-  }
-
-  gdk_cairo_set_source_rgba(cr, self->background_color);
-  cairo_paint(cr);
-}
-
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
   g_autoptr(FlViewRendererSubsurface) self =
@@ -266,7 +253,7 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
 
   // Flutter content is shown directly by the subsurface; only paint the
   // background behind it.
-  paint_background(self, cr);
+  fl_view_renderer_paint_background(FL_VIEW_RENDERER(self), cr);
 
   // The compositor is created when the widget is realized; if it is not yet
   // available there is nothing to present to the subsurface.
@@ -344,18 +331,6 @@ static void fl_view_renderer_subsurface_size_allocate(
   }
 }
 
-// Implements FlViewRenderer::set_background_color.
-static void fl_view_renderer_subsurface_set_background_color(
-    FlViewRenderer* renderer,
-    const GdkRGBA* color) {
-  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(renderer);
-
-  gdk_rgba_free(self->background_color);
-  self->background_color = gdk_rgba_copy(color);
-
-  gtk_widget_queue_draw(GTK_WIDGET(self));
-}
-
 // Implements FlViewRenderer::present_layers.
 static void fl_view_renderer_subsurface_present_layers(
     FlViewRenderer* renderer,
@@ -385,7 +360,6 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
   g_clear_object(&self->engine);
-  g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->dispose(object);
@@ -417,8 +391,6 @@ static void fl_view_renderer_subsurface_class_init(
   widget_class->size_allocate = fl_view_renderer_subsurface_size_allocate;
 
   FlViewRendererClass* renderer_class = FL_VIEW_RENDERER_CLASS(klass);
-  renderer_class->set_background_color =
-      fl_view_renderer_subsurface_set_background_color;
   renderer_class->present_layers = fl_view_renderer_subsurface_present_layers;
 }
 
@@ -426,10 +398,6 @@ static void fl_view_renderer_subsurface_init(FlViewRendererSubsurface* self) {
   self->egl_context = EGL_NO_CONTEXT;
   self->egl_surface = EGL_NO_SURFACE;
   g_mutex_init(&self->frame_mutex);
-
-  GdkRGBA default_background = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  self->background_color = gdk_rgba_copy(&default_background);
 }
 
 FlViewRendererSubsurface* fl_view_renderer_subsurface_new(
