@@ -81,8 +81,7 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
                           gint scale) {
   // Share the engine's EGL display and render context so the engine's frame
   // texture can be accessed directly, without using EGLImage.
-  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
-  EGLDisplay egl_display = fl_opengl_manager_get_display(opengl_manager);
+  EGLDisplay egl_display = get_egl_display(self);
   if (egl_display == EGL_NO_DISPLAY) {
     g_warning("Failed to get EGL display for subsurface");
     return FALSE;
@@ -114,10 +113,10 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
 
   static const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
                                               EGL_NONE};
-  self->egl_context =
-      eglCreateContext(egl_display, egl_config,
-                       fl_opengl_manager_get_context(opengl_manager),
-                       context_attributes);
+  EGLContext share_context =
+      fl_opengl_manager_get_context(fl_engine_get_opengl_manager(self->engine));
+  self->egl_context = eglCreateContext(egl_display, egl_config, share_context,
+                                       context_attributes);
   if (self->egl_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL context for subsurface");
     return FALSE;
