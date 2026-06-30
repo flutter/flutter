@@ -614,9 +614,12 @@ class FlutterPlugin : Plugin<Project> {
                 project.findProperty("dart-defines-file")?.toString()?.let { filePath ->
                     val file = project.file(filePath)
                     if (file.exists()) {
-                        val content = project.providers.fileContents(
-                            project.layout.projectDirectory.file(file.absolutePath)
-                        ).asText.orNull?.trim()
+                        val content =
+                            project.providers
+                                .fileContents(
+                                    project.layout.projectDirectory.file(file.absolutePath)
+                                ).asText.orNull
+                                ?.trim()
                         // The Flutter toolchain never creates an empty file. If the file
                         // exists but has no content, it indicates a contract violation.
                         if (content.isNullOrEmpty()) {
