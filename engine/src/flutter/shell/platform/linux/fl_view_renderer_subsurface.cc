@@ -34,10 +34,14 @@ struct _FlViewRendererSubsurface {
   // Wayland subsurface the frame is rendered into.
   FlSubsurface* subsurface;
 
-  // EGL state for the subsurface. The display is owned by the engine's
-  // FlOpenGLManager (see get_egl_display), not by this renderer.
+  // Native Wayland window backing the subsurface's EGL surface.
   struct wl_egl_window* egl_window;
+
+  // EGL context used to blit engine frames to the subsurface. Shares resources
+  // with the engine's render context (see get_egl_display for the display).
   EGLContext egl_context;
+
+  // EGL surface that draws onto egl_window.
   EGLSurface egl_surface;
 
   // Combines layers into a frame.
