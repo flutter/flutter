@@ -159,6 +159,11 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
                                                        ToHandleType(type_)))),
       is_wrapped_(fbo.has_value() || external_handle.has_value()),
       wrapped_fbo_(fbo) {
+  // Ensure the texture descriptor itself is valid.
+  if (!GetTextureDescriptor().IsValid()) {
+    return;
+  }
+
   // One storage-tracking entry per slice: 6 for a cube, the layer count for an
   // array, 1 otherwise.
   const auto& tracked_desc = GetTextureDescriptor();
@@ -169,11 +174,6 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
     slice_count = tracked_desc.array_layer_count;
   }
   slice_mip_initialized_.resize(slice_count);
-
-  // Ensure the texture descriptor itself is valid.
-  if (!GetTextureDescriptor().IsValid()) {
-    return;
-  }
   // Ensure the texture doesn't exceed device capabilities.
   const auto tex_size = GetTextureDescriptor().size;
   const auto max_size =
@@ -287,6 +287,13 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
   // exists before uploading.
   const bool is_array = tex_descriptor.type == TextureType::kTexture2DArray;
   if (is_array) {
+    // Bail out synchronously on contexts without array support (e.g. ES 2.0).
+    // The glTexImage3D/glTexSubImage3D procs are null there, so queuing the
+    // upload would dereference a null proc on the reactor thread.
+    if (!reactor_->GetProcTable().GetCapabilities()->SupportsTextureArray()) {
+      VALIDATION_LOG << "2D array textures are not supported on this context.";
+      return false;
+    }
     InitializeContentsIfNecessary();
   }
 
