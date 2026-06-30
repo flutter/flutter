@@ -235,6 +235,7 @@ Future<void> buildMacOS({
   // when dependencies don't support them
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
+  final stdoutBuffer = StringBuffer();
   try {
     final List<String> xcodebuildCommandArgs = await globals.xcode!
         .fetchDependenciesAndGenerateXcodebuildArgs(
@@ -270,15 +271,28 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: verboseLogging
-          ? null
-          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: (String line) {
+        stdoutBuffer.writeln(line);
+        if (verboseLogging) {
+          return line;
+        }
+        return _filteredOutput.hasMatch(line) ? line : null;
+      },
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
+    final stdout = stdoutBuffer.toString();
+    if (stdout.contains('MACOSX_DEPLOYMENT_TARGET')) {
+      final pattern = RegExp(r'range of supported deployment target versions is ([0-9.]+) to');
+      final RegExpMatch? match = pattern.firstMatch(stdout);
+      final String? minVersion = match?.group(1);
+      if (minVersion != null) {
+        globals.logger.printError(_macOSDeploymentTargetTooLowMessage(minVersion), emphasis: true);
+      }
+    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
@@ -419,3 +433,16 @@ File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configura
   );
   return disabledSandboxEntitlementFile;
 }
+
+String _macOSDeploymentTargetTooLowMessage(String minVersion) =>
+    '''
+════════════════════════════════════════════════════════════════════════════════
+The macOS deployment target is too low. Xcode requires at least $minVersion.
+
+To upgrade your macOS deployment target, follow these steps:
+  1. Open the project in Xcode:
+     open macos/Runner.xcworkspace
+  2. Select the "Runner" project in the project navigator.
+  3. Select the "Runner" TARGET, and in the "General" tab:
+     Update "Minimum Deployments" to at least $minVersion.
+════════════════════════════════════════════════════════════════════════════════''';
