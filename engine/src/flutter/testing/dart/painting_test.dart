@@ -150,7 +150,6 @@ void main() {
 
     expect(nearestSample, anyOf(0, 255));
     expect(linearSample, allOf(greaterThan(0), lessThan(255)));
-    expect(linearSample, isNot(nearestSample));
 
     nearest.dispose();
     linear.dispose();
