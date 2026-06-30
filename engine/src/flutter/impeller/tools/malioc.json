@@ -1137,9 +1137,9 @@
               "load_store"
             ],
             "total_cycles": [
-              1.2625000476837158,
+              1.21875,
               0.75,
-              1.2625000476837158,
+              1.21875,
               0.4375,
               4.0,
               0.25,
@@ -1209,9 +1209,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.862500011920929,
+              0.8125,
               0.5,
-              0.862500011920929,
+              0.8125,
               0.3125,
               4.0,
               0.25,
@@ -1279,9 +1279,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.9375,
+              0.887499988079071,
               0.515625,
-              0.9375,
+              0.887499988079071,
               0.25,
               4.0,
               0.25,
@@ -1832,11 +1832,11 @@
               "load_store"
             ],
             "total_cycles": [
-              0.4375,
+              0.453125,
               0.15625,
-              0.4375,
+              0.453125,
               0.0625,
-              1.0,
+              2.0,
               0.25,
               0.25
             ]
@@ -3503,9 +3503,9 @@
               "load_store"
             ],
             "total_cycles": [
-              1.21875,
+              1.1875,
               0.737500011920929,
-              1.21875,
+              1.1875,
               0.375,
               4.0,
               0.25,
@@ -3515,7 +3515,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 26,
-          "work_registers_used": 23
+          "work_registers_used": 22
         }
       }
     },
@@ -3620,9 +3620,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.887499988079071,
+              0.862500011920929,
               0.5,
-              0.887499988079071,
+              0.862500011920929,
               0.25,
               4.0,
               0.25,
@@ -3632,7 +3632,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 18,
-          "work_registers_used": 23
+          "work_registers_used": 22
         }
       }
     },
@@ -3735,9 +3735,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.90625,
+              0.875,
               0.5,
-              0.90625,
+              0.875,
               0.1875,
               4.0,
               0.25,
@@ -3747,7 +3747,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 18,
-          "work_registers_used": 23
+          "work_registers_used": 22
         }
       }
     },
@@ -3792,7 +3792,7 @@
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 5,
-          "work_registers_used": 3
+          "work_registers_used": 4
         }
       }
     }
@@ -5496,9 +5496,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.8125,
+              0.78125,
               0.453125,
-              0.8125,
+              0.78125,
               0.1875,
               4.0,
               0.25,
@@ -5546,8 +5546,8 @@
               "arithmetic"
             ],
             "total_cycles": [
-              9.666666984558105,
-              4.0,
+              10.333333015441895,
+              5.0,
               0.0
             ]
           },
@@ -6238,9 +6238,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.800000011920929,
+              0.762499988079071,
               0.375,
-              0.800000011920929,
+              0.762499988079071,
               0.25,
               4.0,
               0.25,
@@ -6250,7 +6250,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 10,
-          "work_registers_used": 21
+          "work_registers_used": 20
         }
       }
     },
@@ -6288,14 +6288,14 @@
               "arithmetic"
             ],
             "total_cycles": [
-              10.0,
-              4.0,
+              10.333333015441895,
+              5.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 2,
-          "work_registers_used": 3
+          "work_registers_used": 2
         }
       }
     }
@@ -7639,9 +7639,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.925000011920929,
+              0.887499988079071,
               0.625,
-              0.925000011920929,
+              0.887499988079071,
               0.4375,
               4.0,
               0.25,
@@ -9998,9 +9998,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.84375,
+              0.800000011920929,
               0.34375,
-              0.84375,
+              0.800000011920929,
               0.25,
               4.0,
               0.25,
@@ -10010,7 +10010,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 14,
-          "work_registers_used": 18
+          "work_registers_used": 19
         }
       }
     }
@@ -10538,9 +10538,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.875,
+              0.824999988079071,
               0.375,
-              0.875,
+              0.824999988079071,
               0.3125,
               4.0,
               0.25,
@@ -10550,7 +10550,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 12,
-          "work_registers_used": 18
+          "work_registers_used": 19
         }
       }
     }
@@ -11516,9 +11516,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.887499988079071,
+              0.84375,
               0.625,
-              0.887499988079071,
+              0.84375,
               0.5,
               4.0,
               0.25,
