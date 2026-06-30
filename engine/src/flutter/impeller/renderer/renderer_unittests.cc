@@ -1638,12 +1638,14 @@ TEST_P(RendererTest, CanCreateAndUpload2DArrayTexture) {
 
   auto texture = context->GetResourceAllocator()->CreateTexture(desc);
   ASSERT_TRUE(texture);
-  EXPECT_EQ(texture->GetTextureDescriptor().array_layer_count, 4u);
+  EXPECT_EQ(static_cast<int>(texture->GetTextureDescriptor().array_layer_count),
+            4);
   EXPECT_TRUE(texture->IsSliceValid(3));
   EXPECT_FALSE(texture->IsSliceValid(4));
 
   std::vector<uint8_t> layer(2u * 2u * 4u, 0xFF);
-  for (size_t slice = 0; slice < desc.array_layer_count; ++slice) {
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
     EXPECT_TRUE(texture->SetContents(layer.data(), layer.size(), slice));
   }
 }

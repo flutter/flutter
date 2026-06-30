@@ -536,7 +536,8 @@ void TextureGLES::InitializeContentsIfNecessary() {
                       gles_format->type,             // type
                       nullptr                        // data
         );
-        for (size_t layer = 0; layer < desc.array_layer_count; ++layer) {
+        for (size_t layer = 0;
+             layer < static_cast<size_t>(desc.array_layer_count); ++layer) {
           MarkSliceMipLevelInitialized(layer, 0);
         }
       } else {
@@ -773,7 +774,8 @@ bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
                   gles_format->type,              // type
                   nullptr                         // data
     );
-    for (size_t layer = 0; layer < desc.array_layer_count; ++layer) {
+    for (size_t layer = 0; layer < static_cast<size_t>(desc.array_layer_count);
+         ++layer) {
       MarkSliceMipLevelInitialized(layer, mip_level);
     }
     return true;

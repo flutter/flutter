@@ -169,13 +169,15 @@ TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
 
   auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
   ASSERT_TRUE(texture);
-  EXPECT_EQ(texture->GetTextureDescriptor().array_layer_count, 3u);
+  EXPECT_EQ(static_cast<int>(texture->GetTextureDescriptor().array_layer_count),
+            3);
   EXPECT_TRUE(texture->IsSliceValid(2));
   EXPECT_FALSE(texture->IsSliceValid(3));
 
   // Every layer can be uploaded.
   std::vector<uint8_t> layer(2u * 2u * 4u, 0xFF);
-  for (size_t slice = 0; slice < desc.array_layer_count; ++slice) {
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
     EXPECT_TRUE(texture->SetContents(layer.data(), layer.size(), slice));
   }
   EXPECT_TRUE(context_gles.GetReactor()->React());
