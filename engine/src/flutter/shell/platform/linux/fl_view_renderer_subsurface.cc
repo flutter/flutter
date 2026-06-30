@@ -469,6 +469,9 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
   g_clear_object(&self->engine);
   g_clear_object(&self->task_runner);
   g_clear_pointer(&self->background_color, gdk_rgba_free);
+  g_mutex_clear(&self->frame_mutex);
+  g_mutex_clear(&self->resize_mutex);
+  g_cond_clear(&self->resize_cond);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->dispose(object);
 }
@@ -482,9 +485,6 @@ static void fl_view_renderer_subsurface_finalize(GObject* object) {
   // holds a strong reference on the view (and thus this renderer) while
   // presenting.
   g_clear_object(&self->compositor);
-  g_mutex_clear(&self->frame_mutex);
-  g_mutex_clear(&self->resize_mutex);
-  g_cond_clear(&self->resize_cond);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->finalize(object);
 }
