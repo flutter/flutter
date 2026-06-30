@@ -48,9 +48,9 @@ void main() {
       sub = transformToLines(process.stdout).listen((String line) {
         if (line.contains('is available at: http://127.0.0.1:')) {
           final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
-          final match = exp.firstMatch(line);
+          final RegExpMatch? match = exp.firstMatch(line);
           if (match != null) {
-            final uri = Uri.parse(match.group(1)!);
+            final Uri uri = Uri.parse(match.group(1)!);
             completer.complete(uri);
           }
         }
@@ -60,10 +60,10 @@ void main() {
       await sub.cancel();
       await subErr.cancel();
 
-      final wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
+      final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
 
       // Connecting with a localhost origin should succeed.
-      final wsLocal = await WebSocket.connect(
+      final WebSocket wsLocal = await WebSocket.connect(
         wsUri.toString(),
         headers: <String, dynamic>{'Origin': 'http://localhost'},
       );
@@ -107,9 +107,9 @@ void main() {
       sub = transformToLines(process.stdout).listen((String line) {
         if (line.contains('is available at: http://127.0.0.1:')) {
           final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
-          final match = exp.firstMatch(line);
+          final RegExpMatch? match = exp.firstMatch(line);
           if (match != null) {
-            final uri = Uri.parse(match.group(1)!);
+            final Uri uri = Uri.parse(match.group(1)!);
             completer.complete(uri);
           }
         }
@@ -119,10 +119,10 @@ void main() {
       await sub.cancel();
       await subErr.cancel();
 
-      final wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
+      final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
 
       // Connecting with a non-localhost origin should succeed.
-      final ws = await WebSocket.connect(
+      final WebSocket ws = await WebSocket.connect(
         wsUri.toString(),
         headers: <String, dynamic>{'Origin': 'http://evil.com'},
       );
