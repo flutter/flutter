@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
+#include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
 
 // Maximum time to wait for the subsurface to be resized before giving up.
@@ -34,11 +35,8 @@ struct _FlViewRendererSubsurface {
   // Background color.
   GdkRGBA* background_color;
 
-  // Wayland globals used to create the subsurface.
-  struct wl_compositor* wl_compositor;
-  struct wl_subcompositor* wl_subcompositor;
-  struct wl_surface* wl_surface;
-  struct wl_subsurface* wl_subsurface;
+  // Wayland subsurface the frame is rendered into.
+  FlSubsurface* subsurface;
 
   // EGL state for the subsurface.
   struct wl_egl_window* egl_window;
@@ -67,31 +65,6 @@ struct _FlViewRendererSubsurface {
 G_DEFINE_TYPE(FlViewRendererSubsurface,
               fl_view_renderer_subsurface,
               fl_view_renderer_get_type())
-
-// Wayland registry handling.
-static void registry_global(void* data,
-                            struct wl_registry* registry,
-                            uint32_t name,
-                            const char* interface,
-                            uint32_t version) {
-  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(data);
-  if (g_strcmp0(interface, wl_compositor_interface.name) == 0) {
-    self->wl_compositor = static_cast<struct wl_compositor*>(wl_registry_bind(
-        registry, name, &wl_compositor_interface, MIN(version, 4)));
-  } else if (g_strcmp0(interface, wl_subcompositor_interface.name) == 0) {
-    self->wl_subcompositor = static_cast<struct wl_subcompositor*>(
-        wl_registry_bind(registry, name, &wl_subcompositor_interface, 1));
-  }
-}
-
-static void registry_global_remove(void* data,
-                                   struct wl_registry* registry,
-                                   uint32_t name) {}
-
-static const struct wl_registry_listener kRegistryListener = {
-    .global = registry_global,
-    .global_remove = registry_global_remove,
-};
 
 // Block until the subsurface has been resized to the requested size, or the
 // timeout expires.
@@ -126,14 +99,14 @@ static void notify_resize(FlViewRendererSubsurface* self,
 
 // Move the subsurface to match the position of the widget in the toplevel.
 static void update_subsurface_position(FlViewRendererSubsurface* self) {
-  if (self->wl_subsurface == nullptr) {
+  if (self->subsurface == nullptr) {
     return;
   }
   GtkWidget* widget = GTK_WIDGET(self);
   GtkWidget* toplevel = gtk_widget_get_toplevel(widget);
   gint x, y;
   gtk_widget_translate_coordinates(widget, toplevel, 0, 0, &x, &y);
-  wl_subsurface_set_position(self->wl_subsurface, x, y);
+  fl_subsurface_set_position(self->subsurface, x, y);
 }
 
 // Sets up the EGL context and window surface for the subsurface.
@@ -186,7 +159,8 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
   }
 
   self->egl_window =
-      wl_egl_window_create(self->wl_surface, width * scale, height * scale);
+      wl_egl_window_create(fl_subsurface_get_surface(self->subsurface),
+                           width * scale, height * scale);
   if (self->egl_window == nullptr) {
     g_warning("Failed to create wl_egl_window for subsurface");
     return FALSE;
@@ -200,7 +174,8 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
     return FALSE;
   }
 
-  wl_surface_set_buffer_scale(self->wl_surface, scale);
+  wl_surface_set_buffer_scale(fl_subsurface_get_surface(self->subsurface),
+                              scale);
 
   eglMakeCurrent(self->egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
@@ -275,26 +250,11 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
   }
   struct wl_display* display = gdk_wayland_display_get_wl_display(gdk_display);
 
-  // Bind the Wayland globals needed to create the subsurface.
-  struct wl_registry* registry = wl_display_get_registry(display);
-  wl_registry_add_listener(registry, &kRegistryListener, self);
-  wl_display_roundtrip(display);
-  wl_registry_destroy(registry);
-  if (self->wl_compositor == nullptr || self->wl_subcompositor == nullptr) {
-    g_warning("Required Wayland globals not available for subsurface");
+  // Create a subsurface on the toplevel's surface.
+  self->subsurface = fl_subsurface_new(widget);
+  if (self->subsurface == nullptr) {
     return;
   }
-
-  // Create a subsurface on the toplevel's surface.
-  GtkWidget* toplevel = gtk_widget_get_toplevel(widget);
-  GdkWindow* gdk_window = gtk_widget_get_window(toplevel);
-  struct wl_surface* parent_surface =
-      gdk_wayland_window_get_wl_surface(gdk_window);
-  self->wl_surface = wl_compositor_create_surface(self->wl_compositor);
-  self->wl_subsurface = wl_subcompositor_get_subsurface(
-      self->wl_subcompositor, self->wl_surface, parent_surface);
-  wl_subsurface_set_sync(self->wl_subsurface);
-  update_subsurface_position(self);
 
   GtkAllocation allocation;
   gtk_widget_get_allocation(widget, &allocation);
@@ -334,16 +294,7 @@ static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
     wl_egl_window_destroy(self->egl_window);
     self->egl_window = nullptr;
   }
-  if (self->wl_subsurface != nullptr) {
-    wl_subsurface_destroy(self->wl_subsurface);
-    self->wl_subsurface = nullptr;
-  }
-  if (self->wl_surface != nullptr) {
-    wl_surface_destroy(self->wl_surface);
-    self->wl_surface = nullptr;
-  }
-  g_clear_pointer(&self->wl_subcompositor, wl_subcompositor_destroy);
-  g_clear_pointer(&self->wl_compositor, wl_compositor_destroy);
+  g_clear_object(&self->subsurface);
 
   GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->unrealize(widget);
 }
@@ -411,7 +362,7 @@ static void fl_view_renderer_subsurface_size_allocate(
 
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
-  if (self->wl_subsurface == nullptr) {
+  if (self->subsurface == nullptr) {
     return;
   }
 
