@@ -1947,7 +1947,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                                        ? std::optional(paint.stroke)
                                        : std::nullopt);
 
-  entity.SetTransform(GetCurrentTransform());
+  entity.SetTransform(GetCurrentTransform().Translate(position));
 
   if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
                                      paint)) {
