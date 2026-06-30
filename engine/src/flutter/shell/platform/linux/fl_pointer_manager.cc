@@ -61,6 +61,9 @@ static gboolean get_button(FlutterPointerDeviceKind device_kind,
                            int64_t* button) {
   if (device_kind == kFlutterPointerDeviceKindStylus ||
       device_kind == kFlutterPointerDeviceKindInvertedStylus) {
+    // GDK button names describe the physical button action, where "primary"
+    // is the stylus tip contact. Flutter stylus button names reserve "primary"
+    // for the first barrel button, so the GDK secondary button maps there.
     switch (gdk_button) {
       case GDK_BUTTON_PRIMARY:
         *button = kFlutterPointerButtonStylusContact;
