@@ -1057,38 +1057,33 @@ class LockTrackingFileSystem extends ForwardingFileSystem {
   final Map<String, int> linkCreateCount = <String, int>{};
 
   @override
-  Directory directory(dynamic path) {
-    return _TrackingDirectory(this, delegate.directory(path));
-  }
+  Directory directory(dynamic path) => _TrackingDirectory(this, delegate.directory(path));
 
   @override
-  File file(dynamic path) {
-    final File delegateFile = delegate.file(path);
-    final pathStr = path.toString();
-    if (pathStr.endsWith('.swift_pm.lock')) {
-      return _LockTrackingFile(this, delegateFile);
-    }
-    return _TrackingFile(this, delegateFile);
-  }
+  File file(dynamic path) => _TrackingFile(this, delegate.file(path));
 
   @override
-  Link link(dynamic path) {
-    return _TrackingLink(this, delegate.link(path));
-  }
+  Link link(dynamic path) => _TrackingLink(this, delegate.link(path));
 }
 
 class _TrackingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
     with ForwardingDirectory {
   _TrackingDirectory(this._fileSystem, this.delegate);
+
   final LockTrackingFileSystem _fileSystem;
+
   @override
   final io.Directory delegate;
+
   @override
   FileSystem get fileSystem => _fileSystem;
+
   @override
   File wrapFile(io.File delegate) => _fileSystem.file(delegate.path);
+
   @override
   Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
+
   @override
   Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
 
@@ -1105,15 +1100,21 @@ class _TrackingDirectory extends ForwardingFileSystemEntity<Directory, io.Direct
 
 class _TrackingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
   _TrackingFile(this._fileSystem, this.delegate);
+
   final LockTrackingFileSystem _fileSystem;
+
   @override
   final io.File delegate;
+
   @override
   FileSystem get fileSystem => _fileSystem;
+
   @override
   File wrapFile(io.File delegate) => _fileSystem.file(delegate.path);
+
   @override
   Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
+
   @override
   Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
 
@@ -1129,47 +1130,12 @@ class _TrackingFile extends ForwardingFileSystemEntity<File, io.File> with Forwa
   }
 
   @override
-  void writeAsBytesSync(List<int> bytes, {FileMode mode = FileMode.write, bool flush = false}) {
-    _fileSystem.writeCount++;
-    super.writeAsBytesSync(bytes, mode: mode, flush: flush);
-  }
-
-  @override
-  Future<File> writeAsBytes(List<int> bytes, {FileMode mode = FileMode.write, bool flush = false}) {
-    _fileSystem.writeCount++;
-    return super.writeAsBytes(bytes, mode: mode, flush: flush);
-  }
-
-  @override
-  Future<File> writeAsString(
-    String contents, {
-    FileMode mode = FileMode.write,
-    Encoding encoding = utf8,
-    bool flush = false,
-  }) {
-    _fileSystem.writeCount++;
-    return super.writeAsString(contents, mode: mode, encoding: encoding, flush: flush);
-  }
-}
-
-class _LockTrackingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
-  _LockTrackingFile(this._fileSystem, this.delegate);
-  final LockTrackingFileSystem _fileSystem;
-  @override
-  final io.File delegate;
-  @override
-  FileSystem get fileSystem => _fileSystem;
-  @override
-  File wrapFile(io.File delegate) => _fileSystem.file(delegate.path);
-  @override
-  Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
-  @override
-  Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
-
-  @override
   RandomAccessFile openSync({FileMode mode = FileMode.read}) {
     final RandomAccessFile delegateOpened = super.openSync(mode: mode);
-    return _LockTrackingRandomAccessFile(_fileSystem, delegateOpened);
+    if (path.endsWith('.swift_pm.lock')) {
+      return _LockTrackingRandomAccessFile(_fileSystem, delegateOpened);
+    }
+    return delegateOpened;
   }
 }
 
@@ -1203,15 +1169,21 @@ class _LockTrackingRandomAccessFile extends Fake implements RandomAccessFile {
 
 class _TrackingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
   _TrackingLink(this._fileSystem, this.delegate);
+
   final LockTrackingFileSystem _fileSystem;
+
   @override
   final io.Link delegate;
+
   @override
   FileSystem get fileSystem => _fileSystem;
+
   @override
   File wrapFile(io.File delegate) => _fileSystem.file(delegate.path);
+
   @override
   Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
+
   @override
   Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
 
