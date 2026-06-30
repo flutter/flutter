@@ -16,11 +16,12 @@ class CompositedTransformFollowerExampleApp extends StatelessWidget {
     return WidgetsApp(
       color: const Color(0xFFFFFFFF),
       home: const CompositedTransformFollowerExample(),
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-          PageRouteBuilder<T>(
-            settings: settings,
-            pageBuilder: (BuildContext context, _, _) => builder(context),
-          ),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return PageRouteBuilder<T>(
+          settings: settings,
+          pageBuilder: (BuildContext context, _, _) => builder(context),
+        );
+      },
     );
   }
 }
