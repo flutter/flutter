@@ -279,4 +279,20 @@ Future<void> testMain() async {
     // Empty range should return empty list or minimal box
     expect(boxes.isEmpty || boxes.every((box) => box.toRect().width == 0), true);
   });
+
+  test('getBoxesForRange handles multiline text', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello \nWorld';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes1 = paragraph.getBoxesForRange(0, 1);
+    final List<ui.TextBox> boxes2 = paragraph.getBoxesForRange(text.length - 1, text.length);
+
+    expect(boxes1.isNotEmpty && boxes1.length == 1, true);
+    expect(boxes2.isNotEmpty && boxes2.length == 1, true);
+    expect(boxes1.first.toRect().bottom == boxes2.first.toRect().top, true);
+  });
 }
