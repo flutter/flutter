@@ -62,41 +62,28 @@ class SwiftPackageManager {
     final File lockFile = project.ephemeralDirectory.childFile('.swift_pm.lock');
     var printed = false;
     while (true) {
+      RandomAccessFile? openedFile;
       try {
         lockFile.parent.createSync(recursive: true);
-        final RandomAccessFile openedFile = lockFile.openSync(mode: FileMode.write);
-        try {
-          openedFile.lockSync();
-          return openedFile;
-        } on FileSystemException {
-          // Lock failed (already locked by another process). Close and retry.
+        openedFile = lockFile.openSync(mode: FileMode.write);
+        openedFile.lockSync();
+        return openedFile;
+      } on UnimplementedError {
+        _logger?.printTrace('Swift PM Locking not supported (UnimplementedError).');
+        return openedFile;
+      } on UnsupportedError {
+        _logger?.printTrace('Swift PM Locking not supported (UnsupportedError).');
+        return openedFile;
+      } on FileSystemException catch (e) {
+        if (openedFile != null) {
           try {
             openedFile.closeSync();
           } on FileSystemException catch (_) {}
-          if (!printed) {
-            _logger?.printTrace(
-              'Waiting to be able to obtain lock of Swift Package Manager directory: ${lockFile.path}',
-            );
-            _logger?.printWarning(
-              'Waiting for another flutter command to release the Swift Package Manager lock...',
-              color: TerminalColor.grey,
-              fatal: false,
-            );
-            printed = true;
-          }
-          await Future<void>.delayed(const Duration(milliseconds: 50));
-        } on UnimplementedError {
-          _logger?.printTrace('Swift PM Locking not supported (UnimplementedError).');
-          return openedFile;
-        } on UnsupportedError {
-          _logger?.printTrace('Swift PM Locking not supported (UnsupportedError).');
-          return openedFile;
         }
-      } on FileSystemException catch (e) {
-        // openSync or createSync failed (e.g. sharing violation). Retry.
         if (!printed) {
+          final details = openedFile != null ? '' : ' (Error: $e)';
           _logger?.printTrace(
-            'Waiting to be able to obtain lock of Swift Package Manager directory: ${lockFile.path} (Error: $e)',
+            'Waiting to be able to obtain lock of Swift Package Manager directory: ${lockFile.path}$details',
           );
           _logger?.printWarning(
             'Waiting for another flutter command to release the Swift Package Manager lock...',

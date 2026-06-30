@@ -125,16 +125,10 @@ class SwiftPackage {
           .childDirectory(target.name);
       if (generateEmptySources) {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
-        var skipWriteSource = false;
-        if (requiredSwiftFile.existsSync()) {
-          skipWriteSource = true;
-        } else {
-          // If the required file doesn't exist, check if the directory already contains other source files.
-          if (targetDirectory.existsSync() && targetDirectory.listSync().isNotEmpty) {
-            skipWriteSource = true;
-          }
-        }
-        if (!skipWriteSource) {
+        final bool hasSources =
+            requiredSwiftFile.existsSync() ||
+            (targetDirectory.existsSync() && targetDirectory.listSync().isNotEmpty);
+        if (!hasSources) {
           requiredSwiftFile.createSync(recursive: true);
           requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
         }
@@ -147,15 +141,12 @@ class SwiftPackage {
     );
 
     var shouldWrite = true;
-    if (_manifest.existsSync()) {
-      try {
-        final String existingContent = _manifest.readAsStringSync();
-        if (existingContent == renderedTemplate) {
-          shouldWrite = false;
-        }
-      } on FileSystemException {
-        // If reading fails, write it anyway.
+    try {
+      if (_manifest.existsSync() && _manifest.readAsStringSync() == renderedTemplate) {
+        shouldWrite = false;
       }
+    } on FileSystemException {
+      // If reading fails, write it anyway.
     }
 
     if (shouldWrite) {
