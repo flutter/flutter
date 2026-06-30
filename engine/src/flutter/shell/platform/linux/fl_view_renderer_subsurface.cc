@@ -34,9 +34,9 @@ struct _FlViewRendererSubsurface {
   // Wayland subsurface the frame is rendered into.
   FlSubsurface* subsurface;
 
-  // EGL state for the subsurface.
+  // EGL state for the subsurface. The display is owned by the engine's
+  // FlOpenGLManager (see get_egl_display), not by this renderer.
   struct wl_egl_window* egl_window;
-  EGLDisplay egl_display;
   EGLContext egl_context;
   EGLSurface egl_surface;
 
@@ -50,6 +50,13 @@ struct _FlViewRendererSubsurface {
 G_DEFINE_TYPE(FlViewRendererSubsurface,
               fl_view_renderer_subsurface,
               fl_view_renderer_get_type())
+
+// Gets the EGL display the engine renders to. The subsurface shares this
+// display so its context can access the engine's frame texture directly.
+static EGLDisplay get_egl_display(FlViewRendererSubsurface* self) {
+  return fl_opengl_manager_get_display(
+      fl_engine_get_opengl_manager(self->engine));
+}
 
 // Move the subsurface to match the position of the widget in the toplevel.
 static void update_subsurface_position(FlViewRendererSubsurface* self) {
@@ -71,8 +78,8 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
   // Share the engine's EGL display and render context so the engine's frame
   // texture can be accessed directly, without using EGLImage.
   FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
-  self->egl_display = fl_opengl_manager_get_display(opengl_manager);
-  if (self->egl_display == EGL_NO_DISPLAY) {
+  EGLDisplay egl_display = fl_opengl_manager_get_display(opengl_manager);
+  if (egl_display == EGL_NO_DISPLAY) {
     g_warning("Failed to get EGL display for subsurface");
     return FALSE;
   }
@@ -92,7 +99,7 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
                                              EGL_NONE};
   EGLConfig egl_config;
   EGLint num_config;
-  if (!eglChooseConfig(self->egl_display, config_attributes, &egl_config, 1,
+  if (!eglChooseConfig(egl_display, config_attributes, &egl_config, 1,
                        &num_config) ||
       num_config == 0) {
     g_warning("Failed to choose EGL config for subsurface");
@@ -103,9 +110,10 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
 
   static const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
                                               EGL_NONE};
-  self->egl_context = eglCreateContext(
-      self->egl_display, egl_config,
-      fl_opengl_manager_get_context(opengl_manager), context_attributes);
+  self->egl_context =
+      eglCreateContext(egl_display, egl_config,
+                       fl_opengl_manager_get_context(opengl_manager),
+                       context_attributes);
   if (self->egl_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL context for subsurface");
     return FALSE;
@@ -120,7 +128,7 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
   }
 
   self->egl_surface = eglCreateWindowSurface(
-      self->egl_display, egl_config,
+      egl_display, egl_config,
       reinterpret_cast<EGLNativeWindowType>(self->egl_window), nullptr);
   if (self->egl_surface == EGL_NO_SURFACE) {
     g_warning("Failed to create EGL window surface for subsurface");
@@ -130,11 +138,10 @@ static gboolean setup_egl(FlViewRendererSubsurface* self,
   wl_surface_set_buffer_scale(fl_subsurface_get_surface(self->subsurface),
                               scale);
 
-  eglMakeCurrent(self->egl_display, self->egl_surface, self->egl_surface,
+  eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
-  eglSwapInterval(self->egl_display, 0);
-  eglMakeCurrent(self->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                 EGL_NO_CONTEXT);
+  eglSwapInterval(egl_display, 0);
+  eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
   return TRUE;
 }
 
@@ -228,18 +235,17 @@ static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
 
   g_clear_object(&self->compositor);
 
-  if (self->egl_display != EGL_NO_DISPLAY) {
-    if (self->egl_surface != EGL_NO_SURFACE) {
-      eglDestroySurface(self->egl_display, self->egl_surface);
-      self->egl_surface = EGL_NO_SURFACE;
-    }
-    if (self->egl_context != EGL_NO_CONTEXT) {
-      eglDestroyContext(self->egl_display, self->egl_context);
-      self->egl_context = EGL_NO_CONTEXT;
-    }
-    // The EGL display is shared with the engine (same Wayland display), so it
-    // must not be terminated here.
-    self->egl_display = EGL_NO_DISPLAY;
+  // The EGL display is owned by the engine (same Wayland display), so only the
+  // surface and context created by this renderer are destroyed here; the
+  // display must not be terminated.
+  EGLDisplay egl_display = get_egl_display(self);
+  if (self->egl_surface != EGL_NO_SURFACE) {
+    eglDestroySurface(egl_display, self->egl_surface);
+    self->egl_surface = EGL_NO_SURFACE;
+  }
+  if (self->egl_context != EGL_NO_CONTEXT) {
+    eglDestroyContext(egl_display, self->egl_context);
+    self->egl_context = EGL_NO_CONTEXT;
   }
   if (self->egl_window != nullptr) {
     wl_egl_window_destroy(self->egl_window);
@@ -279,14 +285,13 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
   // Blit the composited frame to the subsurface window surface using the
   // subsurface's own EGL context. This is done on the GTK thread so the
   // engine's rendering context on the raster thread is never disturbed.
-  eglMakeCurrent(self->egl_display, self->egl_surface, self->egl_surface,
+  EGLDisplay egl_display = get_egl_display(self);
+  eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
 
   EGLint surface_width, surface_height;
-  eglQuerySurface(self->egl_display, self->egl_surface, EGL_WIDTH,
-                  &surface_width);
-  eglQuerySurface(self->egl_display, self->egl_surface, EGL_HEIGHT,
-                  &surface_height);
+  eglQuerySurface(egl_display, self->egl_surface, EGL_WIDTH, &surface_width);
+  eglQuerySurface(egl_display, self->egl_surface, EGL_HEIGHT, &surface_height);
   if (static_cast<size_t>(surface_width) != width ||
       static_cast<size_t>(surface_height) != height) {
     wl_egl_window_resize(self->egl_window, width, height, 0, 0);
@@ -305,11 +310,10 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
                     GL_COLOR_BUFFER_BIT, GL_NEAREST);
-  eglSwapBuffers(self->egl_display, self->egl_surface);
+  eglSwapBuffers(egl_display, self->egl_surface);
   glDeleteFramebuffers(1, &read_framebuffer);
 
-  eglMakeCurrent(self->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                 EGL_NO_CONTEXT);
+  eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
   return TRUE;
 }
@@ -416,7 +420,6 @@ static void fl_view_renderer_subsurface_class_init(
 }
 
 static void fl_view_renderer_subsurface_init(FlViewRendererSubsurface* self) {
-  self->egl_display = EGL_NO_DISPLAY;
   self->egl_context = EGL_NO_CONTEXT;
   self->egl_surface = EGL_NO_SURFACE;
   g_mutex_init(&self->frame_mutex);
