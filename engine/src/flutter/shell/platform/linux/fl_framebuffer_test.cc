@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
 
-TEST(FlFramebufferTest, HasDepthStencil) {
+class FlFramebufferTest : public flutter::testing::LinuxTest {
+ protected:
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+};
 
+TEST_F(FlFramebufferTest, HasDepthStencil) {
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
 
@@ -26,9 +30,7 @@ TEST(FlFramebufferTest, HasDepthStencil) {
   EXPECT_NE(stencil_type, GL_NONE);
 }
 
-TEST(FlFramebufferTest, ResourcesRemoved) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-
+TEST_F(FlFramebufferTest, ResourcesRemoved) {
   EXPECT_CALL(epoxy, glGenFramebuffers);
   EXPECT_CALL(epoxy, glGenTextures);
   EXPECT_CALL(epoxy, glGenRenderbuffers);
@@ -40,9 +42,7 @@ TEST(FlFramebufferTest, ResourcesRemoved) {
   g_object_unref(framebuffer);
 }
 
-TEST(FlFramebufferTest, Sibling) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-
+TEST_F(FlFramebufferTest, Sibling) {
   EXPECT_CALL(epoxy, eglCreateImageKHR);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, 100, 100, TRUE);

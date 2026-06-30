@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/host_window_sized.h"
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
@@ -16,6 +17,17 @@ HostWindowSized::HostWindowSized(WindowManager* window_manager,
       resizable_(resizable),
       view_alive_(std::make_shared<int>(0)) {}
 
+HostWindowSized::~HostWindowSized() {
+  // By the time the base destructor runs, the most-derived class must have
+  // already reset |view_controller_| (and therefore stopped the raster thread
+  // from sizing this object). See the destructor comment in host_window_sized.h
+  // for the rationale. If this fires, a HostWindowSized subclass is missing the
+  // required |view_controller_.reset()| at the start of its destructor.
+  FML_DCHECK(!view_controller_)
+      << "HostWindowSized subclass must reset view_controller_ in its "
+         "destructor.";
+}
+
 void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {
   // This is called from the raster thread.
   std::weak_ptr<int> weak_view_alive = view_alive_;
@@ -24,40 +36,46 @@ void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {
     if (!view_alive) {
       return;
     }
-    if (physical_width_ == width && physical_width_ == height) {
+    if (physical_width_ == width && physical_height_ == height) {
       return;
     }
     if (is_being_destroyed_) {
       return;
     }
     physical_width_ = width;
-    physical_width_ = height;
+    physical_height_ = height;
 
-    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
-    GetWindowInfo(window_handle_, &window_info);
-
-    // Convert physical pixels to logical pixels.
-    UINT const dpi = GetDpiForHWND(window_handle_);
-    double const scale = static_cast<double>(dpi > 0 ? dpi : 96) / 96.0;
-    std::optional<Size> const window_size = GetWindowSizeForClientSize(
-        *engine_->windows_proc_table(), Size(width / scale, height / scale),
-        box_constraints_.smallest(), box_constraints_.biggest(),
-        window_info.dwStyle, window_info.dwExStyle, nullptr);
-
-    if (!window_size) {
-      return;
-    }
-
-    SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
-                 window_size->height(),
-                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-
-    if (resizable_) {
-      // For resizable windows, stop tracking content size after the initial
-      // frame so subsequent user-initiated resizes are forwarded to Flutter.
-      view_controller_->view()->SetSizedToContent(false);
-    }
+    ApplyContentSize(width, height);
   });
+}
+
+void HostWindowSized::ApplyContentSize(int32_t physical_width,
+                                       int32_t physical_height) {
+  WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+  GetWindowInfo(window_handle_, &window_info);
+
+  // Convert physical pixels to logical pixels.
+  UINT const dpi = GetDpiForHWND(window_handle_);
+  double const scale = static_cast<double>(dpi > 0 ? dpi : 96) / 96.0;
+  std::optional<Size> const window_size = GetWindowSizeForClientSize(
+      *engine_->windows_proc_table(),
+      Size(physical_width / scale, physical_height / scale),
+      box_constraints_.smallest(), box_constraints_.biggest(),
+      window_info.dwStyle, window_info.dwExStyle, nullptr);
+
+  if (!window_size) {
+    return;
+  }
+
+  SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
+               window_size->height(),
+               SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+
+  if (resizable_) {
+    // For resizable windows, stop tracking content size after the initial
+    // frame so subsequent user-initiated resizes are forwarded to Flutter.
+    view_controller_->view()->SetSizedToContent(false);
+  }
 }
 
 WindowRect HostWindowSized::GetWorkArea() const {

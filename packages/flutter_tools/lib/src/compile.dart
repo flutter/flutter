@@ -62,6 +62,15 @@ class TargetModel {
 
   @override
   String toString() => _value;
+
+  /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
+  static TargetModel fromTargetPlatform(TargetPlatform? platform) {
+    return switch (platform) {
+      TargetPlatform.web_javascript => TargetModel.dartdevc,
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+      _ => TargetModel.flutter,
+    };
+  }
 }
 
 class CompilerOutput {
@@ -727,6 +736,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
              fileSystem: fileSystem,
              trackWidgetCreation: buildInfo.trackWidgetCreation,
              dartDefines: buildInfo.dartDefines,
+             targetModel: targetModel,
              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
            ),
        extraFrontEndOptions = buildInfo.extraFrontEndOptions,

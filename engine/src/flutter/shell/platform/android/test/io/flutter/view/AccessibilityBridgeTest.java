@@ -2609,7 +2609,7 @@ public class AccessibilityBridgeTest {
   public void itAddsProgressBarToClassName() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
@@ -2617,10 +2617,89 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itAddsComboBoxToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.COMBO_BOX.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.Spinner", nodeInfo.getClassName().toString());
+    assertTrue(nodeInfo.canOpenPopup());
+  }
+
+  @Test
+  public void itAddsMenuToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.Spinner", nodeInfo.getClassName().toString());
+    assertTrue(nodeInfo.canOpenPopup());
+  }
+
+  @Test
+  public void itAddsMenuItemToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU_ITEM.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.view.MenuItem", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsMenuItemCheckboxToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU_ITEM_CHECKBOX.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.view.MenuItem", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsMenuItemRadioToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU_ITEM_RADIO.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.view.MenuItem", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsListViewToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.LIST.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ListView", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsRadioGroupToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.RADIO_GROUP.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.RadioGroup", nodeInfo.getClassName().toString());
+  }
+
+  @Test
   public void itAddsRangeInfoToProgressBar() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "100";
@@ -2638,7 +2717,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_missingMinAndMaxValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
@@ -2654,7 +2733,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableMinValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     testSemanticsNode.minValue = "a";
     testSemanticsNode.maxValue = "100";
@@ -2672,7 +2751,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableMaxValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "a";
@@ -2692,7 +2771,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "a";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "100";
@@ -2714,7 +2793,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableValueAPI36() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "a";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "100";
