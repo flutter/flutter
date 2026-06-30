@@ -181,6 +181,14 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
   if (payload == nullptr || !payload->GetMapping()) {
     return shader_map;
   }
+  // `ShaderBundleBufferHasIdentifier` reads the file identifier at a fixed
+  // offset, so a buffer too small to hold the root offset plus the identifier
+  // would be read out of bounds. A `fromBytes` caller can pass arbitrary bytes,
+  // so reject undersized buffers before sniffing the identifier.
+  if (payload->GetSize() <
+      sizeof(flatbuffers::uoffset_t) + flatbuffers::kFileIdentifierLength) {
+    return shader_map;
+  }
   if (!impeller::fb::shaderbundle::ShaderBundleBufferHasIdentifier(
           payload->GetMapping())) {
     return shader_map;
