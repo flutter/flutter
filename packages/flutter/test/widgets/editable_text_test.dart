@@ -4725,6 +4725,87 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('exposes setText before focus on web', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/172206
+    final semantics = SemanticsTester(tester);
+
+    controller.text = 'test';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    // The field has never been focused, but on web setText is still exposed so
+    // browser automation and autofill can drive the value before Flutter's
+    // focused semantics update arrives.
+    expect(focusNode.hasFocus, isFalse);
+    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
+    expect(node.getSemanticsData().hasAction(SemanticsAction.setText), isTrue);
+
+    semantics.dispose();
+  }, skip: !kIsWeb); // [intended]
+
+  testWidgets('does not expose setText before focus on non-web platforms', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    controller.text = 'test';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isFalse);
+    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
+    expect(node.getSemanticsData().hasAction(SemanticsAction.setText), isFalse);
+
+    semantics.dispose();
+  }, skip: kIsWeb); // [intended]
+
+  testWidgets('does not expose setText for a read-only field', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    controller.text = 'test';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          readOnly: true,
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
+    expect(node.getSemanticsData().hasAction(SemanticsAction.setText), isFalse);
+
+    semantics.dispose();
+  });
+
   testWidgets('can move cursor with a11y means - character', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     const doNotExtendSelection = false;
@@ -4751,6 +4832,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -4780,6 +4862,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -4814,6 +4897,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -4857,6 +4941,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -4886,6 +4971,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -4918,6 +5004,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -4972,6 +5059,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -5001,6 +5089,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -5035,6 +5124,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -5089,6 +5179,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -5118,6 +5209,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -5150,6 +5242,7 @@ void main() {
         actions: <SemanticsAction>[
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
+          if (kIsWeb) SemanticsAction.setText,
         ],
       ),
     );
@@ -5215,6 +5308,9 @@ void main() {
                             SemanticsFlag.isFocusable,
                             SemanticsFlag.isObscured,
                           ],
+                          // On web, an enabled text field exposes setText even
+                          // before focus so browser automation can drive it.
+                          actions: <SemanticsAction>[if (kIsWeb) SemanticsAction.setText],
                           value: expectedValue,
                           inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
@@ -5275,6 +5371,9 @@ void main() {
                             SemanticsFlag.isTextField,
                             SemanticsFlag.isFocusable,
                           ],
+                          // On web, an enabled text field exposes setText even
+                          // before focus so browser automation can drive it.
+                          actions: <SemanticsAction>[if (kIsWeb) SemanticsAction.setText],
                           value: originalText,
                           inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
+import '../services/message_codecs.dart';
 import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
@@ -307,6 +310,34 @@ class SemanticTextField extends SemanticRole {
       'blur',
       createDomEventListener((DomEvent event) {
         SemanticsTextEditingStrategy._instance?.deactivate(this);
+      }),
+    );
+    editableElement.addEventListener(
+      'input',
+      createDomEventListener((DomEvent event) {
+        // When this field is the active text editing field, HybridTextEditing
+        // already syncs the DOM value to the framework through its own "input"
+        // listener (see SemanticsTextEditingStrategy.addEventHandlers).
+        // Dispatching here too would double up, so only act as a fallback for
+        // fields that are not currently active. This is the path used by browser
+        // automation and autofill that write directly to the semantics input
+        // without first opening Flutter's text editing connection.
+        if (SemanticsTextEditingStrategy._instance?.activeTextField == this) {
+          return;
+        }
+        // Only forward when the framework advertises that this node can accept
+        // text. Otherwise there is no handler on the other side.
+        if (!semanticsObject.hasAction(ui.SemanticsAction.setText)) {
+          return;
+        }
+        final String text = EditingState.fromDomElement(editableElement).text;
+        final ByteData? message = const StandardMessageCodec().encodeMessage(text);
+        EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+          viewId,
+          semanticsObject.id,
+          ui.SemanticsAction.setText,
+          message,
+        );
       }),
     );
   }

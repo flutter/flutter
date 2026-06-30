@@ -770,6 +770,9 @@ void main() {
                               SemanticsAction.focus,
                               SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.didLoseAccessibilityFocus,
+                              // On web, an enabled text field exposes setText even
+                              // before focus so browser automation can drive it.
+                              if (kIsWeb) SemanticsAction.setText,
                             ],
                             inputType: ui.SemanticsInputType.text,
                             currentValueLength: 0,
@@ -5657,7 +5660,11 @@ void main() {
                 TestSemantics(
                   textDirection: TextDirection.ltr,
                   value: 'some text',
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 9,
                   flags: <SemanticsFlag>[
@@ -5703,7 +5710,11 @@ void main() {
                 TestSemantics(
                   textDirection: TextDirection.ltr,
                   value: 'some text',
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 9,
                   flags: <SemanticsFlag>[
@@ -8449,7 +8460,11 @@ void main() {
                   textDirection: TextDirection.ltr,
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 0,
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isTextField,
                     SemanticsFlag.isFocusable,
@@ -8482,7 +8497,11 @@ void main() {
                   value: 'Guten Tag',
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 9,
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isTextField,
                     SemanticsFlag.isFocusable,
@@ -8647,7 +8666,11 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
+          if (kIsWeb) SemanticsAction.setText,
+        ],
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
@@ -8666,7 +8689,11 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
+          if (kIsWeb) SemanticsAction.setText,
+        ],
         textDirection: TextDirection.ltr,
         inputType: ui.SemanticsInputType.text,
         flags: <SemanticsFlag>[
@@ -8685,7 +8712,11 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
+          if (kIsWeb) SemanticsAction.setText,
+        ],
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
@@ -8782,7 +8813,11 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 5,
                   textDirection: TextDirection.ltr,
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isTextField,
                     SemanticsFlag.isFocusable,
@@ -9062,7 +9097,11 @@ void main() {
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.isEnabled,
                   ],
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   value: textInTextField,
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 5,
@@ -9162,7 +9201,11 @@ void main() {
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.isEnabled,
                   ],
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   value: textInTextField,
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 5,
@@ -9358,7 +9401,11 @@ void main() {
                   inputType: ui.SemanticsInputType.text,
                   maxValueLength: 10,
                   currentValueLength: 0,
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isTextField,
                     SemanticsFlag.isFocusable,
@@ -9473,7 +9520,11 @@ void main() {
                   textDirection: TextDirection.ltr,
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 0,
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    if (kIsWeb) SemanticsAction.setText,
+                  ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isTextField,
                     SemanticsFlag.isFocusable,
@@ -9534,7 +9585,11 @@ void main() {
                     label: 'label',
                     hint: 'oh no!',
                     textDirection: TextDirection.ltr,
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                    actions: <SemanticsAction>[
+                      SemanticsAction.tap,
+                      SemanticsAction.focus,
+                      if (kIsWeb) SemanticsAction.setText,
+                    ],
                     flags: <SemanticsFlag>[
                       SemanticsFlag.isTextField,
                       SemanticsFlag.isFocusable,
@@ -18821,6 +18876,9 @@ void main() {
                                 defaultTargetPlatform == TargetPlatform.linux)
                               SemanticsAction.didLoseAccessibilityFocus,
                             SemanticsAction.focus,
+                            // On web, an enabled text field exposes setText even
+                            // before focus so browser automation can drive it.
+                            if (kIsWeb) SemanticsAction.setText,
                           ],
                         ),
                       ],
