@@ -15,10 +15,6 @@
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_subsurface.h"
-#include "flutter/shell/platform/linux/fl_task_runner.h"
-
-// Maximum time to wait for the subsurface to be resized before giving up.
-static constexpr gint64 kResizeTimeoutMicroseconds = 100000;  // 100ms
 
 struct _FlViewRendererSubsurface {
   FlViewRenderer parent_instance;
@@ -48,54 +44,13 @@ struct _FlViewRendererSubsurface {
   // Combines layers into a frame.
   FlCompositorOpenGL* compositor;
 
-  // Task runner to wait for frames on.
-  FlTaskRunner* task_runner;
-
   // Ensure Flutter and GTK can access the frame stored in the compositor.
   GMutex frame_mutex;
-
-  // Synchronizes the GTK thread waiting for a resize with the render thread.
-  GMutex resize_mutex;
-  GCond resize_cond;
-  gboolean resize_done;
-  size_t resize_width;
-  size_t resize_height;
 };
 
 G_DEFINE_TYPE(FlViewRendererSubsurface,
               fl_view_renderer_subsurface,
               fl_view_renderer_get_type())
-
-// Block until the subsurface has been resized to the requested size, or the
-// timeout expires.
-static void wait_for_resize(FlViewRendererSubsurface* self,
-                            size_t width,
-                            size_t height) {
-  g_mutex_lock(&self->resize_mutex);
-  self->resize_done = FALSE;
-  self->resize_width = width;
-  self->resize_height = height;
-  gint64 deadline = g_get_monotonic_time() + kResizeTimeoutMicroseconds;
-  while (!self->resize_done) {
-    if (!g_cond_wait_until(&self->resize_cond, &self->resize_mutex, deadline)) {
-      break;
-    }
-  }
-  g_mutex_unlock(&self->resize_mutex);
-}
-
-// Notify a waiting GTK thread that a frame of the requested size was presented.
-static void notify_resize(FlViewRendererSubsurface* self,
-                          size_t width,
-                          size_t height) {
-  g_mutex_lock(&self->resize_mutex);
-  if (!self->resize_done && width == self->resize_width &&
-      height == self->resize_height) {
-    self->resize_done = TRUE;
-    g_cond_signal(&self->resize_cond);
-  }
-  g_mutex_unlock(&self->resize_mutex);
-}
 
 // Move the subsurface to match the position of the widget in the toplevel.
 static void update_subsurface_position(FlViewRendererSubsurface* self) {
@@ -264,8 +219,6 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
     return;
   }
 
-  self->task_runner =
-      FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   // Wayland uses EGL so the engine frame can be shared via EGLImage.
   self->compositor = fl_compositor_opengl_new(
       fl_engine_get_opengl_manager(self->engine), TRUE);
@@ -379,10 +332,6 @@ static void fl_view_renderer_subsurface_size_allocate(
   if (self->egl_window != nullptr) {
     wl_egl_window_resize(self->egl_window, width, height, 0, 0);
   }
-
-  if (!self->sized_to_content) {
-    wait_for_resize(self, width, height);
-  }
 }
 
 // Implements FlViewRenderer::set_background_color.
@@ -409,8 +358,6 @@ static void fl_view_renderer_subsurface_present_layers(
     return;
   }
 
-  size_t width = 0;
-  size_t height = 0;
   {
     g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
@@ -418,14 +365,7 @@ static void fl_view_renderer_subsurface_present_layers(
     // is blitted to the subsurface later, on the GTK thread, so the engine's
     // rendering context is not disturbed here.
     fl_compositor_opengl_present_layers(self->compositor, layers, layers_count);
-    fl_compositor_opengl_get_frame_size(self->compositor, &width, &height);
   }
-
-  // Wake the GTK thread if it is waiting for this resize.
-  notify_resize(self, width, height);
-
-  // Wake up the GTK thread if it is waiting for this frame.
-  fl_task_runner_stop_wait(self->task_runner);
 
   // Perform the redraw in the GTK thread.
   g_idle_add(redraw_cb, g_object_ref(self));
@@ -435,11 +375,8 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
   g_clear_object(&self->engine);
-  g_clear_object(&self->task_runner);
   g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_mutex_clear(&self->frame_mutex);
-  g_mutex_clear(&self->resize_mutex);
-  g_cond_clear(&self->resize_cond);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->dispose(object);
 }
@@ -480,8 +417,6 @@ static void fl_view_renderer_subsurface_init(FlViewRendererSubsurface* self) {
   self->egl_context = EGL_NO_CONTEXT;
   self->egl_surface = EGL_NO_SURFACE;
   g_mutex_init(&self->frame_mutex);
-  g_mutex_init(&self->resize_mutex);
-  g_cond_init(&self->resize_cond);
 
   GdkRGBA default_background = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
