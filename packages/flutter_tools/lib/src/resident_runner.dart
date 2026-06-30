@@ -251,20 +251,26 @@ class FlutterDevice {
         // shuts down, including after an error. If `done` completes before `connectToVmService`,
         // something went wrong that caused DDS to shutdown early.
         try {
-          service = await Future.any<dynamic>(<Future<dynamic>>[
-            connectToVmService(
-              debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri!) : vmServiceUri!,
-              reloadSources: reloadSources,
-              restart: restart,
-              compileExpression: compileExpression,
-              flutterProject: FlutterProject.current(),
-              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-              device: device,
-              logger: globals.logger,
-            ),
-            if (!existingDds)
-              device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
-          ]) as FlutterVmService?;
+          service =
+              await Future.any<dynamic>(<Future<dynamic>>[
+                    connectToVmService(
+                      debuggingOptions.enableDds
+                          ? (device!.dds.uri ?? vmServiceUri!)
+                          : vmServiceUri!,
+                      reloadSources: reloadSources,
+                      restart: restart,
+                      compileExpression: compileExpression,
+                      flutterProject: FlutterProject.current(),
+                      printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+                      device: device,
+                      logger: globals.logger,
+                    ),
+                    if (!existingDds)
+                      device!.dds.done.whenComplete(
+                        () => throw Exception('DDS shut down too early'),
+                      ),
+                  ])
+                  as FlutterVmService?;
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
@@ -1175,7 +1181,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp(); // calls appFinished
-    shutdownDartDevelopmentService();
+    await shutdownDartDevelopmentService();
   }
 
   @override
@@ -1194,9 +1200,22 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
   }
 
-  void shutdownDartDevelopmentService() {
-    for (final FlutterDevice device in flutterDevices) {
-      device.device?.dds.shutdown();
+  Future<void> shutdownDartDevelopmentService() async {
+    try {
+      await Future.wait<void>(
+        flutterDevices.map<Future<void>>((FlutterDevice device) async {
+          final DartDevelopmentService? dds = device.device?.dds;
+          if (dds != null) {
+            try {
+              await dds.shutdown();
+            } on Object catch (error) {
+              globals.printTrace('Warning: Failed to shut down DDS for device: $error');
+            }
+          }
+        }),
+      ).timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      globals.printTrace('Warning: shutdownDartDevelopmentService timed out.');
     }
   }
 
