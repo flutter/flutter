@@ -2791,7 +2791,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterPluginRegistrant",
     platforms: [
-        .macOS("10.15")
+        .macOS("12.0")
     ],
     products: [
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
@@ -3574,7 +3574,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeIntegration",
     platforms: [
-        .macOS("10.15")
+        .macOS("12.0")
     ],
     products: [
         .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])
