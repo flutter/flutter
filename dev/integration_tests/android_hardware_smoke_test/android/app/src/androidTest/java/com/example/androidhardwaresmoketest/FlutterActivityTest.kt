@@ -4,7 +4,6 @@
 
 package com.example.androidhardwaresmoketest
 
-
 import android.graphics.Bitmap
 import android.util.Base64
 import android.util.Log

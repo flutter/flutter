@@ -4,7 +4,6 @@
 
 package com.example.androidhardwaresmoketest
 
-
 object Constants {
     // =============================================================================
     // 1. Native Support Channel
