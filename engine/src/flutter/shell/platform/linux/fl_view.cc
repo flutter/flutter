@@ -511,6 +511,16 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
   if (self->engine != nullptr) {
+    // If this view holds the text input focus, clear the handler's widget
+    // pointer so it does not dangle once this view is finalized.
+    FlTextInputHandler* text_input_handler =
+        fl_engine_get_text_input_handler(self->engine);
+    if (text_input_handler != nullptr &&
+        fl_text_input_handler_get_widget(text_input_handler) ==
+            GTK_WIDGET(self)) {
+      fl_text_input_handler_set_widget(text_input_handler, nullptr);
+    }
+
     // Release the view ID from the engine.
     fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
                           nullptr);
