@@ -110,6 +110,7 @@ class MockDevice final {
 struct MockVulkanState {
   std::vector<std::string> instance_extensions;
   std::vector<std::string> instance_layers;
+  std::vector<std::string> device_extensions;
   std::function<void(VkPhysicalDevice physicalDevice,
                      VkFormat format,
                      VkFormatProperties* pFormatProperties)>
@@ -165,32 +166,46 @@ VkResult vkEnumerateInstanceExtensionProperties(
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
     *pPropertyCount = GetMockVulkanState().instance_extensions.size();
+    return VK_SUCCESS;
   } else {
     uint32_t count = 0;
+    VkResult result = VK_SUCCESS;
     for (const std::string& ext : GetMockVulkanState().instance_extensions) {
-      strncpy(pProperties[count].extensionName, ext.c_str(),
-              sizeof(VkExtensionProperties::extensionName));
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].extensionName,
+               sizeof(pProperties[count].extensionName), "%s", ext.c_str());
       pProperties[count].specVersion = 0;
       count++;
     }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkEnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
                                             VkLayerProperties* pProperties) {
   if (!pProperties) {
     *pPropertyCount = GetMockVulkanState().instance_layers.size();
+    return VK_SUCCESS;
   } else {
     uint32_t count = 0;
-    for (const std::string& layer : GetMockVulkanState().instance_layers) {
-      strncpy(pProperties[count].layerName, layer.c_str(),
-              sizeof(VkLayerProperties::layerName));
+    VkResult result = VK_SUCCESS;
+    for (const std::string& ext : GetMockVulkanState().instance_layers) {
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].layerName,
+               sizeof(pProperties[count].layerName), "%s", ext.c_str());
       pProperties[count].specVersion = 0;
       count++;
     }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkEnumeratePhysicalDevices(VkInstance instance,
@@ -246,12 +261,24 @@ VkResult vkEnumerateDeviceExtensionProperties(
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
-    *pPropertyCount = 1;
+    *pPropertyCount = GetMockVulkanState().device_extensions.size();
+    return VK_SUCCESS;
   } else {
-    strcpy(pProperties[0].extensionName, "VK_KHR_swapchain");
-    pProperties[0].specVersion = 0;
+    uint32_t count = 0;
+    VkResult result = VK_SUCCESS;
+    for (const std::string& ext : GetMockVulkanState().device_extensions) {
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].extensionName,
+               sizeof(pProperties[count].extensionName), "%s", ext.c_str());
+      pProperties[count].specVersion = 0;
+      count++;
+    }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
@@ -436,6 +463,12 @@ VkResult vkCreateGraphicsPipelines(
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   mock_device->AddCalledFunction("vkCreateGraphicsPipelines");
   *pPipelines = reinterpret_cast<VkPipeline>(0x99999999);
+  return VK_SUCCESS;
+}
+
+VkResult vkDeviceWaitIdle(VkDevice device) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkDeviceWaitIdle");
   return VK_SUCCESS;
 }
 
@@ -929,6 +962,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreatePipelineLayout);
   } else if (strcmp("vkCreateGraphicsPipelines", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateGraphicsPipelines);
+  } else if (strcmp("vkDeviceWaitIdle", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDeviceWaitIdle);
   } else if (strcmp("vkDestroyDevice", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyDevice);
   } else if (strcmp("vkDestroyInstance", pName) == 0) {
@@ -1026,6 +1061,7 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
 
 MockVulkanContextBuilder::MockVulkanContextBuilder()
     : instance_extensions_({"VK_KHR_surface", "VK_MVK_macos_surface"}),
+      device_extensions_({"VK_KHR_swapchain"}),
       format_properties_callback_([](VkPhysicalDevice physicalDevice,
                                      VkFormat format,
                                      VkFormatProperties* pFormatProperties) {
@@ -1054,6 +1090,7 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   g_mock_vulkan_state.reset(new MockVulkanState());
   g_mock_vulkan_state->instance_extensions = instance_extensions_;
   g_mock_vulkan_state->instance_layers = instance_layers_;
+  g_mock_vulkan_state->device_extensions = device_extensions_;
   g_mock_vulkan_state->format_properties_callback = format_properties_callback_;
   g_mock_vulkan_state->physical_device_properties_callback =
       physical_properties_callback_;
