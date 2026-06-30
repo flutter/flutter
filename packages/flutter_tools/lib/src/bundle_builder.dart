@@ -188,7 +188,7 @@ Future<void> writeBundle(
               if (entry.value.transformers.isEmpty) {
                 break;
               }
-              final AssetTransformationResult result = await assetTransformer.transformAsset(
+              final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                 asset: input,
                 outputPath: file.path,
                 workingDirectory: projectDir.path,
@@ -196,10 +196,10 @@ Future<void> writeBundle(
                 logger: logger,
               );
               doCopy = false;
-              if (result.failure != null) {
+              if (failure != null) {
                 throwToolExit(
                   'User-defined transformation of asset "${entry.key}" failed.\n'
-                  '${result.failure!.message}',
+                  '${failure.message}',
                 );
               }
             case AssetKind.font:
@@ -208,17 +208,17 @@ Future<void> writeBundle(
               var inputToCompiler = input;
               if (entry.value.transformers.isNotEmpty) {
                 final transformedShaderSourcePath = '${file.path}.transformed';
-                final AssetTransformationResult result = await assetTransformer.transformAsset(
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: inputToCompiler,
                   outputPath: transformedShaderSourcePath,
                   workingDirectory: projectDir.path,
                   transformerEntries: entry.value.transformers,
                   logger: logger,
                 );
-                if (result.failure != null) {
+                if (failure != null) {
                   throwToolExit(
                     'User-defined transformation of shader "${entry.key}" failed.\n'
-                    '${result.failure!.message}',
+                    '${failure.message}',
                   );
                 }
                 inputToCompiler = fileSystem.file(transformedShaderSourcePath);
