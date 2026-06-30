@@ -82,6 +82,37 @@ static gboolean redraw_cb(gpointer user_data) {
   return G_SOURCE_REMOVE;
 }
 
+// Wait for a frame matching the window size to be ready, or until the timeout
+// expires. Must be called with the frame mutex held; the mutex is still held
+// when this function returns.
+static void wait_for_frame(FlViewRendererSoftware* self,
+                           GdkWindow* window,
+                           gint scale_factor) {
+  gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
+  while (true) {
+    size_t width = gdk_window_get_width(window) * scale_factor;
+    size_t height = gdk_window_get_height(window) * scale_factor;
+    size_t frame_width, frame_height;
+    fl_compositor_software_get_frame_size(self->compositor, &frame_width,
+                                          &frame_height);
+    if (frame_width == width && frame_height == height) {
+      break;
+    }
+
+    if (g_get_monotonic_time() > expiry_time) {
+      g_warning(
+          "Timed out waiting for software frame of size %zdx%zd (have "
+          "%zdx%zd)",
+          width, height, frame_width, frame_height);
+      break;
+    }
+
+    g_mutex_unlock(&self->frame_mutex);
+    fl_task_runner_wait(self->task_runner, expiry_time);
+    g_mutex_lock(&self->frame_mutex);
+  }
+}
+
 // Implements GtkWidget::realize.
 static void fl_view_renderer_software_realize(GtkWidget* widget) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(widget);
@@ -107,35 +138,12 @@ static gboolean fl_view_renderer_software_draw(GtkWidget* widget, cairo_t* cr) {
 
   GdkWindow* window = gtk_widget_get_window(widget);
   gint scale_factor = gdk_window_get_scale_factor(window);
-  gboolean wait_for_frame = !self->sized_to_content;
 
   g_mutex_lock(&self->frame_mutex);
 
   // If frame not ready, then wait for it.
-  if (wait_for_frame) {
-    gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
-    while (true) {
-      size_t width = gdk_window_get_width(window) * scale_factor;
-      size_t height = gdk_window_get_height(window) * scale_factor;
-      size_t frame_width, frame_height;
-      fl_compositor_software_get_frame_size(self->compositor, &frame_width,
-                                            &frame_height);
-      if (frame_width == width && frame_height == height) {
-        break;
-      }
-
-      if (g_get_monotonic_time() > expiry_time) {
-        g_warning(
-            "Timed out waiting for software frame of size %zdx%zd (have "
-            "%zdx%zd)",
-            width, height, frame_width, frame_height);
-        break;
-      }
-
-      g_mutex_unlock(&self->frame_mutex);
-      fl_task_runner_wait(self->task_runner, expiry_time);
-      g_mutex_lock(&self->frame_mutex);
-    }
+  if (!self->sized_to_content) {
+    wait_for_frame(self, window, scale_factor);
   }
 
   gboolean result =
