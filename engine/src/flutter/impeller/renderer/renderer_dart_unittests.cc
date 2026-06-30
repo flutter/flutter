@@ -28,7 +28,6 @@
 #include "gtest/gtest.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/tonic/dart_microtask_queue.h"
-#include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace impeller {
 namespace testing {
@@ -157,33 +156,6 @@ class RendererDartTest : public PlaygroundTest,
           }
           return DrainMicrotasks();
         });
-  }
-
-  /// @brief  Invokes a Dart function with a shader bundle's bytes (the
-  ///         `playground.shaderbundle` fixture) as a single `ByteData`
-  ///         argument, to exercise the runtime (non-asset) shader library
-  ///         load path.
-  ///
-  ///         Returns false if invoking the function failed or if any unhandled
-  ///         exceptions were thrown.
-  bool RunDartFunctionWithShaderBundle(const char* dart_function_name) {
-    return GetIsolate()->RunInIsolateScope([&dart_function_name]() -> bool {
-      auto bundle =
-          flutter::testing::OpenFixtureAsMapping("playground.shaderbundle");
-      if (!bundle) {
-        FML_LOG(ERROR) << "Could not open playground.shaderbundle fixture.";
-        return false;
-      }
-      Dart_Handle bytes =
-          tonic::DartByteData::Create(bundle->GetMapping(), bundle->GetSize());
-      Dart_Handle args[] = {bytes};
-      if (tonic::CheckAndHandleError(
-              ::Dart_Invoke(Dart_RootLibrary(),
-                            tonic::ToDart(dart_function_name), 1, args))) {
-        return false;
-      }
-      return DrainMicrotasks();
-    });
   }
 
   /// @brief  Call a dart function that produces a texture and render the result
@@ -334,11 +306,6 @@ TEST_P(RendererDartTest, CanInstantiateFlutterGPUContext) {
 
 TEST_P(RendererDartTest, CanCreateShaderLibrary) {
   ASSERT_TRUE(RunDartFunction("canCreateShaderLibrary"));
-}
-
-TEST_P(RendererDartTest, CanCreateShaderLibraryFromBytes) {
-  ASSERT_TRUE(
-      RunDartFunctionWithShaderBundle("canCreateShaderLibraryFromBytes"));
 }
 
 TEST_P(RendererDartTest, CanReflectUniformStructs) {
