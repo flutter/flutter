@@ -44,6 +44,9 @@ struct TextureDescriptor {
   TextureUsageMask usage = TextureUsage::kShaderRead;
   SampleCount sample_count = SampleCount::kCount1;
   CompressionType compression_type = CompressionType::kLossless;
+  /// The number of layers in a `kTexture2DArray`. Ignored by other texture
+  /// types (a cube map implies 6 layers from its type).
+  uint16_t array_layer_count = 1u;
 
   /// @brief The number of bytes required to store an image of the given texel
   ///        dimensions in this format. Block-compressed formats round the
@@ -93,6 +96,8 @@ struct TextureDescriptor {
     return format != PixelFormat::kUnknown &&  //
            !size.IsEmpty() &&                  //
            mip_count >= 1u &&                  //
+           (type != TextureType::kTexture2DArray ||
+            array_layer_count >= 1u) &&  //
            SamplingOptionsAreValid();
   }
 };

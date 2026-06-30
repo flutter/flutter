@@ -7,6 +7,7 @@
 
 #include <array>
 #include <bitset>
+#include <vector>
 
 #include "fml/logging.h"
 #include "impeller/base/backend_cast.h"
@@ -188,10 +189,11 @@ class TextureGLES final : public Texture,
   // pipeline) keeps its single base-level allocation, and per-level uploads
   // only pay for the levels they actually touch.
   //
-  // Sized for up to 6 cubemap faces × 16 mip levels (covers a 32k base
-  // dimension); requested levels above this are simply not tracked.
+  // One entry per slice (1 for 2D, 6 for a cube, the layer count for an
+  // array), sized at construction. Each tracks up to 16 mip levels (covers a
+  // 32k base dimension); requested levels above this are simply not tracked.
   static constexpr size_t kMaxTrackedMipLevels = 16;
-  std::array<std::bitset<kMaxTrackedMipLevels>, 6> slice_mip_initialized_ = {};
+  std::vector<std::bitset<kMaxTrackedMipLevels>> slice_mip_initialized_;
   const bool is_wrapped_;
   const std::optional<GLuint> wrapped_fbo_;
   UniqueHandleGLES cached_fbo_;

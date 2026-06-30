@@ -269,7 +269,11 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(WaitSync);                          \
   PROC(RenderbufferStorageMultisample);    \
   PROC(BlitFramebuffer);                   \
-  PROC(InvalidateFramebuffer);
+  PROC(InvalidateFramebuffer);             \
+  PROC(TexImage3D);                        \
+  PROC(TexSubImage3D);                     \
+  PROC(CompressedTexImage3D);              \
+  PROC(CompressedTexSubImage3D);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \

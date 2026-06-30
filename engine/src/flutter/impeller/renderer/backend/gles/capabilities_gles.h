@@ -92,6 +92,11 @@ class CapabilitiesGLES final
   ///        chain cannot be made mipmap complete and samples as black.
   bool SupportsTextureMaxLevel() const;
 
+  /// @brief Whether 2D array textures (`GL_TEXTURE_2D_ARRAY`, `sampler2DArray`)
+  ///        are available. Core on desktop GL 3.0+ and OpenGL ES 3.0+; absent
+  ///        on ES 2.0, where callers must fall back to a texture atlas.
+  bool SupportsTextureArray() const;
+
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
 
@@ -173,6 +178,7 @@ class CapabilitiesGLES final
   bool supports_implicit_msaa_ = false;
   bool supports_32bit_primitive_indices_ = false;
   bool supports_texture_max_level_ = false;
+  bool supports_texture_array_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
   bool supports_texture_compression_bc_ = false;

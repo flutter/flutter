@@ -64,6 +64,8 @@ bool Texture::IsSliceValid(size_t slice) const {
       return slice == 0;
     case TextureType::kTextureCube:
       return slice <= 5;
+    case TextureType::kTexture2DArray:
+      return slice < desc_.array_layer_count;
   }
   FML_UNREACHABLE();
 }

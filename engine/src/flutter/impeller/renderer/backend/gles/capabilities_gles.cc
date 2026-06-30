@@ -207,6 +207,10 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                                 desc->GetGlVersion().major_version >= 3 ||
                                 desc->HasExtension(kAppleTextureMaxLevelExt);
 
+  // GL_TEXTURE_2D_ARRAY and sampler2DArray are core in desktop GL 3.0 and
+  // OpenGL ES 3.0; there is no ES 2.0 fallback.
+  supports_texture_array_ = desc->GetGlVersion().major_version >= 3;
+
   // Anisotropic filtering is not part of any core GL or GLES version; it is
   // always gated on GL_EXT_texture_filter_anisotropic. The query and the
   // texture parameter are applied with core ES 2.0 entry points (GetFloatv
@@ -236,6 +240,10 @@ bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
 
 bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
   return supports_texture_max_level_;
+}
+
+bool CapabilitiesGLES::SupportsTextureArray() const {
+  return supports_texture_array_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
