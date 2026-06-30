@@ -292,7 +292,14 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = size;
     if (_isOnscreen) {
-      _canvasProvider.resizeCanvas(_canvas, size);
+      final DomHTMLCanvasElement canvas = _canvas as DomHTMLCanvasElement;
+      if (_useTransferredCanvas) {
+        // Once control is transferred, the visible HTML canvas may only receive
+        // CSS/layout updates. Backing-store sizing is handled by surfaceSetSize.
+        (_canvasProvider as OnscreenCanvasProvider).resizeCanvasCss(canvas, size);
+      } else {
+        _canvasProvider.resizeCanvas(_canvas, size);
+      }
     }
     final int callbackId = surfaceSetSize(handle, size.width, size.height);
     await SkwasmCallbackHandler.instance.registerCallback(callbackId);
