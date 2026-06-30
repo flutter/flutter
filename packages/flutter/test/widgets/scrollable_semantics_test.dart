@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  SemanticsTester semantics;
+  late SemanticsTester semantics;
 
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -851,6 +851,164 @@ void main() {
       semantics.dispose();
     },
   );
+
+  group('semantic scroll actions do not overscroll at the boundaries', () {
+    // Regression test for https://github.com/flutter/flutter/issues/11665
+
+    // Bouncing ListView under a MediaQuery, tracking the extreme offsets seen.
+    Future<(ScrollController, int Function(), List<double>)> pumpList(
+      WidgetTester tester, {
+      required bool accessibleNavigation,
+    }) async {
+      final controller = ScrollController();
+      final extremes = <double>[0.0, 0.0]; // [minObserved, maxObserved]
+      controller.addListener(() {
+        extremes[0] = controller.offset < extremes[0] ? controller.offset : extremes[0];
+        extremes[1] = controller.offset > extremes[1] ? controller.offset : extremes[1];
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(accessibleNavigation: accessibleNavigation),
+            child: ListView(
+              controller: controller,
+              physics: const BouncingScrollPhysics(),
+              children: List<Widget>.generate(
+                80,
+                (int i) => SizedBox(height: 40.0, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Inside the bounds the node exposes both directions plus scrollToOffset.
+      int scrollableId() => semantics
+          .nodesWith(
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollUp,
+              SemanticsAction.scrollDown,
+              SemanticsAction.scrollToOffset,
+            ],
+          )
+          .single
+          .id;
+
+      return (controller, scrollableId, extremes);
+    }
+
+    testWidgets('scroll up near the max extent clamps instead of overscrolling', (
+      WidgetTester tester,
+    ) async {
+      semantics = SemanticsTester(tester);
+      final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
+          await pumpList(tester, accessibleNavigation: true);
+
+      final double maxExtent = controller.position.maxScrollExtent;
+      // Less room left than one semantic scroll step (size * scrollFactor).
+      controller.jumpTo(maxExtent - 10.0);
+      await tester.pump();
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId(),
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      // Never went past the edge, and settled on it.
+      expect(extremes[1], lessThanOrEqualTo(maxExtent));
+      expect(controller.offset, moreOrLessEquals(maxExtent));
+
+      controller.dispose();
+      semantics.dispose();
+    });
+
+    testWidgets('scroll down near the min extent clamps instead of overscrolling', (
+      WidgetTester tester,
+    ) async {
+      semantics = SemanticsTester(tester);
+      final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
+          await pumpList(tester, accessibleNavigation: true);
+
+      final double minExtent = controller.position.minScrollExtent;
+      controller.jumpTo(minExtent + 10.0);
+      await tester.pump();
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId(),
+        SemanticsAction.scrollDown,
+      );
+      await tester.pumpAndSettle();
+
+      // Never went past the edge, and settled on it.
+      expect(extremes[0], greaterThanOrEqualTo(minExtent));
+      expect(controller.offset, moreOrLessEquals(minExtent));
+
+      controller.dispose();
+      semantics.dispose();
+    });
+
+    testWidgets('mid-list semantic scroll still scrolls and stays in bounds', (
+      WidgetTester tester,
+    ) async {
+      semantics = SemanticsTester(tester);
+      final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
+          await pumpList(tester, accessibleNavigation: true);
+
+      final double maxExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(maxExtent / 2.0);
+      await tester.pump();
+      final double before = controller.offset;
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId(),
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      // Still scrolled towards the end, and stayed in range.
+      expect(controller.offset, greaterThan(before));
+      expect(extremes[1], lessThanOrEqualTo(maxExtent));
+      expect(controller.offset, lessThanOrEqualTo(maxExtent));
+
+      controller.dispose();
+      semantics.dispose();
+    });
+
+    testWidgets('does not make a NeverScrollable view scrollable', (WidgetTester tester) async {
+      semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: ListView(
+              controller: controller,
+              physics: const NeverScrollableScrollPhysics(),
+              children: List<Widget>.generate(
+                80,
+                (int i) => SizedBox(height: 40.0, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The clamping wrap must be skipped, otherwise a non-scrollable view would
+      // gain implicit scrolling (onScrollToOffset) under accessible navigation.
+      expect(controller.position.physics, isA<NeverScrollableScrollPhysics>());
+      expect(
+        semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollToOffset]),
+        isEmpty,
+      );
+
+      controller.dispose();
+      semantics.dispose();
+    });
+  });
 }
 
 Future<void> flingUp(WidgetTester tester, {int repetitions = 1}) =>
