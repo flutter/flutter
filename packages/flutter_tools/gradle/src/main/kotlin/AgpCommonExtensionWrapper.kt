@@ -59,7 +59,7 @@ class AgpCommonExtensionWrapper(
             }
         }
 
-    var ndkVersion: String
+    var ndkVersion: String?
         get() =
             when (backingExtension) {
                 is ApplicationExtension -> backingExtension.ndkVersion
@@ -69,12 +69,14 @@ class AgpCommonExtensionWrapper(
                 else -> throw IllegalArgumentException(unsupportedMessage())
             }
         set(value) {
-            when (backingExtension) {
-                is ApplicationExtension -> backingExtension.ndkVersion = value
-                is LibraryExtension -> backingExtension.ndkVersion = value
-                is DynamicFeatureExtension -> backingExtension.ndkVersion = value
-                is TestExtension -> backingExtension.ndkVersion = value
-                else -> throw IllegalArgumentException(unsupportedMessage())
+            if (value != null) {
+                when (backingExtension) {
+                    is ApplicationExtension -> backingExtension.ndkVersion = value
+                    is LibraryExtension -> backingExtension.ndkVersion = value
+                    is DynamicFeatureExtension -> backingExtension.ndkVersion = value
+                    is TestExtension -> backingExtension.ndkVersion = value
+                    else -> throw IllegalArgumentException(unsupportedMessage())
+                }
             }
         }
 

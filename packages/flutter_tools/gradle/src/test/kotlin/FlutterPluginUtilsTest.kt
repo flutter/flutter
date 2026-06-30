@@ -676,7 +676,6 @@ class FlutterPluginUtilsTest {
                 every { get() } answers { callable.call() }
             }
         }
-
         every {
             taskContainer.register(
                 "validateCompileSdkVersion",

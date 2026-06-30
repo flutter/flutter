@@ -635,6 +635,13 @@ object FlutterPluginUtils {
         }
     }
 
+    private fun getAndroidExtensionOrNull(project: Project): AgpCommonExtensionWrapper? =
+        try {
+            getAndroidExtension(project)
+        } catch (e: Exception) {
+            null
+        }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")

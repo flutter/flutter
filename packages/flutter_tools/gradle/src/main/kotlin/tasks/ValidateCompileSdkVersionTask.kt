@@ -14,12 +14,14 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
 /**
  * Task to validate that the project's compileSdkVersion and ndkVersion are not lower than
  * those required by any of the plugins.
  */
+@DisableCachingByDefault(because = "Validation task only printing warnings")
 abstract class ValidateCompileSdkVersionTask : DefaultTask() {
     @get:Input
     abstract val projectCompileSdk: Property<Int>
