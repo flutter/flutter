@@ -167,11 +167,9 @@ static void fl_view_renderer_software_present_layers(
     return;
   }
 
-  {
-    g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-    fl_compositor_software_present_layers(self->compositor, layers,
-                                          layers_count);
-  }
+  g_mutex_lock(&self->frame_mutex);
+  fl_compositor_software_present_layers(self->compositor, layers, layers_count);
+  g_mutex_unlock(&self->frame_mutex);
 
   // Wake up the GTK thread if it is waiting for this frame.
   fl_task_runner_stop_wait(self->task_runner);
