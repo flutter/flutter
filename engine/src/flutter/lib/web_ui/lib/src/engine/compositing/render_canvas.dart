@@ -57,13 +57,32 @@ class RenderCanvas extends DisplayCanvas {
   /// Sets the CSS size of the canvas so that canvas pixels are 1:1 with device
   /// pixels.
   void _updateLogicalHtmlCanvasSize() {
+    final ({double devicePixelRatio, String height, String width}) logicalSize =
+        _computeLogicalHtmlCanvasSize();
+    final DomCSSStyleDeclaration style = canvasElement.style;
+    style.width = logicalSize.width;
+    style.height = logicalSize.height;
+    _currentDevicePixelRatio = logicalSize.devicePixelRatio;
+  }
+
+  ({double devicePixelRatio, String height, String width}) _computeLogicalHtmlCanvasSize() {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     final double logicalWidth = _pixelWidth / devicePixelRatio;
     final double logicalHeight = _pixelHeight / devicePixelRatio;
+    return (
+      devicePixelRatio: devicePixelRatio,
+      height: '${logicalHeight}px',
+      width: '${logicalWidth}px',
+    );
+  }
+
+  bool _isLogicalHtmlCanvasSizeCurrent() {
+    final ({double devicePixelRatio, String height, String width}) logicalSize =
+        _computeLogicalHtmlCanvasSize();
     final DomCSSStyleDeclaration style = canvasElement.style;
-    style.width = '${logicalWidth}px';
-    style.height = '${logicalHeight}px';
-    _currentDevicePixelRatio = devicePixelRatio;
+    return logicalSize.devicePixelRatio == _currentDevicePixelRatio &&
+        style.width == logicalSize.width &&
+        style.height == logicalSize.height;
   }
 
   /// Render the given [bitmap] with this [RenderCanvas].
@@ -99,9 +118,10 @@ class RenderCanvas extends DisplayCanvas {
     // Check if the frame is the same size as before, and if so, we don't need
     // to resize the canvas.
     if (size.width == _pixelWidth && size.height == _pixelHeight) {
-      // The existing canvas doesn't need to be resized (unless the device pixel
-      // ratio changed).
-      if (EngineFlutterDisplay.instance.devicePixelRatio != _currentDevicePixelRatio) {
+      // The existing canvas doesn't need to be resized, but its logical CSS
+      // size may still need to be repaired if the device pixel ratio changed
+      // or a stale inline style was left behind.
+      if (!_isLogicalHtmlCanvasSizeCurrent()) {
         _updateLogicalHtmlCanvasSize();
       }
       return;

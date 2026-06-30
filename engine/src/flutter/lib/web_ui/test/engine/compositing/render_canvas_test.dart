@@ -59,6 +59,29 @@ void testMain() {
       expect(canvas.canvasElement.style.height, '32px');
     });
 
+    test('repairs canvas logical size when inline CSS size drifts', () async {
+      final canvas = RenderCanvas();
+
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.0);
+      canvas.render(await newBitmap(1206, 2142));
+
+      expect(canvas.canvasElement.width, 1206);
+      expect(canvas.canvasElement.height, 2142);
+      expect(canvas.canvasElement.style.width, '402px');
+      expect(canvas.canvasElement.style.height, '714px');
+
+      canvas.canvasElement.style
+        ..width = '0.333333px'
+        ..height = '0.333333px';
+
+      canvas.render(await newBitmap(1206, 2142));
+
+      expect(canvas.canvasElement.width, 1206);
+      expect(canvas.canvasElement.height, 2142);
+      expect(canvas.canvasElement.style.width, '402px');
+      expect(canvas.canvasElement.style.height, '714px');
+    });
+
     test('rounds physical size to nearest integer size', () async {
       final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.debugPhysicalSizeOverride = const ui.Size(199.999999, 200.000001);
