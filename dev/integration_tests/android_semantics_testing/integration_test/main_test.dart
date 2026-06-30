@@ -396,7 +396,7 @@ Future<void> main() async {
             expect(
               await getSemantics(find.byKey(ValueKey<String>('$popupKeyValue.$item')), tester),
               hasAndroidSemantics(
-                className: AndroidClassName.button,
+                className: AndroidClassName.menuItem,
                 isChecked: false,
                 isCheckable: false,
                 isEnabled: true,
@@ -419,7 +419,7 @@ Future<void> main() async {
             expect(
               await getSemantics(find.byKey(ValueKey<String>('$popupKeyValue.$item')), tester),
               hasAndroidSemantics(
-                className: AndroidClassName.button,
+                className: AndroidClassName.menuItem,
                 isChecked: false,
                 isCheckable: false,
                 isEnabled: true,
@@ -468,7 +468,7 @@ Future<void> main() async {
                 tester,
               ),
               hasAndroidSemantics(
-                className: AndroidClassName.button,
+                className: AndroidClassName.menuItem,
                 isChecked: false,
                 isCheckable: false,
                 isEnabled: true,
@@ -504,7 +504,7 @@ Future<void> main() async {
                 tester,
               ),
               hasAndroidSemantics(
-                className: AndroidClassName.button,
+                className: AndroidClassName.menuItem,
                 isChecked: false,
                 isCheckable: false,
                 isEnabled: true,

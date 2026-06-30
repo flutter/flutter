@@ -449,6 +449,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -472,6 +473,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -495,6 +497,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -536,6 +539,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     );
 
     // Invalid sdk and tools.
@@ -579,6 +583,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     );
 
     final ValidationResult validationResult = await androidValidator.validate();
@@ -632,6 +637,7 @@ Review licenses that have not been accepted (y/N)?
       platform: platform,
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(validationResult.messages.last.message, errorMessage);
@@ -655,6 +661,7 @@ Review licenses that have not been accepted (y/N)?
         },
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -724,6 +731,7 @@ Android sdkmanager tool was found, but failed to run
       platform: FakePlatform(),
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -763,6 +771,7 @@ Android sdkmanager tool was found, but failed to run
         platform: FakePlatform(),
         userMessages: UserMessages(),
         processManager: processManager,
+        osUtils: FakeOperatingSystemUtils(),
       ).validate();
 
       expect(
@@ -801,6 +810,7 @@ Android sdkmanager tool was found, but failed to run
       platform: FakePlatform(),
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -837,6 +847,7 @@ Android sdkmanager tool was found, but failed to run
       platform: FakePlatform(),
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -855,6 +866,89 @@ Android sdkmanager tool was found, but failed to run
       true,
     );
   });
+
+  testUsingContext('AndroidValidator warns when multiple adb binaries are found', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator'
+      ..latestVersion = (FakeAndroidSdkVersion()
+        ..sdkLevel = gradle_utils.compileSdkVersionInt
+        ..buildToolsVersion = gradle_utils.minBuildToolsVersion)
+      ..adbPath = '/foo/bar/platform-tools/adb';
+
+    final File adb1 = fileSystem.file('/foo/bar/platform-tools/adb')..createSync(recursive: true);
+    final File adb2 = fileSystem.file('/usr/bin/adb')..createSync(recursive: true);
+
+    final osUtils = ConflictFakeOperatingSystemUtils(<File>[adb1, adb2]);
+
+    final ValidationResult validationResult = await AndroidValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+      processManager: processManager,
+      osUtils: osUtils,
+    ).validate();
+
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) =>
+            message.type == ValidationMessageType.hint &&
+            message.message.contains('Multiple adb binaries found') &&
+            message.message.contains('/foo/bar/platform-tools/adb') &&
+            message.message.contains('/usr/bin/adb'),
+      ),
+      true,
+    );
+  });
+
+  testUsingContext('AndroidValidator does not warn when only one adb binary is found', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator'
+      ..latestVersion = (FakeAndroidSdkVersion()
+        ..sdkLevel = gradle_utils.compileSdkVersionInt
+        ..buildToolsVersion = gradle_utils.minBuildToolsVersion)
+      ..adbPath = '/foo/bar/platform-tools/adb';
+
+    final File adb1 = fileSystem.file('/foo/bar/platform-tools/adb')..createSync(recursive: true);
+
+    final osUtils = ConflictFakeOperatingSystemUtils(<File>[adb1]);
+
+    final ValidationResult validationResult = await AndroidValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+      processManager: processManager,
+      osUtils: osUtils,
+    ).validate();
+
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) =>
+            message.type == ValidationMessageType.hint &&
+            message.message.contains('Multiple adb binaries found'),
+      ),
+      false,
+    );
+  });
+}
+
+class ConflictFakeOperatingSystemUtils extends FakeOperatingSystemUtils {
+  ConflictFakeOperatingSystemUtils(this.adbPaths);
+  final List<File> adbPaths;
+
+  @override
+  List<File> whichAll(String execName) => execName == 'adb' ? adbPaths : <File>[];
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
