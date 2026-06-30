@@ -135,7 +135,7 @@ Future<Depfile> copyAssets(
             case AssetKind.regular:
               if (entry.value.transformers.isNotEmpty) {
                 transformResource = await transformPool.request();
-                final AssetTransformationResult result = await assetTransformer.transformAsset(
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: content.file as File,
                   outputPath: file.path,
                   workingDirectory: environment.projectDir.path,
@@ -143,13 +143,12 @@ Future<Depfile> copyAssets(
                   logger: environment.logger,
                 );
                 doCopy = false;
-                if (result.failure != null) {
+                if (failure != null) {
                   throwToolExit(
                     'User-defined transformation of asset "${entry.key}" failed.\n'
-                    '${result.failure!.message}',
+                    '${failure.message}',
                   );
                 }
-                inputs.addAll(result.dependencies);
               }
             case AssetKind.font:
               doCopy = !await iconTreeShaker.subsetFont(
@@ -163,20 +162,19 @@ Future<Depfile> copyAssets(
               if (entry.value.transformers.isNotEmpty) {
                 transformResource = await transformPool.request();
                 final transformedShaderSourcePath = '${file.path}.transformed';
-                final AssetTransformationResult result = await assetTransformer.transformAsset(
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: inputToCompiler,
                   outputPath: transformedShaderSourcePath,
                   workingDirectory: environment.projectDir.path,
                   transformerEntries: entry.value.transformers,
                   logger: environment.logger,
                 );
-                if (result.failure != null) {
+                if (failure != null) {
                   throwToolExit(
                     'User-defined transformation of shader "${entry.key}" failed.\n'
-                    '${result.failure!.message}',
+                    '${failure.message}',
                   );
                 }
-                inputs.addAll(result.dependencies);
                 inputToCompiler = environment.fileSystem.file(transformedShaderSourcePath);
               }
 
