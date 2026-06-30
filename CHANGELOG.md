@@ -32,6 +32,9 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.44 Changes
 
+## [3.44.4](https://github.com/flutter/flutter/releases/tag/3.44.4)
+- [flutter/188192](https://github.com/flutter/flutter/issues/188192) Fix bounds checking in Flutter Linux's FlAccessibleTextField.
+
 ### [3.44.3](https://github.com/flutter/flutter/releases/tag/3.44.3)
 - [flutter/186738](https://github.com/flutter/flutter/issues/186738) Demote flavor/platform asset skipping messages from warning to trace level to reduce build log noise.
 - [flutter/186899](https://github.com/flutter/flutter/issues/186899) On Android, destroying a texture before the GLES fence that it holds was used may cause a crash.

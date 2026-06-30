@@ -182,6 +182,16 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
           payload->GetMapping())) {
     return shader_map;
   }
+  // Structurally verify the FlatBuffer before accessing any fields. A buffer
+  // with a valid "IPSB" identifier but corrupt internal offsets would otherwise
+  // be read out of bounds. This mirrors the verification added for the runtime
+  // stage and shader archive loaders.
+  flatbuffers::Verifier verifier(
+      reinterpret_cast<const uint8_t*>(payload->GetMapping()),
+      payload->GetSize());
+  if (!impeller::fb::shaderbundle::VerifyShaderBundleBuffer(verifier)) {
+    return shader_map;
+  }
   auto* bundle =
       impeller::fb::shaderbundle::GetShaderBundle(payload->GetMapping());
   if (!bundle) {
