@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@file:Suppress("PackageName")
+package com.example.androidhardwaresmoketest
 
-package com.example.android_hardware_smoke_test
 
 import android.graphics.Bitmap
 import android.util.Base64

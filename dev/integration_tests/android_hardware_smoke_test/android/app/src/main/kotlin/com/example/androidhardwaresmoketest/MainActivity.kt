@@ -1,6 +1,5 @@
-@file:Suppress("PackageName")
+package com.example.androidhardwaresmoketest
 
-package com.example.android_hardware_smoke_test
 
 import android.content.Context
 import android.content.pm.PackageManager

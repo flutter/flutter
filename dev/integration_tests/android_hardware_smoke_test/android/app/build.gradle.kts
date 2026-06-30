@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.android_hardware_smoke_test"
+    namespace = "com.example.androidhardwaresmoketest"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.android_hardware_smoke_test"
+        applicationId = "com.example.androidhardwaresmoketest"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

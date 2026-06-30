@@ -30,7 +30,7 @@ tasks.register("embedTestResultImages") {
         val imagesDir = File(targetVariantDir, "test_result_images")
         imagesDir.mkdirs()
 
-        val packageId = "com.example.android_hardware_smoke_test"
+        val packageId = "com.example.androidhardwaresmoketest"
         val discoveredTests = mutableListOf<DiscoveredTest>()
 
         // Resolve binary safe adb executable from Android Gradle Plugin BaseExtension
