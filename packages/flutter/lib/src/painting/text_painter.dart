@@ -1503,7 +1503,7 @@ class TextPainter {
     final List<TextBox> boxes = _getOrCreateLayoutTemplate().getBoxesForRange(
       0,
       1,
-      boxHeightStyle: ui.BoxHeightStyle.strut,
+      boxHeightStyle: .strut,
     );
     if (boxes.isEmpty) {
       return preferredLineHeight;
