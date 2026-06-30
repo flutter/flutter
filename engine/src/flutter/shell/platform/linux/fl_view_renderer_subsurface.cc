@@ -341,12 +341,17 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
     wl_egl_window_resize(self->egl_window, width, height, 0, 0);
   }
 
-  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
+  // Blit the composited frame into the subsurface. The sibling framebuffer is
+  // explicitly released before the context is cleared, as destroying it makes
+  // OpenGL calls that require a current context.
+  FlFramebuffer* sibling = fl_framebuffer_create_sibling(framebuffer);
   glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(sibling));
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
                     GL_COLOR_BUFFER_BIT, GL_NEAREST);
   eglSwapBuffers(self->egl_display, self->egl_surface);
+  g_object_unref(sibling);
+
   eglMakeCurrent(self->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                  EGL_NO_CONTEXT);
 
