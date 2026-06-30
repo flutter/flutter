@@ -8,7 +8,6 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
@@ -155,8 +154,10 @@ class FlutterPlugin : Plugin<Project> {
 
         FlutterPluginUtils.getTargetPlatforms(project).forEach { targetArch ->
             val abiValue: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
-            val androidExtension: BaseExtension = FlutterPluginUtils.getLegacyAndroidExtension(project)
-            androidExtension.splits.abi.include(abiValue!!)
+            FlutterPluginUtils
+                .getAndroidExtension(project)
+                .splits.abi
+                .include(abiValue!!)
         }
 
         val flutterExecutableName = getExecutableNameForPlatform("flutter")
