@@ -131,8 +131,10 @@ std::shared_ptr<Context> Playground::GetContext() const {
 }
 
 std::shared_ptr<Context> Playground::MakeContext() const {
-  // The PlaygroundTest will make a new context for this specific test
-  // based on the names it recognizes as "tests that need a unique context".
+  // This method is used to get a unique context that is not shared with
+  // other playground tests. It requires that the test has called the
+  // |EnsureContextIsUnique| method before it calls this method. We
+  // verify those conditions here and then set up the context.
   FML_CHECK(!context_) << "MakeContext can only be called once";
   FML_CHECK(!switches_.can_share_context)
       << "MakeContext should only be called after EnsureContextIsUnique()";
