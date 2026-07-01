@@ -72,6 +72,15 @@ class PipelineCompileQueue
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
  protected:
+  //----------------------------------------------------------------------------
+  /// @brief      Post a compilation job to the worker task runner.
+  ///
+  ///             This is a pure virtual function that must be implemented by
+  ///             subclasses. It is responsible for actually dispatching the
+  ///             job closure to the appropriate task runner for execution.
+  ///
+  /// @param[in]  job  The compilation job closure to post
+  ///
   virtual void PostJob(const fml::closure& job) = 0;
 
   //----------------------------------------------------------------------------
@@ -85,8 +94,33 @@ class PipelineCompileQueue
   ///
   virtual void OnJobAdded() = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Execute one pending compilation job from the queue.
+  ///
+  ///             This method retrieves and executes a single job from the
+  ///             pending jobs queue. It is typically called by subclasses
+  ///             when they are ready to process the next job in the queue.
+  ///
   void DoOneJob();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Add a compilation job to the pending queue for the specified
+  ///             descriptor.
+  ///
+  /// @param[in]  desc  The pipeline descriptor that identifies the job
+  /// @param[in]  job   The compilation job closure to add
+  ///
+  /// @return     True if the job was successfully added to the queue, false
+  ///             if a job for this descriptor already exists.
+  ///
   bool AddJob(const PipelineDescriptor& desc, const fml::closure& job);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Check if there are any pending compilation jobs in the queue.
+  ///
+  /// @return     True if there are pending jobs waiting to be processed,
+  ///             false otherwise.
+  ///
   bool HasPendingJobs();
 
  private:
