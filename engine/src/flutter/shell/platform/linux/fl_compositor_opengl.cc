@@ -83,9 +83,9 @@ static void composite_layer(FlCompositorOpenGL* self,
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-gboolean fl_compositor_opengl_present_layers(FlCompositorOpenGL* self,
-                                             const FlutterLayer** layers,
-                                             size_t layers_count) {
+gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
+                                               const FlutterLayer** layers,
+                                               size_t layers_count) {
   if (layers_count == 0) {
     return TRUE;
   }

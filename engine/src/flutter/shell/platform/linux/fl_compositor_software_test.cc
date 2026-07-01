@@ -33,7 +33,7 @@ TEST_F(FlCompositorSoftwareTest, Render) {
                         .offset = {0, 0},
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
-  fl_compositor_software_present_layers(compositor, layers, 1);
+  fl_compositor_software_composite_layers(compositor, layers, 1);
 
   size_t frame_width, frame_height;
   fl_compositor_software_get_frame_size(compositor, &frame_width,
@@ -70,7 +70,7 @@ TEST_F(FlCompositorSoftwareTest, Resize) {
                          .offset = {0, 0},
                          .size = {width1, height1}};
   const FlutterLayer* layers1[1] = {&layer1};
-  fl_compositor_software_present_layers(compositor, layers1, 1);
+  fl_compositor_software_composite_layers(compositor, layers1, 1);
 
   // Present a layer in the new size.
   constexpr size_t width2 = 100;
@@ -88,7 +88,7 @@ TEST_F(FlCompositorSoftwareTest, Resize) {
                          .offset = {0, 0},
                          .size = {width2, height2}};
   const FlutterLayer* layers2[1] = {&layer2};
-  fl_compositor_software_present_layers(compositor, layers2, 1);
+  fl_compositor_software_composite_layers(compositor, layers2, 1);
 
   // The stored frame is now the new size.
   size_t frame_width, frame_height;

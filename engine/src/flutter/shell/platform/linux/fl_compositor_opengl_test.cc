@@ -55,7 +55,7 @@ TEST_F(FlCompositorOpenGLTest, Render) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
   std::thread([&]() {
-    fl_compositor_opengl_present_layers(compositor, layers, 1);
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
 
   size_t frame_width, frame_height;
@@ -89,7 +89,7 @@ TEST_F(FlCompositorOpenGLTest, Resize) {
                          .offset = {0, 0},
                          .size = {width1, height1}};
   const FlutterLayer* layers1[1] = {&layer1};
-  fl_compositor_opengl_present_layers(compositor, layers1, 1);
+  fl_compositor_opengl_composite_layers(compositor, layers1, 1);
 
   // Present layer in current size.
   constexpr size_t width2 = 100;
@@ -104,7 +104,7 @@ TEST_F(FlCompositorOpenGLTest, Resize) {
                          .offset = {0, 0},
                          .size = {width2, height2}};
   const FlutterLayer* layers2[1] = {&layer2};
-  fl_compositor_opengl_present_layers(compositor, layers2, 1);
+  fl_compositor_opengl_composite_layers(compositor, layers2, 1);
 
   // The stored frame is now the new size.
   size_t frame_width, frame_height;
@@ -153,7 +153,7 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_opengl_present_layers(compositor, layers, 1);
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -199,7 +199,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_opengl_present_layers(compositor, layers, 1);
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -243,7 +243,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_opengl_present_layers(compositor, layers, 1);
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -280,7 +280,7 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_opengl_present_layers(compositor, layers, 1);
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -318,7 +318,7 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 
   // Present layer and render.
   std::thread([&]() {
-    fl_compositor_opengl_present_layers(compositor, layers, 1);
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -346,7 +346,7 @@ TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
   std::thread([&]() {
-    fl_compositor_opengl_present_layers(compositor, layers, 1);
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
 
   // Mock window size to be larger (200x200).

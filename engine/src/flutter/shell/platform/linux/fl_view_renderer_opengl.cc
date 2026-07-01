@@ -200,7 +200,7 @@ static void fl_view_renderer_opengl_present_layers(FlViewRenderer* renderer,
   }
 
   g_mutex_lock(&self->frame_mutex);
-  fl_compositor_opengl_present_layers(self->compositor, layers, layers_count);
+  fl_compositor_opengl_composite_layers(self->compositor, layers, layers_count);
   g_mutex_unlock(&self->frame_mutex);
 
   // Wake up the GTK thread if it is waiting for this frame.

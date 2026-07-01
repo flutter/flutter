@@ -39,7 +39,7 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
                                              gboolean shareable);
 
 /**
- * fl_compositor_opengl_present_layers:
+ * fl_compositor_opengl_composite_layers:
  * @compositor: an #FlCompositorOpenGL.
  * @layers: layers to be composited.
  * @layers_count: number of layers.
@@ -48,7 +48,7 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
  *
  * Returns %TRUE if successful.
  */
-gboolean fl_compositor_opengl_present_layers(FlCompositorOpenGL* compositor,
+gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* compositor,
                                              const FlutterLayer** layers,
                                              size_t layers_count);
 

@@ -168,7 +168,8 @@ static void fl_view_renderer_software_present_layers(
   }
 
   g_mutex_lock(&self->frame_mutex);
-  fl_compositor_software_present_layers(self->compositor, layers, layers_count);
+  fl_compositor_software_composite_layers(self->compositor, layers,
+                                          layers_count);
   g_mutex_unlock(&self->frame_mutex);
 
   // Wake up the GTK thread if it is waiting for this frame.

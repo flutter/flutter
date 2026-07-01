@@ -42,9 +42,9 @@ FlCompositorSoftware* fl_compositor_software_new() {
       g_object_new(fl_compositor_software_get_type(), nullptr));
 }
 
-gboolean fl_compositor_software_present_layers(FlCompositorSoftware* self,
-                                               const FlutterLayer** layers,
-                                               size_t layers_count) {
+gboolean fl_compositor_software_composite_layers(FlCompositorSoftware* self,
+                                                 const FlutterLayer** layers,
+                                                 size_t layers_count) {
   if (layers_count == 0) {
     return TRUE;
   }

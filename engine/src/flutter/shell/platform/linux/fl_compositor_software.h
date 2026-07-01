@@ -35,7 +35,7 @@ G_DECLARE_FINAL_TYPE(FlCompositorSoftware,
 FlCompositorSoftware* fl_compositor_software_new();
 
 /**
- * fl_compositor_software_present_layers:
+ * fl_compositor_software_composite_layers:
  * @compositor: an #FlCompositorSoftware.
  * @layers: layers to be composited. Each layer must be a backing store layer
  * (%kFlutterLayerContentTypeBackingStore) backed by a software backing store
@@ -46,7 +46,7 @@ FlCompositorSoftware* fl_compositor_software_new();
  *
  * Returns %TRUE if successful.
  */
-gboolean fl_compositor_software_present_layers(FlCompositorSoftware* compositor,
+gboolean fl_compositor_software_composite_layers(FlCompositorSoftware* compositor,
                                                const FlutterLayer** layers,
                                                size_t layers_count);
 
