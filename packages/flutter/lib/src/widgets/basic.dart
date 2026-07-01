@@ -1934,6 +1934,8 @@ class Transform extends SingleChildRenderObjectWidget {
 /// The [CompositedTransformTarget] must come earlier in the paint order than
 /// any linked [CompositedTransformFollower]s.
 ///
+/// {@macro flutter.widgets.CompositedTransformFollower.overlayPortal}
+///
 /// See also:
 ///
 ///  * [CompositedTransformFollower], the widget that can target this one.
@@ -1984,6 +1986,15 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// hittable. If the parent covers the screen, this is trivially achievable, so
 /// this widget is usually used as the root of an [OverlayEntry] in an app-wide
 /// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
+///
+/// {@template flutter.widgets.CompositedTransformFollower.overlayPortal}
+/// [CompositedTransformFollower] and [CompositedTransformTarget] are
+/// incompatible with [OverlayPortal.overlayChildLayoutBuilder] thus must not
+/// be used together. Consider using the [OverlayPortal.overlayChildLayoutBuilder]
+/// API instead to achieve a similar target-following effect, while also allowing
+/// the follower to be sized and positioned dynamically based on the target's
+/// size and position.
+/// {@endtemplate}
 ///
 /// See also:
 ///
