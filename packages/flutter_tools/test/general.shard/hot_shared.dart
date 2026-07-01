@@ -91,7 +91,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   bool wasShutdown = false;
 
   @override
-  void shutdown() {
+  Future<void> shutdown() async {
     wasShutdown = true;
   }
 }

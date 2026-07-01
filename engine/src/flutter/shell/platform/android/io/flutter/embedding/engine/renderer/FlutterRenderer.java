@@ -785,9 +785,9 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @RequiresApi(API_LEVELS.API_33)
-    private void waitOnFence(Image image) {
-      try {
-        SyncFence fence = image.getFence();
+    @VisibleForTesting
+    void waitOnFence(Image image) {
+      try (SyncFence fence = image.getFence()) {
         fence.awaitForever();
       } catch (IOException e) {
         // Drop.
@@ -1066,8 +1066,7 @@ public class FlutterRenderer implements TextureRegistry {
 
     @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
-      try {
-        SyncFence fence = image.getFence();
+      try (SyncFence fence = image.getFence()) {
         fence.awaitForever();
       } catch (IOException e) {
         // Drop.

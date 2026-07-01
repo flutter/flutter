@@ -565,6 +565,12 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
 }
 
 TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   // Making sure this test is run on a wide gamut enabled backend
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
