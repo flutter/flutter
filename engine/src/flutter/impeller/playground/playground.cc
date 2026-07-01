@@ -354,15 +354,15 @@ bool Playground::OpenPlaygroundHere(
   }
   ::glfwSetWindowSize(window, GetWindowSize().width, GetWindowSize().height);
 
-  std::unique_ptr<Surface> surface = impl_->AcquireSurfaceFrame(context_);
-  if (!surface) {
-    return false;
-  }
-  RenderTarget render_target = surface->GetRenderTarget();
-
   bool writing_golden =
       switches_.golden_output_dir.has_value() && should_write_golden_;
   if (!switches_.enable_playground || writing_golden) {
+    std::unique_ptr<Surface> surface = impl_->AcquireSurfaceFrame(context_);
+    if (!surface) {
+      return false;
+    }
+    RenderTarget render_target = surface->GetRenderTarget();
+
     if (!render_callback(render_target) ||
         !impl_->GetContext()->FlushCommandBuffers()) {
       return false;
