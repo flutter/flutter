@@ -940,9 +940,9 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) 
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
       : targetPlatform.simpleName;
-  final subDirs = (flavor != null && flavor.isNotEmpty)
-      ? 'linux/$arch/$flavor'
-      : 'linux/$arch';
+  final String subDirs = (flavor != null && flavor.isNotEmpty)
+      ? globals.fs.path.join('linux', arch, flavor)
+      : globals.fs.path.join('linux', arch);
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
