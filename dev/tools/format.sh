@@ -3,14 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# ----------------------------------------------------------------------
-# SECURITY NOTE
-# ----------------------------------------------------------------------
-# This script executes tooling with argument lists instead of shell-evaluated
-# command strings. Variables like "$DART" and "$@" are explicitly quoted so
-# metacharacters in user-provided args are treated as data, not shell syntax.
-# ----------------------------------------------------------------------
-
 set -e
 
 # Needed because if it is set, cd may print the path it changed to.

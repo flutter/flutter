@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ----------------------------------------------------------------------
-// SECURITY NOTE
-// ----------------------------------------------------------------------
-// This test verifies metacharacters in argv are printed as data and are not
-// executed as shell syntax.
-// ----------------------------------------------------------------------
-
 import 'dart:io';
 
 import 'package:path/path.dart' as path;

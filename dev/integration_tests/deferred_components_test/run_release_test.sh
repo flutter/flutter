@@ -3,14 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# ----------------------------------------------------------------------
-# SECURITY NOTE
-# ----------------------------------------------------------------------
-# This script invokes adb/java directly with quoted argv values. Variables
-# derived from inputs are quoted in command substitutions and invocations so
-# shell metacharacters are not interpreted as extra commands.
-# ----------------------------------------------------------------------
-
 # Usage:
 #
 #   ./run_release_test.sh <bundletool.jar path> <adb path>

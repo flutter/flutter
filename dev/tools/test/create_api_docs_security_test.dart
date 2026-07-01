@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ----------------------------------------------------------------------
-// SECURITY NOTE
-// ----------------------------------------------------------------------
-// This test verifies that runPubProcess passes arguments as an argv list.
-// A malicious shell payload must stay in a single argument and never become
-// shell syntax.
-// ----------------------------------------------------------------------
-
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 import 'package:test/test.dart';
@@ -18,7 +10,7 @@ import '../create_api_docs.dart' as apidocs;
 
 void main() {
   test('runPubProcess preserves malicious payload as a single argv token', () async {
-    const String payload = '--output=/tmp; echo HACKED';
+    const String payload = '--output=/tmp; echo COMMAND_STUFFING';
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <Pattern>['/flutter/bin/flutter', 'pub', payload],

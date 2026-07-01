@@ -2,15 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ----------------------------------------------------------------------
-// SECURITY NOTE
-// ----------------------------------------------------------------------
-// This file previously logged full command arguments to stdout, which could
-// expose sensitive information (e.g., file paths, tokens) in CI logs. The
-// command execution logging has been sanitized to avoid information leakage.
-// See Flutter security guidelines for CI tooling.
-// ----------------------------------------------------------------------
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -699,7 +690,13 @@ class DartdocGenerator {
       '--auto-include-dependencies',
     ];
 
-    print('Executing dartdoc with sanitized arguments');
+    String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
+    print(
+      'Executing: (cd "${packageRoot.path}" ; '
+      '${FlutterInformation.instance.getFlutterBinaryPath().path} '
+      'pub '
+      '${dartdocArgs.map<String>(quote).join(' ')})',
+    );
 
     process = ProcessWrapper(
       await runPubProcess(

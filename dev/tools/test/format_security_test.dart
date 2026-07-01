@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ----------------------------------------------------------------------
-// SECURITY NOTE
-// ----------------------------------------------------------------------
-// This test verifies that format.sh properly rejects malicious environment
-// variables that could be used for command injection attacks. See Flutter
-// security guidelines for CI tooling.
-// ----------------------------------------------------------------------
-
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
