@@ -142,7 +142,8 @@ class PlatformViewIOS final : public PlatformView {
 
  private:
   void ApplyLocaleToOwnerController();
-  void UpdateAccessibilityBridgeViewController();
+  // Returns true when the bridge was created or rebound to a different owner controller.
+  bool UpdateAccessibilityBridgeViewController();
 
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.

@@ -210,6 +210,65 @@ class MockDelegate : public PlatformView::Delegate {
   [engine stopMocking];
 }
 
+- (void)testAttachViewAppliesSemanticsUpdatesReceivedBeforeViewLoaded {
+  flutter::MockDelegate mock_delegate;
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
+  UIView* flutterView = [[UIView alloc] init];
+  __block BOOL isViewLoaded = NO;
+  __block UIView* viewIfLoaded = nil;
+  OCMStub([flutterViewController isViewLoaded]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&isViewLoaded];
+  });
+  OCMStub([flutterViewController viewIfLoaded]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&viewIfLoaded];
+  });
+  OCMStub([flutterViewController view]).andReturn(flutterView);
+  OCMStub([flutterViewController engine]).andReturn(engine);
+  OCMStub([engine binaryMessenger]).andReturn(messenger);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  platform_view->SetOwnerViewController(flutterViewController);
+  platform_view->SetSemanticsTreeEnabled(true);
+  XCTAssertTrue(platform_view->GetAccessibilityBridge());
+
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = "root before view loaded";
+  flutter::SemanticsNodeUpdates update;
+  update[kRootNodeId] = root_node;
+  platform_view->UpdateSemantics(/*view_id=*/0, std::move(update),
+                                 flutter::CustomAccessibilityActionUpdates());
+  XCTAssertNil(flutterView.accessibilityElements);
+
+  isViewLoaded = YES;
+  viewIfLoaded = flutterView;
+  platform_view->attachView();
+
+  XCTAssertNotNil(flutterView.accessibilityElements);
+  id rootContainer = flutterView.accessibilityElements.firstObject;
+  id rootElement = [rootContainer accessibilityElementAtIndex:0];
+  XCTAssertEqualObjects([rootElement accessibilityLabel], @"root before view loaded");
+  platform_view->SetSemanticsTreeEnabled(false);
+
+  [engine stopMocking];
+}
+
 - (void)testPreservesSemanticsUpdatesWhileOwnerControllerIsDetached {
   flutter::MockDelegate mock_delegate;
   fml::MessageLoop::EnsureInitializedForCurrentThread();

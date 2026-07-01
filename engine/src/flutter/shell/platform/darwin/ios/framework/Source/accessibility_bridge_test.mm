@@ -171,7 +171,7 @@ void StubLoadedView(id view_controller, id view) {
   XCTAssertTrue(bridge.get());
 }
 
-- (void)testSetViewControllerRebindsWhenSameViewControllerLoadsView {
+- (void)testViewDidChangeRebindsWhenSameViewControllerLoadsView {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -206,7 +206,7 @@ void StubLoadedView(id view_controller, id view) {
                                                      /*platform_views_controller=*/nil);
   viewIfLoaded = mockFlutterView;
   OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
-  bridge->SetViewController(mockFlutterViewController, nil);
+  bridge->ViewDidChange();
   OCMVerifyAll(mockFlutterView);
 
   [engine stopMocking];

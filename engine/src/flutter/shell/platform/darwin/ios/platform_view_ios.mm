@@ -64,7 +64,7 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
     NotifyDestroyed();
     ios_surface_.reset();
     if (accessibility_bridge_) {
-      accessibility_bridge_->SetViewController(nil, nil);
+      accessibility_bridge_->SetViewController(nil);
     }
   }
   owner_controller_ = owner_controller;
@@ -79,7 +79,7 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
               usingBlock:^(NSNotification* note) {
                 // Implicit copy of 'this' is fine.
                 if (accessibility_bridge_) {
-                  accessibility_bridge_->SetViewController(nil, nil);
+                  accessibility_bridge_->SetViewController(nil);
                 }
                 owner_controller_ = nil;
               }]);
@@ -104,7 +104,10 @@ void PlatformViewIOS::attachView() {
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
-  UpdateAccessibilityBridgeViewController();
+  bool accessibility_bridge_updated = UpdateAccessibilityBridgeViewController();
+  if (accessibility_bridge_ && !accessibility_bridge_updated) {
+    accessibility_bridge_->ViewDidChange();
+  }
 }
 
 PointerDataDispatcherMaker PlatformViewIOS::GetDispatcherMaker() {
@@ -160,6 +163,11 @@ void PlatformViewIOS::UpdateSemantics(int64_t view_id,
   }
   accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
   if (owner_controller_ && owner_controller_.isViewLoaded) {
+    // Keep the bridge cache up to date even if the owner FlutterView has not loaded yet, but only
+    // notify observers after that cache has been applied to a real UIKit view. For example, a
+    // pre-warmed engine can receive semantics before FlutterViewController.loadView. In that case
+    // viewIfLoaded is nil, so posting now would tell observers to inspect accessibilityElements
+    // that UIKit cannot expose yet.
     [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
                                                         object:owner_controller_];
   }
@@ -241,20 +249,21 @@ void PlatformViewIOS::ApplyLocaleToOwnerController() {
   }
 }
 
-void PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
+bool PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
   if (!semantics_tree_enabled_) {
-    return;
+    return false;
   }
-  FlutterPlatformViewsController* platform_views_controller =
-      owner_controller_.platformViewsController ?: platform_views_controller_;
   if (accessibility_bridge_) {
-    accessibility_bridge_->SetViewController(owner_controller_, platform_views_controller);
-    return;
+    return accessibility_bridge_->SetViewController(owner_controller_);
   }
   if (owner_controller_) {
+    FlutterPlatformViewsController* platform_views_controller =
+        owner_controller_.platformViewsController ?: platform_views_controller_;
     accessibility_bridge_ =
         std::make_unique<AccessibilityBridge>(owner_controller_, this, platform_views_controller);
+    return true;
   }
+  return false;
 }
 
 PlatformViewIOS::ScopedObserver::ScopedObserver() {}

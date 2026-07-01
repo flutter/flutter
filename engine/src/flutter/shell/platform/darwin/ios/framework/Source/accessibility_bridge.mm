@@ -45,7 +45,6 @@ AccessibilityBridge::AccessibilityBridge(
     __weak FlutterPlatformViewsController* platform_views_controller,
     std::unique_ptr<IosDelegate> ios_delegate)
     : view_controller_(view_controller),
-      view_(view_controller.viewIfLoaded),
       fallback_accessibility_container_view_([[UIView alloc] initWithFrame:CGRectZero]),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
@@ -68,23 +67,23 @@ AccessibilityBridge::~AccessibilityBridge() {
   clearState();
 }
 
-void AccessibilityBridge::SetViewController(
-    FlutterViewController* view_controller,
-    __weak FlutterPlatformViewsController* platform_views_controller) {
-  UIView* previous_view = view_;
-  UIView* next_view = view_controller.viewIfLoaded;
-  if (view_controller_ == view_controller &&
-      platform_views_controller_ == platform_views_controller && previous_view == next_view) {
-    return;
+bool AccessibilityBridge::SetViewController(FlutterViewController* view_controller) {
+  if (view_controller_ == view_controller) {
+    return false;
   }
+  UIView* previous_view = viewIfLoaded();
+  UIView* next_view = view_controller.viewIfLoaded;
   if (previous_view != next_view) {
     previous_view.accessibilityElements = nil;
   }
   view_controller_ = view_controller;
-  view_ = next_view;
-  platform_views_controller_ = platform_views_controller;
-  UpdateSemanticsObjectsForViewController();
-  UpdateAccessibilityElementsForViewController();
+  ViewDidChange();
+  return true;
+}
+
+void AccessibilityBridge::ViewDidChange() {
+  NotifySemanticsObjectsViewChanged();
+  UpdateAccessibilityElementsForCurrentView();
 }
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
@@ -112,8 +111,11 @@ void AccessibilityBridge::UpdateSemantics(
     const flutter::CustomAccessibilityAction& action = entry.second;
     actions_[action.id] = action;
   }
+  // The semantics cache is updated even while the owner view is not loaded. UIKit
+  // accessibility notifications are only useful once there is a loaded view with
+  // accessibility elements to inspect.
   BOOL shouldPostAccessibilityNotifications =
-      view_controller_ && view_ &&
+      view_controller_ && viewIfLoaded() &&
       !ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_);
   for (const auto& entry : nodes) {
     const flutter::SemanticsNode& node = entry.second;
@@ -182,7 +184,7 @@ void AccessibilityBridge::UpdateSemantics(
   SemanticsObject* lastAdded = nil;
 
   if (root) {
-    UpdateAccessibilityElementsForViewController();
+    UpdateAccessibilityElementsForCurrentView();
     NSMutableArray<SemanticsObject*>* newRoutes = [[NSMutableArray alloc] init];
     [root collectRoutes:newRoutes];
     // Finds the last route that is not in the previous routes.
@@ -214,7 +216,8 @@ void AccessibilityBridge::UpdateSemantics(
       previous_routes_.push_back([route uid]);
     }
   } else {
-    view_.accessibilityElements = nil;
+    UIView* view = viewIfLoaded();
+    view.accessibilityElements = nil;
   }
 
   NSMutableArray<NSNumber*>* doomed_uids = [NSMutableArray arrayWithArray:objects_.allKeys];
@@ -396,8 +399,8 @@ fml::WeakPtr<AccessibilityBridge> AccessibilityBridge::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void AccessibilityBridge::UpdateAccessibilityElementsForViewController() {
-  UIView* view = view_;
+void AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
+  UIView* view = viewIfLoaded();
   if (!view) {
     return;
   }
@@ -405,7 +408,7 @@ void AccessibilityBridge::UpdateAccessibilityElementsForViewController() {
   view.accessibilityElements = root ? @[ [root accessibilityContainer] ?: [NSNull null] ] : nil;
 }
 
-void AccessibilityBridge::UpdateSemanticsObjectsForViewController() {
+void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {
   for (SemanticsObject* object in objects_.allValues) {
     [object accessibilityBridgeDidChangeView];
   }
@@ -415,7 +418,8 @@ void AccessibilityBridge::clearState() {
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();
-  view_.accessibilityElements = nil;
+  UIView* view = viewIfLoaded();
+  view.accessibilityElements = nil;
 }
 
 }  // namespace flutter
