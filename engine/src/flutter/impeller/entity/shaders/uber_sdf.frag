@@ -159,14 +159,12 @@ vec3 filledRectSDF(vec2 p) {
   vec2 device_pixel_size = vec2(length(vec2(device_dx.x, device_dy.x)),
                                 length(vec2(device_dx.y, device_dy.y)));
 
-  // Width/height scaling factor to make an expanded rectangle with minimum
-  // 1-pixel dimensions.
-  vec2 subpixel_scaling =
-      min((2.0 * frag_info.size) / device_pixel_size, vec2(1.0));
+  // Rectangle's size expanded to have minimum 1 pixel width/height.
+  vec2 expanded_size = max(frag_info.size, device_pixel_size * 0.5);
+  // Scaling factor for the expanded rectangle.
+  vec2 subpixel_scaling = frag_info.size / expanded_size;
   // Ratio of the original rectangle size to the expanded size.
   float thin_shape_alpha_scaling = subpixel_scaling.x * subpixel_scaling.y;
-  // Rectangle's size expanded to have minimum 1 pixel width/height.
-  vec2 expanded_size = frag_info.size / subpixel_scaling;
 
   float sdf = distanceFromRect(p, expanded_size);
 
@@ -266,6 +264,9 @@ void main() {
 
   float alpha =
       SDFAlpha(sdf, pixel_size, frag_info.aa_pixels) * thin_shape_alpha_scaling;
+  // Clamp alpha in case floating point precision errors cause it to be outside
+  // [0.0, 1.0].
+  alpha = clamp(alpha, 0.0, 1.0);
   alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
