@@ -35,7 +35,7 @@ interface class FlutterFeaturesConfig {
 
   // Can be null if no manifest file exists in the current directory.
   final FlutterManifest? _projectManifest;
-  bool _hasWarnedAboutSwiftPackageManagerBeingDisabled = false;
+  final Set<Feature> _warnedFeatures = <Feature>{};
 
   /// Returns whether [feature] has been turned on/off from configuration.
   ///
@@ -108,11 +108,11 @@ interface class FlutterFeaturesConfig {
   /// ```
   bool? isEnabled(Feature feature) {
     final bool? configValue = _isEnabledByConfigValue(feature);
-    if (feature == swiftPackageManager &&
-        configValue == false &&
-        !_hasWarnedAboutSwiftPackageManagerBeingDisabled) {
-      _logger.printWarning(kSwiftPackageManagerDisabledWarning);
-      _hasWarnedAboutSwiftPackageManagerBeingDisabled = true;
+    if (configValue == false &&
+        feature.warningOnDisable != null &&
+        !_warnedFeatures.contains(feature)) {
+      _logger.printWarning(feature.warningOnDisable!);
+      _warnedFeatures.add(feature);
     }
     return configValue ?? _isEnabledByPlatformEnvironment(feature);
   }
