@@ -133,5 +133,53 @@ TEST(PipelineCompileQueueGLESTest, IsProcessingResetsAfterAllJobsComplete) {
   thread.Join();
 }
 
+TEST(PipelineCompileQueueGLESTest, DestroyQueueWithPendingTasks) {
+  fml::Thread thread;
+  std::atomic<int> completed_jobs{0};
+  fml::CountDownLatch latch(3);
+
+  {
+    auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
+    ASSERT_NE(queue, nullptr);
+
+    PipelineDescriptor desc1;
+    desc1.SetSampleCount(SampleCount::kCount1);
+    desc1.SetCullMode(CullMode::kNone);
+
+    PipelineDescriptor desc2;
+    desc2.SetSampleCount(SampleCount::kCount1);
+    desc2.SetCullMode(CullMode::kFrontFace);
+
+    PipelineDescriptor desc3;
+    desc3.SetSampleCount(SampleCount::kCount1);
+    desc3.SetCullMode(CullMode::kBackFace);
+
+    queue->PostJobForDescriptor(desc1, [&]() {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      completed_jobs++;
+      latch.CountDown();
+    });
+
+    queue->PostJobForDescriptor(desc2, [&]() {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      completed_jobs++;
+      latch.CountDown();
+    });
+
+    queue->PostJobForDescriptor(desc3, [&]() {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      completed_jobs++;
+      latch.CountDown();
+    });
+
+    // Queue will be destroyed here with pending jobs.
+    // The destructor should block and wait for all jobs to complete.
+  }
+
+  // All jobs should be completed before the queue is destroyed.
+  EXPECT_EQ(completed_jobs, 3);
+  thread.Join();
+}
+
 }  // namespace testing
 }  // namespace impeller
