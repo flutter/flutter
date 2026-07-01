@@ -112,6 +112,8 @@ Future<void> testMain() async {
       editingStrategy = GloballyPositionedTextEditingStrategy(testTextEditing);
       testTextEditing.debugTextEditingStrategyOverride = editingStrategy;
       testTextEditing.configuration = singlelineConfig;
+      editingStrategy!.debugDocumentHasFocusOverride = null;
+      editingStrategy!.debugDocumentVisibilityStateOverride = null;
     });
 
     test('Creates element when enabled and removes it when disabled', () async {
