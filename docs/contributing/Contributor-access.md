@@ -40,6 +40,8 @@ Being in the GitHub "flutter-hackers" group gives you the following:
 
 * PRs will run their tests slightly faster.
 
+* Exemption from the 2 concurrent open pull request limit on public Flutter repositories.
+
 Being in the Discord "team" group gives you the following:
 
 * The ability to talk without rate-limiting on the #hackers-* channels.

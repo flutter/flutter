@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -49,6 +50,13 @@ import 'swift_package_manager.dart';
 /// Function: createItemModels(for:itemModelSource:)
 /// Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
 /// Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+///
+/// xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open log store at /path/to/app/build/macos/Logs/Build
+/// xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open Build log store: Error Domain=NSCocoaErrorDomain Code=4 "The file "LogStoreManifest.plist" doesn't exist." UserInfo={...}. User info: {
+///     NSFilePath = "/path/to/app/build/macos/Logs/Build/LogStoreManifest.plist";
+///     NSURL = "file:///path/to/app/build/macos/Logs/Build/LogStoreManifest.plist";
+///     NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"";
+/// }.
 
 /// ```
 final _filteredOutput = RegExp(
@@ -56,6 +64,10 @@ final _filteredOutput = RegExp(
   r'Requested but did not find extension point with identifier|'
   r'note\:|'
   r'\[MT\] DVTAssertions: Warning in /System/Volumes/Data/SWE/|'
+  r'.*\[MT\] IDELogStore: Failed to open|'
+  r'.*LogStoreManifest\.plist|'
+  r'.*NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2|'
+  r'^\s*\}\.\s*$|'
   r'Details\:  createItemModels|'
   r'Function\: createItemModels|'
   r'Thread\:   <_NSMainThread\:|'
@@ -203,28 +215,45 @@ Future<void> buildMacOS({
     }
   }
 
-  final String arch = switch (globals.os.hostPlatform) {
+  final String hostArch = switch (globals.os.hostPlatform) {
     HostPlatform.darwin_arm64 => 'arm64',
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
 
-  // Determine the build destination
+  // Determine the build destination specifier for xcodebuild.
+  // This does not prevent some versions of xcodebuild from building a fat binary
+  // even if set to 'platform=macOS,arch=arm64';
   final String destination;
+  // The archtectures to specify in xcode project's build setting.
+  final String? archs;
   if (buildInfo.isDebug) {
     // Debug builds default to current host architecture
-    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$hostArch';
+    archs = null;
   } else {
-    // Release builds default to universal binary
+    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled is set.
     destination = XcodeSdk.MacOSX.genericPlatform;
+    archs = featureFlags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
   }
 
   // Get EXCLUDED_ARCHS from Xcode project build settings
   // This allows developers to exclude specific architectures (e.g., x86_64)
   // when dependencies don't support them
-  final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
+  final String? excludedArchs = switch (buildSettings['EXCLUDED_ARCHS']?.trim()) {
+    null || '' => null,
+    final String excludedArches => excludedArches,
+  };
 
   try {
+    if (archs != null && excludedArchs != null && excludedArchs.contains('arm64')) {
+      throwToolExit(
+        'No Valid Target Arch: '
+        'You have enabled the macOSArm64Only feature flag but '
+        "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
+        'Consider removing arm64 from EXCLUDED_ARCHS.',
+      );
+    }
     final List<String> xcodebuildCommandArgs = await globals.xcode!
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
@@ -253,9 +282,9 @@ Future<void> buildMacOS({
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
         // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
         // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
-        if (excludedArches != null && excludedArches.trim().isNotEmpty)
-          'EXCLUDED_ARCHS=$excludedArches',
+        if (excludedArchs != null) 'EXCLUDED_ARCHS=$excludedArchs',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
+        if (archs != null) 'ARCHS=$archs',
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
