@@ -247,7 +247,7 @@ Future<void> buildMacOS({
   };
 
   final bool binaryContainsX86Slice =
-      archs == null && (excludedArchs == null || excludedArchs.contains('x86_64'));
+      archs == null && (excludedArchs == null || !excludedArchs.contains('x86_64'));
   final bool allowsArm64Only = switch (globals.xcodeProjectInterpreter!.version?.major) {
     null || < 27 => false,
     _ => true,
