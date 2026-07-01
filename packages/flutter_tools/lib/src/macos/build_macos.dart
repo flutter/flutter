@@ -12,7 +12,6 @@ import '../base/os.dart' show HostPlatform;
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
