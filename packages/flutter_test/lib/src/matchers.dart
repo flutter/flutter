@@ -3164,8 +3164,15 @@ class _MatchesSemanticsData extends Matcher {
     }
     var allMatched = true;
     if (children != null) {
+      final int actualChildrenCount = (node as SemanticsNode).childrenCount;
+      if (children!.length != actualChildrenCount) {
+        return failWithDescription(
+          matchState,
+          'expected ${children!.length} child${children!.length == 1 ? '' : 'ren'}, found $actualChildrenCount',
+        );
+      }
       var i = 0;
-      (node as SemanticsNode).visitChildren((SemanticsNode child) {
+      node.visitChildren((SemanticsNode child) {
         allMatched = children![i].matches(child, matchState) && allMatched;
         i += 1;
         return allMatched;
