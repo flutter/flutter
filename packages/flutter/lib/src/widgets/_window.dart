@@ -2514,10 +2514,9 @@ class WindowManager extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  const WindowManager({super.key, required this.child});
+  const WindowManager({super.key, required this.initialWindows});
 
-  /// The child widget of the window manager.
-  final Widget child;
+  final List<WindowEntry> initialWindows;
 
   @override
   State<WindowManager> createState() => _WindowManagerState();
@@ -2527,11 +2526,13 @@ class _WindowManagerState extends State<WindowManager> {
   final WindowRegistry _registry = WindowRegistry();
 
   @override
-  Widget build(BuildContext context) {
-    if (!isWindowingEnabled) {
-      return widget.child;
-    }
+  void initState() {
+    super.initState();
+    widget.initialWindows.forEach(_registry.register);
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return _WindowRegistryScope(
       registry: _registry,
       child: ListenableBuilder(
@@ -2562,17 +2563,8 @@ class _WindowManagerState extends State<WindowManager> {
             };
           }).toList();
 
-          final FlutterView? view = View.maybeOf(context);
-          if (view == null) {
-            return ViewCollection(views: subViews);
-          }
-
-          return ViewAnchor(
-            view: subViews.isNotEmpty ? ViewCollection(views: subViews) : null,
-            child: child!,
-          );
+          return ViewCollection(views: subViews);
         },
-        child: widget.child,
       ),
     );
   }
