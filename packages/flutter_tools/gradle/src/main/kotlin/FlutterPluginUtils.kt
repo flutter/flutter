@@ -581,7 +581,7 @@ object FlutterPluginUtils {
             }
         }
 
-        // If no legacy KGP declarations were found, there is nothing to log.
+        // If no imperative apply KGP declarations were found, there is nothing to log.
         if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
             return
         }
@@ -631,8 +631,13 @@ object FlutterPluginUtils {
     )
 
     /**
-     * Scans the build script of the subproject to detect declarations of Kotlin Gradle Plugin,
-     * Android Gradle Plugin (for applications), and the Android Gradle Plugin (for libraries).
+     * Scans the build script (`build.gradle` or `build.gradle.kts`) of Flutter Android app modules and Flutter plugin
+     * modules to detect declarations of Kotlin Gradle Plugin, Android Gradle Plugin (for applications),
+     * and Android Gradle Plugin (for libraries).
+     *
+     * This inspects build script files directly via regex rather than querying Gradle plugin
+     * state at runtime. Evaluating Kotlin Gradle Plugin dynamically at runtime to conditionally apply Kotlin Gradle Plugin
+     * during configuration leads to lifecycle and ordering issues (see https://github.com/gradle/gradle/issues/36953).
      *
      * Returns null if the build script does not exist, is inside an ephemeral `.android/` directory,
      * or fails to read due to an [IOException].

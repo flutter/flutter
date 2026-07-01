@@ -63,7 +63,7 @@ import kotlin.test.assertTrue
  * @property name The name of the subproject.
  * @property declarativelyAppliedPlugins Plugins applied via the modern Gradle `plugins {}` block.
  *           For more details, see [Gradle Plugins Block Docs](https://docs.gradle.org/current/userguide/plugins_intermediate.html#sec:plugins_block).
- * @property imperativelyAppliedPlugins Plugins applied via the legacy Gradle `apply plugin:` statement.
+ * @property imperativelyAppliedPlugins Plugins applied via the imperative `apply plugin:` statement.
  *           For more details, see [Gradle Old Plugin Application Docs](https://docs.gradle.org/current/userguide/plugins_intermediate.html#sec:old_plugin_application).
  */
 private data class SubprojectConfig(
