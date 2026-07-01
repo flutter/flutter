@@ -5,7 +5,6 @@
 /// @docImport 'color_scheme.dart';
 library;
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -125,6 +124,13 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/carousel/carousel.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to create an auto-playing carousel by using a [Timer]
+/// to periodically animate the [CarouselController].
+///
+/// ** See code in examples/api/lib/material/carousel/carousel.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CarouselController], which controls the first fully visible item in the
@@ -148,10 +154,6 @@ class CarouselView extends StatefulWidget {
     this.onTap,
     this.enableSplash = true,
     this.infinite = false,
-    this.autoPlay = false,
-    this.autoPlayInterval = const Duration(seconds: 4),
-    this.autoPlayAnimationDuration = const Duration(milliseconds: 800),
-    this.autoPlayCurve = Curves.fastOutSlowIn,
     required double this.itemExtent,
     required this.children,
     this.onIndexChanged,
@@ -201,6 +203,15 @@ class CarouselView extends StatefulWidget {
   /// is particularly useful for achieving [Hero](https://m3.material.io/components/carousel/specs#b33a5579-d648-42a9-b934-98718d65454f)
   /// and [Center-aligned hero](https://m3.material.io/components/carousel/specs#92c779ce-de8b-4dee-8201-95d3e429204f)
   /// layouts indicated in the Material Design 3.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to create an auto-playing weighted carousel by using
+  /// a [Timer] to periodically animate the [CarouselController]. It tracks the
+  /// current item index using [onIndexChanged] to know exactly which item to
+  /// animate to next.
+  ///
+  /// ** See code in examples/api/lib/material/carousel/carousel.3.dart **
+  /// {@end-tool}
   const CarouselView.weighted({
     super.key,
     this.padding,
@@ -218,10 +229,6 @@ class CarouselView extends StatefulWidget {
     this.onTap,
     this.enableSplash = true,
     this.infinite = false,
-    this.autoPlay = false,
-    this.autoPlayInterval = const Duration(seconds: 4),
-    this.autoPlayAnimationDuration = const Duration(milliseconds: 800),
-    this.autoPlayCurve = Curves.fastOutSlowIn,
     required List<int> this.flexWeights,
     required this.children,
     this.onIndexChanged,
@@ -270,10 +277,6 @@ class CarouselView extends StatefulWidget {
     this.itemCount,
     this.onIndexChanged,
     this.infinite = false,
-    this.autoPlay = false,
-    this.autoPlayInterval = const Duration(seconds: 4),
-    this.autoPlayAnimationDuration = const Duration(milliseconds: 800),
-    this.autoPlayCurve = Curves.fastOutSlowIn,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        children = const <Widget>[];
@@ -333,10 +336,6 @@ class CarouselView extends StatefulWidget {
     this.itemCount,
     this.onIndexChanged,
     this.infinite = false,
-    this.autoPlay = false,
-    this.autoPlayInterval = const Duration(seconds: 4),
-    this.autoPlayAnimationDuration = const Duration(milliseconds: 800),
-    this.autoPlayCurve = Curves.fastOutSlowIn,
   }) : itemExtent = null,
        children = const <Widget>[];
 
@@ -528,47 +527,6 @@ class CarouselView extends StatefulWidget {
   /// Defaults to false.
   final bool infinite;
 
-  /// Whether the carousel should automatically scroll to the next item.
-  ///
-  /// If true, the carousel will automatically advance to the next item
-  /// at a regular interval defined by [autoPlayInterval].
-  ///
-  /// The automatic scrolling pauses when the user interacts with the
-  /// carousel (e.g., while dragging), and the timer restarts only when the
-  /// interaction ends.
-  ///
-  /// Defaults to false.
-  final bool autoPlay;
-
-  /// The duration between automatic scroll animations.
-  ///
-  /// This interval is measured from the end of the previous automatic scroll
-  /// animation (or the end of a user interaction) to the start of the next
-  /// automatic scroll animation.
-  ///
-  /// Only effective when [autoPlay] is true.
-  ///
-  /// Defaults to 4 seconds.
-  final Duration autoPlayInterval;
-
-  /// The duration of the automatic scroll animation.
-  ///
-  /// This determines how long it takes for the carousel to animate to the
-  /// next item once the [autoPlayInterval] has elapsed.
-  ///
-  /// Only effective when [autoPlay] is true.
-  ///
-  /// Defaults to 800 milliseconds.
-  final Duration autoPlayAnimationDuration;
-
-  /// The animation curve used to transition to the next item when [autoPlay]
-  /// is enabled.
-  ///
-  /// Only effective when [autoPlay] is true.
-  ///
-  /// Defaults to [Curves.fastOutSlowIn].
-  final Curve autoPlayCurve;
-
   @override
   State<CarouselView> createState() => _CarouselViewState();
 }
@@ -580,8 +538,6 @@ class _CarouselViewState extends State<CarouselView> {
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
   late int _lastReportedLeadingItem;
-  Timer? _autoPlayTimer;
-  bool _isInteractionPaused = false;
 
   @override
   void initState() {
@@ -593,9 +549,6 @@ class _CarouselViewState extends State<CarouselView> {
     _lastReportedLeadingItem = _getInitialLeadingItem();
     _controller._attach(this);
     _controller.addListener(_handleScroll);
-    if (widget.autoPlay) {
-      _startAutoPlayTimer();
-    }
   }
 
   @override
@@ -624,96 +577,14 @@ class _CarouselViewState extends State<CarouselView> {
     if (widget.consumeMaxWeight != oldWidget.consumeMaxWeight) {
       (_controller.position as _CarouselPosition).consumeMaxWeight = _consumeMaxWeight;
     }
-    if (widget.autoPlay != oldWidget.autoPlay ||
-        widget.autoPlayInterval != oldWidget.autoPlayInterval) {
-      if (widget.autoPlay) {
-        _startAutoPlayTimer();
-      } else {
-        _stopAutoPlayTimer();
-      }
-    }
   }
 
   @override
   void dispose() {
-    _stopAutoPlayTimer();
     _controller.removeListener(_handleScroll);
     _controller._detach(this);
     _internalController?.dispose();
     super.dispose();
-  }
-
-  void _startAutoPlayTimer() {
-    _stopAutoPlayTimer();
-    if (!widget.autoPlay) {
-      return;
-    }
-    _autoPlayTimer = Timer.periodic(widget.autoPlayInterval, _handleAutoPlayTimerTick);
-  }
-
-  void _stopAutoPlayTimer() {
-    _autoPlayTimer?.cancel();
-    _autoPlayTimer = null;
-  }
-
-  void _handleAutoPlayTimerTick(Timer timer) {
-    if (_isInteractionPaused ||
-        !_controller.hasClients ||
-        !_controller.position.hasContentDimensions) {
-      return;
-    }
-
-    final int? itemCount = _controller._getItemCount();
-    if (itemCount == null || itemCount <= 1) {
-      return;
-    }
-
-    if (!widget.infinite) {
-      final double maxScrollExtent = _controller.position.maxScrollExtent;
-      if (_controller.offset >= maxScrollExtent - precisionErrorTolerance) {
-        _controller.animateToItem(
-          0,
-          duration: widget.autoPlayAnimationDuration,
-          curve: widget.autoPlayCurve,
-        );
-        return;
-      }
-    }
-
-    final position = _controller.position as _CarouselPosition;
-    final int shiftCount = position
-        .getItemFromPixels(position.pixels, position.viewportDimension)
-        .round();
-
-    int nextIndex = shiftCount + 1;
-    if (_flexWeights != null && !widget.consumeMaxWeight) {
-      final int maxWeightIndex = _flexWeights!.indexOf(_flexWeights!.reduce(math.max));
-      nextIndex += maxWeightIndex;
-    }
-
-    if (widget.infinite) {
-      nextIndex = nextIndex % itemCount;
-    }
-
-    _controller.animateToItem(
-      nextIndex,
-      duration: widget.autoPlayAnimationDuration,
-      curve: widget.autoPlayCurve,
-    );
-  }
-
-  bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.autoPlay || notification.depth != 0) {
-      return false;
-    }
-    if (notification is ScrollStartNotification && notification.dragDetails != null) {
-      _isInteractionPaused = true;
-      _stopAutoPlayTimer();
-    } else if (notification is ScrollEndNotification) {
-      _isInteractionPaused = false;
-      _startAutoPlayTimer();
-    }
-    return false;
   }
 
   void _handleScroll() {
@@ -870,17 +741,14 @@ class _CarouselViewState extends State<CarouselView> {
         _itemExtent = widget.itemExtent == null
             ? null
             : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
-        return NotificationListener<ScrollNotification>(
-          onNotification: _handleScrollNotification,
-          child: CustomScrollView(
-            scrollDirection: widget.scrollDirection,
-            reverse: widget.reverse,
-            controller: _controller,
-            physics: physics,
-            clipBehavior: Clip.antiAlias,
-            scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
-            slivers: <Widget>[_buildSliverCarousel(theme)],
-          ),
+        return CustomScrollView(
+          scrollDirection: widget.scrollDirection,
+          reverse: widget.reverse,
+          controller: _controller,
+          physics: physics,
+          clipBehavior: Clip.antiAlias,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
+          slivers: <Widget>[_buildSliverCarousel(theme)],
         );
       },
     );
