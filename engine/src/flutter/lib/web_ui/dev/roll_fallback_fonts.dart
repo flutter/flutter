@@ -116,7 +116,7 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
             <String>[fontFile.path],
           );
           if (decompressResult.exitCode == 0) {
-            queryPath = fontFile.path.replaceAll('.woff2', '.ttf');
+            queryPath = path.setExtension(fontFile.path, '.ttf');
             decompressed = true;
           } else {
             print(
@@ -178,10 +178,19 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
       if (parentCharset == null) {
         continue;
       }
+      final originalParentCharset = Set<int>.from(parentCharset);
       final List<String> slices = parentToSlices[parent]!;
       for (final slice in slices) {
         final Set<int>? sliceCharset = parsedCharsets[slice];
         if (sliceCharset != null) {
+          if (!originalParentCharset.containsAll(sliceCharset)) {
+            final Set<int> difference = sliceCharset.difference(originalParentCharset);
+            throw ToolExit(
+              'Correctness error: CJK split slice "$slice" contains characters not present in its '
+              'full parent font "$parent".\n'
+              'Difference: ${difference.map((c) => "U+${c.toRadixString(16).toUpperCase()}").join(", ")}',
+            );
+          }
           parentCharset.removeAll(sliceCharset);
         }
       }
