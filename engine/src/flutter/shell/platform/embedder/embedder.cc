@@ -1763,7 +1763,7 @@ FlutterEngineResult FlutterEngineCreateAOTData(
       return kSuccess;
     }
     case kFlutterEngineAOTDataSourceTypeDllPath: {
-#if FML_OS_WIN
+#if FML_OS_WIN && FML_ARCH_CPU_X86_64
       if (!source->dll_path || !fml::IsFile(source->dll_path)) {
         return LOG_EMBEDDER_ERROR(kInvalidArguments,
                                   "Invalid DLL path specified.");
@@ -1793,11 +1793,11 @@ FlutterEngineResult FlutterEngineCreateAOTData(
 
       *data_out = aot_data.release();
       return kSuccess;
-#else   // FML_OS_WIN
+#else   // FML_OS_WIN && FML_ARCH_CPU_X86_64
       return LOG_EMBEDDER_ERROR(
           kInvalidArguments,
-          "DLL AOT data sources are only supported on Windows.");
-#endif  // FML_OS_WIN
+          "DLL AOT data sources are only supported on Windows x64.");
+#endif  // FML_OS_WIN && FML_ARCH_CPU_X86_64
     }
   }
 

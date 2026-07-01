@@ -128,9 +128,7 @@ static uint64_t ConvertWinStylusFlagsToFlutterButtons(UINT pen_flags,
 }
 
 // Translate pointer flags from Win32 API to Flutter pointer buttons.
-static uint64_t ConvertWinPointerFlagsToFlutterButtons(
-    UINT flags,
-    POINTER_INPUT_TYPE pointer_type) {
+static uint64_t ConvertWinPointerFlagsToFlutterButtons(UINT flags) {
   uint64_t flutter_buttons = 0;
   if ((flags & POINTER_FLAG_INCONTACT) == 0) {
     // If the pointer is not in contact, then no buttons should be considered
@@ -144,10 +142,6 @@ static uint64_t ConvertWinPointerFlagsToFlutterButtons(
   }
   if (flags & POINTER_FLAG_THIRDBUTTON) {
     flutter_buttons |= kFlutterPointerButtonMouseMiddle;
-  }
-  if (flutter_buttons == 0 &&
-      (pointer_type == PT_MOUSE || pointer_type == PT_TOUCH)) {
-    flutter_buttons |= kFlutterPointerButtonMousePrimary;
   }
   return flutter_buttons;
 }
@@ -630,8 +624,8 @@ FlutterWindow::HandleMessage(UINT const message,
         UINT32 pressure = 0;
         UINT32 rotation = 0;
         bool is_inverted = false;
-        flutter_button = ConvertWinPointerFlagsToFlutterButtons(
-            pointerInfo.pointerFlags, pointerInfo.pointerType);
+        flutter_button =
+            ConvertWinPointerFlagsToFlutterButtons(pointerInfo.pointerFlags);
         if (pointerInfo.pointerType == PT_PEN) {
           POINTER_PEN_INFO penInfo;
           if (windows_proc_table_->GetPointerPenInfo(pointerId, &penInfo)) {
