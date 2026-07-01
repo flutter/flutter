@@ -182,7 +182,6 @@ static void fl_view_renderer_software_dispose(GObject* object) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(object);
 
   g_clear_object(&self->engine);
-  g_clear_object(&self->compositor);
   g_clear_object(&self->task_runner);
   g_mutex_clear(&self->frame_mutex);
 
