@@ -11,6 +11,24 @@
 
 namespace impeller {
 
+//------------------------------------------------------------------------------
+/// @brief      A task queue designed for managing compilation of pipeline state
+///             objects for Vulkan backend.
+///
+///             This subclass uses a fml::BasicTaskRunner as the worker task
+///             runner and dispatches compile jobs directly without sequential
+///             processing constraints.
+///
+///             Key characteristics:
+///             - Uses std::shared_ptr<fml::BasicTaskRunner> for
+///             worker_task_runner_
+///             - Dispatches jobs directly to the task runner in OnJobAdded()
+///             - Does not implement sequential processing like GLES version
+///
+///             The Vulkan backend benefits from the parallel nature of pipeline
+///             compilation, allowing multiple compile jobs to be processed
+///             concurrently through the task runner.
+///
 class PipelineCompileQueueVulkan : public PipelineCompileQueue {
  public:
   static std::shared_ptr<PipelineCompileQueueVulkan> Create(
