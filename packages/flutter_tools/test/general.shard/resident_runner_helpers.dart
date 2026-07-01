@@ -127,6 +127,11 @@ const evictShader = FakeVmServiceRequest(
   args: <String, Object>{'assetKey': 'foo.frag', 'isolateId': '1'},
 );
 
+const reinitializeShaderLibrary = FakeVmServiceRequest(
+  method: 'ext.ui.gpu.reinitializeShaderLibrary',
+  args: <String, Object>{'assetKey': 'foo.shaderbundle', 'isolateId': '1'},
+);
+
 final Uri testUri = Uri.parse('foo://bar');
 
 class FakeDartDevelopmentService extends Fake
@@ -148,7 +153,7 @@ class FakeDartDevelopmentService extends Fake
   Future<void> handleHotRestart(FlutterDevice? device) async {}
 
   @override
-  void shutdown() {}
+  Future<void> shutdown() async {}
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {

@@ -5,20 +5,27 @@
 #include "flutter/shell/platform/windows/host_window_dialog.h"
 
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 
-namespace {
-DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window) {
-  DWORD window_style = WS_OVERLAPPED | WS_CAPTION | WS_THICKFRAME;
+namespace flutter {
+
+DWORD HostWindowDialog::GetWindowStyleForDialog(
+    std::optional<HWND> const& owner_window,
+    bool resizable) {
+  DWORD window_style = WS_OVERLAPPED | WS_CAPTION;
+  if (resizable) {
+    window_style |= WS_THICKFRAME;
+  }
   if (!owner_window) {
     // If the dialog has no owner, add a minimize box and a system menu.
     window_style |= WS_MINIMIZEBOX | WS_SYSMENU;
   }
-
   return window_style;
 }
 
-DWORD GetExtendedWindowStyleForDialog(std::optional<HWND> const& owner_window) {
+DWORD HostWindowDialog::GetExtendedWindowStyleForDialog(
+    std::optional<HWND> const& owner_window) {
   DWORD extended_window_style = WS_EX_DLGMODALFRAME;
   if (owner_window) {
     // If the owner window has WS_EX_TOOLWINDOW style, apply the same
@@ -29,55 +36,80 @@ DWORD GetExtendedWindowStyleForDialog(std::optional<HWND> const& owner_window) {
   }
   return extended_window_style;
 }
-}  // namespace
-
-namespace flutter {
 
 HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    FlutterWindowsEngine* engine,
                                    const WindowSizeRequest& preferred_size,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
-                                   std::optional<HWND> const& owner_window)
-    : HostWindow(window_manager, engine) {
+                                   std::optional<HWND> const& owner_window,
+                                   bool sized_to_content,
+                                   bool resizable)
+    : HostWindowSized(window_manager, engine, resizable) {
+  FML_CHECK(sized_to_content || preferred_size.has_preferred_view_size);
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kDialog,
-      .window_style = GetWindowStyleForDialog(owner_window),
+      .window_style = GetWindowStyleForDialog(owner_window, resizable),
       .extended_window_style = GetExtendedWindowStyleForDialog(owner_window),
       .box_constraints = constraints,
       .initial_window_rect =
-          GetInitialRect(engine, preferred_size, constraints, owner_window),
+          GetInitialRect(engine, preferred_size, constraints, owner_window,
+                         sized_to_content, resizable),
       .title = title,
       .owner_window = owner_window,
+      .sizing_delegate = sized_to_content ? AsSizingDelegate() : nullptr,
+      .is_sized_to_content = sized_to_content,
   });
+
   auto hwnd = window_handle_;
-  if (owner_window == nullptr) {
+  if (owner_window) {
     if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
       EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
     }
   }
 
-  if (owner_window != nullptr) {
+  if (owner_window) {
     UpdateModalState();
   }
+}
+
+HostWindowDialog::~HostWindowDialog() {
+  // Reset the view while this most-derived object is still fully alive, to stop
+  // the raster thread from sizing it before any subobject is torn down. See the
+  // destructor comment in host_window_sized.h for the rationale.
+  view_controller_.reset();
 }
 
 Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,
-                                      std::optional<HWND> const& owner_window) {
-  auto const window_style = GetWindowStyleForDialog(owner_window);
+                                      std::optional<HWND> const& owner_window,
+                                      bool sized_to_content,
+                                      bool resizable) {
+  auto const window_style = GetWindowStyleForDialog(owner_window, resizable);
   auto const extended_window_style =
       GetExtendedWindowStyleForDialog(owner_window);
+
+  double client_width;
+  double client_height;
+  if (sized_to_content) {
+    // Use the minimum constraint as the initial window size. The window will
+    // be resized to match the rendered content after the first frame.
+    client_width = std::max(1.0, constraints.smallest().width());
+    client_height = std::max(1.0, constraints.smallest().height());
+  } else {
+    client_width = preferred_size.preferred_view_width;
+    client_height = preferred_size.preferred_view_height;
+  }
+
   std::optional<Size> const window_size =
       HostWindow::GetWindowSizeForClientSize(
-          *engine->windows_proc_table(),
-          Size(preferred_size.preferred_view_width,
-               preferred_size.preferred_view_height),
+          *engine->windows_proc_table(), Size(client_width, client_height),
           constraints.smallest(), constraints.biggest(), window_style,
           extended_window_style, owner_window);
+
   Point window_origin = {CW_USEDEFAULT, CW_USEDEFAULT};
-  if (owner_window && window_size.has_value()) {
+  if (!sized_to_content && owner_window && window_size.has_value()) {
     // Center dialog in the owner's frame.
     RECT frame;
     DwmGetWindowAttribute(*owner_window, DWMWA_EXTENDED_FRAME_BOUNDS, &frame,
