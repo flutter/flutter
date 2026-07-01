@@ -33,7 +33,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ## Flutter 3.44 Changes
 
 ### [3.44.5](https://github.com/flutter/flutter/releases/tag/3.44.5)
-- [flutter/188718](https://github.com/flutter/flutter/issues/186100) When building Flutter Android apps and add-to-app modules using AGP < 9 with KGP, the tool incorrectly logs Built-in Kotlin migration warnings.
+- [flutter/188718](https://github.com/flutter/flutter/issues/188718) When building Flutter Android apps and add-to-app modules using AGP < 9 with KGP, the tool incorrectly logs Built-in Kotlin migration warnings.
 - [flutter/186810](https://github.com/flutter/flutter/issues/186810) [flutter/187388](https://github.com/flutter/flutter/issues/187388) [flutter/187553](https://github.com/flutter/flutter/issues/187553) When building Android app bundles using flavors, or with an old app template combined with a plugin coming alphabetically before app, fixes problems with failing to include libapp.so in the produced app bundle.
 - [flutter/188035](https://github.com/flutter/flutter/issues/188035) When rendering text with shadows, the shadows would appear elsewhere on the screen, separate from the text.
 - [flutter/187237](https://github.com/flutter/flutter/issues/187237) Fixes a crash that can happen during app shutdown or rotation on some Android devices using Impeller/Vulkan with HCPP.
