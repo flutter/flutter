@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -193,6 +194,43 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not print Intel Mac warning on macOS ARM64',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        await flutterCommand.run();
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_arm64),
+      },
+    );
+
+    testUsingContext(
+      'prints Intel Mac warning on macOS X64 once',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+
+        await flutterCommand.run();
+
+        final String warningText = testLogger.warningText;
+        expect(warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+
+        await flutterCommand.run();
+
+        // BufferLogger.clear() does not clear warnings.
+        expect(testLogger.warningText, equals(warningText));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
       },
     );
 
