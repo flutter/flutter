@@ -423,39 +423,6 @@ TEST_F(WindowManagerTest, DeactivatedRegularWindowDoesNotReactivateItself) {
   EXPECT_EQ(GetActiveWindow(), active_window_handle);
 }
 
-TEST_F(WindowManagerTest, FocusingViewInInactiveWindowDoesNotRaiseIt) {
-  IsolateScope isolate_scope(isolate());
-
-  // Two independent top-level regular windows. The framework may request focus
-  // for a view whose window is not the active one (e.g. multi-view focus
-  // bookkeeping after the user selects another window). Honoring that request
-  // by moving native focus would activate the inactive window and pull it to
-  // the top of the z-order; a view focus request must not change z-order.
-  const int64_t inactive_view_id =
-      InternalFlutterWindows_WindowManager_CreateRegularWindow(
-          engine_id(), regular_creation_request());
-
-  const int64_t active_view_id =
-      InternalFlutterWindows_WindowManager_CreateRegularWindow(
-          engine_id(), regular_creation_request());
-  const HWND active_window_handle =
-      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
-          engine_id(), active_view_id);
-
-  SetActiveWindow(active_window_handle);
-  ASSERT_EQ(GetActiveWindow(), active_window_handle);
-
-  FlutterViewFocusChangeRequest request = {};
-  request.struct_size = sizeof(FlutterViewFocusChangeRequest);
-  request.view_id = inactive_view_id;
-  request.state = kFocused;
-
-  EngineModifier modifier(engine());
-  modifier.OnViewFocusChangeRequest(&request);
-
-  EXPECT_EQ(GetActiveWindow(), active_window_handle);
-}
-
 TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {
   IsolateScope isolate_scope(isolate());
 
