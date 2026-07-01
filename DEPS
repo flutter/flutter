@@ -830,7 +830,7 @@ deps = {
       'packages': [
         {
           'package': 'flutter/flutter_font_fallbacks',
-          'version': '44bd38be0bc8c189a397ca6dd6f737746a9e0c6117b96a8f84f1edf6acd1206b'
+          'version': '042c0aa046a7948eb9808997d63196f8d1c3ffa3573bbffcbd13f3841cc28412'
         }
       ],
       'dep_type': 'cipd',

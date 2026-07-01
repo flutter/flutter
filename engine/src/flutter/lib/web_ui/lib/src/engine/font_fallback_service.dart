@@ -94,7 +94,7 @@ class FallbackFontService {
         } else {
           // Check if any of the fonts belonging to this component's block
           // have already been successfully loaded.
-          isCovered = component.fonts.any((NotoFont f) => _registeredFonts.contains(f));
+          isCovered = component.fonts.any(_isFontRegistered);
           lastComponent = component;
           lastComponentCovered = isCovered;
         }
@@ -165,7 +165,7 @@ class FallbackFontService {
       // were still in the unprocessed queue.
       final bool isCovered = coveredCache.putIfAbsent(
         component,
-        () => component.fonts.any((NotoFont f) => _registeredFonts.contains(f)),
+        () => component.fonts.any(_isFontRegistered),
       );
       if (isCovered) {
         resolvedCodePoints.add(cp);
@@ -176,7 +176,7 @@ class FallbackFontService {
       // We don't want to start multiple concurrent downloads for the same script block.
       final bool isPending = pendingCache.putIfAbsent(
         component,
-        () => component.fonts.any((NotoFont f) => _pendingFonts.contains(f)),
+        () => component.fonts.any(_isFontPending),
       );
       if (isPending) {
         // Keep in _unprocessedCodePoints so we re-evaluate when the download finishes,
@@ -310,6 +310,19 @@ class FallbackFontService {
       }
     }
 
+    // Propagate slice counts and components to their monolithic parents,
+    // but ONLY if the parent is already a candidate (i.e., we need it anyway).
+    for (final NotoFont font in candidateFonts.toList()) {
+      final String? parentName = font.monolithicParent;
+      if (parentName != null) {
+        final NotoFont? parent = manager.findFontByName(parentName);
+        if (parent != null && candidateFonts.contains(parent)) {
+          fontCoverCounts[parent] = fontCoverCounts[parent]! + fontCoverCounts[font]!;
+          fontToComponents[parent]!.addAll(fontToComponents[font]!);
+        }
+      }
+    }
+
     final selectedFonts = <NotoFont>[];
     while (candidateFonts.isNotEmpty) {
       // Pick the "best" font based on coverage and language priority.
@@ -319,6 +332,7 @@ class FallbackFontService {
         manager,
       );
       selectedFonts.add(selectedFont);
+      candidateFonts.remove(selectedFont);
 
       // Once a font is selected, we consider all of its covered components
       // "resolved" for this batch.
@@ -621,6 +635,44 @@ class FallbackFontService {
       return Future<void>.value();
     }
     return _idleCompleter!.future;
+  }
+
+  /// Returns whether [font] is registered.
+  ///
+  /// A split slice is considered registered if its monolithic parent has
+  /// already been registered.
+  bool _isFontRegistered(NotoFont font) {
+    if (_registeredFonts.contains(font)) {
+      return true;
+    }
+    final String? parentName = font.monolithicParent;
+    if (parentName != null) {
+      final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager;
+      final NotoFont? parent = manager.findFontByName(parentName);
+      if (parent != null && _registeredFonts.contains(parent)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Returns whether [font] is currently downloading.
+  ///
+  /// A split slice is considered pending if its monolithic parent is
+  /// currently downloading.
+  bool _isFontPending(NotoFont font) {
+    if (_pendingFonts.contains(font)) {
+      return true;
+    }
+    final String? parentName = font.monolithicParent;
+    if (parentName != null) {
+      final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager;
+      final NotoFont? parent = manager.findFontByName(parentName);
+      if (parent != null && _pendingFonts.contains(parent)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @visibleForTesting
