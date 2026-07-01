@@ -154,8 +154,6 @@ class PlatformViewIOS final : public PlatformView {
     return accessibility_bridges_.empty() ? nullptr : accessibility_bridges_.begin()->second.get();
   }
 
-  bool HasRenderingSurface(int64_t flutter_view_id) override;
-
  private:
   void ApplyLocaleToOwnerController();
   /// Smart pointer for use with objective-c observers.

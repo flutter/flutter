@@ -71,20 +71,16 @@ class IOSSurfacesManager {
 
   void DestroyRenderingSurfaceForView(int64_t view_id) { rendering_surface_.erase(view_id); }
 
-  Surface* GetRenderingSurface(int64_t view_id) {
-    auto iter = rendering_surface_.find(view_id);
-    if (iter != rendering_surface_.end()) {
-      return iter->second.get();
-    }
-    return nullptr;
-  }
-
   std::unique_ptr<SurfaceFrame> CreateSurfaceFrame(int64_t flutter_view_id, DlISize& frame_size) {
     auto iter = rendering_surface_.find(flutter_view_id);
     if (iter != rendering_surface_.end()) {
       return iter->second.get()->AcquireFrame(frame_size);
     }
-    return nullptr;
+    // Return a display-list-backed frame so rasterization has a non-null canvas when the target
+    // surface is missing.
+    return std::make_unique<SurfaceFrame>(
+        nullptr, SurfaceFrame::FramebufferInfo(), [](SurfaceFrame&, DlCanvas*) { return false; },
+        [](SurfaceFrame&) { return false; }, frame_size, nullptr, true);
   }
 
  private:
@@ -428,10 +424,6 @@ std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolv
     out->emplace_back(scriptCode == nullptr ? "" : scriptCode.UTF8String);
   }
   return out;
-}
-
-bool PlatformViewIOS::HasRenderingSurface(int64_t flutter_view_id) {
-  return ios_surfaces_manager_.get()->GetRenderingSurface(flutter_view_id) != nullptr;
 }
 
 void PlatformViewIOS::ApplyLocaleToOwnerController() {

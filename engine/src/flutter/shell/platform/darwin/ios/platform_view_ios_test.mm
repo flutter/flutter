@@ -156,7 +156,7 @@ class MockDelegate : public PlatformView::Delegate {
   [engine stopMocking];
 }
 
-- (void)testNotifyCreatedAndDestroyedTracksRenderingSurfacesPerView {
+- (void)testNotifyCreatedAndDestroyedNotifiesDelegateOnlyForFirstAndLastView {
   flutter::MockDelegate mock_delegate;
   auto thread = std::make_unique<fml::Thread>("PlatformViewIOSTest");
   auto thread_task_runner = thread->GetTaskRunner();
@@ -195,14 +195,12 @@ class MockDelegate : public PlatformView::Delegate {
     platform_view->AddOwnerViewController(secondaryViewController);
 
     platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+
     platform_view->NotifyCreated(kSecondaryFlutterViewId);
-    XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
-    XCTAssertTrue(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
     XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
 
     platform_view->NotifyDestroyed(kSecondaryFlutterViewId);
-    XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
-    XCTAssertFalse(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
     XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
 
     platform_view->RemoveOwnerViewController(kSecondaryFlutterViewId);

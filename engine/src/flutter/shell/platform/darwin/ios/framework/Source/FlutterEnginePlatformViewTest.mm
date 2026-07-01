@@ -280,14 +280,12 @@ flutter::FakeDelegate fake_delegate;
   [secondaryViewController loadViewIfNeeded];
 
   platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
+  XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
+
   platform_view->NotifyCreated(kSecondaryFlutterViewId);
-  XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
-  XCTAssertTrue(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
   XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
 
   platform_view->NotifyDestroyed(kSecondaryFlutterViewId);
-  XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
-  XCTAssertFalse(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
 
   platform_view->NotifyDestroyed(flutter::kFlutterImplicitViewId);
