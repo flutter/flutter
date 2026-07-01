@@ -2931,7 +2931,7 @@ void main() {
     expect(position.pixels, 0.0);
   });
 
-  testWidgets('CarouselView.weighted does not crash on manual scroll when children are few', (
+  testWidgets('CarouselView.weighted does not crash at finite trailing scroll offset', (
     WidgetTester tester,
   ) async {
     final controller = CarouselController();
