@@ -312,6 +312,8 @@ void main() {
     expect(regularChildSize, Size.zero);
   });
 
+  // Regression test for reactivating a shown overlayChildLayoutBuilder portal
+  // while a LayoutBuilder render object is running its layout callback.
   testWidgets('shown portal can be reparented during LayoutBuilder layout', (
     WidgetTester tester,
   ) async {
