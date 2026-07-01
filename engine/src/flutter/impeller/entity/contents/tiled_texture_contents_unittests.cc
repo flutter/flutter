@@ -88,7 +88,7 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
           /*mip_count=*/1);
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  ASSERT_TRUE(contents->Render(*GetContentContext(), {}, *render_pass));
+  ASSERT_TRUE(contents->Render(GetContentContext(), {}, *render_pass));
   const std::vector<Command>& commands = render_pass->GetCommands();
 
   ASSERT_EQ(commands.size(), 1u);
@@ -96,7 +96,7 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
   auto options = OptionsFromPassAndEntity(*render_pass, {});
   options.primitive_type = PrimitiveType::kTriangleStrip;
   EXPECT_EQ(commands[0].pipeline,
-            GetContentContext()->GetTiledTextureExternalPipeline(options));
+            GetContentContext().GetTiledTextureExternalPipeline(options));
 }
 #endif
 
