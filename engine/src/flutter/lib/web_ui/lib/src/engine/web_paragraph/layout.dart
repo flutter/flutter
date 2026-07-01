@@ -206,6 +206,7 @@ class TextLayout {
   double addLine(
     ClusterRange contentRange,
     ClusterRange whitespaceRange,
+    bool hasHardLineBreak,
     int hardLineBreakStart,
     double top,
   ) {
@@ -244,6 +245,7 @@ class TextLayout {
     final line = TextLine(
       contentRange,
       whitespaceRange,
+      hasHardLineBreak,
       hardLineBreakStart,
       lines.length,
       contentTextRange,
@@ -377,9 +379,12 @@ class TextLayout {
             trailingSpacesWidth = span
                 .getTextRangeSelectionInBlock(line.visualBlocks.last, blockLineWhitespaces)
                 .width;
+            (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
+          }
+
+          if (blockLineNoWhitespaces.start < blockLineNoWhitespaces.end) {
             (line.visualBlocks.last as TextBlock).clusterRangeWithoutWhitespaces = _mapping
                 .toClusterRange(blockLineNoWhitespaces.start, blockLineNoWhitespaces.end);
-            (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
           }
 
           line.updateBoundingBox(block);
@@ -1279,6 +1284,7 @@ class TextLine {
   TextLine(
     this.textClusterRange,
     this.whitespacesClusterRange,
+    this.hardLineBreak,
     this.hardLineBreakStart,
     this.lineNumber,
     this.textRange,
@@ -1288,7 +1294,7 @@ class TextLine {
 
   ui.LineMetrics getMetrics() {
     return ui.LineMetrics(
-      hardBreak: hardLineBreakStart != whitespacesRange.end,
+      hardBreak: hardLineBreak,
       ascent: fontBoundingBoxAscent,
       descent: fontBoundingBoxDescent,
       // It was not implemented in SkParagraph either; kept it as is
@@ -1313,6 +1319,7 @@ class TextLine {
   final ui.TextRange whitespacesRange;
   final ui.TextRange allLineTextRange;
   final int hardLineBreakStart;
+  final bool hardLineBreak;
   final int lineNumber;
 
   ui.Rect advance = ui.Rect.zero;

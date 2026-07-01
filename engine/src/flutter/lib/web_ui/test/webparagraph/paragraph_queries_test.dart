@@ -123,45 +123,65 @@ Future<void> testMain() async {
     );
   });
 
-  test('Paragraph getLineBoundary', () {
+  test('getLineBoundary correctly handles text with hard line break at the end', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-
+    const text = 'Hello\nWorld\n';
     final builder = WebParagraphBuilder(paragraphStyle);
-    builder.addText('Line1\nLine2\nLine3');
+    builder.addText(text);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
-    expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: 0 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      const ui.TextRange(start: 0, end: 6),
-    );
-    expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: 6 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      const ui.TextRange(start: 6, end: 12),
-    );
-    expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: 12 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      const ui.TextRange(start: 12, end: 17),
-    );
 
-    expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: -1 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      ui.TextRange.empty,
-    );
+    expect(paragraph.numberOfLines, 3);
 
-    expect(
-      paragraph.getLineBoundary(
-        ui.TextPosition(offset: paragraph.text.length + 1, affinity: ui.TextAffinity.upstream),
-      ),
-      ui.TextRange.empty,
+    // Line 1: "Hello\n"
+    final ui.TextRange line1Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 0));
+    expect(line1Boundary.start, 0);
+    expect(line1Boundary.end, 5); // Should not include the newline
+
+    // Line 2: "World\n"
+    final ui.TextRange line2Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 6));
+    expect(line2Boundary.start, 6);
+    expect(line2Boundary.end, 11); // Should not include the newline
+
+    // Position at the newline should return the line boundary
+    final ui.TextRange line2BoundaryAtNewline = paragraph.getLineBoundary(
+      const ui.TextPosition(offset: 12),
     );
+    expect(line2BoundaryAtNewline.start, -1);
+    expect(line2BoundaryAtNewline.end, -1);
+  });
+
+  test('getLineBoundary correctly handles trailing whitespaces before hard line break', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello \nWorld!';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Line 1: "Hello \n" (with trailing space)
+    final ui.TextRange line1Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 0));
+    expect(line1Boundary.start, 0);
+    expect(line1Boundary.end, 6); // Should include the space and newline
+
+    // Position at the space should return line 1 boundary
+    final ui.TextRange line1BoundaryAtSpace = paragraph.getLineBoundary(
+      const ui.TextPosition(offset: 5),
+    );
+    expect(line1BoundaryAtSpace.start, 0);
+    expect(line1BoundaryAtSpace.end, 6);
+
+    // Position at the newline should return line 1 boundary
+    final ui.TextRange line1BoundaryAtNewline = paragraph.getLineBoundary(
+      const ui.TextPosition(offset: 6),
+    );
+    expect(line1BoundaryAtNewline.start, 0);
+    expect(line1BoundaryAtNewline.end, 6);
+
+    // Line 2: "World!"
+    final ui.TextRange line2Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 7));
+    expect(line2Boundary.start, 7);
+    expect(line2Boundary.end, 13); // No trailing newline in this line
   });
 
   test('Paragraph computeLineMetrics/getLineMetricsAt', () {
