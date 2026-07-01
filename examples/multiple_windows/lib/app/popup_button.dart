@@ -32,7 +32,7 @@ class _PopupButtonState extends State<PopupButton> {
     super.dispose();
   }
 
-  void _onPressed(WindowRegistry windowRegistry, WindowSettings windowSettings) {
+  void _onPressed(WindowSettings windowSettings) {
     // Toggle popup visibility.
     if (_popupWindowEntry != null) {
       _popupWindowEntry!.controller.destroy();
@@ -50,7 +50,6 @@ class _PopupButtonState extends State<PopupButton> {
         positioner: windowSettings.positioner,
         delegate: _PopupWindowControllerDelegate(
           onDestroyed: () {
-            windowRegistry.unregister(entry);
             tracker.dispose();
             if (mounted) {
               setState(() {
@@ -66,7 +65,6 @@ class _PopupButtonState extends State<PopupButton> {
         controller: controller,
         builder: (BuildContext context) => PopupWindowContent(controller: controller),
       );
-      windowRegistry.register(entry);
       tracker.onGlobalRectChange = (rect) {
         controller.updatePosition(anchorRect: rect);
       };
@@ -79,13 +77,20 @@ class _PopupButtonState extends State<PopupButton> {
 
   @override
   Widget build(BuildContext context) {
-    final WindowRegistry windowManager = WindowRegistry.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return OutlinedButton(
       key: _popupButtonKey,
-      onPressed: () => _onPressed(windowManager, windowSettings),
-      child: Text(_popupWindowEntry != null ? 'Hide Popup' : 'Show Popup'),
+      onPressed: () => _onPressed(windowSettings),
+      child: ViewAnchor(
+        view: _popupWindowEntry != null
+            ? View(
+                view: _popupWindowEntry!.controller.rootView,
+                child: Builder(builder: _popupWindowEntry!.builder),
+              )
+            : null,
+        child: Text(_popupWindowEntry != null ? 'Hide Popup' : 'Show Popup'),
+      ),
     );
   }
 }
