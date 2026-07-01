@@ -305,9 +305,9 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - Pre-work: Add missing CI/CD labels (after verifying a PR is safe to run on CI).
-- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+-is%3Adraft+sort%3Acreated-asc+-is%3Adraft)
+- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+sort%3Acreated-asc+-is%3Adraft)
 - [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos+-is%3Adraft+sort%3Aupdated-asc)
-- [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+-is%3Adraft+sort%3Aupdated-asc+)
+- [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+-is%3Adraft+sort%3Aupdated-asc)
 
 ### Linux platforms team (`team-linux`)
 
