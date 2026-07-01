@@ -383,7 +383,7 @@ TEST_P(AiksTest, ThinPathRotated) {
 TEST_P(AiksTest, HairlineDrawLine) {
   DrawLinesTest(
       this,
-      [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
+      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
          Scalar width) {
         builder.DrawLine(DlPoint(100, yoffset), DlPoint(924, yoffset), paint);
       },
