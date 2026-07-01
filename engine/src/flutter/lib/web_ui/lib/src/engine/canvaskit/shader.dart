@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../primitives/image.dart';
 import '../validators.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
@@ -243,7 +244,10 @@ class CkGradientConical extends GradientCkShader implements ui.Gradient {
 /// scenarios that want a shader at different filter quality levels.
 class CkImageShader implements ui.ImageShader, CkShader {
   CkImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
-    : _image = image as CkImage {
+    : _image = image as EngineImage {
+    if (_image.backendImage is! CkImageDelegate) {
+      throw ArgumentError('The image used in this ImageShader must be a CanvasKit image.');
+    }
     _initializeSkImageShader(filterQuality ?? ui.FilterQuality.none);
   }
 
@@ -251,7 +255,7 @@ class CkImageShader implements ui.ImageShader, CkShader {
   final ui.TileMode tileModeY;
   final Float64List matrix4;
   final ui.FilterQuality? filterQuality;
-  final CkImage _image;
+  final EngineImage _image;
 
   /// Owns the reference to the currently [SkShader].
   ///
@@ -282,9 +286,10 @@ class CkImageShader implements ui.ImageShader, CkShader {
   bool get isGradient => false;
 
   void _initializeSkImageShader(ui.FilterQuality quality) {
+    final CkImageDelegate(:skImage) = _image.backendImage as CkImageDelegate;
     final SkShader skShader;
     if (quality == ui.FilterQuality.high) {
-      skShader = _image.skImage.makeShaderCubic(
+      skShader = skImage.makeShaderCubic(
         toSkTileMode(tileModeX),
         toSkTileMode(tileModeY),
         1.0 / 3.0,
@@ -292,7 +297,7 @@ class CkImageShader implements ui.ImageShader, CkShader {
         toSkMatrixFromFloat64(matrix4),
       );
     } else {
-      skShader = _image.skImage.makeShaderOptions(
+      skShader = skImage.makeShaderOptions(
         toSkTileMode(tileModeX),
         toSkTileMode(tileModeY),
         toSkFilterMode(quality),

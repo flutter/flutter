@@ -15,11 +15,10 @@ HostWindowPopup::HostWindowPopup(
     const BoxConstraints& constraints,
     GetWindowPositionCallback get_position_callback,
     HWND parent)
-    : HostWindow(window_manager, engine),
+    : HostWindowSized(window_manager, engine, /*resizable=*/false),
       get_position_callback_(get_position_callback),
       parent_(parent),
-      isolate_(Isolate::Current()),
-      view_alive_(std::make_shared<int>(0)) {
+      isolate_(Isolate::Current()) {
   // Use minimum constraints as initial size to ensure the view can be created
   // with valid metrics. The size will be updated when content is rendered.
   auto const initial_width =
@@ -36,30 +35,21 @@ HostWindowPopup::HostWindowPopup(
       .title = L"",
       .owner_window = parent,
       .nCmdShow = SW_SHOWNOACTIVATE,
-      .sizing_delegate = this,
+      .sizing_delegate = AsSizingDelegate(),
       .is_sized_to_content = true});
 }
 
-void HostWindowPopup::DidUpdateViewSize(int32_t width, int32_t height) {
-  // This is called from the raster thread.
-  std::weak_ptr<int> weak_view_alive = view_alive_;
-  engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
-    auto const view_alive = weak_view_alive.lock();
-    if (!view_alive) {
-      return;
-    }
-    if (width_ == width && height_ == height) {
-      return;
-    }
+HostWindowPopup::~HostWindowPopup() {
+  // Reset the view while this most-derived object is still fully alive, to stop
+  // the raster thread from sizing it (via the overridden ApplyContentSize /
+  // GetWorkArea) before any subobject is torn down. See the destructor comment
+  // in host_window_sized.h for the rationale.
+  view_controller_.reset();
+}
 
-    if (is_being_destroyed_) {
-      return;
-    }
-
-    width_ = width;
-    height_ = height;
-    UpdatePosition();
-  });
+void HostWindowPopup::ApplyContentSize(int32_t physical_width,
+                                       int32_t physical_height) {
+  UpdatePosition();
 }
 
 WindowRect HostWindowPopup::GetWorkArea() const {
@@ -102,7 +92,7 @@ void HostWindowPopup::UpdatePosition() {
   // rect goes out of scope.
   std::unique_ptr<WindowRect, decltype(&free)> rect(
       get_position_callback_(
-          WindowSize{width_, height_},
+          WindowSize{physical_width_, physical_height_},
           WindowRect{parent_top_left.x, parent_top_left.y,
                      parent_bottom_right.x - parent_top_left.x,
                      parent_bottom_right.y - parent_top_left.y},
@@ -113,7 +103,7 @@ void HostWindowPopup::UpdatePosition() {
 
   // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.
-  if (rect->width < width_ || rect->height < height_) {
+  if (rect->width < physical_width_ || rect->height < physical_height_) {
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }

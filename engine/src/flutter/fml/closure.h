@@ -45,6 +45,9 @@ class ScopedCleanupClosure final {
   explicit ScopedCleanupClosure(const fml::closure& closure)
       : closure_(closure) {}
 
+  explicit ScopedCleanupClosure(fml::closure&& closure)
+      : closure_(std::move(closure)) {}
+
   ~ScopedCleanupClosure() { Reset(); }
 
   explicit operator bool() const { return static_cast<bool>(closure_); }

@@ -1,0 +1,16 @@
+name: No PRs on main
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  reject-main-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check base branch
+        run: |
+          if [ "${{ github.base_ref }}" = "main" ]; then
+            echo "::error::Do not open PRs on `main`. The primary branch is `master`. You can change the base branch of this PR to `master`. See: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request"
+            exit 1
+          fi
