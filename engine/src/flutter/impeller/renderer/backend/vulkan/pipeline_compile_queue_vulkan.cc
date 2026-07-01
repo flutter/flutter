@@ -20,7 +20,7 @@ PipelineCompileQueueVulkan::PipelineCompileQueueVulkan(
     : PipelineCompileQueue(),
       worker_task_runner_(std::move(worker_task_runner)) {}
 
-PipelineCompileQueueVulkan::~PipelineCompileQueueVulkan() {}
+PipelineCompileQueueVulkan::~PipelineCompileQueueVulkan() = default;
 
 void PipelineCompileQueueVulkan::OnJobAdded() {
   PostJob([weak_queue = weak_from_this()]() {
