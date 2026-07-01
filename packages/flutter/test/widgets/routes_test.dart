@@ -2824,6 +2824,7 @@ void main() {
   testWidgets('showGeneralDialog applies custom barrierBuilder', (WidgetTester tester) async {
     const expectedPadding = 12.0;
     const barrierKey = ValueKey<String>('custom-barrier-padding');
+    RouteBarrierDetails? capturedDetails;
 
     await tester.pumpWidget(
       TestWidgetsApp(
@@ -2839,6 +2840,7 @@ void main() {
                   barrierColor: _green,
                   barrierBuilder:
                       (BuildContext context, RouteBarrierDetails details, Widget barrier) {
+                        capturedDetails = details;
                         return Padding(
                           key: barrierKey,
                           padding: const EdgeInsets.all(expectedPadding),
@@ -2871,6 +2873,11 @@ void main() {
       find.descendant(of: find.byKey(barrierKey), matching: find.byType(ModalBarrier)),
     );
     expect(barrierWidget.color, _green);
+
+    expect(capturedDetails, isNotNull);
+    expect(capturedDetails!.barrierColor, _green);
+    expect(capturedDetails!.barrierDismissible, true);
+    expect(capturedDetails!.barrierLabel, 'barrier_label');
   });
 }
 
