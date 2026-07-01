@@ -1389,21 +1389,6 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: technical_debt__cost
 
-  - name: Linux test_ownership
-    recipe: infra/test_ownership
-    enabled_branches:
-      - main
-      - master
-    properties:
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-    runIf:
-      - engine/**
-      - DEPS
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
   - name: Linux tool_integration_tests_1_7
     recipe: flutter/flutter_drone
     timeout: 60
@@ -2613,6 +2598,21 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: complex_layout__start_up
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "version:21"}
+        ]
+
+  # linux mokey benchmark - Impeller (OpenGLES) startup test
+  - name: Linux_mokey complex_layout_android__impeller_gles_start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "mokey"]
+      task_name: complex_layout_android__impeller_gles_start_up
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "version:21"}

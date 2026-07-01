@@ -28,7 +28,7 @@ struct _FlCompositorOpenGL {
   // Last rendered frame.
   FlFramebuffer* framebuffer;
 
-  // Last rendered frame pixels (only set if shareable is TRUE).
+  // Last rendered frame pixels (only set if shareable is FALSE).
   uint8_t* pixels;
 
   // Shader program used to composite layers.
