@@ -12,6 +12,7 @@ import '../base/os.dart' show HostPlatform;
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
@@ -94,7 +95,7 @@ Future<void> buildMacOS({
       'to learn about adding macOS support to a project.',
     );
   }
-  const FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.macos;
+  const FlutterDarwinPlatform darwinPlatform = .macos;
   final migrators = <ProjectMigrator>[
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
@@ -245,8 +246,22 @@ Future<void> buildMacOS({
     final String excludedArches => excludedArches,
   };
 
+  final bool binaryContainsX86Slice =
+      archs == null && (excludedArchs == null || excludedArchs.contains('x86_64'));
+  final bool allowsArm64Only = switch (globals.xcodeProjectInterpreter!.version?.major) {
+    null || < 27 => false,
+    _ => true,
+  };
+  if (buildInfo.isRelease && binaryContainsX86Slice && allowsArm64Only) {
+    globals.logger.printWarning(
+      'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+      'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+      'This will become the default behavior in a future Flutter release.',
+    );
+  }
+
   try {
-    if (archs != null && excludedArchs != null && excludedArchs.contains('arm64')) {
+    if (archs != null && excludedArchs != null && excludedArchs.contains(archs)) {
       throwToolExit(
         'No Valid Target Arch: '
         'You have enabled the macOSArm64Only feature flag but '
