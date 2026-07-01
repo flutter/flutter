@@ -1053,6 +1053,24 @@ class StartupTest {
                       ).readAsStringSync(),
                     )
                     as Map<String, dynamic>;
+            final File timelineFile = file(
+              '${testOutputDirectory(testDirectory)}/start_up_timeline.json',
+            );
+            if (timelineFile.existsSync()) {
+              try {
+                final timeline =
+                    json.decode(timelineFile.readAsStringSync()) as Map<String, dynamic>;
+                final int? duration = _extractAsyncEventDuration(
+                  timeline,
+                  'ContentContext::InitializeDefaultPipelines',
+                );
+                if (duration != null) {
+                  data['impellerDefaultPipelinesInitializationMicros'] = duration;
+                }
+              } catch (e) {
+                print('Failed to parse start_up_timeline.json: $e');
+              }
+            }
             results.add(data);
           } else {
             currentFailures += 1;
@@ -1080,6 +1098,7 @@ class StartupTest {
           benchmarkScoreKeys: <String>[
             'timeToFirstFrameMicros',
             'timeToFirstFrameRasterizedMicros',
+            'impellerDefaultPipelinesInitializationMicros',
           ],
         );
       } finally {
@@ -1101,6 +1120,30 @@ class StartupTest {
         canFail: true,
       );
     }
+  }
+
+  int? _extractAsyncEventDuration(Map<String, dynamic> timeline, String eventName) {
+    final traceEvents = timeline['traceEvents'] as List<dynamic>?;
+    if (traceEvents == null) {
+      return null;
+    }
+    int? beginTs;
+    int? endTs;
+    for (final Object? event in traceEvents) {
+      if (event is Map<String, dynamic> && event['name'] == eventName) {
+        if (event['ph'] == 'b') {
+          // Begin phase
+          beginTs = event['ts'] as int?;
+        } else if (event['ph'] == 'e') {
+          // End phase
+          endTs = event['ts'] as int?;
+        }
+      }
+    }
+    if (beginTs != null && endTs != null) {
+      return endTs - beginTs;
+    }
+    return null;
   }
 }
 

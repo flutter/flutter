@@ -14,6 +14,7 @@
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
+#include "flutter/fml/thread.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -386,6 +387,10 @@ class ContentContext {
   bool is_texture_caching_enabled_ = false;
   mutable std::unordered_map<const flutter::DlImage*, std::shared_ptr<Texture>>
       texture_cache_;
+
+#if !FLUTTER_RELEASE
+  std::unique_ptr<fml::Thread> pipeline_warmup_thread_;
+#endif
 
   ContentContext(const ContentContext&) = delete;
 

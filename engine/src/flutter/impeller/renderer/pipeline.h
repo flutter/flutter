@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_H_
 
 #include <future>
+#include <vector>
 
 #include "compute_pipeline_descriptor.h"
 #include "impeller/core/raw_ptr.h"
@@ -91,6 +92,12 @@ using PipelineRef = raw_ptr<Pipeline<PipelineDescriptor>>;
 extern template class Pipeline<PipelineDescriptor>;
 extern template class Pipeline<ComputePipelineDescriptor>;
 
+#if !FLUTTER_RELEASE
+extern thread_local std::vector<
+    std::shared_future<std::shared_ptr<Pipeline<PipelineDescriptor>>>>*
+    g_default_pipeline_futures;
+#endif
+
 /// @brief Create a pipeline for the given descriptor.
 ///
 /// If `async` is true, the compilation is performed on a worker thread. The
@@ -122,7 +129,13 @@ class GenericRenderPipelineHandle {
 
   explicit GenericRenderPipelineHandle(
       PipelineFuture<PipelineDescriptor> future)
-      : pipeline_future_(std::move(future)) {}
+      : pipeline_future_(std::move(future)) {
+#if !FLUTTER_RELEASE
+    if (g_default_pipeline_futures != nullptr && pipeline_future_.IsValid()) {
+      g_default_pipeline_futures->push_back(pipeline_future_.future);
+    }
+#endif
+  }
 
   virtual ~GenericRenderPipelineHandle() = default;
 
@@ -143,6 +156,10 @@ class GenericRenderPipelineHandle {
 
   std::optional<PipelineDescriptor> GetDescriptor() const {
     return pipeline_future_.descriptor;
+  }
+
+  const PipelineFuture<PipelineDescriptor>& GetFuture() const {
+    return pipeline_future_;
   }
 
  private:

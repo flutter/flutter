@@ -78,4 +78,10 @@ PipelineFuture<T> Pipeline<T>::CreateVariant(
 template class Pipeline<PipelineDescriptor>;
 template class Pipeline<ComputePipelineDescriptor>;
 
+#if !FLUTTER_RELEASE
+thread_local std::vector<
+    std::shared_future<std::shared_ptr<Pipeline<PipelineDescriptor>>>>*
+    g_default_pipeline_futures = nullptr;
+#endif
+
 }  // namespace impeller

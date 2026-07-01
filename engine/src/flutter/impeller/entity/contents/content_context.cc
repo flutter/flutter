@@ -567,7 +567,13 @@ ContentContext::ContentContext(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
           context_->GetCapabilities()->GetMinimumUniformAlignment())),
-      text_shadow_cache_(std::make_unique<TextShadowCache>()) {
+      text_shadow_cache_(std::make_unique<TextShadowCache>())
+#if !FLUTTER_RELEASE
+      ,
+      pipeline_warmup_thread_(
+          std::make_unique<fml::Thread>("impeller.pipeline_warmup"))
+#endif
+{
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -626,6 +632,13 @@ ContentContext::ContentContext(
   // Futures for the following pipelines may block in case the first frame is
   // rendered without the pipelines being ready. Put pipelines that are more
   // likely to be used first.
+#if !FLUTTER_RELEASE
+  std::vector<std::shared_future<std::shared_ptr<Pipeline<PipelineDescriptor>>>>
+      default_futures;
+  g_default_pipeline_futures = &default_futures;
+  TRACE_EVENT_ASYNC_BEGIN0("impeller",
+                           "ContentContext::InitializeDefaultPipelines", this);
+#endif
   {
     pipelines_->glyph_atlas.CreateDefault(
         *context_, options,
@@ -873,6 +886,21 @@ ContentContext::ContentContext(
                                                       options_trianglestrip);
 #endif  // IMPELLER_ENABLE_OPENGLES
   }
+
+#if !FLUTTER_RELEASE
+  g_default_pipeline_futures = nullptr;
+  pipeline_warmup_thread_->GetTaskRunner()->PostTask(
+      [futures = std::move(default_futures), context_address = this]() {
+        for (const auto& future : futures) {
+          if (future.valid()) {
+            future.get();
+          }
+        }
+        TRACE_EVENT_ASYNC_END0("impeller",
+                               "ContentContext::InitializeDefaultPipelines",
+                               context_address);
+      });
+#endif
 
   is_valid_ = true;
   InitializeCommonlyUsedShadersIfNeeded();
