@@ -11,7 +11,8 @@
 namespace impeller {
 
 PlaygroundTest::PlaygroundTest()
-    : Playground(PlaygroundSwitches{flutter::testing::GetArgsForProcess()}) {
+    : Playground(GetParam(),
+                 PlaygroundSwitches{flutter::testing::GetArgsForProcess()}) {
   ImpellerValidationErrorsSetCallback(
       [](const char* message, const char* file, int line) -> bool {
         // GTEST_MESSAGE_AT_ can only be used in a function that returns void.
@@ -32,16 +33,6 @@ PlaygroundTest::~PlaygroundTest() {
   ImpellerValidationErrorsSetCallback(nullptr);
 }
 
-namespace {
-bool DoesSupportWideGamutTests() {
-#ifdef __arm64__
-  return true;
-#else
-  return false;
-#endif
-}
-}  // namespace
-
 void PlaygroundTest::SetUp() {
   if (!Playground::SupportsBackend(GetParam())) {
     GTEST_SKIP() << "Playground doesn't support this backend type.";
@@ -52,32 +43,14 @@ void PlaygroundTest::SetUp() {
     GTEST_SKIP() << "Skipping due to user action.";
     return;
   }
+}
 
-  // Test names that end with "WideGamut" will render with wide gamut support.
-  std::string test_name = flutter::testing::GetCurrentTestName();
-  PlaygroundSwitches switches = switches_;
-  switches.enable_wide_gamut =
-      test_name.find("WideGamut/") != std::string::npos;
-
-  if (switches.enable_wide_gamut && (GetParam() != PlaygroundBackend::kMetal ||
-                                     !DoesSupportWideGamutTests())) {
-    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
-    return;
-  }
-
-  switches.flags.antialiased_lines =
-      test_name.find("ExperimentAntialiasLines/") != std::string::npos;
-
-  SetupContext(GetParam(), switches);
-  SetupWindow();
+void PlaygroundTest::TearDown() {
+  Playground::TearDownContextData();
 }
 
 PlaygroundBackend PlaygroundTest::GetBackend() const {
   return GetParam();
-}
-
-void PlaygroundTest::TearDown() {
-  TeardownWindow();
 }
 
 // |Playground|
@@ -106,12 +79,13 @@ std::string PlaygroundTest::GetWindowTitle() const {
     case PlaygroundBackend::kMetalSDF:
       break;
     case PlaygroundBackend::kOpenGLES:
-      if (switches_.use_angle) {
+    case PlaygroundBackend::kOpenGLESSDF:
+      if (GetSwitches().use_angle) {
         stream << " (Angle) ";
       }
       break;
     case PlaygroundBackend::kVulkan:
-      if (switches_.use_swiftshader) {
+      if (GetSwitches().use_swiftshader) {
         stream << " (SwiftShader) ";
       }
       break;
@@ -122,11 +96,11 @@ std::string PlaygroundTest::GetWindowTitle() const {
 
 // |Playground|
 bool PlaygroundTest::ShouldKeepRendering() const {
-  if (!switches_.timeout.has_value()) {
+  if (!GetSwitches().timeout.has_value()) {
     return true;
   }
 
-  if (SecondsF{GetSecondsElapsed()} > switches_.timeout.value()) {
+  if (SecondsF{GetSecondsElapsed()} > GetSwitches().timeout.value()) {
     return false;
   }
 

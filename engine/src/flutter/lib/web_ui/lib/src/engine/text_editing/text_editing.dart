@@ -1577,6 +1577,7 @@ abstract class DefaultTextEditingStrategy
 
     final autocorrectValue = config.autocorrect ? 'on' : 'off';
     activeDomElement.setAttribute('autocorrect', autocorrectValue);
+    config.textCapitalization.setAutocapitalizeAttribute(activeDomElement);
   }
 
   @override
@@ -1973,7 +1974,6 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     if (hasAutofillGroup) {
       placeForm();
     }
-    inputConfig.textCapitalization.setAutocapitalizeAttribute(activeDomElement);
   }
 
   @override
@@ -2130,7 +2130,6 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     } else {
       _insertEditingElementInView(activeDomElement, inputConfig.viewId);
     }
-    inputConfig.textCapitalization.setAutocapitalizeAttribute(activeDomElement);
   }
 
   @override

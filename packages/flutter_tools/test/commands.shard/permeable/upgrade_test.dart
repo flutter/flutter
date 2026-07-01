@@ -55,50 +55,42 @@ void main() {
         });
     });
 
-    testUsingContext(
-      'throws on unknown tag, official branch,  noforce',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
+    testUsingContext('throws on unknown tag, official branch,  noforce', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: const GitTagVersion.unknown(),
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: const GitTagVersion.unknown(),
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
-    testUsingContext(
-      'throws tool exit with uncommitted changes',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.willHaveUncommittedChanges = true;
+    testUsingContext('throws tool exit with uncommitted changes', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.willHaveUncommittedChanges = true;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
     testUsingContext(
       'hasUncommittedChanges ignores pubspec.lock on non-stable channel',
@@ -218,7 +210,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -504,7 +496,11 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              globals.fs.path.join(
+                realCommandRunner.workingDirectory ?? Cache.flutterRoot!,
+                'bin',
+                'flutter',
+              ),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -743,7 +739,7 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',

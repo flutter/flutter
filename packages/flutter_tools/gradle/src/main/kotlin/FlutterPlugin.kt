@@ -6,8 +6,8 @@ package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
@@ -15,6 +15,7 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -23,7 +24,6 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -154,8 +154,10 @@ class FlutterPlugin : Plugin<Project> {
 
         FlutterPluginUtils.getTargetPlatforms(project).forEach { targetArch ->
             val abiValue: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
-            val androidExtension: BaseExtension = FlutterPluginUtils.getLegacyAndroidExtension(project)
-            androidExtension.splits.abi.include(abiValue!!)
+            FlutterPluginUtils
+                .getAndroidExtension(project)
+                .splits.abi
+                .include(abiValue!!)
         }
 
         val flutterExecutableName = getExecutableNameForPlatform("flutter")
@@ -305,15 +307,41 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
-        // TODO(reidbaker): Migrate to getAndroidApplicationExtension and getAndroidLibraryExtension.
-        val androidExtension = FlutterPluginUtils.getLegacyAndroidExtension(projectToAddTasksTo)
-        androidExtension.sourceSets.all {
-            val sourceSet = this
-            val jniLibsDir =
-                projectToAddTasksTo.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
-                )
-            sourceSet.jniLibs.srcDir(jniLibsDir.get().asFile)
+        // The Android Gradle Plugin is always applied to Flutter Android projects, so its components
+        // extension is expected to be present. Use getByType (not findByType) so a misconfiguration
+        // fails loudly rather than silently skipping libapp.so registration.
+        val androidComponents = projectToAddTasksTo.extensions.getByType(AndroidComponentsExtension::class.java)
+        val targetPlatformsList = targetPlatforms
+        androidComponents.onVariants { variant ->
+            val capitalizeVariantName = FlutterPluginUtils.capitalize(variant.name)
+            val compileTaskName = flutterCompileTaskName(variant.name)
+            val copyJniLibsTaskProvider: TaskProvider<CopyFlutterJniLibsTask> =
+                projectToAddTasksTo.tasks.register(
+                    "copyJniLibs${FLUTTER_BUILD_PREFIX}$capitalizeVariantName",
+                    CopyFlutterJniLibsTask::class.java
+                ) {
+                    // The Flutter compile task is registered later (in the legacy
+                    // `applicationVariants` callback in addFlutterDeps) and only for variants that
+                    // are actually built as a Flutter app. It is absent for e.g. an
+                    // `assembleAndroidTest` build, where `shouldConfigureFlutterTask` returns false.
+                    // Look it up tolerantly (findByName, not named) so this task degrades to a no-op
+                    // with empty output instead of failing to be created when there is no Flutter
+                    // build for the variant. See https://github.com/flutter/flutter/issues/188785.
+                    dependsOn(projectToAddTasksTo.tasks.matching { it.name == compileTaskName })
+                    intermediateDir.set(
+                        projectToAddTasksTo.layout.dir(
+                            projectToAddTasksTo.provider {
+                                val compileTask = projectToAddTasksTo.tasks.findByName(compileTaskName) as? FlutterTask
+                                compileTask?.outputDirectory
+                            }
+                        )
+                    )
+                    this.targetPlatforms.set(targetPlatformsList)
+                }
+            variant.sources.jniLibs?.addGeneratedSourceDirectory(
+                copyJniLibsTaskProvider,
+                CopyFlutterJniLibsTask::destinationDir
+            )
         }
 
         val flutterPlugin = this
@@ -503,6 +531,16 @@ class FlutterPlugin : Plugin<Project> {
         private const val FLUTTER_BUILD_PREFIX: String = "flutterBuild"
 
         /**
+         * The name of the [FlutterTask] (the `flutter assemble` invocation) for [variantName].
+         *
+         * Built identically by [addFlutterDeps], which registers the task, and by the variant API
+         * callback in [addFlutterTasks], which references it by name (because that callback runs
+         * before the task is registered).
+         */
+        private fun flutterCompileTaskName(variantName: String): String =
+            FlutterPluginUtils.toCamelCase(listOf("compile", FLUTTER_BUILD_PREFIX, variantName))
+
+        /**
          * Configures flutter default abi support respecting flutter command line flags.
          */
         private fun configureAbis(
@@ -630,7 +668,7 @@ class FlutterPlugin : Plugin<Project> {
                     val filterIdentifier: String? =
                         output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
-                    if (abiVersionCode != null) {
+                    if (abiVersionCode != null && !FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)) {
                         output.versionCodeOverride = abiVersionCode * 1000 + (
                             versionCodeIfPresent
                                 ?: variant.mergedFlavor.versionCode as Int
@@ -660,14 +698,7 @@ class FlutterPlugin : Plugin<Project> {
 
             val variantBuildMode: String = FlutterPluginUtils.buildModeFor(variant.buildType)
             val flavorValue: String = variant.flavorName
-            val taskName: String =
-                FlutterPluginUtils.toCamelCase(
-                    listOf(
-                        "compile",
-                        FLUTTER_BUILD_PREFIX,
-                        variant.name
-                    )
-                )
+            val taskName: String = flutterCompileTaskName(variant.name)
             // The task provider below will shadow a lot of the variable names, so provide this reference
             // to access them within that scope.
 
@@ -711,39 +742,6 @@ class FlutterPlugin : Plugin<Project> {
                     flavor = flavorValue
                 }
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
-            val jniLibsDir =
-                project.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs"
-                )
-            val copyJniLibsTaskProvider: TaskProvider<Sync> =
-                project.tasks.register(
-                    "copyJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
-                    Sync::class.java
-                ) {
-                    dependsOn(flutterCompileTask)
-                    into(jniLibsDir)
-                    targetPlatforms.forEach { targetPlatform ->
-                        val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                        from("${flutterCompileTask.intermediateDir}/$abi") {
-                            include("*.so")
-                            rename { filename: String -> "lib$filename" }
-                            into(abi ?: "null")
-                        }
-                        // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                        val nativeAssetsDir =
-                            "${flutterCompileTask.intermediateDir}/native_assets/jniLibs/lib"
-                        from("$nativeAssetsDir/$abi") {
-                            include("*.so")
-                            into(abi ?: "null")
-                        }
-                    }
-                }
-            val mergeJniLibsTaskName = "merge${FlutterPluginUtils.capitalize(variant.name)}JniLibFolders"
-            project.tasks.configureEach {
-                if (name == mergeJniLibsTaskName) {
-                    dependsOn(copyJniLibsTaskProvider)
-                }
-            }
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
                 project.tasks.register(
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",

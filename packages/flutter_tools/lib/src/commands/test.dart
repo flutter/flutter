@@ -425,6 +425,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final BuildInfo buildInfo = await getBuildInfo(
       forcedBuildMode: BuildMode.debug,
       forcedUseLocalCanvasKit: true,
+      forcedWebEnableHotReload: true,
     );
 
     TestTimeRecorder? testTimeRecorder;
@@ -845,9 +846,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         .map((AssetBundleEntry asset) => asset.content)
         .whereType<DevFSFileContent>();
     for (final entry in files) {
-      // Calling isModified to access file stats first in order for isModifiedAfter
-      // to work.
-      if (entry.isModified && entry.isModifiedAfter(lastModified)) {
+      if (entry.isModifiedAfter(lastModified)) {
         return true;
       }
     }
