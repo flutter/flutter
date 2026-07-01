@@ -3679,6 +3679,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      test_timeout_secs: "2700"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
@@ -3697,6 +3698,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      test_timeout_secs: "2700"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
@@ -3715,6 +3717,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      test_timeout_secs: "2700"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
@@ -3733,6 +3736,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      test_timeout_secs: "2700"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
@@ -3751,6 +3755,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      test_timeout_secs: "2700"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
