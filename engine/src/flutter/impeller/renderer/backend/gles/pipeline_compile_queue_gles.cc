@@ -26,11 +26,11 @@ PipelineCompileQueueGLES::PipelineCompileQueueGLES(
 PipelineCompileQueueGLES::~PipelineCompileQueueGLES() = default;
 
 void PipelineCompileQueueGLES::OnJobAdded() {
-  /// To prevent potential deadlocks and reduce lock contention, avoid calling
-  /// external or virtual methods (such as DrainPendingJobs, which posts tasks
-  /// to the task runner) while holding a mutex. Instead, minimize the scope of
-  /// the lock by using a local boolean flag to trigger the draining process
-  /// outside the lock block.
+  // To prevent potential deadlocks and reduce lock contention, avoid calling
+  // external or virtual methods (such as DrainPendingJobs, which posts tasks
+  // to the task runner) while holding a mutex. Instead, minimize the scope of
+  // the lock by using a local boolean flag to trigger the draining process
+  // outside the lock block.
   bool should_drain = false;
   {
     Lock lock(processing_mutex_);
