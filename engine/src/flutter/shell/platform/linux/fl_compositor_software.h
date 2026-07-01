@@ -23,6 +23,8 @@ G_DECLARE_FINAL_TYPE(FlCompositorSoftware,
  *
  * #FlCompositorSoftware is a class that implements compositing using software
  * rendering.
+ *
+ * The composited frame is stored in a Cairo image surface.
  */
 
 /**
@@ -46,9 +48,10 @@ FlCompositorSoftware* fl_compositor_software_new();
  *
  * Returns %TRUE if successful.
  */
-gboolean fl_compositor_software_composite_layers(FlCompositorSoftware* compositor,
-                                               const FlutterLayer** layers,
-                                               size_t layers_count);
+gboolean fl_compositor_software_composite_layers(
+    FlCompositorSoftware* compositor,
+    const FlutterLayer** layers,
+    size_t layers_count);
 
 /**
  * fl_compositor_software_get_frame_size:

@@ -23,6 +23,16 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
  * FlCompositorOpenGL:
  *
  * #FlCompositorOpenGL is class that implements compositing using OpenGL.
+ *
+ * The composited frame is stored in an OpenGL framebuffer (texture).
+ *
+ * A frame may be written by fl_compositor_opengl_composite_layers using one
+ * OpenGL context and read by fl_compositor_opengl_render using another. When
+ * the compositor is created as shareable the two contexts must belong to the
+ * same share group so the frame texture can be accessed from both, and the
+ * writing context issues a glFlush() so the frame is visible to the reading
+ * context. When not shareable the frame is copied to CPU memory by the writing
+ * context and uploaded into a new texture by the reading context.
  */
 
 /**
@@ -44,13 +54,13 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
  * @layers: layers to be composited.
  * @layers_count: number of layers.
  *
- * Composite layers. Called from the Flutter rendering thread.
+ * Composite layers into the stored frame using the current OpenGL context.
  *
  * Returns %TRUE if successful.
  */
 gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* compositor,
-                                             const FlutterLayer** layers,
-                                             size_t layers_count);
+                                               const FlutterLayer** layers,
+                                               size_t layers_count);
 
 /**
  * fl_compositor_opengl_get_frame_size:
@@ -70,7 +80,7 @@ void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* compositor,
  * @cr: a Cairo rendering context.
  * @window: window being rendered into.
  *
- * Renders the current frame. Called from the GTK thread.
+ * Renders the current frame using the current OpenGL context.
  *
  * Returns %TRUE if successful.
  */
