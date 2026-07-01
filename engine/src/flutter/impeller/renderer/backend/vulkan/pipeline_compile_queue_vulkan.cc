@@ -11,6 +11,9 @@ namespace impeller {
 
 std::shared_ptr<PipelineCompileQueueVulkan> PipelineCompileQueueVulkan::Create(
     std::shared_ptr<fml::BasicTaskRunner> worker_task_runner) {
+  if (!worker_task_runner) {
+    return nullptr;
+  }
   return std::shared_ptr<PipelineCompileQueueVulkan>(
       new PipelineCompileQueueVulkan(std::move(worker_task_runner)));
 }
