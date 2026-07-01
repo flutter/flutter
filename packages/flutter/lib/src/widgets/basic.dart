@@ -1989,7 +1989,7 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 ///
 /// {@template flutter.widgets.CompositedTransformFollower.overlayPortal}
 /// [CompositedTransformFollower] and [CompositedTransformTarget] are
-/// incompatible with [OverlayPortal.overlayChildLayoutBuilder] thus must not
+/// incompatible with [OverlayPortal.overlayChildLayoutBuilder] and thus must not
 /// be used together. Consider using the [OverlayPortal.overlayChildLayoutBuilder]
 /// API instead to achieve a similar target-following effect, while allowing
 /// the follower to be sized and positioned dynamically based on the target's
