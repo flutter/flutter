@@ -1875,9 +1875,8 @@ Future<void> testMain() async {
     });
 
     test('No capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
-      final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig('text');
-      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, capitalizeWordsConfig]);
+      final Map<String, dynamic> noCapitalizationConfig = createFlutterConfig('text');
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, noCapitalizationConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
       const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
@@ -1893,26 +1892,24 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari. `sentences` is the default attribute for
-      // mobile browsers. Check if `off` is added to the input element.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'off');
-      } else {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), isNull);
-      }
+      expect(
+        textEditing!.strategy.domElement!.getAttribute('autocapitalize'),
+        anyOf('off', 'none'),
+      );
 
       spy.messages.clear();
       hideKeyboard();
     });
 
     test('All characters capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
-      final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig(
+      final Map<String, dynamic> capitalizeCharactersConfig = createFlutterConfig(
         'text',
         textCapitalization: 'TextCapitalization.characters',
       );
-      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, capitalizeWordsConfig]);
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        capitalizeCharactersConfig,
+      ]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
       const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
@@ -1928,18 +1925,43 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'characters');
-      }
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'characters');
+
+      spy.messages.clear();
+      hideKeyboard();
+    });
+
+    test('Sentences capitalization: setClient, setEditingState, show', () {
+      final Map<String, dynamic> capitalizeSentencesConfig = createFlutterConfig(
+        'text',
+        textCapitalization: 'TextCapitalization.sentences',
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        capitalizeSentencesConfig,
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': '',
+        'selectionBase': 0,
+        'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      spy.messages.clear();
+
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'sentences');
 
       spy.messages.clear();
       hideKeyboard();
     });
 
     test('Words capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
       final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig(
         'text',
         textCapitalization: 'TextCapitalization.words',
@@ -1960,11 +1982,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
-      }
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
 
       spy.messages.clear();
       hideKeyboard();
@@ -2165,17 +2183,19 @@ Future<void> testMain() async {
 
       MethodCall setStyle;
 
+      // Some browsers add spaces after commas in the DOM element's style object.
+      // We remove them to match `canonicalizeFontFamily` which doesn't use spaces.
       setStyle = configureSetStyleMethodCall(12, 'sans-serif', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
-      expect(input.style.fontFamily, canonicalizeFontFamily('sans-serif'));
+      expect(input.style.fontFamily.replaceAll(', ', ','), canonicalizeFontFamily('sans-serif'));
 
       setStyle = configureSetStyleMethodCall(12, '.SF Pro Text', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
-      expect(input.style.fontFamily, canonicalizeFontFamily('.SF Pro Text'));
+      expect(input.style.fontFamily.replaceAll(', ', ','), canonicalizeFontFamily('.SF Pro Text'));
 
       setStyle = configureSetStyleMethodCall(12, 'foo bar baz', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
-      expect(input.style.fontFamily, canonicalizeFontFamily('foo bar baz'));
+      expect(input.style.fontFamily.replaceAll(', ', ','), canonicalizeFontFamily('foo bar baz'));
 
       hideKeyboard();
     });

@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 
+#include <algorithm>
+
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -51,8 +53,13 @@ static const constexpr char* kTextureCompressionAstcOesExt =
 static const constexpr char* kTextureCompressionAstcHdrExt =
     "GL_KHR_texture_compression_astc_hdr";
 
-// https://registry.khronos.org/OpenGL/extensions/OES/OES_fbo_render_mipmap.txt
-static const constexpr char* kFboRenderMipmapExt = "GL_OES_fbo_render_mipmap";
+// https://registry.khronos.org/OpenGL/extensions/APPLE/APPLE_texture_max_level.txt
+static const constexpr char* kAppleTextureMaxLevelExt =
+    "GL_APPLE_texture_max_level";
+
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_filter_anisotropic.txt
+static const constexpr char* kTextureFilterAnisotropicExt =
+    "GL_EXT_texture_filter_anisotropic";
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -194,11 +201,23 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_texture_compression_etc2_ =
       desc->IsES() && desc->GetGlVersion().major_version >= 3;
 
-  // Non-zero mip levels are renderable on desktop GL, ES 3.0+, or ES 2.0 with
-  // GL_OES_fbo_render_mipmap.
-  supports_fbo_render_mipmap_ = !desc->IsES() ||
+  // GL_TEXTURE_MAX_LEVEL is core on desktop GL and ES 3.0+, and available on
+  // ES 2.0 through GL_APPLE_texture_max_level.
+  supports_texture_max_level_ = !desc->IsES() ||
                                 desc->GetGlVersion().major_version >= 3 ||
-                                desc->HasExtension(kFboRenderMipmapExt);
+                                desc->HasExtension(kAppleTextureMaxLevelExt);
+
+  // Anisotropic filtering is not part of any core GL or GLES version; it is
+  // always gated on GL_EXT_texture_filter_anisotropic. The query and the
+  // texture parameter are applied with core ES 2.0 entry points (GetFloatv
+  // and TexParameterfv), so only the extension check is needed here.
+  if (desc->HasExtension(kTextureFilterAnisotropicExt)) {
+    GLfloat value = 1.0f;
+    gl.GetFloatv(IMPELLER_GL_MAX_TEXTURE_MAX_ANISOTROPY, &value);
+    // The extension guarantees a maximum of at least 2. The limit is a float
+    // but is always an integer in practice, so floor it.
+    max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
+  }
 }
 
 bool CapabilitiesGLES::IsES() const {
@@ -206,7 +225,17 @@ bool CapabilitiesGLES::IsES() const {
 }
 
 bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
-  return supports_fbo_render_mipmap_;
+  // Rendering into a non-zero mip level is not yet supported on the GLES
+  // backend. The texture storage path allocates levels with mutable, lazily
+  // allocated glTexImage2D storage, which yields an incomplete framebuffer
+  // when a non-base mip level is attached. Until that is reworked, do not
+  // advertise the capability so callers fall back instead of failing to
+  // create the framebuffer. Rendering into a cube map face is unaffected.
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
+  return supports_texture_max_level_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
@@ -290,6 +319,13 @@ bool CapabilitiesGLES::Supports32BitPrimitiveIndices() const {
   return supports_32bit_primitive_indices_;
 }
 
+bool CapabilitiesGLES::SupportsManuallyMippedTextures() const {
+  // Without GL_TEXTURE_MAX_LEVEL the sampled mip range cannot be bounded to
+  // the levels the texture declares, so a hand-uploaded chain is mipmap
+  // incomplete and samples as black.
+  return supports_texture_max_level_;
+}
+
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
   return false;
 }
@@ -315,6 +351,10 @@ PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {
 
 ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
   return max_texture_size;
+}
+
+uint32_t CapabilitiesGLES::GetMaxSamplerAnisotropy() const {
+  return max_sampler_anisotropy_;
 }
 
 size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {

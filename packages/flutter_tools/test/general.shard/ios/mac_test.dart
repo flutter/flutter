@@ -832,11 +832,11 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         final buildResult = XcodeBuildResult(
           success: false,
           stdout:
-              "error: The package product 'some-low-requirement-plugin' requires minimum platform version 14.0 "
-              'for the iOS platform, but this target supports 13.0 '
+              "error: The package product 'some-low-requirement-plugin' requires minimum platform version 16.0 "
+              'for the iOS platform, but this target supports 15.0 '
               "(in target 'FlutterGeneratedPluginSwiftPackage' from project 'FlutterGeneratedPluginSwiftPackage')\n"
-              "error: The package product 'cloud-firestore' requires minimum platform version 15.0 "
-              'for the iOS platform, but this target supports 13.0 '
+              "error: The package product 'cloud-firestore' requires minimum platform version 17.0 "
+              'for the iOS platform, but this target supports 15.0 '
               "(in target 'FlutterGeneratedPluginSwiftPackage' from project 'FlutterGeneratedPluginSwiftPackage')",
           xcodeBuildExecution: XcodeBuildExecution(
             buildCommands: buildCommands,
@@ -849,7 +849,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
               XCResultIssue.test(
                 subType: 'Target Integrity',
                 message:
-                    "The package product 'cloud-firestore' requires minimum platform version 15.0 for the iOS platform, but this target supports 13.0",
+                    "The package product 'cloud-firestore' requires minimum platform version 17.0 for the iOS platform, but this target supports 15.0",
               ),
             ],
           ),
@@ -869,7 +869,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         expect(
           logger.errorText,
           contains(
-            "To fix this error, increase your app's minimum platform version from 13.0 to at least 15.0",
+            "To fix this error, increase your app's minimum platform version from 15.0 to at least 17.0",
           ),
         );
         expect(logger.errorText, contains('or remove the cloud-firestore dependency.'));
@@ -889,8 +889,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         final buildResult = XcodeBuildResult(
           success: false,
           stdout:
-              "error: The package product 'cloud-firestore' requires minimum platform version 15.0 "
-              'for the iOS platform, but this target supports 13.0 '
+              "error: The package product 'cloud-firestore' requires minimum platform version 17.0 "
+              'for the iOS platform, but this target supports 15.0 '
               "(in target 'cloud_firestore' from project 'cloud_firestore')",
           xcodeBuildExecution: XcodeBuildExecution(
             buildCommands: buildCommands,
@@ -903,7 +903,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
               XCResultIssue.test(
                 subType: 'Target Integrity',
                 message:
-                    "The package product 'cloud-firestore' requires minimum platform version 15.0 for the iOS platform, but this target supports 13.0",
+                    "The package product 'cloud-firestore' requires minimum platform version 17.0 for the iOS platform, but this target supports 15.0",
               ),
             ],
           ),

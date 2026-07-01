@@ -7,7 +7,19 @@
 part of flutter_gpu;
 
 base class ShaderLibrary extends NativeFieldWrapperClass1 {
-  static ShaderLibrary? fromAsset(String assetName) {
+  /// Loads the shader bundle at [assetName] and returns its [ShaderLibrary],
+  /// or `null` if the bundle could not be parsed.
+  ///
+  /// This is async so it can work on every platform. Some platforms can only
+  /// read assets asynchronously, so loading is async everywhere for a
+  /// consistent API. On platforms that can read synchronously the returned
+  /// [Future] still completes in the same turn. A load failure is reported
+  /// through the [Future] rather than thrown synchronously.
+  ///
+  /// The library is cached by [assetName], so repeated loads of the same
+  /// asset return the same instance. The cache also backs hot reload (see
+  /// [reinitialize]), which looks the library up by asset path.
+  static Future<ShaderLibrary?> fromAsset(String assetName) async {
     final cached = _registry[assetName];
     if (cached != null) {
       return cached;
