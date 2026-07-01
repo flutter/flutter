@@ -30,6 +30,10 @@ class GPUTracerGLES {
 
   ~GPUTracerGLES() = default;
 
+  /// @brief Reset query tracking. Must be called when reusing reusing GLES
+  ///        context in a new window (e.g. for playground tests).
+  void Reset();
+
   /// @brief Record the thread id of the raster thread.
   void RecordRasterThread();
 

@@ -592,6 +592,10 @@ TEST_P(AiksTest, SetContentsWithRegion) {
 
 // Regression test for https://github.com/flutter/flutter/issues/134678.
 TEST_P(AiksTest, ReleasesTextureOnTeardown) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with its own unique context.
+  EnsureContextIsUnique();
+
   auto context = MakeContext();
   std::weak_ptr<Texture> weak_texture;
 

@@ -11,6 +11,7 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/round_rect.h"
+#include "impeller/geometry/round_superellipse_param.h"
 #include "impeller/geometry/stroke_parameters.h"
 #include "impeller/geometry/vector.h"
 
@@ -28,7 +29,7 @@ struct UberSDFParameters {
     kRect,
     kOval,
     kRoundedRect,
-    kRoundedSuperellipse,
+    kRoundedSuperellipseSymmetric,
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -54,18 +55,11 @@ struct UberSDFParameters {
       const RoundingRadii& radii,
       std::optional<StrokeParameters> stroke);
 
-  /// Creates UberSDFParameters for a symmetric round superellipse.
+  /// Creates UberSDFParameters for an asymmetric round superellipse.
   static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
-      Rect bounds,
-      Point superellipse_degree,
-      Point superellipse_a,
-      RoundingRadii radii,
-      Point corner_angle_span,
-      Point corner_circle_center_top,
-      Point corner_circle_center_right,
-      Scalar superellipse_c,
-      Point superellipse_scale,
+      const Rect& bounds,
+      const RoundSuperellipseParam& round_superellipse_params,
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
@@ -85,32 +79,34 @@ struct UberSDFParameters {
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
 
-  /// The corner radii for a rounded shapes.
-  ///
-  /// For RoundSuperellipse, the 'width' component holds the top-octant radius
-  /// and the 'height' component holds the right-octant radius.
-  RoundingRadii radii;
-
-  /// The degrees of the top (.x) and right (.y) octants of a RoundSuperellipse.
+  /// The degree (n) of the superellipse curve for the top and right octants.
   Point superellipse_degree;
 
-  /// The semi-axes of the top (.x) and right (.y) superellipse segments.
-  Point superellipse_a;
+  /// The semi-axis length of the superellipse curve for the top and right
+  /// octants.
+  Point superellipse_semi_axis;
 
-  /// The spans of the top (.x) and right (.y) circular arcs.
-  Point corner_angle_span;
+  /// The angular span of the circular cap for the top and right octants.
+  Point angle_span;
 
-  /// The center of the top circular arc in a RoundSuperellipse.
-  Point corner_circle_center_top;
+  /// The geometric offset 'c' used to connect the two octants of each quadrant.
+  float octant_offset_c;
 
-  /// The center of the right circular arc in a RoundSuperellipse.
-  Point corner_circle_center_right;
+  /// The circular cap center for the top octant of each
+  /// quadrant.
+  Point circle_center_top;
 
-  /// The offset of the octants in a RoundSuperellipse.
-  Scalar superellipse_c;
+  /// The circular cap center for the right octant of each
+  /// quadrant.
+  Point circle_center_right;
 
-  /// The scale of the superellipse.
+  /// The scaling factors used to transform normalized superellipses to their
+  /// true size.
   Point superellipse_scale;
+
+  /// Rounding radii for standard rounded rects and corner radii for circular
+  /// caps of superellipses for top and right octants.
+  Vector4 radii;
 };
 
 }  // namespace impeller

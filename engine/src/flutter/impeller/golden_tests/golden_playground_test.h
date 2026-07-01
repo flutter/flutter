@@ -53,6 +53,16 @@ class GoldenPlaygroundTest
 
   bool OpenPlaygroundHere(const sk_sp<flutter::DisplayList>& list);
 
+  /// Renders `callback` into an offscreen render pass and saves the result as
+  /// a golden image. The render target is single-sampled, uses the context's
+  /// default color format, and has no depth or stencil attachment, so a
+  /// pipeline built from `PipelineBuilder<>::MakeDefaultPipelineDescriptor`
+  /// must be reduced to match by calling `SetSampleCount(kCount1)`,
+  /// `ClearStencilAttachments()`, and `ClearDepthAttachment()` on it. Calling
+  /// only `SetStencilAttachmentDescriptors(nullopt)` leaves the stencil pixel
+  /// format set and trips Metal's render pipeline validation.
+  bool OpenPlaygroundHere(const Playground::SinglePassCallback& callback);
+
   std::unique_ptr<testing::Screenshot> MakeScreenshot(
       const sk_sp<flutter::DisplayList>& list);
 
@@ -98,6 +108,21 @@ class GoldenPlaygroundTest
 
  protected:
   void SetWindowSize(ISize size);
+
+  // See |Playground::PlatformSupportsWideGamutTests|
+  [[nodiscard]] bool PlatformSupportsWideGamutTests() const;
+
+  // See |Playground::EnsureContextIsUnique|
+  // GoldenPlaygroundTest uses context replacement on the fly to support this.
+  void EnsureContextIsUnique() {}
+
+  // See |Playground::EnsureContextSupportsWideGamut|
+  // GoldenPlaygroundTest uses name matching to support this.
+  [[nodiscard]] bool EnsureContextSupportsWideGamut() { return true; }
+
+  // See |Playground::EnsureContextSupportsAntialiasLines|
+  // GoldenPlaygroundTest uses name matching to support this.
+  void EnsureContextSupportsAntialiasLines() {}
 
  private:
 #if FML_OS_MACOSX

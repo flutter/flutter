@@ -29,6 +29,7 @@ import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -62,15 +63,20 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {}
 
   FlutterWidgetPreviews? nextUpdate;
+  bool shouldThrow = false;
 
   @override
-  Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async =>
-      nextUpdate ??
-      const FlutterWidgetPreviews(
-        namespaces: <String, String>{},
-        previews: <FlutterWidgetPreviewDetails>[],
-        scriptUris: <Uri>[],
-      );
+  Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
+    if (shouldThrow) {
+      throw RpcException(123, 'Fake RPC Exception');
+    }
+    return nextUpdate ??
+        const FlutterWidgetPreviews(
+          namespaces: <String, String>{},
+          previews: <FlutterWidgetPreviewDetails>[],
+          scriptUris: <Uri>[],
+        );
+  }
 }
 
 class FakeTerminal extends Fake implements Terminal {}
@@ -94,8 +100,12 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
   @override
   Stream<bool> get onAnalyzing => const Stream<bool>.empty();
 
+  bool waitForAnalysisCalled = false;
+
   @override
-  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {}
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    waitForAnalysisCalled = true;
+  }
 }
 
 class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
@@ -202,7 +212,10 @@ void main() {
     return fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
   }
 
-  Future<void> runWidgetPreviewCommand(List<String> arguments) async {
+  Future<void> runWidgetPreviewCommand(
+    List<String> arguments, {
+    Future<AnalysisServer> Function()? analysisServerFactoryOverride,
+  }) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
         verboseHelp: false,
@@ -222,7 +235,8 @@ void main() {
         processManager: loggingProcessManager,
         terminal: FakeTerminal(),
         dtdServicesOverride: fakeDtdServices,
-        analysisServerFactoryOverride: () async => FakeAnalysisServer(),
+        analysisServerFactoryOverride:
+            analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
       ),
     );
     await runner.run(<String>['widget-preview', ...arguments]);
@@ -252,6 +266,7 @@ void main() {
     required Directory? rootProject,
     List<String>? arguments,
     bool legacyDetection = false,
+    Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
     // This might get changed during the test, so keep track of the original directory.
     final Directory current = fs.currentDirectory;
@@ -262,7 +277,7 @@ void main() {
       '--no-launch-previewer',
       '--verbose',
       ?rootProject?.path,
-    ]);
+    ], analysisServerFactoryOverride: analysisServerFactoryOverride);
     // Don't perform analysis on Windows since `dart pub add` will use '\' for
     // path dependencies and cause analysis to fail.
     // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
@@ -286,6 +301,38 @@ void main() {
 
   group('flutter widget-preview', () {
     group('start exits if', () {
+      testUsingContext(
+        'DTD fails to retrieve widget previews',
+        () async {
+          final Directory rootProject = await createRootProject();
+          fakeDtdServices.shouldThrow = true;
+          try {
+            await startWidgetPreview(rootProject: rootProject);
+            fail('Successfully executed despite DTD failure.');
+          } on ToolExit catch (e) {
+            expect(
+              e.message,
+              contains('Failed to retrieve widget previews from the Dart Tooling Daemon (DTD)'),
+            );
+          }
+          expectNoPreviewLaunchTimingEvents();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => loggingProcessManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+
       testUsingContext('given an invalid directory', () async {
         try {
           await runWidgetPreviewCommand(<String>['start', 'foo']);
@@ -379,6 +426,87 @@ void main() {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
         expectSinglePreviewLaunchTimingEvent();
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'start copies host web directory to scaffold if it exists and removes stale files',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final Directory hostWebDir = rootProject.childDirectory('web')..createSync();
+        hostWebDir.childFile('index.html').writeAsStringSync('<html>custom index</html>');
+        final File staleFile = hostWebDir.childFile('stale.js')
+          ..writeAsStringSync('console.log("stale");');
+
+        await startWidgetPreview(rootProject: rootProject);
+
+        final Directory scaffoldWebDir = WidgetPreviewStartCommand.widgetPreviewScaffold
+            .childDirectory('web');
+        expect(scaffoldWebDir.existsSync(), true);
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expect(scaffoldWebDir.childFile('stale.js').readAsStringSync(), 'console.log("stale");');
+        expectSinglePreviewLaunchTimingEvent();
+
+        // Now remove stale.js from host, and add a new file.
+        staleFile.deleteSync();
+        hostWebDir.childFile('new.js').writeAsStringSync('console.log("new");');
+
+        // Run again
+        await startWidgetPreview(rootProject: rootProject);
+
+        expect(scaffoldWebDir.childFile('stale.js').existsSync(), false);
+        expect(scaffoldWebDir.childFile('new.js').readAsStringSync(), 'console.log("new");');
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expectNPreviewLaunchTimingEvents(2);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'start waits for analysis to complete',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final fakeAnalysisServer = FakeAnalysisServer();
+
+        await startWidgetPreview(
+          rootProject: rootProject,
+          analysisServerFactoryOverride: () async => fakeAnalysisServer,
+        );
+
+        expect(fakeAnalysisServer.waitForAnalysisCalled, isTrue);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,

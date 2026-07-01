@@ -4,14 +4,13 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/time/time_point.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/fixtures/array.frag.h"
 #include "impeller/fixtures/array.vert.h"
-#include "impeller/fixtures/baby.frag.h"
-#include "impeller/fixtures/baby.vert.h"
 #include "impeller/fixtures/box_fade.frag.h"
 #include "impeller/fixtures/box_fade.vert.h"
 #include "impeller/fixtures/colors.frag.h"
@@ -130,56 +129,6 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
     FS::BindContents2(pass, bridge, sampler);
 
     data_host_buffer->Reset();
-    return pass.Draw().ok();
-  };
-  OpenPlaygroundHere(callback);
-}
-
-TEST_P(RendererTest, BabysFirstTriangle) {
-  auto context = GetContext();
-  ASSERT_TRUE(context);
-
-  // Declare a shorthand for the shaders we are going to use.
-  using VS = BabyVertexShader;
-  using FS = BabyFragmentShader;
-
-  // Create a pipeline descriptor that uses the shaders together and default
-  // initializes the fixed function state.
-  //
-  // If the vertex shader outputs disagree with the fragment shader inputs, this
-  // will be a compile time error.
-  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
-  ASSERT_TRUE(desc.has_value());
-
-  // Modify the descriptor for our environment. This is specific to our test.
-  desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
-
-  // Create a pipeline from our descriptor. This is expensive to do. So just do
-  // it once.
-  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
-
-  // Specify the vertex buffer information.
-  VertexBufferBuilder<VS::PerVertexData> vertex_buffer_builder;
-  vertex_buffer_builder.AddVertices({
-      {{-0.5, -0.5}, Color::Red(), Color::Green()},
-      {{0.0, 0.5}, Color::Green(), Color::Blue()},
-      {{0.5, -0.5}, Color::Blue(), Color::Red()},
-  });
-
-  auto vertex_buffer = vertex_buffer_builder.CreateVertexBuffer(
-      *context->GetResourceAllocator());
-
-  auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
-  SinglePassCallback callback = [&](RenderPass& pass) {
-    pass.SetPipeline(pipeline);
-    pass.SetVertexBuffer(vertex_buffer);
-
-    FS::FragInfo frag_info;
-    frag_info.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
-
-    FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(frag_info));
-
     return pass.Draw().ok();
   };
   OpenPlaygroundHere(callback);
@@ -468,11 +417,19 @@ TEST_P(RendererTest, CanRenderToTexture) {
   VS::BindUniformBuffer(*r2t_pass, data_host_buffer->EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->Draw().ok());
   ASSERT_TRUE(r2t_pass->EncodeCommands());
+  ASSERT_TRUE(context->FlushCommandBuffers());
 }
 
 TEST_P(RendererTest, CanRenderInstanced) {
-  if (GetParam() == PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP() << "Instancing is not supported on OpenGL.";
+  if (GetParam() == PlaygroundBackend::kOpenGLES ||
+      GetParam() == PlaygroundBackend::kOpenGLESSDF) {
+    // This test drives instancing through gl_InstanceIndex and a storage
+    // buffer, both of which require OpenGL ES 3.1. The portable instance-rate
+    // vertex attribute path, which works down to OpenGL ES 2.0, is covered by
+    // CanRenderInstancedWithVertexAttributes.
+    GTEST_SKIP() << "This test's instance-ID mechanism requires OpenGL ES 3.1; "
+                    "CanRenderInstancedWithVertexAttributes covers the "
+                    "portable instance-rate path.";
   }
   using VS = InstancedDrawVertexShader;
   using FS = InstancedDrawFragmentShader;
@@ -531,7 +488,8 @@ TEST_P(RendererTest, CanRenderInstanced) {
 }
 
 TEST_P(RendererTest, CanBlitTextureToTexture) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
   }
   auto context = GetContext();
@@ -641,7 +599,8 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
 }
 
 TEST_P(RendererTest, CanBlitTextureToBuffer) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
   }
   auto context = GetContext();
@@ -770,7 +729,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
 }
 
 TEST_P(RendererTest, CanGenerateMipmaps) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
   }
   auto context = GetContext();
@@ -1627,6 +1587,108 @@ TEST_P(RendererTest, BindingNullTexturesDoesNotCrash) {
 
   auto pass = command_buffer->CreateRenderPass(target);
   EXPECT_FALSE(FS::BindContents2(*pass, nullptr, sampler));
+}
+
+// Clears a single cube map face by attaching it as a render target slice.
+// Rendering to cube faces is portable down to OpenGL ES 2.0, so this runs on
+// every backend.
+TEST_P(RendererTest, CanRenderToTextureSlice) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.type = TextureType::kTextureCube;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {100, 100};
+  desc.usage = TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  ColorAttachment color0;
+  color0.texture = texture;
+  color0.slice = 3u;  // +Y face.
+  color0.load_action = LoadAction::kClear;
+  color0.store_action = StoreAction::kStore;
+  color0.clear_color = Color::Green();
+  RenderTarget target;
+  target.SetColorAttachment(color0, 0u);
+
+  auto buffer = context->CreateCommandBuffer();
+  auto pass = buffer->CreateRenderPass(target);
+  ASSERT_TRUE(pass && pass->IsValid());
+  pass->EncodeCommands();
+  EXPECT_TRUE(context->GetCommandQueue()->Submit({buffer}).ok());
+}
+
+// Clears mip level 1 of a texture by attaching it as a render target. Skipped
+// on OpenGL ES, where rendering to non-zero mip levels needs ES 3.0 or
+// GL_OES_fbo_render_mipmap.
+TEST_P(RendererTest, CanRenderToMipLevel) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "Rendering to non-zero mip levels is gated on a GLES "
+                    "capability; covered by the Metal and Vulkan backends.";
+  }
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {100, 100};
+  desc.mip_count = 2u;
+  desc.usage = TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  ColorAttachment color0;
+  color0.texture = texture;
+  color0.mip_level = 1u;
+  color0.load_action = LoadAction::kClear;
+  color0.store_action = StoreAction::kStore;
+  color0.clear_color = Color::Green();
+  RenderTarget target;
+  target.SetColorAttachment(color0, 0u);
+  // The render area follows the mip level dimensions.
+  EXPECT_EQ(target.GetRenderTargetSize(), ISize(50, 50));
+
+  auto buffer = context->CreateCommandBuffer();
+  auto pass = buffer->CreateRenderPass(target);
+  ASSERT_TRUE(pass && pass->IsValid());
+  pass->EncodeCommands();
+  EXPECT_TRUE(context->GetCommandQueue()->Submit({buffer}).ok());
+}
+
+// Attachment validation rejects out-of-range mip levels and slices.
+TEST_P(RendererTest, AttachmentRejectsOutOfRangeSubresource) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {100, 100};
+  desc.mip_count = 2u;
+  desc.usage = TextureUsage::kRenderTarget;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  ColorAttachment color0;
+  color0.texture = texture;
+  color0.load_action = LoadAction::kClear;
+  color0.store_action = StoreAction::kStore;
+  EXPECT_TRUE(color0.IsValid());
+
+  // The out-of-range cases log validation errors on purpose.
+  ScopedValidationDisable disable_validation;
+
+  color0.mip_level = 2u;  // Only levels 0 and 1 exist.
+  EXPECT_FALSE(color0.IsValid());
+
+  color0.mip_level = 0u;
+  color0.slice = 1u;  // A 2D texture has a single slice.
+  EXPECT_FALSE(color0.IsValid());
 }
 
 }  // namespace testing
