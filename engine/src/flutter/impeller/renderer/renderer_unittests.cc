@@ -1335,6 +1335,10 @@ TEST_P(RendererTest, StencilMask) {
     data_host_buffer->Reset();
     return true;
   };
+
+  if ((true)) {  // Disables trailing code without compiler warning.
+    GTEST_SKIP() << "See: https://github.com/flutter/flutter/issues/188884";
+  }
   OpenPlaygroundHere(callback);
 }
 

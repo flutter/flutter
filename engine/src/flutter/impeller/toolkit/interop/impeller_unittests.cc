@@ -659,10 +659,9 @@ TEST_P(InteropPlaygroundTest, CanControlEllipses) {
 }
 
 TEST_P(InteropPlaygroundTest, CanCreateFragmentProgramColorFilters) {
-  // See: https://github.com/flutter/flutter/issues/188882
   if (GetBackend() == PlaygroundBackend::kOpenGLES ||
       GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
-    GTEST_SKIP() << "Cannot run on OpenGL until the shader program is fixed.";
+    GTEST_SKIP() << "See: https://github.com/flutter/flutter/issues/188882";
   }
 
   auto iplr = OpenAssetAsHPPMapping("interop_runtime_stage_cs.frag.iplr");
