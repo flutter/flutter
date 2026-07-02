@@ -376,6 +376,8 @@ void main() {
               '-q',
               '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
