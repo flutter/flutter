@@ -58,7 +58,7 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
   FML_UNREACHABLE();
 }
 
-PlaygroundImpl::PlaygroundImpl(PlaygroundSwitches switches)
+PlaygroundImpl::PlaygroundImpl(const PlaygroundSwitches& switches)
     : switches_(switches) {}
 
 PlaygroundImpl::~PlaygroundImpl() = default;

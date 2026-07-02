@@ -17,7 +17,7 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
  public:
   struct ShareableContext;
 
-  explicit PlaygroundImplGLES(PlaygroundSwitches switches);
+  explicit PlaygroundImplGLES(const PlaygroundSwitches& switches);
 
   ~PlaygroundImplGLES();
 

@@ -48,7 +48,7 @@ class PlaygroundImpl {
  protected:
   const PlaygroundSwitches switches_;
 
-  explicit PlaygroundImpl(PlaygroundSwitches switches);
+  explicit PlaygroundImpl(const PlaygroundSwitches& switches);
 
  private:
   PlaygroundImpl(const PlaygroundImpl&) = delete;

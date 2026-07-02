@@ -82,7 +82,7 @@ struct PlaygroundImplGLES::ShareableContext final {
   ShareableContext(UniqueHandle window,
                    std::shared_ptr<ReactorWorker> worker,
                    std::shared_ptr<ContextGLES> context,
-                   PlaygroundSwitches switches)
+                   const PlaygroundSwitches& switches)
       : window(std::move(window)),
         worker(std::move(worker)),
         context(std::move(context)),
@@ -106,7 +106,7 @@ struct PlaygroundImplGLES::ShareableContext final {
 
   std::shared_ptr<ReactorWorker> worker;
   std::shared_ptr<ContextGLES> context;
-  PlaygroundSwitches switches;
+  const PlaygroundSwitches switches;
 };
 
 void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
@@ -119,7 +119,7 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
 static std::vector<std::shared_ptr<fml::Mapping>>
 ShaderLibraryMappingsForPlayground(bool is_gles3);
 
-PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
+PlaygroundImplGLES::PlaygroundImplGLES(const PlaygroundSwitches& switches)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
       use_angle_(switches.use_angle) {
