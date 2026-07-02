@@ -212,4 +212,71 @@ Future<void> testMain() async {
     expect(rects2.first.toRect().width, paragraph.longestLine);
     expect(rects2.first.toRect().height, paragraph.height);
   });
+
+  test('getBoxesForRange returns correct positions for text selection', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Get boxes for a range
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 5);
+
+    expect(boxes.isNotEmpty, true);
+    for (final box in boxes) {
+      expect(box.left >= 0, true);
+      expect(box.top >= 0, true);
+      expect(box.right > box.left, true);
+      expect(box.bottom > box.top, true);
+    }
+  });
+
+  test('getBoxesForRange handles full text range', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, text.length);
+
+    expect(boxes.isNotEmpty, true);
+  });
+
+  test('getBoxesForRange handles RTL text correctly', () {
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 20,
+      textDirection: ui.TextDirection.rtl,
+    );
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('مرحبا'); // Arabic (RTL)
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 'مرحبا'.length);
+
+    expect(boxes.isNotEmpty, true);
+    for (final box in boxes) {
+      expect(box.left >= 0, true);
+      expect(box.right > box.left, true);
+    }
+  });
+
+  test('getBoxesForRange handles empty range', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(5, 5);
+
+    // Empty range should return empty list or minimal box
+    expect(boxes.isEmpty || boxes.every((box) => box.toRect().width == 0), true);
+  });
 }
