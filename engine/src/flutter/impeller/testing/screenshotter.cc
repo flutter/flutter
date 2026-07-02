@@ -7,32 +7,28 @@
 namespace impeller {
 namespace testing {
 
-#if !IMPELLER_ENABLE_METAL
+#ifndef FML_OS_MACOSX
 std::unique_ptr<Screenshot> Screenshotter::MakeMetalScreenshot(
     std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture) {
   FML_LOG(INFO) << "Screenshot not supported for Metal on this platform";
   return nullptr;
 }
-#endif
 
-#if !IMPELLER_ENABLE_OPENGLES
 std::unique_ptr<Screenshot> Screenshotter::MakeOpenGLScreenshot(
     std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture) {
   FML_LOG(INFO) << "Screenshot not supported for OpenGL on this platform";
   return nullptr;
 }
-#endif
 
-#if !IMPELLER_ENABLE_VULKAN
 std::unique_ptr<Screenshot> Screenshotter::MakeVulkanScreenshot(
     std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture) {
   FML_LOG(INFO) << "Screenshot not supported for Vulkan on this platform";
   return nullptr;
 }
-#endif
+#endif  // FML_OS_MACOSX
 
 std::unique_ptr<Screenshot> Screenshotter::MakeScreenshot(
     std::shared_ptr<Context>& context,
