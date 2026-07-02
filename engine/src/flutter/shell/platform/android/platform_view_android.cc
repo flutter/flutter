@@ -109,7 +109,7 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     AndroidRenderingAPI android_rendering_api,
     bool enable_opengl_gpu_tracing,
     const AndroidContext::ContextSettings& settings,
-    fml::RefPtr<fml::TaskRunner> io_task_runner) {
+    const fml::RefPtr<fml::TaskRunner>& io_task_runner) {
   switch (android_rendering_api) {
 #if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:
