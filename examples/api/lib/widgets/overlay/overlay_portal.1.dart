@@ -38,13 +38,14 @@ class _OverlayPortalLayoutBuilderExampleState
   final OverlayPortalController _controller = OverlayPortalController();
 
   Widget _buildOverlay(BuildContext context, OverlayChildLayoutInfo info) {
-    // Clone the anchor's paint transform and translate it downward by the
-    // anchor's height, so the overlay child appears just below the anchor.
-    final Matrix4 belowAnchor = info.childPaintTransform.clone()
-      ..translateByDouble(0.0, info.childSize.height, 0.0, 1.0);
+    final Offset childOffset = MatrixUtils.transformPoint(
+      info.childPaintTransform,
+      Offset.zero,
+    );
 
-    return Transform(
-      transform: belowAnchor,
+    return Positioned(
+      left: childOffset.dx,
+      top: childOffset.dy + info.childSize.height,
       child: Align(
         alignment: .topLeft,
         child: Container(
