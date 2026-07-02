@@ -307,8 +307,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
 
+    final String? commandName = _findCommandName(args);
+
     if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true' &&
-        (args.contains('config') || args.contains('configure'))) {
+        (commandName == 'config' || commandName == 'configure')) {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
       if (configManager != null) {
         final List<core.ConfigurationOption> options = await configManager.getOptions();
@@ -321,6 +323,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
                 help: option.description,
                 defaultsTo: null,
               );
+              configManager.registerGepFlag(option.name);
             }
           }
         }
@@ -332,6 +335,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
       // No need to print anything because the help was already printed.
       await exitWithHooks(1, shutdownHooks: globals.shutdownHooks);
     }
+  }
+
+  String? _findCommandName(Iterable<String> args) {
+    for (final arg in args) {
+      if (arg.startsWith('-')) {
+        continue;
+      }
+      return arg;
+    }
+    return null;
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.

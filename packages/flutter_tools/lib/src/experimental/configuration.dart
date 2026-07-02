@@ -38,6 +38,16 @@ class ExtensionConfigurationManager {
   static const String _getOptionsMethod = 'config.getOptions';
   static const String _validateMethod = 'config.validate';
 
+  final Set<String> _registeredGepFlags = <String>{};
+
+  /// The set of GEP flags successfully registered on the CLI.
+  Set<String> get registeredGepFlags => _registeredGepFlags;
+
+  /// Register a GEP flag name.
+  void registerGepFlag(String flagName) {
+    _registeredGepFlags.add(flagName);
+  }
+
   List<core.ConfigurationOption>? _cachedOptions;
 
   /// Retrieve the cached options synchronously.
@@ -67,7 +77,7 @@ class ExtensionConfigurationManager {
     for (final ToolExtension extension in _extensionManager.extensions) {
       late final ToolExtensionCapabilities capabilities;
       try {
-        capabilities = await extension.getCapabilities();
+        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
       } on Exception catch (e) {
         _logger.printTrace('Failed to get capabilities: $e');
         continue;
@@ -77,7 +87,9 @@ class ExtensionConfigurationManager {
       }
 
       try {
-        final Object? result = await extension.callMethod(_getOptionsMethod);
+        final Object? result = await extension
+            .callMethod(_getOptionsMethod)
+            .timeout(const Duration(seconds: 5));
         if (result is List) {
           for (final Object? item in result) {
             if (item is Map) {
@@ -113,7 +125,7 @@ class ExtensionConfigurationManager {
     for (final ToolExtension extension in _extensionManager.extensions) {
       late final ToolExtensionCapabilities capabilities;
       try {
-        capabilities = await extension.getCapabilities();
+        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
       } on Exception catch (e) {
         _logger.printTrace('Failed to get capabilities: $e');
         continue;
@@ -123,10 +135,12 @@ class ExtensionConfigurationManager {
       }
 
       try {
-        final Object? result = await extension.callMethod(
-          _validateMethod,
-          params: <String, Object?>{'option': option, 'value': value},
-        );
+        final Object? result = await extension
+            .callMethod(
+              _validateMethod,
+              params: <String, Object?>{'option': option, 'value': value},
+            )
+            .timeout(const Duration(seconds: 5));
         if (result is Map) {
           final Map<String, Object?> resultMap = (result as Map<Object?, Object?>)
               .cast<String, Object?>();
@@ -150,10 +164,12 @@ base class ExtensionConfigurationOption extends core.ConfigurationOption {
 
   /// Parse an option from a JSON GEP map representation.
   factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
-    return ExtensionConfigurationOption(
-      name: json['name']! as String,
-      description: json['description']! as String,
-    );
+    final Object? name = json['name'];
+    final Object? description = json['description'];
+    if (name is! String || description is! String) {
+      throw FormatException('Invalid GEP configuration option format: $json');
+    }
+    return ExtensionConfigurationOption(name: name, description: description);
   }
 
   @override

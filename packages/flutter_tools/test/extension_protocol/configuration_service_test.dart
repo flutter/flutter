@@ -409,6 +409,16 @@ class MockExtensionConfigurationManager extends Fake implements ExtensionConfigu
   final String? failureReason;
   final List<ConfigurationOption> _options;
 
+  final Set<String> _registeredGepFlags = <String>{};
+
+  @override
+  Set<String> get registeredGepFlags => _registeredGepFlags;
+
+  @override
+  void registerGepFlag(String flagName) {
+    _registeredGepFlags.add(flagName);
+  }
+
   @override
   Future<List<ConfigurationOption>> getOptions() async => _options;
 

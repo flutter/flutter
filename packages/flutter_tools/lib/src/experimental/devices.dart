@@ -67,7 +67,7 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
     for (final ToolExtension extension in _extensionManager.extensions) {
       late final ToolExtensionCapabilities capabilities;
       try {
-        capabilities = await extension.getCapabilities();
+        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
       } on Exception {
         continue;
       }
@@ -76,7 +76,9 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
       }
 
       try {
-        final Object? devicesResult = await extension.callMethod('device.discoverDevices');
+        final Object? devicesResult = await extension
+            .callMethod('device.discoverDevices')
+            .timeout(const Duration(seconds: 5));
         if (devicesResult is List) {
           for (final Object? item in devicesResult) {
             if (item is Map) {
@@ -187,10 +189,12 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
     try {
-      await _extension.callMethod(
-        'device.installApp',
-        params: <String, Object?>{'deviceId': id, 'appBundlePath': app.name},
-      );
+      await _extension
+          .callMethod(
+            'device.installApp',
+            params: <String, Object?>{'deviceId': id, 'appBundlePath': app.name},
+          )
+          .timeout(const Duration(seconds: 10));
       return true;
     } on Exception catch (e) {
       throwToolExit('Failed to install app on extension device: $e');
@@ -213,7 +217,7 @@ class ExtensionBackedDevice extends Device {
         // 1. Verify that 'build' service is supported by checking capabilities.
         final ToolExtensionCapabilities capabilities;
         try {
-          capabilities = await _extension.getCapabilities();
+          capabilities = await _extension.getCapabilities().timeout(const Duration(seconds: 5));
         } on Exception catch (e) {
           throwToolExit('Failed to query GEP capabilities: $e');
         }
@@ -224,7 +228,9 @@ class ExtensionBackedDevice extends Device {
 
         // 2. Query 'build.getTargets' to verify target 'assemble_linux_app' is supported.
         try {
-          final Object? targetsResult = await _extension.callMethod('build.getTargets');
+          final Object? targetsResult = await _extension
+              .callMethod('build.getTargets')
+              .timeout(const Duration(seconds: 5));
           if (targetsResult is! List) {
             throwToolExit('GEP extension does not expose build targets.');
           }
@@ -291,13 +297,15 @@ class ExtensionBackedDevice extends Device {
 
         // 5. Invoke GEP build.build
         try {
-          final Object? buildResult = await _extension.callMethod(
-            'build.build',
-            params: <String, Object?>{
-              'targetName': 'assemble_linux_app',
-              'environment': buildEnv.toMap(),
-            },
-          );
+          final Object? buildResult = await _extension
+              .callMethod(
+                'build.build',
+                params: <String, Object?>{
+                  'targetName': 'assemble_linux_app',
+                  'environment': buildEnv.toMap(),
+                },
+              )
+              .timeout(const Duration(seconds: 60));
 
           if (buildResult is Map) {
             final Map<String, Object?> buildResultMap = buildResult.cast<String, Object?>();
@@ -330,19 +338,20 @@ class ExtensionBackedDevice extends Device {
     }
 
     try {
-      await _extension.callMethod(
-        'device.launchApp',
-        params: <String, Object?>{
-          'deviceId': id,
-          'appBundlePath': executablePath ?? package?.name,
-          'args': debuggingOptions.dartEntrypointArgs,
-        },
-      );
+      await _extension
+          .callMethod(
+            'device.launchApp',
+            params: <String, Object?>{
+              'deviceId': id,
+              'appBundlePath': executablePath ?? package?.name,
+              'args': debuggingOptions.dartEntrypointArgs,
+            },
+          )
+          .timeout(const Duration(seconds: 5));
 
-      final Object? uriString = await _extension.callMethod(
-        'device.getVmServiceUri',
-        params: <String, Object?>{'deviceId': id},
-      );
+      final Object? uriString = await _extension
+          .callMethod('device.getVmServiceUri', params: <String, Object?>{'deviceId': id})
+          .timeout(const Duration(seconds: 5));
       if (uriString is! String) {
         return LaunchResult.failed();
       }
@@ -356,7 +365,9 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     try {
-      await _extension.callMethod('device.stopApp', params: <String, Object?>{'deviceId': id});
+      await _extension
+          .callMethod('device.stopApp', params: <String, Object?>{'deviceId': id})
+          .timeout(const Duration(seconds: 5));
       return true;
     } on Exception {
       return false;

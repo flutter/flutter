@@ -144,7 +144,9 @@ class ConfigCommand extends FlutterCommand {
         final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
         if (configManager != null) {
           for (final core.ConfigurationOption option in configManager.cachedOptions) {
-            globals.config.removeValue(option.name);
+            if (configManager.registeredGepFlags.contains(option.name)) {
+              globals.config.removeValue(option.name);
+            }
           }
         }
       }
@@ -202,7 +204,8 @@ class ConfigCommand extends FlutterCommand {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
       if (configManager != null) {
         for (final core.ConfigurationOption option in configManager.cachedOptions) {
-          if (argResults!.wasParsed(option.name)) {
+          if (configManager.registeredGepFlags.contains(option.name) &&
+              argResults!.wasParsed(option.name)) {
             final bool value = boolArg(option.name);
             final core.OptionValidationResult validationResult = await configManager.validate(
               option.name,
@@ -289,9 +292,12 @@ class ConfigCommand extends FlutterCommand {
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true')
-        ...extensionConfigurationManager?.cachedOptions.map(
-              (core.ConfigurationOption e) => e.name,
-            ) ??
+        ...extensionConfigurationManager?.cachedOptions
+                .where(
+                  (core.ConfigurationOption e) =>
+                      extensionConfigurationManager!.registeredGepFlags.contains(e.name),
+                )
+                .map((core.ConfigurationOption e) => e.name) ??
             const <String>[],
       ...globals.config.keys,
     };
