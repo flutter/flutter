@@ -204,6 +204,7 @@ Future<T?> showCupertinoSheet<T>({
       scrollableBuilder: scrollableBuilder,
       settings: settings,
       enableDrag: enableDrag,
+      showDragHandle: showDragHandle,
       topGap: topGap,
     );
 
@@ -248,6 +249,7 @@ Future<T?> showCupertinoSheet<T>({
           ),
       settings: settings,
       enableDrag: enableDrag,
+      showDragHandle: showDragHandle,
       topGap: topGap,
     );
     return Navigator.of(context, rootNavigator: true).push<T>(route);
