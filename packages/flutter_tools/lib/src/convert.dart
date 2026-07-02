@@ -93,13 +93,12 @@ class Utf8Decoder extends Converter<List<int>, String> {
 
   @override
   ByteConversionSink startChunkedConversion(Sink<String> sink) =>
-      (reportErrors ? _strictDecoder : _allowMalformedDecoder).startChunkedConversion(sink);
+      _allowMalformedDecoder.startChunkedConversion(sink);
 
   @override
-  Stream<String> bind(Stream<List<int>> stream) =>
-      (reportErrors ? _strictDecoder : _allowMalformedDecoder).bind(stream);
+  Stream<String> bind(Stream<List<int>> stream) => _allowMalformedDecoder.bind(stream);
 
   @override
   Converter<List<int>, T> fuse<T>(Converter<String, T> other) =>
-      (reportErrors ? _strictDecoder : _allowMalformedDecoder).fuse(other);
+      _allowMalformedDecoder.fuse(other);
 }
