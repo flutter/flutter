@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'package:process/process.dart';
 
 import '../../../flutter_tools_extension.dart';
+import './configuration.dart';
 import './device.dart';
 import './diagnostics.dart';
 
@@ -21,11 +22,9 @@ void linuxDeviceExtensionEntryPoint(SendPort hostSendPort) {
     ),
   );
 
-  provider.registerService(
-    LinuxDiagnosticsService(
-      processManager: const LocalProcessManager(),
-    ),
-  );
+  provider.registerService(LinuxDiagnosticsService(processManager: const LocalProcessManager()));
+
+  provider.registerService(LinuxConfigurationService());
 
   provider.initialize();
 }

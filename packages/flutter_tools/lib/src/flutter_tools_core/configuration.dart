@@ -12,10 +12,39 @@ abstract base class ConfigurationService extends ToolExtensionService {
 
   /// The set of configuration options handled by this extension.
   List<ConfigurationOption> get options;
+
+  @override
+  Future<Map<String, Function>> initialize() async {
+    return <String, Function>{'getOptions': _getOptionsRpc, 'validate': _validateRpc};
+  }
+
+  @override
+  Future<void> shutdown() async {}
+
+  Future<List<Map<String, Object?>>> _getOptionsRpc(Map<String, Object?> params) async {
+    return options.map((ConfigurationOption o) => o.toMap()).toList();
+  }
+
+  Future<Map<String, Object?>> _validateRpc(Map<String, Object?> params) async {
+    final option = params['option'] as String?;
+    final Object? value = params['value'];
+    if (option == null) {
+      return OptionValidationResult.failed('Missing "option" parameter.').toMap();
+    }
+    for (final ConfigurationOption o in options) {
+      if (o.name == option) {
+        return o.validate(option, value).toMap();
+      }
+    }
+    return OptionValidationResult.failed('Unknown configuration option: $option').toMap();
+  }
 }
 
 /// The definition of a single option provided by the [ConfigurationService].
 abstract base class ConfigurationOption {
+  /// Create a new [ConfigurationOption].
+  const ConfigurationOption();
+
   /// The name of the option.
   String get name;
 
@@ -24,6 +53,9 @@ abstract base class ConfigurationOption {
 
   /// Checks if [value] is valid for [option].
   OptionValidationResult validate(String option, Object? value);
+
+  /// Convert the [ConfigurationOption] to a JSON-compatible map.
+  Map<String, Object?> toMap() => <String, Object?>{'name': name, 'description': description};
 }
 
 /// Result type that indicates whether or not a value is valid for an option.
@@ -34,9 +66,24 @@ final class OptionValidationResult {
   /// Create a failed validation result with a reason.
   OptionValidationResult.failed(this.failureReason) : success = false;
 
+  /// Create an [OptionValidationResult] from a JSON map.
+  factory OptionValidationResult.fromJson(Map<String, Object?> json) {
+    final success = json['success']! as bool;
+    if (success) {
+      return OptionValidationResult.success();
+    }
+    return OptionValidationResult.failed(json['failureReason'] as String?);
+  }
+
   /// Whether validation was successful.
   final bool success;
 
   /// The reason why validation failed, if applicable.
   final String? failureReason;
+
+  /// Convert the [OptionValidationResult] to a JSON-compatible map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    'success': success,
+    if (failureReason != null) 'failureReason': failureReason,
+  };
 }

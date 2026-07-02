@@ -7,7 +7,9 @@ import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
 import '../convert.dart';
+import '../experimental/configuration.dart';
 import '../features.dart';
+import '../flutter_tools_core/configuration.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../runner/flutter_command.dart';
@@ -79,6 +81,13 @@ class ConfigCommand extends FlutterCommand {
       help: 'Remove all configured features and restore them to the default values.',
       negatable: false,
     );
+    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true') {
+      argParser.addFlag(
+        'enable-custom-linux-feature',
+        help: 'Enable custom linux feature.',
+        defaultsTo: null,
+      );
+    }
   }
 
   @override
@@ -138,6 +147,9 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(configSetting);
         }
       }
+      if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true') {
+        globals.config.removeValue('enable-custom-linux-feature');
+      }
       globals.printStatus(requireReloadTipText);
       return FlutterCommandResult.success();
     }
@@ -186,6 +198,26 @@ class ConfigCommand extends FlutterCommand {
         throwToolExit('build-dir should be a relative path');
       }
       _updateConfig('build-dir', buildDir);
+    }
+
+    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true' &&
+        argResults!.wasParsed('enable-custom-linux-feature')) {
+      final bool value = boolArg('enable-custom-linux-feature');
+      if (extensionConfigurationManager == null) {
+        throwToolExit('ExtensionConfigurationManager is not available in the current context.');
+      }
+      final OptionValidationResult validationResult = await extensionConfigurationManager!.validate(
+        'enable-custom-linux-feature',
+        value,
+      );
+      if (validationResult.success) {
+        globals.config.setValue('enable-custom-linux-feature', value);
+        globals.printStatus('Setting "enable-custom-linux-feature" value to "$value".');
+      } else {
+        throwToolExit(
+          'Validation failed for option "enable-custom-linux-feature": ${validationResult.failureReason}',
+        );
+      }
     }
 
     for (final Feature feature in featureFlags.allFeatures) {
@@ -255,6 +287,8 @@ class ConfigCommand extends FlutterCommand {
     }
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true')
+        'enable-custom-linux-feature',
       ...globals.config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {

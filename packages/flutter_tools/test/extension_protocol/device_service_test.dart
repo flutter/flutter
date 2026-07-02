@@ -31,7 +31,7 @@ void main() {
 
       // 2. Query capabilities
       final ToolExtensionCapabilities capabilities = await extension.getCapabilities();
-      expect(capabilities.services, const <String>['device', 'diagnostics']);
+      expect(capabilities.services, const <String>['device', 'diagnostics', 'config']);
 
       // 3. Discover devices
       final Object? devicesResult = await extension.callMethod('device.discoverDevices');

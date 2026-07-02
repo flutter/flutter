@@ -37,6 +37,7 @@ import 'device.dart';
 import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'experimental/configuration.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
@@ -211,6 +212,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
       ToolExtensionManager: () => ToolExtensionManager(),
+      ExtensionConfigurationManager: () => ExtensionConfigurationManager(
+        extensionManager: context.get<ToolExtensionManager>()!,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
         java: globals.java,
