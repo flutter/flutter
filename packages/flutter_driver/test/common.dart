@@ -5,7 +5,10 @@
 import 'dart:io';
 
 import 'package:flutter_driver/src/common/error.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
+
+import '../lib/flutter_driver.dart';
 
 export 'package:test/fake.dart';
 export 'package:test/test.dart';
