@@ -283,6 +283,15 @@ void main() {
           return const ToolExtensionCapabilities(services: <String>['config']).toMap();
         });
 
+        testPeer.registerMethod('config.getOptions', () {
+          return <Map<String, Object?>>[
+            <String, Object?>{
+              'name': 'enable-custom-linux-feature',
+              'description': 'Enable custom linux feature.',
+            },
+          ];
+        });
+
         testPeer.registerMethod('config.validate', (rpc.Parameters params) {
           final String option = params['option'].asString;
           final Object? value = params['value'].value;
@@ -339,6 +348,15 @@ void main() {
           return const ToolExtensionCapabilities(services: <String>['config']).toMap();
         });
 
+        testPeer.registerMethod('config.getOptions', () {
+          return <Map<String, Object?>>[
+            <String, Object?>{
+              'name': 'enable-custom-linux-feature',
+              'description': 'Enable custom linux feature.',
+            },
+          ];
+        });
+
         testPeer.registerMethod('config.validate', (rpc.Parameters params) {
           return OptionValidationResult.failed('Invalid type').toMap();
         });
@@ -374,9 +392,28 @@ void main() {
 }
 
 class MockExtensionConfigurationManager extends Fake implements ExtensionConfigurationManager {
-  MockExtensionConfigurationManager({required this.success, this.failureReason});
+  MockExtensionConfigurationManager({
+    required this.success,
+    this.failureReason,
+    List<ConfigurationOption>? options,
+  }) : _options =
+           options ??
+           <ConfigurationOption>[
+             ExtensionConfigurationOption(
+               name: 'enable-custom-linux-feature',
+               description: 'Enable custom linux feature.',
+             ),
+           ];
+
   final bool success;
   final String? failureReason;
+  final List<ConfigurationOption> _options;
+
+  @override
+  Future<List<ConfigurationOption>> getOptions() async => _options;
+
+  @override
+  List<ConfigurationOption> get cachedOptions => _options;
 
   @override
   Future<OptionValidationResult> validate(String option, Object? value) async {

@@ -9,7 +9,7 @@ import '../base/common.dart';
 import '../convert.dart';
 import '../experimental/configuration.dart';
 import '../features.dart';
-import '../flutter_tools_core/configuration.dart';
+import '../flutter_tools_core/configuration.dart' as core;
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../runner/flutter_command.dart';
@@ -81,13 +81,6 @@ class ConfigCommand extends FlutterCommand {
       help: 'Remove all configured features and restore them to the default values.',
       negatable: false,
     );
-    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true') {
-      argParser.addFlag(
-        'enable-custom-linux-feature',
-        help: 'Enable custom linux feature.',
-        defaultsTo: null,
-      );
-    }
   }
 
   @override
@@ -148,7 +141,12 @@ class ConfigCommand extends FlutterCommand {
         }
       }
       if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true') {
-        globals.config.removeValue('enable-custom-linux-feature');
+        final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
+        if (configManager != null) {
+          for (final core.ConfigurationOption option in configManager.cachedOptions) {
+            globals.config.removeValue(option.name);
+          }
+        }
       }
       globals.printStatus(requireReloadTipText);
       return FlutterCommandResult.success();
@@ -200,23 +198,26 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('build-dir', buildDir);
     }
 
-    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true' &&
-        argResults!.wasParsed('enable-custom-linux-feature')) {
-      final bool value = boolArg('enable-custom-linux-feature');
-      if (extensionConfigurationManager == null) {
-        throwToolExit('ExtensionConfigurationManager is not available in the current context.');
-      }
-      final OptionValidationResult validationResult = await extensionConfigurationManager!.validate(
-        'enable-custom-linux-feature',
-        value,
-      );
-      if (validationResult.success) {
-        globals.config.setValue('enable-custom-linux-feature', value);
-        globals.printStatus('Setting "enable-custom-linux-feature" value to "$value".');
-      } else {
-        throwToolExit(
-          'Validation failed for option "enable-custom-linux-feature": ${validationResult.failureReason}',
-        );
+    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true') {
+      final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
+      if (configManager != null) {
+        for (final core.ConfigurationOption option in configManager.cachedOptions) {
+          if (argResults!.wasParsed(option.name)) {
+            final bool value = boolArg(option.name);
+            final core.OptionValidationResult validationResult = await configManager.validate(
+              option.name,
+              value,
+            );
+            if (validationResult.success) {
+              globals.config.setValue(option.name, value);
+              globals.printStatus('Setting "${option.name}" value to "$value".');
+            } else {
+              throwToolExit(
+                'Validation failed for option "${option.name}": ${validationResult.failureReason}',
+              );
+            }
+          }
+        }
       }
     }
 
@@ -288,7 +289,10 @@ class ConfigCommand extends FlutterCommand {
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true')
-        'enable-custom-linux-feature',
+        ...extensionConfigurationManager?.cachedOptions.map(
+              (core.ConfigurationOption e) => e.name,
+            ) ??
+            const <String>[],
       ...globals.config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {

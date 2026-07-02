@@ -17,6 +17,8 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../experimental/configuration.dart';
+import '../flutter_tools_core/configuration.dart' as core;
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
@@ -286,7 +288,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   late bool _machineFlagPresentInAnyCliArg;
 
   @override
-  Future<void> run(Iterable<String> args) {
+  Future<void> run(Iterable<String> args) async {
     var exitWithCodeOne = false;
 
     // Have invocations of 'build', 'custom-devices', and 'pub' print out
@@ -304,12 +306,32 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
-    return super.run(args).then((_) async {
-      if (exitWithCodeOne) {
-        // No need to print anything because the help was already printed.
-        await exitWithHooks(1, shutdownHooks: globals.shutdownHooks);
+
+    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true' &&
+        (args.contains('config') || args.contains('configure'))) {
+      final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
+      if (configManager != null) {
+        final List<core.ConfigurationOption> options = await configManager.getOptions();
+        final Command<void>? configCommand = commands['config'];
+        if (configCommand != null) {
+          for (final option in options) {
+            if (!configCommand.argParser.options.containsKey(option.name)) {
+              configCommand.argParser.addFlag(
+                option.name,
+                help: option.description,
+                defaultsTo: null,
+              );
+            }
+          }
+        }
       }
-    });
+    }
+
+    await super.run(args);
+    if (exitWithCodeOne) {
+      // No need to print anything because the help was already printed.
+      await exitWithHooks(1, shutdownHooks: globals.shutdownHooks);
+    }
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.
