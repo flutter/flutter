@@ -86,8 +86,8 @@ TEST(AllocatorTest, TextureDescriptorCompatibility) {
     TextureDescriptor desc_c = {.type = TextureType::kTexture2DArray,
                                 .array_layer_count = 8};
 
-    ASSERT_EQ(desc_a, desc_b);
-    ASSERT_NE(desc_a, desc_c);
+    EXPECT_EQ(desc_a, desc_b);
+    EXPECT_NE(desc_a, desc_c);
   }
 }
 

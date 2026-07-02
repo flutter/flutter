@@ -208,7 +208,10 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                                 desc->HasExtension(kAppleTextureMaxLevelExt);
 
   // GL_TEXTURE_2D_ARRAY and sampler2DArray are core in desktop GL 3.0 and
-  // OpenGL ES 3.0; there is no ES 2.0 fallback.
+  // OpenGL ES 3.0. ES 2.0 has no core fallback, though some ES 2.0 devices
+  // expose them via GL_EXT_texture_array.
+  // TODO(bdero): Also honor GL_EXT_texture_array on ES 2.0 contexts that expose
+  // it, resolving the array procs from the extension.
   supports_texture_array_ = desc->GetGlVersion().major_version >= 3;
 
   // Anisotropic filtering is not part of any core GL or GLES version; it is

@@ -164,16 +164,6 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
     return;
   }
 
-  // One storage-tracking entry per slice: 6 for a cube, the layer count for an
-  // array, 1 otherwise.
-  const auto& tracked_desc = GetTextureDescriptor();
-  size_t slice_count = 1u;
-  if (tracked_desc.type == TextureType::kTextureCube) {
-    slice_count = 6u;
-  } else if (tracked_desc.type == TextureType::kTexture2DArray) {
-    slice_count = tracked_desc.array_layer_count;
-  }
-  slice_mip_initialized_.resize(slice_count);
   // Ensure the texture doesn't exceed device capabilities.
   const auto tex_size = GetTextureDescriptor().size;
   const auto max_size =
@@ -340,29 +330,30 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
             // requested layer (slice) of the already-allocated base mip level.
             if (format.is_compressed) {
               gl.CompressedTexSubImage3D(
-                  texture_target,             // target
-                  0u,                         // LOD level
-                  0u,                         // x offset
-                  0u,                         // y offset
-                  static_cast<GLint>(slice),  // z offset (layer)
-                  size.width,                 // width
-                  size.height,                // height
-                  1,                          // depth (one layer)
-                  format.internal_format,     // format
-                  image_size,                 // image size
-                  tex_data);                  // data
+                  /*target=*/texture_target,              //
+                  /*level=*/0u,                           //
+                  /*xoffset=*/0u,                         //
+                  /*yoffset=*/0u,                         //
+                  /*zoffset=*/static_cast<GLint>(slice),  //
+                  /*width=*/size.width,                   //
+                  /*height=*/size.height,                 //
+                  /*depth=*/1,                            //
+                  /*format=*/format.internal_format,      //
+                  /*image_size=*/image_size,              //
+                  /*data=*/tex_data);                     //
             } else {
-              gl.TexSubImage3D(texture_target,             // target
-                               0u,                         // LOD level
-                               0u,                         // x offset
-                               0u,                         // y offset
-                               static_cast<GLint>(slice),  // z offset (layer)
-                               size.width,                 // width
-                               size.height,                // height
-                               1,                          // depth (one layer)
-                               format.external_format,     // format
-                               format.type,                // type
-                               tex_data);                  // data
+              gl.TexSubImage3D(
+                  /*target=*/texture_target,              //
+                  /*level=*/0u,                           //
+                  /*xoffset=*/0u,                         //
+                  /*yoffset=*/0u,                         //
+                  /*zoffset=*/static_cast<GLint>(slice),  //
+                  /*width=*/size.width,                   //
+                  /*height=*/size.height,                 //
+                  /*depth=*/1,                            //
+                  /*format=*/format.external_format,      //
+                  /*type=*/format.type,                   //
+                  /*data=*/tex_data);                     //
             }
           } else if (format.is_compressed) {
             gl.CompressedTexImage2D(texture_target,          // target
@@ -525,21 +516,21 @@ void TextureGLES::InitializeContentsIfNecessary() {
         // glTexImage3D call; individual layers are then filled with
         // glTexSubImage3D. Non-zero mip levels are allocated lazily.
         gl.BindTexture(GL_TEXTURE_2D_ARRAY, handle.value());
-        gl.TexImage3D(GL_TEXTURE_2D_ARRAY,           // target
-                      0u,                            // LOD level
-                      gles_format->internal_format,  // internal
-                      size.width,                    // width
-                      size.height,                   // height
-                      desc.array_layer_count,        // depth/layers
-                      0u,                            // border
-                      gles_format->external_format,  // format
-                      gles_format->type,             // type
-                      nullptr                        // data
+        gl.TexImage3D(
+            /*target=*/GL_TEXTURE_2D_ARRAY,                    //
+            /*level=*/0u,                                      //
+            /*internal_format=*/gles_format->internal_format,  //
+            /*width=*/size.width,                              //
+            /*height=*/size.height,                            //
+            /*depth=*/desc.array_layer_count,                  //
+            /*border=*/0u,                                     //
+            /*format=*/gles_format->external_format,           //
+            /*type=*/gles_format->type,                        //
+            /*data=*/nullptr                                   //
         );
-        for (size_t layer = 0;
-             layer < static_cast<size_t>(desc.array_layer_count); ++layer) {
-          MarkSliceMipLevelInitialized(layer, 0);
-        }
+        // glTexImage3D allocated every layer of the base level at once, so a
+        // single entry covers the whole level.
+        MarkSliceMipLevelInitialized(0, 0);
       } else {
         // 2D / multisampled. External-OES textures are always wrapped, so
         // they returned at the is_wrapped_ check above. Only the base mip
@@ -760,24 +751,27 @@ bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
       static_cast<GLsizei>(std::max<int64_t>(1, size.height >> mip_level));
 
   if (desc.type == TextureType::kTexture2DArray) {
-    // glTexImage3D allocates this mip level for every layer at once, so mark
-    // all layers initialized for this level.
-    gl.BindTexture(GL_TEXTURE_2D_ARRAY, handle.value());
-    gl.TexImage3D(GL_TEXTURE_2D_ARRAY,            // target
-                  static_cast<GLint>(mip_level),  // LOD level
-                  gles_format->internal_format,   // internal
-                  mip_width,                      // width
-                  mip_height,                     // height
-                  desc.array_layer_count,         // depth/layers
-                  0u,                             // border
-                  gles_format->external_format,   // format
-                  gles_format->type,              // type
-                  nullptr                         // data
-    );
-    for (size_t layer = 0; layer < static_cast<size_t>(desc.array_layer_count);
-         ++layer) {
-      MarkSliceMipLevelInitialized(layer, mip_level);
+    // glTexImage3D allocates this mip level for every layer at once, so a
+    // single entry (slice 0) tracks the whole level regardless of which layer
+    // was requested. Guard on that entry so a request for a non-zero layer
+    // does not re-allocate and orphan already-uploaded layers.
+    if (IsSliceMipLevelInitialized(0, mip_level)) {
+      return true;
     }
+    gl.BindTexture(GL_TEXTURE_2D_ARRAY, handle.value());
+    gl.TexImage3D(
+        /*target=*/GL_TEXTURE_2D_ARRAY,                    //
+        /*level=*/static_cast<GLint>(mip_level),           //
+        /*internal_format=*/gles_format->internal_format,  //
+        /*width=*/mip_width,                               //
+        /*height=*/mip_height,                             //
+        /*depth=*/desc.array_layer_count,                  //
+        /*border=*/0u,                                     //
+        /*format=*/gles_format->external_format,           //
+        /*type=*/gles_format->type,                        //
+        /*data=*/nullptr                                   //
+    );
+    MarkSliceMipLevelInitialized(0, mip_level);
     return true;
   }
 
