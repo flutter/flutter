@@ -741,9 +741,9 @@ Future<Codec> instantiateImageCodecFromBuffer(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) {
+}) async {
   try {
-    return engine.renderer.instantiateImageCodec(
+    return await engine.renderer.instantiateImageCodec(
       buffer._list!,
       targetWidth: targetWidth,
       targetHeight: targetHeight,
