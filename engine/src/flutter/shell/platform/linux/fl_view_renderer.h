@@ -33,6 +33,8 @@ struct _FlViewRendererClass {
 
   /**
    * Composites a frame into the renderer. May be called from any thread.
+   *
+   * This method is abstract and must be implemented by subclasses.
    */
   void (*present_layers)(FlViewRenderer* renderer,
                          const FlutterLayer** layers,

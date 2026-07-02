@@ -17,6 +17,14 @@ G_DEFINE_TYPE_WITH_PRIVATE(FlViewRenderer,
                            fl_view_renderer,
                            GTK_TYPE_DRAWING_AREA)
 
+// Default implementation for the abstract present_layers method. Subclasses
+// must override this.
+static void fl_view_renderer_present_layers_default(FlViewRenderer* self,
+                                                    const FlutterLayer** layers,
+                                                    size_t layers_count) {
+  g_assert_not_reached();
+}
+
 static void fl_view_renderer_dispose(GObject* object) {
   FlViewRendererPrivate* priv = static_cast<FlViewRendererPrivate*>(
       fl_view_renderer_get_instance_private(FL_VIEW_RENDERER(object)));
@@ -28,6 +36,8 @@ static void fl_view_renderer_dispose(GObject* object) {
 
 static void fl_view_renderer_class_init(FlViewRendererClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_view_renderer_dispose;
+
+  klass->present_layers = fl_view_renderer_present_layers_default;
 
   fl_view_renderer_signals[SIGNAL_FIRST_FRAME] =
       g_signal_new("first-frame", fl_view_renderer_get_type(),
@@ -80,9 +90,7 @@ void fl_view_renderer_present_layers(FlViewRenderer* self,
   g_return_if_fail(FL_IS_VIEW_RENDERER(self));
 
   FlViewRendererClass* klass = FL_VIEW_RENDERER_GET_CLASS(self);
-  if (klass->present_layers != nullptr) {
-    klass->present_layers(self, layers, layers_count);
-  }
+  klass->present_layers(self, layers, layers_count);
 }
 
 void fl_view_renderer_emit_first_frame(FlViewRenderer* self) {
