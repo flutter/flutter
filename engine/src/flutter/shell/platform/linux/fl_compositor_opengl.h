@@ -38,8 +38,8 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
 /**
  * fl_compositor_opengl_new:
  * @opengl_manager: an #FlOpenGLManager
- * @shareable: %TRUE if the can use a framebuffer that is shared between
- * contexts.
+ * @shareable: %TRUE if the compositor can use a framebuffer that is shared
+ * between contexts.
  *
  * Creates a new OpenGL compositor.
  *
