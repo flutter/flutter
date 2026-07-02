@@ -278,7 +278,15 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
           ColrV0 colr = ParseColrV0(colr_data);
           std::vector<Color> palette = ParseCpalPalette0(cpal_data);
 
-          SkStrikeSpec strike_spec = SkStrikeSpec::MakeWithNoDevice(run.font());
+          // Fetch outlines unhinted with linear metrics: these paths are
+          // rendered as scalable vectors, and grid-fitting (e.g. FreeType on
+          // Android) displaces the base glyph and its color layers by
+          // different amounts, which reads as a visible misalignment once
+          // zoomed. (CoreText never hints, so this is a no-op on iOS/macOS.)
+          SkFont path_font = run.font();
+          path_font.setHinting(SkFontHinting::kNone);
+          path_font.setLinearMetrics(true);
+          SkStrikeSpec strike_spec = SkStrikeSpec::MakeWithNoDevice(path_font);
           SkBulkGlyphMetricsAndPaths paths{strike_spec};
 
           const SkGlyphID* glyph_ids = run.glyphs();
