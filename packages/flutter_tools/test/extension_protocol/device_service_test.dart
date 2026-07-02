@@ -163,7 +163,7 @@ void main() {
       );
       addTearDown(deviceService.shutdown);
 
-      // Initialize the RPC handlers inside GEP by calling initialize()
+      // Initialize the RPC handlers inside extension by calling initialize()
       final Map<String, Function> rpcHandlers = await deviceService.initialize();
       final discoverDevices =
           rpcHandlers['discoverDevices']! as Future<List<Object?>> Function(Map<String, Object?>);

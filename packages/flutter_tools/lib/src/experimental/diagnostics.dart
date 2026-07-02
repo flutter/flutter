@@ -34,7 +34,7 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
       return host_doctor.ValidationResult(
         host_doctor.ValidationType.notAvailable,
         const <host_doctor.ValidationMessage>[
-          host_doctor.ValidationMessage('GEP Prototype is not enabled.'),
+          host_doctor.ValidationMessage('Tool extension prototype is not enabled.'),
         ],
         statusInfo: 'disabled',
       );
@@ -85,7 +85,7 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
           host_doctor.ValidationResult(
             host_doctor.ValidationType.missing,
             <host_doctor.ValidationMessage>[
-              host_doctor.ValidationMessage.error('Diagnostics GEP call failed: $e'),
+              host_doctor.ValidationMessage.error('Diagnostics extension call failed: $e'),
             ],
             statusInfo: 'error',
           ),

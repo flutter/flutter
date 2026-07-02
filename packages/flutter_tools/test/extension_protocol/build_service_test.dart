@@ -247,7 +247,7 @@ void main() {
     }
 
     testUsingContext(
-      'ExtensionBackedDevice.startApp delegates build to GEP build.build successfully',
+      'ExtensionBackedDevice.startApp delegates build successfully',
       () async {
         final buildCompleter = Completer<Map<String, Object?>>();
         final ToolExtension extension = await connectMockExtension(
@@ -291,7 +291,7 @@ void main() {
         final env = BuildEnvironment.fromJson(envMap);
 
         expect(env.projectRoot, Uri.parse('file:///project/'));
-        expect(env.outputDirectory.path, contains('build/linux/x64/debug'));
+        expect(env.outputDirectory.path, contains('build/custom_device/linux-proto-1/debug'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -322,7 +322,7 @@ void main() {
 
         expect(
           () => device.startApp(null, debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)),
-          throwsToolExit(message: 'GEP extension does not support the "build" service.'),
+          throwsToolExit(message: 'Tool extension does not support the "build" service.'),
         );
       },
       overrides: <Type, Generator>{
@@ -332,7 +332,7 @@ void main() {
     );
 
     testUsingContext(
-      'throws ToolExit when GEP build fails',
+      'throws ToolExit when build fails',
       () async {
         final ToolExtension extension = await connectMockExtension(
           services: <String>['build'],
@@ -369,7 +369,7 @@ void main() {
             ),
           ),
           throwsToolExit(
-            message: 'GEP build compilation failed: Compilation failed due to syntax error',
+            message: 'Build compilation failed: Compilation failed due to syntax error',
           ),
         );
       },

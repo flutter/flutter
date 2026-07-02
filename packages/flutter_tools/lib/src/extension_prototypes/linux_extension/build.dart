@@ -53,7 +53,7 @@ base class LinuxAssembleTarget extends Target {
   List<String> get outputs => const <String>[];
 
   @override
-  Future<void> build(BuildEnvironment env) async {
+  Future<Map<String, Object?>> build(BuildEnvironment env) async {
     final String projectPath = _fileSystem.path.fromUri(env.projectRoot);
     final String outputPath = _fileSystem.path.fromUri(env.outputDirectory);
 
@@ -85,6 +85,23 @@ base class LinuxAssembleTarget extends Target {
         'Stderr: ${buildResult.stderr}',
       );
     }
+
+    // 3. Resolve the executable name from pubspec.yaml
+    final File pubspec = _fileSystem.file(_fileSystem.path.join(projectPath, 'pubspec.yaml'));
+    var appName = 'app';
+    if (pubspec.existsSync()) {
+      final String pubspecContent = pubspec.readAsStringSync();
+      final nameRegExp = RegExp(r'^name:\s+(\w+)', multiLine: true);
+      final Match? match = nameRegExp.firstMatch(pubspecContent);
+      if (match != null) {
+        appName = match.group(1)!;
+      }
+    }
+
+    final String executablePath = _fileSystem.path.join(outputPath, 'bundle', appName);
+    return <String, Object?>{
+      'executablePath': _fileSystem.file(executablePath).absolute.uri.toString(),
+    };
   }
 }
 

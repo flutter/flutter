@@ -72,8 +72,8 @@ abstract base class BuildService extends ToolExtensionService {
     final Target foundTarget = matching.first;
 
     try {
-      await foundTarget.build(env);
-      return <String, Object?>{'success': true};
+      final Map<String, Object?> buildResultMap = await foundTarget.build(env);
+      return <String, Object?>{'success': true, ...buildResultMap};
     } on Object catch (e, stackTrace) {
       return <String, Object?>{
         'success': false,
@@ -110,7 +110,8 @@ abstract base class Target {
   List<Depfile> get depfiles => const <Depfile>[];
 
   /// Executes target operations.
-  Future<void> build(BuildEnvironment env);
+  /// Returns a map of custom build results (e.g. executablePath).
+  Future<Map<String, Object?>> build(BuildEnvironment env);
 
   /// Custom defines passed back to the tool.
   Future<Map<String, String>> get extraDefines async => const <String, String>{};

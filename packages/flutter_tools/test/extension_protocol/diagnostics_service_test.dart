@@ -37,9 +37,7 @@ void main() {
         const FakeCommand(command: <String>['ninja', '--version'], stdout: '1.10.2\n'),
       ]);
 
-      final diagnosticsService = LinuxDiagnosticsService(
-        processManager: fakeProcessManager,
-      );
+      final diagnosticsService = LinuxDiagnosticsService(processManager: fakeProcessManager);
 
       final List<ValidationResult> results = await diagnosticsService.runDiagnostics();
 
@@ -75,9 +73,7 @@ void main() {
         const FakeCommand(command: <String>['ninja', '--version'], stdout: '1.10.2\n'),
       ]);
 
-      final diagnosticsService = LinuxDiagnosticsService(
-        processManager: fakeProcessManager,
-      );
+      final diagnosticsService = LinuxDiagnosticsService(processManager: fakeProcessManager);
 
       final List<ValidationResult> results = await diagnosticsService.runDiagnostics();
 
@@ -101,7 +97,7 @@ void main() {
 
   group('ExtensionDoctorValidator (Host Side)', () {
     testUsingContext(
-      'ExtensionDoctorValidator queries diagnostics GEP and merges results',
+      'ExtensionDoctorValidator queries diagnostics and merges results',
       () async {
         final manager = ToolExtensionManager();
 

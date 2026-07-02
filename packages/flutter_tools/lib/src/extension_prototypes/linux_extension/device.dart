@@ -35,6 +35,12 @@ class LinuxDevice extends Device {
   final String category;
 
   @override
+  String get platform => 'linux-x64';
+
+  @override
+  String get buildTarget => 'assemble_linux_app';
+
+  @override
   bool get isEmulator => false;
 
   final StreamController<String> _logController = StreamController<String>.broadcast();

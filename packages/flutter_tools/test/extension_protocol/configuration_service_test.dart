@@ -116,7 +116,7 @@ void main() {
 
   group('ExtensionConfigurationManager (Host Side)', () {
     testUsingContext(
-      'queries GEP config and returns validation results',
+      'queries configuration and returns validation results',
       () async {
         final manager = ToolExtensionManager();
 
@@ -262,7 +262,7 @@ void main() {
     late ToolExtensionManager manager;
 
     testUsingContext(
-      'registers flag and validates successfully via GEP routing',
+      'registers flag and validates successfully via routing',
       () async {
         manager = ToolExtensionManager();
 
@@ -327,7 +327,7 @@ void main() {
     );
 
     testUsingContext(
-      'fails with ToolExit if validation fails via GEP routing',
+      'fails with ToolExit if validation fails via routing',
       () async {
         manager = ToolExtensionManager();
 
@@ -409,14 +409,14 @@ class MockExtensionConfigurationManager extends Fake implements ExtensionConfigu
   final String? failureReason;
   final List<ConfigurationOption> _options;
 
-  final Set<String> _registeredGepFlags = <String>{};
+  final Set<String> _registeredExtensionFlags = <String>{};
 
   @override
-  Set<String> get registeredGepFlags => _registeredGepFlags;
+  Set<String> get registeredExtensionFlags => _registeredExtensionFlags;
 
   @override
-  void registerGepFlag(String flagName) {
-    _registeredGepFlags.add(flagName);
+  void registerExtensionFlag(String flagName) {
+    _registeredExtensionFlags.add(flagName);
   }
 
   @override

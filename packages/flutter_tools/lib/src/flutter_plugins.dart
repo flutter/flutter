@@ -1176,6 +1176,8 @@ void createPluginSymlinks(
   FlutterProject project, {
   bool force = false,
   @visibleForTesting FeatureFlags? featureFlagsOverride,
+  CmakeBasedProject? customCMakeProject,
+  String? customPlatformKey,
 }) {
   final FeatureFlags localFeatureFlags = featureFlagsOverride ?? featureFlags;
   Map<String, Object?>? platformPlugins;
@@ -1197,6 +1199,13 @@ void createPluginSymlinks(
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
       platformPlugins[project.linux.pluginConfigKey] as List<Object?>?,
+      force: force,
+    );
+  }
+  if (customCMakeProject != null && customPlatformKey != null) {
+    _createPlatformPluginSymlinks(
+      customCMakeProject.pluginSymlinkDirectory,
+      platformPlugins[customPlatformKey] as List<Object?>?,
       force: force,
     );
   }

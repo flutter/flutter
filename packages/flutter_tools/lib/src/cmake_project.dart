@@ -144,3 +144,36 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
     return firstMatchInFile(cmakeFile, _applicationIdPattern)?.group(1);
   }
 }
+
+/// A generic representation of a CMake-based sub-project for custom or general platforms.
+class GenericCmakeProject implements CmakeBasedProject {
+  GenericCmakeProject(this.parent, this.platformName);
+
+  @override
+  final FlutterProject parent;
+
+  /// The subdirectory name under the project root.
+  final String platformName;
+
+  Directory get _editableDirectory => parent.directory.childDirectory(platformName);
+  Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
+  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+
+  @override
+  bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
+
+  @override
+  File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
+
+  @override
+  File get managedCmakeFile => managedDirectory.childFile('CMakeLists.txt');
+
+  @override
+  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
+
+  @override
+  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
+
+  @override
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+}

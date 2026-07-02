@@ -32,7 +32,7 @@ void main() {
         expect(devicesResult.stdout, contains('linux-proto-1'));
         expect(devicesResult.stdout, contains('linux-x64'));
 
-        // 2. Run flutter doctor -v to check GEP diagnostics integration
+        // 2. Run flutter doctor -v to check diagnostics integration
         final ProcessResult doctorResult = await processManager.run(
           <String>[flutterBin, ...getLocalEngineArguments(), 'doctor', '-v'],
           environment: <String, String>{
@@ -45,7 +45,7 @@ void main() {
         expect(doctorResult.exitCode, 0);
         expect(doctorResult.stdout, contains('Extension-backed Diagnostics'));
 
-        // 3. Test flutter config CLI integration with GEP custom options
+        // 3. Test flutter config CLI integration with custom options
         // Enable custom feature
         final ProcessResult configEnableResult = await processManager.run(
           <String>[
@@ -105,6 +105,6 @@ void main() {
         tempHome.deleteSync(recursive: true);
       }
     },
-    skip: !platform.isLinux, // GEP Linux extension prototype is Linux-only
+    skip: !platform.isLinux, // Linux extension prototype is Linux-only
   );
 }

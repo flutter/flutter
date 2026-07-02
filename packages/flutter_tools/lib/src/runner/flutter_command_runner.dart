@@ -323,7 +323,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
                 help: option.description,
                 defaultsTo: null,
               );
-              configManager.registerGepFlag(option.name);
+              configManager.registerExtensionFlag(option.name);
             }
           }
         }

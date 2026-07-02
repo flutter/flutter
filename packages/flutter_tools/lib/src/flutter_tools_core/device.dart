@@ -11,6 +11,8 @@ abstract class Device {
   String get name;
   String get category;
   bool get isEmulator;
+  String get platform;
+  String get buildTarget;
 
   Future<void> installApp(Uri appBundlePath);
   Future<void> launchApp(Uri appBundlePath, List<String> args);
@@ -87,6 +89,8 @@ abstract base class DeviceService extends ToolExtensionService {
         'name': device.name,
         'category': device.category,
         'isEmulator': device.isEmulator,
+        'platform': device.platform,
+        'buildTarget': device.buildTarget,
       });
     }
     return result;

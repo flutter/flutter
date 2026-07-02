@@ -32,20 +32,20 @@ class ExtensionConfigurationManager {
   final Logger _logger;
   final Platform _platform;
 
-  /// Environment variable key to enable GEP prototype features.
+  /// Environment variable key to enable tool extension prototype features.
   static const String envPrototypeFlag = 'FLUTTER_TOOL_EXTENSION_PROTOTYPE';
   static const String _serviceNamespace = 'config';
   static const String _getOptionsMethod = 'config.getOptions';
   static const String _validateMethod = 'config.validate';
 
-  final Set<String> _registeredGepFlags = <String>{};
+  final Set<String> _registeredExtensionFlags = <String>{};
 
-  /// The set of GEP flags successfully registered on the CLI.
-  Set<String> get registeredGepFlags => _registeredGepFlags;
+  /// The set of extension flags successfully registered on the CLI.
+  Set<String> get registeredExtensionFlags => _registeredExtensionFlags;
 
-  /// Register a GEP flag name.
-  void registerGepFlag(String flagName) {
-    _registeredGepFlags.add(flagName);
+  /// Register an extension flag name.
+  void registerExtensionFlag(String flagName) {
+    _registeredExtensionFlags.add(flagName);
   }
 
   List<core.ConfigurationOption>? _cachedOptions;
@@ -54,7 +54,7 @@ class ExtensionConfigurationManager {
   List<core.ConfigurationOption> get cachedOptions =>
       _cachedOptions ?? const <core.ConfigurationOption>[];
 
-  /// Retrieve configuration options by routing config.getOptions to active GEP extensions.
+  /// Retrieve configuration options by routing config.getOptions to active tool extensions.
   Future<List<core.ConfigurationOption>> getOptions() async {
     if (_platform.environment[envPrototypeFlag] != 'true') {
       return const <core.ConfigurationOption>[];
@@ -100,7 +100,7 @@ class ExtensionConfigurationManager {
           }
         }
       } on Object catch (e) {
-        _logger.printError('Failed to get GEP options from extension: $e');
+        _logger.printError('Failed to get options from extension: $e');
       }
     }
 
@@ -111,7 +111,7 @@ class ExtensionConfigurationManager {
   /// Validates a value for a configuration option by routing to extension isolates.
   Future<core.OptionValidationResult> validate(String option, Object? value) async {
     if (_platform.environment[envPrototypeFlag] != 'true') {
-      return core.OptionValidationResult.failed('GEP Prototype is not enabled.');
+      return core.OptionValidationResult.failed('Tool extension prototype is not enabled.');
     }
 
     if (_extensionManager.extensions.isEmpty) {
@@ -147,7 +147,7 @@ class ExtensionConfigurationManager {
           return core.OptionValidationResult.fromJson(resultMap);
         }
       } on Object catch (e) {
-        return core.OptionValidationResult.failed('Validation GEP call failed: $e');
+        return core.OptionValidationResult.failed('Validation extension call failed: $e');
       }
     }
 
@@ -157,17 +157,17 @@ class ExtensionConfigurationManager {
   }
 }
 
-/// A concrete host-side representation of a GEP configuration option.
+/// A concrete host-side representation of an extension configuration option.
 base class ExtensionConfigurationOption extends core.ConfigurationOption {
   /// Create a new instance of [ExtensionConfigurationOption].
   ExtensionConfigurationOption({required this.description, required this.name});
 
-  /// Parse an option from a JSON GEP map representation.
+  /// Parse an option from a JSON extension map representation.
   factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
     final Object? name = json['name'];
     final Object? description = json['description'];
     if (name is! String || description is! String) {
-      throw FormatException('Invalid GEP configuration option format: $json');
+      throw FormatException('Invalid extension configuration option format: $json');
     }
     return ExtensionConfigurationOption(name: name, description: description);
   }
