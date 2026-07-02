@@ -57,8 +57,6 @@ import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/crash_reporting.dart';
-import 'reporting/first_run.dart';
-import 'reporting/reporting.dart';
 import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
@@ -121,6 +119,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         userMessages: globals.userMessages,
         processManager: globals.processManager,
+        osUtils: globals.os,
       ),
       AndroidWorkflow: () =>
           AndroidWorkflow(androidSdk: globals.androidSdk, featureFlags: featureFlags),
@@ -304,6 +303,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ProcessManager: () => ErrorHandlingProcessManager(
         delegate: const LocalProcessManager(),
         platform: globals.platform,
+        analytics: () => globals.analytics,
       ),
       ProcessUtils: () =>
           ProcessUtils(processManager: globals.processManager, logger: globals.logger),
@@ -316,10 +316,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      Usage: () => Usage(
-        runningOnBot: runningOnBot,
-        firstRunMessenger: FirstRunMessenger(persistentToolState: globals.persistentToolState!),
-      ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,

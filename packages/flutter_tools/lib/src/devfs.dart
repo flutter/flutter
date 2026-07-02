@@ -24,8 +24,6 @@ import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
 
-const _kFontManifest = 'FontManifest.json';
-
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
   bool cacheSymlinks = false;
@@ -38,13 +36,13 @@ DevFSConfig? get devFSConfig => context.get<DevFSConfig>();
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
-  /// Return true if this is the first time this method is called
-  /// or if the entry has been modified since this method was last called.
+  /// Return true if the entry has been modified since it was last marked clean.
   bool get isModified;
 
-  /// Return true if this is the first time this method is called
-  /// or if the entry has been modified after the given time
-  /// or if the given time is null.
+  /// Mark the content as clean, resetting the [isModified] state.
+  void markClean();
+
+  /// Return true if the entry has been modified after the given time.
   bool isModifiedAfter(DateTime time);
 
   int get size;
@@ -78,66 +76,73 @@ class DevFSFileContent extends DevFSContent {
     return file as File;
   }
 
-  void _stat() {
-    final File? linkTarget = _linkTarget;
+  (FileStat?, File?) _statFile() {
+    File? linkTarget = _linkTarget;
     if (linkTarget != null) {
       // Stat the cached symlink target.
       final FileStat fileStat = linkTarget.statSync();
-      if (fileStat.type == FileSystemEntityType.notFound) {
-        _linkTarget = null;
-      } else {
-        _fileStat = fileStat;
-        return;
+      if (fileStat.type != FileSystemEntityType.notFound) {
+        return (fileStat, linkTarget);
       }
+      linkTarget = null;
     }
     final FileStat fileStat = file.statSync();
-    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
-    if (_fileStat != null && _fileStat?.type == FileSystemEntityType.link) {
-      // Resolve, stat, and maybe cache the symlink target.
-      final String resolved = file.resolveSymbolicLinksSync();
-      final File linkTarget = file.fileSystem.file(resolved);
-      // Stat the link target.
-      final FileStat fileStat = linkTarget.statSync();
-      if (fileStat.type == FileSystemEntityType.notFound) {
-        _fileStat = null;
-        _linkTarget = null;
-      } else if (devFSConfig?.cacheSymlinks ?? false) {
-        _linkTarget = linkTarget;
+    if (fileStat.type == FileSystemEntityType.notFound) {
+      return (null, null);
+    }
+    if (fileStat.type == FileSystemEntityType.link) {
+      try {
+        final String resolved = file.resolveSymbolicLinksSync();
+        final File resolvedFile = file.fileSystem.file(resolved);
+        // Stat the link target.
+        final FileStat fileStat = resolvedFile.statSync();
+        if (fileStat.type == FileSystemEntityType.notFound) {
+          return (null, null);
+        }
+        return (fileStat, resolvedFile);
+      } on FileSystemException {
+        return (null, null);
       }
     }
+    return (fileStat, null);
   }
 
   @override
   bool get isModified {
-    final FileStat? oldFileStat = _fileStat;
-    _stat();
-    final FileStat? newFileStat = _fileStat;
-    if (oldFileStat == null && newFileStat == null) {
+    final (FileStat? currentStat, _) = _statFile();
+    if (_fileStat == null && currentStat == null) {
       return false;
     }
-    return oldFileStat == null ||
-        newFileStat == null ||
-        newFileStat.modified.isAfter(oldFileStat.modified);
+    return _fileStat == null ||
+        currentStat == null ||
+        currentStat.modified.isAfter(_fileStat!.modified);
+  }
+
+  @override
+  void markClean() {
+    final (FileStat? fileStat, File? linkTarget) = _statFile();
+    _fileStat = fileStat;
+    if (linkTarget != null && (devFSConfig?.cacheSymlinks ?? false)) {
+      _linkTarget = linkTarget;
+    } else {
+      _linkTarget = null;
+    }
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
-    final FileStat? oldFileStat = _fileStat;
-    _stat();
-    final FileStat? newFileStat = _fileStat;
-    if (oldFileStat == null && newFileStat == null) {
-      return false;
-    }
-    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(time);
+    // Whether the file changed after [time] only depends on the file's current
+    // modification time, not on the cached [_fileStat]. Falling back to the
+    // cached stat (e.g. `_fileStat == null`) would report a freshly created
+    // DevFSFileContent as modified even when its file is older than [time].
+    final (FileStat? currentStat, _) = _statFile();
+    return currentStat != null && currentStat.modified.isAfter(time);
   }
 
   @override
   int get size {
-    if (_fileStat == null) {
-      _stat();
-    }
-    // Can still be null if the file wasn't found.
-    return _fileStat?.size ?? 0;
+    final FileStat? stat = _fileStat ?? _statFile().$1;
+    return stat?.size ?? 0;
   }
 
   @override
@@ -157,12 +162,12 @@ class DevFSByteContent extends DevFSContent {
 
   List<int> get bytes => _bytes;
 
-  /// Return true only once so that the content is written to the device only once.
   @override
-  bool get isModified {
-    final bool modified = _isModified;
+  bool get isModified => _isModified;
+
+  @override
+  void markClean() {
     _isModified = false;
-    return modified;
   }
 
   @override
@@ -215,12 +220,12 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   late final List<int> bytes = _compressor.convert(utf8.encode(_string));
 
-  /// Return true only once so that the content is written to the device only once.
   @override
-  bool get isModified {
-    final bool modified = _isModified;
+  bool get isModified => _isModified;
+
+  @override
+  void markClean() {
     _isModified = false;
-    return modified;
   }
 
   @override
@@ -584,12 +589,10 @@ class DevFS {
     File? dartPluginRegistrant,
   }) async {
     final candidateCompileTime = DateTime.now();
-    didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
 
     // Update modified files
     final dirtyEntries = <Uri, DevFSContent>{};
-    final pendingAssetBuilds = <Future<void>>[];
     var assetBuildFailed = false;
     var syncedBytes = 0;
     if (resetCompiler) {
@@ -626,88 +629,29 @@ class DevFS {
       // await null to give time for telling the compiler to compile.
       await null;
 
-      // The tool writes the assets into the AssetBundle working dir so that they
-      // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory(_config, _fileSystem);
-      final String assetBuildDirPrefix = _asUriPath(assetDirectory);
-      bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
-        // If the content is backed by a real file, isModified will file stat and return true if
-        // it was modified since the last time this was called.
-        if (!entry.content.isModified || bundleFirstUpload) {
-          return;
-        }
-        // Modified shaders must be recompiled per-target platform.
-        final Uri deviceUri = _fileSystem.path.toUri(
-          _fileSystem.path.join(assetDirectory, archivePath),
+      try {
+        final int bundleSyncedBytes = await updateBundle(
+          bundle: bundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: assetDirectory,
+          assetTransformer: _assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: _fileSystem,
+          rootDirectoryPath: rootDirectory.path,
+          assetPathsToEvict: assetPathsToEvict,
+          shaderPathsToEvict: shaderPathsToEvict,
+          bundleFirstUpload: bundleFirstUpload,
+          invalidatedFiles: invalidatedFiles,
+          onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
-        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-        }
-        // If the font manifest is updated, mark this as true so the hot runner
-        // can invoke a service extension to force the engine to reload fonts.
-        if (archivePath == _kFontManifest) {
-          didUpdateFontManifest = true;
-        }
-        final AssetKind? kind = bundle.entries[archivePath]?.kind;
-        switch (kind) {
-          case AssetKind.shader:
-            final Future<DevFSContent?> pending = (() async {
-              DevFSContent content = entry.content;
-              if (entry.transformers.isNotEmpty) {
-                final DevFSContent? transformed = await _assetTransformer.retransformAsset(
-                  inputAssetKey: archivePath,
-                  inputAssetContent: content,
-                  transformerEntries: entry.transformers,
-                  workingDirectory: rootDirectory.path,
-                );
-                if (transformed == null) {
-                  return null;
-                }
-                content = transformed;
-              }
-              return shaderCompiler.recompileShader(content);
-            })();
-            pendingAssetBuilds.add(pending);
-            pending.then((DevFSContent? content) {
-              if (content == null) {
-                assetBuildFailed = true;
-                return;
-              }
-              dirtyEntries[deviceUri] = content;
-              syncedBytes += content.size;
-              if (!bundleFirstUpload) {
-                shaderPathsToEvict.add(archivePath);
-              }
-            });
-          case AssetKind.regular:
-          case AssetKind.font:
-          case null:
-            final Future<DevFSContent?> pending = (() async {
-              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
-                return entry.content;
-              }
-              return _assetTransformer.retransformAsset(
-                inputAssetKey: archivePath,
-                inputAssetContent: entry.content,
-                transformerEntries: entry.transformers,
-                workingDirectory: rootDirectory.path,
-              );
-            })();
-
-            pendingAssetBuilds.add(pending);
-            pending.then((DevFSContent? content) {
-              if (content == null) {
-                assetBuildFailed = true;
-                return;
-              }
-              dirtyEntries[deviceUri] = content;
-              syncedBytes += content.size;
-              if (!bundleFirstUpload) {
-                assetPathsToEvict.add(archivePath);
-              }
-            });
-        }
-      });
+        syncedBytes += bundleSyncedBytes;
+        _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
+      } on Exception catch (err, stackTrace) {
+        _logger.printError('Error updating bundle: $err');
+        _logger.printTrace('$stackTrace');
+        assetBuildFailed = true;
+      }
 
       // Mark processing of bundle done for testability of starting the compile
       // before processing bundle.
@@ -721,7 +665,10 @@ class DevFS {
     _previousCompiled = lastCompiled;
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
-    sources = compilerOutput.sources;
+    sources = <Uri>{
+      ...compilerOutput.sources,
+      ..._assetTransformer.dependencies.values.expand((Set<Uri> uris) => uris),
+    }.toList();
     //
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.
@@ -737,7 +684,6 @@ class DevFS {
     _logger.printTrace('Updating files.');
     final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
 
-    await Future.wait(pendingAssetBuilds);
     if (assetBuildFailed) {
       return UpdateFSReport();
     }
@@ -758,7 +704,126 @@ class DevFS {
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
-  String _asUriPath(String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
+  static String _asUriPath(FileSystem fileSystem, String filePath) =>
+      '${fileSystem.path.toUri(filePath).path}/';
+
+  /// Process and sync [bundle] assets to [dirtyEntries].
+  ///
+  /// Returns the total number of bytes processed.
+  /// Throws an [Exception] if an asset build failed.
+  static Future<int> updateBundle({
+    required AssetBundle bundle,
+    required Map<Uri, DevFSContent> dirtyEntries,
+    required String assetDirectory,
+    required DevelopmentAssetTransformer assetTransformer,
+    required DevelopmentShaderCompiler shaderCompiler,
+    required FileSystem fileSystem,
+    required String rootDirectoryPath,
+    required Set<String> assetPathsToEvict,
+    required Set<String> shaderPathsToEvict,
+    required bool bundleFirstUpload,
+    List<Uri> invalidatedFiles = const <Uri>[],
+    bool syncAllAssetsOnFirstUpload = false,
+    void Function()? onFontManifestUpdated,
+  }) async {
+    final String assetBuildDirPrefix = _asUriPath(fileSystem, assetDirectory);
+    final pendingAssetBuilds = <Future<void>>[];
+    var syncedBytes = 0;
+
+    final Set<Uri> invalidatedSet = invalidatedFiles.toSet();
+    final syncedEntries = <AssetBundleEntry>[];
+    bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
+      final bool hasTransformers = entry.transformers.isNotEmpty;
+      final bool skipSync = bundleFirstUpload && !syncAllAssetsOnFirstUpload && !hasTransformers;
+
+      if (skipSync) {
+        entry.content.markClean();
+        return;
+      }
+
+      final bool isEntryModified = entry.content.isModified;
+      final Set<Uri>? deps = assetTransformer.dependencies[archivePath];
+      final bool hasInvalidatedDependencies = deps != null && deps.any(invalidatedSet.contains);
+
+      if (!bundleFirstUpload && !isEntryModified && !hasInvalidatedDependencies) {
+        return;
+      }
+      syncedEntries.add(entry);
+
+      // Modified shaders must be recompiled per-target platform.
+      final Uri deviceUri = fileSystem.path.toUri(
+        fileSystem.path.join(assetDirectory, archivePath),
+      );
+      if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+      }
+      // If the font manifest is updated, invoke the callback so the hot runner
+      // can invoke a service extension to force the engine to reload fonts.
+      if (archivePath == kFontManifestJson) {
+        onFontManifestUpdated?.call();
+      }
+      switch (entry.kind) {
+        case AssetKind.shader:
+          pendingAssetBuilds.add(() async {
+            DevFSContent content = entry.content;
+            if (entry.transformers.isNotEmpty) {
+              final DevFSContent? transformed = await assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectoryPath,
+              );
+              if (transformed == null) {
+                throw AssetTransformationException(archivePath, 'Failed to transform shader');
+              }
+              content = transformed;
+            }
+            if (!bundleFirstUpload || syncAllAssetsOnFirstUpload) {
+              final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
+              if (compiled == null) {
+                throw DevFSShaderCompilationException(archivePath, 'Failed to compile shader');
+              }
+              dirtyEntries[deviceUri] = compiled;
+              syncedBytes += compiled.size;
+            }
+            if (!bundleFirstUpload) {
+              shaderPathsToEvict.add(archivePath);
+            }
+          }());
+        case AssetKind.regular:
+        case AssetKind.font:
+          pendingAssetBuilds.add(() async {
+            DevFSContent? content;
+            if (entry.transformers.isEmpty || entry.kind != AssetKind.regular) {
+              content = entry.content;
+            } else {
+              content = await assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectoryPath,
+              );
+            }
+            if (content == null) {
+              throw AssetTransformationException(archivePath, 'Failed to transform asset');
+            }
+            if (!bundleFirstUpload || syncAllAssetsOnFirstUpload) {
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+            }
+            if (!bundleFirstUpload) {
+              assetPathsToEvict.add(archivePath);
+            }
+          }());
+      }
+    });
+
+    await Future.wait(pendingAssetBuilds);
+    for (final entry in syncedEntries) {
+      entry.content.markClean();
+    }
+    return syncedBytes;
+  }
 }
 
 /// An implementation of a devFS writer which copies physical files for devices
@@ -795,4 +860,26 @@ class LocalDevFSWriter implements DevFSWriter {
       throw DevFSException(err.toString());
     }
   }
+}
+
+/// Exception thrown when development-time asset transformation fails.
+final class AssetTransformationException implements Exception {
+  AssetTransformationException(this.archivePath, this.message);
+
+  final String archivePath;
+  final String message;
+
+  @override
+  String toString() => 'AssetTransformationException: $message (Asset: $archivePath)';
+}
+
+/// Exception thrown when development-time shader compilation fails.
+final class DevFSShaderCompilationException implements Exception {
+  DevFSShaderCompilationException(this.archivePath, this.message);
+
+  final String archivePath;
+  final String message;
+
+  @override
+  String toString() => 'DevFSShaderCompilationException: $message (Shader: $archivePath)';
 }

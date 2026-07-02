@@ -224,6 +224,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        'ios-profile-debugger',
+        negatable: false,
+        help:
+            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -247,6 +253,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   }
 
   bool get traceStartup => boolArg('trace-startup');
+  bool get traceSystrace => boolArg('trace-systrace');
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
@@ -299,6 +306,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
         ? boolArg('cross-origin-isolation')
         : null;
+    final bool? iosProfileDebugger = argResults!.wasParsed('ios-profile-debugger')
+        ? boolArg('ios-profile-debugger')
+        : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -328,6 +338,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
         testFlag: testFlag,
+        iosProfileDebugger: iosProfileDebugger,
+        traceSystrace: traceSystrace,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -393,6 +405,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableHcpp: enableHcpp,
         webDevServerConfig: webDevServerConfig,
         testFlag: testFlag,
+        iosProfileDebugger: iosProfileDebugger,
       );
     }
   }
@@ -555,7 +568,7 @@ class RunCommand extends RunCommandBase {
     if (devices!.length > 1) {
       return '$command/all';
     }
-    return '$command/${getNameForTargetPlatform(await devices![0].targetPlatform)}';
+    return '$command/${(await devices![0].targetPlatform).getName()}';
   }
 
   @override
@@ -598,7 +611,7 @@ class RunCommand extends RunCommandBase {
       if (device is IOSDevice && device.isWirelesslyConnected) {
         anyWirelessIOSDevices = true;
       }
-      deviceType = getNameForTargetPlatform(platform);
+      deviceType = platform.getName();
       deviceOsVersion = await device.sdkNameAndVersion;
       isEmulator = await device.isLocalEmulator;
     } else {
@@ -744,7 +757,7 @@ class RunCommand extends RunCommandBase {
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
       globals.printWarning(
-        '--flavor is only supported for Android, macOS, and iOS devices. '
+        '--flavor is only supported for Android, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
       );
@@ -964,10 +977,7 @@ class RunCommand extends RunCommandBase {
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
         getBuildMode().cliName,
-        if (devices!.length == 1)
-          getNameForTargetPlatform(await devices![0].targetPlatform)
-        else
-          'multiple',
+        if (devices!.length == 1) (await devices![0].targetPlatform).getName() else 'multiple',
         if (devices!.length == 1 && await devices![0].isLocalEmulator) 'emulator' else null,
       ],
       endTimeOverride: appStartedTime,

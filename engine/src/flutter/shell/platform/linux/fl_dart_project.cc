@@ -15,6 +15,7 @@ struct _FlDartProject {
   gchar** dart_entrypoint_args;
 
   FlUIThreadPolicy ui_thread_policy;
+  gboolean enable_impeller;
 };
 
 G_DEFINE_TYPE(FlDartProject, fl_dart_project, G_TYPE_OBJECT)
@@ -60,6 +61,7 @@ G_MODULE_EXPORT FlDartProject* fl_dart_project_new() {
       g_build_filename(executable_dir, "data", "flutter_assets", nullptr);
   self->icu_data_path =
       g_build_filename(executable_dir, "data", "icudtl.dat", nullptr);
+  self->enable_impeller = TRUE;
 
   return self;
 }
@@ -129,4 +131,17 @@ FlUIThreadPolicy fl_dart_project_get_ui_thread_policy(FlDartProject* project) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project),
                        FL_UI_THREAD_POLICY_DEFAULT);
   return project->ui_thread_policy;
+}
+
+G_MODULE_EXPORT
+void fl_dart_project_set_enable_impeller(FlDartProject* project,
+                                         gboolean enable_impeller) {
+  g_return_if_fail(FL_IS_DART_PROJECT(project));
+  project->enable_impeller = enable_impeller;
+}
+
+G_MODULE_EXPORT
+gboolean fl_dart_project_get_enable_impeller(FlDartProject* project) {
+  g_return_val_if_fail(FL_IS_DART_PROJECT(project), FALSE);
+  return project->enable_impeller;
 }

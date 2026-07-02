@@ -347,7 +347,7 @@ void main() {
           expect(
             logger.warningText,
             contains(
-              '--flavor is only supported for Android, macOS, and iOS devices. '
+              '--flavor is only supported for Android, macOS, iOS, and Windows devices. '
               'Flavor-related features may not function properly and could '
               'behave differently in a future release.',
             ),
@@ -1991,8 +1991,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
 
   @override
-  Future<String> get targetPlatformDisplayName async =>
-      getNameForTargetPlatform(await targetPlatform);
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
@@ -2093,6 +2092,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool? forcedWebEnableHotReload,
   }) async {
     return const BuildInfo(
       BuildMode.debug,
@@ -2250,6 +2250,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required analytics.Analytics analytics,
     required FileSystem fileSystem,
     required FlutterProject flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     required Logger logger,
     required OutputPreferences outputPreferences,
     required Platform platform,
