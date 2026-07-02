@@ -19,6 +19,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/typographer/text_frame.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
@@ -126,6 +127,41 @@ TEST_P(AiksTest, CanvasCanPushPopCTM) {
   ASSERT_EQ(canvas->GetSaveCount(), 1u);
   ASSERT_MATRIX_NEAR(canvas->GetCurrentTransform(),
                      Matrix::MakeTranslation({100.0, 100.0, 0.0}));
+}
+
+TEST_P(AiksTest, DrawColorTextFrameConsumesOneDepthSlot) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  // A COLR text frame whose color layers are produced by the creator, the
+  // same way the Skia typographer backend supplies them.
+  auto make_color_frame = []() {
+    std::vector<TextRun> runs;
+    return std::make_shared<TextFrame>(
+        runs, Rect::MakeLTRB(0, 0, 20, 20), /*has_color=*/true,
+        /*path_creator=*/PathCreator{},
+        /*color_path_creator=*/[]() {
+          std::vector<ColorGlyphLayer> layers(3);
+          layers[0].path = flutter::DlPath::MakeRectLTRB(0, 0, 10, 10);
+          layers[0].use_foreground_color = true;
+          layers[1].path = flutter::DlPath::MakeRectLTRB(2, 2, 8, 8);
+          layers[1].color = Color::Red();
+          layers[2].path = flutter::DlPath::MakeRectLTRB(4, 4, 6, 6);
+          layers[2].color = Color::Green();
+          return layers;
+        });
+  };
+
+  // The DisplayList budgets exactly one depth slot per drawText op
+  // (AUTO_DEPTH_WATCHER(1u) in dl_dispatcher.cc), so drawing all of a color
+  // frame's layers must consume exactly one depth slot regardless of the
+  // layer count.
+  uint64_t depth_before = canvas->GetOpDepth();
+  canvas->DrawTextFrame(make_color_frame(), Point(0, 0), Paint{});
+  EXPECT_EQ(canvas->GetOpDepth(), depth_before + 1u);
+
+  canvas->DrawTextFrame(make_color_frame(), Point(20, 0), Paint{});
+  EXPECT_EQ(canvas->GetOpDepth(), depth_before + 2u);
 }
 
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {

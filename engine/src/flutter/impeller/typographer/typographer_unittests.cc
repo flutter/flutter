@@ -78,6 +78,46 @@ TEST_P(TypographerTest, CanConvertTextBlob) {
   }
 }
 
+TEST_P(TypographerTest, TextFrameReturnsColorPathsFromCreator) {
+  std::vector<TextRun> runs;
+  TextFrame frame(runs, Rect::MakeLTRB(0, 0, 10, 10), /*has_color=*/true,
+                  /*path_creator=*/{},
+                  /*color_path_creator=*/[]() {
+                    std::vector<ColorGlyphLayer> layers(2);
+                    layers[0].use_foreground_color = true;
+                    layers[1].color = Color::Red();
+                    return layers;
+                  });
+  std::vector<ColorGlyphLayer> layers = frame.GetColorPaths();
+  ASSERT_EQ(layers.size(), 2u);
+  EXPECT_TRUE(layers[0].use_foreground_color);
+  EXPECT_FALSE(layers[1].use_foreground_color);
+  EXPECT_EQ(layers[1].color, Color::Red());
+}
+
+TEST_P(TypographerTest, TextFrameWithoutColorPathCreatorHasNoColorPaths) {
+  TextFrame frame;
+  EXPECT_TRUE(frame.GetColorPaths().empty());
+}
+
+TEST_P(TypographerTest, NonColrColorFontHasNoColorPaths) {
+#if FML_OS_MACOSX
+  auto mapping = flutter::testing::OpenFixtureAsSkData("Apple Color Emoji.ttc");
+#else
+  auto mapping = flutter::testing::OpenFixtureAsSkData("NotoColorEmoji.ttf");
+#endif
+  ASSERT_TRUE(mapping);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont emoji_font(font_mgr->makeFromData(mapping), 50.0);
+  auto frame = MakeTextFrameFromTextBlobSkia(
+      SkTextBlob::MakeFromString("😀 ", emoji_font));
+  ASSERT_TRUE(frame->HasColor());
+  // Bitmap emoji formats (CBDT/sbix) carry no COLRv0 layer list, so color
+  // path extraction must come back empty and rendering falls back to the
+  // color glyph atlas.
+  EXPECT_TRUE(frame->GetColorPaths().empty());
+}
+
 TEST_P(TypographerTest, CanCreateRenderContext) {
   auto context = TypographerContextSkia::Make();
   ASSERT_TRUE(context && context->IsValid());
