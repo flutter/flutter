@@ -3,8 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:isolate';
+
+import 'package:process/process.dart';
+
 import '../../../flutter_tools_extension.dart';
 import './device.dart';
+import './diagnostics.dart';
 
 void linuxDeviceExtensionEntryPoint(SendPort hostSendPort) {
   final provider = ToolExtensionProvider(name: 'linux_device_extension', sendPort: hostSendPort);
@@ -16,5 +20,12 @@ void linuxDeviceExtensionEntryPoint(SendPort hostSendPort) {
       },
     ),
   );
+
+  provider.registerService(
+    LinuxDiagnosticsService(
+      processManager: const LocalProcessManager(),
+    ),
+  );
+
   provider.initialize();
 }

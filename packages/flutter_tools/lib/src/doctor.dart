@@ -25,7 +25,9 @@ import 'cache.dart';
 import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
+import 'experimental/diagnostics.dart';
 import 'features.dart';
+import 'generic_extension_protocol/manager.dart';
 import 'globals.dart' as globals;
 import 'http_host_validator.dart';
 import 'linux/linux_doctor.dart';
@@ -146,6 +148,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
     ];
+    final ToolExtensionManager? extensionManager = context.get<ToolExtensionManager>();
+    if (extensionManager != null &&
+        platform.environment[ExtensionDoctorValidator.envPrototypeFlag] == 'true') {
+      _validators!.add(ExtensionDoctorValidator(extensionManager, platform: platform));
+    }
     return _validators!;
   }
 
