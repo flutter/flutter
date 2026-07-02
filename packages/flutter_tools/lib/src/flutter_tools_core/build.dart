@@ -18,6 +18,70 @@ abstract base class BuildService extends ToolExtensionService {
 
   /// Declares engine artifacts required before building.
   List<ArtifactDependency> get artifactDependencies;
+
+  @override
+  Future<Map<String, Function>> initialize() async {
+    return <String, Function>{'getTargets': _getTargetsRpc, 'build': _buildRpc};
+  }
+
+  @override
+  Future<void> shutdown() async {}
+
+  Future<List<Map<String, Object?>>> _getTargetsRpc(Map<String, Object?> params) async {
+    return targets
+        .map(
+          (Target target) => <String, Object?>{
+            'name': target.name,
+            'dependencies': target.dependencies,
+            'inputs': target.inputs,
+            'outputs': target.outputs,
+          },
+        )
+        .toList();
+  }
+
+  Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
+    final Object? targetNameObj = params['targetName'];
+    final Object? environmentJsonObj = params['environment'];
+
+    if (targetNameObj is! String || environmentJsonObj is! Map<Object?, Object?>) {
+      return <String, Object?>{
+        'success': false,
+        'errorMessage':
+            'Missing or invalid parameters: "targetName" must be a String and "environment" must be a Map.',
+      };
+    }
+
+    final String targetName = targetNameObj;
+    final Map<String, Object?> environmentJson = environmentJsonObj.cast<String, Object?>();
+    final BuildEnvironment env;
+    try {
+      env = BuildEnvironment.fromJson(environmentJson);
+    } on Object catch (e, stackTrace) {
+      return <String, Object?>{
+        'success': false,
+        'errorMessage': 'Failed to deserialize environment: $e',
+        'stackTrace': stackTrace.toString(),
+      };
+    }
+
+    final List<Target> matching = targets.where((Target t) => t.name == targetName).toList();
+    if (matching.isEmpty) {
+      return <String, Object?>{'success': false, 'errorMessage': 'Target "$targetName" not found.'};
+    }
+    final Target foundTarget = matching.first;
+
+    try {
+      await foundTarget.build(env);
+      return <String, Object?>{'success': true};
+    } on Object catch (e, stackTrace) {
+      return <String, Object?>{
+        'success': false,
+        'errorMessage': e.toString(),
+        'stackTrace': stackTrace.toString(),
+      };
+    }
+  }
 }
 
 /// A stable, version-checked catalog of core build targets provided by the host tool.
@@ -62,6 +126,17 @@ class BuildEnvironment {
     required this.projectRoot,
   });
 
+  /// Create a BuildEnvironment from a JSON map.
+  factory BuildEnvironment.fromJson(Map<String, Object?> json) {
+    return BuildEnvironment(
+      cacheDir: Uri.parse(json['cacheDir']! as String),
+      defines: (json['defines']! as Map<Object?, Object?>).cast<String, String>(),
+      flutterAssetsDir: Uri.parse(json['flutterAssetsDir']! as String),
+      outputDirectory: Uri.parse(json['outputDirectory']! as String),
+      projectRoot: Uri.parse(json['projectRoot']! as String),
+    );
+  }
+
   /// Defines passed to compilation targets.
   final Map<String, String> defines;
 
@@ -76,6 +151,15 @@ class BuildEnvironment {
 
   /// Assets directory.
   final Uri flutterAssetsDir;
+
+  /// Convert the BuildEnvironment to a JSON-compatible map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    'cacheDir': cacheDir.toString(),
+    'defines': defines,
+    'flutterAssetsDir': flutterAssetsDir.toString(),
+    'outputDirectory': outputDirectory.toString(),
+    'projectRoot': projectRoot.toString(),
+  };
 }
 
 /// A class for representing depfile formats.

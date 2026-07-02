@@ -5,17 +5,23 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file/file.dart';
+
 import '../../generic_extension_protocol.dart';
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../cache.dart';
+import '../cmake.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../extension_prototypes/linux_extension/extension.dart';
+import '../flutter_plugins.dart';
+import '../flutter_tools_core/build.dart';
 import '../globals.dart' as globals;
 import '../linux/application_package.dart';
-import '../linux/build_linux.dart';
 import '../project.dart';
 import '../vmservice.dart';
 
@@ -204,13 +210,114 @@ class ExtensionBackedDevice extends Device {
     if (!prebuiltApplication) {
       final TargetPlatform platform = await targetPlatform;
       if (platform == TargetPlatform.linux_x64) {
-        await buildLinux(
-          FlutterProject.current().linux,
+        // 1. Verify that 'build' service is supported by checking capabilities.
+        final ToolExtensionCapabilities capabilities;
+        try {
+          capabilities = await _extension.getCapabilities();
+        } on Exception catch (e) {
+          throwToolExit('Failed to query GEP capabilities: $e');
+        }
+
+        if (!capabilities.services.contains('build')) {
+          throwToolExit('GEP extension does not support the "build" service.');
+        }
+
+        // 2. Query 'build.getTargets' to verify target 'assemble_linux_app' is supported.
+        try {
+          final Object? targetsResult = await _extension.callMethod('build.getTargets');
+          if (targetsResult is! List) {
+            throwToolExit('GEP extension does not expose build targets.');
+          }
+          final bool hasTarget = targetsResult.any(
+            (Object? t) => t is Map && t['name'] == 'assemble_linux_app',
+          );
+          if (!hasTarget) {
+            throwToolExit('GEP extension does not expose build target "assemble_linux_app".');
+          }
+        } on Object catch (e) {
+          if (e is ToolExit) {
+            rethrow;
+          }
+          throwToolExit('Failed to query GEP build targets: $e');
+        }
+
+        final FlutterProject project = FlutterProject.current();
+        final LinuxProject linuxProject = project.linux;
+
+        final Map<String, String> environmentConfig = debuggingOptions.buildInfo
+            .toEnvironmentConfig();
+        environmentConfig['FLUTTER_TARGET'] = mainPath ?? 'lib/main.dart';
+
+        // 3. Extract local engine overrides
+        final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
+        if (localEngineInfo != null) {
+          final String targetOutPath = localEngineInfo.targetOutPath;
+          environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(
+            globals.fs.path.dirname(targetOutPath),
+          );
+          environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
+          environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
+        }
+
+        // 4. Run host-side build preparation (writing CMake config and plugin symlinks)
+        writeGeneratedCmakeConfig(
+          Cache.flutterRoot!,
+          linuxProject,
           debuggingOptions.buildInfo,
-          target: mainPath,
-          targetPlatform: platform,
-          logger: _logger,
+          environmentConfig,
+          _logger,
         );
+        createPluginSymlinks(project);
+
+        final String buildModeName = debuggingOptions.buildInfo.mode.cliName;
+        final Directory buildDirectory = globals.fs.directory(
+          globals.fs.path.join(
+            project.directory.path,
+            getLinuxBuildDirectory(platform),
+            buildModeName,
+          ),
+        );
+
+        final buildEnv = BuildEnvironment(
+          cacheDir: globals.cache.getRoot().uri,
+          defines: environmentConfig,
+          flutterAssetsDir: project.directory
+              .childDirectory('build')
+              .childDirectory('flutter_assets')
+              .uri,
+          outputDirectory: buildDirectory.uri,
+          projectRoot: project.directory.uri,
+        );
+
+        // 5. Invoke GEP build.build
+        try {
+          final Object? buildResult = await _extension.callMethod(
+            'build.build',
+            params: <String, Object?>{
+              'targetName': 'assemble_linux_app',
+              'environment': buildEnv.toMap(),
+            },
+          );
+
+          if (buildResult is Map) {
+            final Map<String, Object?> buildResultMap = buildResult.cast<String, Object?>();
+            final bool success = buildResultMap['success'] as bool? ?? false;
+            if (!success) {
+              final String message =
+                  buildResultMap['errorMessage'] as String? ??
+                  buildResultMap['message'] as String? ??
+                  'Unknown error';
+              throwToolExit('GEP build compilation failed: $message');
+            }
+          } else {
+            throwToolExit('GEP build compilation failed: invalid response format.');
+          }
+        } on Object catch (e) {
+          if (e is ToolExit) {
+            rethrow;
+          }
+          throwToolExit('GEP build compilation failed with exception: $e');
+        }
       } else {
         throwToolExit('Unsupported platform for custom extension device build: $platform');
       }
