@@ -49,6 +49,8 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// The active devices managed by this service.
   final Map<String, Device> _devices = <String, Device>{};
+  final Map<String, StreamSubscription<String>> _logSubscriptions =
+      <String, StreamSubscription<String>>{};
 
   /// Discovers and returns the list of available devices.
   Future<List<Device>> discoverDevices();
@@ -69,10 +71,17 @@ abstract base class DeviceService extends ToolExtensionService {
 
   Future<List<Map<String, Object?>>> _discoverDevicesRpc(Map<String, Object?> params) async {
     final List<Device> devices = await discoverDevices();
+    for (final StreamSubscription<String> sub in _logSubscriptions.values) {
+      await sub.cancel();
+    }
+    _logSubscriptions.clear();
     _devices.clear();
     final result = <Map<String, Object?>>[];
     for (final device in devices) {
       _devices[device.id] = device;
+      _logSubscriptions[device.id] = device.getLogReader().listen((String line) {
+        onNotification('device.log', <String, Object?>{'deviceId': device.id, 'message': line});
+      });
       result.add(<String, Object?>{
         'id': device.id,
         'name': device.name,
@@ -103,11 +112,6 @@ abstract base class DeviceService extends ToolExtensionService {
     }
 
     await device.launchApp(Uri.file(path), args);
-
-    // Forward the log reader stream to the host via notifications
-    device.getLogReader().listen((String line) {
-      onNotification('device.log', <String, Object?>{'deviceId': id, 'message': line});
-    });
   }
 
   Future<String> _getVmServiceUriRpc(Map<String, Object?> params) async {
@@ -127,5 +131,14 @@ abstract base class DeviceService extends ToolExtensionService {
       throw StateError('Device $id not found.');
     }
     await device.stopApp();
+  }
+
+  @override
+  Future<void> shutdown() async {
+    for (final StreamSubscription<String> sub in _logSubscriptions.values) {
+      await sub.cancel();
+    }
+    _logSubscriptions.clear();
+    _devices.clear();
   }
 }

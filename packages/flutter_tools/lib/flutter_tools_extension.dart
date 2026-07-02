@@ -3,4 +3,5 @@
 // found in the LICENSE file.
 
 export 'flutter_tools_core.dart';
+export 'generic_extension_protocol.dart';
 export 'src/flutter_tools_extension/extension.dart';
