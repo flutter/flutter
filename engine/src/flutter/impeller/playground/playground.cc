@@ -333,7 +333,7 @@ bool Playground::WriteGoldenImage(const RenderTarget& render_target,
   std::string filenamepath =
       switches_.golden_output_dir.value() + "/" + filename;
   if (!screenshot->WriteToPNG(filenamepath)) {
-    FML_LOG(ERROR) << "Failed to write screenshot to " << filename;
+    FML_LOG(ERROR) << "Failed to write screenshot to " << filenamepath;
     return false;
   }
   return true;
@@ -363,13 +363,12 @@ bool Playground::OpenPlaygroundHere(
     }
     RenderTarget render_target = surface->GetRenderTarget();
 
-    if (!render_callback(render_target) ||
-        !impl_->GetContext()->FlushCommandBuffers()) {
+    if (!render_callback(render_target) || !context->FlushCommandBuffers()) {
       return false;
     }
     if (writing_golden) {
-      if (!render_callback(render_target) ||
-          !impl_->GetContext()->FlushCommandBuffers()) {
+      surface->Present();
+      if (!render_callback(render_target) || !context->FlushCommandBuffers()) {
         return false;
       }
       return WriteGoldenImage(render_target);

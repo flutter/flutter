@@ -22,6 +22,7 @@ impeller_component("playground") {
   deps = [
     "../entity",
     "../renderer/backend",
+    "//flutter/impeller/testing:screenshot",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/testing:test_swiftshader_utils",
   ]

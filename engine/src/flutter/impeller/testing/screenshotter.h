@@ -24,6 +24,17 @@ class Screenshotter {
   virtual std::unique_ptr<Screenshot> MakeScreenshot(
       const AiksContext& aiks_context,
       const std::shared_ptr<Texture>& texture) = 0;
+
+ private:
+  static std::unique_ptr<Screenshot> MakeMetalScreenshot(
+      std::shared_ptr<Context>& context,
+      const std::shared_ptr<Texture>& texture);
+  static std::unique_ptr<Screenshot> MakeOpenGLScreenshot(
+      std::shared_ptr<Context>& context,
+      const std::shared_ptr<Texture>& texture);
+  static std::unique_ptr<Screenshot> MakeVulkanScreenshot(
+      std::shared_ptr<Context>& context,
+      const std::shared_ptr<Texture>& texture);
 };
 
 }  // namespace testing

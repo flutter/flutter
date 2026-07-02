@@ -22,6 +22,12 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
   return MakeScreenshot(aiks_context.GetContext(), texture);
 }
 
+std::unique_ptr<Screenshot> Screenshotter::MakeMetalScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  return MetalScreenshotter::MakeScreenshot(context, texture);
+}
+
 std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     const std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture) {

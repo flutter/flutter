@@ -7,7 +7,13 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("screenshot") {
   testonly = true
-  sources = [ "screenshot.h" ]
+  sources = [
+    "screenshot.h",
+    "screenshotter.cc",
+    "screenshotter.h",
+  ]
+
+  deps = [ "//flutter/impeller/display_list" ]
 }
 
 if (is_mac) {
@@ -19,15 +25,12 @@ if (is_mac) {
       "metal/metal_screenshot.mm",
       "metal/metal_screenshotter.h",
       "metal/metal_screenshotter.mm",
-      "screenshotter.cc",
-      "screenshotter.h",
       "vulkan/vulkan_screenshotter.h",
       "vulkan/vulkan_screenshotter.mm",
     ]
 
     deps = [
       ":screenshot",
-      "//flutter/display_list",
       "//flutter/fml",
       "//flutter/impeller/display_list",
       "//flutter/impeller/renderer/backend/metal",

@@ -88,6 +88,18 @@ std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
   return ReadTexture(context, texture);
 }
 
+std::unique_ptr<Screenshot> Screenshotter::MakeOpenGLScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  return ReadTexture(context, texture);
+}
+
+std::unique_ptr<Screenshot> Screenshotter::MakeVulkanScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  return ReadTexture(context, texture);
+}
+
 std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
     const AiksContext& aiks_context,
     const std::shared_ptr<Texture>& texture) {

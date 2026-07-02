@@ -4,22 +4,48 @@
 
 #include "flutter/impeller/testing/screenshotter.h"
 
-#include "flutter/impeller/testing/metal/metal_screenshotter.h"
-#include "flutter/impeller/testing/vulkan/vulkan_screenshotter.h"
-
 namespace impeller {
 namespace testing {
+
+#if !IMPELLER_ENABLE_METAL
+std::unique_ptr<Screenshot> Screenshotter::MakeMetalScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  FML_LOG(INFO) << "Screenshot not supported for Metal on this platform";
+  return nullptr;
+}
+#endif
+
+#if !IMPELLER_ENABLE_OPENGLES
+std::unique_ptr<Screenshot> Screenshotter::MakeOpenGLScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  FML_LOG(INFO) << "Screenshot not supported for OpenGL on this platform";
+  return nullptr;
+}
+#endif
+
+#if !IMPELLER_ENABLE_VULKAN
+std::unique_ptr<Screenshot> Screenshotter::MakeVulkanScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  FML_LOG(INFO) << "Screenshot not supported for Vulkan on this platform";
+  return nullptr;
+}
+#endif
 
 std::unique_ptr<Screenshot> Screenshotter::MakeScreenshot(
     std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture) {
   switch (context->GetBackendType()) {
     case Context::BackendType::kMetal:
-      return MetalScreenshotter::MakeScreenshot(context, texture);
+      return MakeMetalScreenshot(context, texture);
 
     case Context::BackendType::kOpenGLES:
+      return MakeOpenGLScreenshot(context, texture);
+
     case Context::BackendType::kVulkan:
-      return VulkanScreenshotter::MakeScreenshot(context, texture);
+      return MakeVulkanScreenshot(context, texture);
   }
 }
 

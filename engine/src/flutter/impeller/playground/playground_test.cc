@@ -43,6 +43,8 @@ void PlaygroundTest::SetUp() {
     GTEST_SKIP() << "Skipping due to user action.";
     return;
   }
+
+  SetEnableWriteGolden(IsGoldenTestSuite());
 }
 
 void PlaygroundTest::TearDown() {
