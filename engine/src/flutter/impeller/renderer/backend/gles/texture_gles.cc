@@ -507,9 +507,8 @@ void TextureGLES::InitializeContentsIfNecessary() {
         }
       } else if (desc.type == TextureType::kTexture2DArray) {
         if (!gl.GetCapabilities()->SupportsTextureArray()) {
-          VALIDATION_LOG
-              << "2D array textures require OpenGL ES 3.0 or desktop "
-                 "GL 3.0; this context does not support them.";
+          VALIDATION_LOG << "2D array textures are not supported on this "
+                            "context.";
           return;
         }
         // Array textures allocate the whole base mip level (all layers) in one

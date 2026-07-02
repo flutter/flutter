@@ -207,12 +207,16 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                                 desc->GetGlVersion().major_version >= 3 ||
                                 desc->HasExtension(kAppleTextureMaxLevelExt);
 
-  // GL_TEXTURE_2D_ARRAY and sampler2DArray are core in desktop GL 3.0 and
-  // OpenGL ES 3.0. ES 2.0 has no core fallback, though some ES 2.0 devices
-  // expose them via GL_EXT_texture_array.
-  // TODO(bdero): Also honor GL_EXT_texture_array on ES 2.0 contexts that expose
-  // it, resolving the array procs from the extension.
-  supports_texture_array_ = desc->GetGlVersion().major_version >= 3;
+  // 2D array textures (GL_TEXTURE_2D_ARRAY, sampled as sampler2DArray) need the
+  // 3D texture upload entry points. These are core on desktop GL 3.0 and
+  // OpenGL ES 3.0, and reachable below them via GL_EXT_texture_array (desktop
+  // GL 2.x) or GL_NV_texture_array (OpenGL ES 2.0). Gate on the resolved procs
+  // rather than the version so a context that advertises an extension but does
+  // not actually provide the entry points is treated as unsupported, and so
+  // ES 2.0 devices that do expose them are supported.
+  supports_texture_array_ = gl.TexImage3D.IsAvailable() &&
+                            gl.TexSubImage3D.IsAvailable() &&
+                            gl.CompressedTexSubImage3D.IsAvailable();
 
   // Anisotropic filtering is not part of any core GL or GLES version; it is
   // always gated on GL_EXT_texture_filter_anisotropic. The query and the

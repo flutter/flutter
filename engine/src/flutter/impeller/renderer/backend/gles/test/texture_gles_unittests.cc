@@ -156,7 +156,7 @@ TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
            ->GetProcTable()
            .GetCapabilities()
            ->SupportsTextureArray()) {
-    GTEST_SKIP() << "2D array textures require OpenGL ES 3.0.";
+    GTEST_SKIP() << "2D array textures are not supported on this context.";
   }
 
   TextureDescriptor desc;
