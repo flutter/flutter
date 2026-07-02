@@ -20,9 +20,6 @@ struct _FlViewRendererSoftware {
   // TRUE if the view size should be controlled by Flutter.
   gboolean sized_to_content;
 
-  // TRUE if have got the first frame to render.
-  gboolean have_first_frame;
-
   // Combines and stores frames.
   FlCompositorSoftware* compositor;
 
@@ -45,10 +42,7 @@ static gboolean redraw_cb(gpointer user_data) {
     return G_SOURCE_REMOVE;
   }
 
-  if (!self->have_first_frame) {
-    self->have_first_frame = TRUE;
-    fl_view_renderer_emit_first_frame(FL_VIEW_RENDERER(self));
-  }
+  fl_view_renderer_notify_frame(FL_VIEW_RENDERER(self));
 
   // If Flutter is controlling the window size, then resize the view if
   // necessary.

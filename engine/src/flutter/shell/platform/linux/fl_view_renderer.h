@@ -25,7 +25,7 @@ G_DECLARE_DERIVABLE_TYPE(FlViewRenderer,
  *
  * Subclasses implement rendering for a particular backend, for example
  * #FlViewRendererOpenGL and #FlViewRendererSoftware. The "first-frame" signal
- * is emitted by subclasses when the first frame has been rendered.
+ * is emitted when the first frame has been rendered.
  */
 
 struct _FlViewRendererClass {
@@ -75,13 +75,13 @@ void fl_view_renderer_present_layers(FlViewRenderer* renderer,
                                      size_t layers_count);
 
 /**
- * fl_view_renderer_emit_first_frame:
+ * fl_view_renderer_notify_frame:
  * @renderer: an #FlViewRenderer.
  *
- * Emits the "first-frame" signal. Subclasses call this once the first frame
- * has been rendered.
+ * Notifies that a frame has been rendered. Subclasses call this on each frame.
+ * The "first-frame" signal is emitted on the first call.
  */
-void fl_view_renderer_emit_first_frame(FlViewRenderer* renderer);
+void fl_view_renderer_notify_frame(FlViewRenderer* renderer);
 
 G_END_DECLS
 
