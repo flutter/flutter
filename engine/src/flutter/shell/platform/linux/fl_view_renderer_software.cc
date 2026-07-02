@@ -23,6 +23,9 @@ struct _FlViewRendererSoftware {
   // Combines and stores frames.
   FlCompositorSoftware* compositor;
 
+  // Surface the current frame is composited into.
+  cairo_surface_t* surface;
+
   // Task runner to wait for frames on.
   FlTaskRunner* task_runner;
 
@@ -33,6 +36,20 @@ struct _FlViewRendererSoftware {
 G_DEFINE_TYPE(FlViewRendererSoftware,
               fl_view_renderer_software,
               fl_view_renderer_get_type())
+
+// Get the size of the current frame in pixels. The size is zero if there is no
+// frame yet. Must be called with the frame mutex held.
+static void get_frame_size(FlViewRendererSoftware* self,
+                           size_t* width,
+                           size_t* height) {
+  if (self->surface != nullptr) {
+    *width = cairo_image_surface_get_width(self->surface);
+    *height = cairo_image_surface_get_height(self->surface);
+  } else {
+    *width = 0;
+    *height = 0;
+  }
+}
 
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
@@ -45,33 +62,19 @@ static gboolean redraw_cb(gpointer user_data) {
   fl_view_renderer_notify_frame(FL_VIEW_RENDERER(self));
 
   // If Flutter is controlling the window size, then resize the view if
-  // necessary.
-  GtkWidget* render_widget = GTK_WIDGET(self);
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(render_widget, &allocation);
-  gint scale_factor = gtk_widget_get_scale_factor(render_widget);
-  size_t width = allocation.width * scale_factor;
-  size_t height = allocation.height * scale_factor;
-  size_t frame_width, frame_height;
-  {
-    g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-    fl_compositor_software_get_frame_size(self->compositor, &frame_width,
-                                          &frame_height);
-  }
-  gboolean frame_size_matches = width == frame_width && height == frame_height;
-  if (self->sized_to_content && !frame_size_matches) {
-    gtk_widget_set_size_request(render_widget, frame_width / scale_factor,
-                                frame_height / scale_factor);
-    GtkWidget* toplevel = gtk_widget_get_toplevel(render_widget);
-    if (GTK_IS_WINDOW(toplevel)) {
-      // Resize to smallest size, so that the window will shrink to fit the new
-      // size of the render area.
-      gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
+  // necessary. The redraw happens once the resized frame arrives.
+  if (self->sized_to_content) {
+    size_t frame_width, frame_height;
+    g_mutex_lock(&self->frame_mutex);
+    get_frame_size(self, &frame_width, &frame_height);
+    g_mutex_unlock(&self->frame_mutex);
+    if (fl_view_renderer_resize_to_frame(FL_VIEW_RENDERER(self), frame_width,
+                                         frame_height)) {
+      return G_SOURCE_REMOVE;
     }
-    return G_SOURCE_REMOVE;
   }
 
-  gtk_widget_queue_draw(render_widget);
+  gtk_widget_queue_draw(GTK_WIDGET(self));
 
   return G_SOURCE_REMOVE;
 }
@@ -87,8 +90,7 @@ static void wait_for_frame(FlViewRendererSoftware* self,
     size_t width = gdk_window_get_width(window) * scale_factor;
     size_t height = gdk_window_get_height(window) * scale_factor;
     size_t frame_width, frame_height;
-    fl_compositor_software_get_frame_size(self->compositor, &frame_width,
-                                          &frame_height);
+    get_frame_size(self, &frame_width, &frame_height);
     if (frame_width == width && frame_height == height) {
       break;
     }
@@ -140,8 +142,15 @@ static gboolean fl_view_renderer_software_draw(GtkWidget* widget, cairo_t* cr) {
     wait_for_frame(self, window, scale_factor);
   }
 
-  gboolean result =
-      fl_compositor_software_render(self->compositor, cr, scale_factor);
+  gboolean result = FALSE;
+  if (self->surface != nullptr) {
+    cairo_save(cr);
+    cairo_scale(cr, 1.0 / scale_factor, 1.0 / scale_factor);
+    cairo_set_source_surface(cr, self->surface, 0.0, 0.0);
+    cairo_paint(cr);
+    cairo_restore(cr);
+    result = TRUE;
+  }
 
   g_mutex_unlock(&self->frame_mutex);
 
@@ -162,8 +171,27 @@ static void fl_view_renderer_software_present_layers(
   }
 
   g_mutex_lock(&self->frame_mutex);
-  fl_compositor_software_composite_layers(self->compositor, layers,
-                                          layers_count);
+  if (layers_count > 0) {
+    size_t width = layers[0]->size.width;
+    size_t height = layers[0]->size.height;
+
+    // Recreate the surface if the frame size has changed.
+    if (self->surface == nullptr ||
+        static_cast<size_t>(cairo_image_surface_get_width(self->surface)) !=
+            width ||
+        static_cast<size_t>(cairo_image_surface_get_height(self->surface)) !=
+            height) {
+      g_clear_pointer(&self->surface, cairo_surface_destroy);
+      self->surface =
+          cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    }
+
+    cairo_t* cr = cairo_create(self->surface);
+    fl_compositor_software_composite_layers(self->compositor, cr, layers,
+                                            layers_count);
+    cairo_destroy(cr);
+    cairo_surface_flush(self->surface);
+  }
   g_mutex_unlock(&self->frame_mutex);
 
   // Wake up the GTK thread if it is waiting for this frame.
@@ -192,6 +220,7 @@ static void fl_view_renderer_software_finalize(GObject* object) {
   // holds a strong reference on the view (and thus this renderer) while
   // presenting.
   g_clear_object(&self->compositor);
+  g_clear_pointer(&self->surface, cairo_surface_destroy);
 
   G_OBJECT_CLASS(fl_view_renderer_software_parent_class)->finalize(object);
 }
