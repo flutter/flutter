@@ -1973,6 +1973,45 @@ static constexpr Scalar kMaxTextScale = 250;
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
+  // Color (COLR) text: draw each glyph's color layers as vector paths so the
+  // text stays crisp at any scale. The color glyph atlas (used otherwise)
+  // rasterizes at a capped size and softens/pixelates when scaled. Monochrome
+  // text gets the analogous treatment via the GetPath() branch below.
+  if (text_frame->HasColor()) {
+    std::vector<ColorGlyphLayer> color_layers = text_frame->GetColorPaths();
+    if (!color_layers.empty()) {
+      // A drawText op is budgeted exactly one depth slot by the DisplayList
+      // (AUTO_DEPTH_WATCHER(1u) in dl_dispatcher.cc), so all layers must share
+      // it: the first draw takes the slot and the rest stack on top of it via
+      // reuse_depth, composited in submission order (same pattern
+      // BlurStyle::kSolid uses to draw its solid shape atop its blur). Opaque
+      // same-depth draws resolve first-wins via the depth buffer, so layers
+      // are painted front-to-back: topmost COLR layer first, base glyph last.
+      Save(1);
+      Concat(Matrix::MakeTranslation(position));
+      bool first_layer = true;
+      for (auto it = color_layers.rbegin(); it != color_layers.rend(); ++it) {
+        const ColorGlyphLayer& layer = *it;
+        Paint layer_paint = paint;
+        layer_paint.style = Paint::Style::kFill;
+        layer_paint.color_source = nullptr;  // fill with the layer's own color
+        layer_paint.color =
+            layer.use_foreground_color
+                ? paint.color
+                : layer.color.WithAlpha(layer.color.alpha * paint.color.alpha);
+        Entity entity;
+        entity.SetTransform(GetCurrentTransform());
+        entity.SetBlendMode(layer_paint.blend_mode);
+        FillPathGeometry geom(layer.path);
+        AddRenderEntityWithFiltersToCurrentPass(entity, &geom, layer_paint,
+                                                /*reuse_depth=*/!first_layer);
+        first_layer = false;
+      }
+      Restore();
+      return;
+    }
+  }
+
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
   if (max_scale * text_frame->GetFont().GetMetrics().point_size >
       kMaxTextScale) {
