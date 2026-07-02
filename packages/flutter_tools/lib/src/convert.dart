@@ -67,16 +67,20 @@ const Encoding utf8 = Utf8Codec();
 class Utf8Decoder extends Converter<List<int>, String> {
   const Utf8Decoder({this.reportErrors = true});
 
-  static const _systemDecoder = cnv.Utf8Decoder(allowMalformed: true);
+  static const _allowMalformedDecoder = cnv.Utf8Decoder(allowMalformed: true);
+  static const _strictDecoder = cnv.Utf8Decoder();
 
   final bool reportErrors;
 
   @override
   String convert(List<int> input, [int start = 0, int? end]) {
-    final String result = _systemDecoder.convert(input, start, end);
-    // Finding a Unicode replacement character indicates that the input
-    // was malformed.
-    if (reportErrors && result.contains('\u{FFFD}')) {
+    if (!reportErrors) {
+      return _allowMalformedDecoder.convert(input, start, end);
+    }
+    try {
+      return _strictDecoder.convert(input, start, end);
+    } on FormatException {
+      final String result = _allowMalformedDecoder.convert(input, start, end);
       throwToolExit(
         'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found while decoding string: $result. '
         'The Flutter team would greatly appreciate if you could file a bug explaining '
@@ -85,16 +89,17 @@ class Utf8Decoder extends Converter<List<int>, String> {
         'The source bytes were:\n$input\n\n',
       );
     }
-    return result;
   }
 
   @override
   ByteConversionSink startChunkedConversion(Sink<String> sink) =>
-      _systemDecoder.startChunkedConversion(sink);
+      (reportErrors ? _strictDecoder : _allowMalformedDecoder).startChunkedConversion(sink);
 
   @override
-  Stream<String> bind(Stream<List<int>> stream) => _systemDecoder.bind(stream);
+  Stream<String> bind(Stream<List<int>> stream) =>
+      (reportErrors ? _strictDecoder : _allowMalformedDecoder).bind(stream);
 
   @override
-  Converter<List<int>, T> fuse<T>(Converter<String, T> other) => _systemDecoder.fuse(other);
+  Converter<List<int>, T> fuse<T>(Converter<String, T> other) =>
+      (reportErrors ? _strictDecoder : _allowMalformedDecoder).fuse(other);
 }
