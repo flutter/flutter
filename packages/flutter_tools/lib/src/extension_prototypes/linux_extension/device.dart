@@ -49,18 +49,6 @@ class LinuxDevice extends Device {
   @override
   Future<void> launchApp(Uri appBundlePath, List<String> args) async {
     final String filePath = appBundlePath.toFilePath();
-    if (!fileSystem.isFileSync(filePath)) {
-      _logController.add('Launching app bundle $filePath...');
-      Timer.periodic(const Duration(milliseconds: 50), (Timer timer) {
-        if (timer.tick > 3) {
-          timer.cancel();
-          return;
-        }
-        _logController.add('stdout log line #${timer.tick} from application.');
-      });
-      _vmServiceUriCompleter.complete(Uri.parse('http://127.0.0.1:9090/auth-token-123/'));
-      return;
-    }
 
     _logController.add('Launching app bundle $filePath with args: $args...');
 

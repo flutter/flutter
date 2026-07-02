@@ -13,6 +13,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../extension_prototypes/linux_extension/extension.dart';
+import '../globals.dart' as globals;
 import '../linux/application_package.dart';
 import '../linux/build_linux.dart';
 import '../project.dart';
@@ -218,6 +219,7 @@ class ExtensionBackedDevice extends Device {
     String? executablePath;
     if (package is LinuxApp) {
       executablePath = package.executable(debuggingOptions.buildInfo.mode);
+      executablePath = globals.fs.path.absolute(executablePath);
     }
 
     try {

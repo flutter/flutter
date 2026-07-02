@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/generic_extension_protocol.dart';
@@ -30,7 +31,7 @@ void main() {
 
       // 2. Query capabilities
       final ToolExtensionCapabilities capabilities = await extension.getCapabilities();
-      expect(capabilities.services, const <String>['device']);
+      expect(capabilities.services, const <String>['device', 'diagnostics']);
 
       // 3. Discover devices
       final Object? devicesResult = await extension.callMethod('device.discoverDevices');
@@ -61,28 +62,63 @@ void main() {
       });
       addTearDown(sub.cancel);
 
+      final Directory tempDir = Directory.systemTemp.createTempSync(
+        'flutter_extension_device_test_',
+      );
+      addTearDown(() {
+        try {
+          tempDir.deleteSync(recursive: true);
+        } on FileSystemException {
+          // Ignore failures to delete temp directory if process is still exiting.
+        }
+      });
+
+      final mockAppFile = File('${tempDir.path}/mock_app${Platform.isWindows ? ".bat" : ""}');
+      if (Platform.isWindows) {
+        mockAppFile.writeAsStringSync(
+          '@echo off\r\n'
+          'echo stdout log line #1 from application.\r\n'
+          'echo stdout log line #2 from application.\r\n'
+          'echo stdout log line #3 from application.\r\n'
+          'echo The Dart VM service is listening on http://127.0.0.1:9090/auth-token-123/\r\n'
+          'echo stdout log line #4 from application.\r\n'
+          ':loop\r\n'
+          'ping -n 2 127.0.0.1 >nul\r\n'
+          'goto loop\r\n',
+        );
+      } else {
+        mockAppFile.writeAsStringSync(
+          '#!/bin/sh\n'
+          'echo "stdout log line #1 from application."\n'
+          'echo "stdout log line #2 from application."\n'
+          'echo "stdout log line #3 from application."\n'
+          'echo "The Dart VM service is listening on http://127.0.0.1:9090/auth-token-123/"\n'
+          'echo "stdout log line #4 from application."\n'
+          'while true; do\n'
+          '  sleep 1\n'
+          'done\n',
+        );
+        Process.runSync('chmod', <String>['+x', mockAppFile.path]);
+      }
+
+      final String appPath = mockAppFile.path;
+
       await extension.callMethod(
         'device.installApp',
-        params: <String, Object?>{
-          'deviceId': 'linux-proto-1',
-          'appBundlePath': '/build/linux/x64/debug/bundle',
-        },
+        params: <String, Object?>{'deviceId': 'linux-proto-1', 'appBundlePath': appPath},
       );
 
       // 5. Launch app
       await extension.callMethod(
         'device.launchApp',
-        params: <String, Object?>{
-          'deviceId': 'linux-proto-1',
-          'appBundlePath': '/build/linux/x64/debug/bundle',
-        },
+        params: <String, Object?>{'deviceId': 'linux-proto-1', 'appBundlePath': appPath},
       );
 
       // Wait for app logs to be streamed back
       await logCompleter.future.timeout(const Duration(seconds: 3));
 
-      expect(logLines, contains('Installing app bundle /build/linux/x64/debug/bundle...'));
-      expect(logLines, contains('Launching app bundle /build/linux/x64/debug/bundle...'));
+      expect(logLines, contains('Installing app bundle $appPath...'));
+      expect(logLines, contains('Launching app bundle $appPath with args: []...'));
       expect(logLines, contains('stdout log line #1 from application.'));
       expect(logLines, contains('stdout log line #2 from application.'));
       expect(logLines, contains('stdout log line #3 from application.'));
