@@ -103,7 +103,11 @@ source_set("flutter_linux_sources") {
              "fl_window_state_monitor.h",
            ]
 
-  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:wayland_client",
+    "//flutter/shell/platform/linux/config:wayland_egl",
+  ]
 
   public_configs = [ ":disable_warnings" ]
 
@@ -162,6 +166,8 @@ source_set("flutter_linux_sources") {
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
     "fl_string_codec.cc",
+    "fl_subsurface.cc",
+    "fl_subsurface_egl.cc",
     "fl_task_runner.cc",
     "fl_text_input_channel.cc",
     "fl_text_input_handler.cc",
@@ -176,6 +182,7 @@ source_set("flutter_linux_sources") {
     "fl_view_renderer.cc",
     "fl_view_renderer_opengl.cc",
     "fl_view_renderer_software.cc",
+    "fl_view_renderer_subsurface.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
   ]
