@@ -181,7 +181,7 @@ void main() {
                   onPressed: () {
                     showCupertinoSheet<void>(
                       context: scaffoldKey.currentContext!,
-                      pageBuilder: (BuildContext context) {
+                      scrollableBuilder: (BuildContext context, ScrollController controller) {
                         return const CupertinoPageScaffold(child: Text('Page 2'));
                       },
                       showDragHandle: true,
@@ -228,7 +228,7 @@ void main() {
                     showCupertinoSheet<void>(
                       context: scaffoldKey.currentContext!,
                       useNestedNavigation: true,
-                      pageBuilder: (BuildContext context) {
+                      scrollableBuilder: (BuildContext context, ScrollController controller) {
                         return const CupertinoPageScaffold(child: Text('Page 2'));
                       },
                       showDragHandle: true,
