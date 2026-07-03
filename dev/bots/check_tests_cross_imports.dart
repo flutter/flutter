@@ -208,7 +208,6 @@ class TestsCrossImportChecker {
     'packages/flutter_test/test/controller_test.dart',
     'packages/flutter_test/test/recording_canvas_test.dart',
     'packages/flutter_test/test/test_text_input_test.dart',
-    'packages/flutter_test/test/multi_view_accessibility_test.dart',
   };
 
   static final Set<String> _knownCrossImports = {

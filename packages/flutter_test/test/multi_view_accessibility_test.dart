@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'multi_view_testing.dart';
@@ -66,19 +66,19 @@ void main() {
         Container(
           width: 200.0,
           height: 200.0,
-          color: Colors.yellow,
+          color: const Color(0xFFFFEB3B),
           child: const Text(
             'this is a test',
-            style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            style: TextStyle(fontSize: 14.0, color: Color(0xFFFFFF00)),
           ),
         ),
         Container(
           width: 200.0,
           height: 200.0,
-          color: Colors.yellow,
+          color: const Color(0xFFFFEB3B),
           child: const Text(
             'this is a test',
-            style: TextStyle(fontSize: 25.0, color: Colors.yellowAccent),
+            style: TextStyle(fontSize: 25.0, color: Color(0xFFFFFF00)),
           ),
         ),
       ],
