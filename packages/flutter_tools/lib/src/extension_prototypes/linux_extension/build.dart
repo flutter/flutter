@@ -63,10 +63,26 @@ base class LinuxAssembleTarget extends Target {
       outputDir.createSync(recursive: true);
     }
 
-    // 1. cmake -S <project>/linux -B <output>
+    final String buildType = env.defines['CMAKE_BUILD_TYPE'] ?? 'Debug';
+    final String targetPlatform = env.defines['FLUTTER_TARGET_PLATFORM'] ?? 'linux-x64';
+
+    // 1. cmake -G Ninja -DCMAKE_BUILD_TYPE=<buildType> -DFLUTTER_TARGET_PLATFORM=<targetPlatform> -S <project>/linux -B <output>
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
-    final cmakeConfigureCmd = <String>['cmake', '-S', linuxProjectPath, '-B', outputPath];
-    final ProcessResult configureResult = await _processManager.run(cmakeConfigureCmd);
+    final cmakeConfigureCmd = <String>[
+      'cmake',
+      '-G',
+      'Ninja',
+      '-DCMAKE_BUILD_TYPE=$buildType',
+      '-DFLUTTER_TARGET_PLATFORM=$targetPlatform',
+      '-S',
+      linuxProjectPath,
+      '-B',
+      outputPath,
+    ];
+    final ProcessResult configureResult = await _processManager.run(
+      cmakeConfigureCmd,
+      environment: env.defines,
+    );
     if (configureResult.exitCode != 0) {
       throw Exception(
         'CMake configuration failed with exit code ${configureResult.exitCode}.\n'
@@ -77,7 +93,10 @@ base class LinuxAssembleTarget extends Target {
 
     // 2. cmake --build <output>
     final cmakeBuildCmd = <String>['cmake', '--build', outputPath];
-    final ProcessResult buildResult = await _processManager.run(cmakeBuildCmd);
+    final ProcessResult buildResult = await _processManager.run(
+      cmakeBuildCmd,
+      environment: env.defines,
+    );
     if (buildResult.exitCode != 0) {
       throw Exception(
         'CMake build failed with exit code ${buildResult.exitCode}.\n'

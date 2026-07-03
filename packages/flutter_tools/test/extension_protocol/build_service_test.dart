@@ -80,8 +80,24 @@ void main() {
       fs.directory('/build/out').createSync(recursive: true);
 
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['cmake', '-S', '/project/linux', '-B', '/build/out']),
-        const FakeCommand(command: <String>['cmake', '--build', '/build/out']),
+        const FakeCommand(
+          command: <String>[
+            'cmake',
+            '-G',
+            'Ninja',
+            '-DCMAKE_BUILD_TYPE=Debug',
+            '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+            '-S',
+            '/project/linux',
+            '-B',
+            '/build/out',
+          ],
+          environment: <String, String>{},
+        ),
+        const FakeCommand(
+          command: <String>['cmake', '--build', '/build/out'],
+          environment: <String, String>{},
+        ),
       ]);
 
       final buildService = LinuxBuildService(fileSystem: fs, processManager: fakeProcessManager);
@@ -106,6 +122,69 @@ void main() {
       expect(result['success'], true);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
+
+    testWithoutContext(
+      'LinuxBuildService target execution forwards custom defines to cmake and environment',
+      () async {
+        final fs = MemoryFileSystem.test();
+        fs.directory('/project/linux').createSync(recursive: true);
+        fs.directory('/build/out').createSync(recursive: true);
+
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'cmake',
+              '-G',
+              'Ninja',
+              '-DCMAKE_BUILD_TYPE=Release',
+              '-DFLUTTER_TARGET_PLATFORM=linux-arm64',
+              '-S',
+              '/project/linux',
+              '-B',
+              '/build/out',
+            ],
+            environment: <String, String>{
+              'CMAKE_BUILD_TYPE': 'Release',
+              'FLUTTER_TARGET_PLATFORM': 'linux-arm64',
+              'CUSTOM_KEY': 'CUSTOM_VALUE',
+            },
+          ),
+          const FakeCommand(
+            command: <String>['cmake', '--build', '/build/out'],
+            environment: <String, String>{
+              'CMAKE_BUILD_TYPE': 'Release',
+              'FLUTTER_TARGET_PLATFORM': 'linux-arm64',
+              'CUSTOM_KEY': 'CUSTOM_VALUE',
+            },
+          ),
+        ]);
+
+        final buildService = LinuxBuildService(fileSystem: fs, processManager: fakeProcessManager);
+        final Map<String, Function> rpcHandlers = await buildService.initialize();
+        final build =
+            rpcHandlers['build']! as Future<Map<String, Object?>> Function(Map<String, Object?>);
+
+        final env = BuildEnvironment(
+          cacheDir: Uri.parse('file:///cache'),
+          defines: <String, String>{
+            'CMAKE_BUILD_TYPE': 'Release',
+            'FLUTTER_TARGET_PLATFORM': 'linux-arm64',
+            'CUSTOM_KEY': 'CUSTOM_VALUE',
+          },
+          flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
+          outputDirectory: Uri.parse('file:///build/out'),
+          projectRoot: Uri.parse('file:///project'),
+        );
+
+        final Map<String, Object?> result = await build(<String, Object?>{
+          'targetName': 'assemble_linux_app',
+          'environment': env.toMap(),
+        });
+
+        expect(result['success'], true);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
 
     testWithoutContext('LinuxBuildService handles missing/invalid parameters safely', () async {
       final buildService = LinuxBuildService();
@@ -134,7 +213,18 @@ void main() {
 
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
-          command: <String>['cmake', '-S', '/project/linux', '-B', '/build/out'],
+          command: <String>[
+            'cmake',
+            '-G',
+            'Ninja',
+            '-DCMAKE_BUILD_TYPE=Debug',
+            '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+            '-S',
+            '/project/linux',
+            '-B',
+            '/build/out',
+          ],
+          environment: <String, String>{},
           exitCode: 1,
           stdout: 'CMake configure error stdout',
           stderr: 'CMake configure error stderr',
@@ -292,6 +382,9 @@ void main() {
 
         expect(env.projectRoot, Uri.parse('file:///project/'));
         expect(env.outputDirectory.path, contains('build/custom_device/linux-proto-1/debug'));
+        expect(env.defines['FLUTTER_TARGET_PLATFORM'], 'linux-x64');
+        expect(env.defines['FLUTTER_BUILD_MODE'], 'debug');
+        expect(env.defines['CMAKE_BUILD_TYPE'], 'Debug');
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),

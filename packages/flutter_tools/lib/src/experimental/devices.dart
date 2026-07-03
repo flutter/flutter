@@ -12,6 +12,7 @@ import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
@@ -85,7 +86,7 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
           for (final Object? item in devicesResult) {
             if (item is Map) {
               final Map<String, Object?> deviceData = item.cast<String, Object?>();
-              final String? interfaceName = deviceData['connectionInterface'] as String?;
+              final interfaceName = deviceData['connectionInterface'] as String?;
               DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
               if (interfaceName != null) {
                 try {
@@ -300,6 +301,9 @@ class ExtensionBackedDevice extends Device {
       final Map<String, String> environmentConfig = debuggingOptions.buildInfo
           .toEnvironmentConfig();
       environmentConfig['FLUTTER_TARGET'] = mainPath ?? 'lib/main.dart';
+      environmentConfig['FLUTTER_TARGET_PLATFORM'] = platform.getName();
+      environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
+      environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
 
       // 3. Extract local engine overrides
       final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
