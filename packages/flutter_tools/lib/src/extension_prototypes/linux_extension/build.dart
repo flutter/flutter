@@ -139,8 +139,8 @@ base class LinuxAssembleTarget extends Target {
       );
     }
 
-    // 2. cmake --build <output>
-    final cmakeBuildCmd = <String>['cmake', '--build', outputPath];
+    // 2. cmake --build <output> --target install
+    final cmakeBuildCmd = <String>['cmake', '--build', outputPath, '--target', 'install'];
     final ProcessResult buildResult = await _processManager.run(
       cmakeBuildCmd,
       environment: env.defines,

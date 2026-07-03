@@ -100,7 +100,7 @@ void main() {
           environment: <String, String>{},
         ),
         const FakeCommand(
-          command: <String>['cmake', '--build', '/build/out'],
+          command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
           environment: <String, String>{},
         ),
       ]);
@@ -155,7 +155,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out'],
+            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
             environment: <String, String>{
               'CMAKE_BUILD_TYPE': 'Release',
               'FLUTTER_TARGET_PLATFORM': 'linux-arm64',
@@ -301,7 +301,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out'],
+            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
             environment: <String, String>{},
           ),
         ]);
@@ -384,7 +384,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out'],
+            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
             environment: <String, String>{},
           ),
         ]);
