@@ -2,39 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/basic/absorb_pointer.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AbsorbPointer prevents hit testing on its child', (
+  testWidgets('AbsorbPointer absorbs taps over the overlapping region', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.AbsorbPointerApp());
 
-    // Get the center of the stack.
-    final Offset center = tester.getCenter(find.byType(Stack).first);
-
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    // Add the point to the center of the stack where the AbsorbPointer is.
-    await gesture.addPointer(location: center);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    final Finder absorbPointer = find.descendant(
+      of: find.byType(example.AbsorbPointerExample),
+      matching: find.byType(AbsorbPointer),
     );
 
-    // Move the pointer to the left of the stack where the AbsorbPointer is not.
-    await gesture.moveTo(center + const Offset(-100, 0));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+    // Tapping the overlapping region does nothing: the AbsorbPointer claims
+    // the hit, so neither its child button nor the button behind it in the
+    // stack receives the tap.
+    await tester.tapAt(tester.getCenter(absorbPointer));
+    await tester.pump();
+    expect(find.text('Taps received: 0'), findsNWidgets(2));
+
+    // The part of the button behind that the AbsorbPointer does not cover
+    // still receives taps.
+    await tester.tapAt(
+      tester.getCenter(absorbPointer) + const Offset(-75.0, 0.0),
     );
+    await tester.pump();
+    expect(find.text('Taps received: 1'), findsOneWidget);
+  });
+
+  testWidgets('IgnorePointer passes taps through to the widget behind', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.AbsorbPointerApp());
+
+    final Finder ignorePointer = find.descendant(
+      of: find.byType(example.AbsorbPointerExample),
+      matching: find.byType(IgnorePointer),
+    );
+
+    // Tapping the overlapping region taps the button behind: the
+    // IgnorePointer is invisible to hit testing, so the pointer event goes
+    // through to the next target in the stack.
+    await tester.tapAt(tester.getCenter(ignorePointer));
+    await tester.pump();
+    expect(find.text('Taps received: 1'), findsOneWidget);
   });
 }
