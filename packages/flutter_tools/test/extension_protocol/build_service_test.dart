@@ -257,6 +257,232 @@ void main() {
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
+
+    testWithoutContext(
+      'LinuxBuildService proactively deletes non-Ninja CMakeCache.txt and CMakeFiles before configure',
+      () async {
+        final fs = MemoryFileSystem.test();
+        fs.directory('/project/linux').createSync(recursive: true);
+        fs.directory('/build/out').createSync(recursive: true);
+
+        final File cacheFile = fs.file('/build/out/CMakeCache.txt');
+        cacheFile.writeAsStringSync('CMAKE_GENERATOR:INTERNAL=Unix Makefiles\n');
+        final Directory cmakeFilesDir = fs.directory('/build/out/CMakeFiles');
+        cmakeFilesDir.createSync(recursive: true);
+        cmakeFilesDir.childFile('test.cmake').createSync();
+
+        var cacheExistedWhenConfigureRan = false;
+        var cmakeFilesExistedWhenConfigureRan = false;
+
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'cmake',
+              '-G',
+              'Ninja',
+              '-DCMAKE_BUILD_TYPE=Debug',
+              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+              '-S',
+              '/project/linux',
+              '-B',
+              '/build/out',
+            ],
+            environment: const <String, String>{},
+            onRun: (List<String> command) {
+              cacheExistedWhenConfigureRan = fs.file('/build/out/CMakeCache.txt').existsSync();
+              cmakeFilesExistedWhenConfigureRan = fs
+                  .directory('/build/out/CMakeFiles')
+                  .existsSync();
+            },
+          ),
+          const FakeCommand(
+            command: <String>['cmake', '--build', '/build/out'],
+            environment: <String, String>{},
+          ),
+        ]);
+
+        final buildService = LinuxBuildService(fileSystem: fs, processManager: fakeProcessManager);
+        final Map<String, Function> rpcHandlers = await buildService.initialize();
+        final build =
+            rpcHandlers['build']! as Future<Map<String, Object?>> Function(Map<String, Object?>);
+
+        final env = BuildEnvironment(
+          cacheDir: Uri.parse('file:///cache'),
+          defines: <String, String>{},
+          flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
+          outputDirectory: Uri.parse('file:///build/out'),
+          projectRoot: Uri.parse('file:///project'),
+        );
+
+        final Map<String, Object?> result = await build(<String, Object?>{
+          'targetName': 'assemble_linux_app',
+          'environment': env.toMap(),
+        });
+
+        expect(result['success'], true);
+        expect(cacheExistedWhenConfigureRan, false);
+        expect(cmakeFilesExistedWhenConfigureRan, false);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'LinuxBuildService retries CMake configure once when initial configure fails and cache exists',
+      () async {
+        final fs = MemoryFileSystem.test();
+        fs.directory('/project/linux').createSync(recursive: true);
+        fs.directory('/build/out').createSync(recursive: true);
+
+        final File cacheFile = fs.file('/build/out/CMakeCache.txt');
+        cacheFile.writeAsStringSync('CMAKE_GENERATOR:INTERNAL=Ninja\n');
+        final Directory cmakeFilesDir = fs.directory('/build/out/CMakeFiles');
+        cmakeFilesDir.createSync(recursive: true);
+        cmakeFilesDir.childFile('test.cmake').createSync();
+
+        var cacheExistedOnRetry = false;
+        var cmakeFilesExistedOnRetry = false;
+
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'cmake',
+              '-G',
+              'Ninja',
+              '-DCMAKE_BUILD_TYPE=Debug',
+              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+              '-S',
+              '/project/linux',
+              '-B',
+              '/build/out',
+            ],
+            environment: <String, String>{},
+            exitCode: 1,
+            stdout: 'Initial configure failure stdout',
+            stderr: 'Initial configure failure stderr',
+          ),
+          FakeCommand(
+            command: const <String>[
+              'cmake',
+              '-G',
+              'Ninja',
+              '-DCMAKE_BUILD_TYPE=Debug',
+              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+              '-S',
+              '/project/linux',
+              '-B',
+              '/build/out',
+            ],
+            environment: const <String, String>{},
+            onRun: (List<String> command) {
+              cacheExistedOnRetry = fs.file('/build/out/CMakeCache.txt').existsSync();
+              cmakeFilesExistedOnRetry = fs.directory('/build/out/CMakeFiles').existsSync();
+            },
+          ),
+          const FakeCommand(
+            command: <String>['cmake', '--build', '/build/out'],
+            environment: <String, String>{},
+          ),
+        ]);
+
+        final buildService = LinuxBuildService(fileSystem: fs, processManager: fakeProcessManager);
+        final Map<String, Function> rpcHandlers = await buildService.initialize();
+        final build =
+            rpcHandlers['build']! as Future<Map<String, Object?>> Function(Map<String, Object?>);
+
+        final env = BuildEnvironment(
+          cacheDir: Uri.parse('file:///cache'),
+          defines: <String, String>{},
+          flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
+          outputDirectory: Uri.parse('file:///build/out'),
+          projectRoot: Uri.parse('file:///project'),
+        );
+
+        final Map<String, Object?> result = await build(<String, Object?>{
+          'targetName': 'assemble_linux_app',
+          'environment': env.toMap(),
+        });
+
+        expect(result['success'], true);
+        expect(cacheExistedOnRetry, false);
+        expect(cmakeFilesExistedOnRetry, false);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'LinuxBuildService throws error when retried CMake configure fails after cache cleanup',
+      () async {
+        final fs = MemoryFileSystem.test();
+        fs.directory('/project/linux').createSync(recursive: true);
+        fs.directory('/build/out').createSync(recursive: true);
+
+        final File cacheFile = fs.file('/build/out/CMakeCache.txt');
+        cacheFile.writeAsStringSync('CMAKE_GENERATOR:INTERNAL=Ninja\n');
+
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'cmake',
+              '-G',
+              'Ninja',
+              '-DCMAKE_BUILD_TYPE=Debug',
+              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+              '-S',
+              '/project/linux',
+              '-B',
+              '/build/out',
+            ],
+            environment: <String, String>{},
+            exitCode: 1,
+            stdout: 'First configure failure stdout',
+            stderr: 'First configure failure stderr',
+          ),
+          const FakeCommand(
+            command: <String>[
+              'cmake',
+              '-G',
+              'Ninja',
+              '-DCMAKE_BUILD_TYPE=Debug',
+              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+              '-S',
+              '/project/linux',
+              '-B',
+              '/build/out',
+            ],
+            environment: <String, String>{},
+            exitCode: 1,
+            stdout: 'Second configure failure stdout',
+            stderr: 'Second configure failure stderr',
+          ),
+        ]);
+
+        final buildService = LinuxBuildService(fileSystem: fs, processManager: fakeProcessManager);
+        final Map<String, Function> rpcHandlers = await buildService.initialize();
+        final build =
+            rpcHandlers['build']! as Future<Map<String, Object?>> Function(Map<String, Object?>);
+
+        final env = BuildEnvironment(
+          cacheDir: Uri.parse('file:///cache'),
+          defines: <String, String>{},
+          flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
+          outputDirectory: Uri.parse('file:///build/out'),
+          projectRoot: Uri.parse('file:///project'),
+        );
+
+        final Map<String, Object?> result = await build(<String, Object?>{
+          'targetName': 'assemble_linux_app',
+          'environment': env.toMap(),
+        });
+
+        expect(result['success'], false);
+        expect(
+          result['errorMessage']! as String,
+          contains('CMake configuration failed with exit code 1'),
+        );
+        expect(result['errorMessage']! as String, contains('Second configure failure stdout'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
   });
 
   group('ExtensionBackedDevice Build Delegation (Host Side)', () {

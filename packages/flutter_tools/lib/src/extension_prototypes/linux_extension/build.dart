@@ -10,6 +10,10 @@ import 'package:process/process.dart';
 
 import '../../../flutter_tools_extension.dart';
 
+const _cmakeCacheFileName = 'CMakeCache.txt';
+const _cmakeFilesDirectoryName = 'CMakeFiles';
+const _expectedNinjaGeneratorLine = 'CMAKE_GENERATOR:INTERNAL=Ninja';
+
 /// The build service implementation for Linux platform devices.
 base class LinuxBuildService extends BuildService {
   LinuxBuildService({FileSystem? fileSystem, ProcessManager? processManager})
@@ -66,6 +70,26 @@ base class LinuxAssembleTarget extends Target {
     final String buildType = env.defines['CMAKE_BUILD_TYPE'] ?? 'Debug';
     final String targetPlatform = env.defines['FLUTTER_TARGET_PLATFORM'] ?? 'linux-x64';
 
+    try {
+      final File cacheFile = _fileSystem.file(
+        _fileSystem.path.join(outputPath, _cmakeCacheFileName),
+      );
+      if (cacheFile.existsSync()) {
+        var isNinjaGenerator = false;
+        try {
+          final String cacheContent = cacheFile.readAsStringSync();
+          isNinjaGenerator = cacheContent.contains(_expectedNinjaGeneratorLine);
+        } on FileSystemException {
+          isNinjaGenerator = false;
+        }
+        if (!isNinjaGenerator) {
+          _cleanCMakeCache(outputPath);
+        }
+      }
+    } on FileSystemException {
+      // Safely ignore file system exceptions during proactive cache check.
+    }
+
     // 1. cmake -G Ninja -DCMAKE_BUILD_TYPE=<buildType> -DFLUTTER_TARGET_PLATFORM=<targetPlatform> -S <project>/linux -B <output>
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
     final cmakeConfigureCmd = <String>[
@@ -79,10 +103,28 @@ base class LinuxAssembleTarget extends Target {
       '-B',
       outputPath,
     ];
-    final ProcessResult configureResult = await _processManager.run(
+    ProcessResult configureResult = await _processManager.run(
       cmakeConfigureCmd,
       environment: env.defines,
     );
+    if (configureResult.exitCode != 0) {
+      var cacheFilesExist = false;
+      try {
+        final File cacheFile = _fileSystem.file(
+          _fileSystem.path.join(outputPath, _cmakeCacheFileName),
+        );
+        final Directory cmakeFilesDir = _fileSystem.directory(
+          _fileSystem.path.join(outputPath, _cmakeFilesDirectoryName),
+        );
+        cacheFilesExist = cacheFile.existsSync() || cmakeFilesDir.existsSync();
+      } on FileSystemException {
+        cacheFilesExist = false;
+      }
+      if (cacheFilesExist) {
+        _cleanCMakeCache(outputPath);
+        configureResult = await _processManager.run(cmakeConfigureCmd, environment: env.defines);
+      }
+    }
     if (configureResult.exitCode != 0) {
       throw Exception(
         'CMake configuration failed with exit code ${configureResult.exitCode}.\n'
@@ -121,6 +163,28 @@ base class LinuxAssembleTarget extends Target {
     return <String, Object?>{
       'executablePath': _fileSystem.file(executablePath).absolute.uri.toString(),
     };
+  }
+
+  void _cleanCMakeCache(String outputPath) {
+    final File cacheFile = _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName));
+    try {
+      if (cacheFile.existsSync()) {
+        cacheFile.deleteSync();
+      }
+    } on FileSystemException {
+      // Safely ignore file system exceptions when cleaning cache files.
+    }
+
+    final Directory cmakeFilesDir = _fileSystem.directory(
+      _fileSystem.path.join(outputPath, _cmakeFilesDirectoryName),
+    );
+    try {
+      if (cmakeFilesDir.existsSync()) {
+        cmakeFilesDir.deleteSync(recursive: true);
+      }
+    } on FileSystemException {
+      // Safely ignore file system exceptions when cleaning cache files.
+    }
   }
 }
 
