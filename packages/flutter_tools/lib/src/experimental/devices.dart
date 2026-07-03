@@ -129,8 +129,8 @@ class ExtensionBackedDevice extends Device {
     required ToolExtension extension,
     required super.logger,
     required this.name,
-    this.platformName,
     this.buildTargetName,
+    this.platformName,
   }) : _extension = extension,
        _logger = logger,
        super(platformType: PlatformType.custom, ephemeral: true) {
@@ -229,7 +229,7 @@ class ExtensionBackedDevice extends Device {
   }) async {
     final TargetPlatform platform = await targetPlatform;
     final String buildModeName = debuggingOptions.buildInfo.mode.cliName;
-    final String platformName = platform.simpleName.split('-').first;
+    final String platformName = platform.osName;
     final FlutterProject project = FlutterProject.current();
     final cmakeProject = GenericCmakeProject(project, platformName);
     final Directory buildDirectory = globals.fs.directory(

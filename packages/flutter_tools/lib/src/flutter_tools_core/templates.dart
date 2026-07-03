@@ -19,6 +19,49 @@ abstract base class TemplateService extends ToolExtensionService {
 
   /// The set of full project templates provided by the extension.
   Set<ProjectTemplate> get projectTemplates;
+
+  @override
+  Future<Map<String, Function>> initialize() async {
+    return <String, Function>{
+      'getAppTemplates': _getAppTemplatesRpc,
+      'getPluginTemplates': _getPluginTemplatesRpc,
+      'getProjectTemplates': _getProjectTemplatesRpc,
+      'generateTemplateParameters': _generateTemplateParametersRpc,
+    };
+  }
+
+  @override
+  Future<void> shutdown() async {}
+
+  Future<List<String>> _getAppTemplatesRpc() async {
+    return appPlatformTemplates.toList();
+  }
+
+  Future<List<String>> _getPluginTemplatesRpc() async {
+    return pluginPlatformTemplates.toList();
+  }
+
+  Future<List<Map<String, Object?>>> _getProjectTemplatesRpc() async {
+    return projectTemplates.map((ProjectTemplate template) => template.toMap()).toList();
+  }
+
+  Future<Map<String, Object?>> _generateTemplateParametersRpc(Map<String, Object?> params) async {
+    final templateName = params['templateName'] as String?;
+    if (templateName == null) {
+      throw RpcException.invalidParams('Missing "templateName" parameter.');
+    }
+    final Map<String, Object?>? toolParameters =
+        (params['toolParameters'] as Map<Object?, Object?>?)?.cast<String, Object?>();
+    if (toolParameters == null) {
+      throw RpcException.invalidParams('Missing "toolParameters" parameter.');
+    }
+    for (final ProjectTemplate template in projectTemplates) {
+      if (template.name == templateName) {
+        return template.generateTemplateParameters(toolParameters);
+      }
+    }
+    throw RpcException.invalidParams('Unknown project template: $templateName');
+  }
 }
 
 /// A template representation used to generate an entire Flutter project.
@@ -35,6 +78,56 @@ abstract base class ProjectTemplate {
   /// The template source files.
   Set<String> get templateSources;
 
+  /// The package URI string or directory path to the template sources.
+  String get templatePath;
+
   /// Generates the variable mappings for the template.
-  Future<Map<String, String>> generateTemplateParameters(Map<String, String> toolParameters);
+  Future<Map<String, Object?>> generateTemplateParameters(Map<String, Object?> toolParameters);
+
+  /// Serializes the template metadata for transmission over GEP.
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      'name': name,
+      'hidden': hidden,
+      'templateDependencies': templateDependencies.toList(),
+      'templateSources': templateSources.toList(),
+      'templatePath': templatePath,
+    };
+  }
+}
+
+/// A concrete implementation of [ProjectTemplate] that can be parsed from a JSON map.
+final class ExtensionProjectTemplate extends ProjectTemplate {
+  ExtensionProjectTemplate.fromJson(Map<String, Object?> json)
+    : name = json['name']! as String,
+      hidden = json['hidden']! as bool,
+      templateDependencies = (json['templateDependencies']! as List<Object?>)
+          .cast<String>()
+          .toSet(),
+      templateSources = (json['templateSources']! as List<Object?>).cast<String>().toSet(),
+      templatePath = json['templatePath']! as String;
+
+  @override
+  final String name;
+
+  @override
+  final bool hidden;
+
+  @override
+  final Set<String> templateDependencies;
+
+  @override
+  final Set<String> templateSources;
+
+  @override
+  final String templatePath;
+
+  @override
+  Future<Map<String, Object?>> generateTemplateParameters(
+    Map<String, Object?> toolParameters,
+  ) async {
+    throw UnimplementedError(
+      'ExtensionProjectTemplate.generateTemplateParameters should not be called directly on host representation.',
+    );
+  }
 }

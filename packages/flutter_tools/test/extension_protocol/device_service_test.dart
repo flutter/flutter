@@ -37,6 +37,7 @@ void main() {
         'config',
         'build',
         'artifacts',
+        'template',
       ]);
 
       // 3. Discover devices

@@ -132,7 +132,7 @@ ${_projectMetadataInformation()}
         return 'No pubspec in working directory.';
       }
       final metadata = FlutterProjectMetadata(project.metadataFile, _logger);
-      final FlutterTemplateType? projectType = metadata.projectType;
+      final ParsedFlutterTemplateType? projectType = metadata.projectType;
       final description = StringBuffer()
         ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
         ..writeln('**Version**: ${manifest.appVersion}')
