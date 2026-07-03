@@ -66,12 +66,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     final path = hostAppRoot.fileSystem.path;
     Directory? fallback;
     for (final FileSystemEntity entity in hostAppRoot.listSync()) {
-      if (path.extension(entity.path) != extension ||
-          path.basename(entity.path).startsWith('.')) {
+      final String basename = entity.basename;
+      if (path.extension(entity.path) != extension || basename.startsWith('.')) {
         continue;
       }
-      final Directory directory = hostAppRoot.childDirectory(entity.basename);
-      if (entity.basename == '$_defaultHostAppName$extension') {
+      final Directory directory = hostAppRoot.childDirectory(basename);
+      if (basename == '$_defaultHostAppName$extension') {
         return directory;
       }
       fallback ??= directory;
@@ -416,6 +416,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return;
     }
 
+    if (_swiftPackageFetchProcess != null) {
+      return;
+    }
+
     Status? status;
     try {
       final command = <String>[
@@ -424,9 +428,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         xcodeProject.fileSystem.path.absolute(xcodeProject.path),
         '-resolvePackageDependencies',
       ];
-      if (_swiftPackageFetchProcess != null) {
-        return;
-      }
       final Process process = await processUtils.start(command, workingDirectory: hostAppRoot.path);
       _swiftPackageFetchProcess = process;
       var printFetchWarnings = false;
