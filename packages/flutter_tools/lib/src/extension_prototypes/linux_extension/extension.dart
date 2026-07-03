@@ -12,6 +12,7 @@ import './build.dart';
 import './configuration.dart';
 import './device.dart';
 import './diagnostics.dart';
+import './template.dart';
 
 void linuxDeviceExtensionEntryPoint(SendPort hostSendPort) {
   final provider = ToolExtensionProvider(name: 'linux_device_extension', sendPort: hostSendPort);
@@ -36,6 +37,8 @@ void linuxDeviceExtensionEntryPoint(SendPort hostSendPort) {
   );
 
   provider.registerService(LinuxArtifactService());
+
+  provider.registerService(LinuxTemplateService());
 
   provider.initialize();
 }

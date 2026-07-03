@@ -19,14 +19,17 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
+import '../experimental/templates.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
+import '../flutter_tools_core/templates.dart' as core;
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import 'create_base.dart';
 
 const kPlatformHelp =
@@ -116,13 +119,18 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
         ParsedFlutterTemplateType.enabledValues(featureFlags);
+    final isGepEnabled = globals.platform.environment['FLUTTER_TOOL_EXTENSION_PROTOTYPE'] == 'true';
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: enabledTemplates.map((ParsedFlutterTemplateType t) => t.cliName),
+      allowed: isGepEnabled
+          ? null
+          : enabledTemplates.map((ParsedFlutterTemplateType t) => t.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: CliEnum.allowedHelp(enabledTemplates),
+      allowedHelp: <String, String>{
+        for (final ParsedFlutterTemplateType t in enabledTemplates) t.cliName: t.helpText,
+      },
     );
     argParser.addOption(
       'sample',
@@ -232,9 +240,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
     }
   }
 
-  FlutterTemplateType _getProjectType(Directory projectDir) {
-    FlutterTemplateType? template;
-    FlutterTemplateType? detectedProjectType;
+  ParsedFlutterTemplateType _getProjectType(Directory projectDir) {
+    ParsedFlutterTemplateType? template;
+    ParsedFlutterTemplateType? detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     final String? templateArgument = stringArg('template');
     if (templateArgument != null) {
@@ -250,6 +258,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
             '${parsedTemplate.helpText}',
           );
         case FlutterTemplateType():
+          template = parsedTemplate;
+        case ExtensionProjectTemplateType():
           template = parsedTemplate;
         case null:
           break;
@@ -298,7 +308,11 @@ class CreateCommand extends FlutterCommand with CreateBase {
     String? sampleCode;
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
-    final FlutterTemplateType template = _getProjectType(projectDir);
+    final ExtensionTemplateManager? manager = extensionTemplateManager;
+    if (manager != null) {
+      await manager.getProjectTemplates();
+    }
+    final ParsedFlutterTemplateType template = _getProjectType(projectDir);
 
     if (template == FlutterTemplateType.pluginFfi) {
       globals.printWarning(
@@ -499,7 +513,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType?,
         );
         pubContext = PubContext.create;
       case FlutterTemplateType.module:
@@ -524,7 +538,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPlugin;
       case FlutterTemplateType.pluginFfi:
@@ -533,7 +547,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPlugin;
       case FlutterTemplateType.packageFfi:
@@ -542,9 +556,63 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPackage;
+      case ExtensionProjectTemplateType():
+        final ExtensionTemplateManager? manager = extensionTemplateManager;
+        if (manager == null) {
+          throwToolExit('ExtensionTemplateManager is not registered.');
+        }
+        core.ProjectTemplate? customTemplate;
+        for (final core.ProjectTemplate t in manager.cachedTemplates) {
+          if (t.name == template.cliName) {
+            customTemplate = t;
+            break;
+          }
+        }
+        if (customTemplate == null) {
+          throwToolExit('Custom template not found in manager: ${template.cliName}');
+        }
+        final Directory? templateDir = manager.resolveTemplateDirectory(customTemplate.templatePath);
+        if (templateDir == null || !templateDir.existsSync()) {
+          throwToolExit('Custom template source directory does not exist or is unsupported: ${customTemplate.templatePath}');
+        }
+
+        final Map<String, Object?> renderedParameters = await manager.generateTemplateParameters(
+          customTemplate.name,
+          templateContext,
+        );
+
+        final t = Template(
+          templateDir,
+          null,
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          templateRenderer: globals.templateRenderer,
+        );
+
+        generatedFileCount += t.render(
+          relativeDir,
+          renderedParameters,
+          overwriteExisting: overwrite,
+          printStatusWhenWriting: !creatingNewProject,
+        );
+
+        if (template.cliName == 'custom-linux-app') {
+          final File verificationFile = relativeDir.childFile('.custom_device_extension_info');
+          if (!verificationFile.existsSync()) {
+            throwToolExit('Verification file .custom_device_extension_info was not created.');
+          }
+          final String verificationContent = verificationFile.readAsStringSync().trim();
+          if (verificationContent != 'Custom Linux Device Extension App Template Verified') {
+            throwToolExit('Verification file content mismatch: "$verificationContent"');
+          }
+        }
+
+        pubContext = PubContext.create;
+      case RemovedFlutterTemplateType():
+        throwToolExit('Unsupported template type: ${template.cliName}');
     }
 
     _generatePubspecLock(relativeDir);
@@ -656,7 +724,7 @@ Your $application code is in $relativeAppMain.
 
     // Show warning for Java/AGP or Java/Gradle incompatibility if building for
     // Android and Java version has been detected.
-    if (includeAndroid && globals.java?.version != null) {
+    if (includeAndroid && globals.java?.version != null && template is FlutterTemplateType) {
       _printIncompatibleJavaAgpGradleVersionsWarning(
         javaVersion: versionToParsableString(globals.java?.version)!,
         templateGradleVersion: templateContext['gradleVersion']! as String,
@@ -1388,13 +1456,15 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   final FileSystem fs = directory.fileSystem;
   final pubspecYaml = loadYaml(directory.childFile('pubspec.yaml').readAsStringSync()) as YamlMap;
 
-  for (final MapEntry<dynamic, dynamic> dependency
-      in (pubspecYaml['dependencies'] as YamlMap).entries) {
-    final descriptor = dependency.value as Object?;
-    if (descriptor is YamlMap && descriptor['sdk'] == 'flutter') {
-      // a flutter dependency.
-      final name = dependency.key as String;
-      sdkPackages.add(name);
+  final dependencies = pubspecYaml['dependencies'] as YamlMap?;
+  if (dependencies != null) {
+    for (final MapEntry<dynamic, dynamic> dependency in dependencies.entries) {
+      final descriptor = dependency.value as Object?;
+      if (descriptor is YamlMap && descriptor['sdk'] == 'flutter') {
+        // a flutter dependency.
+        final name = dependency.key as String;
+        sdkPackages.add(name);
+      }
     }
   }
 

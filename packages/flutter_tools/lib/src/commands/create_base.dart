@@ -148,13 +148,13 @@ mixin CreateBase on FlutterCommand {
   /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
   @protected
-  FlutterTemplateType? determineTemplateType() {
+  ParsedFlutterTemplateType? determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
     final File metadataFile = globals.fs.file(
       globals.fs.path.join(projectDir.absolute.path, '.metadata'),
     );
     final projectMetadata = FlutterProjectMetadata(metadataFile, globals.logger);
-    final FlutterTemplateType? projectType = projectMetadata.projectType;
+    final ParsedFlutterTemplateType? projectType = projectMetadata.projectType;
     if (projectType != null) {
       return projectType;
     }
