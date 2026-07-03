@@ -3578,6 +3578,69 @@ void main() {
     );
   });
 
+  testWidgets('TabBar accepts zero indicatorWeight with themed indicator', (
+    WidgetTester tester,
+  ) async {
+    const indicatorColor = Color(0xFF00FF00);
+    const indicator = BoxDecoration(color: indicatorColor);
+    const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+
+    Widget buildFrame({required bool secondary}) {
+      return boilerplate(
+        tabBarTheme: const TabBarThemeData(
+          indicator: indicator,
+          indicatorSize: TabBarIndicatorSize.tab,
+        ),
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: DefaultTabController(
+            length: tabs.length,
+            child: secondary
+                ? const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs)
+                : const TabBar(indicatorWeight: 0.0, tabs: tabs),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(secondary: false));
+
+    expect(tester.takeException(), isNull);
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 46.0);
+    expect(
+      tabBarBox,
+      paints..rect(rect: const Rect.fromLTRB(0.0, 0.0, 400.0, 46.0), color: indicatorColor),
+    );
+
+    await tester.pumpWidget(buildFrame(secondary: true));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('TabBar asserts zero indicatorWeight with default indicator', (
+    WidgetTester tester,
+  ) async {
+    const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+
+    Widget buildFrame({required bool secondary}) {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: secondary
+              ? const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs)
+              : const TabBar(indicatorWeight: 0.0, tabs: tabs),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(secondary: false));
+    expect(tester.takeException(), isAssertionError);
+
+    await tester.pumpWidget(buildFrame(secondary: true));
+    expect(tester.takeException(), isAssertionError);
+  });
+
   testWidgets('TabBar with custom indicator and indicatorPadding (RTL)', (
     WidgetTester tester,
   ) async {

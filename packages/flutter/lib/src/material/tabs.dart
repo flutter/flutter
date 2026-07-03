@@ -1038,8 +1038,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.tabAlignment,
     this.textScaler,
     this.indicatorAnimation,
-  }) : _isPrimary = true,
-       assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = true;
 
   /// Creates a Material Design secondary tab bar.
   ///
@@ -1094,8 +1093,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.tabAlignment,
     this.textScaler,
     this.indicatorAnimation,
-  }) : _isPrimary = false,
-       assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = false;
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -1139,7 +1137,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The thickness of the line that appears below the selected tab.
   ///
-  /// The value of this parameter must be greater than zero.
+  /// When using the default underline indicator, the value of this parameter
+  /// must be greater than zero.
   ///
   /// If [ThemeData.useMaterial3] is true and [TabBar] is used to create a
   /// primary tab bar, the default value is 3.0. If the provided value is less
@@ -1948,6 +1947,20 @@ class _TabBarState extends State<TabBar> {
     return true;
   }
 
+  bool _debugIndicatorWeightIsValid(TabBarThemeData tabBarTheme) {
+    assert(() {
+      if (widget.indicator == null &&
+          tabBarTheme.indicator == null &&
+          widget.indicatorWeight <= 0.0) {
+        throw FlutterError(
+          'indicatorWeight must be greater than zero when TabBar uses the default indicator.',
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -1957,6 +1970,7 @@ class _TabBarState extends State<TabBar> {
     final TabAlignment effectiveTabAlignment =
         widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
     assert(_debugTabAlignmentIsValid(effectiveTabAlignment));
+    assert(_debugIndicatorWeightIsValid(tabBarTheme));
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
