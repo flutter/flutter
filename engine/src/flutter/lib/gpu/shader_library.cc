@@ -222,10 +222,22 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
     return shader_map;
   }
 
+  if (bundle->shaders() == nullptr) {
+    return shader_map;
+  }
+
   for (const auto* bundled_shader : *bundle->shaders()) {
+    // The shader bundle FlatBuffer schema marks every field as optional, so the
+    // structural VerifyShaderBundleBuffer() above does not guarantee these
+    // sub-fields are present. Guard the ones this loop dereferences to avoid a
+    // null dereference on a malformed (but structurally-valid) bundle.
+    if (bundled_shader->name() == nullptr) {
+      continue;
+    }
     const impeller::fb::shaderbundle::BackendShader* backend_shader =
         GetShaderBackend(backend_type, bundled_shader);
-    if (!backend_shader) {
+    if (!backend_shader || backend_shader->shader() == nullptr ||
+        backend_shader->entrypoint() == nullptr) {
       VALIDATION_LOG << "Failed to unpack shader \""
                      << bundled_shader->name()->c_str() << "\" from bundle.";
       continue;

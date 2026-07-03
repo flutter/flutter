@@ -70,6 +70,13 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
   if (!runtime_stage) {
     return absl::InvalidArgumentError("Runtime stage is null.");
   }
+  // The runtime stage FlatBuffer schema marks these fields optional, so the
+  // structural VerifyRuntimeStagesBuffer() does not guarantee they are present.
+  // Guard against a malformed (but structurally-valid) stage that omits them.
+  if (runtime_stage->entrypoint() == nullptr ||
+      runtime_stage->shader() == nullptr) {
+    return absl::InvalidArgumentError("Runtime stage is missing required data.");
+  }
 
   RuntimeStage stage(payload);
   stage.stage_ = ToShaderStage(runtime_stage->stage());
