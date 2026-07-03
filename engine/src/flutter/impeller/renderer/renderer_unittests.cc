@@ -146,7 +146,7 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   desc->SetCullMode(CullMode::kBackFace);
   desc->SetWindingOrder(WindingOrder::kCounterClockwise);
   desc->SetSampleCount(SampleCount::kCount4);
-  desc->ClearStencilAttachments();
+  desc->SetStencilAttachmentDescriptors(std::nullopt);
 
   // Setup the vertex layout to take two bindings. The first for positions and
   // the second for colors.
@@ -557,7 +557,13 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       pass->SetLabel("Playground Blit Pass");
 
       // Blit `bridge` to the top left corner of the texture.
-      pass->AddCopy(bridge, texture);
+      // The bridge image is larger than the texture which can fail
+      // if Metal validation is enabled as it is in run_tests.py.
+      IRect bridge_bounds = IRect::MakeSize(bridge->GetSize());
+      IRect texture_bounds = IRect::MakeSize(texture->GetSize());
+      std::optional<IRect> blit_bounds =
+          bridge_bounds.Intersection(texture_bounds);
+      pass->AddCopy(bridge, texture, blit_bounds);
 
       if (!pass->EncodeCommands()) {
         return false;
