@@ -17,6 +17,8 @@ import 'service.dart';
 /// extension isolates, keeping track of their active connections as [ToolExtension] instances.
 class ToolExtensionManager {
   final List<ToolExtension> _extensions = [];
+  final Map<void Function(SendPort), ToolExtension> _activeSpawns = {};
+  final Map<void Function(SendPort), Future<ToolExtension>> _pendingSpawns = {};
   final _notificationsController = StreamController<Notification>.broadcast();
   bool _isDisposed = false;
 
@@ -42,21 +44,39 @@ class ToolExtensionManager {
     if (_isDisposed) {
       throw StateError('ToolExtensionManager is disposed.');
     }
-    final ToolExtension extension = await ToolExtension._start(
-      entryPoint,
-      timeout: timeout,
-      onNotification: (Notification n) {
-        if (!_isDisposed) {
-          _notificationsController.add(n);
-        }
-      },
-    );
-    if (_isDisposed) {
-      await extension.dispose();
-      throw StateError('ToolExtensionManager was disposed during initialization.');
+    final ToolExtension? completed = _activeSpawns[entryPoint];
+    if (completed != null) {
+      return completed;
     }
-    _extensions.add(extension);
-    return extension;
+    final Future<ToolExtension>? pending = _pendingSpawns[entryPoint];
+    if (pending != null) {
+      return pending;
+    }
+
+    final Future<ToolExtension> future = () async {
+      try {
+        final ToolExtension extension = await ToolExtension._start(
+          entryPoint,
+          timeout: timeout,
+          onNotification: (Notification n) {
+            if (!_isDisposed) {
+              _notificationsController.add(n);
+            }
+          },
+        );
+        if (_isDisposed) {
+          await extension.dispose();
+          throw StateError('ToolExtensionManager was disposed during initialization.');
+        }
+        _extensions.add(extension);
+        _activeSpawns[entryPoint] = extension;
+        return extension;
+      } finally {
+        unawaited(_pendingSpawns.remove(entryPoint));
+      }
+    }();
+    _pendingSpawns[entryPoint] = future;
+    return future;
   }
 
   /// Connects to an externally spawned isolate by waiting on [receivePort] for the handshake.
@@ -96,6 +116,8 @@ class ToolExtensionManager {
     _isDisposed = true;
     await Future.wait(_extensions.map((ToolExtension e) => e.dispose()));
     _extensions.clear();
+    _activeSpawns.clear();
+    _pendingSpawns.clear();
     await _notificationsController.close();
   }
 }
@@ -236,8 +258,7 @@ class ToolExtension {
       }
       return;
     }
-    if (message is Map<Object?, Object?> &&
-        !message.containsKey('id')) {
+    if (message is Map<Object?, Object?> && !message.containsKey('id')) {
       final Object? method = message['method'];
       if (method is String) {
         Map<String, Object?>? paramsMap;

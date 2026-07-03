@@ -102,6 +102,18 @@ void main() {
       expect(result, params);
     });
 
+    test(
+      'startExtension concurrently only spawns once and returns the identical instance',
+      () async {
+        final Future<ToolExtension> f1 = manager.startExtension(testExtensionEntryPoint);
+        final Future<ToolExtension> f2 = manager.startExtension(testExtensionEntryPoint);
+
+        final List<ToolExtension> results = await Future.wait(<Future<ToolExtension>>[f1, f2]);
+        expect(results[0], same(results[1]));
+        expect(manager.extensions.length, 1);
+      },
+    );
+
     test('handshake timeout', () async {
       expect(
         () => manager.startExtension(
