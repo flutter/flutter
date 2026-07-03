@@ -45,24 +45,23 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   final bool _verboseHelp;
 
-  @override
-  ArgParser get argParser => _argParser ??= _buildArgParser();
-  ArgParser? _argParser;
+  ArgParser? _baseArgParser;
+  ArgParser? _customArgParser;
+  String _lastTemplateNames = '';
+  bool _buildingBaseParser = false;
 
-  /// Resets the cached [ArgParser] so that it will be rebuilt with any newly
-  /// queried extension templates on next access.
-  void setupExtensionTemplates() {
-    _argParser = null;
-  }
-
-  ArgParser _buildArgParser() {
-    final parser = ArgParser(
+  ArgParser get _baseParser {
+    if (_baseArgParser != null) {
+      return _baseArgParser!;
+    }
+    _buildingBaseParser = true;
+    final ArgParser parser = ArgParser(
       allowTrailingOptions: false,
       usageLineLength: globals.outputPreferences.wrapText
           ? globals.outputPreferences.wrapColumn
           : null,
     );
-    _argParser = parser;
+    _baseArgParser = parser;
     addPubOptions();
     parser.addFlag(
       'with-driver-test',
@@ -180,7 +179,99 @@ class CreateCommand extends FlutterCommand with CreateBase {
       valueHelp: 'path',
       hide: !_verboseHelp,
     );
+    _buildingBaseParser = false;
     return parser;
+  }
+
+  @override
+  ArgParser get argParser {
+    if (_buildingBaseParser) {
+      return _baseParser;
+    }
+    final ExtensionTemplateManager? manager = extensionTemplateManager;
+    final List<core.ProjectTemplate> projectTemplates =
+        manager?.cachedTemplates ?? const <core.ProjectTemplate>[];
+    if (projectTemplates.isEmpty) {
+      return _baseParser;
+    }
+    final String currentNames = projectTemplates.map((core.ProjectTemplate t) => t.name).join(',');
+    if (_customArgParser == null || currentNames != _lastTemplateNames) {
+      _lastTemplateNames = currentNames;
+      _customArgParser = _buildArgParser(_baseParser, projectTemplates);
+    }
+    return _customArgParser!;
+  }
+
+  ArgParser _buildArgParser(ArgParser baseParser, List<core.ProjectTemplate> projectTemplates) {
+    if (projectTemplates.isEmpty) {
+      return baseParser;
+    }
+    final newParser = ArgParser(
+      allowTrailingOptions: baseParser.allowTrailingOptions,
+      usageLineLength: baseParser.usageLineLength,
+    );
+    for (final Option opt in baseParser.options.values) {
+      if (opt.isFlag) {
+        newParser.addFlag(
+          opt.name,
+          abbr: opt.abbr,
+          help: opt.help,
+          defaultsTo: opt.defaultsTo as bool?,
+          negatable: opt.negatable ?? true,
+          hide: opt.hide,
+          hideNegatedUsage: opt.hideNegatedUsage ?? false,
+          aliases: opt.aliases,
+        );
+      } else if (opt.isSingle) {
+        final Map<String, String>? allowedHelp = opt.allowedHelp != null
+            ? Map<String, String>.of(opt.allowedHelp!)
+            : null;
+        List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
+        if (opt.name == 'template') {
+          if (allowedHelp != null) {
+            for (final core.ProjectTemplate template in projectTemplates) {
+              if (!template.hidden) {
+                allowedHelp[template.name] =
+                    'Generate a project using the ${template.name} template.';
+              }
+            }
+          }
+          if (allowed != null) {
+            for (final core.ProjectTemplate template in projectTemplates) {
+              if (!allowed.contains(template.name)) {
+                allowed.add(template.name);
+              }
+            }
+          }
+        }
+        newParser.addOption(
+          opt.name,
+          abbr: opt.abbr,
+          help: opt.help,
+          valueHelp: opt.valueHelp,
+          allowed: allowed,
+          allowedHelp: allowedHelp,
+          defaultsTo: opt.defaultsTo as String?,
+          mandatory: opt.mandatory,
+          hide: opt.hide,
+          aliases: opt.aliases,
+        );
+      } else if (opt.isMultiple) {
+        newParser.addMultiOption(
+          opt.name,
+          abbr: opt.abbr,
+          help: opt.help,
+          valueHelp: opt.valueHelp,
+          allowed: opt.allowed,
+          allowedHelp: opt.allowedHelp,
+          defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
+          splitCommas: opt.splitCommas,
+          hide: opt.hide,
+          aliases: opt.aliases,
+        );
+      }
+    }
+    return newParser;
   }
 
   @override

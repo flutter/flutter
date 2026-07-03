@@ -16,7 +16,6 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../commands/create.dart';
 import '../convert.dart';
 import '../experimental/configuration.dart';
 import '../experimental/templates.dart';
@@ -332,6 +331,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     final String? commandName = _findCommandName(args);
 
+    if (globals.platform.environment[ExtensionTemplateManager.envPrototypeFlag] == 'true' &&
+        (commandName == 'create' || (commandName == 'help' && args.contains('create')))) {
+      final ExtensionTemplateManager? templateManager = extensionTemplateManager;
+      if (templateManager != null) {
+        await templateManager.getProjectTemplates();
+        rebuildArgParser();
+      }
+    }
+
     if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true' &&
         (commandName == 'config' || commandName == 'configure')) {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
@@ -349,19 +357,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
               configManager.registerExtensionFlag(option.name);
             }
           }
-        }
-      }
-    }
-
-    if (globals.platform.environment[ExtensionTemplateManager.envPrototypeFlag] == 'true' &&
-        (commandName == 'create' || (commandName == 'help' && args.contains('create')))) {
-      final ExtensionTemplateManager? templateManager = extensionTemplateManager;
-      if (templateManager != null) {
-        await templateManager.getProjectTemplates();
-        final Command<void>? createCommand = commands['create'];
-        if (createCommand is CreateCommand) {
-          createCommand.setupExtensionTemplates();
-          rebuildArgParser();
         }
       }
     }

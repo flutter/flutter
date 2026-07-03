@@ -7,6 +7,9 @@ import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/generic_extension_protocol.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/experimental/devices.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/device.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/extension.dart';
 import 'package:test/test.dart';
@@ -263,5 +266,30 @@ void main() {
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
+
+    test(
+      'ExtensionDeviceDiscovery discoverDevices respects DeviceDiscoveryFilter connectionInterface',
+      () async {
+        await manager.startExtension(linuxDeviceExtensionEntryPoint);
+
+        final discovery = ExtensionDeviceDiscovery(manager, logger: BufferLogger.test());
+
+        final List<Device> wirelessDevices = await discovery.discoverDevices(
+          filter: DeviceDiscoveryFilter(
+            deviceConnectionInterface: DeviceConnectionInterface.wireless,
+          ),
+        );
+        expect(wirelessDevices, isEmpty);
+
+        final List<Device> attachedDevices = await discovery.discoverDevices(
+          filter: DeviceDiscoveryFilter(
+            deviceConnectionInterface: DeviceConnectionInterface.attached,
+          ),
+        );
+        expect(attachedDevices, hasLength(1));
+        expect(attachedDevices.first.id, 'linux-proto-1');
+        expect(attachedDevices.first.connectionInterface, DeviceConnectionInterface.attached);
+      },
+    );
   });
 }

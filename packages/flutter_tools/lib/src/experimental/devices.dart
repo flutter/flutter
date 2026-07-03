@@ -85,6 +85,15 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
           for (final Object? item in devicesResult) {
             if (item is Map) {
               final Map<String, Object?> deviceData = item.cast<String, Object?>();
+              final String? interfaceName = deviceData['connectionInterface'] as String?;
+              DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+              if (interfaceName != null) {
+                try {
+                  connectionInterface = getDeviceConnectionInterfaceForName(interfaceName);
+                } on Object {
+                  connectionInterface = DeviceConnectionInterface.attached;
+                }
+              }
               discoveredDevices.add(
                 ExtensionBackedDevice(
                   deviceData['id']! as String,
@@ -92,6 +101,7 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
                   category: _parseCategory(deviceData['category'] as String?),
                   platformName: deviceData['platform'] as String?,
                   buildTargetName: deviceData['buildTarget'] as String?,
+                  connectionInterface: connectionInterface,
                   extension: extension,
                   logger: _logger,
                 ),
@@ -104,6 +114,9 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
       }
     }
 
+    if (filter != null) {
+      return filter.filterDevices(discoveredDevices);
+    }
     return discoveredDevices;
   }
 
@@ -131,6 +144,7 @@ class ExtensionBackedDevice extends Device {
     required this.name,
     this.buildTargetName,
     this.platformName,
+    this.connectionInterface = DeviceConnectionInterface.attached,
   }) : _extension = extension,
        _logger = logger,
        super(platformType: PlatformType.custom, ephemeral: true) {
@@ -152,6 +166,9 @@ class ExtensionBackedDevice extends Device {
 
   final String? platformName;
   final String? buildTargetName;
+
+  @override
+  final DeviceConnectionInterface connectionInterface;
 
   @override
   final String name;

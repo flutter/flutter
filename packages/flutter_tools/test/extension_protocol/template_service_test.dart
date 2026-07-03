@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/template.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/flutter_tools_core/templates.dart' as core;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -97,6 +98,95 @@ void main() {
   });
 
   group('ExtensionTemplateManager (Host Side)', () {
+    testUsingContext(
+      'create --help includes custom-linux-app in --template allowed help after templates are fetched',
+      () async {
+        final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
+        final createCommand = CreateCommand();
+        createTestCommandRunner(createCommand);
+        final ExtensionTemplateManager templateManager = context.get<ExtensionTemplateManager>()!;
+
+        expect(
+          createCommand.argParser.options['template']!.allowedHelp!.containsKey('custom-linux-app'),
+          isFalse,
+        );
+
+        await templateManager.getProjectTemplates();
+
+        expect(
+          createCommand.argParser.options['template']!.allowedHelp!.containsKey('custom-linux-app'),
+          isTrue,
+        );
+        expect(
+          createCommand.argParser.options['template']!.allowedHelp!['custom-linux-app'],
+          'Generate a project using the custom-linux-app template.',
+        );
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true', 'PATH': ''},
+        ),
+        ExtensionTemplateManager: () => MockExtensionTemplateManager(
+          templates: <core.ProjectTemplate>[
+            core.ExtensionProjectTemplate.fromJson(<String, Object?>{
+              'name': 'custom-linux-app',
+              'hidden': false,
+              'templateDependencies': <String>[],
+              'templateSources': <String>[
+                'pubspec.yaml.tmpl',
+                'lib/main.dart.tmpl',
+                '.custom_device_extension_info.copy.tmpl',
+              ],
+              'templatePath':
+                  'package:flutter_tools/src/extension_prototypes/linux_extension/templates/custom-linux-app',
+            }),
+          ],
+          fileSystem: MemoryFileSystem.test(),
+        ),
+      },
+    );
+
+    testUsingContext(
+      'FlutterCommandRunner queries getProjectTemplates prior to displaying create help',
+      () async {
+        final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
+        final runner = FlutterCommandRunner();
+        runner.addCommand(CreateCommand());
+        final ExtensionTemplateManager templateManager = context.get<ExtensionTemplateManager>()!;
+
+        expect(templateManager.cachedTemplates, isEmpty);
+
+        await runner.run(<String>['create', '--help']);
+
+        expect(templateManager.cachedTemplates, hasLength(1));
+        expect(templateManager.cachedTemplates.first.name, 'custom-linux-app');
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true', 'PATH': ''},
+        ),
+        ExtensionTemplateManager: () => MockExtensionTemplateManager(
+          templates: <core.ProjectTemplate>[
+            core.ExtensionProjectTemplate.fromJson(<String, Object?>{
+              'name': 'custom-linux-app',
+              'hidden': false,
+              'templateDependencies': <String>[],
+              'templateSources': <String>[
+                'pubspec.yaml.tmpl',
+                'lib/main.dart.tmpl',
+                '.custom_device_extension_info.copy.tmpl',
+              ],
+              'templatePath':
+                  'package:flutter_tools/src/extension_prototypes/linux_extension/templates/custom-linux-app',
+            }),
+          ],
+          fileSystem: MemoryFileSystem.test(),
+        ),
+      },
+    );
+
     testUsingContext(
       'queries project templates and generates parameters',
       () async {
@@ -359,6 +449,11 @@ void main() {
         final Directory outputDir = memoryFileSystem.directory('/my_project');
         expect(outputDir.existsSync(), isFalse);
 
+        // Pre-fetch templates in the manager to populate cache.
+        // This is what would normally happen during runner setup.
+        final ExtensionTemplateManager templateManager = context.get<ExtensionTemplateManager>()!;
+        await templateManager.getProjectTemplates();
+
         await commandRunner.run(<String>[
           'create',
           '--template=custom-linux-app',
@@ -371,17 +466,6 @@ void main() {
         expect(
           outputDir.childFile('.custom_device_extension_info').readAsStringSync(),
           'Custom Linux Device Extension App Template Verified',
-        );
-
-        // Verify that running FlutterCommandRunner with create --help queries
-        // extension templates and updates argParser allowedHelp.
-        final createCmd = CreateCommand();
-        final runner = FlutterCommandRunner();
-        runner.addCommand(createCmd);
-        await runner.run(<String>['create', '--help']);
-        expect(
-          runner.argParser.commands['create']!.options['template']!.allowedHelp,
-          contains('custom-linux-app'),
         );
 
         await manager.dispose();
@@ -410,12 +494,16 @@ class MockExtensionTemplateManager extends Fake implements ExtensionTemplateMana
 
   final List<core.ProjectTemplate> templates;
   final FileSystem fileSystem;
+  List<core.ProjectTemplate>? _cached;
 
   @override
-  List<core.ProjectTemplate> get cachedTemplates => templates;
+  List<core.ProjectTemplate> get cachedTemplates => _cached ?? const <core.ProjectTemplate>[];
 
   @override
-  Future<List<core.ProjectTemplate>> getProjectTemplates() async => templates;
+  Future<List<core.ProjectTemplate>> getProjectTemplates() async {
+    _cached = templates;
+    return templates;
+  }
 
   @override
   Directory resolveTemplateDirectory(String templatePath) {
