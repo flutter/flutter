@@ -71,6 +71,23 @@ static std::shared_ptr<std::vector<uint8_t>> BuildCorruptBundle() {
   return data;
 }
 
+// Builds a structurally-valid shader bundle that omits the optional `shaders`
+// vector entirely, so bundle->shaders() returns nullptr. Mirrors
+// BuildValidEmptyBundle but never calls add_shaders().
+static std::shared_ptr<std::vector<uint8_t>> BuildBundleWithoutShaders() {
+  flatbuffers::FlatBufferBuilder builder;
+  impeller::fb::shaderbundle::ShaderBundleBuilder bundle_builder(builder);
+  bundle_builder.add_format_version(static_cast<uint32_t>(
+      impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion));
+  // Intentionally do NOT call add_shaders(): the field is optional in the
+  // schema, so it is absent and bundle->shaders() == nullptr.
+  auto bundle = bundle_builder.Finish();
+  builder.Finish(bundle, impeller::fb::shaderbundle::ShaderBundleIdentifier());
+  return std::make_shared<std::vector<uint8_t>>(
+      builder.GetBufferPointer(),
+      builder.GetBufferPointer() + builder.GetSize());
+}
+
 // Sanity check on the test fixtures themselves: the corrupt buffer carries the
 // expected identifier (so it reaches the new verification) while failing
 // structural verification, and the valid buffer passes both.
@@ -160,6 +177,33 @@ TEST(FlutterGpuShaderLibraryTest,
       impeller::Context::BackendType::kMetal, CreateMappingFromVector(valid),
       "test_bundle");
   EXPECT_FALSE(library);
+}
+
+// Regression: the shader-bundle FlatBuffer schema marks the `shaders` vector as
+// optional, so a structurally-valid bundle can omit it, making bundle->shaders()
+// return nullptr. ParseShaderBundle() must not dereference the null vector -- it
+// should behave the same as a bundle with a present-but-empty shaders vector
+// rather than crashing.
+TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferHandlesMissingShadersVector) {
+  auto without_shaders = BuildBundleWithoutShaders();
+  // The omitted optional field still passes structural verification.
+  {
+    flatbuffers::Verifier verifier(without_shaders->data(),
+                                   without_shaders->size());
+    EXPECT_TRUE(
+        impeller::fb::shaderbundle::VerifyShaderBundleBuffer(verifier));
+  }
+  // Loading it must not crash (prior to the guard this dereferenced
+  // *bundle->shaders() with shaders() == nullptr) and must match the behavior of
+  // the present-but-empty bundle.
+  auto library_missing = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kMetal,
+      CreateMappingFromVector(without_shaders), "missing_shaders_bundle");
+  auto library_empty = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kMetal,
+      CreateMappingFromVector(BuildValidEmptyBundle()), "empty_bundle");
+  EXPECT_EQ(static_cast<bool>(library_missing),
+            static_cast<bool>(library_empty));
 }
 
 }  // namespace testing
