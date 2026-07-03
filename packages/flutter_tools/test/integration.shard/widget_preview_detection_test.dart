@@ -56,11 +56,13 @@ void main() {
       );
 
       final reloadCompleter = Completer<void>();
-      final StreamSubscription<String> reloadSub = stream.listen((String msg) {
+      late final StreamSubscription<String> reloadSub;
+      reloadSub = stream.listen((String msg) {
         if (msg.contains('Triggering reload based on update to script:')) {
           if (!reloadCompleter.isCompleted) {
             reloadCompleter.complete();
           }
+          reloadSub.cancel();
         }
       });
 
@@ -99,11 +101,13 @@ Widget myNewPreview() => Container();
       );
 
       final initReloadCompleter = Completer<void>();
-      final StreamSubscription<String> initReloadSub = stream.listen((String msg) {
+      late final StreamSubscription<String> initReloadSub;
+      initReloadSub = stream.listen((String msg) {
         if (msg.contains('Triggering reload based on update to script:')) {
           if (!initReloadCompleter.isCompleted) {
             initReloadCompleter.complete();
           }
+          initReloadSub.cancel();
         }
       });
 
@@ -171,11 +175,13 @@ Widget myRemovePreview() => Container();
       );
 
       final initReloadCompleter = Completer<void>();
-      final StreamSubscription<String> initReloadSub = stream.listen((String msg) {
+      late final StreamSubscription<String> initReloadSub;
+      initReloadSub = stream.listen((String msg) {
         if (msg.contains('Triggering reload based on update to script:')) {
           if (!initReloadCompleter.isCompleted) {
             initReloadCompleter.complete();
           }
+          initReloadSub.cancel();
         }
       });
 
@@ -244,11 +250,13 @@ Widget myModifyPreview() => Container();
       );
 
       final reloadCompleter = Completer<void>();
-      final StreamSubscription<String> reloadSub = stream.listen((String msg) {
+      late final StreamSubscription<String> reloadSub;
+      reloadSub = stream.listen((String msg) {
         if (msg.contains('Triggering reload based on update to script:')) {
           if (!reloadCompleter.isCompleted) {
             reloadCompleter.complete();
           }
+          reloadSub.cancel();
         }
       });
 
