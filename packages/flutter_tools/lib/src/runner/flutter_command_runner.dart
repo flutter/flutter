@@ -16,8 +16,10 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../commands/create.dart';
 import '../convert.dart';
 import '../experimental/configuration.dart';
+import '../experimental/templates.dart';
 import '../flutter_tools_core/configuration.dart' as core;
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
@@ -54,7 +56,8 @@ abstract final class FlutterGlobalOptions {
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({bool verboseHelp = false})
-    : super(
+    : _verboseHelp = verboseHelp,
+      super(
         'flutter',
         'Manage your Flutter app development.\n'
             '\n'
@@ -66,6 +69,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
             '  flutter run [options]\n'
             '    Run your Flutter application on an attached device or in an emulator.',
       ) {
+    _populateGlobalOptions(verboseHelp: verboseHelp);
+  }
+
+  final bool _verboseHelp;
+
+  void _populateGlobalOptions({required bool verboseHelp}) {
     argParser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
       abbr: 'v',
@@ -233,9 +242,23 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
   }
 
+  void rebuildArgParser() {
+    _argParser = ArgParser(
+      allowTrailingOptions: false,
+      usageLineLength: globals.outputPreferences.wrapText
+          ? globals.outputPreferences.wrapColumn
+          : null,
+    );
+    _populateGlobalOptions(verboseHelp: _verboseHelp);
+    _argParser.addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage information.');
+    for (final MapEntry<String, Command<void>> entry in commands.entries) {
+      _argParser.addCommand(entry.key, entry.value.argParser);
+    }
+  }
+
   @override
   ArgParser get argParser => _argParser;
-  final _argParser = ArgParser(
+  ArgParser _argParser = ArgParser(
     allowTrailingOptions: false,
     usageLineLength: globals.outputPreferences.wrapText
         ? globals.outputPreferences.wrapColumn
@@ -326,6 +349,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
               configManager.registerExtensionFlag(option.name);
             }
           }
+        }
+      }
+    }
+
+    if (globals.platform.environment[ExtensionTemplateManager.envPrototypeFlag] == 'true' &&
+        (commandName == 'create' || (commandName == 'help' && args.contains('create')))) {
+      final ExtensionTemplateManager? templateManager = extensionTemplateManager;
+      if (templateManager != null) {
+        await templateManager.getProjectTemplates();
+        final Command<void>? createCommand = commands['create'];
+        if (createCommand is CreateCommand) {
+          createCommand.setupExtensionTemplates();
+          rebuildArgParser();
         }
       }
     }

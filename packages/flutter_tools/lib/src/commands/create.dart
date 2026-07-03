@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:yaml/yaml.dart';
@@ -40,36 +41,57 @@ const kPlatformHelp =
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
 class CreateCommand extends FlutterCommand with CreateBase {
-  CreateCommand({bool verboseHelp = false}) {
+  CreateCommand({bool verboseHelp = false}) : _verboseHelp = verboseHelp;
+
+  final bool _verboseHelp;
+
+  @override
+  ArgParser get argParser => _argParser ??= _buildArgParser();
+  ArgParser? _argParser;
+
+  /// Resets the cached [ArgParser] so that it will be rebuilt with any newly
+  /// queried extension templates on next access.
+  void setupExtensionTemplates() {
+    _argParser = null;
+  }
+
+  ArgParser _buildArgParser() {
+    final parser = ArgParser(
+      allowTrailingOptions: false,
+      usageLineLength: globals.outputPreferences.wrapText
+          ? globals.outputPreferences.wrapColumn
+          : null,
+    );
+    _argParser = parser;
     addPubOptions();
-    argParser.addFlag(
+    parser.addFlag(
       'with-driver-test',
       help:
           '(deprecated) Historically, this added a flutter_driver dependency and generated a '
           'sample "flutter drive" test. Now it does nothing. Consider using the '
           '"integration_test" package: https://pub.dev/packages/integration_test',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
-    argParser.addOption(
+    parser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
+    parser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
       help:
           'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
-    argParser.addOption(
+    parser.addOption(
       'org',
       defaultsTo: 'com.example',
       help:
           'The organization responsible for your new Flutter project, in reverse domain name notation. '
           'This string is used in Java package names and as prefix in the iOS bundle identifier.',
     );
-    argParser.addOption(
+    parser.addOption(
       'project-name',
       help:
           'The project name for this new Flutter project. This must be a valid dart package name.',
     );
-    argParser.addOption(
+    parser.addOption(
       'ios-language',
       abbr: 'i',
       defaultsTo: 'swift',
@@ -78,9 +100,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
           '(deprecated) This option is deprecated and no longer has any effect. '
           'Swift is always used for iOS-specific code. '
           'This flag will be removed in a future version of Flutter.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addOption(
+    parser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
@@ -88,26 +110,26 @@ class CreateCommand extends FlutterCommand with CreateBase {
       help:
           'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
-    argParser.addFlag(
+    parser.addFlag(
       'skip-name-checks',
       help:
           'Allow the creation of applications and plugins with invalid names. '
           'This is only intended to enable testing of the tool itself.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addFlag(
+    parser.addFlag(
       'implementation-tests',
       help:
           'Include implementation tests that verify the template functions correctly. '
           'This is only intended to enable testing of the tool itself.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addOption(
+    parser.addOption(
       'initial-create-revision',
       help:
           'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
           'internally and should generally not be used manually.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
 
     final Map<String, String> platformsAllowedHelp = {
@@ -120,7 +142,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     final List<ParsedFlutterTemplateType> enabledTemplates =
         ParsedFlutterTemplateType.enabledValues(featureFlags);
     final isGepEnabled = globals.platform.environment['FLUTTER_TOOL_EXTENSION_PROTOTYPE'] == 'true';
-    argParser.addOption(
+    parser.addOption(
       'template',
       abbr: 't',
       allowed: isGepEnabled
@@ -132,7 +154,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
         for (final ParsedFlutterTemplateType t in enabledTemplates) t.cliName: t.helpText,
       },
     );
-    argParser.addOption(
+    parser.addOption(
       'sample',
       abbr: 's',
       help:
@@ -141,23 +163,24 @@ class CreateCommand extends FlutterCommand with CreateBase {
           'documentation website (https://api.flutter.dev/). An example can be found at: '
           'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       valueHelp: 'id',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addFlag(
+    parser.addFlag(
       'empty',
       abbr: 'e',
       help:
           'Specifies creating using an application template with a main.dart that is minimal, '
           'including no comments, as a starting point for a new application. Implies "--template=app".',
     );
-    argParser.addOption(
+    parser.addOption(
       'list-samples',
       help:
           'Specifies a JSON output file for a listing of Flutter code samples '
           'that can be created with "--sample".',
       valueHelp: 'path',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
+    return parser;
   }
 
   @override

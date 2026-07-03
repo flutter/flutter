@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/template.dart';
 import 'package:flutter_tools/src/flutter_tools_core/templates.dart' as core;
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:test/fake.dart';
@@ -358,11 +359,6 @@ void main() {
         final Directory outputDir = memoryFileSystem.directory('/my_project');
         expect(outputDir.existsSync(), isFalse);
 
-        // Pre-fetch templates in the manager to populate cache.
-        // This is what would normally happen during runner setup.
-        final ExtensionTemplateManager templateManager = context.get<ExtensionTemplateManager>()!;
-        await templateManager.getProjectTemplates();
-
         await commandRunner.run(<String>[
           'create',
           '--template=custom-linux-app',
@@ -375,6 +371,17 @@ void main() {
         expect(
           outputDir.childFile('.custom_device_extension_info').readAsStringSync(),
           'Custom Linux Device Extension App Template Verified',
+        );
+
+        // Verify that running FlutterCommandRunner with create --help queries
+        // extension templates and updates argParser allowedHelp.
+        final createCmd = CreateCommand();
+        final runner = FlutterCommandRunner();
+        runner.addCommand(createCmd);
+        await runner.run(<String>['create', '--help']);
+        expect(
+          runner.argParser.commands['create']!.options['template']!.allowedHelp,
+          contains('custom-linux-app'),
         );
 
         await manager.dispose();
