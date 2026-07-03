@@ -229,7 +229,7 @@ class ExtensionBackedDevice extends Device {
   }) async {
     final TargetPlatform platform = await targetPlatform;
     final String buildModeName = debuggingOptions.buildInfo.mode.cliName;
-    final String platformName = platform.simpleName.split('-').first;
+    final String platformName = platform.osName;
     final FlutterProject project = FlutterProject.current();
     final cmakeProject = GenericCmakeProject(project, platformName);
     final Directory buildDirectory = globals.fs.directory(
@@ -283,6 +283,7 @@ class ExtensionBackedDevice extends Device {
       final Map<String, String> environmentConfig = debuggingOptions.buildInfo
           .toEnvironmentConfig();
       environmentConfig['FLUTTER_TARGET'] = mainPath ?? 'lib/main.dart';
+      environmentConfig['TargetPlatform'] = platform.getName();
 
       // 3. Extract local engine overrides
       final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;

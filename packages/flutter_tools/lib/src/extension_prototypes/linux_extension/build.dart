@@ -65,7 +65,16 @@ base class LinuxAssembleTarget extends Target {
 
     // 1. cmake -S <project>/linux -B <output>
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
-    final cmakeConfigureCmd = <String>['cmake', '-S', linuxProjectPath, '-B', outputPath];
+    final String? targetPlatform = env.defines['TargetPlatform'];
+    final cmakeConfigureCmd = <String>[
+      'cmake',
+      '-S',
+      linuxProjectPath,
+      '-B',
+      outputPath,
+      if (targetPlatform != null) '-DFLUTTER_TARGET_PLATFORM=$targetPlatform',
+    ];
+
     final ProcessResult configureResult = await _processManager.run(cmakeConfigureCmd);
     if (configureResult.exitCode != 0) {
       throw Exception(
@@ -75,8 +84,8 @@ base class LinuxAssembleTarget extends Target {
       );
     }
 
-    // 2. cmake --build <output>
-    final cmakeBuildCmd = <String>['cmake', '--build', outputPath];
+    // 2. cmake --build <output> --target install
+    final cmakeBuildCmd = <String>['cmake', '--build', outputPath, '--target', 'install'];
     final ProcessResult buildResult = await _processManager.run(cmakeBuildCmd);
     if (buildResult.exitCode != 0) {
       throw Exception(
