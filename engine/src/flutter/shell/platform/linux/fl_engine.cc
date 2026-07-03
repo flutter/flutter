@@ -812,11 +812,30 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       break;
   }
 
+  gboolean enable_impeller = fl_dart_project_get_enable_impeller(self->project);
+  gboolean has_enable_impeller = FALSE;
+  for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+    if (env_switch == "--enable-impeller" ||
+        env_switch == "--enable-impeller=true") {
+      enable_impeller = TRUE;
+      has_enable_impeller = TRUE;
+    } else if (env_switch == "--enable-impeller=false") {
+      enable_impeller = FALSE;
+      has_enable_impeller = TRUE;
+    }
+  }
+
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
   for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
     g_ptr_array_add(command_line_args, g_strdup(env_switch.c_str()));
+  }
+  // Linux (and other desktop platforms) always uses SDFs.
+  g_ptr_array_add(command_line_args, g_strdup("--impeller-use-sdfs"));
+
+  if (enable_impeller && !has_enable_impeller) {
+    g_ptr_array_add(command_line_args, g_strdup("--enable-impeller"));
   }
 
   gchar** dart_entrypoint_args =
@@ -1182,7 +1201,9 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
                                         FlutterPointerDeviceKind device_kind,
                                         double scroll_delta_x,
                                         double scroll_delta_y,
-                                        int64_t buttons) {
+                                        int64_t buttons,
+                                        double rotation,
+                                        double pressure) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
   if (self->engine == nullptr) {
@@ -1204,6 +1225,16 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.buttons = buttons;
   fl_event.device = kMousePointerDeviceId;
   fl_event.view_id = view_id;
+  // GDK reports tablet pressure through GDK_AXIS_PRESSURE. The GDK input device
+  // documentation defines pressure as normalized from 0.0 to 1.0, which matches
+  // Flutter's expected pressure range.
+  // See: https://refspecs.linuxbase.org/gtk/2.6/gdk/gdk-Input-Devices.html
+  fl_event.pressure = pressure;
+  fl_event.pressure_min = 0.0;
+  fl_event.pressure_max = 1.0;
+  // GTK reports rotation in degrees, so convert it to radians for
+  // FlutterPointerEvent.rotation.
+  fl_event.rotation = rotation * G_PI / 180.0;
   if (self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1) !=
       kSuccess) {
     g_warning("Failed to send pointer event");

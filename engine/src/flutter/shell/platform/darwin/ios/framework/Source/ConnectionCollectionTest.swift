@@ -3,28 +3,29 @@
 // found in the LICENSE file.
 
 import InternalFlutterSwift
-import XCTest
+import Testing
 
-class ConnectionCollectionTest: XCTestCase {
-  func testAcquireAndRelease() {
+struct ConnectionCollectionTest {
+  @Test func acquireAndRelease() {
     let connections = ConnectionCollection()
     let connectionID = connections.acquireConnection(forChannel: "foo")
-    XCTAssertGreaterThan(connectionID, 0)
-    XCTAssertEqual("foo", connections.cleanupConnection(withID: connectionID))
-    XCTAssertEqual("", connections.cleanupConnection(withID: connectionID))
+    #expect(connectionID > 0)
+    #expect("foo" == connections.cleanupConnection(withID: connectionID))
+    #expect("" == connections.cleanupConnection(withID: connectionID))
   }
 
-  func testUniqueIDs() {
+  @Test func uniqueIDs() {
     let connections = ConnectionCollection()
     let firstConnectionID = connections.acquireConnection(forChannel: "foo")
     let secondConnectionID = connections.acquireConnection(forChannel: "bar")
-    XCTAssertNotEqual(firstConnectionID, secondConnectionID)
-    XCTAssertEqual("foo", connections.cleanupConnection(withID: firstConnectionID))
-    XCTAssertEqual("bar", connections.cleanupConnection(withID: secondConnectionID))
+    #expect(firstConnectionID != secondConnectionID)
+    #expect("foo" == connections.cleanupConnection(withID: firstConnectionID))
+    #expect("bar" == connections.cleanupConnection(withID: secondConnectionID))
   }
 
-  func testErrorConnectionWithNegativeCode() {
-    XCTAssertEqual(55, ConnectionCollection.makeErrorConnection(errorCode: 55))
-    XCTAssertEqual(55, ConnectionCollection.makeErrorConnection(errorCode: -55))
+  @Test func errorConnectionWithNegativeCode() {
+    #expect(55 == ConnectionCollection.makeErrorConnection(errorCode: 55))
+    #expect(55 == ConnectionCollection.makeErrorConnection(errorCode: -55))
   }
 }
+

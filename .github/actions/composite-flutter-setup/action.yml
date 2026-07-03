@@ -70,7 +70,7 @@ runs:
         run: |
           echo "revision=${{inputs.ANDROID_TOOLS_VERSION}};${{inputs.ANDROID_PLATFORM}};build-tools;${{inputs.ANDROID_BUILDTOOLS}}" >> "$GITHUB_OUTPUT"
       - name: Android SDK Cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: android-sdk-setup
         if: env.ACT
         with:
@@ -90,6 +90,37 @@ runs:
           echo "/opt/android/sdk/cmdline-tools/${{ inputs.ANDROID_TOOLS_VERSION }}/bin" >> "$GITHUB_PATH"
           echo "/opt/android/sdk/platform-tools" >> "$GITHUB_PATH"
 
+      # ktlint is needed by tree analyze
+      - name: ktlint cache
+        id: ktlint-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          # Cache the ktlint binary in runner.temp to avoid interfering with Flutter's bin folder
+          path: ${{ runner.temp }}/ktlint-bin/ktlint
+          # Hardcode the version in the key since it's hardcoded in the URL
+          key: ${{ runner.os }}-ktlint-1.5.0
+
+      - name: Download and Install ktlint 1.5.0
+        if: steps.ktlint-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p ${{ runner.temp }}/ktlint-bin
+
+          # 1. Download directly into the temp directory
+          curl -fsSL -o ${{ runner.temp }}/ktlint-bin/ktlint https://github.com/ktlint/ktlint/releases/download/1.5.0/ktlint
+
+          # 2. Verify the checksum to ensure the binary hasn't been tampered with
+          EXPECTED_SHA="a16be01dcc480aab2f55f444b620142152f66e31564b3b9376506d624c28a2ad"
+          echo "$EXPECTED_SHA  ${{ runner.temp }}/ktlint-bin/ktlint" | sha256sum --check -
+
+          # 3. Make the binary executable
+          chmod a+x ${{ runner.temp }}/ktlint-bin/ktlint
+
+      - name: Add ktlint to PATH
+        shell: bash
+        run: |
+          echo "${{ runner.temp }}/ktlint-bin" >> "$GITHUB_PATH"
+
       - name: Add `flutter` to the PATH
         shell: bash
         run: |
@@ -108,7 +139,7 @@ runs:
         run: |
           echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Flutter artifacts cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: flutter-artifacts
         with:
           path: ${{ github.workspace }}/bin/cache
@@ -122,7 +153,7 @@ runs:
           find dev examples packages -name "pubspec.yaml" -print0 | sort -z | xargs -0 cat | sha256sum  >> "$RUNNER_TEMP/pub_deps_sha"
           echo "revision=$(cat "$RUNNER_TEMP/pub_deps_sha")" >> "$GITHUB_OUTPUT"
       - name: pub package cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: pub-cache
         with:
           path: |

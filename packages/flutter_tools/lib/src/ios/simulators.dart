@@ -162,7 +162,13 @@ class SimControl {
       '--json',
     ];
     _logger.printTrace(command.join(' '));
-    final RunResult results = await _processUtils.run(command);
+    final RunResult results;
+    try {
+      results = await _processUtils.run(command);
+    } on Exception catch (exception) {
+      _logger.printError('Error executing simctl:\n$exception');
+      return <String, Map<String, Object?>>{};
+    }
     if (results.exitCode != 0) {
       _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, Object?>>{};
@@ -185,6 +191,11 @@ class SimControl {
 
   /// Returns all the connected simulator devices.
   Future<List<BootedSimDevice>> getConnectedDevices() async {
+    if (!_xcode.isSimctlInstalled) {
+      _logger.printTrace('Skipping iOS simulator discovery because simctl is not available.');
+      return <BootedSimDevice>[];
+    }
+
     final Map<String, Object?> devicesSection = await _listBootedDevices();
 
     return <BootedSimDevice>[
@@ -772,6 +783,7 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
       'senderImagePath ENDSWITH "/Flutter"',
       'senderImagePath ENDSWITH "/libswiftCore.dylib"',
       'processImageUUID == senderImageUUID',
+      'eventMessage CONTAINS "UIScene life cycle is required"',
       'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
       'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
     ]),
@@ -813,7 +825,17 @@ Future<Process?> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
-  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '');
+  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '') {
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    addLogInterceptor(uisceneCrashInterceptor);
+  }
 
   final IOSSimulator device;
 

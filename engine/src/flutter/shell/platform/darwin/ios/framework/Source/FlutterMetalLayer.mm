@@ -11,13 +11,9 @@
 
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 FLUTTER_ASSERT_ARC
-
-@interface FlutterDisplayLinkManager : NSObject
-@property(class, nonatomic, readonly) BOOL maxRefreshRateEnabledOnIPhone;
-+ (double)displayRefreshRate;
-@end
 
 @class FlutterTexture;
 @class FlutterDrawable;
@@ -214,12 +210,8 @@ extern CFTimeInterval display_link_target;
   }
   double maxFrameRate = fmax(refreshRate, 60);
   double minFrameRate = fmax(maxFrameRate / 2, 60);
-  if (@available(iOS 15.0, *)) {
-    _displayLink.preferredFrameRateRange =
-        CAFrameRateRangeMake(forceMax ? maxFrameRate : minFrameRate, maxFrameRate, maxFrameRate);
-  } else {
-    _displayLink.preferredFramesPerSecond = maxFrameRate;
-  }
+  _displayLink.preferredFrameRateRange =
+      CAFrameRateRangeMake(forceMax ? maxFrameRate : minFrameRate, maxFrameRate, maxFrameRate);
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {

@@ -708,8 +708,7 @@ abstract class Device {
   Future<TargetPlatform> get targetPlatform;
 
   /// Platform name for display only.
-  Future<String> get targetPlatformDisplayName async =>
-      getNameForTargetPlatform(await targetPlatform);
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   Future<String> get sdkNameAndVersion;
 
@@ -883,7 +882,7 @@ abstract class Device {
       'name': name,
       'id': id,
       'isSupported': await isSupported(),
-      'targetPlatform': getNameForTargetPlatform(await targetPlatform),
+      'targetPlatform': (await targetPlatform).getName(),
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
       'capabilities': <String, Object>{
@@ -995,6 +994,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.iosProfileDebugger,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1027,6 +1027,8 @@ class DebuggingOptions {
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.iosProfileDebugger,
+    this.traceSystrace = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1038,7 +1040,6 @@ class DebuggingOptions {
        skiaDeterministicRendering = false,
        traceSkia = false,
        traceSkiaAllowlist = null,
-       traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
        profileMicrotasks = false,
@@ -1115,6 +1116,7 @@ class DebuggingOptions {
     required this.google3WorkspaceRoot,
     required this.printDtd,
     this.webDevServerConfig,
+    this.iosProfileDebugger,
   }) : testFlag = false;
 
   final bool debuggingEnabled;
@@ -1162,6 +1164,9 @@ class DebuggingOptions {
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
   final bool testFlag;
+
+  /// Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.
+  final bool? iosProfileDebugger;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1262,6 +1267,7 @@ class DebuggingOptions {
 
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
+    'iosProfileDebugger': iosProfileDebugger,
     'startPaused': startPaused,
     'dartFlags': dartFlags,
     'dartEntrypointArgs': dartEntrypointArgs,
@@ -1334,6 +1340,7 @@ class DebuggingOptions {
       DebuggingOptions._(
         buildInfo: buildInfo,
         debuggingEnabled: json['debuggingEnabled']! as bool,
+        iosProfileDebugger: json['iosProfileDebugger'] as bool?,
         startPaused: json['startPaused']! as bool,
         dartFlags: json['dartFlags']! as String,
         dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),

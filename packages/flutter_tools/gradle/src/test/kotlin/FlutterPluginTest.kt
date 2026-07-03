@@ -13,6 +13,7 @@ import com.android.build.gradle.internal.core.InternalBaseVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
+import com.flutter.gradle.tasks.PrintTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.io.path.writeText
 import kotlin.test.Test
+import kotlin.test.assertContains
 
 class FlutterPluginTest {
     @Test
@@ -59,10 +61,11 @@ class FlutterPluginTest {
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        every { mockAndroidComponentsExtension.selector() } returns
-            mockk {
-                every { all() } returns mockk()
-            }
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        val mockSelector = mockk<com.android.build.api.variant.VariantSelector>(relaxed = true)
+        every { mockAndroidComponentsExtension.selector() } returns mockSelector
+        every { mockSelector.all() } returns mockSelector
+        every { mockSelector.withName(any<String>()) } returns mockSelector
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
@@ -120,8 +123,14 @@ class FlutterPluginTest {
         flutterPlugin.apply(project)
 
         verify { project.tasks.register("generateLockfiles", any()) }
-        verify { project.tasks.register("javaVersion", any()) }
-        verify { project.tasks.register("printBuildVariants", any()) }
+        val registeredPrintTasks = mutableListOf<String>()
+        verify {
+            project.tasks.register(capture(registeredPrintTasks), PrintTask::class.java, any())
+        }
+
+        assertContains(registeredPrintTasks, "javaVersion")
+        assertContains(registeredPrintTasks, "kgpVersion")
+        assertContains(registeredPrintTasks, "printBuildVariants")
     }
 
     @Test
@@ -151,10 +160,11 @@ class FlutterPluginTest {
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        every { mockAndroidComponentsExtension.selector() } returns
-            mockk {
-                every { all() } returns mockk()
-            }
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        val mockSelector = mockk<com.android.build.api.variant.VariantSelector>(relaxed = true)
+        every { mockAndroidComponentsExtension.selector() } returns mockSelector
+        every { mockSelector.all() } returns mockSelector
+        every { mockSelector.withName(any<String>()) } returns mockSelector
         every { project.projectDir } returns projectDir.toFile()
         every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
         every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
