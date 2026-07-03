@@ -18826,6 +18826,10 @@ void main() {
       expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
+    // On web, [EditableText.defaultSelectionWidthStyle] returns
+    // [BoxWidthStyle.tight] for non-iOS browsers regardless of
+    // [defaultTargetPlatform].
+    skip: kIsWeb, // [intended]
   );
 
   testWidgets(
