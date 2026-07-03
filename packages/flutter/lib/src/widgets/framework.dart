@@ -534,9 +534,23 @@ abstract class StatelessWidget extends Widget {
   ///
   /// The framework calls this method when this widget is inserted into the tree
   /// in a given [BuildContext] and when the dependencies of this widget change
-  /// (e.g., an [InheritedWidget] referenced by this widget changes). This
-  /// method can potentially be called in every frame and should not have any side
-  /// effects beyond building a widget.
+  /// (e.g., an [InheritedWidget] referenced by this widget changes).
+  ///
+  /// {@template flutter.widgets.StatelessWidget.build.noSideEffects}
+  /// This method can potentially be called in every frame and should not have
+  /// any side effects beyond building a widget. The framework decides when and
+  /// how often to call it, so any other work done here (mutating state outside
+  /// the widget, notifying listeners, starting asynchronous operations, and so
+  /// on) would be repeated at unpredictable times, possibly as often as once
+  /// per frame. In particular, a build method must not cause other widgets to
+  /// rebuild, for example by calling [State.setState] or by setting the value
+  /// of a [Listenable] (such as a [ChangeNotifier]) that widgets are listening
+  /// to: the framework does not allow widgets to be marked as needing to build
+  /// during the build, layout, or paint phases, and throws an exception when
+  /// this happens. Logic with side effects belongs in event handler callbacks
+  /// or in [State] lifecycle methods such as [State.initState] and
+  /// [State.didUpdateWidget] instead.
+  /// {@endtemplate}
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
@@ -1353,8 +1367,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///  * After calling [deactivate] and then reinserting the [State] object into
   ///    the tree at another location.
   ///
-  /// This method can potentially be called in every frame and should not have
-  /// any side effects beyond building a widget.
+  /// {@macro flutter.widgets.StatelessWidget.build.noSideEffects}
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
