@@ -200,7 +200,6 @@ class TestsCrossImportChecker {
     'packages/flutter_test/test/utils/memory_leak_tests.dart',
     'packages/flutter_test/test/widget_tester_test.dart',
     'packages/flutter_test/test/live_widget_controller_test.dart',
-    'packages/flutter_test/test/live_binding_test.dart',
     'packages/flutter_test/test/accessibility_test.dart',
     'packages/flutter_test/test/finders_test.dart',
     'packages/flutter_test/test/controller_test.dart',
