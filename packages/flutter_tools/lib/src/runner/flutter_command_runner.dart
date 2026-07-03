@@ -16,9 +16,12 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../commands/build.dart';
 import '../convert.dart';
+import '../experimental/build_targets.dart';
 import '../experimental/configuration.dart';
 import '../experimental/templates.dart';
+import '../flutter_tools_core/build.dart' as core_build;
 import '../flutter_tools_core/configuration.dart' as core;
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
@@ -336,6 +339,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
       final ExtensionTemplateManager? templateManager = extensionTemplateManager;
       if (templateManager != null) {
         await templateManager.getProjectTemplates();
+        rebuildArgParser();
+      }
+    }
+
+    if (globals.platform.environment[ExtensionBuildTargetManager.envPrototypeFlag] == 'true' &&
+        (commandName == 'build' || (commandName == 'help' && args.contains('build')))) {
+      final ExtensionBuildTargetManager? buildTargetManager = extensionBuildTargetManager;
+      if (buildTargetManager != null) {
+        final List<core_build.Target> targets = await buildTargetManager.getBuildTargets();
+        final Command<void>? buildCommand = commands['build'];
+        if (buildCommand is BuildCommand) {
+          buildCommand.registerExtensionSubcommands(targets);
+        }
         rebuildArgParser();
       }
     }

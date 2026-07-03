@@ -48,6 +48,12 @@ base class LinuxAssembleTarget extends Target {
   String get name => 'assemble_linux_app';
 
   @override
+  String? get cliSubcommand => 'custom-linux';
+
+  @override
+  String? get cliDescription => 'Build a prototype Linux extension desktop application.';
+
+  @override
   List<String> get dependencies => const <String>[];
 
   @override

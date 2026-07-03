@@ -5,11 +5,15 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/flutter_tools_extension.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/devices.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/build.dart';
@@ -21,6 +25,7 @@ import 'package:stream_channel/stream_channel.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
+import '../src/test_flutter_command_runner.dart';
 
 void main() {
   group('BuildEnvironment & ArtifactDependency Serialization', () {
@@ -697,5 +702,178 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+  });
+  group('Dynamic Extension Build Subcommands (GEP CLI)', () {
+    testWithoutContext(
+      'build.getTargets includes cliSubcommand and cliDescription and ExtensionBuildTarget.fromJson parses them accurately',
+      () async {
+        final buildService = LinuxBuildService();
+        final Map<String, Function> rpcHandlers = await buildService.initialize();
+        final getTargets =
+            rpcHandlers['getTargets']!
+                as Future<List<Map<String, Object?>>> Function(Map<String, Object?>);
+
+        final List<Map<String, Object?>> targetsJson = await getTargets(<String, Object?>{});
+        expect(targetsJson, isNotEmpty);
+        final Map<String, Object?> targetMap = targetsJson.first;
+
+        expect(targetMap['name'], 'assemble_linux_app');
+        expect(targetMap['cliSubcommand'], 'custom-linux');
+        expect(
+          targetMap['cliDescription'],
+          'Build a prototype Linux extension desktop application.',
+        );
+
+        final target = ExtensionBuildTarget.fromJson(targetMap);
+        expect(target.name, 'assemble_linux_app');
+        expect(target.cliSubcommand, 'custom-linux');
+        expect(target.cliDescription, 'Build a prototype Linux extension desktop application.');
+        expect(target.dependencies, isEmpty);
+        expect(target.inputs, isEmpty);
+        expect(target.outputs, isEmpty);
+
+        // Verify null-safe parsing when optional lists are omitted
+        final minimalTarget = ExtensionBuildTarget.fromJson(<String, Object?>{
+          'name': 'minimal_target',
+          'cliSubcommand': 'mini',
+        });
+        expect(minimalTarget.name, 'minimal_target');
+        expect(minimalTarget.cliSubcommand, 'mini');
+        expect(minimalTarget.cliDescription, isNull);
+        expect(minimalTarget.dependencies, isEmpty);
+        expect(minimalTarget.inputs, isEmpty);
+        expect(minimalTarget.outputs, isEmpty);
+      },
+    );
+
+    group('BuildCommand Dynamic Registration & Delegation', () {
+      late ToolExtensionManager manager;
+      rpc.Peer? mockExtensionPeer;
+      ReceivePort? mockExtensionReceivePort;
+      StreamChannel<Object?>? mockExtensionChannel;
+
+      setUp(() {
+        manager = ToolExtensionManager();
+      });
+
+      tearDown(() async {
+        await manager.dispose();
+        await mockExtensionPeer?.close();
+        mockExtensionReceivePort?.close();
+      });
+
+      Future<ToolExtension> connectMockExtension({
+        required List<String> services,
+        List<Map<String, Object?>>? targets,
+        Completer<Map<String, Object?>>? buildCompleter,
+      }) async {
+        final managerReceivePort = ReceivePort();
+        final Future<ToolExtension> connectFuture = manager.connectExtension(managerReceivePort);
+
+        mockExtensionReceivePort = ReceivePort();
+        managerReceivePort.sendPort.send(mockExtensionReceivePort!.sendPort);
+
+        final ToolExtension extension = await connectFuture;
+
+        mockExtensionChannel = IsolateChannel<Object?>.connectReceive(mockExtensionReceivePort!);
+        mockExtensionPeer = rpc.Peer.withoutJson(mockExtensionChannel!);
+
+        mockExtensionPeer!.registerMethod('extension.getCapabilities', () {
+          return <String, Object?>{'services': services};
+        });
+
+        mockExtensionPeer!.registerMethod('build.getTargets', () {
+          return targets ??
+              <Map<String, Object?>>[
+                <String, Object?>{
+                  'name': 'custom_target',
+                  'cliSubcommand': 'custom-ext',
+                  'cliDescription': 'Build custom ext target.',
+                  'dependencies': <String>[],
+                  'inputs': <String>[],
+                  'outputs': <String>[],
+                },
+              ];
+        });
+
+        mockExtensionPeer!.registerMethod('build.build', (rpc.Parameters params) {
+          final String targetName = params['targetName'].asString;
+          final Map<String, Object?> environment = params['environment'].asMap
+              .cast<String, Object?>();
+
+          buildCompleter?.complete(<String, Object?>{
+            'targetName': targetName,
+            'environment': environment,
+          });
+
+          return <String, Object?>{'success': true};
+        });
+
+        unawaited(mockExtensionPeer!.listen());
+        return extension;
+      }
+
+      testUsingContext(
+        'BuildCommand dynamically registers BuildExtensionSubCommand and delegates build over RPC',
+        () async {
+          Cache.disableLocking();
+          final buildCompleter = Completer<Map<String, Object?>>();
+          await connectMockExtension(services: <String>['build'], buildCompleter: buildCompleter);
+
+          final Directory projectDir = globals.fs.directory('/project');
+          projectDir.createSync(recursive: true);
+          projectDir.childFile('pubspec.yaml').writeAsStringSync('name: my_app\n');
+          projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+          projectDir.childFile('.packages').createSync();
+          projectDir
+              .childDirectory('.dart_tool')
+              .childFile('package_config.json')
+              .createSync(recursive: true);
+          globals.fs.currentDirectory = projectDir;
+
+          final CommandRunner<void> runner = createTestCommandRunner(
+            BuildCommand(
+              artifacts: globals.artifacts!,
+              cache: globals.cache,
+              fileSystem: globals.fs,
+              flutterVersion: globals.flutterVersion,
+              buildSystem: globals.buildSystem,
+              osUtils: globals.os,
+              logger: globals.logger,
+              androidSdk: globals.androidSdk,
+              config: globals.config,
+              platform: globals.platform,
+              processUtils: globals.processUtils,
+              processManager: globals.processManager,
+              fileSystemUtils: globals.fsUtils,
+              templateRenderer: globals.templateRenderer,
+              terminal: globals.terminal,
+              plistParser: globals.plistParser,
+              xcode: globals.xcode,
+            ),
+          );
+          await runner.run(<String>['build', 'custom-ext', '--debug', '--dart-define=FOO=BAR']);
+
+          final Map<String, Object?> buildCall = await buildCompleter.future;
+          expect(buildCall['targetName'], 'custom_target');
+
+          final envMap = buildCall['environment']! as Map<String, Object?>;
+          final env = BuildEnvironment.fromJson(envMap);
+
+          expect(env.defines['FLUTTER_BUILD_MODE'], 'debug');
+          expect(env.defines['CMAKE_BUILD_TYPE'], 'Debug');
+          expect(env.defines['DART_DEFINES'], contains(encodeDartDefines(<String>['FOO=BAR'])));
+        },
+        overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          Platform: () => FakePlatform(
+            environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'},
+          ),
+          ProcessManager: () => FakeProcessManager.any(),
+          ToolExtensionManager: () => manager,
+        },
+      );
+    });
   });
 }

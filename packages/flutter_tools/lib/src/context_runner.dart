@@ -37,6 +37,7 @@ import 'device.dart';
 import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'experimental/build_targets.dart';
 import 'experimental/configuration.dart';
 import 'experimental/templates.dart';
 import 'features.dart';
@@ -213,6 +214,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
       ToolExtensionManager: () => ToolExtensionManager(),
+      ExtensionBuildTargetManager: () => ExtensionBuildTargetManager(
+        extensionManager: context.get<ToolExtensionManager>()!,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       ExtensionConfigurationManager: () => ExtensionConfigurationManager(
         extensionManager: context.get<ToolExtensionManager>()!,
         logger: globals.logger,

@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -15,12 +16,18 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/terminal.dart';
+import '../base/utils.dart';
+import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../experimental/build_targets.dart';
 import '../features.dart';
+import '../flutter_tools_core/build.dart' as core;
+import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build_aar.dart';
@@ -57,7 +64,10 @@ class BuildCommand extends FlutterCommand {
     required PlistParser plistParser,
     required Xcode? xcode,
     bool verboseHelp = false,
-  }) {
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _platform = platform,
+       _verboseHelp = verboseHelp {
     _addSubcommand(
       BuildAarCommand(
         fileSystem: fileSystem,
@@ -154,6 +164,36 @@ class BuildCommand extends FlutterCommand {
     );
   }
 
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Platform _platform;
+  final bool _verboseHelp;
+
+  void registerExtensionSubcommands([List<core.Target>? targets]) {
+    if (_platform.environment[ExtensionBuildTargetManager.envPrototypeFlag] != 'true') {
+      return;
+    }
+    final ExtensionBuildTargetManager? targetManager = extensionBuildTargetManager;
+    final List<core.Target> targetsToRegister =
+        targets ?? targetManager?.cachedTargets ?? const <core.Target>[];
+    for (final target in targetsToRegister) {
+      final String? cliSubcommand = target.cliSubcommand;
+      if (cliSubcommand != null && !subcommands.containsKey(cliSubcommand)) {
+        _addSubcommand(
+          ExtensionBuildSubCommand(
+            target: target,
+            targetManager: targetManager,
+            fileSystem: _fileSystem,
+            logger: _logger,
+            verboseHelp: _verboseHelp,
+          ),
+        );
+      }
+    }
+  }
+
+  void registerDynamicSubcommands() => registerExtensionSubcommands();
+
   void _addSubcommand(BuildSubCommand command) {
     if (command.supported) {
       addSubcommand(command);
@@ -184,4 +224,93 @@ abstract class BuildSubCommand extends FlutterCommand {
 
   /// Whether this command is supported and should be shown.
   bool get supported => true;
+}
+
+typedef BuildExtensionSubCommand = ExtensionBuildSubCommand;
+
+class ExtensionBuildSubCommand extends BuildSubCommand {
+  ExtensionBuildSubCommand({
+    required FileSystem fileSystem,
+    required super.logger,
+    required core.Target target,
+    required bool verboseHelp,
+    ExtensionBuildTargetManager? targetManager,
+  }) : _target = target,
+       _targetManager = targetManager,
+       _fileSystem = fileSystem,
+       super(verboseHelp: verboseHelp) {
+    addBuildModeFlags(verboseHelp: verboseHelp);
+    usesTargetOption();
+    usesOutputDir();
+    argParser.addOption(
+      'target-platform',
+      help: 'The target platform for which the app is compiled.',
+    );
+    usesDartDefineOption();
+  }
+
+  final core.Target _target;
+  final ExtensionBuildTargetManager? _targetManager;
+  final FileSystem _fileSystem;
+
+  @override
+  String get name => _target.cliSubcommand ?? _target.name;
+
+  @override
+  String get description => _target.cliDescription ?? 'Build target ${_target.name}.';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    final BuildInfo buildInfo = await getBuildInfo();
+    final String buildModeName = buildInfo.mode.cliName;
+    final String? targetFile = stringArg('target');
+    final String mainPath = targetFile ?? 'lib/main.dart';
+
+    final String defaultPlatform = switch (globals.os.hostPlatform) {
+      HostPlatform.linux_arm64 => 'linux-arm64',
+      HostPlatform.linux_riscv64 => 'linux-riscv64',
+      HostPlatform.darwin_arm64 || HostPlatform.darwin_x64 => 'darwin',
+      HostPlatform.windows_arm64 || HostPlatform.windows_x64 => 'windows-x64',
+      _ => 'linux-x64',
+    };
+    final String targetPlatform = stringArg('target-platform') ?? defaultPlatform;
+
+    final String? outputDirArg = stringArg('output');
+    final FlutterProject project = FlutterProject.current();
+    final Uri projectRootUri = project.directory.uri;
+    final Uri outputUri = outputDirArg != null
+        ? _fileSystem.directory(outputDirArg).uri
+        : project.directory
+              .childDirectory(getBuildDirectory())
+              .childDirectory('custom')
+              .childDirectory(_target.name)
+              .childDirectory(buildModeName)
+              .uri;
+
+    final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
+    environmentConfig['FLUTTER_TARGET'] = mainPath;
+    environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
+    environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
+    environmentConfig['FLUTTER_TARGET_PLATFORM'] = targetPlatform;
+
+    final buildEnv = core.BuildEnvironment(
+      cacheDir: globals.cache.getRoot().uri,
+      defines: environmentConfig,
+      flutterAssetsDir: project.directory
+          .childDirectory(getBuildDirectory())
+          .childDirectory('flutter_assets')
+          .uri,
+      outputDirectory: outputUri,
+      projectRoot: projectRootUri,
+    );
+
+    final ExtensionBuildTargetManager? targetManager =
+        _targetManager ?? extensionBuildTargetManager;
+    if (targetManager != null) {
+      await targetManager.buildTarget(_target.name, buildEnv);
+    } else {
+      throwToolExit('ExtensionBuildTargetManager is not available in context.');
+    }
+    return FlutterCommandResult.success();
+  }
 }

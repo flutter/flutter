@@ -35,6 +35,8 @@ abstract base class BuildService extends ToolExtensionService {
             'dependencies': target.dependencies,
             'inputs': target.inputs,
             'outputs': target.outputs,
+            if (target.cliSubcommand != null) 'cliSubcommand': target.cliSubcommand,
+            if (target.cliDescription != null) 'cliDescription': target.cliDescription,
           },
         )
         .toList();
@@ -48,7 +50,7 @@ abstract base class BuildService extends ToolExtensionService {
       return <String, Object?>{
         'success': false,
         'errorMessage':
-            'Missing or invalid parameters: "targetName" must be a String and "environment" must be a Map.',
+            'Missing or invalid parameters: targetName must be a String and environment must be a Map.',
       };
     }
 
@@ -97,6 +99,12 @@ abstract base class Target {
   /// The name of this target.
   String get name;
 
+  /// Optional subcommand name if this target should be registered as a CLI subcommand under `flutter build`.
+  String? get cliSubcommand => null;
+
+  /// Optional description for the CLI subcommand when registered under `flutter build`.
+  String? get cliDescription => null;
+
   /// The list of names of dependencies.
   List<String> get dependencies;
 
@@ -115,6 +123,48 @@ abstract base class Target {
 
   /// Custom defines passed back to the tool.
   Future<Map<String, String>> get extraDefines async => const <String, String>{};
+}
+
+/// A concrete implementation of [Target] that can be parsed from a JSON map returned over GEP RPC.
+final class ExtensionBuildTarget extends Target {
+  ExtensionBuildTarget.fromJson(Map<String, Object?> json)
+    : name = json['name']! as String,
+      dependencies = json['dependencies'] is List
+          ? (json['dependencies']! as List<Object?>).cast<String>()
+          : const <String>[],
+      inputs = json['inputs'] is List
+          ? (json['inputs']! as List<Object?>).cast<String>()
+          : const <String>[],
+      outputs = json['outputs'] is List
+          ? (json['outputs']! as List<Object?>).cast<String>()
+          : const <String>[],
+      cliSubcommand = json['cliSubcommand'] as String?,
+      cliDescription = json['cliDescription'] as String?;
+
+  @override
+  final String name;
+
+  @override
+  final List<String> dependencies;
+
+  @override
+  final List<String> inputs;
+
+  @override
+  final List<String> outputs;
+
+  @override
+  final String? cliSubcommand;
+
+  @override
+  final String? cliDescription;
+
+  @override
+  Future<Map<String, Object?>> build(BuildEnvironment env) async {
+    throw UnimplementedError(
+      'ExtensionBuildTarget.build should not be called directly on host representation.',
+    );
+  }
 }
 
 /// Environment state provided by the tool.

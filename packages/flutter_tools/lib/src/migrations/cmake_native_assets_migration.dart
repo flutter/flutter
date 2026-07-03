@@ -43,7 +43,7 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
 set(NATIVE_ASSETS_DIR "\${PROJECT_BUILD_DIR}native_assets/$os/")
 install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
   DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"
-  COMPONENT Runtime)
+  COMPONENT Runtime OPTIONAL)
 ''';
 
     // Insert the new command after the bundled libraries loop.
