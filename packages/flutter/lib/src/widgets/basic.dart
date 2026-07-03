@@ -7677,13 +7677,13 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// {@tool dartpad}
 /// The following sample shows an [AbsorbPointer] and an [IgnorePointer] side
-/// by side, each wrapping a button that partially covers another button
+/// by side, each wrapping a box that partially covers a tappable target
 /// behind it in a stack. Tapping the overlapping region on the
 /// [AbsorbPointer] side does nothing: the [AbsorbPointer] absorbs the pointer
-/// events itself, so neither its child button nor the button behind it
-/// receives the tap. Tapping the same region on the [IgnorePointer] side taps
-/// the button behind: the [IgnorePointer] is invisible to hit testing, so the
-/// pointer event goes through to the next target in the stack.
+/// events itself, so neither its child nor the target behind it receives the
+/// tap. Tapping the same region on the [IgnorePointer] side taps the target
+/// behind: the [IgnorePointer] is invisible to hit testing, so the pointer
+/// event goes through to the next target in the stack.
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}

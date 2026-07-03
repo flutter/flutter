@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/basic/absorb_pointer.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
@@ -19,14 +19,14 @@ void main() {
     );
 
     // Tapping the overlapping region does nothing: the AbsorbPointer claims
-    // the hit, so neither its child button nor the button behind it in the
-    // stack receives the tap.
+    // the hit, so neither its child nor the target behind it in the stack
+    // receives the tap.
     await tester.tapAt(tester.getCenter(absorbPointer));
     await tester.pump();
     expect(find.text('Taps received: 0'), findsNWidgets(2));
 
-    // The part of the button behind that the AbsorbPointer does not cover
-    // still receives taps.
+    // The part of the target that the AbsorbPointer does not cover still
+    // receives taps.
     await tester.tapAt(
       tester.getCenter(absorbPointer) + const Offset(-75.0, 0.0),
     );
@@ -44,9 +44,9 @@ void main() {
       matching: find.byType(IgnorePointer),
     );
 
-    // Tapping the overlapping region taps the button behind: the
-    // IgnorePointer is invisible to hit testing, so the pointer event goes
-    // through to the next target in the stack.
+    // Tapping the overlapping region taps the target behind the
+    // IgnorePointer. The IgnorePointer is invisible to hit testing, so the
+    // pointer event goes through to the next target in the stack.
     await tester.tapAt(tester.getCenter(ignorePointer));
     await tester.pump();
     expect(find.text('Taps received: 1'), findsOneWidget);

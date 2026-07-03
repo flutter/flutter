@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for [AbsorbPointer].
 
@@ -13,11 +13,11 @@ class AbsorbPointerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('AbsorbPointer Sample')),
-        body: const Center(child: AbsorbPointerExample()),
-      ),
+    return WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      builder: (BuildContext context, Widget? child) {
+        return const AbsorbPointerExample();
+      },
     );
   }
 }
@@ -35,96 +35,97 @@ class _AbsorbPointerExampleState extends State<AbsorbPointerExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: .spaceEvenly,
-      children: <Widget>[
-        Column(
-          mainAxisSize: .min,
-          children: <Widget>[
-            const Text('AbsorbPointer'),
-            const SizedBox(height: 16.0),
-            Stack(
-              alignment: .center,
-              children: <Widget>[
-                SizedBox(
-                  width: 200.0,
-                  height: 100.0,
-                  child: ElevatedButton(
-                    onPressed: () {
+    return ColoredBox(
+      color: const Color(0xFFFFFFFF),
+      child: Row(
+        mainAxisAlignment: .spaceEvenly,
+        children: <Widget>[
+          Column(
+            mainAxisAlignment: .center,
+            children: <Widget>[
+              const Text('AbsorbPointer'),
+              const SizedBox(height: 16.0),
+              Stack(
+                alignment: .center,
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         _absorbTapCount += 1;
                       });
                     },
-                    child: null,
-                  ),
-                ),
-                // The AbsorbPointer absorbs the pointer events itself: over
-                // the overlapping region, neither its child button nor the
-                // button behind it in the stack receives the tap, so the
-                // counter does not change.
-                SizedBox(
-                  width: 100.0,
-                  height: 200.0,
-                  child: AbsorbPointer(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade200,
+                    child: Container(
+                      width: 200.0,
+                      height: 100.0,
+                      color: const Color(0xFF2196F3),
+                      alignment: .center,
+                      child: const Text(
+                        'Tap me',
+                        style: TextStyle(color: Color(0xFFFFFFFF)),
                       ),
-                      onPressed: () {},
-                      child: null,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16.0),
-            Text('Taps received: $_absorbTapCount'),
-          ],
-        ),
-        Column(
-          mainAxisSize: .min,
-          children: <Widget>[
-            const Text('IgnorePointer'),
-            const SizedBox(height: 16.0),
-            Stack(
-              alignment: .center,
-              children: <Widget>[
-                SizedBox(
-                  width: 200.0,
-                  height: 100.0,
-                  child: ElevatedButton(
-                    onPressed: () {
+                  // The AbsorbPointer absorbs the pointer events itself: over
+                  // the overlapping region, neither its child nor the target
+                  // behind it in the stack receives the tap, so the counter
+                  // does not change.
+                  AbsorbPointer(
+                    child: Container(
+                      width: 100.0,
+                      height: 200.0,
+                      color: const Color(0x88BBDEFB),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              Text('Taps received: $_absorbTapCount'),
+            ],
+          ),
+          Column(
+            mainAxisAlignment: .center,
+            children: <Widget>[
+              const Text('IgnorePointer'),
+              const SizedBox(height: 16.0),
+              Stack(
+                alignment: .center,
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         _ignoreTapCount += 1;
                       });
                     },
-                    child: null,
-                  ),
-                ),
-                // The IgnorePointer is invisible to hit testing: over the
-                // overlapping region, its child button does not receive the
-                // tap, but the button behind it in the stack does, so the
-                // counter increases.
-                SizedBox(
-                  width: 100.0,
-                  height: 200.0,
-                  child: IgnorePointer(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade200,
+                    child: Container(
+                      width: 200.0,
+                      height: 100.0,
+                      color: const Color(0xFF4CAF50),
+                      alignment: .center,
+                      child: const Text(
+                        'Tap me',
+                        style: TextStyle(color: Color(0xFFFFFFFF)),
                       ),
-                      onPressed: () {},
-                      child: null,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16.0),
-            Text('Taps received: $_ignoreTapCount'),
-          ],
-        ),
-      ],
+                  // The IgnorePointer is invisible to hit testing: over the
+                  // overlapping region, its child does not receive the tap,
+                  // but the target behind it in the stack does, so the
+                  // counter increases.
+                  IgnorePointer(
+                    child: Container(
+                      width: 100.0,
+                      height: 200.0,
+                      color: const Color(0x88C8E6C9),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              Text('Taps received: $_ignoreTapCount'),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
