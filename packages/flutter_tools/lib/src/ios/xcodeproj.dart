@@ -420,11 +420,14 @@ class XcodeProjectInterpreter {
       xcodeProject,
       buildDirectory,
     );
+    final String resolvedProjectFilename =
+        projectFilename ?? _fileSystem.path.absolute(xcodeProject.xcodeProject.path);
     final RunResult result = await _processUtils.run(
       <String>[
         ...xcodebuildCommandArgs,
+        '-project',
+        resolvedProjectFilename,
         '-list',
-        if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
       throwOnError: true,
       allowedFailures: allowedFailures,
