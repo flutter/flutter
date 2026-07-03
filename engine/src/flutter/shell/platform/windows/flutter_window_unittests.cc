@@ -854,7 +854,7 @@ TEST_F(FlutterWindowTest, OnMousePointerDown) {
 }
 
 TEST_F(FlutterWindowTest, NonPrimaryMouseButtonCapturesPointer) {
-  MockFlutterWindow win32window;
+  MockFlutterWindow win32window(100, 100);
   MockWindowBindingHandlerDelegate delegate;
   EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
   EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
@@ -883,7 +883,7 @@ TEST_F(FlutterWindowTest, NonPrimaryMouseButtonCapturesPointer) {
 }
 
 TEST_F(FlutterWindowTest, MouseButtonCaptureReleasedAfterAllButtonsReleased) {
-  MockFlutterWindow win32window;
+  MockFlutterWindow win32window(100, 100);
   MockWindowBindingHandlerDelegate delegate;
   EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
   EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
