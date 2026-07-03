@@ -459,9 +459,6 @@ class _PredictiveBackSharedElementPageTransitionState
         begin: switch (widget.currentBackEvent?.swipeEdge) {
           SwipeEdge.left => Offset(xShift, _getYShiftPosition(screenSize.height)),
           SwipeEdge.right => Offset(-xShift, _getYShiftPosition(screenSize.height)),
-          // SwipeEdge.none is a button-triggered back (no swipe direction).
-          // Button events are filtered out in handleStartBackGesture, so this
-          // branch is a safe fallback matching the null (no event) case.
           SwipeEdge.none || null => Offset(xShift, _getYShiftPosition(screenSize.height)),
         },
         end: Offset.zero,
