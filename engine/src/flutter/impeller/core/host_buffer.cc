@@ -247,33 +247,36 @@ void HostBuffer::Reset() {
   current_buffer_ = 0u;
   frame_index_ = (frame_index_ + 1) % kHostBufferArenaSize;
 
-  if (submission_tracker_) {
-    uint64_t completed = submission_tracker_->CompletedThrough();
-
-    // Release retired buffers the GPU has completed with.
-    std::erase_if(retired_buffers_, [completed](const auto& retired) {
-      return retired.first <= completed;
-    });
-
-    // If the GPU may still be reading the next entry's buffers, retire them
-    // and start the entry over with a fresh allocation. Otherwise writes
-    // below would race the reads of an incomplete earlier frame.
-    if (entry_stamps_[frame_index_] > completed) {
-      DeviceBufferDescriptor desc;
-      desc.size = kAllocatorBlockSize;
-      desc.storage_mode = StorageMode::kHostVisible;
-      std::shared_ptr<DeviceBuffer> buffer = allocator_->CreateBuffer(desc);
-      if (buffer) {
-        retired_buffers_.emplace_back(entry_stamps_[frame_index_],
-                                      std::move(device_buffers_[frame_index_]));
-        device_buffers_[frame_index_].clear();
-        device_buffers_[frame_index_].push_back(std::move(buffer));
-        entry_stamps_[frame_index_] = 0;
-      } else {
-        VALIDATION_LOG << "Failed to replace an in-flight host buffer entry.";
-      }
-    }
+  if (!submission_tracker_) {
+    return;
   }
+  uint64_t completed = submission_tracker_->CompletedThrough();
+
+  // Release retired buffers the GPU has completed with.
+  std::erase_if(retired_buffers_, [completed](const auto& retired) {
+    return retired.first <= completed;
+  });
+
+  if (entry_stamps_[frame_index_] <= completed) {
+    return;
+  }
+
+  // The GPU may still be reading the next entry's buffers. Retire them and
+  // start the entry over with a fresh allocation, since reusing them would
+  // race the reads of an incomplete earlier frame.
+  DeviceBufferDescriptor desc;
+  desc.size = kAllocatorBlockSize;
+  desc.storage_mode = StorageMode::kHostVisible;
+  std::shared_ptr<DeviceBuffer> buffer = allocator_->CreateBuffer(desc);
+  if (!buffer) {
+    VALIDATION_LOG << "Failed to replace an in-flight host buffer entry.";
+    return;
+  }
+  retired_buffers_.emplace_back(entry_stamps_[frame_index_],
+                                std::move(device_buffers_[frame_index_]));
+  device_buffers_[frame_index_].clear();
+  device_buffers_[frame_index_].push_back(std::move(buffer));
+  entry_stamps_[frame_index_] = 0;
 }
 
 size_t HostBuffer::GetMinimumUniformAlignment() const {
