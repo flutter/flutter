@@ -79,6 +79,12 @@ base class LinuxAssembleTarget extends Target {
   String? get cliDescription => 'Build a prototype Linux extension desktop application.';
 
   @override
+  String? get targetPlatformDirectory => 'linux-x64';
+
+  @override
+  String? get targetDeviceDirectory => 'linux-proto-1';
+
+  @override
   List<String> get dependencies => const <String>[];
 
   @override

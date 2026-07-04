@@ -17,28 +17,23 @@ import './template.dart';
 void linuxDeviceExtensionEntryPoint(SendPort hostSendPort) {
   final provider = ToolExtensionProvider(name: 'linux_device_extension', sendPort: hostSendPort);
 
-  provider.registerService(
-    LinuxDeviceService(
-      onNotification: (String method, Map<String, Object?> params) {
-        provider.sendNotification(method, params);
-      },
-    ),
-  );
-
-  provider.registerService(LinuxDiagnosticsService(processManager: const LocalProcessManager()));
-
-  provider.registerService(LinuxConfigurationService());
-
-  provider.registerService(
-    LinuxBuildService(
-      fileSystem: const LocalFileSystem(),
-      processManager: const LocalProcessManager(),
-    ),
-  );
-
-  provider.registerService(LinuxArtifactService());
-
-  provider.registerService(LinuxTemplateService());
-
-  provider.initialize();
+  provider
+    ..registerService(
+      LinuxDeviceService(
+        onNotification: (String method, Map<String, Object?> params) {
+          provider.sendNotification(method, params);
+        },
+      ),
+    )
+    ..registerService(LinuxDiagnosticsService(processManager: const LocalProcessManager()))
+    ..registerService(LinuxConfigurationService())
+    ..registerService(
+      LinuxBuildService(
+        fileSystem: const LocalFileSystem(),
+        processManager: const LocalProcessManager(),
+      ),
+    )
+    ..registerService(LinuxArtifactService())
+    ..registerService(LinuxTemplateService())
+    ..initialize();
 }

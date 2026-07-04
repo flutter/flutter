@@ -37,6 +37,10 @@ abstract base class BuildService extends ToolExtensionService {
             'outputs': target.outputs,
             if (target.cliSubcommand != null) 'cliSubcommand': target.cliSubcommand,
             if (target.cliDescription != null) 'cliDescription': target.cliDescription,
+            if (target.targetPlatformDirectory != null)
+              'targetPlatformDirectory': target.targetPlatformDirectory,
+            if (target.targetDeviceDirectory != null)
+              'targetDeviceDirectory': target.targetDeviceDirectory,
           },
         )
         .toList();
@@ -104,6 +108,12 @@ abstract base class Target {
 
   /// Optional description for the CLI subcommand when registered under `flutter build`.
   String? get cliDescription => null;
+
+  /// Optional target platform directory name (e.g., 'linux-x64') for structuring output directories to match `flutter run`.
+  String? get targetPlatformDirectory => null;
+
+  /// Optional device directory name (e.g., 'linux-proto-1') for structuring output directories to match `flutter run`.
+  String? get targetDeviceDirectory => null;
 
   /// The list of names of dependencies.
   List<String> get dependencies;

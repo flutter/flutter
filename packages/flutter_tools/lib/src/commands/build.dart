@@ -267,8 +267,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
         ? _fileSystem.directory(outputDirArg).uri
         : project.directory
               .childDirectory(getBuildDirectory())
-              .childDirectory('custom_device')
-              .childDirectory(_target.name)
+              .childDirectory(_target.targetPlatformDirectory ?? 'custom_device')
+              .childDirectory(_target.targetDeviceDirectory ?? _target.name)
               .childDirectory(buildModeName)
               .uri;
 
