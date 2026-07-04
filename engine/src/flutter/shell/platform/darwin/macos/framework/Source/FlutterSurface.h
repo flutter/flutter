@@ -35,7 +35,7 @@
 @property(readonly, nonatomic, nonnull) IOSurfaceRef ioSurface;
 @property(readonly, nonatomic) CGSize size;
 @property(readonly, nonatomic) int64_t textureId;
-// The Metal texture backed by ioSurface that the engine renders into.
+// Metal texture that the engine renders into, backed by ioSurface.
 @property(readonly, nonatomic, nonnull) id<MTLTexture> texture;
 // Whether the surface is currently in use by the compositor.
 @property(readonly, nonatomic) BOOL isInUse;
