@@ -14,7 +14,6 @@ import '../../../flutter_tools_extension.dart';
 /// Prototype implementation of Device to represent the Linux desktop target.
 class LinuxExtensionDevice extends Device {
   LinuxExtensionDevice({
-    required this.category,
     required this.fileSystem,
     required this.id,
     required this.name,
@@ -31,7 +30,7 @@ class LinuxExtensionDevice extends Device {
   final String name;
 
   @override
-  final String category;
+  final String category = DeviceCategory.desktop;
 
   @override
   String get platform => 'linux-x64';
@@ -115,10 +114,9 @@ final class LinuxDeviceService extends DeviceService {
   Future<List<Device>> discoverDevices() async {
     return <Device>[
       LinuxExtensionDevice(
+        fileSystem: fileSystem,
         id: 'linux-proto-1',
         name: 'Linux Desktop Target',
-        category: 'desktop',
-        fileSystem: fileSystem,
         processManager: processManager,
       ),
     ];
@@ -126,11 +124,6 @@ final class LinuxDeviceService extends DeviceService {
 
   @override
   Future<void> launchEmulator(String emulatorId) async {}
-
-  @override
-  Future<void> shutdown() async {
-    await super.shutdown();
-  }
 }
 
 typedef LinuxDevice = LinuxExtensionDevice;

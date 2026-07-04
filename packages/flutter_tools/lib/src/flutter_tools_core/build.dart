@@ -7,8 +7,12 @@ import 'artifacts.dart';
 
 /// The primary coordinator between the tool and extension compilation logic.
 abstract base class BuildService extends ToolExtensionService {
+  static const String serviceNamespace = 'build';
+  static const String getTargetsMethod = 'build.getTargets';
+  static const String buildMethod = 'build.build';
+
   @override
-  String get namespace => 'build';
+  String get namespace => serviceNamespace;
 
   /// The set of build targets provided by this extension.
   List<Target> get targets;
@@ -28,65 +32,42 @@ abstract base class BuildService extends ToolExtensionService {
   Future<void> shutdown() async {}
 
   Future<List<Map<String, Object?>>> _getTargetsRpc(Map<String, Object?> params) async {
-    return targets
-        .map(
-          (Target target) => <String, Object?>{
-            'name': target.name,
-            'dependencies': target.dependencies,
-            'inputs': target.inputs,
-            'outputs': target.outputs,
-            if (target.cliSubcommand != null) 'cliSubcommand': target.cliSubcommand,
-            if (target.cliDescription != null) 'cliDescription': target.cliDescription,
-            if (target.targetPlatformDirectory != null)
-              'targetPlatformDirectory': target.targetPlatformDirectory,
-            if (target.targetDeviceDirectory != null)
-              'targetDeviceDirectory': target.targetDeviceDirectory,
-          },
-        )
-        .toList();
+    return targets.map((Target target) => target.toMap()).toList();
   }
 
   Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
-    final Object? targetNameObj = params['targetName'];
-    final Object? environmentJsonObj = params['environment'];
+    if (params case {
+      'targetName': final String targetName,
+      'environment': final Map<Object?, Object?> environmentJsonObj,
+    }) {
+      final BuildEnvironment env;
+      try {
+        env = BuildEnvironment.fromJson(environmentJsonObj.cast<String, Object?>());
+      } on Object catch (e, stackTrace) {
+        return BuildResult.failure(
+          'Failed to deserialize environment: $e',
+          stackTrace: stackTrace.toString(),
+        ).toMap();
+      }
 
-    if (targetNameObj is! String || environmentJsonObj is! Map<Object?, Object?>) {
-      return <String, Object?>{
-        'success': false,
-        'errorMessage':
-            'Missing or invalid parameters: targetName must be a String and environment must be a Map.',
-      };
+      final List<Target> matching = targets.where((Target t) => t.name == targetName).toList();
+      if (matching.isEmpty) {
+        return BuildResult.failure('Target "$targetName" not found.').toMap();
+      }
+      final Target foundTarget = matching.first;
+
+      try {
+        final Map<String, Object?> buildResultMap = await foundTarget.build(env);
+        final executablePath = buildResultMap['executablePath'] as String?;
+        return BuildResult.success(executablePath: executablePath, extra: buildResultMap).toMap();
+      } on Object catch (e, stackTrace) {
+        return BuildResult.failure(e.toString(), stackTrace: stackTrace.toString()).toMap();
+      }
     }
 
-    final String targetName = targetNameObj;
-    final Map<String, Object?> environmentJson = environmentJsonObj.cast<String, Object?>();
-    final BuildEnvironment env;
-    try {
-      env = BuildEnvironment.fromJson(environmentJson);
-    } on Object catch (e, stackTrace) {
-      return <String, Object?>{
-        'success': false,
-        'errorMessage': 'Failed to deserialize environment: $e',
-        'stackTrace': stackTrace.toString(),
-      };
-    }
-
-    final List<Target> matching = targets.where((Target t) => t.name == targetName).toList();
-    if (matching.isEmpty) {
-      return <String, Object?>{'success': false, 'errorMessage': 'Target "$targetName" not found.'};
-    }
-    final Target foundTarget = matching.first;
-
-    try {
-      final Map<String, Object?> buildResultMap = await foundTarget.build(env);
-      return <String, Object?>{'success': true, ...buildResultMap};
-    } on Object catch (e, stackTrace) {
-      return <String, Object?>{
-        'success': false,
-        'errorMessage': e.toString(),
-        'stackTrace': stackTrace.toString(),
-      };
-    }
+    return BuildResult.failure(
+      'Missing or invalid parameters: targetName must be a String and environment must be a Map.',
+    ).toMap();
   }
 }
 
@@ -133,6 +114,18 @@ abstract base class Target {
 
   /// Custom defines passed back to the tool.
   Future<Map<String, String>> get extraDefines async => const <String, String>{};
+
+  /// Serializes target metadata for transmission over GEP RPC.
+  Map<String, Object?> toMap() => <String, Object?>{
+    'name': name,
+    'dependencies': dependencies,
+    'inputs': inputs,
+    'outputs': outputs,
+    if (cliSubcommand != null) 'cliSubcommand': cliSubcommand,
+    if (cliDescription != null) 'cliDescription': cliDescription,
+    if (targetPlatformDirectory != null) 'targetPlatformDirectory': targetPlatformDirectory,
+    if (targetDeviceDirectory != null) 'targetDeviceDirectory': targetDeviceDirectory,
+  };
 }
 
 /// A concrete implementation of [Target] that can be parsed from a JSON map returned over GEP RPC.
@@ -149,7 +142,17 @@ final class ExtensionBuildTarget extends Target {
           ? (json['outputs']! as List<Object?>).cast<String>()
           : const <String>[],
       cliSubcommand = json['cliSubcommand'] as String?,
-      cliDescription = json['cliDescription'] as String?;
+      cliDescription = json['cliDescription'] as String?,
+      targetPlatformDirectory = json['targetPlatformDirectory'] as String?,
+      targetDeviceDirectory = json['targetDeviceDirectory'] as String?;
+
+  /// Parse a list of [ExtensionBuildTarget] from an RPC response.
+  static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) => [
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ExtensionBuildTarget.fromJson(m.cast<String, Object?>()),
+  ];
 
   @override
   final String name;
@@ -168,6 +171,12 @@ final class ExtensionBuildTarget extends Target {
 
   @override
   final String? cliDescription;
+
+  @override
+  final String? targetPlatformDirectory;
+
+  @override
+  final String? targetDeviceDirectory;
 
   @override
   Future<Map<String, Object?>> build(BuildEnvironment env) async {
@@ -233,4 +242,57 @@ class Depfile {
 
   /// Outputs in the depfile.
   final List<String> outputs;
+}
+
+/// Result returned by executing a build target over RPC or locally.
+final class BuildResult {
+  BuildResult.success({this.executablePath, Map<String, Object?>? extra})
+    : success = true,
+      errorMessage = null,
+      stackTrace = null,
+      extraData = extra ?? const <String, Object?>{};
+
+  BuildResult.failure(this.errorMessage, {this.stackTrace})
+    : success = false,
+      executablePath = null,
+      extraData = const <String, Object?>{};
+
+  factory BuildResult.fromJson(Map<String, Object?> json) {
+    final success = json['success']! as bool;
+    if (success) {
+      final executablePath = json['executablePath'] as String?;
+      final extra = <String, Object?>{};
+      for (final MapEntry<String, Object?> entry in json.entries) {
+        if (entry.key != 'success' && entry.key != 'executablePath') {
+          extra[entry.key] = entry.value;
+        }
+      }
+      return BuildResult.success(executablePath: executablePath, extra: extra);
+    }
+    return BuildResult.failure(
+      json['errorMessage'] as String? ?? 'Unknown error',
+      stackTrace: json['stackTrace'] as String?,
+    );
+  }
+
+  final bool success;
+  final String? errorMessage;
+  final String? stackTrace;
+  final String? executablePath;
+  final Map<String, Object?> extraData;
+
+  Map<String, Object?> toMap() => <String, Object?>{
+    'success': success,
+    if (executablePath != null) 'executablePath': executablePath,
+    if (errorMessage != null) 'errorMessage': errorMessage,
+    if (stackTrace != null) 'stackTrace': stackTrace,
+    ...extraData,
+  };
+
+  static List<BuildResult> listFromJson(Object? rpcResult) => [
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          BuildResult.fromJson(m.cast<String, Object?>()),
+  ];
 }

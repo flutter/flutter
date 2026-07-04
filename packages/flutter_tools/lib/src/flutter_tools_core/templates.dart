@@ -7,8 +7,14 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for adding custom platform support to
 /// `flutter create`.
 abstract base class TemplateService extends ToolExtensionService {
+  static const String serviceNamespace = 'template';
+  static const String getAppTemplatesMethod = 'template.getAppTemplates';
+  static const String getPluginTemplatesMethod = 'template.getPluginTemplates';
+  static const String getProjectTemplatesMethod = 'template.getProjectTemplates';
+  static const String generateTemplateParametersMethod = 'template.generateTemplateParameters';
+
   @override
-  String get namespace => 'template';
+  String get namespace => serviceNamespace;
 
   /// The set of additional template files to be initialized when using
   /// the `app` template.
@@ -46,21 +52,22 @@ abstract base class TemplateService extends ToolExtensionService {
   }
 
   Future<Map<String, Object?>> _generateTemplateParametersRpc(Map<String, Object?> params) async {
-    final templateName = params['templateName'] as String?;
-    if (templateName == null) {
+    if (params case {
+      'templateName': final String templateName,
+      'toolParameters': final Map<Object?, Object?> toolParametersObj,
+    }) {
+      final Map<String, Object?> toolParameters = toolParametersObj.cast<String, Object?>();
+      for (final ProjectTemplate template in projectTemplates) {
+        if (template.name == templateName) {
+          return template.generateTemplateParameters(toolParameters);
+        }
+      }
+      throw RpcException.invalidParams('Unknown project template: $templateName');
+    }
+    if (params['templateName'] is! String) {
       throw RpcException.invalidParams('Missing "templateName" parameter.');
     }
-    final Map<String, Object?>? toolParameters =
-        (params['toolParameters'] as Map<Object?, Object?>?)?.cast<String, Object?>();
-    if (toolParameters == null) {
-      throw RpcException.invalidParams('Missing "toolParameters" parameter.');
-    }
-    for (final ProjectTemplate template in projectTemplates) {
-      if (template.name == templateName) {
-        return template.generateTemplateParameters(toolParameters);
-      }
-    }
-    throw RpcException.invalidParams('Unknown project template: $templateName');
+    throw RpcException.invalidParams('Missing "toolParameters" parameter.');
   }
 }
 
@@ -106,6 +113,14 @@ final class ExtensionProjectTemplate extends ProjectTemplate {
           .toSet(),
       templateSources = (json['templateSources']! as List<Object?>).cast<String>().toSet(),
       templatePath = json['templatePath']! as String;
+
+  /// Parse a list of [ExtensionProjectTemplate] from an RPC response.
+  static List<ExtensionProjectTemplate> listFromJson(Object? rpcResult) => [
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ExtensionProjectTemplate.fromJson(m.cast<String, Object?>()),
+  ];
 
   @override
   final String name;

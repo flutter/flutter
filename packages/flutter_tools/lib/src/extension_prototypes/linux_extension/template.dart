@@ -7,9 +7,6 @@ import '../../../flutter_tools_extension.dart';
 /// The template service for the Linux extension prototype.
 final class LinuxTemplateService extends TemplateService {
   @override
-  Future<void> shutdown() async {}
-
-  @override
   Set<String> get appPlatformTemplates => const <String>{};
 
   @override

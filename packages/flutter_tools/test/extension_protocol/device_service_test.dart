@@ -298,7 +298,6 @@ void main() {
       () async {
         final fs = MemoryFileSystem.test();
         final device = LinuxDevice(
-          category: 'desktop',
           fileSystem: fs,
           id: 'linux-proto-1',
           name: 'Linux Desktop Target',

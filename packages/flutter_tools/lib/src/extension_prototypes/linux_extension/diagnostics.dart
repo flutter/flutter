@@ -18,9 +18,9 @@ final class LinuxDiagnosticsService extends DiagnosticsService {
   static const String _cmakeBinary = 'cmake';
   static const String _ninjaBinary = 'ninja';
   static const String _versionFlag = '--version';
-  static const String _statusInstalled = 'installed';
-  static const String _statusMissing = 'missing';
-  static const String _statusError = 'error';
+  static const String _statusInstalled = DiagnosticsService.statusInstalled;
+  static const String _statusMissing = DiagnosticsService.statusMissing;
+  static const String _statusError = DiagnosticsService.statusError;
 
   @override
   Future<List<ValidationResult>> runDiagnostics() async {
@@ -52,7 +52,4 @@ final class LinuxDiagnosticsService extends DiagnosticsService {
       ], statusInfo: _statusMissing);
     }
   }
-
-  @override
-  Future<void> shutdown() async {}
 }

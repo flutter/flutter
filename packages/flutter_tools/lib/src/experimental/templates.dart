@@ -25,21 +25,17 @@ class ExtensionTemplateManager {
     FileSystem? fileSystem,
     Logger? logger,
     Platform? platform,
-  }) : _extensionManager = extensionManager,
+  }) : _discoveryHelper = ExtensionDiscoveryHelper(
+         extensionManager: extensionManager,
+         logger: logger ?? globals.logger,
+         platform: platform ?? globals.platform,
+       ),
        _fileSystem = fileSystem ?? globals.fs,
-       _logger = logger ?? globals.logger,
-       _platform = platform ?? globals.platform;
+       _logger = logger ?? globals.logger;
 
-  final ToolExtensionManager _extensionManager;
+  final ExtensionDiscoveryHelper _discoveryHelper;
   final FileSystem _fileSystem;
   final Logger _logger;
-  final Platform _platform;
-
-  /// Environment variable key to enable tool extension prototype features.
-  static const String envPrototypeFlag = 'FLUTTER_TOOL_EXTENSION_PROTOTYPE';
-  static const String _serviceNamespace = 'template';
-  static const String _getProjectTemplatesMethod = 'template.getProjectTemplates';
-  static const String _generateTemplateParametersMethod = 'template.generateTemplateParameters';
 
   List<core.ProjectTemplate>? _cachedTemplates;
 
@@ -49,36 +45,19 @@ class ExtensionTemplateManager {
 
   /// Retrieve templates by routing template.getProjectTemplates to active tool extensions.
   Future<List<core.ProjectTemplate>> getProjectTemplates() async {
-    if (_platform.environment[envPrototypeFlag] != 'true') {
+    if (!_discoveryHelper.isPrototypeEnabled) {
       return const <core.ProjectTemplate>[];
     }
     if (_cachedTemplates != null) {
       return _cachedTemplates!;
     }
 
-    final helper = ExtensionDiscoveryHelper(extensionManager: _extensionManager, logger: _logger);
-    final List<ToolExtension> extensions = await helper.getExtensionsSupporting(_serviceNamespace);
-
-    final templates = <core.ProjectTemplate>[];
-
-    for (final extension in extensions) {
-      try {
-        final Object? result = await extension
-            .callMethod(_getProjectTemplatesMethod)
-            .timeout(const Duration(seconds: 5));
-        if (result case final List<Object?> resultList) {
-          for (final item in resultList) {
-            if (item case final Map<Object?, Object?> itemMap) {
-              templates.add(
-                core.ExtensionProjectTemplate.fromJson(itemMap.cast<String, Object?>()),
-              );
-            }
-          }
-        }
-      } on Object catch (e) {
-        _logger.printError('Failed to get templates from extension: $e');
-      }
-    }
+    final List<core.ProjectTemplate> templates = await _discoveryHelper
+        .getListFromExtensions<core.ProjectTemplate>(
+          core.TemplateService.serviceNamespace,
+          core.TemplateService.getProjectTemplatesMethod,
+          core.ExtensionProjectTemplate.listFromJson,
+        );
 
     _cachedTemplates = templates;
     return templates;
@@ -105,18 +84,19 @@ class ExtensionTemplateManager {
     String templateName,
     Map<String, Object?> toolParameters,
   ) async {
-    if (_platform.environment[envPrototypeFlag] != 'true') {
+    if (!_discoveryHelper.isPrototypeEnabled) {
       return toolParameters;
     }
 
-    final helper = ExtensionDiscoveryHelper(extensionManager: _extensionManager, logger: _logger);
-    final List<ToolExtension> extensions = await helper.getExtensionsSupporting(_serviceNamespace);
+    final List<ToolExtension> extensions = await _discoveryHelper.getExtensionsSupporting(
+      core.TemplateService.serviceNamespace,
+    );
 
     for (final extension in extensions) {
       try {
         final Object? result = await extension
             .callMethod(
-              _generateTemplateParametersMethod,
+              core.TemplateService.generateTemplateParametersMethod,
               params: <String, Object?>{
                 'templateName': templateName,
                 'toolParameters': toolParameters,

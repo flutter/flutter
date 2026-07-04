@@ -7,8 +7,12 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for acquiring the necessary files to develop
 /// and deploy Flutter applications for a custom target platform.
 abstract base class ArtifactService extends ToolExtensionService {
+  static const String serviceNamespace = 'artifacts';
+  static const String getArtifactsMethod = 'artifacts.getArtifacts';
+  static const String downloadMethod = 'artifacts.download';
+
   @override
-  String get namespace => 'artifacts';
+  String get namespace => serviceNamespace;
 
   /// The set of artifacts provided by the extension.
   Set<ArtifactDependency> get artifacts;
@@ -35,53 +39,45 @@ abstract base class ArtifactService extends ToolExtensionService {
   }
 
   Future<Map<String, Object?>> _downloadRpc(Map<String, Object?> params) async {
-    final Object? artifactsJsonObj = params['artifacts'];
-    final Object? buildModeObj = params['buildMode'];
-    final Object? hostPlatformObj = params['hostPlatform'];
-    final Object? targetPlatformObj = params['targetPlatform'];
+    if (params case {
+      'artifacts': final List<Object?> artifactsJsonObj,
+      'buildMode': final String buildMode,
+      'hostPlatform': final String hostPlatform,
+      'targetPlatform': final String targetPlatform,
+    }) {
+      final Set<ArtifactDependency> deps;
+      try {
+        deps = ArtifactDependency.setFromJson(artifactsJsonObj);
+      } on Object catch (e, stackTrace) {
+        return <String, Object?>{
+          'success': false,
+          'errorMessage': 'Failed to deserialize artifact dependencies: $e',
+          'stackTrace': stackTrace.toString(),
+        };
+      }
 
-    if (artifactsJsonObj is! List<Object?> ||
-        buildModeObj is! String ||
-        hostPlatformObj is! String ||
-        targetPlatformObj is! String) {
-      return <String, Object?>{
-        'success': false,
-        'errorMessage':
-            'Missing or invalid parameters: "artifacts" (List), "buildMode" (String), "hostPlatform" (String), "targetPlatform" (String).',
-      };
+      try {
+        await downloadArtifacts(
+          deps,
+          buildMode: buildMode,
+          hostPlatform: hostPlatform,
+          targetPlatform: targetPlatform,
+        );
+        return <String, Object?>{'success': true};
+      } on Object catch (e, stackTrace) {
+        return <String, Object?>{
+          'success': false,
+          'errorMessage': e.toString(),
+          'stackTrace': stackTrace.toString(),
+        };
+      }
     }
 
-    final Set<ArtifactDependency> deps;
-    try {
-      deps = artifactsJsonObj.map((Object? item) {
-        if (item is! Map<Object?, Object?>) {
-          throw FormatException('Invalid artifact item: $item');
-        }
-        return ArtifactDependency.fromJson(item.cast<String, Object?>());
-      }).toSet();
-    } on Object catch (e, stackTrace) {
-      return <String, Object?>{
-        'success': false,
-        'errorMessage': 'Failed to deserialize artifact dependencies: $e',
-        'stackTrace': stackTrace.toString(),
-      };
-    }
-
-    try {
-      await downloadArtifacts(
-        deps,
-        buildMode: buildModeObj,
-        hostPlatform: hostPlatformObj,
-        targetPlatform: targetPlatformObj,
-      );
-      return <String, Object?>{'success': true};
-    } on Object catch (e, stackTrace) {
-      return <String, Object?>{
-        'success': false,
-        'errorMessage': e.toString(),
-        'stackTrace': stackTrace.toString(),
-      };
-    }
+    return <String, Object?>{
+      'success': false,
+      'errorMessage':
+          'Missing or invalid parameters: "artifacts" (List), "buildMode" (String), "hostPlatform" (String), "targetPlatform" (String).',
+    };
   }
 }
 
@@ -106,6 +102,16 @@ class ArtifactDependency {
     );
   }
 
+  /// Parse a set of [ArtifactDependency] from an RPC response.
+  static Set<ArtifactDependency> setFromJson(Object? rpcResult) => listFromJson(rpcResult).toSet();
+
+  static List<ArtifactDependency> listFromJson(Object? rpcResult) => [
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ArtifactDependency.fromJson(m.cast<String, Object?>()),
+  ];
+
   /// The name of the required artifact (e.g., 'gen_snapshot').
   final String name;
 
@@ -129,4 +135,11 @@ class ArtifactDependency {
     'targetArchitecture': targetArchitecture,
     'targetPlatform': targetPlatform,
   };
+}
+
+/// Standard core artifact names shared across host and extension protocol boundaries.
+abstract final class CoreArtifactNames {
+  static const String linuxDesktopPath = 'linuxDesktopPath';
+  static const String linuxHeaders = 'linuxHeaders';
+  static const String icuData = 'icuData';
 }

@@ -7,8 +7,14 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for executing custom diagnostic checks that
 /// can be reported via `flutter doctor`.
 abstract base class DiagnosticsService extends ToolExtensionService {
+  static const String serviceNamespace = 'diagnostics';
+  static const String runDiagnosticsMethod = 'diagnostics.runDiagnostics';
+  static const String statusInstalled = 'installed';
+  static const String statusMissing = 'missing';
+  static const String statusError = 'error';
+
   @override
-  String get namespace => 'diagnostics';
+  String get namespace => serviceNamespace;
 
   /// Runs all diagnostic checks and returns the results.
   Future<List<ValidationResult>> runDiagnostics();
@@ -17,6 +23,9 @@ abstract base class DiagnosticsService extends ToolExtensionService {
   Future<Map<String, Function>> initialize() async {
     return <String, Function>{'runDiagnostics': _runDiagnosticsRpc};
   }
+
+  @override
+  Future<void> shutdown() async {}
 
   Future<List<Map<String, Object?>>> _runDiagnosticsRpc(Map<String, Object?> params) async {
     final List<ValidationResult> results = await runDiagnostics();
@@ -92,6 +101,13 @@ class ValidationMessage {
     'message': message,
     'piiStrippedMessage': piiStrippedMessage,
   };
+
+  static List<ValidationMessage> listFromJson(Object? rpcResult) => [
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ValidationMessage.fromJson(m.cast<String, Object?>()),
+  ];
 }
 
 /// The outcome of a single diagnostic check.
@@ -103,15 +119,17 @@ class ValidationResult {
     final typeName = json['type']! as String;
     final ValidationType type = ValidationType.values.byName(typeName);
     final statusInfo = json['statusInfo'] as String?;
-    final messagesJson = json['messages']! as List<Object?>;
-    final messages = List<ValidationMessage>.from(
-      messagesJson.map(
-        (msg) =>
-            ValidationMessage.fromJson((msg! as Map<Object?, Object?>).cast<String, Object?>()),
-      ),
-    );
+    final List<ValidationMessage> messages = ValidationMessage.listFromJson(json['messages']);
     return ValidationResult(type, messages, statusInfo: statusInfo);
   }
+
+  /// Parse a list of [ValidationResult] from an RPC response.
+  static List<ValidationResult> listFromJson(Object? rpcResult) => [
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ValidationResult.fromJson(m.cast<String, Object?>()),
+  ];
 
   /// The status category of validation.
   final ValidationType type;

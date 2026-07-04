@@ -9,30 +9,29 @@ import 'package:file/local.dart';
 import 'package:process/process.dart';
 
 import '../../../flutter_tools_extension.dart';
-import '../../artifacts.dart';
 
 const _cmakeCacheFileName = 'CMakeCache.txt';
 const _cmakeFilesDirectoryName = 'CMakeFiles';
 const _expectedNinjaGeneratorLine = 'CMAKE_GENERATOR:INTERNAL=Ninja';
 
 final List<ArtifactDependency> _kLinuxArtifactDependencies = <ArtifactDependency>[
-  ArtifactDependency(
+  const ArtifactDependency(
     hostPlatform: 'linux-x64',
-    name: Artifact.linuxDesktopPath.name,
+    name: CoreArtifactNames.linuxDesktopPath,
     sha256Checksums: <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
   ),
-  ArtifactDependency(
+  const ArtifactDependency(
     hostPlatform: 'linux-x64',
-    name: Artifact.linuxHeaders.name,
+    name: CoreArtifactNames.linuxHeaders,
     sha256Checksums: <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
   ),
-  ArtifactDependency(
+  const ArtifactDependency(
     hostPlatform: 'linux-x64',
-    name: Artifact.icuData.name,
+    name: CoreArtifactNames.icuData,
     sha256Checksums: <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
@@ -107,28 +106,14 @@ base class LinuxAssembleTarget extends Target {
     final String buildType = env.defines['CMAKE_BUILD_TYPE'] ?? 'Debug';
     final String targetPlatform = env.defines['FLUTTER_TARGET_PLATFORM'] ?? 'linux-x64';
 
-    try {
-      final File cacheFile = _fileSystem.file(
-        _fileSystem.path.join(outputPath, _cmakeCacheFileName),
-      );
-      if (cacheFile.existsSync()) {
-        var isNinjaGenerator = false;
-        try {
-          final String cacheContent = cacheFile.readAsStringSync();
-          isNinjaGenerator = cacheContent.contains(_expectedNinjaGeneratorLine);
-        } on FileSystemException {
-          isNinjaGenerator = false;
-        }
-        if (!isNinjaGenerator) {
-          _cleanCMakeCache(outputPath);
-        }
-      }
-    } on FileSystemException {
-      // Safely ignore file system exceptions during proactive cache check.
+    final File cacheFile = _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName));
+    if (cacheFile.existsSync() && !_isNinjaGenerator(cacheFile)) {
+      _cleanCMakeCache(outputPath);
     }
 
     // 1. cmake -G Ninja -DCMAKE_BUILD_TYPE=<buildType> -DFLUTTER_TARGET_PLATFORM=<targetPlatform> -S <project>/linux -B <output>
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
+
     final cmakeConfigureCmd = <String>[
       'cmake',
       '-G',
@@ -145,18 +130,10 @@ base class LinuxAssembleTarget extends Target {
       environment: env.defines,
     );
     if (configureResult.exitCode != 0) {
-      var cacheFilesExist = false;
-      try {
-        final File cacheFile = _fileSystem.file(
-          _fileSystem.path.join(outputPath, _cmakeCacheFileName),
-        );
-        final Directory cmakeFilesDir = _fileSystem.directory(
-          _fileSystem.path.join(outputPath, _cmakeFilesDirectoryName),
-        );
-        cacheFilesExist = cacheFile.existsSync() || cmakeFilesDir.existsSync();
-      } on FileSystemException {
-        cacheFilesExist = false;
-      }
+      final Directory cmakeFilesDir = _fileSystem.directory(
+        _fileSystem.path.join(outputPath, _cmakeFilesDirectoryName),
+      );
+      final bool cacheFilesExist = cacheFile.existsSync() || cmakeFilesDir.existsSync();
       if (cacheFilesExist) {
         _cleanCMakeCache(outputPath);
         configureResult = await _processManager.run(cmakeConfigureCmd, environment: env.defines);
@@ -172,6 +149,7 @@ base class LinuxAssembleTarget extends Target {
 
     // 2. cmake --build <output>
     final cmakeBuildCmd = <String>['cmake', '--build', outputPath];
+
     final ProcessResult buildResult = await _processManager.run(
       cmakeBuildCmd,
       environment: env.defines,
@@ -186,41 +164,39 @@ base class LinuxAssembleTarget extends Target {
 
     // 3. Resolve the executable name from pubspec.yaml
     final File pubspec = _fileSystem.file(_fileSystem.path.join(projectPath, 'pubspec.yaml'));
-    var appName = 'app';
-    if (pubspec.existsSync()) {
-      final String pubspecContent = pubspec.readAsStringSync();
-      final nameRegExp = RegExp(r'^name:\s+(\w+)', multiLine: true);
-      final Match? match = nameRegExp.firstMatch(pubspecContent);
-      if (match != null) {
-        appName = match.group(1)!;
-      }
-    }
+    final String appName = pubspec.existsSync()
+        ? RegExp(
+                r'^name:\s+(\w+)',
+                multiLine: true,
+              ).firstMatch(pubspec.readAsStringSync())?.group(1) ??
+              'app'
+        : 'app';
 
     final String executablePath = _fileSystem.path.join(outputPath, 'bundle', appName);
+
     return <String, Object?>{
       'executablePath': _fileSystem.file(executablePath).absolute.uri.toString(),
     };
   }
 
   void _cleanCMakeCache(String outputPath) {
-    final File cacheFile = _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName));
-    try {
-      if (cacheFile.existsSync()) {
-        cacheFile.deleteSync();
+    for (final entity in <FileSystemEntity>[
+      _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName)),
+      _fileSystem.directory(_fileSystem.path.join(outputPath, _cmakeFilesDirectoryName)),
+    ]) {
+      try {
+        entity.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Ignore exception if entity does not exist or cannot be deleted.
       }
-    } on FileSystemException {
-      // Safely ignore file system exceptions when cleaning cache files.
     }
+  }
 
-    final Directory cmakeFilesDir = _fileSystem.directory(
-      _fileSystem.path.join(outputPath, _cmakeFilesDirectoryName),
-    );
+  bool _isNinjaGenerator(File cacheFile) {
     try {
-      if (cmakeFilesDir.existsSync()) {
-        cmakeFilesDir.deleteSync(recursive: true);
-      }
+      return cacheFile.readAsStringSync().contains(_expectedNinjaGeneratorLine);
     } on FileSystemException {
-      // Safely ignore file system exceptions when cleaning cache files.
+      return false;
     }
   }
 }

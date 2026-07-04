@@ -20,6 +20,7 @@ import '../commands/build.dart';
 import '../convert.dart';
 import '../experimental/build_targets.dart';
 import '../experimental/configuration.dart';
+import '../experimental/extension_discovery.dart';
 import '../experimental/templates.dart';
 import '../flutter_tools_core/build.dart' as core_build;
 import '../flutter_tools_core/configuration.dart' as core;
@@ -334,7 +335,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     final String? commandName = _findCommandName(args);
 
-    if (globals.platform.environment[ExtensionTemplateManager.envPrototypeFlag] == 'true' &&
+    if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
         (commandName == 'create' || (commandName == 'help' && args.contains('create')))) {
       final ExtensionTemplateManager? templateManager = extensionTemplateManager;
       if (templateManager != null) {
@@ -343,11 +344,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
 
-    if (globals.platform.environment[ExtensionBuildTargetManager.envPrototypeFlag] == 'true' &&
+    if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
         (commandName == 'build' || (commandName == 'help' && args.contains('build')))) {
       final ExtensionBuildTargetManager? buildTargetManager = extensionBuildTargetManager;
       if (buildTargetManager != null) {
-        final List<core_build.Target> targets = await buildTargetManager.getBuildTargets();
+        final List<core_build.Target> targets = await buildTargetManager.getTargets();
         final Command<void>? buildCommand = commands['build'];
         if (buildCommand is BuildCommand) {
           buildCommand.registerExtensionSubcommands(targets);
@@ -356,7 +357,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
 
-    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true' &&
+    if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
         (commandName == 'config' || commandName == 'configure')) {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
       if (configManager != null) {
