@@ -9,10 +9,35 @@ import 'package:file/local.dart';
 import 'package:process/process.dart';
 
 import '../../../flutter_tools_extension.dart';
+import '../../artifacts.dart';
 
 const _cmakeCacheFileName = 'CMakeCache.txt';
 const _cmakeFilesDirectoryName = 'CMakeFiles';
 const _expectedNinjaGeneratorLine = 'CMAKE_GENERATOR:INTERNAL=Ninja';
+
+final List<ArtifactDependency> _kLinuxArtifactDependencies = <ArtifactDependency>[
+  ArtifactDependency(
+    hostPlatform: 'linux-x64',
+    name: Artifact.linuxDesktopPath.name,
+    sha256Checksums: <String, String>{},
+    targetArchitecture: 'x64',
+    targetPlatform: 'linux',
+  ),
+  ArtifactDependency(
+    hostPlatform: 'linux-x64',
+    name: Artifact.linuxHeaders.name,
+    sha256Checksums: <String, String>{},
+    targetArchitecture: 'x64',
+    targetPlatform: 'linux',
+  ),
+  ArtifactDependency(
+    hostPlatform: 'linux-x64',
+    name: Artifact.icuData.name,
+    sha256Checksums: <String, String>{},
+    targetArchitecture: 'x64',
+    targetPlatform: 'linux',
+  ),
+];
 
 /// The build service implementation for Linux platform devices.
 base class LinuxBuildService extends BuildService {
@@ -32,7 +57,7 @@ base class LinuxBuildService extends BuildService {
   Map<String, Object?> get nativeAssetsConfig => const <String, Object?>{};
 
   @override
-  List<ArtifactDependency> get artifactDependencies => const <ArtifactDependency>[];
+  List<ArtifactDependency> get artifactDependencies => _kLinuxArtifactDependencies;
 }
 
 /// The compilation target for the Linux application.
@@ -139,8 +164,8 @@ base class LinuxAssembleTarget extends Target {
       );
     }
 
-    // 2. cmake --build <output> --target install
-    final cmakeBuildCmd = <String>['cmake', '--build', outputPath, '--target', 'install'];
+    // 2. cmake --build <output>
+    final cmakeBuildCmd = <String>['cmake', '--build', outputPath];
     final ProcessResult buildResult = await _processManager.run(
       cmakeBuildCmd,
       environment: env.defines,
@@ -196,8 +221,13 @@ base class LinuxAssembleTarget extends Target {
 
 /// The artifact service implementation for Linux platform devices.
 base class LinuxArtifactService extends ArtifactService {
+  LinuxArtifactService({FileSystem? fileSystem})
+    : _fileSystem = fileSystem ?? const LocalFileSystem();
+
+  final FileSystem _fileSystem;
+
   @override
-  Set<ArtifactDependency> get artifacts => const <ArtifactDependency>{};
+  Set<ArtifactDependency> get artifacts => _kLinuxArtifactDependencies.toSet();
 
   @override
   Future<void> downloadArtifacts(
@@ -206,6 +236,20 @@ base class LinuxArtifactService extends ArtifactService {
     required String hostPlatform,
     required String targetPlatform,
   }) async {
-    // No-op for this prototype since we have no custom external dependencies.
+    final Directory cacheDir = _fileSystem.systemTempDirectory
+        .childDirectory('flutter_tools_extension_artifacts')
+        .childDirectory(targetPlatform)
+        .childDirectory(buildMode);
+    if (!cacheDir.existsSync()) {
+      cacheDir.createSync(recursive: true);
+    }
+    for (final dep in artifacts) {
+      final File artifactFile = cacheDir.childFile(dep.name);
+      if (!artifactFile.existsSync()) {
+        artifactFile.writeAsStringSync(
+          'Simulated artifact content for ${dep.name} ($hostPlatform -> $targetPlatform)',
+        );
+      }
+    }
   }
 }

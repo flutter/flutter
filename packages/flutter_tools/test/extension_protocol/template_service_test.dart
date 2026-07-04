@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/template.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/flutter_tools_core/templates.dart' as core;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -101,7 +100,6 @@ void main() {
     testUsingContext(
       'create --help includes custom-linux-app in --template allowed help after templates are fetched',
       () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
         final createCommand = CreateCommand();
         createTestCommandRunner(createCommand);
         final ExtensionTemplateManager templateManager = context.get<ExtensionTemplateManager>()!;
@@ -150,7 +148,6 @@ void main() {
     testUsingContext(
       'FlutterCommandRunner queries getProjectTemplates prior to displaying create help',
       () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
         final runner = FlutterCommandRunner();
         runner.addCommand(CreateCommand());
         final ExtensionTemplateManager templateManager = context.get<ExtensionTemplateManager>()!;

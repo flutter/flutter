@@ -143,8 +143,7 @@ class ToolExtensionProvider implements RpcRegistrar {
       message.forEach(_interceptNotifications);
       return;
     }
-    if (message is Map<Object?, Object?> &&
-        !message.containsKey('id')) {
+    if (message is Map<Object?, Object?> && !message.containsKey('id')) {
       final Object? method = message['method'];
       if (method is String) {
         Map<String, Object?>? paramsMap;
@@ -153,9 +152,7 @@ class ToolExtensionProvider implements RpcRegistrar {
         } on Object catch (_) {
           // Not a map (could be a List or empty), ignore or handle if needed.
         }
-        _notificationsController.add(
-          Notification(method: method, params: paramsMap),
-        );
+        _notificationsController.add(Notification(method: method, params: paramsMap));
       }
     }
   }

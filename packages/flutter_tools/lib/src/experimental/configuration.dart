@@ -90,12 +90,10 @@ class ExtensionConfigurationManager {
         final Object? result = await extension
             .callMethod(_getOptionsMethod)
             .timeout(const Duration(seconds: 5));
-        if (result is List) {
-          for (final Object? item in result) {
-            if (item is Map) {
-              final Map<String, Object?> resultMap = (item as Map<Object?, Object?>)
-                  .cast<String, Object?>();
-              options.add(ExtensionConfigurationOption.fromJson(resultMap));
+        if (result case final List<Object?> resultList) {
+          for (final item in resultList) {
+            if (item case final Map<Object?, Object?> itemMap) {
+              options.add(ExtensionConfigurationOption.fromJson(itemMap.cast<String, Object?>()));
             }
           }
         }
@@ -141,10 +139,8 @@ class ExtensionConfigurationManager {
               params: <String, Object?>{'option': option, 'value': value},
             )
             .timeout(const Duration(seconds: 5));
-        if (result is Map) {
-          final Map<String, Object?> resultMap = (result as Map<Object?, Object?>)
-              .cast<String, Object?>();
-          return core.OptionValidationResult.fromJson(resultMap);
+        if (result case final Map<Object?, Object?> resultMap) {
+          return core.OptionValidationResult.fromJson(resultMap.cast<String, Object?>());
         }
       } on Object catch (e) {
         return core.OptionValidationResult.failed('Validation extension call failed: $e');
@@ -164,12 +160,10 @@ base class ExtensionConfigurationOption extends core.ConfigurationOption {
 
   /// Parse an option from a JSON extension map representation.
   factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
-    final Object? name = json['name'];
-    final Object? description = json['description'];
-    if (name is! String || description is! String) {
-      throw FormatException('Invalid extension configuration option format: $json');
+    if (json case {'name': final String name, 'description': final String description}) {
+      return ExtensionConfigurationOption(name: name, description: description);
     }
-    return ExtensionConfigurationOption(name: name, description: description);
+    throw FormatException('Invalid extension configuration option format: $json');
   }
 
   @override

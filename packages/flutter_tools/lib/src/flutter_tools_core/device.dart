@@ -3,6 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:process/process.dart';
+
 import '../../generic_extension_protocol.dart';
 
 /// Abstract representation of a target device in the extensibility package.
@@ -13,6 +18,10 @@ abstract class Device {
   bool get isEmulator;
   String get platform;
   String get buildTarget;
+
+  Future<bool> isSupported() async => true;
+  bool isRunnable() => true;
+  bool isSupportedForProject(Uri projectRoot) => true;
 
   Future<void> installApp(Uri appBundlePath);
   Future<void> launchApp(Uri appBundlePath, List<String> args);
@@ -37,6 +46,102 @@ abstract base class ForwardedPort {
   final int devicePort;
 
   Future<void> dispose();
+}
+
+/// Helper utility for launching a local executable process and extracting its VM service URI.
+abstract final class LocalDeviceLaunchHelper {
+  static final RegExp _vmServiceRegExp = RegExp(
+    r'The Dart VM service is listening on ((?:http|ws)://[a-zA-Z0-9.:\[\]]+/[^/]+/)',
+  );
+
+  /// Extracts the VM service URI from a log line, if present.
+  static Uri? parseVmServiceUri(String line) {
+    final Match? match = _vmServiceRegExp.firstMatch(line);
+    if (match != null) {
+      final String? uriString = match.group(1);
+      if (uriString != null) {
+        return Uri.tryParse(uriString);
+      }
+    }
+    return null;
+  }
+
+  /// Launches [command] using [processManager], pipes stdout/stderr to [logController],
+  /// and completes [vmServiceUriCompleter] when the VM service URI is printed or the process exits early.
+  /// Returns the spawned [Process].
+  static Future<Process> launchAndMonitorProcess({
+    required List<String> command,
+    required ProcessManager processManager,
+    required StreamController<String> logController,
+    required Completer<Uri> vmServiceUriCompleter,
+  }) async {
+    final Process process = await processManager.start(command);
+
+    unawaited(
+      process.exitCode.then((int exitCode) {
+        if (!vmServiceUriCompleter.isCompleted) {
+          vmServiceUriCompleter.completeError(
+            StateError(
+              'The process exited early with exit code $exitCode before VM Service URI was printed.',
+            ),
+          );
+        }
+      }),
+    );
+
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      logController.add(line);
+      final Uri? uri = parseVmServiceUri(line);
+      if (uri != null && !vmServiceUriCompleter.isCompleted) {
+        vmServiceUriCompleter.complete(uri);
+      }
+    });
+
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      logController.add('ERROR: $line');
+    });
+
+    return process;
+  }
+}
+
+/// Helper for extracting Dart VM Service URIs from an already started process.
+class ProcessLaunchHelper {
+  ProcessLaunchHelper({required this.onLogLine, required this.process});
+
+  final void Function(String line) onLogLine;
+  final Process process;
+
+  /// Streams stdout and stderr logs from [process] and completes with the VM Service URI.
+  Future<Uri> extractVmServiceUri() {
+    final completer = Completer<Uri>();
+
+    unawaited(
+      process.exitCode.then((int exitCode) {
+        if (!completer.isCompleted) {
+          completer.completeError(
+            StateError(
+              'The process exited early with exit code $exitCode before VM Service URI was printed.',
+            ),
+          );
+        }
+      }),
+    );
+
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      onLogLine(line);
+      final Uri? uri = LocalDeviceLaunchHelper.parseVmServiceUri(line);
+      if (uri != null && !completer.isCompleted) {
+        completer.complete(uri);
+      }
+    });
+
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      onLogLine('ERROR: $line');
+    });
+
+    return completer.future;
+  }
 }
 
 /// Abstract representation of the Device Service in the extensibility package.
@@ -91,6 +196,8 @@ abstract base class DeviceService extends ToolExtensionService {
         'isEmulator': device.isEmulator,
         'platform': device.platform,
         'buildTarget': device.buildTarget,
+        'isSupported': await device.isSupported(),
+        'isRunnable': device.isRunnable(),
       });
     }
     return result;

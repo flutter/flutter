@@ -24,13 +24,11 @@ final class LinuxDiagnosticsService extends DiagnosticsService {
 
   @override
   Future<List<ValidationResult>> runDiagnostics() async {
-    final results = <ValidationResult>[];
-
-    results.add(await _checkTool(_clangBinary, <String>[_versionFlag]));
-    results.add(await _checkTool(_cmakeBinary, <String>[_versionFlag]));
-    results.add(await _checkTool(_ninjaBinary, <String>[_versionFlag]));
-
-    return results;
+    return Future.wait<ValidationResult>(<Future<ValidationResult>>[
+      _checkTool(_clangBinary, const <String>[_versionFlag]),
+      _checkTool(_cmakeBinary, const <String>[_versionFlag]),
+      _checkTool(_ninjaBinary, const <String>[_versionFlag]),
+    ]);
   }
 
   Future<ValidationResult> _checkTool(String exe, List<String> args) async {

@@ -22,11 +22,8 @@ import '../extension_prototypes/linux_extension/extension.dart';
 import '../flutter_plugins.dart';
 import '../flutter_tools_core/build.dart';
 import '../globals.dart' as globals;
-import '../linux/application_package.dart';
-import '../macos/application_package.dart';
 import '../project.dart';
 import '../vmservice.dart';
-import '../windows/application_package.dart';
 
 /// A [DeviceDiscovery] implementation that delegates discovery to active tool extensions.
 class ExtensionDeviceDiscovery extends DeviceDiscovery {
@@ -35,8 +32,11 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
   final ToolExtensionManager _extensionManager;
   final Logger _logger;
 
+  static const String envPrototypeFlag = 'FLUTTER_TOOL_EXTENSION_PROTOTYPE';
+
+  /// Whether the host platform enables tool extension device discovery.
   @override
-  bool get supportsPlatform => true;
+  bool get supportsPlatform => Platform.environment[envPrototypeFlag] == 'true';
 
   @override
   bool get canListAnything => true;
@@ -57,7 +57,7 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
   }) async {
     final discoveredDevices = <Device>[];
 
-    if (Platform.environment['FLUTTER_TOOL_EXTENSION_PROTOTYPE'] == 'true') {
+    if (Platform.environment[envPrototypeFlag] == 'true') {
       if (_extensionManager.extensions.isEmpty) {
         try {
           await _extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
@@ -121,18 +121,12 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
     return discoveredDevices;
   }
 
-  Category _parseCategory(String? category) {
-    if (category == 'desktop') {
-      return Category.desktop;
-    }
-    if (category == 'mobile') {
-      return Category.mobile;
-    }
-    if (category == 'web') {
-      return Category.web;
-    }
-    return Category.mobile;
-  }
+  Category _parseCategory(String? category) => switch (category) {
+    'desktop' => Category.desktop,
+    'mobile' => Category.mobile,
+    'web' => Category.web,
+    'desktop' || _ => Category.desktop,
+  };
 }
 
 /// A client-side [Device] implementation that delegates all commands to an extension isolate.
@@ -180,7 +174,14 @@ class ExtensionBackedDevice extends Device {
   Future<bool> isSupported() async => true;
 
   @override
-  bool isSupportedForProject(FlutterProject project) => true;
+  bool isSupportedForProject(FlutterProject project) {
+    if (buildTargetName == 'assemble_linux_app' ||
+        platformName == 'linux-x64' ||
+        name.toLowerCase().contains('linux')) {
+      return project.linux.existsSync();
+    }
+    return true;
+  }
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -213,7 +214,7 @@ class ExtensionBackedDevice extends Device {
       Category.desktop => TargetPlatform.linux_x64,
       Category.mobile => TargetPlatform.android,
       Category.web => TargetPlatform.web_javascript,
-      null => TargetPlatform.android,
+      null => TargetPlatform.linux_x64,
     };
   }
 
@@ -254,7 +255,7 @@ class ExtensionBackedDevice extends Device {
       globals.fs.path.join(
         project.directory.path,
         getBuildDirectory(),
-        'custom_device',
+        platform.getName(),
         id,
         buildModeName,
       ),
@@ -399,16 +400,6 @@ class ExtensionBackedDevice extends Device {
           if (appName != null) {
             executablePath = globals.fs.path.join(buildDirectory.path, 'bundle', appName);
           }
-        }
-      }
-      // Fallback 2: Legacy platform package type casting / prebuilt application lookup
-      if (executablePath == null || !globals.fs.file(executablePath).existsSync()) {
-        if (package is LinuxApp) {
-          executablePath = package.executable(debuggingOptions.buildInfo.mode);
-        } else if (package is WindowsApp) {
-          executablePath = package.executable(debuggingOptions.buildInfo.mode, platform);
-        } else if (package is MacOSApp) {
-          executablePath = package.executable(debuggingOptions.buildInfo);
         }
       }
     }

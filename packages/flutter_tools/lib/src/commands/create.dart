@@ -20,6 +20,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
+import '../experimental/extension_arg_parser.dart';
 import '../experimental/templates.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
@@ -40,28 +41,21 @@ const kPlatformHelp =
     'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
-class CreateCommand extends FlutterCommand with CreateBase {
+class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMixin {
   CreateCommand({bool verboseHelp = false}) : _verboseHelp = verboseHelp;
 
   final bool _verboseHelp;
 
-  ArgParser? _baseArgParser;
-  ArgParser? _customArgParser;
-  String _lastTemplateNames = '';
-  bool _buildingBaseParser = false;
+  @override
+  ArgParser createBaseArgParser() => ArgParser(
+    allowTrailingOptions: false,
+    usageLineLength: globals.outputPreferences.wrapText
+        ? globals.outputPreferences.wrapColumn
+        : null,
+  );
 
-  ArgParser get _baseParser {
-    if (_baseArgParser != null) {
-      return _baseArgParser!;
-    }
-    _buildingBaseParser = true;
-    final ArgParser parser = ArgParser(
-      allowTrailingOptions: false,
-      usageLineLength: globals.outputPreferences.wrapText
-          ? globals.outputPreferences.wrapColumn
-          : null,
-    );
-    _baseArgParser = parser;
+  @override
+  void populateBaseArgParser(ArgParser parser) {
     addPubOptions();
     parser.addFlag(
       'with-driver-test',
@@ -140,7 +134,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
         ParsedFlutterTemplateType.enabledValues(featureFlags);
-    final isGepEnabled = globals.platform.environment['FLUTTER_TOOL_EXTENSION_PROTOTYPE'] == 'true';
+    final bool isGepEnabled = globals.isToolExtensionPrototypeEnabled;
     parser.addOption(
       'template',
       abbr: 't',
@@ -179,30 +173,27 @@ class CreateCommand extends FlutterCommand with CreateBase {
       valueHelp: 'path',
       hide: !_verboseHelp,
     );
-    _buildingBaseParser = false;
-    return parser;
   }
 
   @override
-  ArgParser get argParser {
-    if (_buildingBaseParser) {
-      return _baseParser;
-    }
+  String? get extensionArgParserCacheKey {
     final ExtensionTemplateManager? manager = extensionTemplateManager;
     final List<core.ProjectTemplate> projectTemplates =
         manager?.cachedTemplates ?? const <core.ProjectTemplate>[];
     if (projectTemplates.isEmpty) {
-      return _baseParser;
+      return null;
     }
-    final String currentNames = projectTemplates.map((core.ProjectTemplate t) => t.name).join(',');
-    if (_customArgParser == null || currentNames != _lastTemplateNames) {
-      _lastTemplateNames = currentNames;
-      _customArgParser = _buildArgParser(_baseParser, projectTemplates);
-    }
-    return _customArgParser!;
+    return projectTemplates.map((core.ProjectTemplate t) => t.name).join(',');
   }
 
-  ArgParser _buildArgParser(ArgParser baseParser, List<core.ProjectTemplate> projectTemplates) {
+  @override
+  ArgParser buildDynamicArgParser(ArgParser baseParser) {
+    final ExtensionTemplateManager? manager = extensionTemplateManager;
+    final List<core.ProjectTemplate> projectTemplates =
+        manager?.cachedTemplates ?? const <core.ProjectTemplate>[];
+    if (projectTemplates.isEmpty) {
+      return baseParser;
+    }
     if (projectTemplates.isEmpty) {
       return baseParser;
     }
@@ -226,10 +217,10 @@ class CreateCommand extends FlutterCommand with CreateBase {
         final Map<String, String>? allowedHelp = opt.allowedHelp != null
             ? Map<String, String>.of(opt.allowedHelp!)
             : null;
-        List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
+        final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
         if (opt.name == 'template') {
           if (allowedHelp != null) {
-            for (final core.ProjectTemplate template in projectTemplates) {
+            for (final template in projectTemplates) {
               if (!template.hidden) {
                 allowedHelp[template.name] =
                     'Generate a project using the ${template.name} template.';
@@ -237,7 +228,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
             }
           }
           if (allowed != null) {
-            for (final core.ProjectTemplate template in projectTemplates) {
+            for (final template in projectTemplates) {
               if (!allowed.contains(template.name)) {
                 allowed.add(template.name);
               }

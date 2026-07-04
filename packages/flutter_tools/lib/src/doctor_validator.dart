@@ -8,7 +8,9 @@ import 'package:meta/meta.dart';
 
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
+import 'flutter_tools_core/diagnostics.dart' show ValidationMessageType, ValidationType;
 import 'globals.dart' as globals;
+export 'flutter_tools_core/diagnostics.dart' show ValidationMessageType, ValidationType;
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
@@ -32,10 +34,6 @@ abstract class Workflow {
   /// Are we functional enough to list emulators?
   bool get canListEmulators;
 }
-
-enum ValidationType { crash, missing, partial, notAvailable, success }
-
-enum ValidationMessageType { error, hint, information }
 
 abstract class DoctorValidator {
   DoctorValidator(this.title);

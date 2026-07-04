@@ -58,6 +58,8 @@ import 'version.dart';
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
 BuildTargets get buildTargets => context.get<BuildTargets>()!;
+bool get isToolExtensionPrototypeEnabled =>
+    platform.environment['FLUTTER_TOOL_EXTENSION_PROTOTYPE'] == 'true';
 Cache get cache => context.get<Cache>()!;
 CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;

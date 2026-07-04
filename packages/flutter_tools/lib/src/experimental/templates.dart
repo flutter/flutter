@@ -84,12 +84,12 @@ class ExtensionTemplateManager {
         final Object? result = await extension
             .callMethod(_getProjectTemplatesMethod)
             .timeout(const Duration(seconds: 5));
-        if (result is List) {
-          for (final Object? item in result) {
-            if (item is Map) {
-              final Map<String, Object?> resultMap = (item as Map<Object?, Object?>)
-                  .cast<String, Object?>();
-              templates.add(core.ExtensionProjectTemplate.fromJson(resultMap));
+        if (result case final List<Object?> resultList) {
+          for (final item in resultList) {
+            if (item case final Map<Object?, Object?> itemMap) {
+              templates.add(
+                core.ExtensionProjectTemplate.fromJson(itemMap.cast<String, Object?>()),
+              );
             }
           }
         }
@@ -102,7 +102,7 @@ class ExtensionTemplateManager {
     return templates;
   }
 
-  /// Resolves a GEP template package URI to a local directory.
+  /// Resolves a Tool Extension Protocol template package URI to a local directory.
   Directory resolveTemplateDirectory(String templatePath) {
     if (templatePath.startsWith('package:flutter_tools/')) {
       final String relativePath = templatePath.substring('package:flutter_tools/'.length);
@@ -118,7 +118,7 @@ class ExtensionTemplateManager {
     throw ArgumentError('Unsupported template path format: $templatePath');
   }
 
-  /// Request template parameter generation over GEP RPC.
+  /// Request template parameter generation over extension protocol RPC.
   Future<Map<String, Object?>> generateTemplateParameters(
     String templateName,
     Map<String, Object?> toolParameters,
@@ -158,10 +158,8 @@ class ExtensionTemplateManager {
               },
             )
             .timeout(const Duration(seconds: 5));
-        if (result is Map) {
-          final Map<String, Object?> resultMap = (result as Map<Object?, Object?>)
-              .cast<String, Object?>();
-          return resultMap;
+        if (result case final Map<Object?, Object?> resultMap) {
+          return resultMap.cast<String, Object?>();
         }
       } on Object catch (e) {
         _logger.printError('Failed to generate template parameters from extension: $e');

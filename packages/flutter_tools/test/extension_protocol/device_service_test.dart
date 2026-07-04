@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/devices.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/device.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/extension.dart';
+import 'package:flutter_tools/src/flutter_tools_core/device.dart' show LocalDeviceLaunchHelper;
 import 'package:test/test.dart';
 
 import '../src/fake_process_manager.dart';
@@ -289,6 +290,35 @@ void main() {
         expect(attachedDevices, hasLength(1));
         expect(attachedDevices.first.id, 'linux-proto-1');
         expect(attachedDevices.first.connectionInterface, DeviceConnectionInterface.attached);
+      },
+    );
+
+    test(
+      'LinuxDevice and LocalDeviceLaunchHelper expose built-in alignment and URI parsing',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final device = LinuxDevice(
+          category: 'desktop',
+          fileSystem: fs,
+          id: 'linux-proto-1',
+          name: 'Linux Desktop Target',
+          processManager: FakeProcessManager.any(),
+        );
+
+        expect(await device.isSupported(), isTrue);
+        expect(device.isRunnable(), isTrue);
+        expect(device.isSupportedForProject(Uri.parse('file:///project')), isFalse);
+
+        final Uri? parsedUri = LocalDeviceLaunchHelper.parseVmServiceUri(
+          'The Dart VM service is listening on http://127.0.0.1:8181/auth-token/',
+        );
+        expect(parsedUri, isNotNull);
+        expect(parsedUri.toString(), 'http://127.0.0.1:8181/auth-token/');
+
+        expect(
+          LocalDeviceLaunchHelper.parseVmServiceUri('Some regular log line without VM service'),
+          isNull,
+        );
       },
     );
   });

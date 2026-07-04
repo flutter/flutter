@@ -66,7 +66,6 @@ class BuildCommand extends FlutterCommand {
     bool verboseHelp = false,
   }) : _fileSystem = fileSystem,
        _logger = logger,
-       _platform = platform,
        _verboseHelp = verboseHelp {
     _addSubcommand(
       BuildAarCommand(
@@ -166,11 +165,10 @@ class BuildCommand extends FlutterCommand {
 
   final FileSystem _fileSystem;
   final Logger _logger;
-  final Platform _platform;
   final bool _verboseHelp;
 
   void registerExtensionSubcommands([List<core.Target>? targets]) {
-    if (_platform.environment[ExtensionBuildTargetManager.envPrototypeFlag] != 'true') {
+    if (!globals.isToolExtensionPrototypeEnabled) {
       return;
     }
     final ExtensionBuildTargetManager? targetManager = extensionBuildTargetManager;
@@ -242,10 +240,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesTargetOption();
     usesOutputDir();
-    argParser.addOption(
-      'target-platform',
-      help: 'The target platform for which the app is compiled.',
-    );
     usesDartDefineOption();
   }
 
@@ -266,15 +260,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final String? targetFile = stringArg('target');
     final String mainPath = targetFile ?? 'lib/main.dart';
 
-    final String defaultPlatform = switch (globals.os.hostPlatform) {
-      HostPlatform.linux_arm64 => 'linux-arm64',
-      HostPlatform.linux_riscv64 => 'linux-riscv64',
-      HostPlatform.darwin_arm64 || HostPlatform.darwin_x64 => 'darwin',
-      HostPlatform.windows_arm64 || HostPlatform.windows_x64 => 'windows-x64',
-      _ => 'linux-x64',
-    };
-    final String targetPlatform = stringArg('target-platform') ?? defaultPlatform;
-
     final String? outputDirArg = stringArg('output');
     final FlutterProject project = FlutterProject.current();
     final Uri projectRootUri = project.directory.uri;
@@ -282,7 +267,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
         ? _fileSystem.directory(outputDirArg).uri
         : project.directory
               .childDirectory(getBuildDirectory())
-              .childDirectory('custom')
+              .childDirectory('custom_device')
               .childDirectory(_target.name)
               .childDirectory(buildModeName)
               .uri;
@@ -291,7 +276,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     environmentConfig['FLUTTER_TARGET'] = mainPath;
     environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
     environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
-    environmentConfig['FLUTTER_TARGET_PLATFORM'] = targetPlatform;
 
     final buildEnv = core.BuildEnvironment(
       cacheDir: globals.cache.getRoot().uri,

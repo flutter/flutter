@@ -87,7 +87,7 @@ abstract base class ArtifactService extends ToolExtensionService {
 
 /// Declares a specific engine artifact required before building can begin.
 class ArtifactDependency {
-  ArtifactDependency({
+  const ArtifactDependency({
     required this.hostPlatform,
     required this.name,
     required this.sha256Checksums,

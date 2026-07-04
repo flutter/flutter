@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -13,8 +12,8 @@ import 'package:process/process.dart';
 import '../../../flutter_tools_extension.dart';
 
 /// Prototype implementation of Device to represent the Linux desktop target.
-class LinuxDevice extends Device {
-  LinuxDevice({
+class LinuxExtensionDevice extends Device {
+  LinuxExtensionDevice({
     required this.category,
     required this.fileSystem,
     required this.id,
@@ -43,6 +42,18 @@ class LinuxDevice extends Device {
   @override
   bool get isEmulator => false;
 
+  @override
+  Future<bool> isSupported() async => true;
+
+  @override
+  bool isRunnable() => true;
+
+  @override
+  bool isSupportedForProject(Uri projectRoot) {
+    final String projectPath = fileSystem.path.fromUri(projectRoot);
+    return fileSystem.directory(fileSystem.path.join(projectPath, 'linux')).existsSync();
+  }
+
   final StreamController<String> _logController = StreamController<String>.broadcast();
   final Completer<Uri> _vmServiceUriCompleter = Completer<Uri>();
   Process? _process;
@@ -59,40 +70,17 @@ class LinuxDevice extends Device {
     _logController.add('Launching app bundle $filePath with args: $args...');
 
     try {
-      final Process process = await processManager.start(<String>[filePath, ...args]);
-      _process = process;
-
-      unawaited(
-        process.exitCode.then((int exitCode) {
-          if (!_vmServiceUriCompleter.isCompleted) {
-            _vmServiceUriCompleter.completeError(
-              StateError(
-                'The process exited early with exit code $exitCode before VM Service URI was printed.',
-              ),
-            );
-          }
-        }),
+      _process = await LocalDeviceLaunchHelper.launchAndMonitorProcess(
+        command: <String>[filePath, ...args],
+        processManager: processManager,
+        logController: _logController,
+        vmServiceUriCompleter: _vmServiceUriCompleter,
       );
-
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        _logController.add(line);
-        final vmServiceRegExp = RegExp(
-          r'The Dart VM service is listening on (http://127.0.0.1:\d+/[^/]+/)',
-        );
-        final Match? match = vmServiceRegExp.firstMatch(line);
-        if (match != null) {
-          if (!_vmServiceUriCompleter.isCompleted) {
-            _vmServiceUriCompleter.complete(Uri.parse(match.group(1)!));
-          }
-        }
-      });
-
-      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        _logController.add('ERROR: $line');
-      });
     } on Object catch (e) {
       _logController.add('Failed to launch application process: $e');
-      _vmServiceUriCompleter.completeError(e);
+      if (!_vmServiceUriCompleter.isCompleted) {
+        _vmServiceUriCompleter.completeError(e);
+      }
     }
   }
 
@@ -126,7 +114,7 @@ final class LinuxDeviceService extends DeviceService {
   @override
   Future<List<Device>> discoverDevices() async {
     return <Device>[
-      LinuxDevice(
+      LinuxExtensionDevice(
         id: 'linux-proto-1',
         name: 'Linux Desktop Target',
         category: 'desktop',
@@ -144,3 +132,5 @@ final class LinuxDeviceService extends DeviceService {
     await super.shutdown();
   }
 }
+
+typedef LinuxDevice = LinuxExtensionDevice;

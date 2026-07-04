@@ -100,7 +100,7 @@ void main() {
           environment: <String, String>{},
         ),
         const FakeCommand(
-          command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
+          command: <String>['cmake', '--build', '/build/out'],
           environment: <String, String>{},
         ),
       ]);
@@ -155,7 +155,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
+            command: <String>['cmake', '--build', '/build/out'],
             environment: <String, String>{
               'CMAKE_BUILD_TYPE': 'Release',
               'FLUTTER_TARGET_PLATFORM': 'linux-arm64',
@@ -301,7 +301,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
+            command: <String>['cmake', '--build', '/build/out'],
             environment: <String, String>{},
           ),
         ]);
@@ -384,7 +384,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
+            command: <String>['cmake', '--build', '/build/out'],
             environment: <String, String>{},
           ),
         ]);
@@ -612,7 +612,7 @@ void main() {
         final env = BuildEnvironment.fromJson(envMap);
 
         expect(env.projectRoot, Uri.parse('file:///project/'));
-        expect(env.outputDirectory.path, contains('build/custom_device/linux-proto-1/debug'));
+        expect(env.outputDirectory.path, contains('build/linux-x64/linux-proto-1/debug'));
         expect(env.defines['FLUTTER_TARGET_PLATFORM'], 'linux-x64');
         expect(env.defines['FLUTTER_BUILD_MODE'], 'debug');
         expect(env.defines['CMAKE_BUILD_TYPE'], 'Debug');
@@ -703,7 +703,7 @@ void main() {
       },
     );
   });
-  group('Dynamic Extension Build Subcommands (GEP CLI)', () {
+  group('Dynamic Extension Build Subcommands (Tool Extension Protocol CLI)', () {
     testWithoutContext(
       'build.getTargets includes cliSubcommand and cliDescription and ExtensionBuildTarget.fromJson parses them accurately',
       () async {

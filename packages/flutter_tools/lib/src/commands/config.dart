@@ -140,7 +140,7 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(configSetting);
         }
       }
-      if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true') {
+      if (globals.isToolExtensionPrototypeEnabled) {
         final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
         if (configManager != null) {
           for (final core.ConfigurationOption option in configManager.cachedOptions) {
@@ -200,7 +200,7 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('build-dir', buildDir);
     }
 
-    if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true') {
+    if (globals.isToolExtensionPrototypeEnabled) {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
       if (configManager != null) {
         for (final core.ConfigurationOption option in configManager.cachedOptions) {
@@ -291,7 +291,7 @@ class ConfigCommand extends FlutterCommand {
     }
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
-      if (globals.platform.environment[ExtensionConfigurationManager.envPrototypeFlag] == 'true')
+      if (globals.isToolExtensionPrototypeEnabled)
         ...extensionConfigurationManager?.cachedOptions
                 .where(
                   (core.ConfigurationOption e) =>

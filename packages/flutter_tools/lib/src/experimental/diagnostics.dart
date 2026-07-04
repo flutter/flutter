@@ -70,12 +70,10 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
 
       try {
         final Object? diagnosticsResult = await extension.callMethod(_runDiagnosticsMethod);
-        if (diagnosticsResult is List) {
-          for (final Object? item in diagnosticsResult) {
-            if (item is Map) {
-              final Map<String, Object?> resultMap = (item as Map<Object?, Object?>)
-                  .cast<String, Object?>();
-              final coreResult = core.ValidationResult.fromJson(resultMap);
+        if (diagnosticsResult case final List<Object?> items) {
+          for (final item in items) {
+            if (item case final Map<Object?, Object?> rawMap) {
+              final coreResult = core.ValidationResult.fromJson(rawMap.cast<String, Object?>());
               subResults.add(_mapCoreResultToHost(coreResult));
             }
           }
@@ -101,15 +99,15 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
       core.ValidationMessage msg,
     ) {
       return switch (msg.type) {
-        core.ValidationMessageType.error => host_doctor.ValidationMessage.error(
+        host_doctor.ValidationMessageType.error => host_doctor.ValidationMessage.error(
           msg.message,
           piiStrippedMessage: msg.piiStrippedMessage,
         ),
-        core.ValidationMessageType.hint => host_doctor.ValidationMessage.hint(
+        host_doctor.ValidationMessageType.hint => host_doctor.ValidationMessage.hint(
           msg.message,
           piiStrippedMessage: msg.piiStrippedMessage,
         ),
-        core.ValidationMessageType.information => host_doctor.ValidationMessage(
+        host_doctor.ValidationMessageType.information => host_doctor.ValidationMessage(
           msg.message,
           contextUrl: msg.contextUrl,
           piiStrippedMessage: msg.piiStrippedMessage,
@@ -117,15 +115,11 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
       };
     }).toList();
 
-    final host_doctor.ValidationType hostType = switch (coreResult.type) {
-      core.ValidationType.crash => host_doctor.ValidationType.crash,
-      core.ValidationType.missing => host_doctor.ValidationType.missing,
-      core.ValidationType.partial => host_doctor.ValidationType.partial,
-      core.ValidationType.notAvailable => host_doctor.ValidationType.notAvailable,
-      core.ValidationType.success => host_doctor.ValidationType.success,
-    };
-
-    return host_doctor.ValidationResult(hostType, hostMessages, statusInfo: coreResult.statusInfo);
+    return host_doctor.ValidationResult(
+      coreResult.type,
+      hostMessages,
+      statusInfo: coreResult.statusInfo,
+    );
   }
 
   host_doctor.ValidationResult _mergeValidationResults(List<host_doctor.ValidationResult> results) {
