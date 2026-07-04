@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210721"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:async';
 import 'dart:io';
 
@@ -44,28 +37,23 @@ void main() {
     });
   });
 
-  // The next three tests must run in order -- first using `test`, then `testWidgets`, then `test` again.
+  group('testTextInput', () {
+    setUp(() {
+      expect(binding.testTextInput, isNotNull);
+      expect(binding.testTextInput.isRegistered, isFalse);
+      expect(HttpOverrides.current, isNotNull);
+    });
+    tearDown(() {
+      expect(binding.testTextInput.isRegistered, isFalse);
+    });
 
-  var order = 0;
+    testWidgets('Registers testTextInput', (WidgetTester tester) async {
+      expect(tester.testTextInput.isRegistered, isTrue);
+    });
 
-  test('Initializes httpOverrides and testTextInput', () async {
-    assert(order == 0);
-    expect(binding.testTextInput, isNotNull);
-    expect(binding.testTextInput.isRegistered, isFalse);
-    expect(HttpOverrides.current, isNotNull);
-    order += 1;
-  });
-
-  testWidgets('Registers testTextInput', (WidgetTester tester) async {
-    assert(order == 1);
-    expect(tester.testTextInput.isRegistered, isTrue);
-    order += 1;
-  });
-
-  test('Unregisters testTextInput', () async {
-    assert(order == 2);
-    expect(binding.testTextInput.isRegistered, isFalse);
-    order += 1;
+    test('Does not register testTextInput', () async {
+      expect(binding.testTextInput.isRegistered, isFalse);
+    });
   });
 
   testWidgets('timeStamp should be accurate to microsecond precision', (WidgetTester tester) async {
