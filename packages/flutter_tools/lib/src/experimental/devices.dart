@@ -18,12 +18,12 @@ import '../cache.dart';
 import '../cmake.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
-import '../extension_prototypes/linux_extension/extension.dart';
 import '../flutter_plugins.dart';
 import '../flutter_tools_core/build.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
+import 'extension_discovery.dart';
 
 /// A [DeviceDiscovery] implementation that delegates discovery to active tool extensions.
 class ExtensionDeviceDiscovery extends DeviceDiscovery {
@@ -57,27 +57,10 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
   }) async {
     final discoveredDevices = <Device>[];
 
-    if (Platform.environment[envPrototypeFlag] == 'true') {
-      if (_extensionManager.extensions.isEmpty) {
-        try {
-          await _extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
-        } on Object catch (e) {
-          _logger.printError('Failed to spawn prototype extension: $e');
-        }
-      }
-    }
+    final helper = ExtensionDiscoveryHelper(extensionManager: _extensionManager, logger: _logger);
+    final List<ToolExtension> extensions = await helper.getExtensionsSupporting('device');
 
-    for (final ToolExtension extension in _extensionManager.extensions) {
-      late final ToolExtensionCapabilities capabilities;
-      try {
-        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
-      } on Exception {
-        continue;
-      }
-      if (!capabilities.services.contains('device')) {
-        continue;
-      }
-
+    for (final extension in extensions) {
       try {
         final Object? devicesResult = await extension
             .callMethod('device.discoverDevices')
@@ -105,6 +88,7 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
                   connectionInterface: connectionInterface,
                   extension: extension,
                   logger: _logger,
+                  extensionManager: _extensionManager,
                 ),
               );
             }
@@ -140,6 +124,7 @@ class ExtensionBackedDevice extends Device {
     this.buildTargetName,
     this.platformName,
     this.connectionInterface = DeviceConnectionInterface.attached,
+    this.extensionManager,
   }) : _extension = extension,
        _logger = logger,
        super(platformType: PlatformType.custom, ephemeral: true) {
@@ -158,6 +143,7 @@ class ExtensionBackedDevice extends Device {
 
   final ToolExtension _extension;
   final Logger _logger;
+  final ToolExtensionManager? extensionManager;
 
   final String? platformName;
   final String? buildTargetName;
@@ -265,14 +251,18 @@ class ExtensionBackedDevice extends Device {
 
     if (!prebuiltApplication) {
       // 1. Verify that 'build' service is supported by checking capabilities.
-      final ToolExtensionCapabilities capabilities;
+      final helper = ExtensionDiscoveryHelper(
+        extensionManager: extensionManager ?? ToolExtensionManager(),
+        logger: _logger,
+      );
+      final bool isSupported;
       try {
-        capabilities = await _extension.getCapabilities().timeout(const Duration(seconds: 5));
-      } on Exception catch (e) {
+        isSupported = await helper.isServiceSupported(_extension, 'build', throwOnFailure: true);
+      } on Object catch (e) {
         throwToolExit('Failed to query capabilities: $e');
       }
 
-      if (!capabilities.services.contains('build')) {
+      if (!isSupported) {
         throwToolExit('Tool extension does not support the "build" service.');
       }
 

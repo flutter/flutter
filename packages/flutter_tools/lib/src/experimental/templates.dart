@@ -9,11 +9,10 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../cache.dart';
-import '../extension_prototypes/linux_extension/extension.dart';
 import '../flutter_tools_core/templates.dart' as core;
 import '../generic_extension_protocol/manager.dart';
-import '../generic_extension_protocol/service.dart';
 import '../globals.dart' as globals;
+import 'extension_discovery.dart';
 
 /// Retrieve the [ExtensionTemplateManager] from the context.
 ExtensionTemplateManager? get extensionTemplateManager => context.get<ExtensionTemplateManager>();
@@ -57,29 +56,12 @@ class ExtensionTemplateManager {
       return _cachedTemplates!;
     }
 
-    if (_extensionManager.extensions.isEmpty) {
-      try {
-        await _extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
-      } on Object catch (e) {
-        _logger.printError('Failed to spawn prototype extension for templates: $e');
-        return const <core.ProjectTemplate>[];
-      }
-    }
+    final helper = ExtensionDiscoveryHelper(extensionManager: _extensionManager, logger: _logger);
+    final List<ToolExtension> extensions = await helper.getExtensionsSupporting(_serviceNamespace);
 
     final templates = <core.ProjectTemplate>[];
 
-    for (final ToolExtension extension in _extensionManager.extensions) {
-      late final ToolExtensionCapabilities capabilities;
-      try {
-        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
-      } on Exception catch (e) {
-        _logger.printTrace('Failed to get capabilities: $e');
-        continue;
-      }
-      if (!capabilities.services.contains(_serviceNamespace)) {
-        continue;
-      }
-
+    for (final extension in extensions) {
       try {
         final Object? result = await extension
             .callMethod(_getProjectTemplatesMethod)
@@ -127,27 +109,10 @@ class ExtensionTemplateManager {
       return toolParameters;
     }
 
-    if (_extensionManager.extensions.isEmpty) {
-      try {
-        await _extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
-      } on Object catch (e) {
-        _logger.printError('Failed to spawn prototype extension for template generation: $e');
-        return toolParameters;
-      }
-    }
+    final helper = ExtensionDiscoveryHelper(extensionManager: _extensionManager, logger: _logger);
+    final List<ToolExtension> extensions = await helper.getExtensionsSupporting(_serviceNamespace);
 
-    for (final ToolExtension extension in _extensionManager.extensions) {
-      late final ToolExtensionCapabilities capabilities;
-      try {
-        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
-      } on Exception catch (e) {
-        _logger.printTrace('Failed to get capabilities: $e');
-        continue;
-      }
-      if (!capabilities.services.contains(_serviceNamespace)) {
-        continue;
-      }
-
+    for (final extension in extensions) {
       try {
         final Object? result = await extension
             .callMethod(

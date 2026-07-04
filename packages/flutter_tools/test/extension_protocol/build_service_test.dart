@@ -54,7 +54,7 @@ void main() {
     });
 
     testWithoutContext('ArtifactDependency serialization and deserialization', () {
-      final dep = ArtifactDependency(
+      const dep = ArtifactDependency(
         hostPlatform: 'linux',
         name: 'gen_snapshot',
         sha256Checksums: <String, String>{'x64': 'hash123'},

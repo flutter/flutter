@@ -7,11 +7,10 @@ import 'dart:async';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../extension_prototypes/linux_extension/extension.dart';
 import '../flutter_tools_core/configuration.dart' as core;
 import '../generic_extension_protocol/manager.dart';
-import '../generic_extension_protocol/service.dart';
 import '../globals.dart' as globals;
+import 'extension_discovery.dart';
 
 /// Retrieve the [ExtensionConfigurationManager] from the context.
 ExtensionConfigurationManager? get extensionConfigurationManager =>
@@ -63,29 +62,12 @@ class ExtensionConfigurationManager {
       return _cachedOptions!;
     }
 
-    if (_extensionManager.extensions.isEmpty) {
-      try {
-        await _extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
-      } on Object catch (e) {
-        _logger.printError('Failed to spawn prototype extension: $e');
-        return const <core.ConfigurationOption>[];
-      }
-    }
-
     final options = <core.ConfigurationOption>[];
 
-    for (final ToolExtension extension in _extensionManager.extensions) {
-      late final ToolExtensionCapabilities capabilities;
-      try {
-        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
-      } on Exception catch (e) {
-        _logger.printTrace('Failed to get capabilities: $e');
-        continue;
-      }
-      if (!capabilities.services.contains(_serviceNamespace)) {
-        continue;
-      }
-
+    for (final ToolExtension extension in await ExtensionDiscoveryHelper(
+      extensionManager: _extensionManager,
+      logger: _logger,
+    ).getExtensionsSupporting(_serviceNamespace)) {
       try {
         final Object? result = await extension
             .callMethod(_getOptionsMethod)
@@ -112,26 +94,10 @@ class ExtensionConfigurationManager {
       return core.OptionValidationResult.failed('Tool extension prototype is not enabled.');
     }
 
-    if (_extensionManager.extensions.isEmpty) {
-      try {
-        await _extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
-      } on Object catch (e) {
-        return core.OptionValidationResult.failed('Failed to spawn prototype extension: $e');
-      }
-    }
-
-    for (final ToolExtension extension in _extensionManager.extensions) {
-      late final ToolExtensionCapabilities capabilities;
-      try {
-        capabilities = await extension.getCapabilities().timeout(const Duration(seconds: 5));
-      } on Exception catch (e) {
-        _logger.printTrace('Failed to get capabilities: $e');
-        continue;
-      }
-      if (!capabilities.services.contains(_serviceNamespace)) {
-        continue;
-      }
-
+    for (final ToolExtension extension in await ExtensionDiscoveryHelper(
+      extensionManager: _extensionManager,
+      logger: _logger,
+    ).getExtensionsSupporting(_serviceNamespace)) {
       try {
         final Object? result = await extension
             .callMethod(

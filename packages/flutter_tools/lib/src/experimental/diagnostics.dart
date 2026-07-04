@@ -7,11 +7,10 @@ import 'dart:async';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../doctor_validator.dart' as host_doctor;
-import '../extension_prototypes/linux_extension/extension.dart';
 import '../flutter_tools_core/diagnostics.dart' as core;
 import '../generic_extension_protocol/manager.dart';
-import '../generic_extension_protocol/service.dart';
 import '../globals.dart' as globals;
+import 'extension_discovery.dart';
 
 /// A host-side doctor validator that delegates diagnostics to tool extensions.
 class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
@@ -40,34 +39,12 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
       );
     }
 
-    if (_extensionManager.extensions.isEmpty) {
-      try {
-        await _extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
-      } on Object catch (e) {
-        return host_doctor.ValidationResult(
-          host_doctor.ValidationType.missing,
-          <host_doctor.ValidationMessage>[
-            host_doctor.ValidationMessage.error('Failed to spawn prototype extension: $e'),
-          ],
-          statusInfo: 'failed to spawn extension',
-        );
-      }
-    }
-
     final subResults = <host_doctor.ValidationResult>[];
 
-    for (final ToolExtension extension in _extensionManager.extensions) {
-      late final ToolExtensionCapabilities capabilities;
-      try {
-        capabilities = await extension.getCapabilities();
-      } on Exception catch (e) {
-        _logger.printTrace('Failed to get capabilities: $e');
-        continue;
-      }
-      if (!capabilities.services.contains(_serviceNamespace)) {
-        continue;
-      }
-
+    for (final ToolExtension extension in await ExtensionDiscoveryHelper(
+      extensionManager: _extensionManager,
+      logger: _logger,
+    ).getExtensionsSupporting(_serviceNamespace)) {
       try {
         final Object? diagnosticsResult = await extension.callMethod(_runDiagnosticsMethod);
         if (diagnosticsResult case final List<Object?> items) {
