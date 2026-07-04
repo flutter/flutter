@@ -45,9 +45,6 @@ std::shared_ptr<const IdleWaiter> Context::GetIdleWaiter() const {
 
 std::shared_ptr<const GpuSubmissionTracker> Context::GetSubmissionTracker()
     const {
-  // TODO(https://github.com/flutter/flutter/issues/184091): Wire submission
-  // tracking for the Vulkan and GLES backends. Their swapchains bound frames
-  // in flight today, so HostBuffer reuse keeps the previous behavior there.
   return nullptr;
 }
 

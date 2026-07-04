@@ -119,6 +119,14 @@ class ContextVK final : public Context,
   std::shared_ptr<Allocator> GetResourceAllocator() const override;
 
   // |Context|
+  std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
+      const override;
+
+  // Mutable tracker for command buffer submission bookkeeping.
+  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
+      const;
+
+  // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;
 
   // |Context|
@@ -280,6 +288,8 @@ class ContextVK final : public Context,
   QueuesVK queues_;
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
+  std::shared_ptr<GpuSubmissionTracker> submission_tracker_ =
+      std::make_shared<GpuSubmissionTracker>();
   std::shared_ptr<ResourceManagerVK> resource_manager_;
   std::shared_ptr<DescriptorPoolRecyclerVK> descriptor_pool_recycler_;
   std::shared_ptr<CommandPoolRecyclerVK> command_pool_recycler_;

@@ -47,6 +47,8 @@ class ContextGLES final : public Context,
 
  private:
   std::shared_ptr<ReactorGLES> reactor_;
+  std::shared_ptr<GpuSubmissionTracker> submission_tracker_ =
+      std::make_shared<GpuSubmissionTracker>();
   std::shared_ptr<ShaderLibraryGLES> shader_library_;
   std::shared_ptr<PipelineLibraryGLES> pipeline_library_;
   std::shared_ptr<SamplerLibraryGLES> sampler_library_;
@@ -74,6 +76,14 @@ class ContextGLES final : public Context,
 
   // |Context|
   std::shared_ptr<Allocator> GetResourceAllocator() const override;
+
+  // |Context|
+  std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
+      const override;
+
+  // Mutable tracker for command buffer submission bookkeeping.
+  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
+      const;
 
   // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;
