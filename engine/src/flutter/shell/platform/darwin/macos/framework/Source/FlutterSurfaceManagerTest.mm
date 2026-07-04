@@ -44,11 +44,16 @@ static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView, BOOL enab
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   id<MTLCommandQueue> commandQueue = [device newCommandQueue];
   CALayer* layer = reinterpret_cast<CALayer*>(testView.layer);
-  return [[FlutterSurfaceManager alloc] initWithDevice:device
-                                          commandQueue:commandQueue
-                                                 layer:layer
-                                              delegate:testView
-                                             wideGamut:enableWideGamut];
+  FlutterSurfaceManager* surfaceManager =
+      [[FlutterSurfaceManager alloc] initWithDevice:device
+                                       commandQueue:commandQueue
+                                              layer:layer
+                                           delegate:testView
+                                          wideGamut:enableWideGamut];
+  // The fence blit would be the only GPU work touching surfaces in these
+  // tests and would keep them marked in use, breaking cache expectations.
+  surfaceManager.disableFenceBlitForTesting = YES;
+  return surfaceManager;
 }
 
 static FlutterSurfacePresentInfo* CreatePresentInfo(
@@ -178,28 +183,38 @@ TEST(FlutterSurfaceManager, BackingStoreCacheSurfaceStuckInUse) {
   auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
 
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
-  [surfaceManager waitForAllFramesInFlight];
   // Pretend that compositor is holding on to the surface. The surface will be kept
   // in cache until the age of kSurfaceEvictionAge is reached, and then evicted.
   surface1.isInUseOverride = YES;
 
   auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface2) ] atTime:0 notify:nil];
-  [surfaceManager waitForAllFramesInFlight];
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 
   for (int i = 0; i < 30 /* kSurfaceEvictionAge */ - 1; ++i) {
     auto surface3 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
     [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface3) ] atTime:0 notify:nil];
-    [surfaceManager waitForAllFramesInFlight];
     EXPECT_EQ(surfaceManager.backBufferCache.count, 2ul);
   }
 
   auto surface4 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface4) ] atTime:0 notify:nil];
-  [surfaceManager waitForAllFramesInFlight];
   // Surface in use should bet old enough at this point to be evicted.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
+}
+
+TEST(FlutterSurfaceManager, PresentsAreFencedAndBounded) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView);
+  surfaceManager.disableFenceBlitForTesting = NO;
+
+  // Presenting more frames than the in-flight limit must not deadlock, and
+  // all frames must eventually complete.
+  for (int i = 0; i < 10; ++i) {
+    auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
+    [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface) ] atTime:0 notify:nil];
+  }
+  [surfaceManager waitForAllFramesInFlight];
 }
 
 inline bool operator==(const CGRect& lhs, const CGRect& rhs) {

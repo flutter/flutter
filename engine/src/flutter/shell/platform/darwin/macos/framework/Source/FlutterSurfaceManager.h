@@ -128,6 +128,12 @@
  */
 - (void)waitForAllFramesInFlight;
 
+/**
+ * Skips the fence blit during present. The blit is the only GPU work in unit
+ * tests and would keep surfaces marked in use. Used for tests.
+ */
+@property(readwrite, nonatomic) BOOL disableFenceBlitForTesting;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERSURFACEMANAGER_H_

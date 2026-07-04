@@ -30,6 +30,8 @@ static const intptr_t kMaxFramesInFlight = 3;
 
   // 1x1 target for the fence blit in presentSurfaces.
   id<MTLTexture> _fenceScratchTexture;
+
+  BOOL _disableFenceBlitForTesting;
   CALayer* _containingLayer;
   __weak id<FlutterSurfaceManagerDelegate> _delegate;
   BOOL _wideGamut;
@@ -161,6 +163,14 @@ static void UpdateContentSubLayers(CALayer* layer,
   }
 }
 
+- (BOOL)disableFenceBlitForTesting {
+  return _disableFenceBlitForTesting;
+}
+
+- (void)setDisableFenceBlitForTesting:(BOOL)value {
+  _disableFenceBlitForTesting = value;
+}
+
 - (NSArray*)frontSurfaces {
   return _frontSurfaces;
 }
@@ -272,7 +282,7 @@ static CGSize GetRequiredFrameSize(NSArray<FlutterSurfacePresentInfo*>* surfaces
   // Read a pixel of each surface so that hazard tracking orders this command
   // buffer after the frame's rendering. An empty command buffer has no
   // dependencies and may complete before the rendering does.
-  if (surfaces.count > 0) {
+  if (surfaces.count > 0 && !_disableFenceBlitForTesting) {
     id<MTLTexture> first = surfaces.firstObject.surface.texture;
     if (_fenceScratchTexture == nil || _fenceScratchTexture.pixelFormat != first.pixelFormat) {
       MTLTextureDescriptor* descriptor =
