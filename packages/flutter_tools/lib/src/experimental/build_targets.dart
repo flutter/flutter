@@ -32,9 +32,9 @@ class ExtensionBuildTargetManager {
 
   final ExtensionDiscoveryHelper _discoveryHelper;
 
-  static const String _serviceNamespace = 'build';
-  static const String _getTargetsMethod = 'build.getTargets';
-  static const String _buildMethod = 'build.build';
+  static const String _serviceNamespace = core.BuildService.serviceNamespace;
+  static const String _getTargetsMethod = core.BuildService.getTargetsMethod;
+  static const String _buildMethod = core.BuildService.buildMethod;
 
   List<core.Target>? _cachedTargets;
 

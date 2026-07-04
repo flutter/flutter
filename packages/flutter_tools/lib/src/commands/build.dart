@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../cmake.dart';
 import '../experimental/build_targets.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
@@ -298,6 +299,13 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
           ? project.linux
           : GenericCmakeProject(project, _target.targetPlatformDirectory ?? platformKey);
       if (cmakeProject.existsSync()) {
+        writeGeneratedCmakeConfig(
+          Cache.flutterRoot!,
+          cmakeProject,
+          buildInfo,
+          environmentConfig,
+          globals.logger,
+        );
         createPluginSymlinks(
           project,
           customCMakeProject: cmakeProject,

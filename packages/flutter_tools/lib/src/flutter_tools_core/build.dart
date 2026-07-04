@@ -7,8 +7,12 @@ import 'artifacts.dart';
 
 /// The primary coordinator between the tool and extension compilation logic.
 abstract base class BuildService extends ToolExtensionService {
+  static const String serviceNamespace = 'build';
+  static const String getTargetsMethod = 'build.getTargets';
+  static const String buildMethod = 'build.build';
+
   @override
-  String get namespace => 'build';
+  String get namespace => serviceNamespace;
 
   /// The set of build targets provided by this extension.
   List<Target> get targets;
@@ -118,10 +122,10 @@ abstract base class Target {
   /// Optional device directory name (e.g., 'linux-proto-1') for structuring output directories to match `flutter run`.
   String? get targetDeviceDirectory => null;
 
-  /// Optional platform key (e.g., 'linux', 'windows') used for plugin negotiation when building for this target.
+  /// Optional plugin platform key (e.g., 'linux') for negotiating host plugin generation and injection.
   String? get pluginPlatformKey => null;
 
-  /// Whether this target generates CMake plugin files.
+  /// Whether this target expects the host to generate CMake plugin integration files (e.g., `generated_plugins.cmake`).
   bool get generatesCmakePluginFiles => false;
 
   /// The list of names of dependencies.
@@ -159,8 +163,6 @@ final class ExtensionBuildTarget extends Target {
           : const <String>[],
       cliSubcommand = json['cliSubcommand'] as String?,
       cliDescription = json['cliDescription'] as String?,
-      targetPlatformDirectory = json['targetPlatformDirectory'] as String?,
-      targetDeviceDirectory = json['targetDeviceDirectory'] as String?,
       pluginPlatformKey = json['pluginPlatformKey'] as String?,
       generatesCmakePluginFiles = json['generatesCmakePluginFiles'] == true;
 
@@ -181,12 +183,6 @@ final class ExtensionBuildTarget extends Target {
 
   @override
   final String? cliDescription;
-
-  @override
-  final String? targetPlatformDirectory;
-
-  @override
-  final String? targetDeviceDirectory;
 
   @override
   final String? pluginPlatformKey;

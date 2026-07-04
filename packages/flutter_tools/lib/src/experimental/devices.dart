@@ -337,12 +337,6 @@ class ExtensionBackedDevice extends Device {
             releaseMode: debuggingOptions.buildInfo.mode.isRelease,
             linuxPlatform: true,
           );
-        } else if (platform.getName() == 'windows-x64' || platformName.contains('windows')) {
-          await injectPlugins(
-            project,
-            releaseMode: debuggingOptions.buildInfo.mode.isRelease,
-            windowsPlatform: true,
-          );
         }
       } else {
         _logger.printTrace(

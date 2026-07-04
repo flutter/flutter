@@ -161,11 +161,19 @@ class ProcessLaunchHelper {
 abstract base class DeviceService extends ToolExtensionService {
   DeviceService({required this.onNotification});
 
+  static const String serviceNamespace = 'device';
+  static const String discoverDevicesMethod = 'device.discoverDevices';
+  static const String installAppMethod = 'device.installApp';
+  static const String launchAppMethod = 'device.launchApp';
+  static const String getVmServiceUriMethod = 'device.getVmServiceUri';
+  static const String stopAppMethod = 'device.stopApp';
+  static const String logNotificationMethod = 'device.log';
+
   /// Callback to forward notifications back to the host tool.
   final void Function(String method, Map<String, Object?> params) onNotification;
 
   @override
-  String get namespace => 'device';
+  String get namespace => serviceNamespace;
 
   /// The active devices managed by this service.
   final Map<String, Device> _devices = <String, Device>{};
@@ -209,7 +217,10 @@ abstract base class DeviceService extends ToolExtensionService {
     for (final device in devices) {
       _devices[device.id] = device;
       _logSubscriptions[device.id] = device.getLogReader().listen((String line) {
-        onNotification('device.log', <String, Object?>{'deviceId': device.id, 'message': line});
+        onNotification(logNotificationMethod, <String, Object?>{
+          'deviceId': device.id,
+          'message': line,
+        });
       });
       result.add(<String, Object?>{
         'id': device.id,

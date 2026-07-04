@@ -31,9 +31,9 @@ class ExtensionConfigurationManager {
 
   final ExtensionDiscoveryHelper _discoveryHelper;
 
-  static const String _serviceNamespace = 'config';
-  static const String _getOptionsMethod = 'config.getOptions';
-  static const String _validateMethod = 'config.validate';
+  static const String _serviceNamespace = core.ConfigurationService.serviceNamespace;
+  static const String _getOptionsMethod = core.ConfigurationService.getOptionsMethod;
+  static const String _validateMethod = core.ConfigurationService.validateMethod;
 
   final Set<String> _registeredExtensionFlags = <String>{};
 

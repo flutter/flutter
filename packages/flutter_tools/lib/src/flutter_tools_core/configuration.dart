@@ -7,8 +7,12 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for managing custom configuration options for
 /// an extension.
 abstract base class ConfigurationService extends ToolExtensionService {
+  static const String serviceNamespace = 'config';
+  static const String getOptionsMethod = 'config.getOptions';
+  static const String validateMethod = 'config.validate';
+
   @override
-  String get namespace => 'config';
+  String get namespace => serviceNamespace;
 
   /// The set of configuration options handled by this extension.
   List<ConfigurationOption> get options;
