@@ -6,59 +6,50 @@ import 'dart:async';
 
 import '../../generic_extension_protocol.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../extension_prototypes/linux_extension/extension.dart';
 import '../globals.dart' as globals;
 
-/// Helper class for discovering tool extensions supporting specific services.
+/// A helper class for abstracting extension isolate spawning and capability querying.
 class ExtensionDiscoveryHelper {
   /// Create a new instance of [ExtensionDiscoveryHelper].
-  ExtensionDiscoveryHelper({required this.extensionManager, required this.logger});
+  ExtensionDiscoveryHelper({
+    required Logger logger,
+    Duration capabilitiesTimeout = const Duration(seconds: 5),
+    ToolExtensionManager? extensionManager,
+    Platform? platform,
+  }) : _logger = logger,
+       _capabilitiesTimeout = capabilitiesTimeout,
+       _extensionManager = extensionManager,
+       _platform = platform;
 
-  /// The extension manager used to manage extension isolates.
-  final ToolExtensionManager extensionManager;
+  final Duration _capabilitiesTimeout;
+  final ToolExtensionManager? _extensionManager;
+  final Logger _logger;
+  final Platform? _platform;
 
-  /// The logger used for reporting errors and traces.
-  final Logger logger;
+  /// Environment variable key to enable tool extension prototype features.
+  static const String envPrototypeFlag = 'FLUTTER_TOOL_EXTENSION_PROTOTYPE';
 
-  /// Timeout duration for querying capabilities from an extension isolate.
-  static const Duration capabilitiesTimeout = Duration(seconds: 5);
+  /// Whether the host platform enables tool extension prototype features.
+  bool get _isPrototypeEnabled => _platform != null
+      ? _platform.environment[envPrototypeFlag] == 'true'
+      : globals.isToolExtensionPrototypeEnabled;
 
-  /// Returns a list of [ToolExtension]s that support the requested [serviceNamespace].
-  ///
-  /// Checks whether [globals.isToolExtensionPrototypeEnabled] is true when starting a new
-  /// prototype extension if no extensions are active, queries capabilities with a timeout,
-  /// and filters the extensions by [serviceNamespace].
-  Future<List<ToolExtension>> getExtensionsSupporting(
-    String serviceNamespace, {
+  /// Query the capabilities of a [ToolExtension] with a timeout.
+  Future<ToolExtensionCapabilities?> getExtensionCapabilities(
+    ToolExtension extension, {
     bool throwOnFailure = false,
   }) async {
-    if (extensionManager.extensions.isEmpty) {
-      if (!globals.isToolExtensionPrototypeEnabled) {
-        return const <ToolExtension>[];
+    try {
+      return await extension.getCapabilities().timeout(_capabilitiesTimeout);
+    } on Object catch (e) {
+      if (throwOnFailure) {
+        rethrow;
       }
-      try {
-        await extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
-      } on Object catch (e) {
-        if (throwOnFailure) {
-          rethrow;
-        }
-        logger.printError('Failed to spawn prototype extension: $e');
-        return const <ToolExtension>[];
-      }
+      _logger.printTrace('Failed to get capabilities: $e');
+      return null;
     }
-
-    final extensions = <ToolExtension>[];
-    for (final ToolExtension extension in extensionManager.extensions) {
-      final bool supported = await isServiceSupported(
-        extension,
-        serviceNamespace,
-        throwOnFailure: throwOnFailure,
-      );
-      if (supported) {
-        extensions.add(extension);
-      }
-    }
-    return extensions;
   }
 
   /// Checks whether a specific [extension] supports the given [serviceNamespace].
@@ -67,16 +58,49 @@ class ExtensionDiscoveryHelper {
     String serviceNamespace, {
     bool throwOnFailure = false,
   }) async {
-    final ToolExtensionCapabilities capabilities;
-    try {
-      capabilities = await extension.getCapabilities().timeout(capabilitiesTimeout);
-    } on Object catch (e) {
-      if (throwOnFailure) {
-        rethrow;
-      }
-      logger.printTrace('Failed to get capabilities: $e');
-      return false;
+    final ToolExtensionCapabilities? capabilities = await getExtensionCapabilities(
+      extension,
+      throwOnFailure: throwOnFailure,
+    );
+    return capabilities != null && capabilities.services.contains(serviceNamespace);
+  }
+
+  /// Discover active or newly spawned tool extensions that support [serviceNamespace].
+  Future<List<ToolExtension>> getExtensionsSupporting(
+    String serviceNamespace, {
+    bool throwOnFailure = false,
+  }) async {
+    final ToolExtensionManager? extensionManager = _extensionManager;
+    if (extensionManager == null) {
+      return const <ToolExtension>[];
     }
-    return capabilities.services.contains(serviceNamespace);
+
+    if (extensionManager.extensions.isEmpty) {
+      if (!_isPrototypeEnabled) {
+        return const <ToolExtension>[];
+      }
+      try {
+        await extensionManager.startExtension(linuxDeviceExtensionEntryPoint);
+      } on Object catch (e) {
+        if (throwOnFailure) {
+          rethrow;
+        }
+        _logger.printError('Failed to spawn prototype extension: $e');
+        return const <ToolExtension>[];
+      }
+    }
+
+    final matchingExtensions = <ToolExtension>[];
+    for (final ToolExtension extension in extensionManager.extensions) {
+      final bool supported = await isServiceSupported(
+        extension,
+        serviceNamespace,
+        throwOnFailure: throwOnFailure,
+      );
+      if (supported) {
+        matchingExtensions.add(extension);
+      }
+    }
+    return matchingExtensions;
   }
 }
