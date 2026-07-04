@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERSURFACE_H_
 
 #import <Cocoa/Cocoa.h>
+#import <Metal/Metal.h>
 
 #import "flutter/shell/platform/embedder/embedder.h"
 
@@ -34,6 +35,8 @@
 @property(readonly, nonatomic, nonnull) IOSurfaceRef ioSurface;
 @property(readonly, nonatomic) CGSize size;
 @property(readonly, nonatomic) int64_t textureId;
+// The Metal texture backed by ioSurface that the engine renders into.
+@property(readonly, nonatomic, nonnull) id<MTLTexture> texture;
 // Whether the surface is currently in use by the compositor.
 @property(readonly, nonatomic) BOOL isInUse;
 // Whether the surface was created with wide gamut enabled.

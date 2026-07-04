@@ -178,22 +178,26 @@ TEST(FlutterSurfaceManager, BackingStoreCacheSurfaceStuckInUse) {
   auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
 
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
+  [surfaceManager waitForAllFramesInFlight];
   // Pretend that compositor is holding on to the surface. The surface will be kept
   // in cache until the age of kSurfaceEvictionAge is reached, and then evicted.
   surface1.isInUseOverride = YES;
 
   auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface2) ] atTime:0 notify:nil];
+  [surfaceManager waitForAllFramesInFlight];
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 
   for (int i = 0; i < 30 /* kSurfaceEvictionAge */ - 1; ++i) {
     auto surface3 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
     [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface3) ] atTime:0 notify:nil];
+    [surfaceManager waitForAllFramesInFlight];
     EXPECT_EQ(surfaceManager.backBufferCache.count, 2ul);
   }
 
   auto surface4 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface4) ] atTime:0 notify:nil];
+  [surfaceManager waitForAllFramesInFlight];
   // Surface in use should bet old enough at this point to be evicted.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 }

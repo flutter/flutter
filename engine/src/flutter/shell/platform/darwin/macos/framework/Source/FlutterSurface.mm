@@ -34,6 +34,10 @@
   return reinterpret_cast<int64_t>(_texture);
 }
 
+- (id<MTLTexture>)texture {
+  return _texture;
+}
+
 - (BOOL)isInUse {
   return _isInUseOverride || IOSurfaceIsInUse(_ioSurface);
 }

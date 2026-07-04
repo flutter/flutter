@@ -11,12 +11,33 @@
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
+// Maximum number of frames that may be scheduled on the GPU but not yet
+// completed at the time a new frame is presented. Impeller's per-frame
+// transient buffers (impeller::HostBuffer) cycle an arena of
+// impeller::kHostBufferArenaSize (4) entries; one entry is consumed by the
+// frame currently being recorded, so at most 3 additional frames may be in
+// flight before an arena entry is reused while the GPU is still reading it.
+// Other platforms get an equivalent bound from their display surfaces (for
+// example CAMetalLayer's drawable pool on iOS), but the IOSurface-based
+// macOS compositor provides none.
+// See https://github.com/flutter/flutter/issues/184091.
+static const intptr_t kMaxFramesInFlight = 3;
+
 @implementation FlutterSurfacePresentInfo
 @end
 
 @interface FlutterSurfaceManager () {
   id<MTLDevice> _device;
   id<MTLCommandQueue> _commandQueue;
+
+  // Limits the number of frames scheduled but not yet completed on the GPU
+  // to kMaxFramesInFlight. Waited on (raster thread) before presenting a
+  // frame, signaled from the frame command buffer's completion handler.
+  dispatch_semaphore_t _frameSemaphore;
+
+  // 1x1 destination for the fence blit in presentSurfaces. Recreated if the
+  // surface pixel format changes (e.g. wide gamut).
+  id<MTLTexture> _fenceScratchTexture;
   CALayer* _containingLayer;
   __weak id<FlutterSurfaceManagerDelegate> _delegate;
   BOOL _wideGamut;
@@ -116,6 +137,7 @@ static void UpdateContentSubLayers(CALayer* layer,
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
     _frontSurfaces = [NSMutableArray array];
     _layers = [NSMutableArray array];
+    _frameSemaphore = dispatch_semaphore_create(kMaxFramesInFlight);
   }
   return self;
 }
@@ -136,6 +158,15 @@ static void UpdateContentSubLayers(CALayer* layer,
 
 - (FlutterBackBufferCache*)backBufferCache {
   return _backBufferCache;
+}
+
+- (void)waitForAllFramesInFlight {
+  for (intptr_t i = 0; i < kMaxFramesInFlight; i++) {
+    dispatch_semaphore_wait(_frameSemaphore, DISPATCH_TIME_FOREVER);
+  }
+  for (intptr_t i = 0; i < kMaxFramesInFlight; i++) {
+    dispatch_semaphore_signal(_frameSemaphore);
+  }
 }
 
 - (NSArray*)frontSurfaces {
@@ -242,7 +273,49 @@ static CGSize GetRequiredFrameSize(NSArray<FlutterSurfacePresentInfo*>* surfaces
 - (void)presentSurfaces:(NSArray<FlutterSurfacePresentInfo*>*)surfaces
                  atTime:(CFTimeInterval)presentationTime
                  notify:(dispatch_block_t)notify {
+  // Apply backpressure when the GPU falls more than kMaxFramesInFlight frames
+  // behind. The frame's rendering command buffers are already committed at
+  // this point, so blocking here only delays presentation and the recording
+  // of subsequent frames. It never blocks while the GPU keeps up.
+  dispatch_semaphore_wait(_frameSemaphore, DISPATCH_TIME_FOREVER);
+
   id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+  // Read one pixel of each presented surface so Metal's hazard tracking
+  // serializes this command buffer behind all of the frame's rendering into
+  // those surfaces. Without this the buffer is empty, has no dependencies,
+  // and can complete while the frame's rendering is still executing, which
+  // would make the completion handler below meaningless as a frame fence.
+  if (surfaces.count > 0) {
+    id<MTLTexture> first = surfaces.firstObject.surface.texture;
+    if (_fenceScratchTexture == nil || _fenceScratchTexture.pixelFormat != first.pixelFormat) {
+      MTLTextureDescriptor* descriptor =
+          [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:first.pixelFormat
+                                                             width:1
+                                                            height:1
+                                                         mipmapped:NO];
+      descriptor.storageMode = MTLStorageModePrivate;
+      _fenceScratchTexture = [_device newTextureWithDescriptor:descriptor];
+    }
+    id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
+    for (FlutterSurfacePresentInfo* info in surfaces) {
+      if (info.surface.texture.pixelFormat != _fenceScratchTexture.pixelFormat) {
+        continue;
+      }
+      [blit copyFromTexture:info.surface.texture
+                sourceSlice:0
+                sourceLevel:0
+               sourceOrigin:MTLOriginMake(0, 0, 0)
+                 sourceSize:MTLSizeMake(1, 1, 1)
+                  toTexture:_fenceScratchTexture
+           destinationSlice:0
+           destinationLevel:0
+          destinationOrigin:MTLOriginMake(0, 0, 0)];
+    }
+    [blit endEncoding];
+  }
+  [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+    dispatch_semaphore_signal(_frameSemaphore);
+  }];
   [commandBuffer commit];
   [commandBuffer waitUntilScheduled];
 

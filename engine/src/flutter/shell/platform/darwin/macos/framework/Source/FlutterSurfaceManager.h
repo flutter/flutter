@@ -122,6 +122,12 @@
 @property(readonly, nonatomic, nonnull) NSArray<FlutterSurface*>* frontSurfaces;
 @property(readonly, nonatomic, nonnull) NSArray<CALayer*>* layers;
 
+/**
+ * Blocks until the GPU has completed all previously presented frames. Used
+ * for tests.
+ */
+- (void)waitForAllFramesInFlight;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERSURFACEMANAGER_H_
