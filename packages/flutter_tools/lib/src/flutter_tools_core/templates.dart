@@ -7,8 +7,14 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for adding custom platform support to
 /// `flutter create`.
 abstract base class TemplateService extends ToolExtensionService {
+  static const String serviceNamespace = 'template';
+  static const String getAppTemplatesMethod = 'template.getAppTemplates';
+  static const String getPluginTemplatesMethod = 'template.getPluginTemplates';
+  static const String getProjectTemplatesMethod = 'template.getProjectTemplates';
+  static const String generateTemplateParametersMethod = 'template.generateTemplateParameters';
+
   @override
-  String get namespace => 'template';
+  String get namespace => serviceNamespace;
 
   /// The set of additional template files to be initialized when using
   /// the `app` template.

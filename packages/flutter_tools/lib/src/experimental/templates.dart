@@ -37,27 +37,11 @@ class ExtensionTemplateManager {
   final Logger _logger;
   final ExtensionDiscoveryHelper _discoveryHelper;
 
-  static const String _serviceNamespace = 'template';
-  static const String _getProjectTemplatesMethod = 'template.getProjectTemplates';
-  static const String _generateTemplateParametersMethod = 'template.generateTemplateParameters';
-
   List<core.ProjectTemplate>? _cachedTemplates;
 
   /// Retrieve the cached templates synchronously.
   List<core.ProjectTemplate> get cachedTemplates =>
       _cachedTemplates ?? const <core.ProjectTemplate>[];
-
-  static List<core.ProjectTemplate> _decodeTemplates(Object? rpcResult) {
-    final templates = <core.ProjectTemplate>[];
-    if (rpcResult case final List<Object?> resultList) {
-      for (final item in resultList) {
-        if (item case final Map<Object?, Object?> itemMap) {
-          templates.add(core.ExtensionProjectTemplate.fromJson(itemMap.cast<String, Object?>()));
-        }
-      }
-    }
-    return templates;
-  }
 
   /// Retrieve templates by routing template.getProjectTemplates to active tool extensions.
   Future<List<core.ProjectTemplate>> getProjectTemplates() async {
@@ -70,9 +54,9 @@ class ExtensionTemplateManager {
 
     final List<core.ProjectTemplate> templates = await _discoveryHelper
         .getListFromExtensions<core.ProjectTemplate>(
-          _serviceNamespace,
-          _getProjectTemplatesMethod,
-          _decodeTemplates,
+          core.TemplateService.serviceNamespace,
+          core.TemplateService.getProjectTemplatesMethod,
+          core.ExtensionProjectTemplate.listFromJson,
         );
 
     _cachedTemplates = templates;
@@ -105,14 +89,14 @@ class ExtensionTemplateManager {
     }
 
     final List<ToolExtension> extensions = await _discoveryHelper.getExtensionsSupporting(
-      _serviceNamespace,
+      core.TemplateService.serviceNamespace,
     );
 
     for (final extension in extensions) {
       try {
         final Object? result = await extension
             .callMethod(
-              _generateTemplateParametersMethod,
+              core.TemplateService.generateTemplateParametersMethod,
               params: <String, Object?>{
                 'templateName': templateName,
                 'toolParameters': toolParameters,

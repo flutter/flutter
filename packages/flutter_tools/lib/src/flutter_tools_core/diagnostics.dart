@@ -7,8 +7,11 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for executing custom diagnostic checks that
 /// can be reported via `flutter doctor`.
 abstract base class DiagnosticsService extends ToolExtensionService {
+  static const String serviceNamespace = 'diagnostics';
+  static const String runDiagnosticsMethod = 'diagnostics.runDiagnostics';
+
   @override
-  String get namespace => 'diagnostics';
+  String get namespace => serviceNamespace;
 
   /// Runs all diagnostic checks and returns the results.
   Future<List<ValidationResult>> runDiagnostics();

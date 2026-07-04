@@ -41,6 +41,9 @@ abstract base class BuildService extends ToolExtensionService {
               'targetPlatformDirectory': target.targetPlatformDirectory,
             if (target.targetDeviceDirectory != null)
               'targetDeviceDirectory': target.targetDeviceDirectory,
+            if (target.pluginPlatformKey != null) 'pluginPlatformKey': target.pluginPlatformKey,
+            if (target.generatesCmakePluginFiles)
+              'generatesCmakePluginFiles': target.generatesCmakePluginFiles,
           },
         )
         .toList();
@@ -115,6 +118,12 @@ abstract base class Target {
   /// Optional device directory name (e.g., 'linux-proto-1') for structuring output directories to match `flutter run`.
   String? get targetDeviceDirectory => null;
 
+  /// Optional platform key (e.g., 'linux', 'windows') used for plugin negotiation when building for this target.
+  String? get pluginPlatformKey => null;
+
+  /// Whether this target generates CMake plugin files.
+  bool get generatesCmakePluginFiles => false;
+
   /// The list of names of dependencies.
   List<String> get dependencies;
 
@@ -149,7 +158,11 @@ final class ExtensionBuildTarget extends Target {
           ? (json['outputs']! as List<Object?>).cast<String>()
           : const <String>[],
       cliSubcommand = json['cliSubcommand'] as String?,
-      cliDescription = json['cliDescription'] as String?;
+      cliDescription = json['cliDescription'] as String?,
+      targetPlatformDirectory = json['targetPlatformDirectory'] as String?,
+      targetDeviceDirectory = json['targetDeviceDirectory'] as String?,
+      pluginPlatformKey = json['pluginPlatformKey'] as String?,
+      generatesCmakePluginFiles = json['generatesCmakePluginFiles'] == true;
 
   @override
   final String name;
@@ -168,6 +181,18 @@ final class ExtensionBuildTarget extends Target {
 
   @override
   final String? cliDescription;
+
+  @override
+  final String? targetPlatformDirectory;
+
+  @override
+  final String? targetDeviceDirectory;
+
+  @override
+  final String? pluginPlatformKey;
+
+  @override
+  final bool generatesCmakePluginFiles;
 
   @override
   Future<Map<String, Object?>> build(BuildEnvironment env) async {

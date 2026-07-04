@@ -125,6 +125,10 @@ void main() {
       });
 
       expect(result['success'], true);
+      expect(
+        fs.file('/project/linux/flutter/generated_plugins.cmake').readAsStringSync(),
+        '# Generated stub for empty plugin list\n',
+      );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
@@ -724,11 +728,19 @@ void main() {
           targetMap['cliDescription'],
           'Build a prototype Linux extension desktop application.',
         );
+        expect(targetMap['pluginPlatformKey'], 'linux');
+        expect(targetMap['generatesCmakePluginFiles'], true);
+        expect(targetMap['targetPlatformDirectory'], 'linux-x64');
+        expect(targetMap['targetDeviceDirectory'], 'linux-proto-1');
 
         final target = ExtensionBuildTarget.fromJson(targetMap);
         expect(target.name, 'assemble_linux_app');
         expect(target.cliSubcommand, 'custom-linux');
         expect(target.cliDescription, 'Build a prototype Linux extension desktop application.');
+        expect(target.pluginPlatformKey, 'linux');
+        expect(target.generatesCmakePluginFiles, true);
+        expect(target.targetPlatformDirectory, 'linux-x64');
+        expect(target.targetDeviceDirectory, 'linux-proto-1');
         expect(target.dependencies, isEmpty);
         expect(target.inputs, isEmpty);
         expect(target.outputs, isEmpty);
@@ -741,6 +753,10 @@ void main() {
         expect(minimalTarget.name, 'minimal_target');
         expect(minimalTarget.cliSubcommand, 'mini');
         expect(minimalTarget.cliDescription, isNull);
+        expect(minimalTarget.pluginPlatformKey, isNull);
+        expect(minimalTarget.generatesCmakePluginFiles, false);
+        expect(minimalTarget.targetPlatformDirectory, isNull);
+        expect(minimalTarget.targetDeviceDirectory, isNull);
         expect(minimalTarget.dependencies, isEmpty);
         expect(minimalTarget.inputs, isEmpty);
         expect(minimalTarget.outputs, isEmpty);
@@ -864,6 +880,87 @@ void main() {
           expect(env.defines['FLUTTER_BUILD_MODE'], 'debug');
           expect(env.defines['CMAKE_BUILD_TYPE'], 'Debug');
           expect(env.defines['DART_DEFINES'], contains(encodeDartDefines(<String>['FOO=BAR'])));
+        },
+        overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          Platform: () => FakePlatform(
+            environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'},
+          ),
+          ProcessManager: () => FakeProcessManager.any(),
+          ToolExtensionManager: () => manager,
+        },
+      );
+
+      testUsingContext(
+        'BuildCommand dynamically registers BuildExtensionSubCommand and triggers plugin discovery hooks prior to build delegation',
+        () async {
+          Cache.disableLocking();
+          final buildCompleter = Completer<Map<String, Object?>>();
+          await connectMockExtension(
+            services: <String>['build'],
+            targets: <Map<String, Object?>>[
+              <String, Object?>{
+                'name': 'custom_linux_target',
+                'cliSubcommand': 'custom-linux',
+                'cliDescription': 'Build custom linux ext target.',
+                'pluginPlatformKey': 'linux',
+                'generatesCmakePluginFiles': true,
+                'targetPlatformDirectory': 'linux-x64',
+                'dependencies': <String>[],
+                'inputs': <String>[],
+                'outputs': <String>[],
+              },
+            ],
+            buildCompleter: buildCompleter,
+          );
+
+          final Directory projectDir = globals.fs.directory('/project');
+          projectDir.createSync(recursive: true);
+          projectDir.childFile('pubspec.yaml').writeAsStringSync('name: my_app\n');
+          projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+          projectDir.childFile('.packages').createSync();
+          projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(
+              '{"configVersion": 2, "packages": [{"name": "my_app", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+            );
+          projectDir.childDirectory('.dart_tool').childFile('package_graph.json')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(
+              '{"configVersion":1,"packages":[{"name":"my_app","dependencies":[],"devDependencies":[]}],"roots":["my_app"]}',
+            );
+          projectDir
+              .childDirectory('linux')
+              .childFile('CMakeLists.txt')
+              .createSync(recursive: true);
+          globals.fs.currentDirectory = projectDir;
+
+          final CommandRunner<void> runner = createTestCommandRunner(
+            BuildCommand(
+              artifacts: globals.artifacts!,
+              cache: globals.cache,
+              fileSystem: globals.fs,
+              flutterVersion: globals.flutterVersion,
+              buildSystem: globals.buildSystem,
+              osUtils: globals.os,
+              logger: globals.logger,
+              androidSdk: globals.androidSdk,
+              config: globals.config,
+              platform: globals.platform,
+              processUtils: globals.processUtils,
+              processManager: globals.processManager,
+              fileSystemUtils: globals.fsUtils,
+              templateRenderer: globals.templateRenderer,
+              terminal: globals.terminal,
+              plistParser: globals.plistParser,
+              xcode: globals.xcode,
+            ),
+          );
+          await runner.run(<String>['build', 'custom-linux', '--debug']);
+
+          final Map<String, Object?> buildCall = await buildCompleter.future;
+          expect(buildCall['targetName'], 'custom_linux_target');
         },
         overrides: <Type, Generator>{
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),

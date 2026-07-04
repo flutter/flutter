@@ -22,6 +22,7 @@ import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../experimental/build_targets.dart';
 import '../features.dart';
+import '../flutter_plugins.dart';
 import '../flutter_tools_core/build.dart' as core;
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
@@ -291,6 +292,35 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final ExtensionBuildTargetManager? targetManager =
         _targetManager ?? extensionBuildTargetManager;
     if (targetManager != null) {
+      if (_target.pluginPlatformKey != null ||
+          _target.generatesCmakePluginFiles ||
+          _target.targetPlatformDirectory == 'linux-x64') {
+        await refreshPluginsList(project);
+        final String platformKey = _target.pluginPlatformKey ?? 'linux';
+        final CmakeBasedProject cmakeProject = _target.targetPlatformDirectory == 'linux-x64'
+            ? project.linux
+            : GenericCmakeProject(project, _target.targetPlatformDirectory ?? platformKey);
+        if (cmakeProject.existsSync()) {
+          createPluginSymlinks(
+            project,
+            customCMakeProject: cmakeProject,
+            customPlatformKey: platformKey,
+          );
+          if (platformKey == 'linux') {
+            await injectPlugins(
+              project,
+              releaseMode: buildInfo.mode.isRelease,
+              linuxPlatform: true,
+            );
+          } else if (platformKey == 'windows') {
+            await injectPlugins(
+              project,
+              releaseMode: buildInfo.mode.isRelease,
+              windowsPlatform: true,
+            );
+          }
+        }
+      }
       await targetManager.buildTarget(_target.name, buildEnv);
     } else {
       throwToolExit('ExtensionBuildTargetManager is not available in context.');

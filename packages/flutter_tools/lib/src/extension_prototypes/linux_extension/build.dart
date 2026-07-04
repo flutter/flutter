@@ -89,6 +89,12 @@ base class LinuxAssembleTarget extends Target {
   String? get targetDeviceDirectory => 'linux-proto-1';
 
   @override
+  String? get pluginPlatformKey => 'linux';
+
+  @override
+  bool get generatesCmakePluginFiles => true;
+
+  @override
   List<String> get dependencies => const <String>[];
 
   @override
@@ -137,6 +143,14 @@ base class LinuxAssembleTarget extends Target {
     }
 
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
+    final File generatedPluginsFile = _fileSystem.file(
+      _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugins.cmake'),
+    );
+    if (!generatedPluginsFile.existsSync()) {
+      generatedPluginsFile.createSync(recursive: true);
+      generatedPluginsFile.writeAsStringSync('# Generated stub for empty plugin list\n');
+    }
+
     final cmakeConfigureCmd = <String>[
       'cmake',
       '-G',

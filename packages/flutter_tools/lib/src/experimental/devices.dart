@@ -318,6 +318,7 @@ class ExtensionBackedDevice extends Device {
 
       // 4. Host preparations (write CMake configuration & plugin symlinks if CMake project exists)
       if (cmakeProject.existsSync()) {
+        await refreshPluginsList(project);
         writeGeneratedCmakeConfig(
           Cache.flutterRoot!,
           cmakeProject,
@@ -330,6 +331,19 @@ class ExtensionBackedDevice extends Device {
           customCMakeProject: cmakeProject,
           customPlatformKey: platformName,
         );
+        if (platform.getName() == 'linux-x64' || platformName.contains('linux')) {
+          await injectPlugins(
+            project,
+            releaseMode: debuggingOptions.buildInfo.mode.isRelease,
+            linuxPlatform: true,
+          );
+        } else if (platform.getName() == 'windows-x64' || platformName.contains('windows')) {
+          await injectPlugins(
+            project,
+            releaseMode: debuggingOptions.buildInfo.mode.isRelease,
+            windowsPlatform: true,
+          );
+        }
       } else {
         _logger.printTrace(
           'Extension device platform "$platformName" does not use host CMake configuration.',

@@ -91,3 +91,38 @@ final class OptionValidationResult {
           OptionValidationResult.fromJson(m.cast<String, Object?>()),
   ];
 }
+
+/// A concrete host-side representation of an extension configuration option.
+final class ExtensionConfigurationOption extends ConfigurationOption {
+  /// Create a new instance of [ExtensionConfigurationOption].
+  ExtensionConfigurationOption({required this.description, required this.name});
+
+  /// Parse an option from a JSON extension map representation.
+  factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
+    if (json case {'name': final String name, 'description': final String description}) {
+      return ExtensionConfigurationOption(name: name, description: description);
+    }
+    throw FormatException('Invalid extension configuration option format: $json');
+  }
+
+  /// Parse a list of [ExtensionConfigurationOption] from an RPC response.
+  static List<ExtensionConfigurationOption> listFromJson(Object? rpcResult) => [
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ExtensionConfigurationOption.fromJson(m.cast<String, Object?>()),
+  ];
+
+  @override
+  final String name;
+
+  @override
+  final String description;
+
+  @override
+  OptionValidationResult validate(String option, Object? value) {
+    throw UnimplementedError(
+      'Host-side validation should call ExtensionConfigurationManager.validate',
+    );
+  }
+}

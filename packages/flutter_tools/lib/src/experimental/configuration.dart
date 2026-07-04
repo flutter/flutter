@@ -51,18 +51,6 @@ class ExtensionConfigurationManager {
   List<core.ConfigurationOption> get cachedOptions =>
       _cachedOptions ?? const <core.ConfigurationOption>[];
 
-  static List<core.ConfigurationOption> _decodeOptions(Object? rpcResult) {
-    final options = <core.ConfigurationOption>[];
-    if (rpcResult case final List<Object?> resultList) {
-      for (final item in resultList) {
-        if (item case final Map<Object?, Object?> itemMap) {
-          options.add(ExtensionConfigurationOption.fromJson(itemMap.cast<String, Object?>()));
-        }
-      }
-    }
-    return options;
-  }
-
   /// Retrieve configuration options by routing config.getOptions to active tool extensions.
   Future<List<core.ConfigurationOption>> getOptions() async {
     if (!_discoveryHelper.isPrototypeEnabled) {
@@ -76,7 +64,7 @@ class ExtensionConfigurationManager {
         .getListFromExtensions<core.ConfigurationOption>(
           _serviceNamespace,
           _getOptionsMethod,
-          _decodeOptions,
+          core.ExtensionConfigurationOption.listFromJson,
         );
 
     _cachedOptions = options;
@@ -109,33 +97,6 @@ class ExtensionConfigurationManager {
 
     return core.OptionValidationResult.failed(
       'No extension service registered configuration option: $option',
-    );
-  }
-}
-
-/// A concrete host-side representation of an extension configuration option.
-base class ExtensionConfigurationOption extends core.ConfigurationOption {
-  /// Create a new instance of [ExtensionConfigurationOption].
-  ExtensionConfigurationOption({required this.description, required this.name});
-
-  /// Parse an option from a JSON extension map representation.
-  factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
-    if (json case {'name': final String name, 'description': final String description}) {
-      return ExtensionConfigurationOption(name: name, description: description);
-    }
-    throw FormatException('Invalid extension configuration option format: $json');
-  }
-
-  @override
-  final String name;
-
-  @override
-  final String description;
-
-  @override
-  core.OptionValidationResult validate(String option, Object? value) {
-    throw UnimplementedError(
-      'Host-side validation should call ExtensionConfigurationManager.validate',
     );
   }
 }

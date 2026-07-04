@@ -27,9 +27,6 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
 
   final ExtensionDiscoveryHelper _discoveryHelper;
 
-  static const String _serviceNamespace = 'diagnostics';
-  static const String _runDiagnosticsMethod = 'diagnostics.runDiagnostics';
-
   @override
   Future<host_doctor.ValidationResult> validateImpl() async {
     if (!_discoveryHelper.isPrototypeEnabled) {
@@ -45,10 +42,12 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
     final subResults = <host_doctor.ValidationResult>[];
 
     for (final ToolExtension extension in await _discoveryHelper.getExtensionsSupporting(
-      _serviceNamespace,
+      core.DiagnosticsService.serviceNamespace,
     )) {
       try {
-        final Object? diagnosticsResult = await extension.callMethod(_runDiagnosticsMethod);
+        final Object? diagnosticsResult = await extension.callMethod(
+          core.DiagnosticsService.runDiagnosticsMethod,
+        );
         if (diagnosticsResult case final List<Object?> items) {
           for (final item in items) {
             if (item case final Map<Object?, Object?> rawMap) {
