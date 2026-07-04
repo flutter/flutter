@@ -7,14 +7,8 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for executing custom diagnostic checks that
 /// can be reported via `flutter doctor`.
 abstract base class DiagnosticsService extends ToolExtensionService {
-  static const String serviceNamespace = 'diagnostics';
-  static const String runDiagnosticsMethod = 'diagnostics.runDiagnostics';
-  static const String statusInstalled = 'installed';
-  static const String statusMissing = 'missing';
-  static const String statusError = 'error';
-
   @override
-  String get namespace => serviceNamespace;
+  String get namespace => 'diagnostics';
 
   /// Runs all diagnostic checks and returns the results.
   Future<List<ValidationResult>> runDiagnostics();
@@ -94,7 +88,6 @@ class ValidationMessage {
   /// Optional PII-stripped version of the message.
   final String piiStrippedMessage;
 
-  /// Convert the ValidationMessage to a JSON-compatible map.
   Map<String, Object?> toMap() => <String, Object?>{
     'type': type.name,
     'contextUrl': contextUrl,
@@ -102,7 +95,7 @@ class ValidationMessage {
     'piiStrippedMessage': piiStrippedMessage,
   };
 
-  static List<ValidationMessage> listFromJson(Object? rpcResult) => [
+  static List<ValidationMessage> listFromJson(Object? rpcResult) => <ValidationMessage>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
         if (item case final Map<Object?, Object?> m)
@@ -123,14 +116,6 @@ class ValidationResult {
     return ValidationResult(type, messages, statusInfo: statusInfo);
   }
 
-  /// Parse a list of [ValidationResult] from an RPC response.
-  static List<ValidationResult> listFromJson(Object? rpcResult) => [
-    if (rpcResult case final List<Object?> l)
-      for (final item in l)
-        if (item case final Map<Object?, Object?> m)
-          ValidationResult.fromJson(m.cast<String, Object?>()),
-  ];
-
   /// The status category of validation.
   final ValidationType type;
 
@@ -140,10 +125,16 @@ class ValidationResult {
   /// The messages logged during validation.
   final List<ValidationMessage> messages;
 
-  /// Convert the ValidationResult to a JSON-compatible map.
   Map<String, Object?> toMap() => <String, Object?>{
     'type': type.name,
     'statusInfo': statusInfo,
     'messages': messages.map((ValidationMessage m) => m.toMap()).toList(),
   };
+
+  static List<ValidationResult> listFromJson(Object? rpcResult) => <ValidationResult>[
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ValidationResult.fromJson(m.cast<String, Object?>()),
+  ];
 }

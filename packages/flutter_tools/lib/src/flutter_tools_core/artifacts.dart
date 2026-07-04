@@ -7,12 +7,8 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for acquiring the necessary files to develop
 /// and deploy Flutter applications for a custom target platform.
 abstract base class ArtifactService extends ToolExtensionService {
-  static const String serviceNamespace = 'artifacts';
-  static const String getArtifactsMethod = 'artifacts.getArtifacts';
-  static const String downloadMethod = 'artifacts.download';
-
   @override
-  String get namespace => serviceNamespace;
+  String get namespace => 'artifacts';
 
   /// The set of artifacts provided by the extension.
   Set<ArtifactDependency> get artifacts;
@@ -47,7 +43,7 @@ abstract base class ArtifactService extends ToolExtensionService {
     }) {
       final Set<ArtifactDependency> deps;
       try {
-        deps = ArtifactDependency.setFromJson(artifactsJsonObj);
+        deps = ArtifactDependency.listFromJson(artifactsJsonObj).toSet();
       } on Object catch (e, stackTrace) {
         return <String, Object?>{
           'success': false,
@@ -72,7 +68,6 @@ abstract base class ArtifactService extends ToolExtensionService {
         };
       }
     }
-
     return <String, Object?>{
       'success': false,
       'errorMessage':
@@ -102,16 +97,6 @@ class ArtifactDependency {
     );
   }
 
-  /// Parse a set of [ArtifactDependency] from an RPC response.
-  static Set<ArtifactDependency> setFromJson(Object? rpcResult) => listFromJson(rpcResult).toSet();
-
-  static List<ArtifactDependency> listFromJson(Object? rpcResult) => [
-    if (rpcResult case final List<Object?> l)
-      for (final item in l)
-        if (item case final Map<Object?, Object?> m)
-          ArtifactDependency.fromJson(m.cast<String, Object?>()),
-  ];
-
   /// The name of the required artifact (e.g., 'gen_snapshot').
   final String name;
 
@@ -127,7 +112,6 @@ class ArtifactDependency {
   /// A mapping of host/target keys to SHA-256 hashes for binary validation.
   final Map<String, String> sha256Checksums;
 
-  /// Convert the ArtifactDependency to a JSON-compatible map.
   Map<String, Object?> toMap() => <String, Object?>{
     'hostPlatform': hostPlatform,
     'name': name,
@@ -135,11 +119,11 @@ class ArtifactDependency {
     'targetArchitecture': targetArchitecture,
     'targetPlatform': targetPlatform,
   };
-}
 
-/// Standard core artifact names shared across host and extension protocol boundaries.
-abstract final class CoreArtifactNames {
-  static const String linuxDesktopPath = 'linuxDesktopPath';
-  static const String linuxHeaders = 'linuxHeaders';
-  static const String icuData = 'icuData';
+  static List<ArtifactDependency> listFromJson(Object? rpcResult) => <ArtifactDependency>[
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m)
+          ArtifactDependency.fromJson(m.cast<String, Object?>()),
+  ];
 }

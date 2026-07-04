@@ -10,14 +10,15 @@ import 'package:file/local.dart';
 import 'package:process/process.dart';
 
 import '../../../flutter_tools_extension.dart';
+import '../../flutter_tools_core/device.dart';
 
-/// Prototype implementation of Device to represent the Linux desktop target.
+/// Represents a Linux desktop device managed by the extension.
 class LinuxExtensionDevice extends Device {
   LinuxExtensionDevice({
-    required this.fileSystem,
     required this.id,
     required this.name,
-    required this.processManager,
+    this.fileSystem = const LocalFileSystem(),
+    this.processManager = const LocalProcessManager(),
   });
 
   final FileSystem fileSystem;
@@ -33,19 +34,13 @@ class LinuxExtensionDevice extends Device {
   final String category = DeviceCategory.desktop;
 
   @override
-  String get platform => 'linux-x64';
-
-  @override
-  String get buildTarget => 'assemble_linux_app';
-
-  @override
   bool get isEmulator => false;
 
   @override
-  Future<bool> isSupported() async => true;
+  String get platform => 'linux';
 
   @override
-  bool isRunnable() => true;
+  String get buildTarget => 'assemble_linux_app';
 
   @override
   bool isSupportedForProject(Uri projectRoot) {
@@ -114,9 +109,9 @@ final class LinuxDeviceService extends DeviceService {
   Future<List<Device>> discoverDevices() async {
     return <Device>[
       LinuxExtensionDevice(
-        fileSystem: fileSystem,
         id: 'linux-proto-1',
         name: 'Linux Desktop Target',
+        fileSystem: fileSystem,
         processManager: processManager,
       ),
     ];

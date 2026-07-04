@@ -9,29 +9,30 @@ import 'package:file/local.dart';
 import 'package:process/process.dart';
 
 import '../../../flutter_tools_extension.dart';
+import '../../artifacts.dart';
 
 const _cmakeCacheFileName = 'CMakeCache.txt';
 const _cmakeFilesDirectoryName = 'CMakeFiles';
 const _expectedNinjaGeneratorLine = 'CMAKE_GENERATOR:INTERNAL=Ninja';
 
 final List<ArtifactDependency> _kLinuxArtifactDependencies = <ArtifactDependency>[
-  const ArtifactDependency(
+  ArtifactDependency(
     hostPlatform: 'linux-x64',
-    name: CoreArtifactNames.linuxDesktopPath,
+    name: Artifact.linuxDesktopPath.name,
     sha256Checksums: <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
   ),
-  const ArtifactDependency(
+  ArtifactDependency(
     hostPlatform: 'linux-x64',
-    name: CoreArtifactNames.linuxHeaders,
+    name: Artifact.linuxHeaders.name,
     sha256Checksums: <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
   ),
-  const ArtifactDependency(
+  ArtifactDependency(
     hostPlatform: 'linux-x64',
-    name: CoreArtifactNames.icuData,
+    name: Artifact.icuData.name,
     sha256Checksums: <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
@@ -113,7 +114,6 @@ base class LinuxAssembleTarget extends Target {
 
     // 1. cmake -G Ninja -DCMAKE_BUILD_TYPE=<buildType> -DFLUTTER_TARGET_PLATFORM=<targetPlatform> -S <project>/linux -B <output>
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
-
     final cmakeConfigureCmd = <String>[
       'cmake',
       '-G',
@@ -130,10 +130,16 @@ base class LinuxAssembleTarget extends Target {
       environment: env.defines,
     );
     if (configureResult.exitCode != 0) {
-      final Directory cmakeFilesDir = _fileSystem.directory(
-        _fileSystem.path.join(outputPath, _cmakeFilesDirectoryName),
-      );
-      final bool cacheFilesExist = cacheFile.existsSync() || cmakeFilesDir.existsSync();
+      var cacheFilesExist = false;
+      try {
+        final File cf = _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName));
+        final Directory cmakeFilesDir = _fileSystem.directory(
+          _fileSystem.path.join(outputPath, _cmakeFilesDirectoryName),
+        );
+        cacheFilesExist = cf.existsSync() || cmakeFilesDir.existsSync();
+      } on FileSystemException {
+        cacheFilesExist = false;
+      }
       if (cacheFilesExist) {
         _cleanCMakeCache(outputPath);
         configureResult = await _processManager.run(cmakeConfigureCmd, environment: env.defines);
@@ -149,7 +155,6 @@ base class LinuxAssembleTarget extends Target {
 
     // 2. cmake --build <output>
     final cmakeBuildCmd = <String>['cmake', '--build', outputPath];
-
     final ProcessResult buildResult = await _processManager.run(
       cmakeBuildCmd,
       environment: env.defines,
@@ -173,23 +178,9 @@ base class LinuxAssembleTarget extends Target {
         : 'app';
 
     final String executablePath = _fileSystem.path.join(outputPath, 'bundle', appName);
-
     return <String, Object?>{
       'executablePath': _fileSystem.file(executablePath).absolute.uri.toString(),
     };
-  }
-
-  void _cleanCMakeCache(String outputPath) {
-    for (final entity in <FileSystemEntity>[
-      _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName)),
-      _fileSystem.directory(_fileSystem.path.join(outputPath, _cmakeFilesDirectoryName)),
-    ]) {
-      try {
-        entity.deleteSync(recursive: true);
-      } on FileSystemException {
-        // Ignore exception if entity does not exist or cannot be deleted.
-      }
-    }
   }
 
   bool _isNinjaGenerator(File cacheFile) {
@@ -197,6 +188,21 @@ base class LinuxAssembleTarget extends Target {
       return cacheFile.readAsStringSync().contains(_expectedNinjaGeneratorLine);
     } on FileSystemException {
       return false;
+    }
+  }
+
+  void _cleanCMakeCache(String outputPath) {
+    try {
+      _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName)).deleteSync();
+    } on FileSystemException {
+      // Safely ignore if cache file does not exist or cannot be deleted.
+    }
+    try {
+      _fileSystem
+          .directory(_fileSystem.path.join(outputPath, _cmakeFilesDirectoryName))
+          .deleteSync(recursive: true);
+    } on FileSystemException {
+      // Safely ignore if cache directory does not exist or cannot be deleted.
     }
   }
 }
@@ -225,12 +231,10 @@ base class LinuxArtifactService extends ArtifactService {
     if (!cacheDir.existsSync()) {
       cacheDir.createSync(recursive: true);
     }
-    for (final dep in artifacts) {
-      final File artifactFile = cacheDir.childFile(dep.name);
+    for (final artifact in artifacts) {
+      final File artifactFile = cacheDir.childFile(artifact.name);
       if (!artifactFile.existsSync()) {
-        artifactFile.writeAsStringSync(
-          'Simulated artifact content for ${dep.name} ($hostPlatform -> $targetPlatform)',
-        );
+        artifactFile.writeAsStringSync('Mock binary content for ${artifact.name}');
       }
     }
   }

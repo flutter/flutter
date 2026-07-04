@@ -19,7 +19,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../flutter_plugins.dart';
 import '../flutter_tools_core/build.dart' as core;
-import '../flutter_tools_core/device.dart' as core;
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
@@ -28,11 +27,15 @@ import 'extension_discovery.dart';
 /// A [DeviceDiscovery] implementation that delegates discovery to active tool extensions.
 class ExtensionDeviceDiscovery extends DeviceDiscovery {
   ExtensionDeviceDiscovery(ToolExtensionManager extensionManager, {required Logger logger})
-    : _discoveryHelper = ExtensionDiscoveryHelper(
-        extensionManager: extensionManager,
+    : _extensionManager = extensionManager,
+      _logger = logger,
+      _discoveryHelper = ExtensionDiscoveryHelper(
         logger: logger,
+        extensionManager: extensionManager,
       );
 
+  final ToolExtensionManager _extensionManager;
+  final Logger _logger;
   final ExtensionDiscoveryHelper _discoveryHelper;
 
   /// Whether the host platform enables tool extension device discovery.
@@ -58,39 +61,41 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
   }) async {
     final discoveredDevices = <Device>[];
 
-    final List<ToolExtension> extensions = await _discoveryHelper.getExtensionsSupporting(
-      core.DeviceService.serviceNamespace,
-    );
+    final List<ToolExtension> extensions = await _discoveryHelper.getExtensionsSupporting('device');
 
     for (final extension in extensions) {
       try {
         final Object? devicesResult = await extension
-            .callMethod(core.DeviceService.discoverDevicesMethod)
+            .callMethod('device.discoverDevices')
             .timeout(const Duration(seconds: 5));
-        for (final core.ExtensionDeviceInfo info in core.ExtensionDeviceInfo.listFromJson(
-          devicesResult,
-        )) {
-          DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
-          if (info.connectionInterface != null) {
-            try {
-              connectionInterface = getDeviceConnectionInterfaceForName(info.connectionInterface!);
-            } on Object {
-              connectionInterface = DeviceConnectionInterface.attached;
+        if (devicesResult is List) {
+          for (final Object? item in devicesResult) {
+            if (item is Map) {
+              final Map<String, Object?> deviceData = item.cast<String, Object?>();
+              final interfaceName = deviceData['connectionInterface'] as String?;
+              DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+              if (interfaceName != null) {
+                try {
+                  connectionInterface = getDeviceConnectionInterfaceForName(interfaceName);
+                } on Object {
+                  connectionInterface = DeviceConnectionInterface.attached;
+                }
+              }
+              discoveredDevices.add(
+                ExtensionBackedDevice(
+                  deviceData['id']! as String,
+                  category: _parseCategory(deviceData['category'] as String?),
+                  extension: extension,
+                  logger: _logger,
+                  name: deviceData['name']! as String,
+                  buildTargetName: deviceData['buildTarget'] as String?,
+                  connectionInterface: connectionInterface,
+                  extensionManager: _extensionManager,
+                  platformName: deviceData['platform'] as String?,
+                ),
+              );
             }
           }
-          discoveredDevices.add(
-            ExtensionBackedDevice(
-              info.id,
-              category: _parseCategory(info.category),
-              extension: extension,
-              logger: _discoveryHelper.logger,
-              name: info.name,
-              buildTargetName: info.buildTarget,
-              connectionInterface: connectionInterface,
-              extensionManager: _discoveryHelper.extensionManager,
-              platformName: info.platform,
-            ),
-          );
         }
       } on Object {
         // Ignore failures from individual extensions.
@@ -104,8 +109,8 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
   }
 
   Category _parseCategory(String? category) => switch (category) {
-    core.DeviceCategory.mobile => Category.mobile,
-    core.DeviceCategory.web => Category.web,
+    'mobile' => Category.mobile,
+    'web' => Category.web,
     _ => Category.desktop,
   };
 }
@@ -122,22 +127,22 @@ class ExtensionBackedDevice extends Device {
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.extensionManager,
     this.platformName,
-  }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         extensionManager: extensionManager ?? ToolExtensionManager(),
-         logger: logger,
-       ),
-       _extension = extension,
+  }) : _extension = extension,
        _logger = logger,
+       _discoveryHelper = ExtensionDiscoveryHelper(
+         logger: logger,
+         extensionManager: extensionManager ?? ToolExtensionManager(),
+       ),
        super(platformType: PlatformType.custom, ephemeral: true) {
     _logReader = ExtensionDeviceLogReader(
       logLines: _extension.notifications.expand(
         (Notification n) => switch (n) {
           Notification(
             method: 'device.log',
-            params: {'deviceId': final String deviceId, 'message': final String message},
+            params: {'deviceId': final String dId, 'message': final String msg},
           )
-              when deviceId == id =>
-            <String>[message],
+              when dId == id =>
+            <String>[msg],
           _ => const <String>[],
         },
       ),
@@ -145,10 +150,10 @@ class ExtensionBackedDevice extends Device {
     );
   }
 
-  final ExtensionDiscoveryHelper _discoveryHelper;
   final ToolExtension _extension;
   final Logger _logger;
   final ToolExtensionManager? extensionManager;
+  final ExtensionDiscoveryHelper _discoveryHelper;
 
   final String? platformName;
   final String? buildTargetName;
@@ -194,9 +199,9 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<TargetPlatform> get targetPlatform async {
-    if (platformName != null) {
+    if (platformName case final String name) {
       try {
-        return TargetPlatform.fromName(platformName!);
+        return TargetPlatform.fromName(name);
       } on Exception {
         // Fallback to category switch on parsing failure
       }
@@ -204,7 +209,7 @@ class ExtensionBackedDevice extends Device {
     return switch (category) {
       Category.mobile => TargetPlatform.android,
       Category.web => TargetPlatform.web_javascript,
-      _ => TargetPlatform.linux_x64,
+      Category.desktop || null => TargetPlatform.linux_x64,
     };
   }
 
@@ -216,7 +221,7 @@ class ExtensionBackedDevice extends Device {
     try {
       await _extension
           .callMethod(
-            core.DeviceService.installAppMethod,
+            'device.installApp',
             params: <String, Object?>{'deviceId': id, 'appBundlePath': app.name},
           )
           .timeout(const Duration(seconds: 10));
@@ -348,19 +353,17 @@ class ExtensionBackedDevice extends Device {
       try {
         final Object? buildResult = await _extension
             .callMethod(
-              core.BuildService.buildMethod,
+              'build.build',
               params: <String, Object?>{'targetName': buildTarget, 'environment': buildEnv.toMap()},
             )
             .timeout(const Duration(seconds: 60));
 
-        if (buildResult case final Map<Object?, Object?> rawResultMap) {
-          final buildResult = core.BuildResult.fromJson(rawResultMap.cast<String, Object?>());
-          if (!buildResult.success) {
-            throwToolExit(
-              'Build compilation failed: ${buildResult.errorMessage ?? "Unknown error"}',
-            );
+        if (buildResult case final Map<Object?, Object?> rawMap) {
+          final result = core.BuildResult.fromJson(rawMap.cast<String, Object?>());
+          if (!result.success) {
+            throwToolExit('Build compilation failed: ${result.errorMessage ?? "Unknown error"}');
           }
-          buildExecutablePath = buildResult.executablePath;
+          buildExecutablePath = result.executablePath;
         } else {
           throwToolExit('Build compilation failed: invalid response format.');
         }
@@ -395,7 +398,7 @@ class ExtensionBackedDevice extends Device {
     try {
       await _extension
           .callMethod(
-            core.DeviceService.launchAppMethod,
+            'device.launchApp',
             params: <String, Object?>{
               'deviceId': id,
               'appBundlePath': executablePath ?? package?.name,
@@ -405,10 +408,7 @@ class ExtensionBackedDevice extends Device {
           .timeout(const Duration(seconds: 5));
 
       final Object? uriString = await _extension
-          .callMethod(
-            core.DeviceService.getVmServiceUriMethod,
-            params: <String, Object?>{'deviceId': id},
-          )
+          .callMethod('device.getVmServiceUri', params: <String, Object?>{'deviceId': id})
           .timeout(const Duration(seconds: 5));
       if (uriString is! String) {
         return LaunchResult.failed();
@@ -424,7 +424,7 @@ class ExtensionBackedDevice extends Device {
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     try {
       await _extension
-          .callMethod(core.DeviceService.stopAppMethod, params: <String, Object?>{'deviceId': id})
+          .callMethod('device.stopApp', params: <String, Object?>{'deviceId': id})
           .timeout(const Duration(seconds: 5));
       return true;
     } on Exception {
@@ -447,16 +447,13 @@ class ExtensionBackedDevice extends Device {
 
 /// A [DeviceLogReader] implementation that listens to notifications from the extension.
 class ExtensionDeviceLogReader extends DeviceLogReader {
-  ExtensionDeviceLogReader({required Stream<String> logLines, required this.name})
-    : _logLines = logLines;
+  ExtensionDeviceLogReader({required this.logLines, required this.name});
+
+  @override
+  final Stream<String> logLines;
 
   @override
   final String name;
-
-  final Stream<String> _logLines;
-
-  @override
-  Stream<String> get logLines => _logLines;
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {}

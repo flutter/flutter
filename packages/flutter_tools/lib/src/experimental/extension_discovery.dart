@@ -28,12 +28,6 @@ class ExtensionDiscoveryHelper {
   final Logger _logger;
   final Platform? _platform;
 
-  /// The logger used by this helper.
-  Logger get logger => _logger;
-
-  /// The extension manager used by this helper.
-  ToolExtensionManager? get extensionManager => _extensionManager;
-
   /// Environment variable key to enable tool extension prototype features.
   static const String envPrototypeFlag = 'FLUTTER_TOOL_EXTENSION_PROTOTYPE';
 
@@ -41,6 +35,14 @@ class ExtensionDiscoveryHelper {
   bool get isPrototypeEnabled => _platform != null
       ? _platform.environment[envPrototypeFlag] == 'true'
       : globals.isToolExtensionPrototypeEnabled;
+
+  bool get _isPrototypeEnabled => isPrototypeEnabled;
+
+  /// The [Logger] used by this helper.
+  Logger get logger => _logger;
+
+  /// The [ToolExtensionManager] used by this helper.
+  ToolExtensionManager? get extensionManager => _extensionManager;
 
   /// Query the capabilities of a [ToolExtension] with a timeout.
   Future<ToolExtensionCapabilities?> getExtensionCapabilities(
@@ -82,7 +84,7 @@ class ExtensionDiscoveryHelper {
     }
 
     if (extensionManager.extensions.isEmpty) {
-      if (!isPrototypeEnabled) {
+      if (!_isPrototypeEnabled) {
         return const <ToolExtension>[];
       }
       try {
@@ -110,24 +112,21 @@ class ExtensionDiscoveryHelper {
     return matchingExtensions;
   }
 
-  /// Query extensions supporting [serviceNamespace] and invoke [method], decoding results with [decoder].
+  /// Discover active or newly spawned tool extensions that support [serviceNamespace],
+  /// invoke [method] on each, and decode results using [decoder].
   Future<List<T>> getListFromExtensions<T>(
     String serviceNamespace,
     String method,
     List<T> Function(Object? rpcResult) decoder, {
     Duration timeout = const Duration(seconds: 5),
   }) async {
-    if (!isPrototypeEnabled) {
-      return <T>[];
-    }
-    final List<ToolExtension> matchingExtensions = await getExtensionsSupporting(serviceNamespace);
     final results = <T>[];
-    for (final extension in matchingExtensions) {
+    for (final ToolExtension extension in await getExtensionsSupporting(serviceNamespace)) {
       try {
         final Object? rpcResult = await extension.callMethod(method).timeout(timeout);
         results.addAll(decoder(rpcResult));
       } on Object catch (e) {
-        _logger.printError('Failed to get $method from extension: $e');
+        _logger.printError('Failed to get results from extension for $method: $e');
       }
     }
     return results;

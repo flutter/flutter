@@ -19,6 +19,12 @@ abstract class Device {
   String get platform;
   String get buildTarget;
 
+  static List<Map<String, Object?>> listFromJson(Object? rpcResult) => <Map<String, Object?>>[
+    if (rpcResult case final List<Object?> l)
+      for (final item in l)
+        if (item case final Map<Object?, Object?> m) m.cast<String, Object?>(),
+  ];
+
   Future<bool> isSupported() async => true;
   bool isRunnable() => true;
   bool isSupportedForProject(Uri projectRoot) => true;
@@ -28,6 +34,13 @@ abstract class Device {
   Stream<String> getLogReader();
   Future<Uri> getVmServiceUri();
   Future<void> stopApp();
+}
+
+/// Standard device category string constants.
+abstract final class DeviceCategory {
+  static const String desktop = 'desktop';
+  static const String mobile = 'mobile';
+  static const String web = 'web';
 }
 
 /// Abstract interface for forwarding ports from the host to the device.
@@ -144,29 +157,15 @@ class ProcessLaunchHelper {
   }
 }
 
-abstract final class DeviceCategory {
-  static const String desktop = 'desktop';
-  static const String mobile = 'mobile';
-  static const String web = 'web';
-}
-
 /// Abstract representation of the Device Service in the extensibility package.
 abstract base class DeviceService extends ToolExtensionService {
   DeviceService({required this.onNotification});
-
-  static const String serviceNamespace = 'device';
-  static const String discoverDevicesMethod = 'device.discoverDevices';
-  static const String installAppMethod = 'device.installApp';
-  static const String launchAppMethod = 'device.launchApp';
-  static const String getVmServiceUriMethod = 'device.getVmServiceUri';
-  static const String stopAppMethod = 'device.stopApp';
-  static const String logNotification = 'device.log';
 
   /// Callback to forward notifications back to the host tool.
   final void Function(String method, Map<String, Object?> params) onNotification;
 
   @override
-  String get namespace => serviceNamespace;
+  String get namespace => 'device';
 
   /// The active devices managed by this service.
   final Map<String, Device> _devices = <String, Device>{};
@@ -190,6 +189,15 @@ abstract base class DeviceService extends ToolExtensionService {
     };
   }
 
+  Device _getDevice(Map<String, Object?> params) {
+    final id = params['deviceId']! as String;
+    final Device? device = _devices[id];
+    if (device == null) {
+      throw StateError('Device $id not found.');
+    }
+    return device;
+  }
+
   Future<List<Map<String, Object?>>> _discoverDevicesRpc(Map<String, Object?> params) async {
     final List<Device> devices = await discoverDevices();
     for (final StreamSubscription<String> sub in _logSubscriptions.values) {
@@ -201,30 +209,20 @@ abstract base class DeviceService extends ToolExtensionService {
     for (final device in devices) {
       _devices[device.id] = device;
       _logSubscriptions[device.id] = device.getLogReader().listen((String line) {
-        onNotification(logNotification, <String, Object?>{'deviceId': device.id, 'message': line});
+        onNotification('device.log', <String, Object?>{'deviceId': device.id, 'message': line});
       });
-      final info = ExtensionDeviceInfo(
-        buildTarget: device.buildTarget,
-        category: device.category,
-        id: device.id,
-        isEmulator: device.isEmulator,
-        isRunnable: device.isRunnable(),
-        isSupported: await device.isSupported(),
-        name: device.name,
-        platform: device.platform,
-      );
-      result.add(info.toMap());
+      result.add(<String, Object?>{
+        'id': device.id,
+        'name': device.name,
+        'category': device.category,
+        'isEmulator': device.isEmulator,
+        'platform': device.platform,
+        'buildTarget': device.buildTarget,
+        'isSupported': await device.isSupported(),
+        'isRunnable': device.isRunnable(),
+      });
     }
     return result;
-  }
-
-  Device _getDevice(Map<String, Object?> params) {
-    final id = params['deviceId']! as String;
-    final Device? device = _devices[id];
-    if (device == null) {
-      throw StateError('Device $id not found.');
-    }
-    return device;
   }
 
   Future<void> _installAppRpc(Map<String, Object?> params) async {
@@ -259,62 +257,4 @@ abstract base class DeviceService extends ToolExtensionService {
     _logSubscriptions.clear();
     _devices.clear();
   }
-}
-
-/// Serializable data transfer object representing device discovery metadata over GEP RPC.
-final class ExtensionDeviceInfo {
-  ExtensionDeviceInfo({
-    required this.buildTarget,
-    required this.category,
-    required this.id,
-    required this.isEmulator,
-    required this.isRunnable,
-    required this.isSupported,
-    required this.name,
-    required this.platform,
-    this.connectionInterface,
-  });
-
-  factory ExtensionDeviceInfo.fromJson(Map<String, Object?> json) {
-    return ExtensionDeviceInfo(
-      buildTarget: json['buildTarget']! as String,
-      category: json['category']! as String,
-      id: json['id']! as String,
-      isEmulator: json['isEmulator']! as bool,
-      isRunnable: json['isRunnable']! as bool,
-      isSupported: json['isSupported']! as bool,
-      name: json['name']! as String,
-      platform: json['platform']! as String,
-      connectionInterface: json['connectionInterface'] as String?,
-    );
-  }
-
-  final String id;
-  final String name;
-  final String category;
-  final bool isEmulator;
-  final String platform;
-  final String buildTarget;
-  final bool isSupported;
-  final bool isRunnable;
-  final String? connectionInterface;
-
-  Map<String, Object?> toMap() => <String, Object?>{
-    'id': id,
-    'name': name,
-    'category': category,
-    'isEmulator': isEmulator,
-    'platform': platform,
-    'buildTarget': buildTarget,
-    'isSupported': isSupported,
-    'isRunnable': isRunnable,
-    if (connectionInterface != null) 'connectionInterface': connectionInterface,
-  };
-
-  static List<ExtensionDeviceInfo> listFromJson(Object? rpcResult) => [
-    if (rpcResult case final List<Object?> l)
-      for (final item in l)
-        if (item case final Map<Object?, Object?> m)
-          ExtensionDeviceInfo.fromJson(m.cast<String, Object?>()),
-  ];
 }

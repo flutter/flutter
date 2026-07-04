@@ -7,12 +7,8 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for managing custom configuration options for
 /// an extension.
 abstract base class ConfigurationService extends ToolExtensionService {
-  static const String serviceNamespace = 'config';
-  static const String getOptionsMethod = 'config.getOptions';
-  static const String validateMethod = 'config.validate';
-
   @override
-  String get namespace => serviceNamespace;
+  String get namespace => 'config';
 
   /// The set of configuration options handled by this extension.
   List<ConfigurationOption> get options;
@@ -48,14 +44,6 @@ abstract base class ConfigurationOption {
   /// Create a new [ConfigurationOption].
   const ConfigurationOption();
 
-  /// Parse a list of [ConfigurationOption] from an RPC response.
-  static List<ConfigurationOption> listFromJson(Object? rpcResult) => [
-    if (rpcResult case final List<Object?> l)
-      for (final item in l)
-        if (item case final Map<Object?, Object?> m)
-          ExtensionConfigurationOption.fromJson(m.cast<String, Object?>()),
-  ];
-
   /// The name of the option.
   String get name;
 
@@ -65,7 +53,6 @@ abstract base class ConfigurationOption {
   /// Checks if [value] is valid for [option].
   OptionValidationResult validate(String option, Object? value);
 
-  /// Convert the [ConfigurationOption] to a JSON-compatible map.
   Map<String, Object?> toMap() => <String, Object?>{'name': name, 'description': description};
 }
 
@@ -92,50 +79,15 @@ final class OptionValidationResult {
   /// The reason why validation failed, if applicable.
   final String? failureReason;
 
-  /// Convert the [OptionValidationResult] to a JSON-compatible map.
   Map<String, Object?> toMap() => <String, Object?>{
     'success': success,
     if (failureReason != null) 'failureReason': failureReason,
   };
 
-  static List<OptionValidationResult> listFromJson(Object? rpcResult) => [
+  static List<OptionValidationResult> listFromJson(Object? rpcResult) => <OptionValidationResult>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
         if (item case final Map<Object?, Object?> m)
           OptionValidationResult.fromJson(m.cast<String, Object?>()),
-  ];
-}
-
-/// A concrete representation of a configuration option received over GEP RPC.
-final class ExtensionConfigurationOption extends ConfigurationOption {
-  /// Create a new instance of [ExtensionConfigurationOption].
-  ExtensionConfigurationOption({required this.description, required this.name});
-
-  /// Parse an option from a JSON map representation.
-  factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
-    if (json case {'name': final String name, 'description': final String description}) {
-      return ExtensionConfigurationOption(description: description, name: name);
-    }
-    throw FormatException('Invalid configuration option format: $json');
-  }
-
-  @override
-  final String name;
-
-  @override
-  final String description;
-
-  @override
-  OptionValidationResult validate(String option, Object? value) {
-    throw UnimplementedError(
-      'ExtensionConfigurationOption.validate should not be called directly on host representation.',
-    );
-  }
-
-  static List<ExtensionConfigurationOption> listFromJson(Object? rpcResult) => [
-    if (rpcResult case final List<Object?> l)
-      for (final item in l)
-        if (item case final Map<Object?, Object?> m)
-          ExtensionConfigurationOption.fromJson(m.cast<String, Object?>()),
   ];
 }

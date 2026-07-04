@@ -6,60 +6,66 @@ import 'dart:async';
 
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../doctor_validator.dart'
-    show
-        DoctorValidator,
-        ValidationMessage,
-        ValidationMessageType,
-        ValidationResult,
-        ValidationType;
+import '../doctor_validator.dart' as host_doctor;
 import '../flutter_tools_core/diagnostics.dart' as core;
 import '../generic_extension_protocol/manager.dart';
 import '../globals.dart' as globals;
 import 'extension_discovery.dart';
 
 /// A host-side doctor validator that delegates diagnostics to tool extensions.
-class ExtensionDoctorValidator extends DoctorValidator {
+class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
   ExtensionDoctorValidator(
     ToolExtensionManager extensionManager, {
     Logger? logger,
     Platform? platform,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         extensionManager: extensionManager,
          logger: logger ?? globals.logger,
+         extensionManager: extensionManager,
          platform: platform ?? globals.platform,
        ),
        super('Extension-backed Diagnostics');
 
   final ExtensionDiscoveryHelper _discoveryHelper;
 
+  static const String _serviceNamespace = 'diagnostics';
+  static const String _runDiagnosticsMethod = 'diagnostics.runDiagnostics';
+
   @override
-  Future<ValidationResult> validateImpl() async {
+  Future<host_doctor.ValidationResult> validateImpl() async {
     if (!_discoveryHelper.isPrototypeEnabled) {
-      return ValidationResult(ValidationType.notAvailable, const <ValidationMessage>[
-        ValidationMessage('Tool extension prototype is not enabled.'),
-      ], statusInfo: 'disabled');
+      return host_doctor.ValidationResult(
+        host_doctor.ValidationType.notAvailable,
+        const <host_doctor.ValidationMessage>[
+          host_doctor.ValidationMessage('Tool extension prototype is not enabled.'),
+        ],
+        statusInfo: 'disabled',
+      );
     }
 
-    final subResults = <ValidationResult>[];
+    final subResults = <host_doctor.ValidationResult>[];
 
-    for (final ToolExtension toolExtension in await _discoveryHelper.getExtensionsSupporting(
-      core.DiagnosticsService.serviceNamespace,
+    for (final ToolExtension extension in await _discoveryHelper.getExtensionsSupporting(
+      _serviceNamespace,
     )) {
       try {
-        final Object? diagnosticsResult = await toolExtension.callMethod(
-          core.DiagnosticsService.runDiagnosticsMethod,
-        );
-        for (final core.ValidationResult coreResult in core.ValidationResult.listFromJson(
-          diagnosticsResult,
-        )) {
-          subResults.add(_mapCoreResultToHost(coreResult));
+        final Object? diagnosticsResult = await extension.callMethod(_runDiagnosticsMethod);
+        if (diagnosticsResult case final List<Object?> items) {
+          for (final item in items) {
+            if (item case final Map<Object?, Object?> rawMap) {
+              final coreResult = core.ValidationResult.fromJson(rawMap.cast<String, Object?>());
+              subResults.add(_mapCoreResultToHost(coreResult));
+            }
+          }
         }
       } on Object catch (e) {
         subResults.add(
-          ValidationResult(ValidationType.missing, <ValidationMessage>[
-            ValidationMessage.error('Diagnostics extension call failed: $e'),
-          ], statusInfo: 'error'),
+          host_doctor.ValidationResult(
+            host_doctor.ValidationType.missing,
+            <host_doctor.ValidationMessage>[
+              host_doctor.ValidationMessage.error('Diagnostics extension call failed: $e'),
+            ],
+            statusInfo: 'error',
+          ),
         );
       }
     }
@@ -67,20 +73,20 @@ class ExtensionDoctorValidator extends DoctorValidator {
     return _mergeValidationResults(subResults);
   }
 
-  ValidationResult _mapCoreResultToHost(core.ValidationResult coreResult) {
-    final List<ValidationMessage> hostMessages = coreResult.messages.map((
+  host_doctor.ValidationResult _mapCoreResultToHost(core.ValidationResult coreResult) {
+    final List<host_doctor.ValidationMessage> hostMessages = coreResult.messages.map((
       core.ValidationMessage msg,
     ) {
       return switch (msg.type) {
-        ValidationMessageType.error => ValidationMessage.error(
+        host_doctor.ValidationMessageType.error => host_doctor.ValidationMessage.error(
           msg.message,
           piiStrippedMessage: msg.piiStrippedMessage,
         ),
-        ValidationMessageType.hint => ValidationMessage.hint(
+        host_doctor.ValidationMessageType.hint => host_doctor.ValidationMessage.hint(
           msg.message,
           piiStrippedMessage: msg.piiStrippedMessage,
         ),
-        ValidationMessageType.information => ValidationMessage(
+        host_doctor.ValidationMessageType.information => host_doctor.ValidationMessage(
           msg.message,
           contextUrl: msg.contextUrl,
           piiStrippedMessage: msg.piiStrippedMessage,
@@ -88,21 +94,25 @@ class ExtensionDoctorValidator extends DoctorValidator {
       };
     }).toList();
 
-    return ValidationResult(coreResult.type, hostMessages, statusInfo: coreResult.statusInfo);
+    return host_doctor.ValidationResult(
+      coreResult.type,
+      hostMessages,
+      statusInfo: coreResult.statusInfo,
+    );
   }
 
-  ValidationResult _mergeValidationResults(List<ValidationResult> results) {
+  host_doctor.ValidationResult _mergeValidationResults(List<host_doctor.ValidationResult> results) {
     if (results.isEmpty) {
-      return ValidationResult(
-        ValidationType.success,
-        const <ValidationMessage>[],
+      return host_doctor.ValidationResult(
+        host_doctor.ValidationType.success,
+        const <host_doctor.ValidationMessage>[],
         statusInfo: 'no checks executed',
       );
     }
 
-    final mergedMessages = <ValidationMessage>[];
+    final mergedMessages = <host_doctor.ValidationMessage>[];
     String? statusInfo;
-    final types = <ValidationType>{};
+    final types = <host_doctor.ValidationType>{};
 
     for (final result in results) {
       statusInfo ??= result.statusInfo;
@@ -111,22 +121,25 @@ class ExtensionDoctorValidator extends DoctorValidator {
     }
 
     if (types.length > 1) {
-      types.remove(ValidationType.notAvailable);
+      types.remove(host_doctor.ValidationType.notAvailable);
     }
 
-    final ValidationType mergedType = switch ((
-      types.contains(ValidationType.crash),
-      types.contains(ValidationType.missing),
-      types.contains(ValidationType.partial),
-      types.contains(ValidationType.success),
-    )) {
-      (_, _, true, _) || (true, _, _, true) || (_, true, _, true) => ValidationType.partial,
-      (true, _, _, _) => ValidationType.crash,
-      (_, true, _, _) => ValidationType.missing,
-      (_, _, _, true) => ValidationType.success,
-      _ => ValidationType.notAvailable,
+    final host_doctor.ValidationType mergedType = switch (types) {
+      _
+          when types.contains(host_doctor.ValidationType.partial) ||
+              (types.contains(host_doctor.ValidationType.crash) &&
+                  types.contains(host_doctor.ValidationType.success)) ||
+              (types.contains(host_doctor.ValidationType.missing) &&
+                  types.contains(host_doctor.ValidationType.success)) =>
+        host_doctor.ValidationType.partial,
+      _ when types.contains(host_doctor.ValidationType.crash) => host_doctor.ValidationType.crash,
+      _ when types.contains(host_doctor.ValidationType.missing) =>
+        host_doctor.ValidationType.missing,
+      _ when types.contains(host_doctor.ValidationType.success) =>
+        host_doctor.ValidationType.success,
+      _ => host_doctor.ValidationType.notAvailable,
     };
 
-    return ValidationResult(mergedType, mergedMessages, statusInfo: statusInfo);
+    return host_doctor.ValidationResult(mergedType, mergedMessages, statusInfo: statusInfo);
   }
 }

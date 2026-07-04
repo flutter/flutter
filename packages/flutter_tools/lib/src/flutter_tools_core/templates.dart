@@ -7,14 +7,8 @@ import '../../generic_extension_protocol.dart';
 /// The service responsible for adding custom platform support to
 /// `flutter create`.
 abstract base class TemplateService extends ToolExtensionService {
-  static const String serviceNamespace = 'template';
-  static const String getAppTemplatesMethod = 'template.getAppTemplates';
-  static const String getPluginTemplatesMethod = 'template.getPluginTemplates';
-  static const String getProjectTemplatesMethod = 'template.getProjectTemplates';
-  static const String generateTemplateParametersMethod = 'template.generateTemplateParameters';
-
   @override
-  String get namespace => serviceNamespace;
+  String get namespace => 'template';
 
   /// The set of additional template files to be initialized when using
   /// the `app` template.
@@ -54,9 +48,9 @@ abstract base class TemplateService extends ToolExtensionService {
   Future<Map<String, Object?>> _generateTemplateParametersRpc(Map<String, Object?> params) async {
     if (params case {
       'templateName': final String templateName,
-      'toolParameters': final Map<Object?, Object?> toolParametersObj,
+      'toolParameters': final Map<Object?, Object?> rawParameters,
     }) {
-      final Map<String, Object?> toolParameters = toolParametersObj.cast<String, Object?>();
+      final Map<String, Object?> toolParameters = rawParameters.cast<String, Object?>();
       for (final ProjectTemplate template in projectTemplates) {
         if (template.name == templateName) {
           return template.generateTemplateParameters(toolParameters);
@@ -91,7 +85,6 @@ abstract base class ProjectTemplate {
   /// Generates the variable mappings for the template.
   Future<Map<String, Object?>> generateTemplateParameters(Map<String, Object?> toolParameters);
 
-  /// Serializes the template metadata for transmission over GEP.
   Map<String, Object?> toMap() {
     return <String, Object?>{
       'name': name,
@@ -113,14 +106,6 @@ final class ExtensionProjectTemplate extends ProjectTemplate {
           .toSet(),
       templateSources = (json['templateSources']! as List<Object?>).cast<String>().toSet(),
       templatePath = json['templatePath']! as String;
-
-  /// Parse a list of [ExtensionProjectTemplate] from an RPC response.
-  static List<ExtensionProjectTemplate> listFromJson(Object? rpcResult) => [
-    if (rpcResult case final List<Object?> l)
-      for (final item in l)
-        if (item case final Map<Object?, Object?> m)
-          ExtensionProjectTemplate.fromJson(m.cast<String, Object?>()),
-  ];
 
   @override
   final String name;
@@ -145,4 +130,12 @@ final class ExtensionProjectTemplate extends ProjectTemplate {
       'ExtensionProjectTemplate.generateTemplateParameters should not be called directly on host representation.',
     );
   }
+
+  static List<ExtensionProjectTemplate> listFromJson(Object? rpcResult) =>
+      <ExtensionProjectTemplate>[
+        if (rpcResult case final List<Object?> l)
+          for (final item in l)
+            if (item case final Map<Object?, Object?> m)
+              ExtensionProjectTemplate.fromJson(m.cast<String, Object?>()),
+      ];
 }

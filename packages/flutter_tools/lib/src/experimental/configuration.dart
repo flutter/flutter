@@ -24,12 +24,16 @@ class ExtensionConfigurationManager {
     Logger? logger,
     Platform? platform,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         extensionManager: extensionManager,
          logger: logger ?? globals.logger,
+         extensionManager: extensionManager,
          platform: platform ?? globals.platform,
        );
 
   final ExtensionDiscoveryHelper _discoveryHelper;
+
+  static const String _serviceNamespace = 'config';
+  static const String _getOptionsMethod = 'config.getOptions';
+  static const String _validateMethod = 'config.validate';
 
   final Set<String> _registeredExtensionFlags = <String>{};
 
@@ -47,6 +51,18 @@ class ExtensionConfigurationManager {
   List<core.ConfigurationOption> get cachedOptions =>
       _cachedOptions ?? const <core.ConfigurationOption>[];
 
+  static List<core.ConfigurationOption> _decodeOptions(Object? rpcResult) {
+    final options = <core.ConfigurationOption>[];
+    if (rpcResult case final List<Object?> resultList) {
+      for (final item in resultList) {
+        if (item case final Map<Object?, Object?> itemMap) {
+          options.add(ExtensionConfigurationOption.fromJson(itemMap.cast<String, Object?>()));
+        }
+      }
+    }
+    return options;
+  }
+
   /// Retrieve configuration options by routing config.getOptions to active tool extensions.
   Future<List<core.ConfigurationOption>> getOptions() async {
     if (!_discoveryHelper.isPrototypeEnabled) {
@@ -58,28 +74,28 @@ class ExtensionConfigurationManager {
 
     final List<core.ConfigurationOption> options = await _discoveryHelper
         .getListFromExtensions<core.ConfigurationOption>(
-          core.ConfigurationService.serviceNamespace,
-          core.ConfigurationService.getOptionsMethod,
-          core.ConfigurationOption.listFromJson,
+          _serviceNamespace,
+          _getOptionsMethod,
+          _decodeOptions,
         );
 
     _cachedOptions = options;
     return options;
   }
 
-  /// Request validation of an option value over extension protocol RPC.
+  /// Validates a value for a configuration option by routing to extension isolates.
   Future<core.OptionValidationResult> validate(String option, Object? value) async {
     if (!_discoveryHelper.isPrototypeEnabled) {
-      return core.OptionValidationResult.failed('Extension protocol prototype feature disabled.');
+      return core.OptionValidationResult.failed('Tool extension prototype is not enabled.');
     }
 
     for (final ToolExtension extension in await _discoveryHelper.getExtensionsSupporting(
-      core.ConfigurationService.serviceNamespace,
+      _serviceNamespace,
     )) {
       try {
         final Object? result = await extension
             .callMethod(
-              core.ConfigurationService.validateMethod,
+              _validateMethod,
               params: <String, Object?>{'option': option, 'value': value},
             )
             .timeout(const Duration(seconds: 5));
@@ -93,6 +109,33 @@ class ExtensionConfigurationManager {
 
     return core.OptionValidationResult.failed(
       'No extension service registered configuration option: $option',
+    );
+  }
+}
+
+/// A concrete host-side representation of an extension configuration option.
+base class ExtensionConfigurationOption extends core.ConfigurationOption {
+  /// Create a new instance of [ExtensionConfigurationOption].
+  ExtensionConfigurationOption({required this.description, required this.name});
+
+  /// Parse an option from a JSON extension map representation.
+  factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
+    if (json case {'name': final String name, 'description': final String description}) {
+      return ExtensionConfigurationOption(name: name, description: description);
+    }
+    throw FormatException('Invalid extension configuration option format: $json');
+  }
+
+  @override
+  final String name;
+
+  @override
+  final String description;
+
+  @override
+  core.OptionValidationResult validate(String option, Object? value) {
+    throw UnimplementedError(
+      'Host-side validation should call ExtensionConfigurationManager.validate',
     );
   }
 }
