@@ -289,38 +289,29 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       projectRoot: projectRootUri,
     );
 
+    if (_target.pluginPlatformKey != null ||
+        _target.generatesCmakePluginFiles ||
+        _target.targetPlatformDirectory == 'linux-x64') {
+      await refreshPluginsList(project);
+      final String platformKey = _target.pluginPlatformKey ?? 'linux';
+      final CmakeBasedProject cmakeProject = _target.targetPlatformDirectory == 'linux-x64'
+          ? project.linux
+          : GenericCmakeProject(project, _target.targetPlatformDirectory ?? platformKey);
+      if (cmakeProject.existsSync()) {
+        createPluginSymlinks(
+          project,
+          customCMakeProject: cmakeProject,
+          customPlatformKey: platformKey,
+        );
+        if (platformKey == 'linux') {
+          await injectPlugins(project, releaseMode: buildInfo.mode.isRelease, linuxPlatform: true);
+        }
+      }
+    }
+
     final ExtensionBuildTargetManager? targetManager =
         _targetManager ?? extensionBuildTargetManager;
     if (targetManager != null) {
-      if (_target.pluginPlatformKey != null ||
-          _target.generatesCmakePluginFiles ||
-          _target.targetPlatformDirectory == 'linux-x64') {
-        await refreshPluginsList(project);
-        final String platformKey = _target.pluginPlatformKey ?? 'linux';
-        final CmakeBasedProject cmakeProject = _target.targetPlatformDirectory == 'linux-x64'
-            ? project.linux
-            : GenericCmakeProject(project, _target.targetPlatformDirectory ?? platformKey);
-        if (cmakeProject.existsSync()) {
-          createPluginSymlinks(
-            project,
-            customCMakeProject: cmakeProject,
-            customPlatformKey: platformKey,
-          );
-          if (platformKey == 'linux') {
-            await injectPlugins(
-              project,
-              releaseMode: buildInfo.mode.isRelease,
-              linuxPlatform: true,
-            );
-          } else if (platformKey == 'windows') {
-            await injectPlugins(
-              project,
-              releaseMode: buildInfo.mode.isRelease,
-              windowsPlatform: true,
-            );
-          }
-        }
-      }
       await targetManager.buildTarget(_target.name, buildEnv);
     } else {
       throwToolExit('ExtensionBuildTargetManager is not available in context.');
