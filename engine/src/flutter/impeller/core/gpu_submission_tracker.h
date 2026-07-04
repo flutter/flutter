@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <mutex>
-#include <set>
+#include <vector>
 
 namespace impeller {
 
@@ -39,7 +39,10 @@ class GpuSubmissionTracker {
  private:
   mutable std::mutex mutex_;
   uint64_t last_id_ = 0;
-  std::set<uint64_t> pending_;
+  // Sorted, since ids are recorded in increasing order. The pending count
+  // tracks GPU queue depth and stays small, so erasure is cheap and steady
+  // state performs no heap allocation.
+  std::vector<uint64_t> pending_;
 };
 
 }  // namespace impeller
