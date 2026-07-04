@@ -37,32 +37,31 @@ class _OverlayPortalLayoutBuilderExampleState
     extends State<OverlayPortalLayoutBuilderExample> {
   final OverlayPortalController _controller = OverlayPortalController();
 
-  Widget _buildOverlay(BuildContext context, OverlayChildLayoutInfo info) {
-    final Offset childOffset = MatrixUtils.transformPoint(
-      info.childPaintTransform,
-      Offset.zero,
-    );
-
-    return Positioned(
-      left: childOffset.dx,
-      top: childOffset.dy + info.childSize.height,
-      child: Align(
-        alignment: .topLeft,
-        child: Container(
-          color: const Color(0xFFFFE57F),
-          padding: const .all(8),
-          child: const Text('Hello from the overlay!'),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
       child: OverlayPortal.overlayChildLayoutBuilder(
         controller: _controller,
-        overlayChildBuilder: _buildOverlay,
+        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
+          // Translate the child widget's local coordinates to the overlay's
+          // coordinate space. This assumes the child paint transform is invertible
+          // (e.g., not a transform that collapses the child to a line or point),
+          // otherwise the resulting childRect would be NaN.
+          final Rect childRect = MatrixUtils.transformRect(
+            info.childPaintTransform,
+            Offset.zero & info.childSize,
+          );
+
+          return Positioned(
+            left: childRect.left,
+            top: childRect.bottom,
+            child: Container(
+              color: const Color(0xFFFFE57F),
+              padding: const .all(8),
+              child: const Text('Hello from the overlay!'),
+            ),
+          );
+        },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _controller.toggle,
