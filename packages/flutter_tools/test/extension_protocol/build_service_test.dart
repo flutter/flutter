@@ -100,7 +100,7 @@ void main() {
           environment: <String, String>{},
         ),
         const FakeCommand(
-          command: <String>['cmake', '--build', '/build/out'],
+          command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
           environment: <String, String>{},
         ),
       ]);
@@ -155,7 +155,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out'],
+            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
             environment: <String, String>{
               'CMAKE_BUILD_TYPE': 'Release',
               'FLUTTER_TARGET_PLATFORM': 'linux-arm64',
@@ -301,7 +301,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out'],
+            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
             environment: <String, String>{},
           ),
         ]);
@@ -384,7 +384,7 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['cmake', '--build', '/build/out'],
+            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
             environment: <String, String>{},
           ),
         ]);
@@ -507,11 +507,12 @@ void main() {
     });
 
     Future<ToolExtension> connectMockExtension({
-      required List<String> services,
-      bool mockGetTargets = true,
-      bool mockBuild = true,
-      Map<String, Object?>? buildResponse,
       Completer<Map<String, Object?>>? buildCompleter,
+      Map<String, Object?>? buildResponse,
+      bool mockBuild = true,
+      bool mockGetTargets = true,
+      List<ExtensionBuildTarget>? targets,
+      required List<String> services,
     }) async {
       final managerReceivePort = ReceivePort();
       final Future<ToolExtension> connectFuture = manager.connectExtension(managerReceivePort);

@@ -14,26 +14,30 @@ import '../../artifacts.dart';
 const _cmakeCacheFileName = 'CMakeCache.txt';
 const _cmakeFilesDirectoryName = 'CMakeFiles';
 const _expectedNinjaGeneratorLine = 'CMAKE_GENERATOR:INTERNAL=Ninja';
+const String _kTargetPlatformLinuxX64 = 'linux-x64';
+const String _kAssembleLinuxAppTarget = 'assemble_linux_app';
+const String _kCustomLinuxSubcommand = 'custom-linux';
+final RegExp _kAppNamePattern = RegExp(r'^name:\s+(\w+)', multiLine: true);
 
 final List<ArtifactDependency> _kLinuxArtifactDependencies = <ArtifactDependency>[
   ArtifactDependency(
-    hostPlatform: 'linux-x64',
+    hostPlatform: _kTargetPlatformLinuxX64,
     name: Artifact.linuxDesktopPath.name,
-    sha256Checksums: <String, String>{},
+    sha256Checksums: const <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
   ),
   ArtifactDependency(
-    hostPlatform: 'linux-x64',
+    hostPlatform: _kTargetPlatformLinuxX64,
     name: Artifact.linuxHeaders.name,
-    sha256Checksums: <String, String>{},
+    sha256Checksums: const <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
   ),
   ArtifactDependency(
-    hostPlatform: 'linux-x64',
+    hostPlatform: _kTargetPlatformLinuxX64,
     name: Artifact.icuData.name,
-    sha256Checksums: <String, String>{},
+    sha256Checksums: const <String, String>{},
     targetArchitecture: 'x64',
     targetPlatform: 'linux',
   ),
@@ -70,10 +74,10 @@ base class LinuxAssembleTarget extends Target {
   final ProcessManager _processManager;
 
   @override
-  String get name => 'assemble_linux_app';
+  String get name => _kAssembleLinuxAppTarget;
 
   @override
-  String? get cliSubcommand => 'custom-linux';
+  String? get cliSubcommand => _kCustomLinuxSubcommand;
 
   @override
   String? get cliDescription => 'Build a prototype Linux extension desktop application.';
@@ -98,27 +102,46 @@ base class LinuxAssembleTarget extends Target {
     final String projectPath = _fileSystem.path.fromUri(env.projectRoot);
     final String outputPath = _fileSystem.path.fromUri(env.outputDirectory);
 
-    // Make sure the output directory exists.
     final Directory outputDir = _fileSystem.directory(outputPath);
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
     }
 
-    final String buildType = env.defines['CMAKE_BUILD_TYPE'] ?? 'Debug';
-    final String targetPlatform = env.defines['FLUTTER_TARGET_PLATFORM'] ?? 'linux-x64';
+    final String targetPlatform =
+        env.defines['FLUTTER_TARGET_PLATFORM'] ??
+        env.defines['targetPlatform'] ??
+        _kTargetPlatformLinuxX64;
+    final String buildMode = env.defines['buildMode'] ?? 'debug';
+
+    var appName = 'app';
+    final File pubspecFile = _fileSystem.file(_fileSystem.path.join(projectPath, 'pubspec.yaml'));
+    if (pubspecFile.existsSync()) {
+      final String content = pubspecFile.readAsStringSync();
+      final Match? match = _kAppNamePattern.firstMatch(content);
+      if (match != null && match.group(1) != null) {
+        appName = match.group(1)!;
+      }
+    }
+
+    final String cmakeBuildType =
+        env.defines['CMAKE_BUILD_TYPE'] ??
+        switch (buildMode) {
+          'release' => 'Release',
+          'profile' => 'Profile',
+          _ => 'Debug',
+        };
 
     final File cacheFile = _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName));
     if (cacheFile.existsSync() && !_isNinjaGenerator(cacheFile)) {
       _cleanCMakeCache(outputPath);
     }
 
-    // 1. cmake -G Ninja -DCMAKE_BUILD_TYPE=<buildType> -DFLUTTER_TARGET_PLATFORM=<targetPlatform> -S <project>/linux -B <output>
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
     final cmakeConfigureCmd = <String>[
       'cmake',
       '-G',
       'Ninja',
-      '-DCMAKE_BUILD_TYPE=$buildType',
+      '-DCMAKE_BUILD_TYPE=$cmakeBuildType',
       '-DFLUTTER_TARGET_PLATFORM=$targetPlatform',
       '-S',
       linuxProjectPath,
@@ -153,8 +176,7 @@ base class LinuxAssembleTarget extends Target {
       );
     }
 
-    // 2. cmake --build <output>
-    final cmakeBuildCmd = <String>['cmake', '--build', outputPath];
+    final cmakeBuildCmd = <String>['cmake', '--build', outputPath, '--target', 'install'];
     final ProcessResult buildResult = await _processManager.run(
       cmakeBuildCmd,
       environment: env.defines,
@@ -166,16 +188,6 @@ base class LinuxAssembleTarget extends Target {
         'Stderr: ${buildResult.stderr}',
       );
     }
-
-    // 3. Resolve the executable name from pubspec.yaml
-    final File pubspec = _fileSystem.file(_fileSystem.path.join(projectPath, 'pubspec.yaml'));
-    final String appName = pubspec.existsSync()
-        ? RegExp(
-                r'^name:\s+(\w+)',
-                multiLine: true,
-              ).firstMatch(pubspec.readAsStringSync())?.group(1) ??
-              'app'
-        : 'app';
 
     final String executablePath = _fileSystem.path.join(outputPath, 'bundle', appName);
     return <String, Object?>{
