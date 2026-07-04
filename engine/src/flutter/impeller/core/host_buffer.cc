@@ -21,16 +21,21 @@ constexpr size_t kAllocatorBlockSize = 1024000;  // 1024 Kb.
 std::shared_ptr<HostBuffer> HostBuffer::Create(
     const std::shared_ptr<Allocator>& allocator,
     const std::shared_ptr<const IdleWaiter>& idle_waiter,
-    size_t minimum_uniform_alignment) {
+    size_t minimum_uniform_alignment,
+    std::shared_ptr<const GpuSubmissionTracker> submission_tracker) {
   return std::shared_ptr<HostBuffer>(
-      new HostBuffer(allocator, idle_waiter, minimum_uniform_alignment));
+      new HostBuffer(allocator, idle_waiter, minimum_uniform_alignment,
+                     std::move(submission_tracker)));
 }
 
-HostBuffer::HostBuffer(const std::shared_ptr<Allocator>& allocator,
-                       const std::shared_ptr<const IdleWaiter>& idle_waiter,
-                       size_t minimum_uniform_alignment)
+HostBuffer::HostBuffer(
+    const std::shared_ptr<Allocator>& allocator,
+    const std::shared_ptr<const IdleWaiter>& idle_waiter,
+    size_t minimum_uniform_alignment,
+    std::shared_ptr<const GpuSubmissionTracker> submission_tracker)
     : allocator_(allocator),
       idle_waiter_(idle_waiter),
+      submission_tracker_(std::move(submission_tracker)),
       minimum_uniform_alignment_(minimum_uniform_alignment) {
   DeviceBufferDescriptor desc;
   desc.size = kAllocatorBlockSize;
@@ -233,9 +238,42 @@ void HostBuffer::Reset() {
     device_buffers_[frame_index_].pop_back();
   }
 
+  if (submission_tracker_) {
+    // Everything submitted so far may reference this entry's buffers.
+    entry_stamps_[frame_index_] = submission_tracker_->LatestSubmission();
+  }
+
   offset_ = 0u;
   current_buffer_ = 0u;
   frame_index_ = (frame_index_ + 1) % kHostBufferArenaSize;
+
+  if (submission_tracker_) {
+    uint64_t completed = submission_tracker_->CompletedThrough();
+
+    // Release retired buffers the GPU has completed with.
+    std::erase_if(retired_buffers_, [completed](const auto& retired) {
+      return retired.first <= completed;
+    });
+
+    // If the GPU may still be reading the next entry's buffers, retire them
+    // and start the entry over with a fresh allocation. Otherwise writes
+    // below would race the reads of an incomplete earlier frame.
+    if (entry_stamps_[frame_index_] > completed) {
+      DeviceBufferDescriptor desc;
+      desc.size = kAllocatorBlockSize;
+      desc.storage_mode = StorageMode::kHostVisible;
+      std::shared_ptr<DeviceBuffer> buffer = allocator_->CreateBuffer(desc);
+      if (buffer) {
+        retired_buffers_.emplace_back(entry_stamps_[frame_index_],
+                                      std::move(device_buffers_[frame_index_]));
+        device_buffers_[frame_index_].clear();
+        device_buffers_[frame_index_].push_back(std::move(buffer));
+        entry_stamps_[frame_index_] = 0;
+      } else {
+        VALIDATION_LOG << "Failed to replace an in-flight host buffer entry.";
+      }
+    }
+  }
 }
 
 size_t HostBuffer::GetMinimumUniformAlignment() const {
