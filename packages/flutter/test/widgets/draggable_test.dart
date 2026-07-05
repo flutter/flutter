@@ -96,6 +96,173 @@ void main() {
     expect(moveCount, 1);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/187543
+  testWidgets(
+    'Drag and drop - a lower DragTarget is recognized after entering an upper rejecting target',
+    (WidgetTester tester) async {
+      final accepted = <int>[];
+      const topKey = ValueKey<String>('upper');
+      const bottomKey = ValueKey<String>('lower');
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              const Draggable<int>(data: 1, feedback: Text('Dragging'), child: Text('Source')),
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    // Lower target, on the right half; it accepts.
+                    Positioned(
+                      left: 200.0,
+                      top: 0.0,
+                      width: 200.0,
+                      height: 400.0,
+                      child: DragTarget<int>(
+                        key: bottomKey,
+                        onWillAcceptWithDetails: (DragTargetDetails<int> _) => true,
+                        onAcceptWithDetails: (DragTargetDetails<int> details) =>
+                            accepted.add(details.data),
+                        builder: (BuildContext context, List<int?> data, List<dynamic> rejects) =>
+                            const SizedBox.expand(),
+                      ),
+                    ),
+                    // Upper target, overlapping the lower one on its left; it rejects.
+                    Positioned(
+                      left: 0.0,
+                      top: 0.0,
+                      width: 300.0,
+                      height: 400.0,
+                      child: DragTarget<int>(
+                        key: topKey,
+                        onWillAcceptWithDetails: (DragTargetDetails<int> _) => false,
+                        builder: (BuildContext context, List<int?> data, List<dynamic> rejects) =>
+                            const SizedBox.expand(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Rect topRect = tester.getRect(find.byKey(topKey));
+      final Rect bottomRect = tester.getRect(find.byKey(bottomKey));
+      // Covered only by the upper (rejecting) target.
+      final onlyUpper = Offset(topRect.left + 20.0, topRect.center.dy);
+      // In the overlap, covered by both targets.
+      final overlap = Offset(bottomRect.left + 20.0, bottomRect.center.dy);
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('Source')),
+        pointer: 7,
+      );
+      await tester.pump();
+
+      // Enter the upper target first; it rejects, so nothing is accepted yet.
+      await gesture.moveTo(onlyUpper);
+      await tester.pump();
+      expect(accepted, isEmpty);
+
+      // Move into the overlap. The lower target must now be recognized even
+      // though the upper (rejecting) target is still under the pointer.
+      await gesture.moveTo(overlap);
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(accepted, equals(<int>[1]));
+    },
+  );
+
+  // Companion to the regression test above (issue #187543): verifies the fix
+  // preserves the existing behavior where, once a target accepts, the drag does
+  // not fall through to a lower overlapping target.
+  testWidgets(
+    'Drag and drop - an accepting upper DragTarget is not bypassed by a lower overlapping target',
+    (WidgetTester tester) async {
+      final upperAccepted = <int>[];
+      final lowerAccepted = <int>[];
+      const topKey = ValueKey<String>('upper');
+      const bottomKey = ValueKey<String>('lower');
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              const Draggable<int>(data: 1, feedback: Text('Dragging'), child: Text('Source')),
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    // Lower target, on the right half; it also accepts.
+                    Positioned(
+                      left: 200.0,
+                      top: 0.0,
+                      width: 200.0,
+                      height: 400.0,
+                      child: DragTarget<int>(
+                        key: bottomKey,
+                        onWillAcceptWithDetails: (DragTargetDetails<int> _) => true,
+                        onAcceptWithDetails: (DragTargetDetails<int> details) =>
+                            lowerAccepted.add(details.data),
+                        builder: (BuildContext context, List<int?> data, List<dynamic> rejects) =>
+                            const SizedBox.expand(),
+                      ),
+                    ),
+                    // Upper target, overlapping the lower one on its left; it accepts.
+                    Positioned(
+                      left: 0.0,
+                      top: 0.0,
+                      width: 300.0,
+                      height: 400.0,
+                      child: DragTarget<int>(
+                        key: topKey,
+                        onWillAcceptWithDetails: (DragTargetDetails<int> _) => true,
+                        onAcceptWithDetails: (DragTargetDetails<int> details) =>
+                            upperAccepted.add(details.data),
+                        builder: (BuildContext context, List<int?> data, List<dynamic> rejects) =>
+                            const SizedBox.expand(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Rect topRect = tester.getRect(find.byKey(topKey));
+      final Rect bottomRect = tester.getRect(find.byKey(bottomKey));
+      final onlyUpper = Offset(topRect.left + 20.0, topRect.center.dy);
+      final overlap = Offset(bottomRect.left + 20.0, bottomRect.center.dy);
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('Source')),
+        pointer: 7,
+      );
+      await tester.pump();
+
+      // Enter the upper target first; it accepts, becoming the active target.
+      await gesture.moveTo(onlyUpper);
+      await tester.pump();
+
+      // Move into the overlap. The drag must not fall through the already
+      // accepting upper target to the lower one.
+      await gesture.moveTo(overlap);
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(upperAccepted, equals(<int>[1]));
+      expect(lowerAccepted, isEmpty);
+    },
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter', (
     WidgetTester tester,
