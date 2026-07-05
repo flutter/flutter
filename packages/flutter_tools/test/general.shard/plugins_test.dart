@@ -493,9 +493,12 @@ dependencies:
           // Write bytes that are not valid UTF-8, so readAsString throws a FileSystemException.
           pluginDirs[1].childFile('pubspec.yaml').writeAsBytesSync(<int>[0xff, 0xfe, 0xfd]);
 
-          // The unreadable plugin is skipped rather than crashing the tool.
-          final List<Plugin> plugins = await findPlugins(flutterProject);
+          // The tool must not crash when a plugin's pubspec.yaml cannot be read.
+          final Future<List<Plugin>> pluginsFuture = findPlugins(flutterProject);
+          await expectLater(pluginsFuture, completes);
 
+          // The unreadable plugin is skipped, but the readable one is still found.
+          final List<Plugin> plugins = await pluginsFuture;
           expect(plugins.map((Plugin plugin) => plugin.name), contains('good_plugin'));
           expect(plugins.map((Plugin plugin) => plugin.name), isNot(contains('bad_plugin')));
         },
