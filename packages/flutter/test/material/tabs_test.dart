@@ -3623,21 +3623,30 @@ void main() {
   ) async {
     const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
 
-    Widget buildFrame({required bool secondary}) {
-      return boilerplate(
+    await tester.pumpWidget(
+      boilerplate(
         child: DefaultTabController(
           length: tabs.length,
-          child: secondary
-              ? const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs)
-              : const TabBar(indicatorWeight: 0.0, tabs: tabs),
+          child: const TabBar(indicatorWeight: 0.0, tabs: tabs),
         ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(secondary: false));
+      ),
+    );
     expect(tester.takeException(), isAssertionError);
+  });
 
-    await tester.pumpWidget(buildFrame(secondary: true));
+  testWidgets('TabBar.secondary asserts zero indicatorWeight with default indicator', (
+    WidgetTester tester,
+  ) async {
+    const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs),
+        ),
+      ),
+    );
     expect(tester.takeException(), isAssertionError);
   });
 
