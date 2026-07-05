@@ -483,6 +483,30 @@ dependencies:
       );
 
       testUsingContext(
+        'does not crash when a plugin pubspec.yaml is not valid UTF-8',
+        () async {
+          // Regression test for https://github.com/flutter/flutter/issues/188970.
+          final List<Directory> pluginDirs = createFakePlugins(fs, <String>[
+            'good_plugin',
+            'bad_plugin',
+          ]);
+          // Write bytes that are not valid UTF-8, so readAsString throws a FileSystemException.
+          pluginDirs[1].childFile('pubspec.yaml').writeAsBytesSync(<int>[0xff, 0xfe, 0xfd]);
+
+          // The unreadable plugin is skipped rather than crashing the tool.
+          final List<Plugin> plugins = await findPlugins(flutterProject);
+
+          expect(plugins.map((Plugin plugin) => plugin.name), contains('good_plugin'));
+          expect(plugins.map((Plugin plugin) => plugin.name), isNot(contains('bad_plugin')));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
         'Refreshing the plugin list updates .flutter-plugins-dependencies if the plugins changed',
         () async {
           // Refresh the plugin list (we have no plugins).
