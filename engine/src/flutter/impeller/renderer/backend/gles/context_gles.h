@@ -45,6 +45,10 @@ class ContextGLES final : public Context,
 
   std::shared_ptr<GPUTracerGLES> GetGPUTracer() const { return gpu_tracer_; }
 
+  // Mutable tracker for command buffer submission bookkeeping.
+  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
+      const;
+
  private:
   std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<GpuSubmissionTracker> submission_tracker_ =
@@ -80,10 +84,6 @@ class ContextGLES final : public Context,
   // |Context|
   std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
       const override;
-
-  // Mutable tracker for command buffer submission bookkeeping.
-  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
-      const;
 
   // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;

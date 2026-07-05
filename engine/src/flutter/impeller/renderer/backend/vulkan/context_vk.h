@@ -65,6 +65,10 @@ class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
                         public std::enable_shared_from_this<ContextVK> {
  public:
+  // Mutable tracker for command buffer submission bookkeeping.
+  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
+      const;
+
   /// Embedder Stuff
   struct EmbedderData {
     VkInstance instance;
@@ -121,10 +125,6 @@ class ContextVK final : public Context,
   // |Context|
   std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
       const override;
-
-  // Mutable tracker for command buffer submission bookkeeping.
-  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
-      const;
 
   // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;
