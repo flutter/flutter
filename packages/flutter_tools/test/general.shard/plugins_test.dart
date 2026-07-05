@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -491,7 +492,9 @@ dependencies:
             'bad_plugin',
           ]);
           // Write bytes that are not valid UTF-8, so readAsString throws a FileSystemException.
-          pluginDirs[1].childFile('pubspec.yaml').writeAsBytesSync(<int>[0xff, 0xfe, 0xfd]);
+          pluginDirs[1].childFile('pubspec.yaml').writeAsBytesSync(
+            Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]),
+          );
 
           // The tool must not crash when a plugin's pubspec.yaml cannot be read.
           final Future<List<Plugin>> pluginsFuture = findPlugins(flutterProject);
@@ -499,8 +502,9 @@ dependencies:
 
           // The unreadable plugin is skipped, but the readable one is still found.
           final List<Plugin> plugins = await pluginsFuture;
-          expect(plugins.map((Plugin plugin) => plugin.name), contains('good_plugin'));
-          expect(plugins.map((Plugin plugin) => plugin.name), isNot(contains('bad_plugin')));
+          final pluginNames = <String>[for (final Plugin plugin in plugins) plugin.name];
+          expect(pluginNames, contains('good_plugin'));
+          expect(pluginNames, isNot(contains('bad_plugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
