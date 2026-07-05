@@ -2876,7 +2876,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerify([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
 }
 
-- (void)testPerformImplicitEngineCallbacksNoAppLaunchEventFallbacksWhenNoStoryboard {
+- (void)testPerformImplicitEngineCallbacksUsesAppLaunchEventFallbacksWhenNotAwokenFromNib {
+  // Programmatic implicit engines (not from a storyboard) should also receive the
+  // didFinishLaunching fallback so plugins don't miss the event.
   id mockEngine = OCMClassMock([FlutterEngine class]);
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
                                                                                 nibName:nil
@@ -2901,18 +2903,59 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
-  OCMReject([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
-  OCMReject([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
+  OCMVerify([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
+  OCMVerify([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
 }
 
-- (void)testPerformImplicitEngineCallbacksNoAppLaunchEventFallbacksWhenNoScenes {
+- (void)testImplicitEngineReplaysSceneWillConnectWhenNotAwokenFromNib {
+  // When a programmatic implicit FlutterViewController is created after the scene has already
+  // connected, engine:receivedConnectNotificationFor: must be called so plugins receive
+  // scene:willConnectToSession:options:.
   id mockEngine = OCMClassMock([FlutterEngine class]);
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
                                                                                 nibName:nil
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
-  OCMStub([viewControllerMock awokenFromNib]).andReturn(YES);
+  OCMStub([viewControllerMock awokenFromNib]).andReturn(NO);
+
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(NO);
+
+  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
+  OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
+
+  id mockScene = OCMClassMock([UIScene class]);
+  id mockSceneDelegate = OCMProtocolMock(@protocol(UISceneDelegate));
+  OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
+  OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockScene]);
+
+  FlutterPluginSceneLifeCycleDelegate* mockSceneLifeCycleDelegate =
+      OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub(ClassMethod([mockSceneLifeCycleDelegate fromScene:[OCMArg any]]))
+      .andReturn(mockSceneLifeCycleDelegate);
+
+  FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
+  OCMVerify([mockSceneLifeCycleDelegate engine:mockEngine
+                 receivedConnectNotificationFor:mockScene]);
+}
+
+- (void)testPerformImplicitEngineCallbacksNoAppLaunchEventFallbacksWhenNoScenes {
+  // Without connected scenes hasSceneDelegate returns NO, so no fallback events are sent
+  // regardless of whether the VC was awoken from a nib.
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
+  OCMStub([viewControllerMock awokenFromNib]).andReturn(NO);
 
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
