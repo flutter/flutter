@@ -81,13 +81,17 @@ bool AccessibilityBridge::SetViewController(FlutterViewController* view_controll
   return true;
 }
 
-void AccessibilityBridge::ViewDidChange() {
+bool AccessibilityBridge::ViewDidChange() {
   NotifySemanticsObjectsViewChanged();
-  UpdateAccessibilityElementsForCurrentView();
+  return UpdateAccessibilityElementsForCurrentView();
 }
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
   return [[platform_view_->GetOwnerViewController().engine textInputPlugin] textInputView];
+}
+
+bool AccessibilityBridge::HasSemantics() const {
+  return objects_[@(kRootNodeId)] != nil;
 }
 
 void AccessibilityBridge::AccessibilityObjectDidBecomeFocused(int32_t id) {
@@ -399,13 +403,14 @@ fml::WeakPtr<AccessibilityBridge> AccessibilityBridge::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
+bool AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
   UIView* view = viewIfLoaded();
   if (!view) {
-    return;
+    return false;
   }
   SemanticsObject* root = objects_[@(kRootNodeId)];
   view.accessibilityElements = root ? @[ [root accessibilityContainer] ?: [NSNull null] ] : nil;
+  return root != nil;
 }
 
 void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {

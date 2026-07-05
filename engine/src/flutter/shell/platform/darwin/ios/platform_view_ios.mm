@@ -105,8 +105,14 @@ void PlatformViewIOS::attachView() {
   FML_DCHECK(ios_surface_ != nullptr);
 
   bool accessibility_bridge_updated = UpdateAccessibilityBridgeViewController();
-  if (accessibility_bridge_ && !accessibility_bridge_updated) {
-    accessibility_bridge_->ViewDidChange();
+  bool semantics_were_applied = false;
+  if (accessibility_bridge_ && accessibility_bridge_updated) {
+    semantics_were_applied = accessibility_bridge_->HasSemantics();
+  } else if (accessibility_bridge_) {
+    semantics_were_applied = accessibility_bridge_->ViewDidChange();
+  }
+  if (semantics_were_applied) {
+    PostSemanticsUpdateNotification();
   }
 }
 
@@ -163,13 +169,12 @@ void PlatformViewIOS::UpdateSemantics(int64_t view_id,
   }
   accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
   if (owner_controller_ && owner_controller_.isViewLoaded) {
-    // Keep the bridge cache up to date even if the owner FlutterView has not loaded yet, but only
-    // notify observers after that cache has been applied to a real UIKit view. For example, a
-    // pre-warmed engine can receive semantics before FlutterViewController.loadView. In that case
-    // viewIfLoaded is nil, so posting now would tell observers to inspect accessibilityElements
-    // that UIKit cannot expose yet.
-    [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
-                                                        object:owner_controller_];
+    // The bridge can cache semantics before the owner FlutterView is loaded. For example, a
+    // pre-warmed engine can receive semantics before FlutterViewController.loadView, when
+    // viewIfLoaded is still nil. Only notify observers after the semantics are applied to a loaded
+    // UIKit view, so accessibilityElements are ready to inspect. If cached semantics are applied
+    // later by attachView, attachView posts this same notification.
+    PostSemanticsUpdateNotification();
   }
 }
 
@@ -240,6 +245,11 @@ std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolv
     out->emplace_back(scriptCode == nullptr ? "" : scriptCode.UTF8String);
   }
   return out;
+}
+
+void PlatformViewIOS::PostSemanticsUpdateNotification() {
+  [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
+                                                      object:owner_controller_];
 }
 
 void PlatformViewIOS::ApplyLocaleToOwnerController() {

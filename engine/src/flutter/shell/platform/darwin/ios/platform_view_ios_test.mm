@@ -247,6 +247,15 @@ class MockDelegate : public PlatformView::Delegate {
   platform_view->SetSemanticsTreeEnabled(true);
   XCTAssertTrue(platform_view->GetAccessibilityBridge());
 
+  __block NSInteger semanticsUpdateNotificationCount = 0;
+  id observer =
+      [[NSNotificationCenter defaultCenter] addObserverForName:FlutterSemanticsUpdateNotification
+                                                        object:flutterViewController
+                                                         queue:nil
+                                                    usingBlock:^(NSNotification* notification) {
+                                                      semanticsUpdateNotificationCount += 1;
+                                                    }];
+
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
   root_node.label = "root before view loaded";
@@ -255,16 +264,19 @@ class MockDelegate : public PlatformView::Delegate {
   platform_view->UpdateSemantics(/*view_id=*/0, std::move(update),
                                  flutter::CustomAccessibilityActionUpdates());
   XCTAssertNil(flutterView.accessibilityElements);
+  XCTAssertEqual(semanticsUpdateNotificationCount, 0);
 
   isViewLoaded = YES;
   viewIfLoaded = flutterView;
   platform_view->attachView();
 
+  XCTAssertEqual(semanticsUpdateNotificationCount, 1);
   XCTAssertNotNil(flutterView.accessibilityElements);
   id rootContainer = flutterView.accessibilityElements.firstObject;
   id rootElement = [rootContainer accessibilityElementAtIndex:0];
   XCTAssertEqualObjects([rootElement accessibilityLabel], @"root before view loaded");
   platform_view->SetSemanticsTreeEnabled(false);
+  [[NSNotificationCenter defaultCenter] removeObserver:observer];
 
   [engine stopMocking];
 }

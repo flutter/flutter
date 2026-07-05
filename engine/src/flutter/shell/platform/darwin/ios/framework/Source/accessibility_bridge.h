@@ -57,9 +57,12 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   // Returns true when the owner FlutterViewController changed.
   bool SetViewController(FlutterViewController* view_controller);
   // Called when the current FlutterViewController's root view changes or finishes loading.
-  void ViewDidChange();
+  // Returns true when cached semantics were applied to a loaded view.
+  bool ViewDidChange();
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
+  // Returns true when a root semantics object is cached in the bridge.
+  bool HasSemantics() const;
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
   void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) override;
   void DispatchSemanticsAction(int32_t id,
@@ -91,7 +94,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void clearState();
 
  private:
-  void UpdateAccessibilityElementsForCurrentView();
+  bool UpdateAccessibilityElementsForCurrentView();
   void NotifySemanticsObjectsViewChanged();
   SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
   SemanticsObject* FindNextFocusableIfNecessary();
