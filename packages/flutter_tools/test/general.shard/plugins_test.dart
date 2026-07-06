@@ -877,75 +877,6 @@ dependencies:
           Pub: ThrowingPub.new,
         },
       );
-
-      testUsingContext(
-        'Refreshing the plugin list preserves custom platforms in .flutter-plugins-dependencies',
-        () async {
-          // Create a plugin that supports 'my_custom_platform'.
-          final Directory pluginDirectory = fs.systemTempDirectory.childDirectory(
-            'my_custom_plugin',
-          );
-          writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
-          addToPackageConfig('my_custom_plugin', pluginDirectory);
-          pluginDirectory.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      my_custom_platform:
-        pluginClass: MyCustomPlugin
-''');
-
-          // Manually write the dependencies file with the custom platform.
-          // This simulates a previous run where the custom platform was registered.
-          final File pluginsFile = flutterProject.flutterPluginsDependenciesFile;
-          pluginsFile.createSync(recursive: true);
-          pluginsFile.writeAsStringSync(
-            json.encode(<String, Object?>{
-              'info': 'This is a generated file; do not edit or check into version control.',
-              'plugins': <String, Object?>{
-                'ios': <Object?>[],
-                'android': <Object?>[],
-                'macos': <Object?>[],
-                'linux': <Object?>[],
-                'windows': <Object?>[],
-                'web': <Object?>[],
-                'my_custom_platform': <Object?>[
-                  <String, Object?>{'name': 'my_custom_plugin', 'path': pluginDirectory.path},
-                ],
-              },
-              'dependencyGraph': <Object?>[],
-            }),
-          );
-
-          // Clear registered custom platforms to simulate a new run of a command
-          // that doesn't run discovery (e.g. pub get).
-          Plugin.clearCustomPlatforms();
-
-          await refreshPluginsList(flutterProject);
-
-          expect(pluginsFile, exists);
-
-          final jsonContent =
-              json.decode(pluginsFile.readAsStringSync()) as Map<String, Object?>;
-          final pluginsMap = jsonContent['plugins']! as Map<String, Object?>;
-
-          expect(pluginsMap, contains('my_custom_platform'));
-          final customPlatformPlugins =
-              pluginsMap['my_custom_platform']! as List<Object?>;
-          expect(customPlatformPlugins, hasLength(1));
-          final pluginInfo =
-              customPlatformPlugins.first! as Map<String, Object?>;
-          expect(pluginInfo['name'], 'my_custom_plugin');
-          expect(pluginInfo['path'], '${pluginDirectory.path}/');
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
     });
 
     group('injectPlugins', () {
@@ -1944,49 +1875,6 @@ flutter:
           for (final file in dummyFiles) {
             expect(file, isNot(exists));
           }
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => featureFlags,
-        },
-      );
-
-      testUsingContext(
-        'Symlinks are created for custom platform plugins if the platform directory exists',
-        () async {
-          const customPlatform = 'my_custom_platform';
-          final Directory customPlatformDirectory = flutterProject.directory.childDirectory(
-            customPlatform,
-          );
-          customPlatformDirectory.childFile('CMakeLists.txt').createSync(recursive: true);
-
-          // Create a fake plugin that supports the custom platform.
-          final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-          writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
-          final Directory pluginDirectory = fakePubCache.childDirectory('some_custom_plugin');
-          addToPackageConfig('some_custom_plugin', pluginDirectory);
-          pluginDirectory.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      $customPlatform:
-        pluginClass: SomeCustomPlugin
-''');
-
-          // We need to register the custom platform first, otherwise findPlugins will ignore it.
-          Plugin.registerCustomPlatform(customPlatform);
-
-          await refreshPluginsList(flutterProject);
-
-          final Directory pluginSymlinkDirectory = customPlatformDirectory
-              .childDirectory('flutter')
-              .childDirectory('ephemeral')
-              .childDirectory('.plugin_symlinks');
-
-          expect(pluginSymlinkDirectory.childLink('some_custom_plugin'), exists);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -3071,6 +2959,57 @@ flutter:
         testLogger.errorText,
         contains('conflict_foo:ios has conflicting direct dependency implementations'),
       );
+    });
+
+    testWithoutContext('parses custom platform plugins', () {
+      final yaml = loadYaml(r'''
+platforms:
+  foo_platform:
+    pluginClass: CustomPlugin
+    fileName: custom_plugin.dart
+    someCustomKey: customValue
+''') as YamlMap;
+      final plugin = Plugin.fromYaml(
+        'my_custom_plugin',
+        '/path/to/plugin',
+        yaml,
+        null,
+        const <String>[],
+        fileSystem: MemoryFileSystem.test(),
+        isDevDependency: false,
+      );
+
+      expect(plugin.platforms, contains('foo_platform'));
+      final PluginPlatform? customPlatform = plugin.platforms['foo_platform'];
+      expect(customPlatform, isNotNull);
+      expect(customPlatform, isA<CustomPlatformPlugin>());
+      final customPlatformPlugin = customPlatform! as CustomPlatformPlugin;
+      expect(customPlatformPlugin.configuration, containsPair('pluginClass', 'CustomPlugin'));
+      expect(customPlatformPlugin.configuration, containsPair('someCustomKey', 'customValue'));
+    });
+
+    testWithoutContext('resolves custom platform implementations', () {
+      final customPlugin = Plugin(
+        name: 'custom_plugin',
+        path: '',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{
+          'foo_platform': CustomPlatformPlugin(
+            configuration: <String, Object?>{'pluginClass': 'CustomPluginClass'},
+          ),
+        },
+        dependencies: const <String>[],
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+      final plugins = <Plugin>[customPlugin];
+
+      final List<Plugin> resolved = resolvePluginImplementationsForPlatform(
+        plugins,
+        'foo_platform',
+      );
+      expect(resolved, contains(customPlugin));
     });
   });
 

@@ -95,7 +95,6 @@ void main() {
   });
   testWithoutContext('Plugin creation from the multi-platform format with custom platform', () {
     final fileSystem = MemoryFileSystem.test();
-    Plugin.registerCustomPlatform('custom_platform');
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n'
@@ -118,19 +117,17 @@ void main() {
     );
 
     final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
-    final customPlugin = plugin.platforms['custom_platform']! as CustomPluginPlatform;
+    final customPlugin = plugin.platforms['custom_platform']! as CustomPlatformPlugin;
 
     expect(androidPlugin.pluginClass, 'ASamplePlugin');
     expect(androidPlugin.package, 'com.flutter.dev');
-    expect(customPlugin.pluginClass, 'CustomSamplePlugin');
-    expect(customPlugin.dartPluginClass, 'CustomDartPlugin');
-    expect(customPlugin.ffiPlugin, isTrue);
-    expect(customPlugin.defaultPackage, isNull);
+    expect(customPlugin.configuration['pluginClass'], 'CustomSamplePlugin');
+    expect(customPlugin.configuration['dartPluginClass'], 'CustomDartPlugin');
+    expect(customPlugin.configuration['ffiPlugin'], isTrue);
   });
 
   testWithoutContext('Plugin parsing allows a default_package field for custom platform', () {
     final fileSystem = MemoryFileSystem.test();
-    Plugin.registerCustomPlatform('custom_platform');
     const pluginYamlRaw =
         'platforms:\n'
         ' custom_platform:\n'

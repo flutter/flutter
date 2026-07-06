@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
@@ -77,12 +76,12 @@ class Plugin {
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
-    if (pluginYaml?['platforms'] != null) {
+    if (pluginYaml != null && pluginYaml['platforms'] != null) {
       // SAFETY: Assumes that validatePluginYaml(pluginYaml) has been called.
       return Plugin._fromMultiPlatformYaml(
         name,
         path,
-        pluginYaml!,
+        pluginYaml,
         flutterConstraint,
         dependencies,
         fileSystem,
@@ -121,74 +120,61 @@ class Plugin {
 
     final platforms = <String, PluginPlatform>{};
 
-    if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
-      platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
-        name,
-        platformsYaml[AndroidPlugin.kConfigKey] as YamlMap,
-        path,
-        fileSystem,
-      );
-    }
+    for (final Object? key in platformsYaml.keys) {
+      if (key is! String) {
+        continue;
+      }
+      final Object? value = platformsYaml[key];
+      if (value is! YamlMap) {
+        continue;
+      }
 
-    if (_providesImplementationForPlatform(platformsYaml, IOSPlugin.kConfigKey)) {
-      platforms[IOSPlugin.kConfigKey] = IOSPlugin.fromYaml(
-        name,
-        platformsYaml[IOSPlugin.kConfigKey] as YamlMap,
-      );
-    }
-
-    if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
-      platforms[LinuxPlugin.kConfigKey] = LinuxPlugin.fromYaml(
-        name,
-        platformsYaml[LinuxPlugin.kConfigKey] as YamlMap,
-      );
-    }
-
-    if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
-      platforms[MacOSPlugin.kConfigKey] = MacOSPlugin.fromYaml(
-        name,
-        platformsYaml[MacOSPlugin.kConfigKey] as YamlMap,
-      );
-    }
-
-    if (_providesImplementationForPlatform(platformsYaml, WebPlugin.kConfigKey)) {
-      platforms[WebPlugin.kConfigKey] = WebPlugin.fromYaml(
-        name,
-        platformsYaml[WebPlugin.kConfigKey] as YamlMap,
-      );
-    }
-
-    if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
-      platforms[WindowsPlugin.kConfigKey] = WindowsPlugin.fromYaml(
-        name,
-        platformsYaml[WindowsPlugin.kConfigKey] as YamlMap,
-      );
-    }
-
-    for (final String customPlatform in customPlatforms) {
-      if (_providesImplementationForPlatform(platformsYaml, customPlatform)) {
-        platforms[customPlatform] = CustomPluginPlatform.fromYaml(
-          name,
-          customPlatform,
-          platformsYaml[customPlatform] as YamlMap,
-        );
+      if (key == AndroidPlugin.kConfigKey) {
+        if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
+          platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
+            name,
+            value,
+            path,
+            fileSystem,
+          );
+        }
+      } else if (key == IOSPlugin.kConfigKey) {
+        if (_providesImplementationForPlatform(platformsYaml, IOSPlugin.kConfigKey)) {
+          platforms[IOSPlugin.kConfigKey] = IOSPlugin.fromYaml(name, value);
+        }
+      } else if (key == LinuxPlugin.kConfigKey) {
+        if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
+          platforms[LinuxPlugin.kConfigKey] = LinuxPlugin.fromYaml(name, value);
+        }
+      } else if (key == MacOSPlugin.kConfigKey) {
+        if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
+          platforms[MacOSPlugin.kConfigKey] = MacOSPlugin.fromYaml(name, value);
+        }
+      } else if (key == WebPlugin.kConfigKey) {
+        if (_providesImplementationForPlatform(platformsYaml, WebPlugin.kConfigKey)) {
+          platforms[WebPlugin.kConfigKey] = WebPlugin.fromYaml(name, value);
+        }
+      } else if (key == WindowsPlugin.kConfigKey) {
+        if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
+          platforms[WindowsPlugin.kConfigKey] = WindowsPlugin.fromYaml(name, value);
+        }
+      } else {
+        if (_providesImplementationForPlatform(platformsYaml, key)) {
+          platforms[key] = CustomPlatformPlugin(configuration: _yamlMapToMap(value));
+        }
       }
     }
 
-    // TODO(stuartmorgan): Consider merging web into this common handling; the
-    //  fact that its implementation of Dart-only plugins and default packages
-    //  are separate is legacy.
-    final sharedHandlingPlatforms = <String>[
-      AndroidPlugin.kConfigKey,
-      IOSPlugin.kConfigKey,
-      LinuxPlugin.kConfigKey,
-      MacOSPlugin.kConfigKey,
-      WindowsPlugin.kConfigKey,
-      ...customPlatforms,
-    ];
     final defaultPackages = <String, String>{};
     final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
-    for (final platform in sharedHandlingPlatforms) {
+    for (final Object? platformKeyObj in platformsYaml.keys) {
+      if (platformKeyObj is! String) {
+        continue;
+      }
+      final String platform = platformKeyObj;
+      if (platform == WebPlugin.kConfigKey) {
+        continue;
+      }
       final String? defaultPackage = _getDefaultPackageForPlatform(platformsYaml, platform);
       if (defaultPackage != null) {
         defaultPackages[platform] = defaultPackage;
@@ -259,17 +245,6 @@ class Plugin {
       isDirectDependency: isDirectDependency,
       isDevDependency: isDevDependency,
     );
-  }
-
-  static final Set<String> customPlatforms = <String>{};
-
-  static void registerCustomPlatform(String platformKey) {
-    customPlatforms.add(platformKey);
-  }
-
-  @visibleForTesting
-  static void clearCustomPlatforms() {
-    customPlatforms.clear();
   }
 
   /// Create a YamlMap that represents the supported platforms.
@@ -368,9 +343,6 @@ class Plugin {
         'Invalid "macos" plugin specification.',
       if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate))
         'Invalid "windows" plugin specification.',
-      for (final String customPlatform in customPlatforms)
-        if (isInvalid(customPlatform, CustomPluginPlatform.validate))
-          'Invalid "$customPlatform" plugin specification.',
     ];
   }
 
@@ -575,3 +547,34 @@ class PluginInterfaceResolution {
 /// See also:
 /// - [PluginInterfaceResolution], which uses this record to create Map with metadata.
 typedef DartPluginClassAndFilePair = ({String dartClass, String dartFileName});
+
+Map<String, Object?> _yamlMapToMap(YamlMap yamlMap) {
+  final result = <String, Object?>{};
+  for (final MapEntry<Object?, Object?> entry in yamlMap.entries) {
+    if (entry.key case final String key) {
+      final Object? val = entry.value;
+      if (val is YamlMap) {
+        result[key] = _yamlMapToMap(val);
+      } else if (val is YamlList) {
+        result[key] = _yamlListToList(val);
+      } else {
+        result[key] = val;
+      }
+    }
+  }
+  return result;
+}
+
+List<Object?> _yamlListToList(YamlList yamlList) {
+  final result = <Object?>[];
+  for (final Object? val in yamlList) {
+    if (val is YamlMap) {
+      result.add(_yamlMapToMap(val));
+    } else if (val is YamlList) {
+      result.add(_yamlListToList(val));
+    } else {
+      result.add(val);
+    }
+  }
+  return result;
+}

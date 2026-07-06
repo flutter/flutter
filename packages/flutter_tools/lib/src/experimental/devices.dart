@@ -13,13 +13,12 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
-import '../cmake.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../flutter_plugins.dart';
 import '../flutter_tools_core/build.dart' as core;
 import '../globals.dart' as globals;
+import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../vmservice.dart';
@@ -85,8 +84,8 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
               discoveredDevices.add(
                 ExtensionBackedDevice(
                   deviceData['id']! as String,
+                  extension,
                   category: _parseCategory(deviceData['category'] as String?),
-                  extension: extension,
                   logger: _logger,
                   name: deviceData['name']! as String,
                   buildTargetName: deviceData['buildTarget'] as String?,
@@ -119,18 +118,16 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
 /// A client-side [Device] implementation that delegates all commands to an extension isolate.
 class ExtensionBackedDevice extends Device {
   ExtensionBackedDevice(
-    super.id, {
+    super.id,
+    this._extension, {
     required super.category,
-    required ToolExtension extension,
     required super.logger,
     required this.name,
     this.buildTargetName,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.extensionManager,
     this.platformName,
-  }) : _extension = extension,
-       _logger = logger,
-       _discoveryHelper = ExtensionDiscoveryHelper(
+  }) : _discoveryHelper = ExtensionDiscoveryHelper(
          logger: logger,
          extensionManager: extensionManager ?? ToolExtensionManager(),
        ),
@@ -152,7 +149,6 @@ class ExtensionBackedDevice extends Device {
   }
 
   final ToolExtension _extension;
-  final Logger _logger;
   final ToolExtensionManager? extensionManager;
   final ExtensionDiscoveryHelper _discoveryHelper;
 
@@ -278,8 +274,8 @@ class ExtensionBackedDevice extends Device {
 
       final String buildTarget = buildTargetName ?? 'assemble_linux_app';
 
-      core.ExtensionBuildTarget? target;
-      // 2. Query 'build.getTargets' to verify target is supported.
+      // 2. Query "build.getTargets" to verify target is supported and extract target platform info.
+      core.Target? foundTarget;
       try {
         final Object? targetsResult = await _extension
             .callMethod('build.getTargets')
@@ -290,8 +286,12 @@ class ExtensionBackedDevice extends Device {
         final List<core.ExtensionBuildTarget> targets = core.ExtensionBuildTarget.listFromJson(
           targetsResult,
         );
-        target = targets.where((core.ExtensionBuildTarget t) => t.name == buildTarget).firstOrNull;
-        if (target == null) {
+        final List<core.Target> matching = targets
+            .where((core.Target t) => t.name == buildTarget)
+            .toList();
+        if (matching.isNotEmpty) {
+          foundTarget = matching.first;
+        } else {
           throwToolExit('Tool extension does not expose build target "$buildTarget".');
         }
       } on Object catch (e) {
@@ -299,27 +299,6 @@ class ExtensionBackedDevice extends Device {
           rethrow;
         }
         throwToolExit('Failed to query build targets: $e');
-      }
-
-      final String? platformKey = target.pluginPlatformKey;
-
-      var gepPlugins = <core.GepPlugin>[];
-      if (platformKey != null) {
-        await refreshPluginsList(project);
-        final List<Plugin> allPlugins = await findPlugins(project);
-        final List<Plugin> platformPlugins =
-            resolvePlatformImplementation(allPlugins, selectDartPluginsOnly: false)
-                .where((PluginInterfaceResolution r) => r.platform == platformKey)
-                .map((PluginInterfaceResolution r) => r.plugin)
-                .toList();
-
-        gepPlugins = platformPlugins.map((Plugin p) {
-          return core.GepPlugin(
-            name: p.name,
-            path: p.path,
-            configuration: p.platforms[platformKey]?.toMap() ?? <String, Object?>{},
-          );
-        }).toList();
       }
 
       final Map<String, String> environmentConfig = debuggingOptions.buildInfo
@@ -340,41 +319,26 @@ class ExtensionBackedDevice extends Device {
         environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
       }
 
-      // 4. Host preparations (write CMake configuration & plugin symlinks if CMake project exists)
-      final bool shouldHostManagePlugins = target.generatesCmakePluginFiles;
-
-      if (cmakeProject.existsSync()) {
-        writeGeneratedCmakeConfig(
-          Cache.flutterRoot!,
-          cmakeProject,
-          debuggingOptions.buildInfo,
-          environmentConfig,
-          _logger,
+      // 4. Host preparations (resolve plugins for custom target platform)
+      final resolvedPlugins = <core.ExtensionPlugin>[];
+      final String? pluginPlatformKey = foundTarget.pluginPlatformKey;
+      if (pluginPlatformKey != null) {
+        await refreshPluginsList(project);
+        final List<Plugin> plugins = await findPlugins(project);
+        final List<Plugin> resolved = resolvePluginImplementationsForPlatform(
+          plugins,
+          pluginPlatformKey,
         );
-        if (shouldHostManagePlugins) {
-          await refreshPluginsList(project);
-          createPluginSymlinks(
-            project,
-            customCMakeProject: cmakeProject,
-            customPlatformKey: platformKey ?? platformName,
-          );
-          if (platform.getName() == 'linux-x64' ||
-              (platformKey ?? platformName).contains('linux')) {
-            await injectPlugins(
-              project,
-              releaseMode: debuggingOptions.buildInfo.mode.isRelease,
-              linuxPlatform: true,
-            );
-          }
-        } else {
-          _logger.printTrace(
-            'Extension device platform "$platformName" plugin injection is managed by the extension, bypassing host plugin symlinks and injection.',
+        for (final plugin in resolved) {
+          final PluginPlatform platformConfig = plugin.platforms[pluginPlatformKey]!;
+          resolvedPlugins.add(
+            core.ExtensionPlugin(
+              configuration: platformConfig.toMap(),
+              name: plugin.name,
+              path: plugin.path,
+            ),
           );
         }
-      } else {
-        _logger.printTrace(
-          'Extension device platform "$platformName" does not use host CMake configuration.',
-        );
       }
 
       final buildEnv = core.BuildEnvironment(
@@ -385,8 +349,8 @@ class ExtensionBackedDevice extends Device {
             .childDirectory('flutter_assets')
             .uri,
         outputDirectory: buildDirectory.uri,
+        plugins: resolvedPlugins,
         projectRoot: project.directory.uri,
-        plugins: gepPlugins,
       );
 
       String? buildExecutablePath;

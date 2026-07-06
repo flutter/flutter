@@ -7,9 +7,9 @@ import 'package:file/file.dart';
 import 'build.dart';
 
 /// Helper to recreate plugin symlinks directory and link each resolved plugin.
-void createGepPluginSymlinks({
+void createExtensionPluginSymlinks({
   required FileSystem fileSystem,
-  required List<GepPlugin> plugins,
+  required List<ExtensionPlugin> plugins,
   required Directory symlinkDirectory,
   bool force = false,
 }) {
@@ -39,14 +39,14 @@ void createGepPluginSymlinks({
 /// Generates the content of `generated_plugins.cmake` for CMake-based platforms.
 String generateCmakePluginsFile({
   required String os,
-  required List<GepPlugin> plugins,
+  required List<ExtensionPlugin> plugins,
   required String pluginsDir,
 }) {
-  final List<GepPlugin> methodChannelPlugins = plugins.where((GepPlugin p) {
+  final List<ExtensionPlugin> methodChannelPlugins = plugins.where((ExtensionPlugin p) {
     return p.configuration['class'] != null;
   }).toList();
 
-  final List<GepPlugin> ffiPlugins = plugins.where((GepPlugin p) {
+  final List<ExtensionPlugin> ffiPlugins = plugins.where((ExtensionPlugin p) {
     return p.configuration['ffiPlugin'] == true && p.configuration['class'] == null;
   }).toList();
 

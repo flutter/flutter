@@ -46,8 +46,6 @@ abstract base class BuildService extends ToolExtensionService {
             if (target.targetDeviceDirectory != null)
               'targetDeviceDirectory': target.targetDeviceDirectory,
             if (target.pluginPlatformKey != null) 'pluginPlatformKey': target.pluginPlatformKey,
-            if (target.generatesCmakePluginFiles)
-              'generatesCmakePluginFiles': target.generatesCmakePluginFiles,
           },
         )
         .toList();
@@ -125,9 +123,6 @@ abstract base class Target {
   /// Optional plugin platform key (e.g., 'linux') for negotiating host plugin generation and injection.
   String? get pluginPlatformKey => null;
 
-  /// Whether this target expects the host to generate CMake plugin integration files (e.g., `generated_plugins.cmake`).
-  bool get generatesCmakePluginFiles => false;
-
   /// The list of names of dependencies.
   List<String> get dependencies;
 
@@ -163,8 +158,7 @@ final class ExtensionBuildTarget extends Target {
           : const <String>[],
       cliSubcommand = json['cliSubcommand'] as String?,
       cliDescription = json['cliDescription'] as String?,
-      pluginPlatformKey = json['pluginPlatformKey'] as String?,
-      generatesCmakePluginFiles = json['generatesCmakePluginFiles'] == true;
+      pluginPlatformKey = json['pluginPlatformKey'] as String?;
 
   @override
   final String name;
@@ -186,9 +180,6 @@ final class ExtensionBuildTarget extends Target {
 
   @override
   final String? pluginPlatformKey;
-
-  @override
-  final bool generatesCmakePluginFiles;
 
   @override
   Future<Map<String, Object?>> build(BuildEnvironment env) async {
@@ -213,7 +204,7 @@ class BuildEnvironment {
     required this.flutterAssetsDir,
     required this.outputDirectory,
     required this.projectRoot,
-    this.plugins = const <GepPlugin>[],
+    required this.plugins,
   });
 
   /// Create a BuildEnvironment from a JSON map.
@@ -224,13 +215,15 @@ class BuildEnvironment {
       flutterAssetsDir: Uri.parse(json['flutterAssetsDir']! as String),
       outputDirectory: Uri.parse(json['outputDirectory']! as String),
       projectRoot: Uri.parse(json['projectRoot']! as String),
-      plugins: json['plugins'] is List
-          ? <GepPlugin>[
-              for (final Object? item in json['plugins']! as List<Object?>)
-                if (item case final Map<Object?, Object?> itemMap)
-                  GepPlugin.fromJson(itemMap.cast<String, Object?>()),
-            ]
-          : const <GepPlugin>[],
+      plugins:
+          (json['plugins'] as List<Object?>?)
+              ?.map(
+                (Object? item) => ExtensionPlugin.fromJson(
+                  (item! as Map<Object?, Object?>).cast<String, Object?>(),
+                ),
+              )
+              .toList() ??
+          const <ExtensionPlugin>[],
     );
   }
 
@@ -249,41 +242,40 @@ class BuildEnvironment {
   /// Assets directory.
   final Uri flutterAssetsDir;
 
-  /// Plugins resolved for this build.
-  final List<GepPlugin> plugins;
+  /// The plugins resolved for this target.
+  final List<ExtensionPlugin> plugins;
 
   Map<String, Object?> toMap() => <String, Object?>{
     'cacheDir': cacheDir.toString(),
     'defines': defines,
     'flutterAssetsDir': flutterAssetsDir.toString(),
     'outputDirectory': outputDirectory.toString(),
+    'plugins': plugins.map((ExtensionPlugin p) => p.toMap()).toList(),
     'projectRoot': projectRoot.toString(),
-    'plugins': plugins.map((GepPlugin plugin) => plugin.toMap()).toList(),
   };
 }
 
-class GepPlugin {
-  GepPlugin({required this.configuration, required this.name, required this.path});
+class ExtensionPlugin {
+  ExtensionPlugin({required this.configuration, required this.name, required this.path});
 
-  factory GepPlugin.fromJson(Map<String, Object?> json) {
-    if (json case {
-      'name': final String name,
-      'path': final String path,
-      'configuration': final Map<Object?, Object?> config,
-    }) {
-      return GepPlugin(configuration: config.cast<String, Object?>(), name: name, path: path);
-    }
-    throw FormatException('Invalid GepPlugin JSON: $json');
+  factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
+    return ExtensionPlugin(
+      configuration:
+          (json['configuration'] as Map<Object?, Object?>?)?.cast<String, Object?>() ??
+          const <String, Object?>{},
+      name: json['name']! as String,
+      path: json['path']! as String,
+    );
   }
 
+  final Map<String, Object?> configuration;
   final String name;
   final String path;
-  final Map<String, Object?> configuration;
 
   Map<String, Object?> toMap() => <String, Object?>{
+    'configuration': configuration,
     'name': name,
     'path': path,
-    'configuration': configuration,
   };
 }
 

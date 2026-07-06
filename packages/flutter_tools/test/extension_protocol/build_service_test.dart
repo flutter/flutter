@@ -36,6 +36,13 @@ void main() {
         flutterAssetsDir: Uri.parse('file:///assets'),
         outputDirectory: Uri.parse('file:///output'),
         projectRoot: Uri.parse('file:///project'),
+        plugins: <ExtensionPlugin>[
+          ExtensionPlugin(
+            configuration: const <String, Object?>{'key': 'val'},
+            name: 'my_plugin',
+            path: '/path/to/my_plugin',
+          ),
+        ],
       );
 
       final Map<String, Object?> map = env.toMap();
@@ -44,6 +51,13 @@ void main() {
       expect(map['flutterAssetsDir'], 'file:///assets');
       expect(map['outputDirectory'], 'file:///output');
       expect(map['projectRoot'], 'file:///project');
+      expect(map['plugins'], isList);
+      final pluginsList = map['plugins']! as List<Object?>;
+      expect(pluginsList.length, 1);
+      final pluginMap = pluginsList.first! as Map<String, Object?>;
+      expect(pluginMap['name'], 'my_plugin');
+      expect(pluginMap['path'], '/path/to/my_plugin');
+      expect(pluginMap['configuration'], <String, Object?>{'key': 'val'});
 
       final deserialized = BuildEnvironment.fromJson(map);
       expect(deserialized.cacheDir.toString(), 'file:///cache');
@@ -51,6 +65,10 @@ void main() {
       expect(deserialized.flutterAssetsDir.toString(), 'file:///assets');
       expect(deserialized.outputDirectory.toString(), 'file:///output');
       expect(deserialized.projectRoot.toString(), 'file:///project');
+      expect(deserialized.plugins.length, 1);
+      expect(deserialized.plugins.first.name, 'my_plugin');
+      expect(deserialized.plugins.first.path, '/path/to/my_plugin');
+      expect(deserialized.plugins.first.configuration, <String, Object?>{'key': 'val'});
     });
 
     testWithoutContext('ArtifactDependency serialization and deserialization', () {
@@ -117,6 +135,7 @@ void main() {
         flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
         outputDirectory: Uri.parse('file:///build/out'),
         projectRoot: Uri.parse('file:///project'),
+        plugins: const <ExtensionPlugin>[],
       );
 
       final Map<String, Object?> result = await build(<String, Object?>{
@@ -179,6 +198,7 @@ void main() {
           flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
           outputDirectory: Uri.parse('file:///build/out'),
           projectRoot: Uri.parse('file:///project'),
+          plugins: const <ExtensionPlugin>[],
         );
 
         final Map<String, Object?> result = await build(<String, Object?>{
@@ -248,6 +268,7 @@ void main() {
         flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
         outputDirectory: Uri.parse('file:///build/out'),
         projectRoot: Uri.parse('file:///project'),
+        plugins: const <ExtensionPlugin>[],
       );
 
       final Map<String, Object?> result = await build(<String, Object?>{
@@ -317,6 +338,7 @@ void main() {
           flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
           outputDirectory: Uri.parse('file:///build/out'),
           projectRoot: Uri.parse('file:///project'),
+          plugins: const <ExtensionPlugin>[],
         );
 
         final Map<String, Object?> result = await build(<String, Object?>{
@@ -400,6 +422,7 @@ void main() {
           flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
           outputDirectory: Uri.parse('file:///build/out'),
           projectRoot: Uri.parse('file:///project'),
+          plugins: const <ExtensionPlugin>[],
         );
 
         final Map<String, Object?> result = await build(<String, Object?>{
@@ -472,6 +495,7 @@ void main() {
           flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
           outputDirectory: Uri.parse('file:///build/out'),
           projectRoot: Uri.parse('file:///project'),
+          plugins: const <ExtensionPlugin>[],
         );
 
         final Map<String, Object?> result = await build(<String, Object?>{
@@ -511,7 +535,7 @@ void main() {
       Map<String, Object?>? buildResponse,
       bool mockBuild = true,
       bool mockGetTargets = true,
-      List<Map<String, Object?>>? targets,
+      List<ExtensionBuildTarget>? targets,
       required List<String> services,
     }) async {
       final managerReceivePort = ReceivePort();
@@ -531,15 +555,14 @@ void main() {
 
       if (mockGetTargets) {
         mockExtensionPeer!.registerMethod('build.getTargets', () {
-          return targets ??
-              <Map<String, Object?>>[
-                <String, Object?>{
-                  'name': 'assemble_linux_app',
-                  'dependencies': <String>[],
-                  'inputs': <String>[],
-                  'outputs': <String>[],
-                },
-              ];
+          return <Map<String, Object?>>[
+            <String, Object?>{
+              'name': 'assemble_linux_app',
+              'dependencies': <String>[],
+              'inputs': <String>[],
+              'outputs': <String>[],
+            },
+          ];
         });
       }
 
@@ -586,8 +609,8 @@ void main() {
 
         final device = ExtensionBackedDevice(
           'linux-proto-1',
+          extension,
           category: Category.desktop,
-          extension: extension,
           logger: BufferLogger.test(),
           name: 'Mock Device',
         );
@@ -631,16 +654,6 @@ void main() {
         final buildCompleter = Completer<Map<String, Object?>>();
         final ToolExtension extension = await connectMockExtension(
           services: <String>['build'],
-          targets: <Map<String, Object?>>[
-            <String, Object?>{
-              'name': 'assemble_linux_app',
-              'pluginPlatformKey': 'linux',
-              'generatesCmakePluginFiles': true,
-              'dependencies': <String>[],
-              'inputs': <String>[],
-              'outputs': <String>[],
-            },
-          ],
           buildCompleter: buildCompleter,
         );
 
@@ -665,8 +678,8 @@ void main() {
 
         final device = ExtensionBackedDevice(
           'linux-proto-1',
+          extension,
           category: Category.desktop,
-          extension: extension,
           logger: BufferLogger.test(),
           name: 'Mock Device',
         );
@@ -684,14 +697,11 @@ void main() {
         );
 
         expect(result.started, true);
-        expect(
-          projectDir
-              .childDirectory('linux')
-              .childDirectory('flutter')
-              .childFile('generated_plugins.cmake')
-              .existsSync(),
-          isTrue,
-        );
+
+        final Map<String, Object?> buildCall = await buildCompleter.future;
+        final envMap = buildCall['environment']! as Map<String, Object?>;
+        final env = BuildEnvironment.fromJson(envMap);
+        expect(env.plugins, isEmpty);
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -714,8 +724,8 @@ void main() {
 
         final device = ExtensionBackedDevice(
           'linux-proto-1',
+          extension,
           category: Category.desktop,
-          extension: extension,
           logger: BufferLogger.test(),
           name: 'Mock Device',
         );
@@ -750,8 +760,8 @@ void main() {
 
         final device = ExtensionBackedDevice(
           'linux-proto-1',
+          extension,
           category: Category.desktop,
-          extension: extension,
           logger: BufferLogger.test(),
           name: 'Mock Device',
         );
@@ -819,6 +829,119 @@ void main() {
         expect(minimalTarget.dependencies, isEmpty);
         expect(minimalTarget.inputs, isEmpty);
         expect(minimalTarget.outputs, isEmpty);
+      },
+    );
+
+    testWithoutContext(
+      'LinuxBuildService compiles target and dynamically generates plugin symlinks, CMake configurations, and C++ registrants when plugins are present',
+      () async {
+        final fs = MemoryFileSystem.test();
+        fs.directory('/project/linux').createSync(recursive: true);
+        fs.directory('/build/out').createSync(recursive: true);
+
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'cmake',
+              '-G',
+              'Ninja',
+              '-DCMAKE_BUILD_TYPE=Debug',
+              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+              '-S',
+              '/project/linux',
+              '-B',
+              '/build/out',
+            ],
+            environment: <String, String>{},
+          ),
+          const FakeCommand(
+            command: <String>['cmake', '--build', '/build/out', '--target', 'install'],
+            environment: <String, String>{},
+          ),
+        ]);
+
+        final buildService = LinuxBuildService(fileSystem: fs, processManager: fakeProcessManager);
+        final Map<String, Function> rpcHandlers = await buildService.initialize();
+        final build =
+            rpcHandlers['build']! as Future<Map<String, Object?>> Function(Map<String, Object?>);
+
+        final env = BuildEnvironment(
+          cacheDir: Uri.parse('file:///cache'),
+          defines: <String, String>{},
+          flutterAssetsDir: Uri.parse('file:///project/build/flutter_assets'),
+          outputDirectory: Uri.parse('file:///build/out'),
+          plugins: <ExtensionPlugin>[
+            ExtensionPlugin(
+              configuration: const <String, Object?>{'pluginClass': 'UrlLauncherPlugin'},
+              name: 'url_launcher_linux',
+              path: '/plugins/url_launcher_linux',
+            ),
+            ExtensionPlugin(
+              configuration: const <String, Object?>{'ffiPlugin': true},
+              name: 'my_ffi_plugin',
+              path: '/plugins/my_ffi_plugin',
+            ),
+          ],
+          projectRoot: Uri.parse('file:///project'),
+        );
+
+        final Map<String, Object?> result = await build(<String, Object?>{
+          'targetName': 'assemble_linux_app',
+          'environment': env.toMap(),
+        });
+
+        expect(result['success'], true);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+
+        // Verify symlinks were created
+        final Directory symlinkDir = fs.directory(
+          '/project/linux/flutter/ephemeral/.plugin_symlinks',
+        );
+        expect(symlinkDir.childLink('url_launcher_linux').existsSync(), isTrue);
+        expect(
+          symlinkDir.childLink('url_launcher_linux').targetSync(),
+          '/plugins/url_launcher_linux',
+        );
+        expect(symlinkDir.childLink('my_ffi_plugin').existsSync(), isTrue);
+        expect(symlinkDir.childLink('my_ffi_plugin').targetSync(), '/plugins/my_ffi_plugin');
+
+        // Verify generated_plugins.cmake content
+        final File cmakeFile = fs.file('/project/linux/flutter/generated_plugins.cmake');
+        expect(cmakeFile.existsSync(), isTrue);
+        final String cmakeContent = cmakeFile.readAsStringSync();
+        expect(cmakeContent, contains('list(APPEND FLUTTER_PLUGIN_LIST\n  url_launcher_linux\n)'));
+        expect(cmakeContent, contains('list(APPEND FLUTTER_FFI_PLUGIN_LIST\n  my_ffi_plugin\n)'));
+        expect(
+          cmakeContent,
+          contains(
+            r'add_subdirectory(flutter/ephemeral/.plugin_symlinks/${plugin}/linux plugins/${plugin})',
+          ),
+        );
+
+        // Verify generated_plugin_registrant.h
+        final File headerFile = fs.file('/project/linux/flutter/generated_plugin_registrant.h');
+        expect(headerFile.existsSync(), isTrue);
+        final String headerContent = headerFile.readAsStringSync();
+        expect(headerContent, contains('void fl_register_plugins(FlPluginRegistry* registry);'));
+
+        // Verify generated_plugin_registrant.cc
+        final File sourceFile = fs.file('/project/linux/flutter/generated_plugin_registrant.cc');
+        expect(sourceFile.existsSync(), isTrue);
+        final String sourceContent = sourceFile.readAsStringSync();
+        expect(sourceContent, contains('#include <url_launcher_linux/url_launcher_plugin.h>'));
+        expect(sourceContent, contains('void fl_register_plugins(FlPluginRegistry* registry) {'));
+        expect(
+          sourceContent,
+          contains('g_autoptr(FlPluginRegistrar) url_launcher_linux_registrar ='),
+        );
+        expect(
+          sourceContent,
+          contains('fl_plugin_registry_get_registrar_for_plugin(registry, "UrlLauncherPlugin");'),
+        );
+        expect(
+          sourceContent,
+          contains('url_launcher_plugin_register_with_registrar(url_launcher_linux_registrar);'),
+        );
       },
     );
 
@@ -1022,14 +1145,10 @@ void main() {
 
           final Map<String, Object?> buildCall = await buildCompleter.future;
           expect(buildCall['targetName'], 'custom_plugin_target');
-          expect(
-            projectDir
-                .childDirectory('linux')
-                .childDirectory('flutter')
-                .childFile('generated_plugins.cmake')
-                .existsSync(),
-            isTrue,
-          );
+
+          final envMap = buildCall['environment']! as Map<String, Object?>;
+          final env = BuildEnvironment.fromJson(envMap);
+          expect(env.plugins, isEmpty);
         },
         overrides: <Type, Generator>{
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),

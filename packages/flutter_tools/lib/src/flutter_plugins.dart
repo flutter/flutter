@@ -275,36 +275,6 @@ const _kFlutterPluginsDevDependencyKey = 'dev_dependency';
 ///
 ///
 /// Finally, returns `true` if the plugins list has changed, otherwise returns `false`.
-void _registerCustomPlatforms(FlutterProject project) {
-  final File pluginsFile = project.flutterPluginsDependenciesFile;
-  if (!pluginsFile.existsSync()) {
-    return;
-  }
-  final Iterable<String> standardPlatformKeys = <String>[
-    project.ios.pluginConfigKey,
-    project.android.pluginConfigKey,
-    project.macos.pluginConfigKey,
-    project.linux.pluginConfigKey,
-    project.windows.pluginConfigKey,
-    project.web.pluginConfigKey,
-  ];
-  try {
-    final jsonContent =
-        json.decode(pluginsFile.readAsStringSync()) as Map<String, Object?>?;
-    final pluginsMap =
-        jsonContent?[_kFlutterPluginsPluginListKey] as Map<String, Object?>?;
-    if (pluginsMap != null) {
-      for (final String key in pluginsMap.keys) {
-        if (!standardPlatformKeys.contains(key)) {
-          Plugin.registerCustomPlatform(key);
-        }
-      }
-    }
-  } on Exception {
-    // Ignore errors reading/parsing the file.
-  }
-}
-
 bool _writeFlutterPluginsList(
   FlutterProject project,
   List<Plugin> plugins, {
@@ -316,7 +286,7 @@ bool _writeFlutterPluginsList(
     return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
   }
 
-  final Iterable<String> standardPlatformKeys = <String>[
+  final Iterable<String> platformKeys = <String>[
     project.ios.pluginConfigKey,
     project.android.pluginConfigKey,
     project.macos.pluginConfigKey,
@@ -324,10 +294,6 @@ bool _writeFlutterPluginsList(
     project.windows.pluginConfigKey,
     project.web.pluginConfigKey,
   ];
-
-  final customPlatforms = Set<String>.from(Plugin.customPlatforms);
-
-  final Iterable<String> platformKeys = <String>[...standardPlatformKeys, ...customPlatforms];
 
   final Map<String, List<Plugin>> resolvedPlatformPlugins = _resolvePluginImplementations(
     plugins,
@@ -1236,22 +1202,6 @@ void createPluginSymlinks(
       force: force,
     );
   }
-
-  // Handle registered custom platforms automatically.
-  for (final String customPlatform in Plugin.customPlatforms) {
-    if (customPlatform == customPlatformKey) {
-      continue;
-    }
-    final cmakeProject = GenericCmakeProject(project, customPlatform);
-    if (cmakeProject.existsSync()) {
-      _createPlatformPluginSymlinks(
-        cmakeProject.pluginSymlinkDirectory,
-        platformPlugins[customPlatform] as List<Object?>?,
-        force: force,
-      );
-    }
-  }
-
   if (customCMakeProject != null && customPlatformKey != null) {
     _createPlatformPluginSymlinks(
       customCMakeProject.pluginSymlinkDirectory,
@@ -1359,7 +1309,6 @@ Future<void> refreshPluginsList(
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
 }) async {
-  _registerCustomPlatforms(project);
   final List<Plugin> plugins = await findPlugins(
     project,
     pubspecCache: pubspecCache,
@@ -1605,20 +1554,26 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
   required _PluginResolutionType pluginResolutionType,
   bool quiet = false,
 }) {
+  final platformKeys = <String>{
+    AndroidPlugin.kConfigKey,
+    IOSPlugin.kConfigKey,
+    LinuxPlugin.kConfigKey,
+    MacOSPlugin.kConfigKey,
+    WindowsPlugin.kConfigKey,
+    WebPlugin.kConfigKey,
+  };
+  for (final plugin in plugins) {
+    platformKeys.addAll(plugin.platforms.keys);
+  }
+
   final pluginsByPlatform = <String, List<Plugin>>{
-    AndroidPlugin.kConfigKey: <Plugin>[],
-    IOSPlugin.kConfigKey: <Plugin>[],
-    LinuxPlugin.kConfigKey: <Plugin>[],
-    MacOSPlugin.kConfigKey: <Plugin>[],
-    WindowsPlugin.kConfigKey: <Plugin>[],
-    WebPlugin.kConfigKey: <Plugin>[],
-    for (final String customPlatform in Plugin.customPlatforms) customPlatform: <Plugin>[],
+    for (final platformKey in platformKeys) platformKey: <Plugin>[],
   };
 
   var hasPluginPubspecError = false;
   var hasResolutionError = false;
 
-  for (final String platformKey in pluginsByPlatform.keys) {
+  for (final platformKey in platformKeys) {
     final (
       List<Plugin> platformPluginResolutions,
       bool hasPlatformPluginPubspecError,

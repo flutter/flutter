@@ -54,7 +54,7 @@ base class LinuxBuildService extends BuildService {
 
   @override
   late final List<Target> targets = <Target>[
-    LinuxAssembleTarget(fileSystem: _fileSystem, processManager: _processManager),
+    LinuxAssembleTarget(_fileSystem, _processManager),
   ];
 
   @override
@@ -66,9 +66,7 @@ base class LinuxBuildService extends BuildService {
 
 /// The compilation target for the Linux application.
 base class LinuxAssembleTarget extends Target {
-  LinuxAssembleTarget({required FileSystem fileSystem, required ProcessManager processManager})
-    : _fileSystem = fileSystem,
-      _processManager = processManager;
+  LinuxAssembleTarget(this._fileSystem, this._processManager);
 
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
@@ -90,9 +88,6 @@ base class LinuxAssembleTarget extends Target {
 
   @override
   String? get pluginPlatformKey => 'linux';
-
-  @override
-  bool get generatesCmakePluginFiles => false;
 
   @override
   List<String> get dependencies => const <String>[];
@@ -143,95 +138,133 @@ base class LinuxAssembleTarget extends Target {
     }
 
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
-
-    // 1. Recreate plugin symlinks directory and link each resolved plugin.
-    final Directory symlinkDirectory = _fileSystem.directory(
-      _fileSystem.path.join(linuxProjectPath, 'flutter', 'ephemeral', '.plugin_symlinks'),
-    );
-    createGepPluginSymlinks(
-      fileSystem: _fileSystem,
-      force: true,
-      plugins: env.plugins,
-      symlinkDirectory: symlinkDirectory,
-    );
-
-    // 2. Generate generated_plugins.cmake dynamically.
-    final String cmakeContent = generateCmakePluginsFile(
-      os: 'linux',
-      plugins: env.plugins,
-      pluginsDir: 'flutter/ephemeral/.plugin_symlinks',
-    );
-
     final File generatedPluginsFile = _fileSystem.file(
       _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugins.cmake'),
     );
-    generatedPluginsFile.createSync(recursive: true);
-    generatedPluginsFile.writeAsStringSync(cmakeContent);
-
-    // Filter method channel plugins for registrant generation.
-    final List<GepPlugin> methodChannelPlugins = env.plugins.where((GepPlugin p) {
-      return p.configuration['class'] != null;
-    }).toList();
-
-    // 3. Generate generated_plugin_registrant.h.
-    final File registrantHeader = _fileSystem.file(
+    final File generatedPluginHeader = _fileSystem.file(
       _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugin_registrant.h'),
     );
-    registrantHeader.createSync(recursive: true);
-    registrantHeader.writeAsStringSync('''
-//
-//  Generated file. Do not edit.
-//
-
-// clang-format off
-
-#ifndef GENERATED_PLUGIN_REGISTRANT_
-#define GENERATED_PLUGIN_REGISTRANT_
-
-#include <flutter_linux/flutter_linux.h>
-
-// Registers Flutter plugins.
-void fl_register_plugins(FlPluginRegistry* registry);
-
-#endif  // GENERATED_PLUGIN_REGISTRANT_
-''');
-
-    // 4. Generate generated_plugin_registrant.cc.
-    final registrantImpl = StringBuffer();
-    registrantImpl.writeln('//');
-    registrantImpl.writeln('//  Generated file. Do not edit.');
-    registrantImpl.writeln('//');
-    registrantImpl.writeln();
-    registrantImpl.writeln('// clang-format off');
-    registrantImpl.writeln();
-    registrantImpl.writeln('#include "generated_plugin_registrant.h"');
-    registrantImpl.writeln();
-    for (final plugin in methodChannelPlugins) {
-      final filename = plugin.configuration['filename'] as String?;
-      if (filename != null) {
-        registrantImpl.writeln('#include <${plugin.name}/$filename.h>');
-      }
-    }
-    registrantImpl.writeln();
-    registrantImpl.writeln('void fl_register_plugins(FlPluginRegistry* registry) {');
-    for (final plugin in methodChannelPlugins) {
-      final pluginClass = plugin.configuration['class'] as String?;
-      final filename = plugin.configuration['filename'] as String?;
-      if (pluginClass != null && filename != null) {
-        registrantImpl.writeln('  g_autoptr(FlPluginRegistrar) ${plugin.name}_registrar =');
-        registrantImpl.writeln(
-          '      fl_plugin_registry_get_registrar_for_plugin(registry, "$pluginClass");',
-        );
-        registrantImpl.writeln('  ${filename}_register_with_registrar(${plugin.name}_registrar);');
-      }
-    }
-    registrantImpl.writeln('}');
-
-    final File registrantImplFile = _fileSystem.file(
+    final File generatedPluginSource = _fileSystem.file(
       _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugin_registrant.cc'),
     );
-    registrantImplFile.createSync(recursive: true);
-    registrantImplFile.writeAsStringSync(registrantImpl.toString());
+
+    // Create plugin symlinks
+    final Directory symlinkDirectory = _fileSystem.directory(
+      _fileSystem.path.join(linuxProjectPath, 'flutter', 'ephemeral', '.plugin_symlinks'),
+    );
+    if (symlinkDirectory.existsSync()) {
+      symlinkDirectory.deleteSync(recursive: true);
+    }
+    symlinkDirectory.createSync(recursive: true);
+
+    for (final ExtensionPlugin plugin in env.plugins) {
+      final Link link = symlinkDirectory.childLink(plugin.name);
+      link.createSync(plugin.path);
+    }
+
+    String camelCaseToUnderscore(String camelCaseSelector) {
+      final regex = RegExp(r'(?<=[a-z])(?=[A-Z])');
+      return camelCaseSelector.split(regex).join('_').toLowerCase();
+    }
+
+    final methodChannelPlugins = <Map<String, Object?>>[];
+    final ffiPlugins = <Map<String, Object?>>[];
+
+    for (final ExtensionPlugin plugin in env.plugins) {
+      final Map<String, Object?> config = plugin.configuration;
+      final isFfi = config['ffiPlugin'] == true;
+      final String? pluginClass = config['class'] as String? ?? config['pluginClass'] as String?;
+
+      if (pluginClass != null) {
+        final String filename = config['filename'] as String? ?? camelCaseToUnderscore(pluginClass);
+        methodChannelPlugins.add(<String, Object?>{
+          'name': plugin.name,
+          'class': pluginClass,
+          'filename': filename,
+          'path': plugin.path,
+        });
+      } else if (isFfi) {
+        ffiPlugins.add(<String, Object?>{'name': plugin.name, 'path': plugin.path});
+      }
+    }
+
+    // 1. Write generated_plugins.cmake
+    final cmakeContent = StringBuffer();
+    cmakeContent.writeln('# Generated file, do not edit.');
+    cmakeContent.writeln();
+    cmakeContent.writeln('list(APPEND FLUTTER_PLUGIN_LIST');
+    for (final plugin in methodChannelPlugins) {
+      cmakeContent.writeln('  ${plugin["name"]}');
+    }
+    cmakeContent.writeln(')');
+    cmakeContent.writeln();
+    cmakeContent.writeln('list(APPEND FLUTTER_FFI_PLUGIN_LIST');
+    for (final plugin in ffiPlugins) {
+      cmakeContent.writeln('  ${plugin["name"]}');
+    }
+    cmakeContent.writeln(')');
+    cmakeContent.writeln();
+    cmakeContent.writeln('set(PLUGIN_BUNDLED_LIBRARIES)');
+    cmakeContent.writeln();
+    cmakeContent.writeln(r'foreach(plugin ${FLUTTER_PLUGIN_LIST})');
+    cmakeContent.writeln(
+      r'  add_subdirectory(flutter/ephemeral/.plugin_symlinks/${plugin}/linux plugins/${plugin})',
+    );
+    cmakeContent.writeln(r'  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin}_plugin)');
+    cmakeContent.writeln(
+      r'  list(APPEND PLUGIN_BUNDLED_LIBRARIES $<TARGET_FILE:${plugin}_plugin>)',
+    );
+    cmakeContent.writeln(r'  list(APPEND PLUGIN_BUNDLED_LIBRARIES ${${plugin}_bundled_libraries})');
+    cmakeContent.writeln('endforeach(plugin)');
+    cmakeContent.writeln();
+    cmakeContent.writeln(r'foreach(ffi_plugin ${FLUTTER_FFI_PLUGIN_LIST})');
+    cmakeContent.writeln(
+      r'  add_subdirectory(flutter/ephemeral/.plugin_symlinks/${ffi_plugin}/linux plugins/${ffi_plugin})',
+    );
+    cmakeContent.writeln(
+      r'  list(APPEND PLUGIN_BUNDLED_LIBRARIES ${${ffi_plugin}_bundled_libraries})',
+    );
+    cmakeContent.writeln('endforeach(ffi_plugin)');
+
+    generatedPluginsFile.writeAsStringSync(cmakeContent.toString());
+
+    // 2. Write generated_plugin_registrant.h
+    final headerContent = StringBuffer();
+    headerContent.writeln('// Generated file. Do not edit.');
+    headerContent.writeln('#ifndef GENERATED_PLUGIN_REGISTRANT_');
+    headerContent.writeln('#define GENERATED_PLUGIN_REGISTRANT_');
+    headerContent.writeln();
+    headerContent.writeln('#include <flutter_linux/flutter_linux.h>');
+    headerContent.writeln();
+    headerContent.writeln('// Registers Flutter plugins.');
+    headerContent.writeln('void fl_register_plugins(FlPluginRegistry* registry);');
+    headerContent.writeln();
+    headerContent.writeln('#endif  // GENERATED_PLUGIN_REGISTRANT_');
+
+    generatedPluginHeader.writeAsStringSync(headerContent.toString());
+
+    // 3. Write generated_plugin_registrant.cc
+    final sourceContent = StringBuffer();
+    sourceContent.writeln('// Generated file. Do not edit.');
+    sourceContent.writeln('#include "generated_plugin_registrant.h"');
+    sourceContent.writeln();
+    for (final plugin in methodChannelPlugins) {
+      sourceContent.writeln('#include <${plugin["name"]}/${plugin["filename"]}.h>');
+    }
+    sourceContent.writeln();
+    sourceContent.writeln('void fl_register_plugins(FlPluginRegistry* registry) {');
+    for (final plugin in methodChannelPlugins) {
+      sourceContent.writeln('  g_autoptr(FlPluginRegistrar) ${plugin["name"]}_registrar =');
+      sourceContent.writeln(
+        '      fl_plugin_registry_get_registrar_for_plugin(registry, "${plugin["class"]}");',
+      );
+      sourceContent.writeln(
+        '  ${plugin["filename"]}_register_with_registrar(${plugin["name"]}_registrar);',
+      );
+    }
+    sourceContent.writeln('}');
+
+    generatedPluginSource.writeAsStringSync(sourceContent.toString());
 
     final cmakeConfigureCmd = <String>[
       'cmake',
