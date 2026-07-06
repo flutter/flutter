@@ -28,15 +28,8 @@ struct _FlCompositorOpenGL {
   // Last rendered frame.
   FlFramebuffer* framebuffer;
 
-  // Last rendered frame pixels (only set if shareable is TRUE).
+  // Last rendered frame pixels (only set if shareable is FALSE).
   uint8_t* pixels;
-
-  // whether the renderer waits for frame render
-  bool blocking_main_thread;
-
-  // true if frame was completed; resizing is not synchronized until first frame
-  // was rendered
-  bool had_first_frame;
 
   // Shader program used to composite layers.
   FlCompositorOpenGLShader* shader;
@@ -127,8 +120,6 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
           static_cast<uint8_t*>(g_realloc(self->pixels, data_length));
     }
   }
-
-  self->had_first_frame = true;
 
   // FIXME(robert-ancell): The vertex array is the same for all views, but
   // cannot be shared in OpenGL. Find a way to not generate this every time.
