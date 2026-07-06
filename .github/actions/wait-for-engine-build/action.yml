@@ -50,20 +50,14 @@ runs:
           echo "changed=false" >> "$GITHUB_OUTPUT"
         fi
 
-    # Note: lewagon/wait-on-check-action has a limit of 100 checks (pagination).
-    # Consider writing an API endpoint on flutter/cocoon that returns the status of an array of checks.
+    # Note: Use the Cocoon wait-for-tests action to poll the Cocoon API.
     - name: Wait for test check-in
       if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
-      uses: lewagon/wait-on-check-action@9312864dfbc9fd208e9c0417843430751c042800
+      uses: flutter/cocoon/packages/wait_for_tests@main
       with:
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
-        check-name: ${{ inputs.check-name }}
-        check-regexp: ${{ inputs.check-regexp }}
-        repo-token: ${{ inputs.github-token }}
-        wait-interval: 30 # seconds
-        checks-discovery-timeout: 3600 # Wait up to 1 hour for LUCI to register the check
-        allowed-conclusions: success,neutral
-        verbose: false
+        sha: ${{ github.event.pull_request.head.sha || github.sha }}
+        repo: ${{ github.repository }}
+        required-tests: ${{ inputs.check-name }}
 
     - name: Redirect engine.version
       if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
