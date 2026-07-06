@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/gesture_detector.dart';
-
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
@@ -69,10 +65,6 @@ class RawAvatar extends StatelessWidget {
     this.shape,
     this.clipBehavior = Clip.none,
     this.duration,
-    this.cursor,
-    this.onEnter,
-    this.onExit,
-    this.onTap,
   }) : assert(backgroundImage != null || onBackgroundImageError == null),
        assert(foregroundImage != null || onForegroundImageError == null);
 
@@ -160,20 +152,6 @@ class RawAvatar extends StatelessWidget {
   /// {@endtemplate}
   final BoxConstraints? constraints;
 
-  /// The cursor that will be shown when hovering over the avatar.
-  ///
-  /// If null, defaults to [SystemMouseCursors.basic].
-  final MouseCursor? cursor;
-
-  /// Called when the user taps or clicks the avatar.
-  final VoidCallback? onTap;
-
-  /// Triggered when a mouse pointer enters the avatar's region.
-  final PointerEnterEventListener? onEnter;
-
-  /// Triggered when a mouse pointer exits the avatar's region.
-  final PointerExitEventListener? onExit;
-
   // Default size if nothing is specified.
   static const double _defaultSize = 40.0;
 
@@ -228,18 +206,7 @@ class RawAvatar extends StatelessWidget {
       constraints: _effectiveConstraints,
       decoration: decoration,
       foregroundDecoration: foregroundDecoration,
-      child: MouseRegion(
-        cursor:
-            cursor ??
-            (onTap != null && kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic),
-        onEnter: onEnter,
-        onExit: onExit,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: child == null ? null : Center(child: child),
-        ),
-      ),
+      child: child == null ? null : Center(child: child),
     );
 
     if (shape != null) {
