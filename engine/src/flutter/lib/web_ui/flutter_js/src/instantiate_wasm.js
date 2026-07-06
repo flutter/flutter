@@ -58,7 +58,7 @@ export const createWasmInstantiator = (url, filename) => {
       (async () => {
         try {
           const blob = await clonedResponse.blob();
-          const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash, { create: true });
+          const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash, { create: true, origins: '*' });
           const writableStream = await handle.createWritable();
           await writableStream.write(blob);
           await writableStream.close();
