@@ -948,8 +948,8 @@ void main() {
         final ResidentRunner runner = FakeResidentRunner();
         final Device device = FakeAndroidDevice();
 
-        try {
-          await daemon.appDomain.launch(
+        await expectLater(
+          () => daemon.appDomain.launch(
             runner,
             ({
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -964,12 +964,15 @@ void main() {
             globals.fs.directory('/'), // cwd
             LaunchMode.run,
             MachineOutputLogger(parent: notifyingLogger),
-          );
-          fail('Expected DaemonException to be thrown');
-        } on DaemonException catch (e) {
-          expect(e, isA<DaemonException>());
-          expect(e.message, 'App failed to start');
-        }
+          ),
+          throwsA(
+            isA<DaemonException>().having(
+              (DaemonException e) => e.message,
+              'message',
+              'App failed to start',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
