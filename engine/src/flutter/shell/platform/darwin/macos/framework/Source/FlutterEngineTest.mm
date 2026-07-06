@@ -1199,6 +1199,16 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
         [invocation setReturnValue:&visibility];
       });
 
+  // handleWillBecomeActive derives visibility from the windows (not from the
+  // occlusion state, which can latch stale), so provide a window whose visibility
+  // we can toggle independently.
+  __block BOOL windowVisible = YES;
+  id mockWindow = OCMClassMock([NSWindow class]);
+  OCMStub([mockWindow isVisible]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&windowVisible];
+  });
+  OCMStub([mockApplication windows]).andReturn(@[ mockWindow ]);
+
   NSNotification* willBecomeActive =
       [[NSNotification alloc] initWithName:NSApplicationWillBecomeActiveNotification
                                     object:nil
@@ -1227,12 +1237,12 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
   [engineMock handleDidChangeOcclusionState:didChangeOcclusionState];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
 
-  // Becoming active resumes the app even though the occlusion state still reads
-  // not-visible at this point. macOS does not reliably deliver a
-  // DidChangeOcclusionState(visible) notification on every occlusion->visible
-  // transition (e.g. a same-screen Cmd-Tab / Mission Control return), so relying
-  // on the stale visibility here would leave the app stuck in kHidden with a
-  // frozen UI. Regression test for https://github.com/flutter/flutter/issues/155977.
+  // Becoming active with an on-screen window resumes the app even though the
+  // occlusion state still reads not-visible at this point. macOS can leave
+  // occlusionState latched stale on an occlusion->visible transition (e.g. a
+  // same-screen Cmd-Tab / Mission Control return) with no notification to correct
+  // it, so relying on it here would leave the app stuck in kHidden with a frozen
+  // UI. Regression test for https://github.com/flutter/flutter/issues/155977.
   [engineMock handleWillBecomeActive:willBecomeActive];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kResumed);
 
@@ -1241,6 +1251,20 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
   [engineMock handleWillResignActive:willResignActive];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kInactive);
 
+  // Occlusion stays authoritative after a becomeActive resume: a genuine
+  // not-visible occlusion notification still hides the app.
+  visibility = 0;
+  [engineMock handleDidChangeOcclusionState:didChangeOcclusionState];
+  EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
+
+  // Becoming active while no window is visible (e.g. activated with all windows
+  // minimized, which does not deminiaturize) must not resume: visibility is
+  // derived from the windows, not from the activation itself.
+  windowVisible = NO;
+  [engineMock handleWillBecomeActive:willBecomeActive];
+  EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
+
+  [mockWindow stopMocking];
   [mockApplication stopMocking];
 }
 
