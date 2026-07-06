@@ -2231,6 +2231,18 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isWebEnabled => true;
 
+  // Desktop platforms aren't under test in this file; report disabled so
+  // platform tooling regen (now run when a package config is present —
+  // see #163774) does not try to materialize desktop platform directories.
+  @override
+  bool get isLinuxEnabled => false;
+
+  @override
+  bool get isMacOSEnabled => false;
+
+  @override
+  bool get isWindowsEnabled => false;
+
   @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;
 

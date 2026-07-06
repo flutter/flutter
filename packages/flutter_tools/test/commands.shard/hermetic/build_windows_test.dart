@@ -695,7 +695,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       fileSystem.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync('version: 1.2.3+4');
+        ..writeAsStringSync('name: my_app\nversion: 1.2.3+4');
 
       processManager = FakeProcessManager.list(<FakeCommand>[
         cmakeGenerationCommand(),
@@ -793,7 +793,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       fileSystem.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync('version: 9.9.9+9');
+        ..writeAsStringSync('name: my_app\nversion: 9.9.9+9');
 
       processManager = FakeProcessManager.list(<FakeCommand>[
         cmakeGenerationCommand(),
@@ -845,7 +845,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       fileSystem.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync('version: 1.2.3+9');
+        ..writeAsStringSync('name: my_app\nversion: 1.2.3+9');
 
       processManager = FakeProcessManager.list(<FakeCommand>[
         cmakeGenerationCommand(),
@@ -897,7 +897,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       fileSystem.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync('version: 9.9.9+9');
+        ..writeAsStringSync('name: my_app\nversion: 9.9.9+9');
 
       processManager = FakeProcessManager.list(<FakeCommand>[
         cmakeGenerationCommand(),

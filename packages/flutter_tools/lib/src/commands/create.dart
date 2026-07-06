@@ -563,16 +563,12 @@ class CreateCommand extends FlutterCommand with CreateBase {
       // TODO(dacoharkes): Uncouple the app and parent project platforms. https://github.com/flutter/flutter/issues/133874
       // Then this if can be removed.
       if (!generateFfiPackage) {
-        // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
-        //
-        // `flutter packages get` inherently is neither a debug or release build,
-        // and since a future build (`flutter build apk`) will regenerate tooling
-        // anyway, we assume this is fine.
-        //
-        // It won't be if they do `flutter build --no-pub`, though.
-        const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+        // `flutter create` is neither a debug nor a release build; pick
+        // debug-mode tooling. Safe because every build path regenerates
+        // platform tooling for the active build mode, including
+        // `flutter build --no-pub` (see #163774).
         await project.ensureReadyForPlatformSpecificTooling(
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          releaseMode: false,
           androidPlatform: includeAndroid,
           iosPlatform: includeIos || includeDarwin,
           linuxPlatform: includeLinux,
