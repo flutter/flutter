@@ -93,6 +93,63 @@ void main() {
     expect(webPlugin.fileName, 'web_plugin.dart');
     expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
   });
+  testWithoutContext('Plugin creation from the multi-platform format with custom platform', () {
+    final fileSystem = MemoryFileSystem.test();
+    Plugin.registerCustomPlatform('custom_platform');
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' android:\n'
+        '  package: com.flutter.dev\n'
+        '  pluginClass: ASamplePlugin\n'
+        ' custom_platform:\n'
+        '  pluginClass: CustomSamplePlugin\n'
+        '  dartPluginClass: CustomDartPlugin\n'
+        '  ffiPlugin: true\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      isDevDependency: false,
+      fileSystem: fileSystem,
+    );
+
+    final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final customPlugin = plugin.platforms['custom_platform']! as CustomPluginPlatform;
+
+    expect(androidPlugin.pluginClass, 'ASamplePlugin');
+    expect(androidPlugin.package, 'com.flutter.dev');
+    expect(customPlugin.pluginClass, 'CustomSamplePlugin');
+    expect(customPlugin.dartPluginClass, 'CustomDartPlugin');
+    expect(customPlugin.ffiPlugin, isTrue);
+    expect(customPlugin.defaultPackage, isNull);
+  });
+
+  testWithoutContext('Plugin parsing allows a default_package field for custom platform', () {
+    final fileSystem = MemoryFileSystem.test();
+    Plugin.registerCustomPlatform('custom_platform');
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' custom_platform:\n'
+        '  default_package: custom_package\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      isDevDependency: false,
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.platforms['custom_platform'], isNull);
+    expect(plugin.defaultPackagePlatforms['custom_platform'], 'custom_package');
+  });
 
   testWithoutContext(
     'Plugin parsing of unknown fields are allowed (allows some future compatibility)',

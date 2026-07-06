@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
@@ -164,6 +165,16 @@ class Plugin {
       );
     }
 
+    for (final String customPlatform in customPlatforms) {
+      if (_providesImplementationForPlatform(platformsYaml, customPlatform)) {
+        platforms[customPlatform] = CustomPluginPlatform.fromYaml(
+          name,
+          customPlatform,
+          platformsYaml[customPlatform] as YamlMap,
+        );
+      }
+    }
+
     // TODO(stuartmorgan): Consider merging web into this common handling; the
     //  fact that its implementation of Dart-only plugins and default packages
     //  are separate is legacy.
@@ -173,6 +184,7 @@ class Plugin {
       LinuxPlugin.kConfigKey,
       MacOSPlugin.kConfigKey,
       WindowsPlugin.kConfigKey,
+      ...customPlatforms,
     ];
     final defaultPackages = <String, String>{};
     final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
@@ -247,6 +259,17 @@ class Plugin {
       isDirectDependency: isDirectDependency,
       isDevDependency: isDevDependency,
     );
+  }
+
+  static final Set<String> customPlatforms = <String>{};
+
+  static void registerCustomPlatform(String platformKey) {
+    customPlatforms.add(platformKey);
+  }
+
+  @visibleForTesting
+  static void clearCustomPlatforms() {
+    customPlatforms.clear();
   }
 
   /// Create a YamlMap that represents the supported platforms.
@@ -345,6 +368,9 @@ class Plugin {
         'Invalid "macos" plugin specification.',
       if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate))
         'Invalid "windows" plugin specification.',
+      for (final String customPlatform in customPlatforms)
+        if (isInvalid(customPlatform, CustomPluginPlatform.validate))
+          'Invalid "$customPlatform" plugin specification.',
     ];
   }
 

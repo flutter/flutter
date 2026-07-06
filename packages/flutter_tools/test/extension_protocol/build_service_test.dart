@@ -511,7 +511,7 @@ void main() {
       Map<String, Object?>? buildResponse,
       bool mockBuild = true,
       bool mockGetTargets = true,
-      List<ExtensionBuildTarget>? targets,
+      List<Map<String, Object?>>? targets,
       required List<String> services,
     }) async {
       final managerReceivePort = ReceivePort();
@@ -531,14 +531,15 @@ void main() {
 
       if (mockGetTargets) {
         mockExtensionPeer!.registerMethod('build.getTargets', () {
-          return <Map<String, Object?>>[
-            <String, Object?>{
-              'name': 'assemble_linux_app',
-              'dependencies': <String>[],
-              'inputs': <String>[],
-              'outputs': <String>[],
-            },
-          ];
+          return targets ??
+              <Map<String, Object?>>[
+                <String, Object?>{
+                  'name': 'assemble_linux_app',
+                  'dependencies': <String>[],
+                  'inputs': <String>[],
+                  'outputs': <String>[],
+                },
+              ];
         });
       }
 
@@ -630,6 +631,16 @@ void main() {
         final buildCompleter = Completer<Map<String, Object?>>();
         final ToolExtension extension = await connectMockExtension(
           services: <String>['build'],
+          targets: <Map<String, Object?>>[
+            <String, Object?>{
+              'name': 'assemble_linux_app',
+              'pluginPlatformKey': 'linux',
+              'generatesCmakePluginFiles': true,
+              'dependencies': <String>[],
+              'inputs': <String>[],
+              'outputs': <String>[],
+            },
+          ],
           buildCompleter: buildCompleter,
         );
 

@@ -664,3 +664,76 @@ String _filenameForCppClass(String className) {
     onNonMatch: (String n) => n.toLowerCase(),
   );
 }
+
+class CustomPluginPlatform extends PluginPlatform implements NativeOrDartPlugin {
+  const CustomPluginPlatform({
+    required this.name,
+    required this.platformKey,
+    this.dartFileName,
+    this.dartPluginClass,
+    this.defaultPackage,
+    bool? ffiPlugin,
+    this.pluginClass,
+  }) : ffiPlugin = ffiPlugin ?? false;
+
+  factory CustomPluginPlatform.fromYaml(String name, String platformKey, YamlMap yaml) {
+    assert(validate(yaml));
+
+    final dartPluginClass = yaml[kDartPluginClass] as String?;
+    final dartFileName = yaml[kDartFileName] as String?;
+
+    if (dartPluginClass == null && dartFileName != null) {
+      throwToolExit(
+        '"dartFileName" cannot be specified without "dartPluginClass" in $platformKey platform of plugin "$name"',
+      );
+    }
+
+    return CustomPluginPlatform(
+      name: name,
+      platformKey: platformKey,
+      dartFileName: dartFileName,
+      dartPluginClass: dartPluginClass,
+      defaultPackage: yaml[kDefaultPackage] as String?,
+      ffiPlugin: yaml[kFfiPlugin] as bool? ?? false,
+      pluginClass: yaml[kPluginClass] as String?,
+    );
+  }
+
+  final String name;
+  final String platformKey;
+  final String? pluginClass;
+  final String? dartPluginClass;
+  final String? dartFileName;
+  final bool ffiPlugin;
+  final String? defaultPackage;
+
+  static bool validate(YamlMap yaml) {
+    return yaml[kPluginClass] is String ||
+        yaml[kDartPluginClass] is String ||
+        yaml[kFfiPlugin] == true ||
+        yaml[kDefaultPackage] is String;
+  }
+
+  @override
+  bool hasDart() => dartPluginClass != null;
+
+  @override
+  bool hasFfi() => ffiPlugin;
+
+  @override
+  bool hasMethodChannel() => pluginClass != null;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'name': name,
+      'platformKey': platformKey,
+      'class': pluginClass,
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
+      kDartPluginClass: dartPluginClass,
+      kDartFileName: dartFileName,
+      if (ffiPlugin) kFfiPlugin: true,
+      kDefaultPackage: defaultPackage,
+    };
+  }
+}

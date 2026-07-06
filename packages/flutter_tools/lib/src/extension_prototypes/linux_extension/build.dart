@@ -92,7 +92,7 @@ base class LinuxAssembleTarget extends Target {
   String? get pluginPlatformKey => 'linux';
 
   @override
-  bool get generatesCmakePluginFiles => true;
+  bool get generatesCmakePluginFiles => false;
 
   @override
   List<String> get dependencies => const <String>[];
@@ -143,13 +143,95 @@ base class LinuxAssembleTarget extends Target {
     }
 
     final String linuxProjectPath = _fileSystem.path.join(projectPath, 'linux');
+
+    // 1. Recreate plugin symlinks directory and link each resolved plugin.
+    final Directory symlinkDirectory = _fileSystem.directory(
+      _fileSystem.path.join(linuxProjectPath, 'flutter', 'ephemeral', '.plugin_symlinks'),
+    );
+    createGepPluginSymlinks(
+      fileSystem: _fileSystem,
+      force: true,
+      plugins: env.plugins,
+      symlinkDirectory: symlinkDirectory,
+    );
+
+    // 2. Generate generated_plugins.cmake dynamically.
+    final String cmakeContent = generateCmakePluginsFile(
+      os: 'linux',
+      plugins: env.plugins,
+      pluginsDir: 'flutter/ephemeral/.plugin_symlinks',
+    );
+
     final File generatedPluginsFile = _fileSystem.file(
       _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugins.cmake'),
     );
-    if (!generatedPluginsFile.existsSync()) {
-      generatedPluginsFile.createSync(recursive: true);
-      generatedPluginsFile.writeAsStringSync('# Generated stub for empty plugin list\n');
+    generatedPluginsFile.createSync(recursive: true);
+    generatedPluginsFile.writeAsStringSync(cmakeContent);
+
+    // Filter method channel plugins for registrant generation.
+    final List<GepPlugin> methodChannelPlugins = env.plugins.where((GepPlugin p) {
+      return p.configuration['class'] != null;
+    }).toList();
+
+    // 3. Generate generated_plugin_registrant.h.
+    final File registrantHeader = _fileSystem.file(
+      _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugin_registrant.h'),
+    );
+    registrantHeader.createSync(recursive: true);
+    registrantHeader.writeAsStringSync('''
+//
+//  Generated file. Do not edit.
+//
+
+// clang-format off
+
+#ifndef GENERATED_PLUGIN_REGISTRANT_
+#define GENERATED_PLUGIN_REGISTRANT_
+
+#include <flutter_linux/flutter_linux.h>
+
+// Registers Flutter plugins.
+void fl_register_plugins(FlPluginRegistry* registry);
+
+#endif  // GENERATED_PLUGIN_REGISTRANT_
+''');
+
+    // 4. Generate generated_plugin_registrant.cc.
+    final registrantImpl = StringBuffer();
+    registrantImpl.writeln('//');
+    registrantImpl.writeln('//  Generated file. Do not edit.');
+    registrantImpl.writeln('//');
+    registrantImpl.writeln();
+    registrantImpl.writeln('// clang-format off');
+    registrantImpl.writeln();
+    registrantImpl.writeln('#include "generated_plugin_registrant.h"');
+    registrantImpl.writeln();
+    for (final plugin in methodChannelPlugins) {
+      final filename = plugin.configuration['filename'] as String?;
+      if (filename != null) {
+        registrantImpl.writeln('#include <${plugin.name}/$filename.h>');
+      }
     }
+    registrantImpl.writeln();
+    registrantImpl.writeln('void fl_register_plugins(FlPluginRegistry* registry) {');
+    for (final plugin in methodChannelPlugins) {
+      final pluginClass = plugin.configuration['class'] as String?;
+      final filename = plugin.configuration['filename'] as String?;
+      if (pluginClass != null && filename != null) {
+        registrantImpl.writeln('  g_autoptr(FlPluginRegistrar) ${plugin.name}_registrar =');
+        registrantImpl.writeln(
+          '      fl_plugin_registry_get_registrar_for_plugin(registry, "$pluginClass");',
+        );
+        registrantImpl.writeln('  ${filename}_register_with_registrar(${plugin.name}_registrar);');
+      }
+    }
+    registrantImpl.writeln('}');
+
+    final File registrantImplFile = _fileSystem.file(
+      _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugin_registrant.cc'),
+    );
+    registrantImplFile.createSync(recursive: true);
+    registrantImplFile.writeAsStringSync(registrantImpl.toString());
 
     final cmakeConfigureCmd = <String>[
       'cmake',

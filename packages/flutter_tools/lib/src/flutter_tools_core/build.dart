@@ -213,6 +213,7 @@ class BuildEnvironment {
     required this.flutterAssetsDir,
     required this.outputDirectory,
     required this.projectRoot,
+    this.plugins = const <GepPlugin>[],
   });
 
   /// Create a BuildEnvironment from a JSON map.
@@ -223,6 +224,13 @@ class BuildEnvironment {
       flutterAssetsDir: Uri.parse(json['flutterAssetsDir']! as String),
       outputDirectory: Uri.parse(json['outputDirectory']! as String),
       projectRoot: Uri.parse(json['projectRoot']! as String),
+      plugins: json['plugins'] is List
+          ? <GepPlugin>[
+              for (final Object? item in json['plugins']! as List<Object?>)
+                if (item case final Map<Object?, Object?> itemMap)
+                  GepPlugin.fromJson(itemMap.cast<String, Object?>()),
+            ]
+          : const <GepPlugin>[],
     );
   }
 
@@ -241,12 +249,41 @@ class BuildEnvironment {
   /// Assets directory.
   final Uri flutterAssetsDir;
 
+  /// Plugins resolved for this build.
+  final List<GepPlugin> plugins;
+
   Map<String, Object?> toMap() => <String, Object?>{
     'cacheDir': cacheDir.toString(),
     'defines': defines,
     'flutterAssetsDir': flutterAssetsDir.toString(),
     'outputDirectory': outputDirectory.toString(),
     'projectRoot': projectRoot.toString(),
+    'plugins': plugins.map((GepPlugin plugin) => plugin.toMap()).toList(),
+  };
+}
+
+class GepPlugin {
+  GepPlugin({required this.configuration, required this.name, required this.path});
+
+  factory GepPlugin.fromJson(Map<String, Object?> json) {
+    if (json case {
+      'name': final String name,
+      'path': final String path,
+      'configuration': final Map<Object?, Object?> config,
+    }) {
+      return GepPlugin(configuration: config.cast<String, Object?>(), name: name, path: path);
+    }
+    throw FormatException('Invalid GepPlugin JSON: $json');
+  }
+
+  final String name;
+  final String path;
+  final Map<String, Object?> configuration;
+
+  Map<String, Object?> toMap() => <String, Object?>{
+    'name': name,
+    'path': path,
+    'configuration': configuration,
   };
 }
 

@@ -25,6 +25,7 @@ import '../experimental/templates.dart';
 import '../flutter_tools_core/build.dart' as core_build;
 import '../flutter_tools_core/configuration.dart' as core;
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
@@ -349,6 +350,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       final ExtensionBuildTargetManager? buildTargetManager = extensionBuildTargetManager;
       if (buildTargetManager != null) {
         final List<core_build.Target> targets = await buildTargetManager.getTargets();
+        for (final target in targets) {
+          if (target.pluginPlatformKey != null) {
+            Plugin.registerCustomPlatform(target.pluginPlatformKey!);
+          }
+        }
         final Command<void>? buildCommand = commands['build'];
         if (buildCommand is BuildCommand) {
           buildCommand.registerExtensionSubcommands(targets);

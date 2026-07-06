@@ -29,6 +29,7 @@ import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
+import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -277,6 +278,28 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
     environmentConfig['FLUTTER_TARGET'] = mainPath;
     environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
+
+    final String? platformKey = _target.pluginPlatformKey;
+
+    var gepPlugins = <core.GepPlugin>[];
+    if (platformKey != null) {
+      await refreshPluginsList(project);
+      final List<Plugin> allPlugins = await findPlugins(project);
+      final List<Plugin> platformPlugins =
+          resolvePlatformImplementation(allPlugins, selectDartPluginsOnly: false)
+              .where((PluginInterfaceResolution r) => r.platform == platformKey)
+              .map((PluginInterfaceResolution r) => r.plugin)
+              .toList();
+
+      gepPlugins = platformPlugins.map((Plugin p) {
+        return core.GepPlugin(
+          name: p.name,
+          path: p.path,
+          configuration: p.platforms[platformKey]?.toMap() ?? <String, Object?>{},
+        );
+      }).toList();
+    }
+
     environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
 
     final buildEnv = core.BuildEnvironment(
@@ -288,30 +311,30 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
           .uri,
       outputDirectory: outputUri,
       projectRoot: projectRootUri,
+      plugins: gepPlugins,
     );
 
-    if (_target.pluginPlatformKey != null ||
-        _target.generatesCmakePluginFiles ||
-        _target.targetPlatformDirectory == 'linux-x64') {
-      await refreshPluginsList(project);
-      final String platformKey = _target.pluginPlatformKey ?? 'linux';
-      final CmakeBasedProject cmakeProject = _target.targetPlatformDirectory == 'linux-x64'
-          ? project.linux
-          : GenericCmakeProject(project, _target.targetPlatformDirectory ?? platformKey);
-      if (cmakeProject.existsSync()) {
-        writeGeneratedCmakeConfig(
-          Cache.flutterRoot!,
-          cmakeProject,
-          buildInfo,
-          environmentConfig,
-          globals.logger,
-        );
+    final bool shouldHostManagePlugins = _target.generatesCmakePluginFiles;
+    final String effectivePlatformKey = platformKey ?? 'linux';
+    final CmakeBasedProject cmakeProject = _target.targetPlatformDirectory == 'linux-x64'
+        ? project.linux
+        : GenericCmakeProject(project, _target.targetPlatformDirectory ?? effectivePlatformKey);
+
+    if (cmakeProject.existsSync()) {
+      writeGeneratedCmakeConfig(
+        Cache.flutterRoot!,
+        cmakeProject,
+        buildInfo,
+        environmentConfig,
+        globals.logger,
+      );
+      if (shouldHostManagePlugins) {
         createPluginSymlinks(
           project,
           customCMakeProject: cmakeProject,
-          customPlatformKey: platformKey,
+          customPlatformKey: effectivePlatformKey,
         );
-        if (platformKey == 'linux') {
+        if (effectivePlatformKey == 'linux') {
           await injectPlugins(project, releaseMode: buildInfo.mode.isRelease, linuxPlatform: true);
         }
       }

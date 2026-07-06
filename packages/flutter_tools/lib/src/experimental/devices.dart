@@ -20,6 +20,7 @@ import '../device_port_forwarder.dart';
 import '../flutter_plugins.dart';
 import '../flutter_tools_core/build.dart' as core;
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../vmservice.dart';
 import 'extension_discovery.dart';
@@ -277,6 +278,7 @@ class ExtensionBackedDevice extends Device {
 
       final String buildTarget = buildTargetName ?? 'assemble_linux_app';
 
+      core.ExtensionBuildTarget? target;
       // 2. Query 'build.getTargets' to verify target is supported.
       try {
         final Object? targetsResult = await _extension
@@ -285,10 +287,11 @@ class ExtensionBackedDevice extends Device {
         if (targetsResult is! List) {
           throwToolExit('Tool extension does not expose build targets.');
         }
-        final bool hasTarget = targetsResult.any(
-          (Object? t) => t is Map && t['name'] == buildTarget,
+        final List<core.ExtensionBuildTarget> targets = core.ExtensionBuildTarget.listFromJson(
+          targetsResult,
         );
-        if (!hasTarget) {
+        target = targets.where((core.ExtensionBuildTarget t) => t.name == buildTarget).firstOrNull;
+        if (target == null) {
           throwToolExit('Tool extension does not expose build target "$buildTarget".');
         }
       } on Object catch (e) {
@@ -296,6 +299,27 @@ class ExtensionBackedDevice extends Device {
           rethrow;
         }
         throwToolExit('Failed to query build targets: $e');
+      }
+
+      final String? platformKey = target.pluginPlatformKey;
+
+      var gepPlugins = <core.GepPlugin>[];
+      if (platformKey != null) {
+        await refreshPluginsList(project);
+        final List<Plugin> allPlugins = await findPlugins(project);
+        final List<Plugin> platformPlugins =
+            resolvePlatformImplementation(allPlugins, selectDartPluginsOnly: false)
+                .where((PluginInterfaceResolution r) => r.platform == platformKey)
+                .map((PluginInterfaceResolution r) => r.plugin)
+                .toList();
+
+        gepPlugins = platformPlugins.map((Plugin p) {
+          return core.GepPlugin(
+            name: p.name,
+            path: p.path,
+            configuration: p.platforms[platformKey]?.toMap() ?? <String, Object?>{},
+          );
+        }).toList();
       }
 
       final Map<String, String> environmentConfig = debuggingOptions.buildInfo
@@ -317,8 +341,9 @@ class ExtensionBackedDevice extends Device {
       }
 
       // 4. Host preparations (write CMake configuration & plugin symlinks if CMake project exists)
+      final bool shouldHostManagePlugins = target.generatesCmakePluginFiles;
+
       if (cmakeProject.existsSync()) {
-        await refreshPluginsList(project);
         writeGeneratedCmakeConfig(
           Cache.flutterRoot!,
           cmakeProject,
@@ -326,16 +351,24 @@ class ExtensionBackedDevice extends Device {
           environmentConfig,
           _logger,
         );
-        createPluginSymlinks(
-          project,
-          customCMakeProject: cmakeProject,
-          customPlatformKey: platformName,
-        );
-        if (platform.getName() == 'linux-x64' || platformName.contains('linux')) {
-          await injectPlugins(
+        if (shouldHostManagePlugins) {
+          await refreshPluginsList(project);
+          createPluginSymlinks(
             project,
-            releaseMode: debuggingOptions.buildInfo.mode.isRelease,
-            linuxPlatform: true,
+            customCMakeProject: cmakeProject,
+            customPlatformKey: platformKey ?? platformName,
+          );
+          if (platform.getName() == 'linux-x64' ||
+              (platformKey ?? platformName).contains('linux')) {
+            await injectPlugins(
+              project,
+              releaseMode: debuggingOptions.buildInfo.mode.isRelease,
+              linuxPlatform: true,
+            );
+          }
+        } else {
+          _logger.printTrace(
+            'Extension device platform "$platformName" plugin injection is managed by the extension, bypassing host plugin symlinks and injection.',
           );
         }
       } else {
@@ -353,6 +386,7 @@ class ExtensionBackedDevice extends Device {
             .uri,
         outputDirectory: buildDirectory.uri,
         projectRoot: project.directory.uri,
+        plugins: gepPlugins,
       );
 
       String? buildExecutablePath;

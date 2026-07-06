@@ -8,4 +8,5 @@ export 'src/flutter_tools_core/configuration.dart';
 export 'src/flutter_tools_core/device.dart';
 export 'src/flutter_tools_core/diagnostics.dart';
 export 'src/flutter_tools_core/logger.dart';
+export 'src/flutter_tools_core/plugins.dart';
 export 'src/flutter_tools_core/templates.dart';
