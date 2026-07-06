@@ -777,6 +777,29 @@ const EdgeInsets.symmetric(horizontal: 8.0);
 ```
 
 
+### Use private named parameters (initializing formals) for private fields in constructors
+
+When a constructor initializes private fields, prefer using private named parameters (initializing formals) directly in the constructor parameter list (e.g. `this._fieldName`) rather than accepting a non-private parameter and assigning it to the private field in the constructor body or initializer list.
+
+Example:
+
+```dart
+// BAD:
+class Foo {
+  Foo({ double? widthFactor }) : _widthFactor = widthFactor;
+
+  final double? _widthFactor;
+}
+
+// GOOD:
+class Foo {
+  Foo({ this._widthFactor });
+
+  final double? _widthFactor;
+}
+```
+
+
 ### Minimize the visibility scope of constants
 
 Prefer using a local const or a static const in a relevant class than using a
