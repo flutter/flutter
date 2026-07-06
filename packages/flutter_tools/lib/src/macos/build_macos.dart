@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -214,28 +215,47 @@ Future<void> buildMacOS({
     }
   }
 
-  final String arch = switch (globals.os.hostPlatform) {
+  final String hostArch = switch (globals.os.hostPlatform) {
     HostPlatform.darwin_arm64 => 'arm64',
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
 
-  // Determine the build destination
+  // Determine the build destination specifier for xcodebuild.
+  // This does not prevent some versions of xcodebuild from building a fat binary
+  // even if set to 'platform=macOS,arch=arm64';
   final String destination;
+  // The archtectures to specify in xcode project's build setting.
+  final String? archs;
   if (buildInfo.isDebug) {
     // Debug builds default to current host architecture
-    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$hostArch';
+    archs = null;
   } else {
-    // Release builds default to universal binary
+    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled is set.
     destination = XcodeSdk.MacOSX.genericPlatform;
+    archs = featureFlags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
   }
 
   // Get EXCLUDED_ARCHS from Xcode project build settings
   // This allows developers to exclude specific architectures (e.g., x86_64)
   // when dependencies don't support them
-  final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
+  final String? excludedArchs = switch (buildSettings['EXCLUDED_ARCHS']?.trim()) {
+    null || '' => null,
+    final String excludedArches => excludedArches,
+  };
 
+  var hasMacOSMinDeploymentTargetIssue = false;
+  String? macOSMinDeploymentTarget;
   try {
+    if (archs != null && excludedArchs != null && excludedArchs.contains('arm64')) {
+      throwToolExit(
+        'No Valid Target Arch: '
+        'You have enabled the macOSArm64Only feature flag but '
+        "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
+        'Consider removing arm64 from EXCLUDED_ARCHS.',
+      );
+    }
     final List<String> xcodebuildCommandArgs = await globals.xcode!
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
@@ -264,21 +284,41 @@ Future<void> buildMacOS({
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
         // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
         // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
-        if (excludedArches != null && excludedArches.trim().isNotEmpty)
-          'EXCLUDED_ARCHS=$excludedArches',
+        if (excludedArchs != null) 'EXCLUDED_ARCHS=$excludedArchs',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
+        if (archs != null) 'ARCHS=$archs',
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: verboseLogging
-          ? null
-          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: (String line) {
+        if (line.contains("deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to") &&
+            line.contains('but the range of supported deployment target versions is')) {
+          hasMacOSMinDeploymentTargetIssue = true;
+          final pattern = RegExp(
+            r'range of supported deployment target versions is ([0-9.]+) to',
+          );
+          final RegExpMatch? match = pattern.firstMatch(line);
+          if (match != null) {
+            macOSMinDeploymentTarget = match.group(1);
+          }
+        }
+        if (verboseLogging) {
+          return line;
+        }
+        return _filteredOutput.hasMatch(line) ? line : null;
+      },
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
+    if (hasMacOSMinDeploymentTargetIssue) {
+      globals.logger.printError(
+        _macOSDeploymentTargetTooLowMessage(macOSMinDeploymentTarget),
+        emphasis: true,
+      );
+    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
@@ -418,4 +458,19 @@ File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configura
     ),
   );
   return disabledSandboxEntitlementFile;
+}
+
+String _macOSDeploymentTargetTooLowMessage(String? minVersion) {
+  final String versionText = minVersion ?? 'the minimum supported version';
+  return '''
+════════════════════════════════════════════════════════════════════════════════
+The macOS deployment target is too low. Xcode requires at least $versionText.
+
+To upgrade your macOS deployment target, follow these steps:
+  1. Open the project in Xcode:
+     open macos/Runner.xcworkspace
+  2. Select the "Runner" project in the project navigator.
+  3. Select the "Runner" TARGET, and in the "General" tab:
+     Update "Minimum Deployments" to at least $versionText.
+════════════════════════════════════════════════════════════════════════════════''';
 }

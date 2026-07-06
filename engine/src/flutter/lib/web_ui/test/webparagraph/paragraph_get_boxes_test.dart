@@ -302,7 +302,6 @@ Future<void> testMain() async {
       text.length,
       boxHeightStyle: ui.BoxHeightStyle.strut,
     );
-
     expect(boxes1, hasLength(1));
     expect(boxes2, hasLength(1));
     expect(boxes1.first.toRect().bottom, boxes2.first.toRect().top);
