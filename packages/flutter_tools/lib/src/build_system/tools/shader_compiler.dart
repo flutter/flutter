@@ -279,11 +279,7 @@ class ShaderCompiler {
       return false;
     }
     const winErrorAccessDisabledByPolicy = 1260;
-    final String message = exception.message.toLowerCase();
-    return message.contains('application control policy') ||
-        message.contains('blocked by your administrator') ||
-        message.contains('blocked by group policy') ||
-        exception.errorCode == winErrorAccessDisabledByPolicy;
+    return exception.errorCode == winErrorAccessDisabledByPolicy;
   }
 
   void _logSecurityBlockError(String impellercPath) {
