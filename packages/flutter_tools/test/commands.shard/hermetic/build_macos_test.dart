@@ -1302,6 +1302,52 @@ STDERR STUFF
   );
 
   testUsingContext(
+    'Build with arm64 destination in release/profile mode if isMacOSArm64OnlyEnabled is true',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await runner.run(const <String>['build', 'macos', '--profile', '--no-pub']);
+      await runner.run(const <String>['build', 'macos', '--no-pub']);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // Still uses host arch in debug mode even if the flag is set.
+        setUpFakeXcodeBuildHandler('Debug'),
+        setUpFakeXcodeBuildHandler('Profile', additionalCommandArguments: <String>['ARCHS=arm64']),
+        setUpFakeXcodeBuildHandler('Release', additionalCommandArguments: <String>['ARCHS=arm64']),
+      ]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
     'Passes EXCLUDED_ARCHS from Xcode project to xcodebuild command',
     () async {
       createMinimalMockProjectFiles();
@@ -1352,6 +1398,54 @@ STDERR STUFF
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
         overrides: <String, String>{'EXCLUDED_ARCHS': 'x86_64'},
+      ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Fails when isMacOSArm64OnlyEnabled is true and arm64 is in EXCLUDED_ARCHS',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      await expectLater(
+        createTestCommandRunner(command).run(<String>['build', 'macos', '--release', '--no-pub']),
+        throwsToolExit(
+          message: 'No Valid Target Arch: '
+              'You have enabled the macOSArm64Only feature flag but '
+              "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
+              'Consider removing arm64 from EXCLUDED_ARCHS.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'EXCLUDED_ARCHS': 'arm64'},
       ),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
@@ -1409,6 +1503,175 @@ STDERR STUFF
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
         // Empty overrides - no EXCLUDED_ARCHS
       ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'macOS deployment target too low shows guided message',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: fakeProcessManager,
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      createMinimalMockProjectFiles();
+
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            flutterProject.macos.xcodeWorkspace!.path,
+            '-configuration',
+            'Debug',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            flutterBuildDir.absolute.path,
+            '-destination',
+            'platform=macOS,arch=x86_64',
+            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          exitCode: 1,
+          stdout:
+              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is 12.0 to 27.0.x. (in target 'Runner' from project 'Runner')",
+        ),
+      );
+
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(
+        testLogger.errorText,
+        contains('The macOS deployment target is too low. Xcode requires at least 12.0.'),
+      );
+      expect(
+        testLogger.errorText,
+        contains('Select the "Runner" TARGET, and in the "General" tab:'),
+      );
+      expect(testLogger.errorText, contains('Update "Minimum Deployments" to at least 12.0.'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'macOS deployment target too low shows fallback message if version cannot be parsed',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: fakeProcessManager,
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      createMinimalMockProjectFiles();
+
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            flutterProject.macos.xcodeWorkspace!.path,
+            '-configuration',
+            'Debug',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            flutterBuildDir.absolute.path,
+            '-destination',
+            'platform=macOS,arch=x86_64',
+            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          exitCode: 1,
+          stdout:
+              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x. (in target 'Runner' from project 'Runner')",
+        ),
+      );
+
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(
+        testLogger.errorText,
+        contains(
+          'The macOS deployment target is too low. Xcode requires at least the minimum supported version.',
+        ),
+      );
+      expect(
+        testLogger.errorText,
+        contains('Select the "Runner" TARGET, and in the "General" tab:'),
+      );
+      expect(
+        testLogger.errorText,
+        contains('Update "Minimum Deployments" to at least the minimum supported version.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

@@ -626,7 +626,11 @@ void main() {
               WidgetSpan(
                 alignment: PlaceholderAlignment.baseline,
                 baseline: TextBaseline.alphabetic,
-                child: Semantics(label: 'inner', container: true),
+                child: Semantics(
+                  label: 'inner',
+                  container: true,
+                  child: const SizedBox(width: 10, height: 10),
+                ),
               ),
               const TextSpan(text: ' after'),
             ],
