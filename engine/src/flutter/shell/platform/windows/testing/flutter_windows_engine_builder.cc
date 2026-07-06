@@ -51,6 +51,7 @@ FlutterWindowsEngineBuilder::FlutterWindowsEngineBuilder(
   properties_.assets_path = context.GetAssetsPath().c_str();
   properties_.icu_data_path = context.GetIcuDataPath().c_str();
   properties_.aot_library_path = context.GetAotLibraryPath().c_str();
+  properties_.impeller_switch = DefaultImpeller;
 }
 
 FlutterWindowsEngineBuilder::~FlutterWindowsEngineBuilder() = default;
@@ -67,6 +68,11 @@ void FlutterWindowsEngineBuilder::AddDartEntrypointArgument(std::string arg) {
 void FlutterWindowsEngineBuilder::SetSwitches(
     std::vector<std::string> switches) {
   switches_ = std::move(switches);
+}
+
+void FlutterWindowsEngineBuilder::SetImpellerSwitch(
+    FlutterDesktopImpellerSwitch impeller_switch) {
+  properties_.impeller_switch = impeller_switch;
 }
 
 void FlutterWindowsEngineBuilder::SetCreateKeyboardHandlerCallbacks(

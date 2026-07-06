@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
@@ -38,14 +39,29 @@ static void set_key_event_channel(FlMockBinaryMessenger* messenger,
       data);
 }
 
+class FlKeyChannelResponderTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    messenger = fl_mock_binary_messenger_new();
+    responder = fl_key_channel_responder_new(FL_BINARY_MESSENGER(messenger));
+  }
+
+  ~FlKeyChannelResponderTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+    g_clear_object(&responder);
+    g_clear_object(&messenger);
+  }
+
+  void TestLockEvent(guint key_code,
+                     const char* down_expected,
+                     const char* up_expected);
+
+  FlMockBinaryMessenger* messenger = nullptr;
+  FlKeyChannelResponder* responder = nullptr;
+};
+
 // Test sending a letter "A";
-TEST(FlKeyChannelResponderTest, SendKeyEvent) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlKeyChannelResponder) responder =
-      fl_key_channel_responder_new(FL_BINARY_MESSENGER(messenger));
-
+TEST_F(FlKeyChannelResponderTest, SendKeyEvent) {
   set_key_event_channel(
       messenger,
       "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, keyCode: 65, "
@@ -83,19 +99,11 @@ TEST(FlKeyChannelResponderTest, SendKeyEvent) {
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-void test_lock_event(guint key_code,
-                     const char* down_expected,
-                     const char* up_expected) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlKeyChannelResponder) responder =
-      fl_key_channel_responder_new(FL_BINARY_MESSENGER(messenger));
-
+void FlKeyChannelResponderTest::TestLockEvent(guint key_code,
+                                              const char* down_expected,
+                                              const char* up_expected) {
   set_key_event_channel(messenger, down_expected, FALSE);
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       12345, TRUE, 0x04, key_code, static_cast<GdkModifierType>(0), 0);
@@ -125,44 +133,36 @@ void test_lock_event(guint key_code,
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 // Test sending a "NumLock" keypress.
-TEST(FlKeyChannelResponderTest, SendNumLockKeyEvent) {
-  test_lock_event(GDK_KEY_Num_Lock,
-                  "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
-                  "keyCode: 65407, modifiers: 16}",
-                  "{type: keyup, keymap: linux, scanCode: 4, toolkit: gtk, "
-                  "keyCode: 65407, modifiers: 0}");
+TEST_F(FlKeyChannelResponderTest, SendNumLockKeyEvent) {
+  TestLockEvent(GDK_KEY_Num_Lock,
+                "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
+                "keyCode: 65407, modifiers: 16}",
+                "{type: keyup, keymap: linux, scanCode: 4, toolkit: gtk, "
+                "keyCode: 65407, modifiers: 0}");
 }
 
 // Test sending a "CapsLock" keypress.
-TEST(FlKeyChannelResponderTest, SendCapsLockKeyEvent) {
-  test_lock_event(GDK_KEY_Caps_Lock,
-                  "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
-                  "keyCode: 65509, modifiers: 2}",
-                  "{type: keyup, keymap: linux, scanCode: 4, toolkit: gtk, "
-                  "keyCode: 65509, modifiers: 0}");
+TEST_F(FlKeyChannelResponderTest, SendCapsLockKeyEvent) {
+  TestLockEvent(GDK_KEY_Caps_Lock,
+                "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
+                "keyCode: 65509, modifiers: 2}",
+                "{type: keyup, keymap: linux, scanCode: 4, toolkit: gtk, "
+                "keyCode: 65509, modifiers: 0}");
 }
 
 // Test sending a "ShiftLock" keypress.
-TEST(FlKeyChannelResponderTest, SendShiftLockKeyEvent) {
-  test_lock_event(GDK_KEY_Shift_Lock,
-                  "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
-                  "keyCode: 65510, modifiers: 2}",
-                  "{type: keyup, keymap: linux, scanCode: 4, toolkit: gtk, "
-                  "keyCode: 65510, modifiers: 0}");
+TEST_F(FlKeyChannelResponderTest, SendShiftLockKeyEvent) {
+  TestLockEvent(GDK_KEY_Shift_Lock,
+                "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
+                "keyCode: 65510, modifiers: 2}",
+                "{type: keyup, keymap: linux, scanCode: 4, toolkit: gtk, "
+                "keyCode: 65510, modifiers: 0}");
 }
 
-TEST(FlKeyChannelResponderTest, TestKeyEventHandledByFramework) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlKeyChannelResponder) responder =
-      fl_key_channel_responder_new(FL_BINARY_MESSENGER(messenger));
-
+TEST_F(FlKeyChannelResponderTest, TestKeyEventHandledByFramework) {
   set_key_event_channel(
       messenger,
       "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
@@ -181,17 +181,9 @@ TEST(FlKeyChannelResponderTest, TestKeyEventHandledByFramework) {
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlKeyChannelResponder) responder =
-      fl_key_channel_responder_new(FL_BINARY_MESSENGER(messenger));
-
+TEST_F(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
   set_key_event_channel(
       messenger,
       "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
@@ -211,6 +203,4 @@ TEST(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
       },
       loop);
   g_main_loop_run(loop);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }

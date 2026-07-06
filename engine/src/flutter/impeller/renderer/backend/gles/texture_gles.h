@@ -13,6 +13,7 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
+#include "impeller/renderer/backend/gles/unique_handle_gles.h"
 
 namespace impeller {
 
@@ -81,9 +82,6 @@ class TextureGLES final : public Texture,
               bool threadsafe = false);
 
   // |Texture|
-  ~TextureGLES() override;
-
-  // |Texture|
   bool IsValid() const override;
 
   std::optional<GLuint> GetGLHandle() const;
@@ -98,7 +96,9 @@ class TextureGLES final : public Texture,
     kStencil,
   };
   [[nodiscard]] bool SetAsFramebufferAttachment(GLenum target,
-                                                AttachmentType attachment_type);
+                                                AttachmentType attachment_type,
+                                                uint32_t mip_level = 0,
+                                                uint32_t slice = 0);
 
   Type GetType() const;
 
@@ -164,6 +164,13 @@ class TextureGLES final : public Texture,
   /// Retrieve the cached FBO object, or a dead handle if there is no object.
   const HandleGLES& GetCachedFBO() const;
 
+  /// Records the subresource the cached FBO is currently bound to.
+  void SetCachedFBOSubresource(uint32_t mip_level, uint32_t slice);
+
+  /// Whether the cached FBO is currently bound to `(mip_level, slice)`. When
+  /// false, the FBO must be re-attached before use.
+  bool CachedFBOMatchesSubresource(uint32_t mip_level, uint32_t slice) const;
+
   // Visible for testing.
   std::optional<HandleGLES> GetSyncFence() const;
 
@@ -173,8 +180,8 @@ class TextureGLES final : public Texture,
  private:
   std::shared_ptr<ReactorGLES> reactor_;
   const Type type_;
-  HandleGLES handle_;
-  std::optional<HandleGLES> fence_ = std::nullopt;
+  UniqueHandleGLES handle_;
+  UniqueHandleGLES fence_;
   // Tracks which `(slice, mip_level)` pairs have had their storage allocated
   // by a `glTexImage2D` call. Allocation is performed lazily on first write
   // to a level so the only-renders-then-mipmaps path (Impeller's snapshot
@@ -187,7 +194,9 @@ class TextureGLES final : public Texture,
   std::array<std::bitset<kMaxTrackedMipLevels>, 6> slice_mip_initialized_ = {};
   const bool is_wrapped_;
   const std::optional<GLuint> wrapped_fbo_;
-  HandleGLES cached_fbo_ = HandleGLES::DeadHandle();
+  UniqueHandleGLES cached_fbo_;
+  uint32_t cached_fbo_mip_level_ = 0;
+  uint32_t cached_fbo_slice_ = 0;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
@@ -215,6 +224,11 @@ class TextureGLES final : public Texture,
   ISize GetSize() const override;
 
   void InitializeContentsIfNecessary();
+
+  // Allocates storage for `(slice, mip_level)` if it has not been allocated
+  // yet, so the subresource can be attached to a framebuffer. Returns false on
+  // failure.
+  bool EnsureSliceMipLevelStorage(size_t slice, size_t mip_level);
 
   TextureGLES(const TextureGLES&) = delete;
 
