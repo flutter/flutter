@@ -769,6 +769,12 @@ FlutterWindow::HandleMessage(UINT const message,
       y_pos = GET_Y_LPARAM(lparam);
       flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
 
+      // WM_*BUTTONUP messages use wparam to report which buttons remain
+      // pressed after this event; release capture only after the last mouse
+      // button is released. WM_*BUTTONDOWN messages already identify the newly
+      // pressed button via the message itself.
+      // See:
+      // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup
       if ((wparam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON | MK_XBUTTON1 |
                      MK_XBUTTON2)) == 0) {
         ReleaseCapture();
