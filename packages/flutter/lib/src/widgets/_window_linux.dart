@@ -99,8 +99,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = RegularWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredSize: size,
-      preferredConstraints: constraints,
+      size: size,
+      constraints: constraints,
       title: title,
     );
     _windows[controller.rootView.viewId] = controller._window;
@@ -121,8 +121,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = DialogWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredSize: size,
-      preferredConstraints: constraints,
+      size: size,
+      constraints: constraints,
       parent: parent,
       title: title,
     );
@@ -143,7 +143,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = TooltipWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredConstraints: constraints,
+      constraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -165,7 +165,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = PopupWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredConstraints: constraints,
+      constraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -243,8 +243,8 @@ class RegularWindowControllerLinux extends RegularWindowController
   RegularWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
     bool decorated = true,
   }) : _owner = owner,
@@ -266,11 +266,11 @@ class RegularWindowControllerLinux extends RegularWindowController
       },
       onDestroy: _delegate.onWindowDestroyed,
     );
-    if (preferredSize != null) {
-      _window.setDefaultSize(preferredSize.width.toInt(), preferredSize.height.toInt());
+    if (size != null) {
+      _window.setDefaultSize(size.width.toInt(), size.height.toInt());
     }
-    if (preferredConstraints != null) {
-      setConstraints(preferredConstraints);
+    if (constraints != null) {
+      setConstraints(constraints);
     }
     if (title != null) {
       setTitle(title);
@@ -446,8 +446,8 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
   DialogWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,
@@ -483,11 +483,11 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
       },
       onDestroy: _delegate.onWindowDestroyed,
     );
-    if (preferredSize != null) {
-      _window.setDefaultSize(preferredSize.width.toInt(), preferredSize.height.toInt());
+    if (size != null) {
+      _window.setDefaultSize(size.width.toInt(), size.height.toInt());
     }
-    if (preferredConstraints != null) {
-      setConstraints(preferredConstraints);
+    if (constraints != null) {
+      setConstraints(constraints);
     }
     if (title != null) {
       setTitle(title);
@@ -633,7 +633,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   TooltipWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -656,7 +656,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
       onConfigure: notifyListeners,
       onDestroy: _delegate.onWindowDestroyed,
     );
-    setConstraints(preferredConstraints);
+    setConstraints(constraints);
     final engine = _FlEngine.current();
     _view = _FlView(engine, isSizedToContent: true);
     _viewMonitor = _FlViewMonitor(
@@ -824,7 +824,7 @@ class PopupWindowControllerLinux extends PopupWindowController {
   PopupWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -848,7 +848,7 @@ class PopupWindowControllerLinux extends PopupWindowController {
       },
       onDestroy: _delegate.onWindowDestroyed,
     );
-    setConstraints(preferredConstraints);
+    setConstraints(constraints);
     final engine = _FlEngine.current();
     _view = _FlView(engine, isSizedToContent: true);
     _viewMonitor = _FlViewMonitor(
