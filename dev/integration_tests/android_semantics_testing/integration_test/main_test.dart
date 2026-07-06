@@ -67,19 +67,22 @@ Future<void> main() async {
   group('AccessibilityBridge', () {
     group('TextField', () {
       Future<void> prepareTextField(WidgetTester tester) async {
-        app.main();
-        await tester.pumpAndSettle();
-        await tester.tap(find.text(textFieldRoute));
-        await tester.pumpAndSettle();
-
         // The text selection menu and related semantics vary depending on if
         // the clipboard contents are pasteable. Copy some text into the
         // clipboard to make sure these tests always run with pasteable content
         // in the clipboard.
+        //
+        // This MUST be called before the text field is initialized (before app.main
+        // and navigation) to avoid a race condition with EditableText's initial
+        // asynchronous clipboard status query during initState.
+        //
         // Ideally this should test the case where there is nothing on the
         // clipboard as well, but there is no reliable way to clear the
         // clipboard on Android devices.
         await setClipboard('Hello World');
+        app.main();
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(textFieldRoute));
         await tester.pumpAndSettle();
       }
 
