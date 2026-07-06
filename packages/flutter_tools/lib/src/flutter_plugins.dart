@@ -1172,6 +1172,10 @@ Future<void> _writeWebPluginRegistrant(
 ///
 /// This uses [FlutterProject.flutterPluginsDependenciesFile], so it should only be
 /// run after [refreshPluginsList] has been run since the last plugin change.
+///
+/// The optional [customCMakeProject] and [customPlatformKey] are used by custom
+/// tool extension platforms that use CMake. They allow the extension to delegate
+/// plugin symlink creation to its own target directory.
 void createPluginSymlinks(
   FlutterProject project, {
   bool force = false,
@@ -1549,6 +1553,11 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 ///
 /// If [quiet] is true, validation and resolution errors or warnings will not
 /// be printed.
+///
+/// This method dynamically gathers all platform keys defined across all plugins
+/// in the project (including custom platforms declared by extension plugins)
+/// rather than relying on a hardcoded list of standard platforms, ensuring
+/// that custom platform implementations are resolved correctly.
 Map<String, List<Plugin>> _resolvePluginImplementations(
   List<Plugin> plugins, {
   required _PluginResolutionType pluginResolutionType,

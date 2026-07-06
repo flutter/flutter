@@ -665,9 +665,18 @@ String _filenameForCppClass(String className) {
   );
 }
 
+/// A generic fallback implementation of [PluginPlatform] used for custom
+/// platforms registered via the tool extension protocol.
+///
+/// Rather than defining platform-specific fields (like `package` or `pluginClass`
+/// in [AndroidPlugin]), this class stores the raw configuration map defined under
+/// the platform key in `pubspec.yaml`. This map is passed to the extension-side
+/// build service, allowing custom platforms to interpret their specific plugin
+/// parameters on the extension side without requiring changes to the host tool.
 class CustomPlatformPlugin extends PluginPlatform {
   const CustomPlatformPlugin({required this.configuration});
 
+  /// The raw plugin configuration map parsed from `pubspec.yaml` for this custom platform.
   final Map<String, Object?> configuration;
 
   @override

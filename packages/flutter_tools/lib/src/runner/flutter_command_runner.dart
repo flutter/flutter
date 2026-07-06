@@ -245,6 +245,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
   }
 
+  /// Rebuilds the underlying [ArgParser] to register dynamic CLI options.
+  ///
+  /// Since GEP extensions can dynamically register custom project templates,
+  /// build targets, and configuration flags at runtime, the command runner
+  /// must rebuild its parser and populate the newly registered commands and flags
+  /// before executing.
   void rebuildArgParser() {
     _argParser = ArgParser(
       allowTrailingOptions: false,
@@ -335,6 +341,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     final String? commandName = _findCommandName(args);
 
+    // If the tool extension prototype is enabled and the command is 'create',
+    // query the template manager to discover custom templates provided by
+    // active tool extensions, and rebuild the parser to register them.
     if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
         (commandName == 'create' || (commandName == 'help' && args.contains('create')))) {
       final ExtensionTemplateManager? templateManager = extensionTemplateManager;
@@ -344,6 +353,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
 
+    // If the tool extension prototype is enabled and the command is 'build',
+    // query the build target manager to discover custom build targets provided
+    // by active tool extensions. Register them as CLI subcommands and rebuild the parser.
     if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
         (commandName == 'build' || (commandName == 'help' && args.contains('build')))) {
       final ExtensionBuildTargetManager? buildTargetManager = extensionBuildTargetManager;
@@ -357,6 +369,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
 
+    // If the tool extension prototype is enabled and the command is 'config',
+    // query the configuration manager to discover custom configuration options
+    // provided by active tool extensions. Register them as flags on the config command.
     if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
         (commandName == 'config' || commandName == 'configure')) {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;

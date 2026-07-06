@@ -159,6 +159,9 @@ class Plugin {
           platforms[WindowsPlugin.kConfigKey] = WindowsPlugin.fromYaml(name, value);
         }
       } else {
+        // Fallback for custom extension platforms. Any unrecognized platform key
+        // is parsed into a generic CustomPlatformPlugin holding its raw configuration
+        // map, allowing the extension-side implementation to parse it dynamically.
         if (_providesImplementationForPlatform(platformsYaml, key)) {
           platforms[key] = CustomPlatformPlugin(configuration: _yamlMapToMap(value));
         }
@@ -167,11 +170,15 @@ class Plugin {
 
     final defaultPackages = <String, String>{};
     final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
+    // Dynamically collect default package names and Dart plugin classes for all platforms.
+    // This allows custom platforms to declare these fields without requiring host-side registration.
     for (final Object? platformKeyObj in platformsYaml.keys) {
       if (platformKeyObj is! String) {
         continue;
       }
       final String platform = platformKeyObj;
+      // Web is historically a special case where Dart-only plugins and default packages
+      // are handled separately, so we exclude it from the dynamic loop.
       if (platform == WebPlugin.kConfigKey) {
         continue;
       }

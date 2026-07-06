@@ -6,7 +6,13 @@ import 'package:file/file.dart';
 
 import 'build.dart';
 
-/// Helper to recreate plugin symlinks directory and link each resolved plugin.
+/// Helper to recreate the plugin symlinks directory and link each resolved plugin
+/// specifically for tool extension platforms.
+///
+/// Unlike standard host-side plugin symlinking which assumes specific directories
+/// and CMake project layouts, this utility creates symlinks from the actual plugin
+/// directory on the host to the target directory requested by the custom platform.
+/// This allows custom extension platforms to manage their own native dependencies.
 void createExtensionPluginSymlinks({
   required FileSystem fileSystem,
   required List<ExtensionPlugin> plugins,
@@ -36,7 +42,13 @@ void createExtensionPluginSymlinks({
   }
 }
 
-/// Generates the content of `generated_plugins.cmake` for CMake-based platforms.
+/// Generates the content of `generated_plugins.cmake` for CMake-based extension platforms.
+///
+/// This parses the custom configuration of each [ExtensionPlugin] to separate FFI-based plugins
+/// from standard MethodChannel-based plugins. FFI-based plugins do not require a companion
+/// C++ class but still need to be linked and bundled.
+/// FFI-based plugins are identified by the 'ffiPlugin' flag in their configuration,
+/// whereas MethodChannel plugins must specify a 'class' property representing the C++ plugin class.
 String generateCmakePluginsFile({
   required String os,
   required List<ExtensionPlugin> plugins,

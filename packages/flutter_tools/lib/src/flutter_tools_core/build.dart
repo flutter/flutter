@@ -196,7 +196,10 @@ final class ExtensionBuildTarget extends Target {
   ];
 }
 
-/// Environment state provided by the tool.
+/// Environment state provided by the host tool to the extension build target.
+///
+/// This structure is serialized over the tool extension RPC to convey directories,
+/// build flags, engine parameters, and resolved plugins to the extension-side compiler.
 class BuildEnvironment {
   BuildEnvironment({
     required this.cacheDir,
@@ -207,7 +210,7 @@ class BuildEnvironment {
     required this.plugins,
   });
 
-  /// Create a BuildEnvironment from a JSON map.
+  /// Create a BuildEnvironment from a JSON map received over RPC.
   factory BuildEnvironment.fromJson(Map<String, Object?> json) {
     return BuildEnvironment(
       cacheDir: Uri.parse(json['cacheDir']! as String),
@@ -227,24 +230,29 @@ class BuildEnvironment {
     );
   }
 
-  /// Defines passed to compilation targets.
+  /// Defines and build flags passed to compilation targets.
   final Map<String, String> defines;
 
-  /// Directory holding cached files.
+  /// Directory holding cached artifacts and files.
   final Uri cacheDir;
 
-  /// Root directory of the project.
+  /// Root directory of the Flutter project being built.
   final Uri projectRoot;
 
-  /// Output directory.
+  /// Output directory where build artifacts should be written.
   final Uri outputDirectory;
 
-  /// Assets directory.
+  /// Directory holding the compiled flutter assets (e.g. AssetBundle).
   final Uri flutterAssetsDir;
 
-  /// The plugins resolved for this target.
+  /// The list of resolved plugins applicable to the target platform.
+  ///
+  /// This lists plugins resolved on the host tool, including their paths and raw
+  /// configurations, allowing the extension-side build to dynamically bundle
+  /// and link them natively.
   final List<ExtensionPlugin> plugins;
 
+  /// Converts the environment config to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     'cacheDir': cacheDir.toString(),
     'defines': defines,
@@ -255,9 +263,16 @@ class BuildEnvironment {
   };
 }
 
+/// A Data Transfer Object representing a resolved Flutter plugin.
+///
+/// This class is shared between the host tool and the extension protocol.
+/// It contains the plugin's metadata and the raw configuration block extracted
+/// from `pubspec.yaml` under `platforms: <platform_key>`, allowing custom
+/// platforms to interpret their specific plugin parameters on the extension side.
 class ExtensionPlugin {
   ExtensionPlugin({required this.configuration, required this.name, required this.path});
 
+  /// Decodes an [ExtensionPlugin] from a JSON map.
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
     return ExtensionPlugin(
       configuration:
@@ -268,10 +283,16 @@ class ExtensionPlugin {
     );
   }
 
+  /// The raw plugin configuration map defined under the platform key in `pubspec.yaml`.
   final Map<String, Object?> configuration;
+
+  /// The name of the plugin package.
   final String name;
+
+  /// The absolute path to the plugin package on the host filesystem.
   final String path;
 
+  /// Encodes this plugin DTO into a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     'configuration': configuration,
     'name': name,

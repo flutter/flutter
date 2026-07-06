@@ -114,6 +114,7 @@ base class LinuxAssembleTarget extends Target {
         _kTargetPlatformLinuxX64;
     final String buildMode = env.defines['buildMode'] ?? 'debug';
 
+    // Parse the app name from pubspec.yaml.
     var appName = 'app';
     final File pubspecFile = _fileSystem.file(_fileSystem.path.join(projectPath, 'pubspec.yaml'));
     if (pubspecFile.existsSync()) {
@@ -132,6 +133,7 @@ base class LinuxAssembleTarget extends Target {
           _ => 'Debug',
         };
 
+    // Clean up stale CMake cache if it was configured with a non-Ninja generator.
     final File cacheFile = _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName));
     if (cacheFile.existsSync() && !_isNinjaGenerator(cacheFile)) {
       _cleanCMakeCache(outputPath);
@@ -148,7 +150,10 @@ base class LinuxAssembleTarget extends Target {
       _fileSystem.path.join(linuxProjectPath, 'flutter', 'generated_plugin_registrant.cc'),
     );
 
-    // Create plugin symlinks
+    // Extension-Side Plugin Symlinking
+    //
+    // Unlike standard host-side injection, the extension is responsible for setting up symlinks
+    // to the plugins. It creates symlinks in the target project's ephemeral directory.
     final Directory symlinkDirectory = _fileSystem.directory(
       _fileSystem.path.join(linuxProjectPath, 'flutter', 'ephemeral', '.plugin_symlinks'),
     );
@@ -170,6 +175,8 @@ base class LinuxAssembleTarget extends Target {
     final methodChannelPlugins = <Map<String, Object?>>[];
     final ffiPlugins = <Map<String, Object?>>[];
 
+    // Classify resolved plugins into MethodChannel plugins vs FFI plugins based
+    // on their custom plugin configuration map.
     for (final ExtensionPlugin plugin in env.plugins) {
       final Map<String, Object?> config = plugin.configuration;
       final isFfi = config['ffiPlugin'] == true;
@@ -188,7 +195,9 @@ base class LinuxAssembleTarget extends Target {
       }
     }
 
-    // 1. Write generated_plugins.cmake
+    // Step 1: Write generated_plugins.cmake
+    // This dynamically generates the CMake script to include and link each plugin natively
+    // in the custom Linux build, using the relative symlink paths created above.
     final cmakeContent = StringBuffer();
     cmakeContent.writeln('# Generated file, do not edit.');
     cmakeContent.writeln();

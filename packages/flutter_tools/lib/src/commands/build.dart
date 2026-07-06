@@ -170,6 +170,12 @@ class BuildCommand extends FlutterCommand {
   final Logger _logger;
   final bool _verboseHelp;
 
+  /// Dynamically registers custom build targets provided by GEP extensions
+  /// as CLI subcommands under `flutter build`.
+  ///
+  /// This queries the [ExtensionBuildTargetManager] for cached build targets
+  /// returned by the extension over RPC, and registers an [ExtensionBuildSubCommand]
+  /// for each target that specifies a `cliSubcommand`.
   void registerExtensionSubcommands([List<core.Target>? targets]) {
     if (!globals.isToolExtensionPrototypeEnabled) {
       return;
@@ -229,6 +235,14 @@ abstract class BuildSubCommand extends FlutterCommand {
 
 typedef BuildExtensionSubCommand = ExtensionBuildSubCommand;
 
+/// A [BuildSubCommand] that delegates compilation of a custom target to a tool extension.
+///
+/// This subcommand is dynamically registered when the tool extension prototype is enabled and
+/// the extension exposes a target with a `cliSubcommand` property.
+///
+/// It resolves target platform configurations, compiles Dart define arguments,
+/// resolves custom platform plugin dependencies on the host, and packages them
+/// into the [core.BuildEnvironment] before calling `buildTarget` on the tool extension target manager.
 class ExtensionBuildSubCommand extends BuildSubCommand {
   // ignore: prefer_initializing_formals
   ExtensionBuildSubCommand({
@@ -247,8 +261,13 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     usesDartDefineOption();
   }
 
+  /// The tool extension build target definition from the extension.
   final core.Target _target;
+
+  /// The manager executing the tool extension RPC build.
   final ExtensionBuildTargetManager? _targetManager;
+
+  /// The host filesystem.
   final FileSystem _fileSystem;
 
   @override
@@ -267,6 +286,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final String? outputDirArg = stringArg('output');
     final FlutterProject project = FlutterProject.current();
     final Uri projectRootUri = project.directory.uri;
+
+    // Determine output directory. Defaults to standard build/<platform>/<target>/<mode>/ layout.
     final Uri outputUri = outputDirArg != null
         ? _fileSystem.directory(outputDirArg).uri
         : project.directory
@@ -276,11 +297,17 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
               .childDirectory(buildModeName)
               .uri;
 
+    // Collect standard environment configs for compilation.
     final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
     environmentConfig['FLUTTER_TARGET'] = mainPath;
     environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
     environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
 
+    // Host-Side Plugin Resolution
+    //
+    // If the tool extension target specifies a `pluginPlatformKey`, the host dynamically resolves
+    // applicable plugins from pubspec.yaml and packages their metadata and configuration
+    // as ExtensionPlugin DTOs.
     final resolvedPlugins = <core.ExtensionPlugin>[];
     final String? pluginPlatformKey = _target.pluginPlatformKey;
     if (pluginPlatformKey != null) {
@@ -302,6 +329,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       }
     }
 
+    // Assemble the environment to be sent over RPC.
     final buildEnv = core.BuildEnvironment(
       cacheDir: globals.cache.getRoot().uri,
       defines: environmentConfig,
@@ -314,6 +342,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       projectRoot: projectRootUri,
     );
 
+    // Delegate the compilation over tool extension RPC to the extension.
     final ExtensionBuildTargetManager? targetManager =
         _targetManager ?? extensionBuildTargetManager;
     if (targetManager != null) {

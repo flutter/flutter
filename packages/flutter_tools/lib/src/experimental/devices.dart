@@ -256,7 +256,8 @@ class ExtensionBackedDevice extends Device {
     String? executablePath;
 
     if (!prebuiltApplication) {
-      // 1. Verify that 'build' service is supported by checking capabilities.
+      // Step 1: Verify tool extension build service support
+      // Query capabilities to check if the extension supports the 'build' service.
       final bool isSupported;
       try {
         isSupported = await _discoveryHelper.isServiceSupported(
@@ -274,7 +275,9 @@ class ExtensionBackedDevice extends Device {
 
       final String buildTarget = buildTargetName ?? 'assemble_linux_app';
 
-      // 2. Query "build.getTargets" to verify target is supported and extract target platform info.
+      // Step 2: Query build targets
+      // Invoke 'build.getTargets' over the tool extension RPC to verify the target is supported
+      // by the extension and extract target platform config (like pluginPlatformKey).
       core.Target? foundTarget;
       try {
         final Object? targetsResult = await _extension
@@ -308,7 +311,8 @@ class ExtensionBackedDevice extends Device {
       environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
       environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
 
-      // 3. Extract local engine overrides
+      // Step 3: Extract local engine overrides
+      // Propagate engine paths if compiling against a local engine build.
       final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
       if (localEngineInfo != null) {
         final String targetOutPath = localEngineInfo.targetOutPath;
@@ -319,7 +323,9 @@ class ExtensionBackedDevice extends Device {
         environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
       }
 
-      // 4. Host preparations (resolve plugins for custom target platform)
+      // Step 4: Host-side plugin resolution
+      // If the target platform supports plugins (has a pluginPlatformKey), resolve plugins
+      // on the host and package them as ExtensionPlugin DTOs for the extension to compile natively.
       final resolvedPlugins = <core.ExtensionPlugin>[];
       final String? pluginPlatformKey = foundTarget.pluginPlatformKey;
       if (pluginPlatformKey != null) {
@@ -355,7 +361,8 @@ class ExtensionBackedDevice extends Device {
 
       String? buildExecutablePath;
 
-      // 5. Invoke build.build
+      // Step 5: Invoke build over tool extension RPC
+      // Delegate compilation to the extension isolate.
       try {
         final Object? buildResult = await _extension
             .callMethod(
