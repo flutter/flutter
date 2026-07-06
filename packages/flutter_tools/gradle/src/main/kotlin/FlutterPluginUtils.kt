@@ -4,6 +4,7 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
@@ -22,6 +23,7 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.register
 import java.io.File
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 
@@ -547,38 +549,15 @@ object FlutterPluginUtils {
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
-
+        val agpVersion = VersionFetcher.getAGPVersion(project)
         var shouldLogForApp = false
         project.rootProject.subprojects {
-            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
-            if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
-
-            val scriptText: String =
-                if (buildFile.absolutePath.contains("app/build.gradle")) {
-                    getBuildGradleFileFromProjectDir(this.projectDir, this.logger).readText()
-                } else {
-                    buildFile.readText()
-                }
-
-            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
-                if (buildFile.extension == "kts") {
-                    Triple(
-                        kgpRegexKotlin.containsMatchIn(scriptText),
-                        appPluginRegexKotlin.containsMatchIn(scriptText),
-                        libPluginRegexKotlin.containsMatchIn(scriptText)
-                    )
-                } else {
-                    Triple(
-                        kgpRegexGroovy.containsMatchIn(scriptText),
-                        appPluginRegexGroovy.containsMatchIn(scriptText),
-                        libPluginRegexGroovy.containsMatchIn(scriptText)
-                    )
-                }
+            val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
             // Ensures applying AGP exists in the build file configuration.
-            if (!hasAppPlugin && !hasLibPlugin) return@subprojects
+            if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
-            if (!hasKgpPlugin) {
+            if (!isBuiltInKotlinEnabled(project, agpVersion) && !pluginState.hasKgpPlugin) {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
@@ -590,22 +569,24 @@ object FlutterPluginUtils {
                         """.trimIndent()
                     )
                 }
-                return@subprojects
             }
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
-            if (hasAppPlugin) {
+            if (pluginState.hasAppPlugin && pluginState.hasKgpPlugin) {
                 shouldLogForApp = true
             }
 
-            if (hasLibPlugin) {
+            if (pluginState.hasLibPlugin && pluginState.hasKgpPlugin) {
                 pluginsWithKGPAppliedList.add(name)
             }
         }
 
+        // If no imperative apply KGP declarations were found, there is nothing to log.
+        if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
+            return
+        }
+
         project.gradle.projectsEvaluated {
-            // Safe to query AGP version after all projects are evaluated.
-            val agpVersion = VersionFetcher.getAGPVersion(project)
             if (agpVersion == null || agpVersion.major < 9) {
                 return@projectsEvaluated
             }
@@ -633,6 +614,99 @@ object FlutterPluginUtils {
                 """.trimIndent()
             )
         }
+    }
+
+    /**
+     * Represents whether Kotlin Gradle Plugin, Android Gradle Plugin (for applications), and the
+     * Android Gradle Plugin (for libraries) are declared in a subproject's build script.
+     *
+     * @property hasKgpPlugin `true` if the Kotlin Gradle Plugin (KGP) is declared in the subproject's build script.
+     * @property hasAppPlugin `true` if the Android Gradle Plugin (AGP) for applications is declared in the subproject's build script.
+     * @property hasLibPlugin `true` if the Android Gradle Plugin (AGP) for libraries is declared in the subproject's build script.
+     */
+    internal data class SubprojectPluginState(
+        val hasKgpPlugin: Boolean,
+        val hasAppPlugin: Boolean,
+        val hasLibPlugin: Boolean
+    )
+
+    /**
+     * Scans the build script (`build.gradle` or `build.gradle.kts`) of Flutter Android app modules and Flutter plugin
+     * modules to detect declarations of Kotlin Gradle Plugin, Android Gradle Plugin (for applications),
+     * and Android Gradle Plugin (for libraries).
+     *
+     * This inspects build script files directly via regex rather than querying Gradle plugin
+     * state at runtime. Evaluating Kotlin Gradle Plugin dynamically at runtime to conditionally apply Kotlin Gradle Plugin
+     * during configuration leads to lifecycle and ordering issues (see https://github.com/gradle/gradle/issues/36953).
+     *
+     * Returns null if the build script does not exist, is inside an ephemeral `.android/` directory,
+     * or fails to read due to an [IOException].
+     */
+    internal fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
+        val buildFile = subproject.buildFile
+
+        // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory
+        // should not be adjusted and by default does not apply KGP
+        if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) {
+            return null
+        }
+
+        val scriptText: String =
+            try {
+                if (buildFile.absolutePath.contains("app/build.gradle")) {
+                    getBuildGradleFileFromProjectDir(
+                        subproject.projectDir,
+                        subproject.logger
+                    ).readText()
+                } else {
+                    buildFile.readText()
+                }
+            } catch (e: IOException) {
+                subproject.logger.error("Failed to read build file: ${buildFile.absolutePath}", e)
+                return null
+            }
+
+        val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+            if (buildFile.extension == "kts") {
+                Triple(
+                    kgpRegexKotlin.containsMatchIn(scriptText),
+                    appPluginRegexKotlin.containsMatchIn(scriptText),
+                    libPluginRegexKotlin.containsMatchIn(scriptText)
+                )
+            } else {
+                Triple(
+                    kgpRegexGroovy.containsMatchIn(scriptText),
+                    appPluginRegexGroovy.containsMatchIn(scriptText),
+                    libPluginRegexGroovy.containsMatchIn(scriptText)
+                )
+            }
+
+        return SubprojectPluginState(hasKgpPlugin, hasAppPlugin, hasLibPlugin)
+    }
+
+    /**
+     * Determines if the Gradle property `android.builtInKotlin` is enabled globally across the multi-project Gradle build.
+     *
+     * Evaluates the `android.builtInKotlin` Gradle property, supporting any [standard Gradle
+     * configuration source](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties) (such as the root project's `gradle.properties` file or command-line `-P` flags).
+     *
+     * Defaults to `true` for AGP 9.0+ unless `android.builtInKotlin` is explicitly configured
+     * to `false`. Always returns `false` if the AGP version is below `9.0.0` (or null).
+     * See [Android Migration Guide](https://developer.android.com/build/migrate-to-built-in-kotlin).
+     */
+    @JvmStatic
+    @JvmName("isBuiltInKotlinEnabled")
+    internal fun isBuiltInKotlinEnabled(
+        project: Project,
+        agpVersion: AndroidPluginVersion?
+    ): Boolean {
+        if (agpVersion == null || agpVersion.major < 9) {
+            return false
+        }
+        return project.providers
+            .gradleProperty("android.builtInKotlin")
+            .orNull
+            ?.toBoolean() ?: true
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */

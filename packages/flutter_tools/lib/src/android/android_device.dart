@@ -705,7 +705,9 @@ class AndroidDevice extends Device {
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
-    if (result.contains('Error: ')) {
+    if (result.contains(
+      RegExp(r'(Error:|Error type|Security\s?exception)', caseSensitive: false),
+    )) {
       _logger.printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
