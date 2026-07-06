@@ -658,66 +658,63 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
-    test(
-      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
-      () async {
-        final spy = PlatformMessagesSpy();
-        spy.setUp();
+    test('keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
 
-        textEditing.configuration = singlelineConfig;
+      textEditing.configuration = singlelineConfig;
 
-        final showCompleter = Completer<void>();
-        textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
-        await showCompleter.future;
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
 
-        // The "setSizeAndTransform" message has to be here before we call
-        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
-        // we don't put the input element into the DOM until we get its correct
-        // dimensions from the framework.
-        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      textEditing.channel.handleTextInput(
+        codec.encodeMethodCall(setSizeAndTransform),
+        (ByteData? data) {},
+      );
+
+      expect(textEditing.isEditing, isTrue);
+
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.viewManager
+          .findViewForElement(textEditing.strategy.domElement)!;
+
+      flutterView.dom.rootElement.focusWithoutScroll();
+      expect(spy.messages, isEmpty);
+
+      if (isSafari) {
+        // In Safari the web engine does not respond to blur, so there's no
+        // expectation that the input element keep focus.
+        expect(domDocument.activeElement, flutterView.dom.rootElement);
+      } else if (isFirefox) {
+        // This is a mysterious behavior in Firefox. Even though the engine does
+        // call <input>.focus() the browser doesn't move focus to the target
+        // element. This only happens in the test harness. When testing
+        // manually, Firefox happily moves focus to the input element.
+        //
+        // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
+        // element). But when running locally, we are seeing the wrong behavior explained in the
+        // comment above. To work around this, the test will accept both behaviors for now.
+        expect(
+          domDocument.activeElement,
+          anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
         );
-        textEditing.channel.handleTextInput(
-          codec.encodeMethodCall(setSizeAndTransform),
-          (ByteData? data) {},
-        );
-
-        expect(textEditing.isEditing, isTrue);
-
+      } else {
         expect(domDocument.activeElement, textEditing.strategy.domElement);
+      }
 
-        final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.viewManager
-            .findViewForElement(textEditing.strategy.domElement)!;
-
-        flutterView.dom.rootElement.focusWithoutScroll();
-        expect(spy.messages, isEmpty);
-
-        if (isSafari) {
-          // In Safari the web engine does not respond to blur, so there's no
-          // expectation that the input element keep focus.
-          expect(domDocument.activeElement, flutterView.dom.rootElement);
-        } else if (isFirefox) {
-          // This is a mysterious behavior in Firefox. Even though the engine does
-          // call <input>.focus() the browser doesn't move focus to the target
-          // element. This only happens in the test harness. When testing
-          // manually, Firefox happily moves focus to the input element.
-          //
-          // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
-          // element). But when running locally, we are seeing the wrong behavior explained in the
-          // comment above. To work around this, the test will accept both behaviors for now.
-          expect(
-            domDocument.activeElement,
-            anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
-          );
-        } else {
-          expect(domDocument.activeElement, textEditing.strategy.domElement);
-        }
-
-        spy.tearDown();
-      },
-    );
+      spy.tearDown();
+    });
   });
 
   group('IOSTextEditingStrategy scrollIntoView for embedded scenarios', () {
@@ -1098,50 +1095,40 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
-    test(
-      'setClient, setEditingState, setSizeAndTransform, show - input element is put into the DOM Safari Desktop',
-      () async {
-        editingStrategy = SafariDesktopTextEditingStrategy(textEditing!);
-        textEditing!.debugTextEditingStrategyOverride = editingStrategy;
-        final setClient = MethodCall('TextInput.setClient', <dynamic>[
-          123,
-          flutterSinglelineConfig,
-        ]);
-        sendFrameworkMessage(codec.encodeMethodCall(setClient));
+    test('setClient, setEditingState, setSizeAndTransform, show - input element is put into the DOM Safari Desktop', () async {
+      editingStrategy = SafariDesktopTextEditingStrategy(textEditing!);
+      textEditing!.debugTextEditingStrategyOverride = editingStrategy;
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
-        const show = MethodCall('TextInput.show');
-        sendFrameworkMessage(codec.encodeMethodCall(show));
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
 
-        // Editing shouldn't have started yet.
-        expect(domDocument.activeElement, domDocument.body);
+      // Editing shouldn't have started yet.
+      expect(domDocument.activeElement, domDocument.body);
 
-        // The "setSizeAndTransform" message has to be here before we call
-        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
-        // we don't put the input element into the DOM until we get its correct
-        // dimensions from the framework.
-        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        );
-        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
-        const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
-          'text': 'abcd',
-          'selectionBase': 2,
-          'selectionExtent': 3,
-          'composingBase': -1,
-          'composingExtent': -1,
-        });
-        sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
-        expect(
-          defaultTextEditingRoot.ownerDocument?.activeElement,
-          textEditing!.strategy.domElement,
-        );
-      },
-      skip: !isSafari,
-    );
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement, textEditing!.strategy.domElement);
+    }, skip: !isSafari);
 
     test('setClient, setEditingState, show, updateConfig, clearClient', () {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[
@@ -1638,8 +1625,7 @@ Future<void> testMain() async {
       expect(
         domDocument.activeElement,
         implicitViewRootElement,
-        reason:
-            'Receiving another client via setClient should stop editing, hence should remove the previous active element.',
+        reason: 'Receiving another client via setClient should stop editing, hence should remove the previous active element.',
       );
 
       // Confirm that [HybridTextEditing] didn't send any messages.
@@ -1875,9 +1861,8 @@ Future<void> testMain() async {
     });
 
     test('No capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
-      final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig('text');
-      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, capitalizeWordsConfig]);
+      final Map<String, dynamic> noCapitalizationConfig = createFlutterConfig('text');
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, noCapitalizationConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
       const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
@@ -1893,26 +1878,24 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari. `sentences` is the default attribute for
-      // mobile browsers. Check if `off` is added to the input element.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'off');
-      } else {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), isNull);
-      }
+      expect(
+        textEditing!.strategy.domElement!.getAttribute('autocapitalize'),
+        anyOf('off', 'none'),
+      );
 
       spy.messages.clear();
       hideKeyboard();
     });
 
     test('All characters capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
-      final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig(
+      final Map<String, dynamic> capitalizeCharactersConfig = createFlutterConfig(
         'text',
         textCapitalization: 'TextCapitalization.characters',
       );
-      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, capitalizeWordsConfig]);
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        capitalizeCharactersConfig,
+      ]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
       const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
@@ -1928,18 +1911,43 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'characters');
-      }
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'characters');
+
+      spy.messages.clear();
+      hideKeyboard();
+    });
+
+    test('Sentences capitalization: setClient, setEditingState, show', () {
+      final Map<String, dynamic> capitalizeSentencesConfig = createFlutterConfig(
+        'text',
+        textCapitalization: 'TextCapitalization.sentences',
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        capitalizeSentencesConfig,
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': '',
+        'selectionBase': 0,
+        'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      spy.messages.clear();
+
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'sentences');
 
       spy.messages.clear();
       hideKeyboard();
     });
 
     test('Words capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
       final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig(
         'text',
         textCapitalization: 'TextCapitalization.words',
@@ -1960,11 +1968,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
-      }
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
 
       spy.messages.clear();
       hideKeyboard();

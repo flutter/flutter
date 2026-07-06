@@ -1141,7 +1141,7 @@ class HotRunner extends ResidentRunner {
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
-    shutdownDartDevelopmentService();
+    await shutdownDartDevelopmentService();
     if (stopAppDuringCleanup) {
       return exitApp();
     }
@@ -1200,27 +1200,25 @@ Future<OperationResult> defaultReloadSourcesHelper(
       pause: pause,
     );
     allReportsFutures.add(
-      Future.wait(reportFutures).then<DeviceReloadReport?>((
-        List<vm_service.ReloadReport> reports,
-      ) async {
-        // TODO(aam): Investigate why we are validating only first reload report,
-        // which seems to be current behavior
-        if (reports.isEmpty) {
-          return null;
-        }
-        final vm_service.ReloadReport firstReport = reports.first;
-        // Don't print errors because they will be printed further down when
-        // `validateReloadReport` is called again.
-        await device.updateReloadStatus(
-          HotRunner.validateReloadReport(firstReport, printErrors: false),
-        );
-        return DeviceReloadReport(device, reports);
-      }),
+      Future.wait(reportFutures)
+          .then<DeviceReloadReport?>((List<vm_service.ReloadReport> reports) async {
+            // TODO(aam): Investigate why we are validating only first reload report,
+            // which seems to be current behavior
+            if (reports.isEmpty) {
+              return null;
+            }
+            final vm_service.ReloadReport firstReport = reports.first;
+            // Don't print errors because they will be printed further down when
+            // `validateReloadReport` is called again.
+            await device.updateReloadStatus(
+              HotRunner.validateReloadReport(firstReport, printErrors: false),
+            );
+            return DeviceReloadReport(device, reports);
+          }),
     );
   }
-  final Iterable<DeviceReloadReport> reports = (await Future.wait(
-    allReportsFutures,
-  )).whereType<DeviceReloadReport>();
+  final Iterable<DeviceReloadReport> reports = (await Future.wait(allReportsFutures))
+      .whereType<DeviceReloadReport>();
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
     analytics.send(

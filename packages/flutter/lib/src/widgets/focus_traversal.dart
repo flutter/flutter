@@ -43,14 +43,13 @@ BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
 
 /// Signature for the callback that's called when a traversal policy
 /// requests focus.
-typedef TraversalRequestFocusCallback =
-    void Function(
-      FocusNode node, {
-      ScrollPositionAlignmentPolicy? alignmentPolicy,
-      double? alignment,
-      Duration? duration,
-      Curve? curve,
-    });
+typedef TraversalRequestFocusCallback = void Function(
+  FocusNode node, {
+  ScrollPositionAlignmentPolicy? alignmentPolicy,
+  double? alignment,
+  Duration? duration,
+  Curve? curve,
+});
 
 // A class to temporarily hold information about FocusTraversalGroups when
 // sorting their contents.
@@ -1454,9 +1453,8 @@ class _ReadingOrderSortData with Diagnosticable {
           .getElementForInheritedWidgetOfExactType<Directionality>();
       while (directionalityElement != null) {
         result.add(directionalityElement.widget as Directionality);
-        directionalityElement = _getAncestor(
-          directionalityElement,
-        )?.getElementForInheritedWidgetOfExactType<Directionality>();
+        directionalityElement = _getAncestor(directionalityElement)
+            ?.getElementForInheritedWidgetOfExactType<Directionality>();
       }
       return result;
     }
@@ -2044,6 +2042,7 @@ class FocusTraversalGroup extends StatefulWidget {
     this.descendantsAreFocusable = true,
     this.descendantsAreTraversable = true,
     this.onFocusNodeCreated,
+    this.parentNode,
     required this.child,
   }) : policy = policy ?? ReadingOrderTraversalPolicy();
 
@@ -2077,6 +2076,19 @@ class FocusTraversalGroup extends StatefulWidget {
 
   /// Called when the [FocusNode] of this widget is created.
   final void Function(FocusNode)? onFocusNodeCreated;
+
+  /// The optional parent node to use when reparenting this group's [FocusNode].
+  ///
+  /// If null, the enclosing [FocusScope] is used as the parent, which mirrors
+  /// the widget tree and is typically what is desired.
+  ///
+  /// Setting this attaches the group (and the focus subtree below it) to the
+  /// given node instead of the enclosing [FocusScope], which is useful to keep
+  /// a subtree's focus independent from the surrounding focus tree (for
+  /// example, so each [View] forms its own focus root).
+  ///
+  /// Defaults to null.
+  final FocusNode? parentNode;
 
   /// Returns the [FocusTraversalPolicy] that applies to the nearest ancestor of
   /// the given [FocusNode].
@@ -2239,6 +2251,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
   Widget build(BuildContext context) {
     return Focus(
       focusNode: focusNode,
+      parentNode: widget.parentNode,
       canRequestFocus: false,
       skipTraversal: true,
       includeSemantics: false,

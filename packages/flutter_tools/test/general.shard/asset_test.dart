@@ -116,21 +116,19 @@ dependencies:
         );
       });
 
-      testWithoutContext(
-        'does not pick up assets from dev-dependencies and workspace packages not in the transitive closure',
-        () async {
-          final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
-          final assetBundle = ManifestAssetBundle(
-            logger: logger,
-            fileSystem: fileSystem,
-            platform: platform,
-            splitDeferredAssets: true,
-            flutterRoot: flutterRoot,
-          );
+      testWithoutContext('does not pick up assets from dev-dependencies and workspace packages not in the transitive closure', () async {
+        final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
+        final assetBundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: fileSystem,
+          platform: platform,
+          splitDeferredAssets: true,
+          flutterRoot: flutterRoot,
+        );
 
-          fileSystem.file(fileSystem.path.join('font', 'pubspec.yaml'))
-            ..createSync(recursive: true)
-            ..writeAsStringSync(r'''
+        fileSystem.file(fileSystem.path.join('font', 'pubspec.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
 name: font
 description: A test project that contains a font.
 
@@ -144,13 +142,13 @@ flutter:
     fonts:
       - asset: test_font_file
 ''');
-          fileSystem.file(fileSystem.path.join('font', 'test_font_file'))
-            ..createSync(recursive: true)
-            ..writeAsStringSync('This is a fake font.');
+        fileSystem.file(fileSystem.path.join('font', 'test_font_file'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('This is a fake font.');
 
-          fileSystem.file(fileSystem.path.join('dev_dependency', 'pubspec.yaml'))
-            ..createSync(recursive: true)
-            ..writeAsStringSync(r'''
+        fileSystem.file(fileSystem.path.join('dev_dependency', 'pubspec.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
 name: dev_dependency
 description: Another test project that contains a font.
 
@@ -164,13 +162,13 @@ flutter:
     fonts:
       - asset: dev_dependency_test_font_file
 ''');
-          fileSystem.file(fileSystem.path.join('dev_dependency', 'dev_dependency_test_font_file'))
-            ..createSync(recursive: true)
-            ..writeAsStringSync('This is a fake font.');
+        fileSystem.file(fileSystem.path.join('dev_dependency', 'dev_dependency_test_font_file'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('This is a fake font.');
 
-          fileSystem.file(fileSystem.path.join('dev_dependency', 'pubspec.yaml'))
-            ..createSync(recursive: true)
-            ..writeAsStringSync(r'''
+        fileSystem.file(fileSystem.path.join('dev_dependency', 'pubspec.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
 name: dev_dependency
 description: Another test project that contains a font.
 
@@ -184,26 +182,26 @@ flutter:
     fonts:
       - asset: dev_dependency_test_font_file
 ''');
-          fileSystem.file(fileSystem.path.join('dev_dependency', 'dev_dependency_test_font_file'))
-            ..createSync(recursive: true)
-            ..writeAsStringSync('This is a fake font.');
+        fileSystem.file(fileSystem.path.join('dev_dependency', 'dev_dependency_test_font_file'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('This is a fake font.');
 
-          writePackageConfigFiles(
-            mainLibName: 'main',
-            mainLibRootUri: 'main',
-            directory: fileSystem.currentDirectory,
-            packages: <String, String>{
-              'font': 'font',
-              'dev_dependency': 'dev_dependency',
-              'workspace_root': '.',
-            },
-            dependencies: <String>['font'],
-            devDependencies: <String>['dev_dependency'],
-          );
+        writePackageConfigFiles(
+          mainLibName: 'main',
+          mainLibRootUri: 'main',
+          directory: fileSystem.currentDirectory,
+          packages: <String, String>{
+            'font': 'font',
+            'dev_dependency': 'dev_dependency',
+            'workspace_root': '.',
+          },
+          dependencies: <String>['font'],
+          devDependencies: <String>['dev_dependency'],
+        );
 
-          fileSystem.file(manifestPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync(r'''
+        fileSystem.file(manifestPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
 name: main
 description: A test project that has a package with a font as a dependency.
 
@@ -224,9 +222,9 @@ flutter:
   uses-material-design: false
 ''');
 
-          fileSystem.file('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync(r'''
+        fileSystem.file('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
 name: workspace_root
 description: A pubspec that defines a workspace root, but also a font.
 
@@ -244,37 +242,33 @@ flutter:
       - asset: root_test_font_file
 ''');
 
-          fileSystem.file('root_test_font_file')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('This is a fake font.');
-          final String packageConfigPath = fileSystem.path.join(
-            '.dart_tool',
-            'package_config.json',
-          );
-          await assetBundle.build(
-            packageConfigPath: packageConfigPath,
-            manifestPath: manifestPath,
-            flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
-            targetPlatform: TargetPlatform.tester,
-          );
+        fileSystem.file('root_test_font_file')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('This is a fake font.');
+        final String packageConfigPath = fileSystem.path.join('.dart_tool', 'package_config.json');
+        await assetBundle.build(
+          packageConfigPath: packageConfigPath,
+          manifestPath: manifestPath,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
+          targetPlatform: TargetPlatform.tester,
+        );
 
-          expect(assetBundle.entries, contains('FontManifest.json'));
-          expect(
-            await _getValueAsString('FontManifest.json', assetBundle),
-            '[{"family":"packages/font/test_font","fonts":[{"asset":"packages/font/test_font_file"}]}]',
-          );
-          expect(assetBundle.wasBuiltOnce(), true);
-          expect(
-            assetBundle.inputFiles.map((File f) => f.path),
-            equals(<String>[
-              packageConfigPath,
-              fileSystem.path.join(fileSystem.currentDirectory.path, manifestPath),
-              fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'pubspec.yaml'),
-              fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'test_font_file'),
-            ]),
-          );
-        },
-      );
+        expect(assetBundle.entries, contains('FontManifest.json'));
+        expect(
+          await _getValueAsString('FontManifest.json', assetBundle),
+          '[{"family":"packages/font/test_font","fonts":[{"asset":"packages/font/test_font_file"}]}]',
+        );
+        expect(assetBundle.wasBuiltOnce(), true);
+        expect(
+          assetBundle.inputFiles.map((File f) => f.path),
+          equals(<String>[
+            packageConfigPath,
+            fileSystem.path.join(fileSystem.currentDirectory.path, manifestPath),
+            fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'pubspec.yaml'),
+            fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'test_font_file'),
+          ]),
+        );
+      });
 
       testWithoutContext('handles empty pubspec with .dart_tool/package_config.json', () async {
         final String packageConfigPath = fileSystem.path.join(
@@ -307,22 +301,30 @@ flutter:
         expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
       });
 
-      final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
-
       testWithoutContext('bundles material shaders on non-web platforms', () async {
-        for (final shader in testShaders) {
-          final String shaderPath = fileSystem.path.join(
-            flutterRoot,
-            'packages',
-            'flutter',
-            'lib',
-            'src',
-            'material',
-            'shaders',
-            shader,
-          );
-          fileSystem.file(shaderPath).createSync(recursive: true);
-        }
+        final String inkSparklePath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'material',
+          'shaders',
+          'ink_sparkle.frag',
+        );
+        fileSystem.file(inkSparklePath).createSync(recursive: true);
+
+        final String stretchEffectPath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'widgets',
+          'shaders',
+          'stretch_effect.frag',
+        );
+        fileSystem.file(stretchEffectPath).createSync(recursive: true);
 
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
@@ -339,25 +341,34 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        for (final shader in testShaders) {
-          expect(assetBundle.entries.keys, contains('shaders/$shader'));
-        }
+        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        expect(assetBundle.entries.keys, contains('shaders/stretch_effect.frag'));
       });
 
       testWithoutContext('bundles material shaders on web platforms', () async {
-        for (final shader in testShaders) {
-          final String shaderPath = fileSystem.path.join(
-            flutterRoot,
-            'packages',
-            'flutter',
-            'lib',
-            'src',
-            'material',
-            'shaders',
-            shader,
-          );
-          fileSystem.file(shaderPath).createSync(recursive: true);
-        }
+        final String inkSparklePath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'material',
+          'shaders',
+          'ink_sparkle.frag',
+        );
+        fileSystem.file(inkSparklePath).createSync(recursive: true);
+
+        final String stretchEffectPath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'widgets',
+          'shaders',
+          'stretch_effect.frag',
+        );
+        fileSystem.file(stretchEffectPath).createSync(recursive: true);
 
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
@@ -374,9 +385,8 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        for (final shader in testShaders) {
-          expect(assetBundle.entries.keys, contains('shaders/$shader'));
-        }
+        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        expect(assetBundle.entries.keys, contains('shaders/stretch_effect.frag'));
       });
 
       testWithoutContext('fails if shader is also in assets', () async {

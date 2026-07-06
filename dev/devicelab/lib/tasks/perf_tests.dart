@@ -284,10 +284,11 @@ TaskFunction createFlutterGalleryStartupTest({
   ).run;
 }
 
-TaskFunction createComplexLayoutStartupTest({bool? enableImpeller}) {
+TaskFunction createComplexLayoutStartupTest({bool? enableImpeller, bool forceOpenGLES = false}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
   ).run;
 }
 
@@ -514,13 +515,10 @@ TaskFunction createsScrollSmoothnessPerfTest() {
           deviceId,
         ],
       );
-      final data =
-          json.decode(
-                file(
-                  '${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
+      final data = json.decode(
+        file('${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json')
+            .readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       final result = <String, dynamic>{};
       void addResult(dynamic data, String suffix) {
@@ -906,6 +904,7 @@ class StartupTest {
     this.enableLazyShaderMode = false,
     this.enableHcpp = false,
     this.enableImpeller,
+    this.forceOpenGLES = false,
   });
 
   final String testDirectory;
@@ -913,6 +912,7 @@ class StartupTest {
   final bool enableLazyShaderMode;
   final bool enableHcpp;
   final bool? enableImpeller;
+  final bool forceOpenGLES;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -928,6 +928,9 @@ class StartupTest {
       }
       if (enableHcpp) {
         _addHcppSupportToManifest(testDirectory);
+      }
+      if ((enableImpeller ?? true) && forceOpenGLES) {
+        _addOpenGLESToManifest(testDirectory);
       }
 
       try {
@@ -1040,13 +1043,9 @@ class StartupTest {
           );
           timer.cancel();
           if (result == 0) {
-            final data =
-                json.decode(
-                      file(
-                        '${testOutputDirectory(testDirectory)}/start_up_info.json',
-                      ).readAsStringSync(),
-                    )
-                    as Map<String, dynamic>;
+            final data = json.decode(
+              file('${testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
+            ) as Map<String, dynamic>;
             results.add(data);
           } else {
             currentFailures += 1;
@@ -1457,13 +1456,9 @@ class PerfTest {
         await selectedDevice.toggleFixedPerformanceMode(false);
       }
 
-      final data =
-          json.decode(
-                file(
-                  '${testOutputDirectory(testDirectory)}/$resultFilename.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
+      final data = json.decode(
+        file('${testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -1656,9 +1651,8 @@ class WebCompileTest {
         await Process.run('gzip', <String>['--keep', kGzipCompressionLevel, filePath]);
         // gzip does not provide a CLI option to specify an output file, so
         // instead just move the output file to the temp dir
-        final File compressedFile = File(
-          '$filePath.gz',
-        ).renameSync(path.join(tempDir.absolute.path, '$key.gz'));
+        final File compressedFile = File('$filePath.gz')
+            .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
         sizeMetrics['${metric}_${key}_compressed_bytes'] = compressedFile.lengthSync();
       }
 

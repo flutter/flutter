@@ -227,7 +227,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/$frameworkName.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.osx.deployment_target = '10.15'
+  s.osx.deployment_target = '12.0'
   s.vendored_frameworks   = '$frameworkName'
   s.prepare_command       = 'unzip $frameworkName -d $frameworkName'
 end
@@ -259,9 +259,9 @@ end
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: TargetPlatform.darwin.getName(),
-          kDarwinArchs: defaultMacOSArchsForEnvironment(
-            globals.artifacts!,
-          ).map((DarwinArch e) => e.name).join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(globals.artifacts!)
+              .map((DarwinArch e) => e.name)
+              .join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,

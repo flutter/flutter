@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../utils.dart';
 import 'use_cases.dart';
 
@@ -37,7 +38,9 @@ class MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
-      body: Center(child: Text('Tap count: $_tapCount')),
+      body: Center(
+        child: Semantics(container: true, liveRegion: true, child: Text('Tap count: $_tapCount')),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {

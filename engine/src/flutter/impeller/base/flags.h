@@ -11,6 +11,8 @@ struct Flags {
   bool antialiased_lines = false;
   /// Use SDFs for rendering.
   bool use_sdfs = false;
+
+  bool operator==(const Flags&) const = default;
 };
 }  // namespace impeller
 

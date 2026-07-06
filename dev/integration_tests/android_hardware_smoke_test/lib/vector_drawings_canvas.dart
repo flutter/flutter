@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'constants.dart';
+
 /// A custom widget wrapping a CustomPaint canvas to render different vector
 /// drawings (rectangles, paths, and blends) based on the active test scenario command.
 class VectorDrawingsCanvas extends StatelessWidget {
@@ -46,25 +48,15 @@ class _VectorDrawingsPainter extends CustomPainter {
 
   void _renderAdvancedBlendTest(Canvas canvas, Size size) {
     final paintBackground = Paint()..color = Colors.blue;
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      paintBackground,
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paintBackground);
 
     final paintCircle = Paint()..color = Colors.red;
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      50.0,
-      paintCircle,
-    );
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 50.0, paintCircle);
 
     final paintBlend = Paint()
       ..color = Colors.green
       ..blendMode = BlendMode.difference;
-    canvas.drawRect(
-      Rect.fromLTWH(size.width / 2 - 30, size.height / 2 - 30, 80, 80),
-      paintBlend,
-    );
+    canvas.drawRect(Rect.fromLTWH(size.width / 2 - 30, size.height / 2 - 30, 80, 80), paintBlend);
   }
 
   void _renderDefault(Canvas canvas, Size size) {
@@ -78,13 +70,13 @@ class _VectorDrawingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     switch (_message) {
-      case 'blueRectangleTest':
+      case kBlueRectangleTest:
         _renderBlueRectangleTest(canvas, size);
         return;
-      case 'trianglePathTest':
+      case kTrianglePathTest:
         _renderTrianglePathTest(canvas, size);
         return;
-      case 'advancedBlendTest':
+      case kAdvancedBlendTest:
         _renderAdvancedBlendTest(canvas, size);
         return;
       default:

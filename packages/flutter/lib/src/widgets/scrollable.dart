@@ -54,12 +54,11 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 
 /// Signature used by [TwoDimensionalScrollable] to build the viewport through
 /// which the scrollable content is displayed.
-typedef TwoDimensionalViewportBuilder =
-    Widget Function(
-      BuildContext context,
-      ViewportOffset verticalPosition,
-      ViewportOffset horizontalPosition,
-    );
+typedef TwoDimensionalViewportBuilder = Widget Function(
+  BuildContext context,
+  ViewportOffset verticalPosition,
+  ViewportOffset horizontalPosition,
+);
 
 // The return type of _performEnsureVisible.
 //
@@ -1705,10 +1704,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
+    config
+      ..isSemanticBoundary = true
+      ..hasImplicitScrolling = allowImplicitScrolling;
     if (position.haveDimensions) {
       config
-        ..hasImplicitScrolling = allowImplicitScrolling
         ..scrollPosition = _position.pixels
         ..scrollExtentMax = _position.maxScrollExtent
         ..scrollExtentMin = _position.minScrollExtent

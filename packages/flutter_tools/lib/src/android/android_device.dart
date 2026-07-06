@@ -578,12 +578,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -702,7 +700,9 @@ class AndroidDevice extends Device {
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
-    if (result.contains('Error: ')) {
+    if (result.contains(
+      RegExp(r'(Error:|Error type|Security\s?exception)', caseSensitive: false),
+    )) {
       _logger.printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }

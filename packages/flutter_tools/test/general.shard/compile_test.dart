@@ -226,7 +226,7 @@ void main() {
             '--enable-asserts',
             '--track-widget-creation',
             '--initialize-from-dill',
-            'build/72879a0a1c6924a9ff6430cb690ed03a.cache.dill.track.dill',
+            'build/0ca43a24517cbfd39e8c3fdfd86bd8d9.cache.dill.track.dill',
             '--verbosity=error',
             '--extra-flag',
           ],
@@ -278,78 +278,75 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    '--include-unsupported-platform-library-stubs when includeUnsupportedPlatformLibraryStubs is set',
-    () async {
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list([
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
-            '--sdk-root',
-            'sdkroot/',
-            '--incremental',
-            '--target=dartdevc',
-            '--experimental-emit-debug-metadata',
-            '--output-dill',
-            'foo.dill',
-            '--packages',
-            '.dart_tool/package_config.json',
-            '-Ddart.vm.profile=false',
-            '-Ddart.vm.product=false',
-            '--enable-asserts',
-            '--track-widget-creation',
-            '--include-unsupported-platform-library-stubs',
-            '--initialize-from-dill',
-            'build/0c26bc4a79e35468a98f2218acd4a6cd.cache.dill.track.dill',
-            '--verbosity=error',
-            '--extra-flag',
-          ],
-          onRun: (_) => completer.complete(),
-        ),
-      ]);
-      final compiler = DefaultResidentCompiler(
-        'sdkroot',
-        buildInfo: BuildInfo.debug.copyWith(
-          // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
-          // argument list.
-          includeUnsupportedPlatformLibraryStubs: true,
-          extraFrontEndOptions: [
-            // Include a random extra flag to ensure not all extra options are stripped.
-            '--extra-flag',
-          ],
-        ),
-        logger: BufferLogger.test(),
-        processManager: processManager,
-        artifacts: Artifacts.test(),
-        platform: FakePlatform(),
-        fileSystem: MemoryFileSystem.test(),
-        shutdownHooks: FakeShutdownHooks(),
-        targetModel: TargetModel.dartdevc,
-        config: Config.test(),
-      );
+  testWithoutContext('--include-unsupported-platform-library-stubs when includeUnsupportedPlatformLibraryStubs is set', () async {
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list([
+      FakeCommand(
+        command: const <String>[
+          'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+          'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+          '--sdk-root',
+          'sdkroot/',
+          '--incremental',
+          '--target=dartdevc',
+          '--experimental-emit-debug-metadata',
+          '--output-dill',
+          'foo.dill',
+          '--packages',
+          '.dart_tool/package_config.json',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--track-widget-creation',
+          '--include-unsupported-platform-library-stubs',
+          '--initialize-from-dill',
+          'build/d484347ee69722eb276c222b372bed02.cache.dill.track.dill',
+          '--verbosity=error',
+          '--extra-flag',
+        ],
+        onRun: (_) => completer.complete(),
+      ),
+    ]);
+    final compiler = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug.copyWith(
+        // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
+        // argument list.
+        includeUnsupportedPlatformLibraryStubs: true,
+        extraFrontEndOptions: [
+          // Include a random extra flag to ensure not all extra options are stripped.
+          '--extra-flag',
+        ],
+      ),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      shutdownHooks: FakeShutdownHooks(),
+      targetModel: TargetModel.dartdevc,
+      config: Config.test(),
+    );
 
-      await runZonedGuarded(
-        () {
-          // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
-          compiler.recompile(
-            Uri.file('foo.dart'),
-            [],
-            outputPath: 'foo.dill',
-            packageConfig: PackageConfig.empty,
-          );
-        },
-        (e, st) {
-          if (e is! ToolExit) {
-            completer.completeError(e, st);
-          }
-        },
-      );
+    await runZonedGuarded(
+      () {
+        // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
+        compiler.recompile(
+          Uri.file('foo.dart'),
+          [],
+          outputPath: 'foo.dill',
+          packageConfig: PackageConfig.empty,
+        );
+      },
+      (e, st) {
+        if (e is! ToolExit) {
+          completer.completeError(e, st);
+        }
+      },
+    );
 
-      // Fail if the command isn't run. This can happen when the commands actual arguments don't
-      // match.
-      await completer.future.timeout(const Duration(seconds: 5));
-    },
-  );
+    // Fail if the command isn't run. This can happen when the commands actual arguments don't
+    // match.
+    await completer.future.timeout(const Duration(seconds: 5));
+  });
 }

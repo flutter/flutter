@@ -2002,8 +2002,8 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    if (callingAction != null) {
-      return callingAction!.invoke(intent);
+    if (callingAction case final callingAction?) {
+      return callingAction.invoke(intent);
     }
     return invokeAction(intent, context);
   }
@@ -3433,8 +3433,10 @@ typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
 ///
 ///  * [EditableTextContextMenuBuilder], which performs the same role for
 ///    [EditableText].
-typedef SelectableRegionContextMenuBuilder =
-    Widget Function(BuildContext context, SelectableRegionState selectableRegionState);
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  SelectableRegionState selectableRegionState,
+);
 
 /// The status of the selection under a [SelectableRegion].
 ///

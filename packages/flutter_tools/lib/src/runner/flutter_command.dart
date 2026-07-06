@@ -817,8 +817,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceUserOption() {
     argParser.addOption(
       FlutterOptions.kDeviceUser,
-      help:
-          'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
+      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
       valueHelp: '10',
     );
   }
@@ -826,8 +825,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceTimeoutOption() {
     argParser.addOption(
       FlutterOptions.kDeviceTimeout,
-      help:
-          'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
+      help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
       valueHelp: '10',
     );
   }
@@ -840,10 +838,8 @@ abstract class FlutterCommand extends Command<void> {
       allowed: <String>['attached', 'wireless', 'both'],
       allowedHelp: <String, String>{
         'both': 'Searches for both attached and wireless devices.',
-        'attached':
-            'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
-        'wireless':
-            'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
+        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
       },
     );
   }
@@ -1364,6 +1360,9 @@ abstract class FlutterCommand extends Command<void> {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    // TODO(nshahan): Delete when fully migrated to new module system,
+    // https://github.com/flutter/flutter/issues/142060.
+    bool? forcedWebEnableHotReload,
   }) async {
     final bool trackWidgetCreation =
         argParser.options.containsKey('track-widget-creation') && boolArg('track-widget-creation');
@@ -1402,8 +1401,9 @@ abstract class FlutterCommand extends Command<void> {
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
     final bool webEnableHotReload =
-        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload);
+        forcedWebEnableHotReload ??
+        (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+            boolArg(FlutterOptions.kWebExperimentalHotReload));
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -1681,9 +1681,8 @@ abstract class FlutterCommand extends Command<void> {
     });
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      final Iterable<String> defines = stringsArg(
-        FlutterOptions.kDartDefinesOption,
-      ).where((string) => string.isNotEmpty);
+      final Iterable<String> defines = stringsArg(FlutterOptions.kDartDefinesOption)
+          .where((string) => string.isNotEmpty);
       dartDefines.addAll(defines);
     }
 

@@ -585,8 +585,11 @@ class _ProxiedForwardedPort extends ForwardedPort {
   }
 }
 
-typedef CreateSocketServer =
-    Future<ServerSocket> Function(Logger logger, int? hostPort, bool? ipv6);
+typedef CreateSocketServer = Future<ServerSocket> Function(
+  Logger logger,
+  int? hostPort,
+  bool? ipv6,
+);
 
 /// A [DevicePortForwarder] for a proxied device.
 ///
@@ -968,7 +971,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> shutdown() async {
     if (_ddsStartedLocally) {
-      _localDds.shutdown();
+      await _localDds.shutdown();
       _ddsStartedLocally = false;
     } else {
       await connection.sendRequest('device.shutdownDartDevelopmentService', <String, Object?>{

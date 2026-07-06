@@ -21,6 +21,7 @@ import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/tools/shader_compiler.dart';
@@ -1174,7 +1175,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp(); // calls appFinished
-    shutdownDartDevelopmentService();
+    await shutdownDartDevelopmentService();
   }
 
   @override
@@ -1193,9 +1194,22 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
   }
 
-  void shutdownDartDevelopmentService() {
-    for (final FlutterDevice device in flutterDevices) {
-      device.device?.dds.shutdown();
+  Future<void> shutdownDartDevelopmentService() async {
+    try {
+      await Future.wait<void>(
+        flutterDevices.map<Future<void>>((FlutterDevice device) async {
+          final DartDevelopmentService? dds = device.device?.dds;
+          if (dds != null) {
+            try {
+              await dds.shutdown();
+            } on Object catch (error) {
+              globals.printTrace('Warning: Failed to shut down DDS for device: $error');
+            }
+          }
+        }),
+      ).timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      globals.printTrace('Warning: shutdownDartDevelopmentService timed out.');
     }
   }
 
@@ -1207,12 +1221,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
+      final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
+      final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
         fileSystem: globals.fs,
+        targetModel: targetModel,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
@@ -1302,6 +1319,21 @@ abstract class ResidentRunner extends ResidentHandlers {
       return;
     }
     globals.printStatus('Lost connection to device.');
+
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    for (final FlutterDevice device in flutterDevices) {
+      final Device? rawDevice = device.device;
+      if (rawDevice is IOSDevice &&
+          debuggingOptions.buildInfo.isProfile &&
+          !(debuggingOptions.iosProfileDebugger ??
+              (xcodeVersion == null || xcodeVersion.major < 26))) {
+        globals.printStatus(
+          'If the application crashed, you can attach a debugger to get a more complete '
+          'stack trace by running again with the "--ios-profile-debugger" flag.',
+        );
+      }
+    }
+
     _finished.complete(0);
   }
 

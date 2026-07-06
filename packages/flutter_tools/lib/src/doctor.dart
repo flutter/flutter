@@ -42,6 +42,11 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
 
+const _kIntelMacWarning = ValidationMessage.hint(
+  'Flutter is deprecating support for Intel-based Macs. '
+  'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+);
+
 abstract class DoctorValidatorsProvider {
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
   // [FeatureFlags].
@@ -86,7 +91,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       return _validators!;
     }
     final proxyValidator = ProxyValidator(platform: platform);
-    _validators = <DoctorValidator>[
+    return _validators = <DoctorValidator>[
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
@@ -146,7 +151,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
     ];
-    return _validators!;
   }
 
   @override
@@ -514,7 +518,9 @@ class FlutterValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[
+      if (_operatingSystemUtils.hostPlatform == .darwin_x64) _kIntelMacWarning,
+    ];
     String? versionChannel;
     String? frameworkVersion;
 
@@ -593,7 +599,7 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
-    ValidationType valid;
+    final ValidationType valid;
     if (messages.every((ValidationMessage message) => message.isInformation)) {
       valid = ValidationType.success;
     } else {
@@ -777,9 +783,9 @@ class DeviceValidator extends DoctorValidator {
     );
     var installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = (await Device.descriptions(
-        devices,
-      )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+      installedMessages = (await Device.descriptions(devices))
+          .map<ValidationMessage>((String msg) => ValidationMessage(msg))
+          .toList();
     }
 
     var diagnosticMessages = <ValidationMessage>[];

@@ -591,19 +591,17 @@ flutter:
       );
     });
 
-    testWithoutContext(
-      "AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds",
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
+    testWithoutContext("AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds", () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
 
-        fileSystem.file('my-asset.txt').createSync();
+      fileSystem.file('my-asset.txt').createSync();
 
-        final logger = BufferLogger.test();
-        final platform = FakePlatform();
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -611,35 +609,35 @@ flutter:
       transformers:
         - package: my-transformer-one
 ''');
-        final bundle = ManifestAssetBundle(
-          logger: logger,
-          fileSystem: fileSystem,
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: Cache.defaultFlutterRoot(
           platform: platform,
-          flutterRoot: Cache.defaultFlutterRoot(
-            platform: platform,
-            fileSystem: fileSystem,
-            userMessages: UserMessages(),
-          ),
-        );
+          fileSystem: fileSystem,
+          userMessages: UserMessages(),
+        ),
+      );
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
-        bundle.entries['my-asset.txt']!.content.markClean();
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+      bundle.entries['my-asset.txt']!.content.markClean();
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
 
-        fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+      fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -649,15 +647,14 @@ flutter:
         - package: my-transformer-two
 ''');
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
-      },
-    );
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+    });
   });
 
   group('AssetBundle.build (web builds)', () {
@@ -737,9 +734,8 @@ flutter:
 
         final Uint8List manifestBinJsonBytes = base64.decode(
           json.decode(
-                utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
-              )
-              as String,
+            utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
+          ) as String,
         );
 
         final manifestBinBytes = Uint8List.fromList(
@@ -1053,44 +1049,96 @@ flutter:
         );
         fileSystem.file(materialIconsPath).createSync(recursive: true);
 
-        final String materialPath = fileSystem.path.join(
-          getFlutterRoot(),
+        final String flutterRoot = getFlutterRoot();
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                flutterRoot,
+                'packages',
+                'flutter',
+                'lib',
+                'src',
+                'material',
+                'shaders',
+                'ink_sparkle.frag',
+              ),
+            )
+            .createSync(recursive: true);
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                flutterRoot,
+                'packages',
+                'flutter',
+                'lib',
+                'src',
+                'widgets',
+                'shaders',
+                'stretch_effect.frag',
+              ),
+            )
+            .createSync(recursive: true);
+
+        final String materialShaderDir = fileSystem.path.join(
+          flutterRoot,
           'packages',
           'flutter',
           'lib',
           'src',
           'material',
+          'shaders',
         );
-        final Directory materialDir = fileSystem.directory(materialPath)
-          ..createSync(recursive: true);
-        for (final String shader in kMaterialShaders) {
-          materialDir.childFile(shader).createSync(recursive: true);
-        }
+        final String widgetsShaderDir = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'widgets',
+          'shaders',
+        );
 
-        final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+        (globals.processManager as FakeProcessManager).addCommand(
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
+              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
+              '--input=${fileSystem.path.join(materialShaderDir, 'ink_sparkle.frag')}',
+              '--input-type=frag',
+              '--include=$materialShaderDir',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        );
 
-        for (final shader in testShaders) {
-          (globals.processManager as FakeProcessManager).addCommand(
-            FakeCommand(
-              command: <String>[
-                impellerc,
-                '--sksl',
-                '--iplr',
-                '--json',
-                '--sl=${fileSystem.path.join(output.path, 'shaders', shader)}',
-                '--spirv=${fileSystem.path.join(output.path, 'shaders', '$shader.spirv')}',
-                '--input=${fileSystem.path.join(materialDir.path, 'shaders', shader)}',
-                '--input-type=frag',
-                '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-                '--include=$shaderLibDir',
-              ],
-              onRun: (_) {
-                fileSystem.file(outputPath).createSync(recursive: true);
-                fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-              },
-            ),
-          );
-        }
+        (globals.processManager as FakeProcessManager).addCommand(
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=${fileSystem.path.join(output.path, 'shaders', 'stretch_effect.frag')}',
+              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'stretch_effect.frag.spirv')}',
+              '--input=${fileSystem.path.join(widgetsShaderDir, 'stretch_effect.frag')}',
+              '--input-type=frag',
+              '--include=$widgetsShaderDir',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        );
 
         fileSystem.file('pubspec.yaml')
           ..createSync()
