@@ -24,21 +24,30 @@ class MainActivity : FlutterActivity() {
     var messageChannel: BasicMessageChannel<Any>? = null
     private var impellerBackend = "vulkan"
 
-    override fun provideFlutterEngine(context: Context): FlutterEngine {
-        var backend = "vulkan"
-        try {
-            val appInfo =
-                context.packageManager.getApplicationInfo(
-                    context.packageName,
-                    PackageManager.GET_META_DATA
-                )
-            val manifestBackend = appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
-            if (!manifestBackend.isNullOrEmpty()) {
-                backend = manifestBackend
+    // Resolves the Impeller backend to run: queries the intent parameter first,
+    // falls back to AndroidManifest metadata next, and defaults to Vulkan.
+    private fun getImpellerBackend(context: Context): String {
+        var backend = intent.getStringExtra("backend")
+        if (backend.isNullOrEmpty()) {
+            try {
+                val appInfo =
+                    context.packageManager.getApplicationInfo(
+                        context.packageName,
+                        PackageManager.GET_META_DATA
+                    )
+                val manifestBackend = appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
+                if (!manifestBackend.isNullOrEmpty()) {
+                    backend = manifestBackend
+                }
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
             }
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
         }
+        return if (backend.isNullOrEmpty()) "vulkan" else backend
+    }
+
+    override fun provideFlutterEngine(context: Context): FlutterEngine {
+        val backend = getImpellerBackend(context)
 
         // Cache the engine.
         // This both speeds up the test execution and avoids teardown crashes
@@ -49,30 +58,20 @@ class MainActivity : FlutterActivity() {
         if (backend == "vulkan") {
             var engine = FlutterEngineCache.getInstance().get("smoke_test_engine")
             if (engine == null) {
-                engine = FlutterEngine(context)
+                val shellArgs = arrayOf("--enable-impeller", "--impeller-backend=vulkan")
+                engine = FlutterEngine(context, shellArgs)
                 FlutterEngineCache.getInstance().put("smoke_test_engine", engine)
             }
             return engine
         }
-        return FlutterEngine(context)
+        val shellArgs = arrayOf("--enable-impeller", "--impeller-backend=opengles")
+        return FlutterEngine(context, shellArgs)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        try {
-            val appInfo =
-                packageManager.getApplicationInfo(
-                    packageName,
-                    PackageManager.GET_META_DATA
-                )
-            val manifestBackend = appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
-            if (!manifestBackend.isNullOrEmpty()) {
-                impellerBackend = manifestBackend
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
-        }
+        impellerBackend = getImpellerBackend(this)
 
         messageChannel =
             BasicMessageChannel(

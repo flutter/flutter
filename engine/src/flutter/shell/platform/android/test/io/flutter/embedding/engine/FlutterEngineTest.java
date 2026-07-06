@@ -389,4 +389,27 @@ public class FlutterEngineTest {
     assertNotNull(pluginBindingCaptor.getValue());
     assertEquals(mockGroup, pluginBindingCaptor.getValue().getEngineGroup());
   }
+
+  @Test
+  public void itPassesShellArgsToNativeAttach() {
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    String[] shellArgs = new String[] {"--enable-impeller", "--impeller-backend=opengles"};
+
+    doAnswer(
+            new Answer() {
+              @Override
+              public Object answer(InvocationOnMock invocation) throws Throwable {
+                jniAttached = true;
+                return null;
+              }
+            })
+        .when(flutterJNI)
+        .attachToNative(shellArgs);
+
+    new FlutterEngine(
+        ctx, mockFlutterLoader, flutterJNI, new PlatformViewsController(), shellArgs, true);
+
+    verify(flutterJNI).attachToNative(shellArgs);
+    verify(flutterJNI, never()).attachToNative();
+  }
 }

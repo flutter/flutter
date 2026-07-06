@@ -6,12 +6,12 @@
 
 package com.example.android_hardware_smoke_test
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.flutter.embedding.engine.FlutterEngineCache
 import org.json.JSONObject
@@ -19,19 +19,28 @@ import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import org.junit.runners.Parameterized.Parameters
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-@RunWith(AndroidJUnit4::class)
-class FlutterActivityTest {
+@RunWith(Parameterized::class)
+class FlutterActivityTest(
+    private val backend: String
+) {
     companion object {
         private const val TAG = "FlutterActivityTest"
         private const val SCREENSHOT_CAPTURE_DELAY_MS = 200L
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun backends(): Collection<Array<Any>> = listOf(arrayOf("vulkan"), arrayOf("opengles"))
 
         @JvmStatic
         @AfterClass
@@ -44,7 +53,14 @@ class FlutterActivityTest {
         }
     }
 
-    @get:Rule val rule = ActivityScenarioRule(MainActivity::class.java)
+    @get:Rule val rule =
+        ActivityScenarioRule<MainActivity>(
+            Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java).apply {
+                putExtra("backend", backend)
+            }
+        )
+
+    @get:Rule val testNameRule = TestName()
 
     /**
      * Common test body for executing a test on the device by sending a command to the Flutter

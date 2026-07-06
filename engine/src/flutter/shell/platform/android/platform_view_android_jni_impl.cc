@@ -182,13 +182,34 @@ static jfieldID g_path_fill_type_winding_field = nullptr;
 static jfieldID g_path_fill_type_even_odd_field = nullptr;
 
 // Called By Java
-static jlong AttachJNI(JNIEnv* env, jclass clazz, jobject flutterJNI) {
+static jlong AttachJNI(JNIEnv* env,
+                       jclass clazz,
+                       jobject flutterJNI,
+                       jobjectArray jargs) {
   fml::jni::JavaObjectWeakGlobalRef java_object(env, flutterJNI);
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade =
       std::make_shared<PlatformViewAndroidJNIImpl>(java_object);
-  auto shell_holder = std::make_unique<AndroidShellHolder>(
-      FlutterMain::Get().GetSettings(), jni_facade,
-      FlutterMain::Get().GetAndroidRenderingAPI());
+
+  auto settings = FlutterMain::Get().GetSettings();
+  flutter::AndroidRenderingAPI rendering_api =
+      FlutterMain::Get().GetAndroidRenderingAPI();
+
+  if (jargs != nullptr) {
+    std::vector<std::string> args = fml::jni::StringArrayToVector(env, jargs);
+    for (const auto& arg : args) {
+      if (arg == "--impeller-backend=opengles") {
+        rendering_api = flutter::AndroidRenderingAPI::kImpellerOpenGLES;
+      } else if (arg == "--impeller-backend=vulkan") {
+        rendering_api = flutter::AndroidRenderingAPI::kImpellerVulkan;
+      }
+      if (arg.compare(0, 19, "--impeller-backend=") == 0) {
+        settings.requested_rendering_backend = arg.substr(19);
+      }
+    }
+  }
+
+  auto shell_holder =
+      std::make_unique<AndroidShellHolder>(settings, jni_facade, rendering_api);
   if (shell_holder->IsValid()) {
     return reinterpret_cast<jlong>(shell_holder.release());
   } else {
@@ -739,7 +760,8 @@ bool RegisterApi(JNIEnv* env) {
       // Start of methods from FlutterJNI
       {
           .name = "nativeAttach",
-          .signature = "(Lio/flutter/embedding/engine/FlutterJNI;)J",
+          .signature =
+              "(Lio/flutter/embedding/engine/FlutterJNI;[Ljava/lang/String;)J",
           .fnPtr = reinterpret_cast<void*>(&AttachJNI),
       },
       {
