@@ -222,6 +222,7 @@ void main() {
         final String warningText = testLogger.warningText;
         expect(warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
 
+        // Run the command again, the message shouldn't be printed again.
         await flutterCommand.run();
 
         // BufferLogger.clear() does not clear warnings.
