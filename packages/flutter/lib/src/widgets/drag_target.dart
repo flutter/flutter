@@ -904,8 +904,11 @@ class _DragAvatar<T extends Object> extends Drag {
 
     final List<_DragTargetState<Object>> targets = _getDragTargets(result.path).toList();
 
+    // Require equal length: a longer `targets` means a new target (e.g. one
+    // stacked beneath a refusing target) is now under the pointer and must be
+    // entered, not skipped. https://github.com/flutter/flutter/issues/187543
     var listsMatch = false;
-    if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
+    if (targets.length == _enteredTargets.length && _enteredTargets.isNotEmpty) {
       listsMatch = true;
       final Iterator<_DragTargetState<Object>> iterator = targets.iterator;
       for (var i = 0; i < _enteredTargets.length; i += 1) {

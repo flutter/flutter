@@ -511,6 +511,92 @@ void main() {
     events.clear();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/187543
+  //
+  // A drag refused by the upper target must fall through to an accepting target
+  // stacked beneath it once they overlap. The upper target uses an IgnorePointer
+  // so it does not occlude the lower one.
+  testWidgets('Drag and drop - drops through a refusing target to an accepting one beneath it', (
+    WidgetTester tester,
+  ) async {
+    var bottomAccepted = 0;
+    var topAccepted = 0;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            const Draggable<int>(data: 10, feedback: Text('Dragging'), child: Text('Source')),
+            SizedBox(
+              key: const Key('field'),
+              height: 200.0,
+              width: 200.0,
+              child: Stack(
+                children: <Widget>[
+                  // Lower target: accepts, occupies the lower-right area.
+                  Positioned(
+                    left: 50,
+                    bottom: 50,
+                    child: DragTarget<int>(
+                      builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+                        return const SizedBox(height: 100.0, width: 100.0);
+                      },
+                      onWillAcceptWithDetails: (DragTargetDetails<int> _) => true,
+                      onAcceptWithDetails: (DragTargetDetails<int> details) {
+                        bottomAccepted += details.data;
+                      },
+                    ),
+                  ),
+                  // Upper target: refuses, occupies the upper-left area and
+                  // overlaps the lower target. IgnorePointer keeps its content
+                  // from occluding the target beneath it.
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: DragTarget<int>(
+                      builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+                        return const IgnorePointer(child: SizedBox(height: 100.0, width: 100.0));
+                      },
+                      onWillAcceptWithDetails: (DragTargetDetails<int> _) => false,
+                      onAcceptWithDetails: (DragTargetDetails<int> details) {
+                        topAccepted += details.data;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset fieldOrigin = tester.getTopLeft(find.byKey(const Key('field')));
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final Offset secondLocation =
+        fieldOrigin + const Offset(20, 20); // over the refusing target only
+    final Offset thirdLocation =
+        fieldOrigin + const Offset(75, 75); // over the overlap of both targets
+
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    // Over the refusing target only: nothing is accepted.
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    // Move into the overlap so the accepting target below is now under the
+    // pointer, then release there.
+    await gesture.moveTo(thirdLocation);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(bottomAccepted, 10);
+    expect(topAccepted, 0);
+  });
+
   testWidgets('Drag and drop - tapping button', (WidgetTester tester) async {
     final events = <String>[];
     Offset firstLocation, secondLocation;
