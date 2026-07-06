@@ -833,11 +833,6 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint)) {
-    if (rect.IsEmpty()) {
-      // Empty rect doesn't need to be drawn.
-      return;
-    }
-
     Vector2 transform_scaling = GetCurrentTransform().GetBasisScaleXY();
     if (transform_scaling.x <= 0.0f || transform_scaling.y <= 0.0f) {
       // Rectangle is scaled to 0 and doesn't need to be drawn.
