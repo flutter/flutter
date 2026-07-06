@@ -13,7 +13,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import io.flutter.embedding.engine.FlutterEngineCache
 import org.json.JSONObject
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -30,6 +32,16 @@ class FlutterActivityTest {
         private const val SCREENSHOT_CAPTURE_DELAY_MS = 200L
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
+
+        @JvmStatic
+        @AfterClass
+        fun tearDownClass() {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                val engine = FlutterEngineCache.getInstance().get("smoke_test_engine")
+                engine?.destroy()
+                FlutterEngineCache.getInstance().remove("smoke_test_engine")
+            }
+        }
     }
 
     @get:Rule val rule = ActivityScenarioRule(MainActivity::class.java)
