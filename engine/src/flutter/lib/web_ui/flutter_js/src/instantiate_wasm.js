@@ -37,7 +37,7 @@ export const createWasmInstantiator = (url, filename) => {
       return new Response(fileBlob, {
         headers: { 'Content-Type': 'application/wasm' },
       });
-    } catch {     
+    } catch(err) {
       if (err && err.name !== 'NotFoundError' && err.name !== 'NotAllowedError') {
         console.warn('Unexpected error during retrieval of ' + filename + ' (hash: ' + hash + ').', err);
       }
