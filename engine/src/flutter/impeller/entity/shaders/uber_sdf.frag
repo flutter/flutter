@@ -200,13 +200,13 @@ vec2 strokedSDF(vec2 p) {
       float outer = distanceFromRect(p, frag_info.size + half_stroke);
       float inner = base_sdf + half_stroke;
       float sdf = max(outer, -inner);
-      return vec2(sdf, base_pixel_size);
+      return vec2(sdf, pixelSize(sdf));
     } else if (frag_info.stroke_join < 1.5) {  // Bevel
       float outer =
           distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
       float inner = base_sdf + half_stroke;
       float sdf = max(outer, -inner);
-      return vec2(sdf, base_pixel_size);
+      return vec2(sdf, pixelSize(sdf));
     }
   }
 
