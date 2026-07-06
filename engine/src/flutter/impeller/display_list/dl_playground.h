@@ -45,6 +45,11 @@ class DlPlayground : public PlaygroundTest {
   DlPlayground& operator=(const DlPlayground&) = delete;
 };
 
+class DlPlaygroundWithGoldens : public DlPlayground {
+ protected:
+  bool IsGoldenTestSuite() const override { return true; }
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_DISPLAY_LIST_DL_PLAYGROUND_H_

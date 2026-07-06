@@ -7,8 +7,6 @@
 // golden harness and have their output uploaded to Skia Gold. They only build
 // as part of the golden test executable.
 
-#ifdef IMPELLER_GOLDEN_TESTS
-
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -44,7 +42,12 @@
 namespace impeller {
 namespace testing {
 
+#ifdef IMPELLER_GOLDEN_TESTS
 using RendererGoldenTest = GoldenPlaygroundTest;
+#else
+using RendererGoldenTest = PlaygroundTestWithGoldens;
+#endif
+
 INSTANTIATE_PLAYGROUND_SUITE(RendererGoldenTest);
 
 // Ported from RendererTest.BabysFirstTriangle. Draws a single gradient
@@ -211,7 +214,7 @@ TEST_P(RendererGoldenTest, CanRenderInstancedWithVertexAttributes) {
 // through the golden harness. The pixel format and the raw block bytes are the
 // only things that differ between the compressed families; the texture upload,
 // pipeline, quad, and draw are shared by every compressed-format golden below.
-static void DrawCompressedTextureGolden(GoldenPlaygroundTest& test,
+static void DrawCompressedTextureGolden(RendererGoldenTest& test,
                                         PixelFormat format,
                                         const std::vector<uint8_t>& block_data,
                                         ISize size) {
@@ -386,7 +389,7 @@ TEST_P(RendererGoldenTest, CanRenderASTCCompressedTexture) {
 // so the golden would have been blank there. The base is four colored quadrants
 // and the second level is solid orange, so LOD 0 renders the quadrants and LOD
 // 1 renders solid orange.
-static void DrawManuallyMippedTextureGolden(GoldenPlaygroundTest& test,
+static void DrawManuallyMippedTextureGolden(RendererGoldenTest& test,
                                             float lod) {
   using VS = MipmapsVertexShader;
   using FS = MipmapsFragmentShader;
@@ -517,5 +520,3 @@ TEST_P(RendererGoldenTest, CanSampleManuallyMippedTextureLod1) {
 }  // namespace impeller
 
 // NOLINTEND(bugprone-unchecked-optional-access)
-
-#endif  // IMPELLER_GOLDEN_TESTS

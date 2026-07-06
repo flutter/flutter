@@ -630,7 +630,9 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
 TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
   // Must be called before any methods that use the context to ensure that
   // this test is run with the antialias flag.
-  EnsureContextSupportsAntialiasLines();
+  if (!EnsureContextSupportsAntialiasLines()) {
+    GTEST_SKIP() << "This backend doesn't yet support experimental AA lines.";
+  }
 
   Scalar scale = 5.0;
   Scalar line_width = 10.f;
@@ -686,7 +688,9 @@ TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
 TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
   // Must be called before any methods that use the context to ensure that
   // this test is run with the antialias flag.
-  EnsureContextSupportsAntialiasLines();
+  if (!EnsureContextSupportsAntialiasLines()) {
+    GTEST_SKIP() << "This backend doesn't yet support experimental AA lines.";
+  }
 
   float scale = 5.0f;
   float line_width = 10.f;
@@ -753,7 +757,9 @@ TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
 TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
   // Must be called before any methods that use the context to ensure that
   // this test is run with the antialias flag.
-  EnsureContextSupportsAntialiasLines();
+  if (!EnsureContextSupportsAntialiasLines()) {
+    GTEST_SKIP() << "This backend doesn't yet support experimental AA lines.";
+  }
 
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);

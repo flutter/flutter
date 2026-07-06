@@ -27,6 +27,8 @@ class PlaygroundTest : public Playground,
 
   virtual ~PlaygroundTest();
 
+  static void SetupTestEnvironment();
+
   void SetUp() override;
 
   void TearDown() override;
@@ -42,6 +44,8 @@ class PlaygroundTest : public Playground,
 
   // |Playground|
   std::string GetWindowTitle() const override;
+
+  testing::GoldenDigestManager* GetGoldenDigestManager() const override;
 
  protected:
   /// @brief This method is overridden on a test suite basis and establishes

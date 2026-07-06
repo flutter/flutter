@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/fml/time/time_point.h"
+#include "impeller/playground/playground_test.h"
 
+#include "flutter/fml/time/time_point.h"
 #include "impeller/base/timing.h"
 #include "impeller/base/validation.h"
-#include "impeller/playground/playground_test.h"
+#include "impeller/playground/playground_impl.h"
+#include "impeller/testing/golden_digest_manager.h"
 
 namespace impeller {
 
@@ -49,6 +51,48 @@ void PlaygroundTest::SetUp() {
 
 void PlaygroundTest::TearDown() {
   Playground::TearDownContextData();
+}
+
+namespace {
+
+class PlaygroundTestEnvironment : public ::testing::Environment {
+ public:
+  void SetUp() override {
+    const fml::CommandLine& args = ::flutter::testing::GetArgsForProcess();
+    std::string golden_output_dir;
+    if (args.GetOptionValue("golden_output_dir", &golden_output_dir)) {
+      golden_manager_.emplace(golden_output_dir);
+    }
+  }
+
+  void TearDown() override {
+    if (golden_manager_) {
+      golden_manager_->Write();
+      golden_manager_.reset();
+    }
+    PlaygroundImpl::OnTearDownTestEnvironment();
+  }
+
+  static testing::GoldenDigestManager* GetGoldenDigestManager() {
+    return golden_manager_ ? &golden_manager_.value() : nullptr;
+  }
+
+ private:
+  static std::optional<testing::GoldenDigestManager> golden_manager_;
+};
+
+std::optional<testing::GoldenDigestManager>
+    PlaygroundTestEnvironment::golden_manager_;
+
+}  // namespace
+
+void PlaygroundTest::SetupTestEnvironment() {
+  ::testing::AddGlobalTestEnvironment(new PlaygroundTestEnvironment());
+}
+
+impeller::testing::GoldenDigestManager* PlaygroundTest::GetGoldenDigestManager()
+    const {
+  return PlaygroundTestEnvironment::GetGoldenDigestManager();
 }
 
 bool PlaygroundTest::IsGoldenTestSuite() const {

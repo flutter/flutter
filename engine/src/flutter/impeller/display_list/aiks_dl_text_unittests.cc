@@ -489,6 +489,16 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
 }
 
 TEST_P(AiksTest, TextRotated) {
+  // This test used to be intentionally excluded for impeller_golden_tests
+  // but when the SDF backend variants were added, the explicit exclusions
+  // for those backends were not added to the exclusion list. So it has
+  // actually been running just fine for a while now generating goldens
+  // for the SDF backends.
+  // We will let it run on all backends now in the playground-based golden
+  // mechanism as the underlying flakiness may have been resolved since the
+  // exclusion was added.
+  // https://github.com/flutter/flutter/blame/ad80825c24d770a19e33f67800fc0338a3b89ec7/engine/src/flutter/impeller/golden_tests/golden_playground_test_mac.cc#L107
+
   DisplayListBuilder builder;
 
   builder.Scale(GetContentScale().x, GetContentScale().y);

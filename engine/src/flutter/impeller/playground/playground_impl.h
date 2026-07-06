@@ -45,6 +45,8 @@ class PlaygroundImpl {
   [[nodiscard]]
   virtual RuntimeStageBackend GetRuntimeStageBackend() const = 0;
 
+  static void OnTearDownTestEnvironment();
+
  protected:
   const PlaygroundSwitches switches_;
 

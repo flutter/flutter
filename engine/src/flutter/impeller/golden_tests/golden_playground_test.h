@@ -110,20 +110,21 @@ class GoldenPlaygroundTest
  protected:
   void SetWindowSize(ISize size);
 
-  // See |Playground::PlatformSupportsWideGamutTests|
-  [[nodiscard]] bool PlatformSupportsWideGamutTests() const;
-
   // See |Playground::EnsureContextIsUnique|
   // GoldenPlaygroundTest uses context replacement on the fly to support this.
   void EnsureContextIsUnique() {}
 
   // See |Playground::EnsureContextSupportsWideGamut|
-  // GoldenPlaygroundTest uses name matching to support this.
+  // GoldenPlaygroundTest uses testname matching in |Setup| to manage this.
+  // In particular, it will automatically GTEST_SKIP if the platform doesn't
+  // support wide gamuts.
   [[nodiscard]] bool EnsureContextSupportsWideGamut() { return true; }
 
   // See |Playground::EnsureContextSupportsAntialiasLines|
-  // GoldenPlaygroundTest uses name matching to support this.
-  void EnsureContextSupportsAntialiasLines() {}
+  // GoldenPlaygroundTest uses testname matching in |Setup| to manage this.
+  // In particular, it will automatically GTEST_SKIP if the platform doesn't
+  // support experimental AA lines.
+  [[nodiscard]] bool EnsureContextSupportsAntialiasLines() { return true; }
 
  private:
 #if FML_OS_MACOSX

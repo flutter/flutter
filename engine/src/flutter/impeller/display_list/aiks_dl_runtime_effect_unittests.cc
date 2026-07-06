@@ -52,6 +52,12 @@ absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
 
 // Regression test for https://github.com/flutter/flutter/issues/126701 .
 TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
+  // This test used to be excluded on Vulkan for impeller_golden_tests
+  // but has been running fine so far with the playground-based golden
+  // mechanism, so we will let it run as the underlying problem may
+  // have been fixed since the exclusion was added.
+  // https://github.com/flutter/flutter/blame/ad80825c24d770a19e33f67800fc0338a3b89ec7/engine/src/flutter/impeller/golden_tests/golden_playground_test_mac.cc#L109
+
   struct FragUniforms {
     Vector2 iResolution;
     Scalar iTime;

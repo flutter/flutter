@@ -391,7 +391,8 @@ int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
   return max_y;
 }
 
-int32_t CalculateSpaceBetweenUI(const impeller::testing::Screenshot* img) {
+std::optional<int32_t> CalculateSpaceBetweenUI(
+    const impeller::testing::Screenshot* img) {
   const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
   ptr += img->GetWidth() * static_cast<int32_t>(img->GetHeight() / 2.0);
   std::vector<size_t> boundaries;
@@ -403,7 +404,9 @@ int32_t CalculateSpaceBetweenUI(const impeller::testing::Screenshot* img) {
     value = *ptr++;
   }
 
-  assert(boundaries.size() == 6);
+  if (boundaries.size() != 6) {
+    return {};
+  }
   return boundaries[4] - boundaries[3];
 }
 }  // namespace
@@ -467,11 +470,12 @@ TEST_P(DlGoldenTest, MaintainsSpace) {
       GTEST_SKIP() << "making screenshots not supported.";
     }
 
-    int32_t space = CalculateSpaceBetweenUI(right.get());
-    if (last_space.has_value()) {
-      int32_t diff = abs(space - *last_space);
+    std::optional<int32_t> space = CalculateSpaceBetweenUI(right.get());
+    ASSERT_TRUE(space.has_value());
+    if (space.has_value() && last_space.has_value()) {
+      int32_t diff = abs(*space - *last_space);
       EXPECT_TRUE(diff <= 1)
-          << "i:" << i << " space:" << space << " last_space:" << *last_space;
+          << "i:" << i << " space:" << *space << " last_space:" << *last_space;
     }
     last_space = space;
   }

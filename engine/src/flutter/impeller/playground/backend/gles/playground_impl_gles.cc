@@ -30,22 +30,6 @@
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/surface_gles.h"
 
-namespace {
-
-class GLESPlaygroundEnvironment : public ::testing::Environment {
- public:
-  std::unique_ptr<impeller::PlaygroundImplGLES::ShareableContext>
-      shared_context;
-  std::unique_ptr<impeller::PlaygroundImplGLES::ShareableContext>
-      shared_context_sdf;
-};
-
-GLESPlaygroundEnvironment* g_gles_playground_env =
-    static_cast<GLESPlaygroundEnvironment*>(
-        ::testing::AddGlobalTestEnvironment(new GLESPlaygroundEnvironment()));
-
-}  // namespace
-
 namespace impeller {
 
 class PlaygroundImplGLES::ReactorWorker final : public ReactorGLES::Worker {
@@ -109,6 +93,16 @@ struct PlaygroundImplGLES::ShareableContext final {
   const PlaygroundSwitches switches;
 };
 
+std::unique_ptr<PlaygroundImplGLES::ShareableContext>
+    PlaygroundImplGLES::shared_context_msaa_;
+std::unique_ptr<PlaygroundImplGLES::ShareableContext>
+    PlaygroundImplGLES::shared_context_sdf_;
+
+void PlaygroundImplGLES::OnTearDownTestEnvironment() {
+  shared_context_msaa_.reset();
+  shared_context_sdf_.reset();
+}
+
 void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
   if (!handle) {
     return;
@@ -155,10 +149,8 @@ PlaygroundImplGLES::GetShareableContext() {
     return unique_context_;
   }
 
-  FML_CHECK(g_gles_playground_env != nullptr);
   std::unique_ptr<PlaygroundImplGLES::ShareableContext>& shared_context =
-      switches_.flags.use_sdfs ? g_gles_playground_env->shared_context_sdf
-                               : g_gles_playground_env->shared_context;
+      switches_.flags.use_sdfs ? shared_context_sdf_ : shared_context_msaa_;
 
   // If the switches have values that result in a different GLES context than
   // the existing shared context, reset the shared context to create a new one.

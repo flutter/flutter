@@ -7,6 +7,7 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("screenshot") {
   testonly = true
+
   sources = [
     "screenshot.h",
     "screenshotter.cc",
@@ -14,6 +15,31 @@ impeller_component("screenshot") {
   ]
 
   deps = [ "//flutter/impeller/display_list" ]
+}
+
+impeller_component("golden_digest_manager") {
+  testonly = true
+
+  sources = [
+    "golden_digest_manager.cc",
+    "golden_digest_manager.h",
+  ]
+
+  deps = [ "//flutter/fml" ]
+}
+
+impeller_component("impeller_unittest_suite") {
+  testonly = true
+
+  sources = [
+    "impeller_unittest_suite.cc",
+    "impeller_unittest_suite.h",
+  ]
+
+  deps = [
+    "//flutter/fml",
+    "//flutter/impeller/playground:playground_test",
+  ]
 }
 
 if (is_mac) {

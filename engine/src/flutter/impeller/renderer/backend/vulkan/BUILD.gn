@@ -202,7 +202,7 @@ if (is_android) {
       ":mock_vulkan",
       ":unittests_fixtures",
       ":vulkan",
-      "//flutter/testing",
+      "//flutter/testing:testing_lib",
     ]
 
     defines = [ "TESTING" ]

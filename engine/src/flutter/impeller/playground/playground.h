@@ -24,6 +24,10 @@ namespace impeller {
 
 class PlaygroundImpl;
 
+namespace testing {
+class GoldenDigestManager;
+}
+
 enum class PlaygroundBackend {
   kMetal,
   kMetalSDF,
@@ -65,7 +69,7 @@ class Playground {
 
   ContentContext& GetContentContext() const;
 
-  std::shared_ptr<TypographerContext> GetTypographerContext() const;
+  std::shared_ptr<TypographerContext>& GetTypographerContext() const;
 
   using RenderCallback = std::function<bool(RenderTarget& render_target)>;
 
@@ -79,7 +83,7 @@ class Playground {
 
   bool OpenPlaygroundHere(const RenderCallback& render_callback);
 
-  bool OpenPlaygroundHere(SinglePassCallback pass_callback);
+  bool OpenPlaygroundHere(const SinglePassCallback& pass_callback);
 
   static std::shared_ptr<CompressedImage> LoadFixtureImageCompressed(
       std::shared_ptr<fml::Mapping> mapping);
@@ -156,12 +160,18 @@ class Playground {
   /// @see PlatformSupportsWideGamut()
   [[nodiscard]] virtual bool EnsureContextSupportsWideGamut();
 
+  /// @brief Returns true if the platform can support experimental AA lines.
+  bool PlatformSupportsAtialiasLines() const;
+
   /// @brief Make sure that when the context is later created that it
   ///        will support the experimental AA lines flag.
   ///
   /// Must be called before any other method except for the Ensure family
   /// of methods.
-  virtual void EnsureContextSupportsAntialiasLines();
+  ///
+  /// Callers should abort (such as via GTEST_SKIP) if the method returns
+  /// false if their behavior depends on the experimental AA lines.
+  [[nodiscard]] virtual bool EnsureContextSupportsAntialiasLines();
 
   /// @brief  Return an unmodifiable reference to the current switches.
   ///         The switches might change at the start of a test as it
@@ -175,6 +185,8 @@ class Playground {
       std::shared_ptr<TypographerContext> typographer_context);
 
   void SetWindowSize(ISize size);
+
+  virtual testing::GoldenDigestManager* GetGoldenDigestManager() const;
 
  private:
   const PlaygroundBackend backend_;
@@ -209,6 +221,10 @@ class Playground {
 
   void SetCursorPosition(Point pos);
 
+  [[nodiscard]]
+  bool RenderImage(const RenderCallback& render_callback, bool write_image);
+
+  [[nodiscard]]
   bool WriteGoldenImage(const RenderTarget& render_target,
                         const std::string& postfix = "");
 

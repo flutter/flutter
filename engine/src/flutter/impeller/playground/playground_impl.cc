@@ -58,6 +58,12 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
   FML_UNREACHABLE();
 }
 
+void PlaygroundImpl::OnTearDownTestEnvironment() {
+#if IMPELLER_ENABLE_OPENGLES
+  PlaygroundImplGLES::OnTearDownTestEnvironment();
+#endif  // IMPELLER_ENABLE_OPENGLES
+}
+
 PlaygroundImpl::PlaygroundImpl(const PlaygroundSwitches& switches)
     : switches_(switches) {}
 

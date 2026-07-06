@@ -186,10 +186,6 @@ bool DoesSupportWideGamutTests() {
 }
 }  // namespace
 
-bool GoldenPlaygroundTest::PlatformSupportsWideGamutTests() const {
-  return DoesSupportWideGamutTests() && GetParam() == PlaygroundBackend::kMetal;
-}
-
 void GoldenPlaygroundTest::SetUp() {
   std::filesystem::path testing_assets_path =
       flutter::testing::GetTestingAssetsPath();

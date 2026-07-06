@@ -32,6 +32,7 @@
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/testing/golden_digest_manager.h"
 #include "impeller/testing/screenshotter.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
@@ -108,6 +109,10 @@ static void InitializeGLFWOnce() {
   });
 }
 
+testing::GoldenDigestManager* Playground::GetGoldenDigestManager() const {
+  return nullptr;
+}
+
 Playground::Playground(PlaygroundBackend backend,
                        const PlaygroundSwitches& switches)
     : backend_(backend), switches_(switches) {
@@ -124,7 +129,8 @@ void Playground::EnsureContextIsUnique() {
 
 bool Playground::PlatformSupportsWideGamutTests() const {
 #if __arm64__ && FML_OS_MACOSX
-  return backend_ == PlaygroundBackend::kMetal;
+  return backend_ == PlaygroundBackend::kMetal ||
+         backend_ == PlaygroundBackend::kMetalSDF;
 #else
   return false;
 #endif
@@ -139,9 +145,19 @@ bool Playground::EnsureContextSupportsWideGamut() {
   return true;
 }
 
-void Playground::EnsureContextSupportsAntialiasLines() {
+bool Playground::PlatformSupportsAtialiasLines() const {
+  // This used to only be enabled for Metal and MetalSDF, but all
+  // platforms should support it now.
+  return true;
+}
+
+bool Playground::EnsureContextSupportsAntialiasLines() {
   FML_CHECK(!context_) << "Must be called before a context is created.";
+  if (!PlatformSupportsAtialiasLines()) {
+    return false;
+  }
   switches_.flags.antialiased_lines = true;
+  return true;
 }
 
 std::shared_ptr<Context> Playground::GetContext() const {
@@ -173,7 +189,7 @@ ContentContext& Playground::GetContentContext() const {
   return *content_context_;
 }
 
-std::shared_ptr<TypographerContext> Playground::GetTypographerContext() const {
+std::shared_ptr<TypographerContext>& Playground::GetTypographerContext() const {
   if (!typographer_context_) {
     typographer_context_ = TypographerContextSkia::Make();
   }
@@ -313,29 +329,64 @@ void Playground::SetEnableWriteGolden(bool write_golden) {
   should_write_golden_ = write_golden;
 }
 
+bool Playground::RenderImage(const RenderCallback& callback,
+                             bool write_result) {
+  std::shared_ptr<Context> context = GetContext();
+  AiksContext renderer(context, typographer_context_);
+  Point content_scale = GetContentScale();
+  ISize size(std::round(GetWindowSize().width * content_scale.x),
+             std::round(GetWindowSize().height * content_scale.y));
+
+  RenderTargetAllocator render_target_allocator(
+      context->GetResourceAllocator());
+  std::string label =
+      write_result ? "Golden Render Pass" : "Playground Verification Pass";
+  RenderTarget render_target = render_target_allocator.CreateOffscreen(
+      *context, size, /*mip_count=*/1, label,
+      RenderTarget::kDefaultColorAttachmentConfig,
+      /*stencil_attachment_config=*/std::nullopt);
+  if (!render_target.IsValid()) {
+    return false;
+  }
+  if (!callback(render_target)) {
+    return false;
+  }
+  if (write_result && !WriteGoldenImage(render_target)) {
+    return false;
+  }
+  return true;
+}
+
 bool Playground::WriteGoldenImage(const RenderTarget& render_target,
                                   const std::string& postfix) {
-  if (!switches_.golden_output_dir.has_value()) {
-    return true;
+  testing::GoldenDigestManager* digest = GetGoldenDigestManager();
+  if (!digest) {
+    FML_LOG(ERROR) << "Golden image has no working directory";
+    return false;
   }
+
   std::shared_ptr<Context> context = GetContext();
+  digest->AddDimension("gpu_string", context->DescribeGpuModel());
+
+  std::string test_name = GetTestName();
+
   std::unique_ptr<testing::Screenshot> screenshot =
       testing::Screenshotter::MakeScreenshot(
           context, render_target.GetRenderTargetTexture());
   if (!screenshot || !screenshot->GetBytes()) {
-    FML_LOG(ERROR) << "Failed to collect screenshot for test " << GetTestName();
+    FML_LOG(ERROR) << "Failed to collect screenshot for test " << test_name;
     return false;
   }
-  std::string test_name = GetTestName();
+
   std::string filename = GetGoldenFilename(postfix);
-  // testing::GoldenDigest::Instance()->AddImage(
-  //     test_name, filename, screenshot->GetWidth(), screenshot->GetHeight());
-  std::string filenamepath =
-      switches_.golden_output_dir.value() + "/" + filename;
+  std::string filenamepath = digest->GetFullPath(filename);
   if (!screenshot->WriteToPNG(filenamepath)) {
     FML_LOG(ERROR) << "Failed to write screenshot to " << filenamepath;
     return false;
   }
+  digest->AddImage(test_name, filename,  //
+                   screenshot->GetWidth(), screenshot->GetHeight());
+
   return true;
 }
 
@@ -354,27 +405,16 @@ bool Playground::OpenPlaygroundHere(
   }
   ::glfwSetWindowSize(window, GetWindowSize().width, GetWindowSize().height);
 
-  bool writing_golden =
-      switches_.golden_output_dir.has_value() && should_write_golden_;
+  bool writing_golden = GetGoldenDigestManager() && should_write_golden_;
   if (!switches_.enable_playground || writing_golden) {
-    std::unique_ptr<Surface> surface = impl_->AcquireSurfaceFrame(context_);
-    if (!surface) {
-      return false;
+    bool success = RenderImage(render_callback, false);
+    if (success && writing_golden) {
+      // Render twice for a golden result so the second pass observes warmed
+      // pipeline and resource caches.
+      success = RenderImage(render_callback, true);
     }
-    RenderTarget render_target = surface->GetRenderTarget();
-
-    if (!render_callback(render_target) || !context->FlushCommandBuffers()) {
-      return false;
-    }
-    if (writing_golden) {
-      surface->Present();
-      if (!render_callback(render_target) || !context->FlushCommandBuffers()) {
-        return false;
-      }
-      return WriteGoldenImage(render_target);
-    }
-    if (!switches_.enable_playground) {
-      return true;
+    if (!success || !switches_.enable_playground) {
+      return success;
     }
   }
   FML_CHECK(switches_.enable_playground);
@@ -497,7 +537,7 @@ bool Playground::OpenPlaygroundHere(
   return true;
 }
 
-bool Playground::OpenPlaygroundHere(SinglePassCallback pass_callback) {
+bool Playground::OpenPlaygroundHere(const SinglePassCallback& pass_callback) {
   return OpenPlaygroundHere(
       [context = GetContext(), &pass_callback](RenderTarget& render_target) {
         auto buffer = context->CreateCommandBuffer();
