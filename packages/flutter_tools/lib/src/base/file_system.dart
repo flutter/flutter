@@ -2,15 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
 import 'common.dart';
 import 'io.dart';
+import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
 import 'signals.dart';
+import 'terminal.dart';
 
 // package:file/local.dart must not be exported. This exposes LocalFileSystem,
 // which we override to ensure that temporary directories are cleaned up when
@@ -272,4 +276,68 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   // This only exist because the memory file system does not support a systemTemp that does not exists #74042
   @visibleForTesting
   Directory get superSystemTempDirectory => super.systemTempDirectory;
+}
+
+extension FileSystemLocking on FileSystem {
+  /// Runs [scope] while holding an exclusive file lock on the file at [lockPath].
+  ///
+  /// The lock is released after [scope] completes, even if it throws.
+  ///
+  /// If the lock cannot be acquired immediately, it will retry every 50ms.
+  Future<T> runLocked<T>({
+    required String lockPath,
+    required FutureOr<T> Function() scope,
+    Logger? logger,
+    String? traceMessage,
+    String? warningMessage,
+  }) async {
+    final File lockFile = file(lockPath);
+    var printed = false;
+    RandomAccessFile? openedFile;
+    while (true) {
+      try {
+        lockFile.parent.createSync(recursive: true);
+        openedFile = lockFile.openSync(mode: FileMode.write);
+        openedFile.lockSync();
+        break;
+      } on UnimplementedError {
+        logger?.printTrace(traceMessage ?? 'Locking not supported (UnimplementedError).');
+        break;
+      } on UnsupportedError {
+        logger?.printTrace(traceMessage ?? 'Locking not supported (UnsupportedError).');
+        break;
+      } on FileSystemException catch (e) {
+        final lockFailed = openedFile != null;
+        if (openedFile != null) {
+          try {
+            openedFile.closeSync();
+          } on FileSystemException catch (_) {}
+          openedFile = null;
+        }
+        if (!printed) {
+          final details = lockFailed ? '' : ' (Error: $e)';
+          logger?.printTrace(
+            traceMessage ?? 'Waiting to obtain lock of directory: ${lockFile.path}$details',
+          );
+          logger?.printWarning(
+            warningMessage ?? 'Waiting for another flutter command to release the lock...',
+            color: TerminalColor.grey,
+            fatal: false,
+          );
+          printed = true;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    try {
+      return await scope();
+    } finally {
+      if (openedFile != null) {
+        try {
+          openedFile.closeSync();
+        } on FileSystemException {} // ignore: empty_catches
+      }
+    }
+  }
 }
