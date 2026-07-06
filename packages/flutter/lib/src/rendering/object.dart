@@ -2303,8 +2303,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // currently allowed to mutate, and a boolean indicating whether this
   // RenderObject is allowed to mutate.
   //
-  // This method must only be called during layout as mutations are always allowed
-  // before layout.
+  // This method must only be called during layout, as mutations are always
+  // allowed before layout. A null return value indicates another render subtree
+  // is actively performing layout and, in the process, illegally mutating this
+  // RenderObject's subtree.
   (RenderObject, bool)? get _debugClosestMutationRoot {
     return switch (this) {
       // This subtree is being mutated in a layout callback.
