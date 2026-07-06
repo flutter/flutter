@@ -183,11 +183,10 @@ void main() {
         final Analytics analyticsAgentBot = getAnalytics(
           runningOnBot: true,
           flutterVersion: FakeFlutterVersion(),
-          environment: const <String, String>{},
+          environment: const <String, String>{'CLAUDECODE': '1'},
           analyticsOverride: analyticsOverride,
           clientIde: clientIde,
           config: config,
-          aiAgentName: 'Claude Code',
         );
         expect(analyticsAgentBot, isNot(isA<NoOpAnalytics>()));
         expect(analyticsAgentBot, equals(analyticsOverride));

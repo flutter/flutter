@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/config.dart';
@@ -20,19 +19,18 @@ import '../version.dart';
 ///
 /// For testing purposes, pass in a [FakeAnalytics] instance initialized with
 /// an in-memory file system to prevent writing to disk.
-@visibleForTesting
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
   required Map<String, String> environment,
   required String? clientIde,
   required Config config,
-  String? aiAgentName,
   bool enableAsserts = false,
   FakeAnalytics? analyticsOverride,
 }) {
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
   final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final String? aiAgentName = AiAgent.detectAgentName(environment);
   final bool hasAiAgent = aiAgentName != null;
 
   if ( // Ignore local user branches.

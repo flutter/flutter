@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:meta/meta.dart';
 
 import '../persistent_tool_state.dart';
@@ -80,9 +79,6 @@ class BotDetector {
     _persistentToolState.setIsRunningOnBot(result);
     return result;
   }
-
-  /// The detected AI agent executing the tool, if any.
-  late final String? aiAgentName = AiAgent.detectAgentName(_platform.environment);
 }
 
 // Are we running on Azure?
