@@ -29,6 +29,7 @@ import '../../src/context.dart';
 final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
+  '--disable-renderer-backgrounding',
   '--disable-default-apps',
   '--disable-extensions',
   '--disable-popup-blocking',

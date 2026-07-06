@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io'; // flutter_ignore: dart_io_import
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
@@ -17,6 +18,7 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -628,8 +630,6 @@ window.\$dartLoader.loader.nextAttempt();
     if (_logger.isVerbose) {
       _logger.printTrace('Loading test suite $relativePath.');
     }
-    _logger.printStatus('[CHROME_DIAGNOSTIC] Loading test suite $relativePath.');
-
     final PoolResource lockResource = await _suiteLock.request();
 
     final Runtime browser = platform.runtime;
@@ -647,7 +647,6 @@ window.\$dartLoader.loader.nextAttempt();
     if (_logger.isVerbose) {
       _logger.printTrace('Running test suite $relativePath.');
     }
-    _logger.printStatus('[CHROME_DIAGNOSTIC] Running test suite $relativePath.');
 
     final RunnerSuite suite = await _browserManager!.load(
       relativePath,
@@ -659,7 +658,6 @@ window.\$dartLoader.loader.nextAttempt();
         if (_logger.isVerbose) {
           _logger.printTrace('Test suite $relativePath finished.');
         }
-        _logger.printStatus('[CHROME_DIAGNOSTIC] Test suite $relativePath finished.');
       },
     );
 
@@ -681,7 +679,6 @@ window.\$dartLoader.loader.nextAttempt();
     final completer = Completer<WebSocketChannel>.sync();
     final String path = _webSocketHandler.create(
       webSocketHandler((WebSocketChannel webSocket, _) {
-        _logger.printStatus('[CHROME_DIAGNOSTIC] WebSocket connection established from Chrome.');
         completer.complete(webSocket);
       }),
     );
@@ -696,7 +693,6 @@ window.\$dartLoader.loader.nextAttempt();
         );
 
     _logger.printTrace('Serving tests at $hostUrl');
-    _logger.printStatus('[CHROME_DIAGNOSTIC] Serving tests at $hostUrl');
 
     return BrowserManager.start(
       _chromiumLauncher,
@@ -705,29 +701,24 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
+      webBrowserFlags: <String>[if (useWasm) '--disable-dev-shm-usage'],
     );
   }
 
   @override
   Future<void> closeEphemeral() async {
-    _logger.printStatus(
-      '[CHROME_DIAGNOSTIC] closeEphemeral called. _browserManager is null: ${_browserManager == null}',
-    );
     if (_browserManager != null) {
       await _browserManager!.close();
     }
-    _logger.printStatus('[CHROME_DIAGNOSTIC] closeEphemeral finished.');
   }
 
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
-    _logger.printStatus('[CHROME_DIAGNOSTIC] FlutterWebPlatform.close called.');
     await Future.wait<void>(<Future<dynamic>>[
       if (_browserManager != null) _browserManager!.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);
-    _logger.printStatus('[CHROME_DIAGNOSTIC] FlutterWebPlatform.close finished.');
   });
 }
 
@@ -773,12 +764,11 @@ class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
   BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger) {
-    _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager created for ${_runtime.name}.');
     unawaited(
       _browser.onExit.then((int exitCode) {
         if (!_closed) {
           _logger.printError(
-            '[CHROME_DIAGNOSTIC] Chrome browser process (PID: ${_browser.pid}) '
+            'Chrome browser process (PID: ${_browser.pid}) '
             'exited unexpectedly with code $exitCode during test execution.',
           );
         }
@@ -792,9 +782,6 @@ class BrowserManager {
     // Start this canceled because we don't want it to start ticking until we
     // get some response from the iframe.
     _timer = RestartableTimer(const Duration(seconds: 3), () {
-      _logger.printStatus(
-        '[CHROME_DIAGNOSTIC] No messages received from Chrome for 3 seconds. Browser may be deadlocked or doing heavy synchronous work. Disabling test timeouts.',
-      );
       _isDebugging = true;
       for (final RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
@@ -806,15 +793,11 @@ class BrowserManager {
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
         return stream.map((Object? message) {
-          _logger.printStatus('[CHROME_DIAGNOSTIC] WebSocket message received: $message');
           if (!_closed) {
             _timer.reset();
           }
           if (_isDebugging) {
             _isDebugging = false;
-            _logger.printStatus(
-              '[CHROME_DIAGNOSTIC] Messages resumed from Chrome. Re-enabling test timeouts.',
-            );
           }
           for (final RunnerSuiteController controller in _controllers) {
             controller.setDebugging(false);
@@ -905,53 +888,38 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
-    final completer = Completer<BrowserManager>();
-
-    final diagnosticTimer = Timer.periodic(const Duration(seconds: 5), (Timer timer) async {
-      var exitCode = -1;
-      try {
-        exitCode = await chrome.onExit.timeout(Duration.zero, onTimeout: () => -1);
-      } on Object catch (_) {
-        // Ignored
-      }
-      final isRunning = exitCode == -1;
-
-      logger.printStatus(
-        '[CHROME_DIAGNOSTIC] Waiting for WebSocket connection. '
-        'Chrome PID: ${chrome.pid}. Running: $isRunning.',
-      );
-
-      if (isRunning) {
-        try {
-          final List<dynamic> tabs = await chrome.chromeConnection.getTabs();
-          logger.printStatus('[CHROME_DIAGNOSTIC] DevTools is responsive. Tabs: $tabs');
-        } on Object catch (e) {
-          logger.printStatus('[CHROME_DIAGNOSTIC] DevTools is UNRESPONSIVE: $e');
-        }
-      } else {
-        logger.printStatus(
-          '[CHROME_DIAGNOSTIC] Chrome process has already exited with code $exitCode.',
-        );
-        timer.cancel();
-      }
-    });
-
     unawaited(
-      completer.future.whenComplete(() {
-        diagnosticTimer.cancel();
+      Future<void>(() async {
+        try {
+          final ChromeTab? tab = await chrome.chromeConnection.getTab(
+            (ChromeTab tab) => tab.url.contains('index.html'),
+            retryFor: const Duration(seconds: 5),
+          );
+          if (tab != null) {
+            final WipConnection connection = await tab.connect();
+            await connection.runtime.enable();
+            connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+              logger.printStatus(
+                '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
+              );
+            });
+            connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
+              logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
+            });
+          }
+        } on Object catch (_) {}
       }),
     );
+    final completer = Completer<BrowserManager>();
 
     unawaited(
       chrome.onExit
           .then<Object?>((int? browserExitCode) {
-            diagnosticTimer.cancel();
             throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
           })
           .then(
             (Object? obj) => obj,
             onError: (Object error, StackTrace stackTrace) {
-              diagnosticTimer.cancel();
               if (!completer.isCompleted) {
                 completer.completeError(error, stackTrace);
               }
@@ -969,7 +937,6 @@ class BrowserManager {
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();
-          diagnosticTimer.cancel();
           if (!completer.isCompleted) {
             completer.completeError(error, stackTrace);
           }
@@ -1035,9 +1002,6 @@ class BrowserManager {
       ),
     );
 
-    _logger.printStatus(
-      '[CHROME_DIAGNOSTIC] BrowserManager.load: sending loadSuite command for $path',
-    );
     _channel.sink.add(<String, Object>{
       'command': 'loadSuite',
       'url': url.toString(),
@@ -1046,7 +1010,6 @@ class BrowserManager {
     });
 
     try {
-      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.load: deserializing suite for $path');
       controller = deserializeSuite(
         path,
         SuitePlatform(Runtime.chrome),
@@ -1057,13 +1020,7 @@ class BrowserManager {
       );
 
       _controllers.add(controller);
-      _logger.printStatus(
-        '[CHROME_DIAGNOSTIC] BrowserManager.load: awaiting controller.suite for $path',
-      );
       final RunnerSuite suite = await controller.suite;
-      _logger.printStatus(
-        '[CHROME_DIAGNOSTIC] BrowserManager.load: controller.suite completed successfully for $path',
-      );
       return suite;
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
@@ -1115,7 +1072,6 @@ class BrowserManager {
   /// the browser.
   Future<dynamic> close() {
     return _closeMemoizer.runOnce(() {
-      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.close called.');
       _closed = true;
       _timer.cancel();
       if (_pauseCompleter != null) {
@@ -1123,21 +1079,7 @@ class BrowserManager {
       }
       _pauseCompleter = null;
       _controllers.clear();
-      _logger.printStatus('[CHROME_DIAGNOSTIC] BrowserManager.close: closing browser.');
       final Future<dynamic> closeFuture = _browser.close();
-      unawaited(
-        closeFuture
-            .then((_) {
-              _logger.printStatus(
-                '[CHROME_DIAGNOSTIC] BrowserManager.close: browser closed successfully.',
-              );
-            })
-            .catchError((Object error) {
-              _logger.printStatus(
-                '[CHROME_DIAGNOSTIC] BrowserManager.close: browser close error: $error',
-              );
-            }),
-      );
       return closeFuture;
     });
   }
