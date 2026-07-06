@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Dynamic argument parser mixin for tool extensions.
+///
+/// This library provides a mixin to allow commands to dynamically rebuild
+/// their argument parsers when extension-provided options change.
+library experimental.extension_arg_parser;
+
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 
@@ -25,19 +31,26 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   @protected
   ArgParser createBaseArgParser() => ArgParser(allowTrailingOptions: false);
 
-  /// Populates options and flags on `parser` (which is also accessible via `argParser`).
+  /// Populates options and flags on the base parser.
+  ///
+  /// Subclasses should override this to register their static options instead
+  /// of overriding `populateParser`.
   @protected
   void populateBaseArgParser(ArgParser parser);
 
   /// Returns a cache key representing the current set of dynamic extension options
   /// (for example, a comma-separated list of template names).
   ///
+  /// This key is used to determine if the dynamic parser needs to be rebuilt.
   /// If this returns null or an empty string, the base parser is returned directly.
   @protected
   String? get extensionArgParserCacheKey;
 
   /// Builds a new dynamic `ArgParser` by cloning `baseParser` and injecting
   /// any dynamic extension options or allowed help entries.
+  ///
+  /// Subclasses must implement this to define how they inject dynamic options
+  /// into the cloned parser.
   @protected
   ArgParser buildDynamicArgParser(ArgParser baseParser);
 
@@ -57,6 +70,8 @@ mixin ExtensionArgParserMixin on FlutterCommand {
     }
   }
 
+  /// Returns either the base parser or a dynamically rebuilt parser if the
+  /// cache key has changed.
   @override
   ArgParser get argParser {
     if (_buildingBaseParser) {

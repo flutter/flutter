@@ -140,6 +140,8 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(configSetting);
         }
       }
+      // If the tool extension prototype is enabled, clear any registered
+      // extension-specific configuration options.
       if (globals.isToolExtensionPrototypeEnabled) {
         final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
         if (configManager != null) {
@@ -200,6 +202,8 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('build-dir', buildDir);
     }
 
+    // If the tool extension prototype is enabled, validate and set any
+    // extension-specific configuration options passed as arguments.
     if (globals.isToolExtensionPrototypeEnabled) {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
       if (configManager != null) {
@@ -291,6 +295,7 @@ class ConfigCommand extends FlutterCommand {
     }
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      // Include registered tool extension configuration keys if the prototype is enabled.
       if (globals.isToolExtensionPrototypeEnabled)
         ...extensionConfigurationManager?.cachedOptions
                 .where(

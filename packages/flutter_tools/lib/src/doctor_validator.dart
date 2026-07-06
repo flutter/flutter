@@ -8,6 +8,8 @@ import 'package:meta/meta.dart';
 
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
+// Re-export ValidationType and ValidationMessageType from flutter_tools_core
+// to share them with tool extensions and avoid duplication.
 import 'flutter_tools_core/diagnostics.dart' show ValidationMessageType, ValidationType;
 import 'globals.dart' as globals;
 export 'flutter_tools_core/diagnostics.dart' show ValidationMessageType, ValidationType;

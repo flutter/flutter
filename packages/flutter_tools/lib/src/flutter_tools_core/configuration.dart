@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core configuration service and option definitions for tool extensions.
+///
+/// This library defines the interface for registering custom configuration
+/// options and validating them from the host tool.
+library flutter_tools_core.configuration;
+
 import '../../generic_extension_protocol.dart';
 
 /// The service responsible for managing custom configuration options for
@@ -17,11 +23,15 @@ abstract base class ConfigurationService extends ToolExtensionService {
   /// The set of configuration options handled by this extension.
   List<ConfigurationOption> get options;
 
+  /// Initializes the service by registering RPC methods with the extension provider.
+  ///
+  /// Registers `getOptions` to list options and `validate` to validate a value.
   @override
   Future<Map<String, Function>> initialize() async {
     return <String, Function>{'getOptions': _getOptionsRpc, 'validate': _validateRpc};
   }
 
+  /// Shuts down the service and cleans up any resources.
   @override
   Future<void> shutdown() async {}
 
@@ -44,6 +54,9 @@ abstract base class ConfigurationService extends ToolExtensionService {
 }
 
 /// The definition of a single option provided by the [ConfigurationService].
+///
+/// Extensions implement this class to define custom configuration options
+/// (e.g., enabling experimental features).
 abstract base class ConfigurationOption {
   /// Create a new [ConfigurationOption].
   const ConfigurationOption();
@@ -61,6 +74,8 @@ abstract base class ConfigurationOption {
 }
 
 /// Result type that indicates whether or not a value is valid for an option.
+///
+/// Used by [ConfigurationOption.validate] to report validation success or failure.
 final class OptionValidationResult {
   /// Create a successful validation result.
   OptionValidationResult.success() : success = true, failureReason = null;
@@ -68,7 +83,7 @@ final class OptionValidationResult {
   /// Create a failed validation result with a reason.
   OptionValidationResult.failed(this.failureReason) : success = false;
 
-  /// Create an [OptionValidationResult] from a JSON map.
+  /// Creates an [OptionValidationResult] from a JSON map.
   factory OptionValidationResult.fromJson(Map<String, Object?> json) {
     final success = json['success']! as bool;
     if (success) {
@@ -97,11 +112,15 @@ final class OptionValidationResult {
 }
 
 /// A concrete host-side representation of an extension configuration option.
+///
+/// This represents an option defined by an extension on the host side.
+/// Its [validate] method throws an [UnimplementedError] because validation
+/// must be delegated to the extension isolate via RPC.
 final class ExtensionConfigurationOption extends ConfigurationOption {
   /// Create a new instance of [ExtensionConfigurationOption].
   ExtensionConfigurationOption({required this.description, required this.name});
 
-  /// Parse an option from a JSON extension map representation.
+  /// Parses an option from a JSON extension map representation.
   factory ExtensionConfigurationOption.fromJson(Map<String, Object?> json) {
     if (json case {'name': final String name, 'description': final String description}) {
       return ExtensionConfigurationOption(name: name, description: description);

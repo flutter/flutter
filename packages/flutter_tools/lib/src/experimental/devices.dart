@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Device discovery and device implementation for tool extensions.
+///
+/// This library enables discovering and interacting with custom devices
+/// provided by active tool extensions.
+library experimental.devices;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -25,6 +31,9 @@ import '../vmservice.dart';
 import 'extension_discovery.dart';
 
 /// A [DeviceDiscovery] implementation that delegates discovery to active tool extensions.
+///
+/// This class queries active [ToolExtension]s for devices they manage and
+/// registers them as [ExtensionBackedDevice]s.
 class ExtensionDeviceDiscovery extends DeviceDiscovery {
   ExtensionDeviceDiscovery(ToolExtensionManager extensionManager, {required Logger logger})
     : _extensionManager = extensionManager,
@@ -53,6 +62,8 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
     return discoverDevices(filter: filter);
   }
 
+  /// Discovers devices by querying all active tool extensions that support the
+  /// 'device' service.
   @override
   Future<List<Device>> discoverDevices({
     Duration? timeout,
@@ -116,6 +127,10 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
 }
 
 /// A client-side [Device] implementation that delegates all commands to an extension isolate.
+///
+/// This class represents a device that is managed by a tool extension.
+/// Operations like installing, launching, and stopping apps are delegated
+/// to the extension over RPC.
 class ExtensionBackedDevice extends Device {
   ExtensionBackedDevice(
     super.id,
@@ -166,6 +181,9 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<bool> isSupported() async => true;
 
+  /// Checks if the device supports the given project.
+  ///
+  /// For Linux devices, it checks if the project has a linux directory.
   @override
   bool isSupportedForProject(FlutterProject project) {
     if (buildTargetName == 'assemble_linux_app' ||
@@ -194,6 +212,10 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => false;
 
+  /// Returns the target platform of the device.
+  ///
+  /// Maps the platform name from the extension to a [TargetPlatform],
+  /// or falls back to category-based defaults if parsing fails.
   @override
   Future<TargetPlatform> get targetPlatform async {
     if (platformName case final String name) {
@@ -213,6 +235,7 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async => 'Extension Custom SDK';
 
+  /// Installs the app on the device by calling `device.installApp` on the extension.
   @override
   Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
     try {
@@ -228,6 +251,10 @@ class ExtensionBackedDevice extends Device {
     }
   }
 
+  /// Starts the app on the device.
+  ///
+  /// If [prebuiltApplication] is false and the device supports building,
+  /// it first delegates the build to the extension before launching.
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
@@ -433,6 +460,7 @@ class ExtensionBackedDevice extends Device {
     }
   }
 
+  /// Stops the app on the device by calling `device.stopApp` on the extension.
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     try {

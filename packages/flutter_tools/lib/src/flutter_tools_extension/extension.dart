@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// User-facing API for writing Flutter Tools extensions.
+///
+/// This library defines the [FlutterToolsExtension] base class that custom
+/// platforms extend to integrate with the Flutter tool.
+library flutter_tools_extension.extension;
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
@@ -14,11 +20,16 @@ import '../../generic_extension_protocol.dart';
 /// as the extension's entrypoint.
 const registerExtension = _RegisterExtension();
 
+/// Internal helper class for the [registerExtension] annotation.
 final class _RegisterExtension {
   const _RegisterExtension();
 }
 
 /// The representation of a Flutter Tools extension.
+///
+/// Extensions must extend this class and mark it with `@registerExtension`.
+/// It provides access to system abstractions (file system, process manager, logger, platform)
+/// and allows registering various services (build, device, diagnostics, template, etc.).
 abstract base class FlutterToolsExtension {
   FlutterToolsExtension({
     required this.fileSystem,
@@ -62,6 +73,9 @@ abstract base class FlutterToolsExtension {
   /// The service responsible for adding custom platform support to `flutter create`.
   final TemplateService? templateService;
 
+  /// Initializes the extension and all registered services.
+  ///
+  /// Returns the capabilities of the extension based on the registered services.
   @mustCallSuper
   Future<FlutterToolExtensionCapabilities> initialize() async {
     await artifactService?.initialize();
@@ -74,6 +88,7 @@ abstract base class FlutterToolsExtension {
     return FlutterToolExtensionCapabilities.fromExtension(this);
   }
 
+  /// Shuts down the extension and all registered services, cleaning up resources.
   @mustCallSuper
   Future<void> shutdown() async {
     await artifactService?.shutdown();
@@ -86,6 +101,9 @@ abstract base class FlutterToolsExtension {
 }
 
 /// Determines the set of capabilities provided by a [FlutterToolsExtension].
+///
+/// It scans the extension for non-null services and reports their namespaces
+/// as supported capabilities.
 final class FlutterToolExtensionCapabilities extends ToolExtensionCapabilities {
   factory FlutterToolExtensionCapabilities.fromExtension(FlutterToolsExtension ext) {
     final services = <String>[];

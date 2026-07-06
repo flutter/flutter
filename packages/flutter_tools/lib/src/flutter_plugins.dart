@@ -1207,6 +1207,8 @@ void createPluginSymlinks(
     );
   }
   if (customCMakeProject != null && customPlatformKey != null) {
+    // If a custom CMake project and platform key are provided (e.g. by a tool extension),
+    // create symlinks for that custom platform's plugins.
     _createPlatformPluginSymlinks(
       customCMakeProject.pluginSymlinkDirectory,
       platformPlugins[customPlatformKey] as List<Object?>?,
@@ -1563,6 +1565,8 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
   required _PluginResolutionType pluginResolutionType,
   bool quiet = false,
 }) {
+  // Dynamically collect all platform keys defined in all plugins.
+  // This allows custom platforms defined by extensions to be resolved.
   final platformKeys = <String>{
     AndroidPlugin.kConfigKey,
     IOSPlugin.kConfigKey,

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Linux prototype extension diagnostics service.
+///
+/// This library implements the diagnostics service for the Linux platform
+/// prototype extension, checking for required build tools.
+library linux_extension.diagnostics;
+
 import 'dart:io';
 
 import 'package:process/process.dart';
@@ -9,6 +15,9 @@ import '../../../flutter_tools_extension.dart';
 
 /// Service that performs host diagnostics check on Linux platforms
 /// for needed tools (clang++, cmake, ninja).
+///
+/// This service is registered by the Linux extension and runs diagnostics
+/// to ensure the host has the necessary build tools installed for compilation.
 final class LinuxDiagnosticsService extends DiagnosticsService {
   LinuxDiagnosticsService({required this.processManager});
 
@@ -22,6 +31,7 @@ final class LinuxDiagnosticsService extends DiagnosticsService {
   static const String _statusMissing = 'missing';
   static const String _statusError = 'error';
 
+  /// Runs diagnostics check for clang++, cmake, and ninja concurrently.
   @override
   Future<List<ValidationResult>> runDiagnostics() async {
     return Future.wait<ValidationResult>(<Future<ValidationResult>>[
@@ -31,6 +41,10 @@ final class LinuxDiagnosticsService extends DiagnosticsService {
     ]);
   }
 
+  /// Checks if a tool is installed by running it with the given arguments.
+  ///
+  /// Returns a [ValidationResult] indicating success if the tool exits with 0,
+  /// or missing/error if it fails or is not found.
   Future<ValidationResult> _checkTool(String exe, List<String> args) async {
     try {
       final ProcessResult result = await processManager.run(<String>[exe, ...args]);

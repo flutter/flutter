@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Extension discovery helper for tool extensions.
+///
+/// This library provides utilities for discovering active tool extensions,
+/// spawning prototype extensions, and querying their capabilities over RPC.
+library experimental.extension_discovery;
+
 import 'dart:async';
 
 import '../../generic_extension_protocol.dart';
@@ -11,6 +17,10 @@ import '../extension_prototypes/linux_extension/extension.dart';
 import '../globals.dart' as globals;
 
 /// A helper class for abstracting extension isolate spawning and capability querying.
+///
+/// This helper provides utilities to check if the tool extension prototype is enabled,
+/// query capabilities of extensions, filter extensions by supported services,
+/// and invoke RPC methods on multiple extensions.
 class ExtensionDiscoveryHelper {
   /// Create a new instance of [ExtensionDiscoveryHelper].
   ExtensionDiscoveryHelper({
@@ -32,6 +42,9 @@ class ExtensionDiscoveryHelper {
   static const String envPrototypeFlag = 'FLUTTER_TOOL_EXTENSION_PROTOTYPE';
 
   /// Whether the host platform enables tool extension prototype features.
+  ///
+  /// Checks the injected platform's environment variables first, and falls back
+  /// to the global flag if no platform was injected.
   bool get isPrototypeEnabled => _platform != null
       ? _platform.environment[envPrototypeFlag] == 'true'
       : globals.isToolExtensionPrototypeEnabled;
@@ -45,6 +58,8 @@ class ExtensionDiscoveryHelper {
   ToolExtensionManager? get extensionManager => _extensionManager;
 
   /// Query the capabilities of a [ToolExtension] with a timeout.
+  ///
+  /// Returns null if the query fails, unless [throwOnFailure] is true.
   Future<ToolExtensionCapabilities?> getExtensionCapabilities(
     ToolExtension extension, {
     bool throwOnFailure = false,
@@ -61,6 +76,9 @@ class ExtensionDiscoveryHelper {
   }
 
   /// Checks whether a specific [extension] supports the given [serviceNamespace].
+  ///
+  /// Queries the extension's capabilities and checks if the service namespace
+  /// is listed in the supported services.
   Future<bool> isServiceSupported(
     ToolExtension extension,
     String serviceNamespace, {
@@ -74,6 +92,9 @@ class ExtensionDiscoveryHelper {
   }
 
   /// Discover active or newly spawned tool extensions that support [serviceNamespace].
+  ///
+  /// If the extension manager has no extensions registered and the prototype
+  /// is enabled, it attempts to start the default Linux extension prototype.
   Future<List<ToolExtension>> getExtensionsSupporting(
     String serviceNamespace, {
     bool throwOnFailure = false,
@@ -114,6 +135,8 @@ class ExtensionDiscoveryHelper {
 
   /// Discover active or newly spawned tool extensions that support [serviceNamespace],
   /// invoke [method] on each, and decode results using [decoder].
+  ///
+  /// Combines results from all responding extensions into a single list.
   Future<List<T>> getListFromExtensions<T>(
     String serviceNamespace,
     String method,

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core build service and target definitions for tool extensions.
+///
+/// This library defines the interface for registering custom build targets
+/// and executing builds from the host tool.
+library flutter_tools_core.build;
+
 import '../../generic_extension_protocol.dart';
 import 'artifacts.dart';
 
@@ -23,11 +29,15 @@ abstract base class BuildService extends ToolExtensionService {
   /// Declares engine artifacts required before building.
   List<ArtifactDependency> get artifactDependencies;
 
+  /// Initializes the service by registering RPC methods with the extension provider.
+  ///
+  /// Registers `getTargets` to list targets and `build` to trigger a build.
   @override
   Future<Map<String, Function>> initialize() async {
     return <String, Function>{'getTargets': _getTargetsRpc, 'build': _buildRpc};
   }
 
+  /// Shuts down the service and cleans up any resources.
   @override
   Future<void> shutdown() async {}
 
@@ -96,6 +106,9 @@ abstract base class BuildService extends ToolExtensionService {
 }
 
 /// A stable, version-checked catalog of core build targets provided by the host tool.
+///
+/// These targets represent standard build steps in the Flutter tool's build system
+/// (like compiling the kernel snapshot or copying assets) that extensions can depend on.
 abstract final class CoreBuildTargets {
   static const String kernelSnapshot = 'kernel_snapshot_program';
   static const String aotElf = 'aot_elf_profile';
@@ -104,6 +117,9 @@ abstract final class CoreBuildTargets {
 }
 
 /// Defines a specific build, bundle, or signing step.
+///
+/// Extensions implement this class to define custom build targets (e.g., compiling
+/// native binaries for a custom platform).
 abstract base class Target {
   /// The name of this target.
   String get name;
@@ -136,14 +152,20 @@ abstract base class Target {
   List<Depfile> get depfiles => const <Depfile>[];
 
   /// Executes target operations.
-  /// Returns a map of custom build results (e.g. executablePath).
+  ///
+  /// Returns a map of custom build results (e.g. `executablePath`).
   Future<Map<String, Object?>> build(BuildEnvironment env);
 
   /// Custom defines passed back to the tool.
   Future<Map<String, String>> get extraDefines async => const <String, String>{};
 }
 
-/// A concrete implementation of [Target] that can be parsed from a JSON map returned over the tool extension RPC.
+/// A concrete implementation of [Target] that can be parsed from a JSON map
+/// returned over the tool extension RPC.
+///
+/// This represents an extension's target on the host side. Its [build] method
+/// throws an [UnimplementedError] because the actual build execution must be
+/// delegated to the extension isolate via RPC.
 final class ExtensionBuildTarget extends Target {
   ExtensionBuildTarget.fromJson(Map<String, Object?> json)
     : name = json['name']! as String,
@@ -210,7 +232,7 @@ class BuildEnvironment {
     required this.plugins,
   });
 
-  /// Create a BuildEnvironment from a JSON map received over RPC.
+  /// Creates a [BuildEnvironment] from a JSON map received over RPC.
   factory BuildEnvironment.fromJson(Map<String, Object?> json) {
     return BuildEnvironment(
       cacheDir: Uri.parse(json['cacheDir']! as String),
@@ -272,7 +294,7 @@ class BuildEnvironment {
 class ExtensionPlugin {
   ExtensionPlugin({required this.configuration, required this.name, required this.path});
 
-  /// Decodes an [ExtensionPlugin] from a JSON map.
+  /// Creates an [ExtensionPlugin] from a JSON map.
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
     return ExtensionPlugin(
       configuration:
@@ -317,7 +339,7 @@ class BuildResult {
   /// Create a new instance of [BuildResult].
   BuildResult({required this.success, this.errorMessage, this.executablePath, this.stackTrace});
 
-  /// Parse a [BuildResult] from a JSON map returned over the tool extension RPC.
+  /// Parses a [BuildResult] from a JSON map returned over the RPC.
   factory BuildResult.fromJson(Map<String, Object?> json) {
     return BuildResult(
       success: json['success'] == true,

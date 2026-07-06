@@ -77,6 +77,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   final bool _verboseHelp;
 
+  /// Populates the global options for the command runner.
+  ///
+  /// This registers standard flags like `--verbose`, `--device-id`, etc.
   void _populateGlobalOptions({required bool verboseHelp}) {
     argParser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
@@ -400,6 +403,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
+  /// Helper to extract the command name from the list of arguments, skipping flags.
   String? _findCommandName(Iterable<String> args) {
     for (final arg in args) {
       if (arg.startsWith('-')) {

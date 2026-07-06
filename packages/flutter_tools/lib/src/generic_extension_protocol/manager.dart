@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Manager and connection representation for tool extensions.
+///
+/// This library handles spawning extension isolates, performing the handshake,
+/// and managing the JSON-RPC 2.0 connection.
+library generic_extension_protocol.manager;
+
 import 'dart:async';
 import 'dart:isolate';
 
@@ -15,6 +21,7 @@ import 'service.dart';
 ///
 /// This class is used by the host Flutter tool to start and connect to multiple
 /// extension isolates, keeping track of their active connections as [ToolExtension] instances.
+/// It also aggregates notifications from all managed extensions.
 class ToolExtensionManager {
   final List<ToolExtension> _extensions = [];
   final Map<void Function(SendPort), ToolExtension> _activeSpawns = {};
@@ -123,6 +130,10 @@ class ToolExtensionManager {
 }
 
 /// Represents an active connection to a running Flutter Tool Extension.
+///
+/// This class wraps the communication channel (Isolate and RPC Peer) to a single
+/// extension. It provides methods to call remote methods on the extension
+/// ([callMethod]), send notifications ([sendNotification]), and query capabilities ([getCapabilities]).
 class ToolExtension {
   ToolExtension._({
     required Isolate? isolate,
@@ -144,6 +155,8 @@ class ToolExtension {
   Stream<Notification> get notifications => _notificationsController.stream;
 
   /// Helper to start a new extension isolate.
+  ///
+  /// Spawns the isolate, performs the handshake, and sets up the RPC peer.
   static Future<ToolExtension> _start(
     void Function(SendPort) entryPoint, {
     required Duration timeout,
@@ -198,6 +211,8 @@ class ToolExtension {
   }
 
   /// Helper to connect to an externally spawned extension.
+  ///
+  /// Performs the handshake and sets up the RPC peer.
   static Future<ToolExtension> _connect(
     ReceivePort receivePort, {
     required Duration timeout,
@@ -247,6 +262,10 @@ class ToolExtension {
     }
   }
 
+  /// Intercepts incoming RPC messages.
+  ///
+  /// If a message is a notification (no 'id' key), it parses it and adds it
+  /// to the notifications stream, and calls the optional [onNotification] callback.
   static void _interceptNotifications(
     Object? message,
     StreamController<Notification> controller,

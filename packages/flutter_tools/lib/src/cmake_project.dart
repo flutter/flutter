@@ -146,17 +146,28 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
 }
 
 /// A generic representation of a CMake-based sub-project for custom or general platforms.
+///
+/// This class is used to represent projects that use CMake but are not
+/// one of the standard supported platforms (like Linux, Windows, macOS).
+/// It allows custom platform extensions to define their own project structure
+/// while still reusing the common CMake build logic.
 class GenericCmakeProject implements CmakeBasedProject {
+  /// Creates a [GenericCmakeProject].
   GenericCmakeProject(this.parent, this.platformName);
 
   @override
   final FlutterProject parent;
 
-  /// The subdirectory name under the project root.
+  /// The subdirectory name under the project root (e.g., 'custom_platform').
   final String platformName;
 
+  /// The directory containing the editable user code for this platform.
   Directory get _editableDirectory => parent.directory.childDirectory(platformName);
+
+  /// The directory containing managed Flutter configuration files.
   Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
+
+  /// The directory containing ephemeral build artifacts.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   @override

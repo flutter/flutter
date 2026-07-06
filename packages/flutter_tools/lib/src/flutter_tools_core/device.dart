@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core device service and backing device definitions for tool extensions.
+///
+/// This library defines the interface for registering custom devices,
+/// launching applications, and streaming logs from the extension to the host.
+library flutter_tools_core.device;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -37,6 +43,8 @@ abstract class Device {
 }
 
 /// Standard device category string constants.
+///
+/// Used to classify devices (e.g., desktop, mobile, web) for filtering and display.
 abstract final class DeviceCategory {
   static const String desktop = 'desktop';
   static const String mobile = 'mobile';
@@ -44,6 +52,9 @@ abstract final class DeviceCategory {
 }
 
 /// Abstract interface for forwarding ports from the host to the device.
+///
+/// Extensions can implement this if their target devices require port forwarding
+/// to communicate with the host (e.g., for porting the VM service port).
 abstract class DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts;
   Future<ForwardedPort> forward(int devicePort, {int? hostPort});
@@ -52,6 +63,8 @@ abstract class DevicePortForwarder {
 }
 
 /// Abstract representation of a forwarded port.
+///
+/// Keeps track of the [hostPort] and [devicePort] mapping.
 abstract base class ForwardedPort {
   ForwardedPort(this.hostPort, this.devicePort);
 
@@ -62,6 +75,8 @@ abstract base class ForwardedPort {
 }
 
 /// Helper utility for launching a local executable process and extracting its VM service URI.
+///
+/// Useful for desktop-like devices where the application runs as a local process.
 abstract final class LocalDeviceLaunchHelper {
   static final RegExp _vmServiceRegExp = RegExp(
     r'The Dart VM service is listening on ((?:http|ws)://[a-zA-Z0-9.:\[\]]+/[^/]+/)',
@@ -119,6 +134,8 @@ abstract final class LocalDeviceLaunchHelper {
 }
 
 /// Helper for extracting Dart VM Service URIs from an already started process.
+///
+/// Monitors the process's stdout and stderr streams.
 class ProcessLaunchHelper {
   ProcessLaunchHelper({required this.onLogLine, required this.process});
 
@@ -158,6 +175,9 @@ class ProcessLaunchHelper {
 }
 
 /// Abstract representation of the Device Service in the extensibility package.
+///
+/// Extensions implement this service to expose custom devices to the host tool.
+/// It handles discovering devices, installing and launching apps, and streaming logs.
 abstract base class DeviceService extends ToolExtensionService {
   DeviceService({required this.onNotification});
 
@@ -186,6 +206,7 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Launches a specific device emulator.
   Future<void> launchEmulator(String emulatorId);
 
+  /// Initializes the service by registering RPC methods with the extension provider.
   @override
   Future<Map<String, Function>> initialize() async {
     return <String, Function>{
@@ -260,6 +281,7 @@ abstract base class DeviceService extends ToolExtensionService {
     await device.stopApp();
   }
 
+  /// Shuts down the service, cancelling log subscriptions and clearing device lists.
   @override
   Future<void> shutdown() async {
     for (final StreamSubscription<String> sub in _logSubscriptions.values) {

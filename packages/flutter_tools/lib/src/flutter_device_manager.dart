@@ -124,6 +124,8 @@ class FlutterDeviceManager extends DeviceManager {
            logger: logger,
            config: customDevicesConfig,
          ),
+         // Register the ExtensionDeviceDiscovery if a ToolExtensionManager is provided,
+         // enabling discovery of custom devices managed by tool extensions.
          if (extensionManager != null) ExtensionDeviceDiscovery(extensionManager, logger: logger),
        ];
 

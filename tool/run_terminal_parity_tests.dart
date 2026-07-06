@@ -8,6 +8,10 @@ import 'dart:io';
 const int _kTimeoutSeconds = 120;
 const int _kTimeoutExitCode = 124;
 
+/// Represents a test scenario for terminal CLI parity testing.
+///
+/// Defines the command, arguments, environment variables, and working directory
+/// for a single execution test.
 class TestScenario {
   TestScenario({
     required this.args,
@@ -26,6 +30,9 @@ class TestScenario {
   final String? workingDirectory;
 }
 
+/// Represents the result of running a [TestScenario].
+///
+/// Contains execution duration, exit code, output snippets, and whether it timed out.
 class TestResult {
   TestResult({
     required this.duration,
@@ -44,6 +51,10 @@ class TestResult {
   final bool timedOut;
 }
 
+/// Runs a single [TestScenario] process and monitors its execution.
+///
+/// It enforces a timeout defined by [_kTimeoutSeconds], captures stdout and stderr,
+/// and returns a [TestResult].
 Future<TestResult> runScenario(TestScenario scenario) async {
   stdout.writeln('Running [${scenario.subsystem}] ${scenario.name}...');
   final stopwatch = Stopwatch();

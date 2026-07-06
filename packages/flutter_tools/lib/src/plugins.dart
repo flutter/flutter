@@ -555,6 +555,9 @@ class PluginInterfaceResolution {
 /// - [PluginInterfaceResolution], which uses this record to create Map with metadata.
 typedef DartPluginClassAndFilePair = ({String dartClass, String dartFileName});
 
+/// Converts a [YamlMap] to a standard Dart [Map].
+///
+/// Recursively converts nested [YamlMap]s and [YamlList]s.
 Map<String, Object?> _yamlMapToMap(YamlMap yamlMap) {
   final result = <String, Object?>{};
   for (final MapEntry<Object?, Object?> entry in yamlMap.entries) {
@@ -572,6 +575,9 @@ Map<String, Object?> _yamlMapToMap(YamlMap yamlMap) {
   return result;
 }
 
+/// Converts a [YamlList] to a standard Dart [List].
+///
+/// Recursively converts nested [YamlMap]s and [YamlList]s.
 List<Object?> _yamlListToList(YamlList yamlList) {
   final result = <Object?>[];
   for (final Object? val in yamlList) {

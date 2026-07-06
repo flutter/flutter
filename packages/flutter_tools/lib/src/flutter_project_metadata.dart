@@ -28,7 +28,9 @@ sealed class ParsedFlutterTemplateType {
 
   /// Parses and returns a [ParsedFlutterTemplateType], if any, for [cliName].
   ///
-  /// If no match was found `null` is returned.
+  /// If no match was found in standard templates, it queries the
+  /// [ExtensionTemplateManager] to check if it matches a custom template.
+  /// If no match is found, `null` is returned.
   static ParsedFlutterTemplateType? fromCliName(String cliName) {
     for (final ParsedFlutterTemplateType type in _values) {
       if (cliName == type.cliName) {
@@ -47,6 +49,9 @@ sealed class ParsedFlutterTemplateType {
   }
 
   /// Returns template types that are enabled based on the current [featureFlags].
+  ///
+  /// Includes custom templates from [ExtensionTemplateManager] if the manager
+  /// is available and has cached templates.
   static List<ParsedFlutterTemplateType> enabledValues(FeatureFlags featureFlags) {
     final List<ParsedFlutterTemplateType> values = _values.toList();
     final ExtensionTemplateManager? manager = extensionTemplateManager;
@@ -64,6 +69,8 @@ sealed class ParsedFlutterTemplateType {
   bool isEnabled(FeatureFlags featureFlags) => true;
 }
 
+/// A [ParsedFlutterTemplateType] representing a template provided dynamically
+/// by a tool extension.
 class ExtensionProjectTemplateType extends ParsedFlutterTemplateType {
   ExtensionProjectTemplateType({required this.cliName});
 

@@ -149,6 +149,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
     ];
+    // If the tool extension prototype is enabled, register the ExtensionDoctorValidator
+    // to run diagnostics provided by registered tool extensions.
     final ToolExtensionManager? extensionManager = context.get<ToolExtensionManager>();
     if (extensionManager != null &&
         platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true') {

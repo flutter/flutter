@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Configuration manager for tool extensions.
+///
+/// This library manages discovery of custom configuration options from active
+/// tool extensions and handles routing validation requests to them.
+library experimental.configuration;
+
 import 'dart:async';
 
 import '../base/context.dart';
@@ -17,6 +23,9 @@ ExtensionConfigurationManager? get extensionConfigurationManager =>
     context.get<ExtensionConfigurationManager>();
 
 /// Manages querying configuration options and validation from extension isolates.
+///
+/// This manager interacts with active [ToolExtension]s to discover custom
+/// configuration options and validate their values over the extension protocol RPC.
 class ExtensionConfigurationManager {
   /// Create a new instance of [ExtensionConfigurationManager].
   ExtensionConfigurationManager({
@@ -38,9 +47,14 @@ class ExtensionConfigurationManager {
   final Set<String> _registeredExtensionFlags = <String>{};
 
   /// The set of extension flags successfully registered on the CLI.
+  ///
+  /// These flags are used to identify which configuration settings are managed
+  /// by tool extensions and need to be cleared or validated specially.
   Set<String> get registeredExtensionFlags => _registeredExtensionFlags;
 
   /// Register an extension flag name.
+  ///
+  /// This tracks which configuration flags are owned by extensions.
   void registerExtensionFlag(String flagName) {
     _registeredExtensionFlags.add(flagName);
   }
@@ -48,10 +62,14 @@ class ExtensionConfigurationManager {
   List<core.ConfigurationOption>? _cachedOptions;
 
   /// Retrieve the cached options synchronously.
+  ///
+  /// Returns the list of configuration options cached from the last [getOptions] call.
   List<core.ConfigurationOption> get cachedOptions =>
       _cachedOptions ?? const <core.ConfigurationOption>[];
 
-  /// Retrieve configuration options by routing config.getOptions to active tool extensions.
+  /// Retrieve configuration options by routing `config.getOptions` to active tool extensions.
+  ///
+  /// Results are cached after the first successful call.
   Future<List<core.ConfigurationOption>> getOptions() async {
     if (!_discoveryHelper.isPrototypeEnabled) {
       return const <core.ConfigurationOption>[];
@@ -72,6 +90,9 @@ class ExtensionConfigurationManager {
   }
 
   /// Validates a value for a configuration option by routing to extension isolates.
+  ///
+  /// Sends a validation request to the active tool extension that supports the
+  /// configuration service namespace, passing the [option] name and [value] to validate.
   Future<core.OptionValidationResult> validate(String option, Object? value) async {
     if (!_discoveryHelper.isPrototypeEnabled) {
       return core.OptionValidationResult.failed('Tool extension prototype is not enabled.');

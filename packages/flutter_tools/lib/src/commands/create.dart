@@ -134,11 +134,11 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
         ParsedFlutterTemplateType.enabledValues(featureFlags);
-    final bool isGepEnabled = globals.isToolExtensionPrototypeEnabled;
+    final bool isToolExtensionEnabled = globals.isToolExtensionPrototypeEnabled;
     parser.addOption(
       'template',
       abbr: 't',
-      allowed: isGepEnabled
+      allowed: isToolExtensionEnabled
           ? null
           : enabledTemplates.map((ParsedFlutterTemplateType t) => t.cliName),
       help: 'Specify the type of project to create.',
@@ -665,11 +665,13 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPackage;
+      // Handle custom templates provided by tool extensions.
       case ExtensionProjectTemplateType():
         final ExtensionTemplateManager? manager = extensionTemplateManager;
         if (manager == null) {
           throwToolExit('ExtensionTemplateManager is not registered.');
         }
+        // Resolve the custom template by name from the cached templates.
         core.ProjectTemplate? customTemplate;
         for (final core.ProjectTemplate t in manager.cachedTemplates) {
           if (t.name == template.cliName) {
@@ -680,11 +682,13 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         if (customTemplate == null) {
           throwToolExit('Custom template not found in manager: ${template.cliName}');
         }
+        // Resolve the absolute path to the template directory.
         final Directory templateDir = manager.resolveTemplateDirectory(customTemplate.templatePath);
         if (!templateDir.existsSync()) {
           throwToolExit('Custom template source directory does not exist: ${templateDir.path}');
         }
 
+        // Request the extension to generate template parameters based on the host context.
         final Map<String, Object?> renderedParameters = await manager.generateTemplateParameters(
           customTemplate.name,
           templateContext,
@@ -698,6 +702,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           templateRenderer: globals.templateRenderer,
         );
 
+        // Render the template into the project directory.
         generatedFileCount += t.render(
           relativeDir,
           renderedParameters,
@@ -705,6 +710,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           printStatusWhenWriting: !creatingNewProject,
         );
 
+        // Verify that the template was rendered successfully by checking a verification file.
+        // This is a safety check to ensure the extension template rendered correctly.
         final File verificationFile = relativeDir.childFile('.custom_device_extension_info');
         if (!verificationFile.existsSync()) {
           throwToolExit('Verification file .custom_device_extension_info was not created.');

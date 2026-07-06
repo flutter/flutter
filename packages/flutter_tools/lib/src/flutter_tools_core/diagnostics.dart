@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core diagnostics service and validation result definitions for tool extensions.
+///
+/// This library defines the interface for running diagnostic checks (e.g. for doctor)
+/// from active tool extensions.
+library flutter_tools_core.diagnostics;
+
 import '../../generic_extension_protocol.dart';
 
 /// The service responsible for executing custom diagnostic checks that
@@ -16,11 +22,13 @@ abstract base class DiagnosticsService extends ToolExtensionService {
   /// Runs all diagnostic checks and returns the results.
   Future<List<ValidationResult>> runDiagnostics();
 
+  /// Initializes the service by registering the `runDiagnostics` RPC method.
   @override
   Future<Map<String, Function>> initialize() async {
     return <String, Function>{'runDiagnostics': _runDiagnosticsRpc};
   }
 
+  /// Shuts down the service and cleans up any resources.
   @override
   Future<void> shutdown() async {}
 
@@ -37,6 +45,9 @@ enum ValidationType { crash, missing, partial, notAvailable, success }
 enum ValidationMessageType { error, hint, information }
 
 /// A specific message output by the diagnostic validator.
+///
+/// Contains the message text, severity type, and optional context URL or
+/// PII-stripped version.
 class ValidationMessage {
   /// Create an information message.
   const ValidationMessage(this.message, {this.contextUrl, String? piiStrippedMessage})
@@ -55,7 +66,7 @@ class ValidationMessage {
       piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
 
-  /// Create a ValidationMessage from a JSON map.
+  /// Creates a [ValidationMessage] from a JSON map.
   factory ValidationMessage.fromJson(Map<String, Object?> json) {
     final message = json['message']! as String;
     final piiStrippedMessage = json['piiStrippedMessage'] as String?;
@@ -107,10 +118,13 @@ class ValidationMessage {
 }
 
 /// The outcome of a single diagnostic check.
+///
+/// Combines a [ValidationType] status, a list of [ValidationMessage]s,
+/// and optional status info.
 class ValidationResult {
   ValidationResult(this.type, this.messages, {this.statusInfo});
 
-  /// Create a ValidationResult from a JSON map.
+  /// Creates a [ValidationResult] from a JSON map.
   factory ValidationResult.fromJson(Map<String, Object?> json) {
     final typeName = json['type']! as String;
     final ValidationType type = ValidationType.values.byName(typeName);

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core plugin utilities for tool extensions.
+///
+/// This library provides helper utilities for creating plugin symlinks and
+/// generating CMake plugin configuration files on the extension side.
+library flutter_tools_core.plugins;
+
 import 'package:file/file.dart';
 
 import 'build.dart';
@@ -49,6 +55,9 @@ void createExtensionPluginSymlinks({
 /// C++ class but still need to be linked and bundled.
 /// FFI-based plugins are identified by the 'ffiPlugin' flag in their configuration,
 /// whereas MethodChannel plugins must specify a 'class' property representing the C++ plugin class.
+///
+/// [os] is the target platform OS (e.g. 'linux', 'windows').
+/// [pluginsDir] is the directory path containing the plugin symlinks.
 String generateCmakePluginsFile({
   required String os,
   required List<ExtensionPlugin> plugins,

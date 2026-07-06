@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core template service and project template definitions for tool extensions.
+///
+/// This library defines the interface for registering custom project templates
+/// and generating template parameters from the host tool.
+library flutter_tools_core.templates;
+
 import '../../generic_extension_protocol.dart';
 
 /// The service responsible for adding custom platform support to
@@ -26,6 +32,7 @@ abstract base class TemplateService extends ToolExtensionService {
   /// The set of full project templates provided by the extension.
   Set<ProjectTemplate> get projectTemplates;
 
+  /// Initializes the service by registering RPC methods with the extension provider.
   @override
   Future<Map<String, Function>> initialize() async {
     return <String, Function>{
@@ -36,6 +43,7 @@ abstract base class TemplateService extends ToolExtensionService {
     };
   }
 
+  /// Shuts down the service and cleans up any resources.
   @override
   Future<void> shutdown() async {}
 
@@ -72,6 +80,8 @@ abstract base class TemplateService extends ToolExtensionService {
 }
 
 /// A template representation used to generate an entire Flutter project.
+///
+/// Extensions implement this class to define custom project templates.
 abstract base class ProjectTemplate {
   /// The name of this project template.
   String get name;
@@ -103,7 +113,12 @@ abstract base class ProjectTemplate {
 }
 
 /// A concrete implementation of [ProjectTemplate] that can be parsed from a JSON map.
+///
+/// This represents an extension's template on the host side. Its
+/// [generateTemplateParameters] method throws an [UnimplementedError] because
+/// parameter generation must be delegated to the extension isolate via RPC.
 final class ExtensionProjectTemplate extends ProjectTemplate {
+  /// Creates an [ExtensionProjectTemplate] from a JSON map.
   ExtensionProjectTemplate.fromJson(Map<String, Object?> json)
     : name = json['name']! as String,
       hidden = json['hidden']! as bool,

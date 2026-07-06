@@ -147,6 +147,9 @@ mixin CreateBase on FlutterCommand {
   ///
   /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
+  ///
+  /// Returns a [ParsedFlutterTemplateType] which can represent standard
+  /// Flutter templates or custom templates from extensions.
   @protected
   ParsedFlutterTemplateType? determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);

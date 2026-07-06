@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Diagnostics doctor validator for tool extensions.
+///
+/// This library defines a [host_doctor.DoctorValidator] that delegates diagnostic checks
+/// to active tool extensions and merges their results.
+library experimental.diagnostics;
+
 import 'dart:async';
 
 import '../base/logger.dart';
@@ -13,6 +19,10 @@ import '../globals.dart' as globals;
 import 'extension_discovery.dart';
 
 /// A host-side doctor validator that delegates diagnostics to tool extensions.
+///
+/// This validator queries active [ToolExtension]s that support the diagnostics
+/// service namespace, runs their diagnostics, and merges the results into
+/// a single [host_doctor.ValidationResult] to be displayed by `flutter doctor`.
 class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
   ExtensionDoctorValidator(
     ToolExtensionManager extensionManager, {
@@ -27,6 +37,9 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
 
   final ExtensionDiscoveryHelper _discoveryHelper;
 
+  /// Runs the diagnostics by calling `diagnostics.runDiagnostics` on all supporting extensions.
+  ///
+  /// If the prototype is disabled, it returns a result indicating it is not available.
   @override
   Future<host_doctor.ValidationResult> validateImpl() async {
     if (!_discoveryHelper.isPrototypeEnabled) {
@@ -72,6 +85,7 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
     return _mergeValidationResults(subResults);
   }
 
+  /// Maps a [core.ValidationResult] from the extension to a host-side [host_doctor.ValidationResult].
   host_doctor.ValidationResult _mapCoreResultToHost(core.ValidationResult coreResult) {
     final List<host_doctor.ValidationMessage> hostMessages = coreResult.messages.map((
       core.ValidationMessage msg,
@@ -100,6 +114,10 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
     );
   }
 
+  /// Merges multiple [host_doctor.ValidationResult]s into a single result.
+  ///
+  /// It combines all messages and determines the overall validation type based on
+  /// the severity of the individual results (e.g., if any is partial, the merged result is partial).
   host_doctor.ValidationResult _mergeValidationResults(List<host_doctor.ValidationResult> results) {
     if (results.isEmpty) {
       return host_doctor.ValidationResult(

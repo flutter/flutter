@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Linux prototype extension build service and target.
+///
+/// This library implements the build service and target for the Linux platform
+/// prototype extension, handling CMake compilation and plugin registration.
+library linux_extension.build;
+
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -44,6 +50,9 @@ final List<ArtifactDependency> _kLinuxArtifactDependencies = <ArtifactDependency
 ];
 
 /// The build service implementation for Linux platform devices.
+///
+/// This service provides the [LinuxAssembleTarget] as the default build target
+/// for Linux extensions.
 base class LinuxBuildService extends BuildService {
   LinuxBuildService({FileSystem? fileSystem, ProcessManager? processManager})
     : _fileSystem = fileSystem ?? const LocalFileSystem(),
@@ -53,9 +62,7 @@ base class LinuxBuildService extends BuildService {
   final ProcessManager _processManager;
 
   @override
-  late final List<Target> targets = <Target>[
-    LinuxAssembleTarget(_fileSystem, _processManager),
-  ];
+  late final List<Target> targets = <Target>[LinuxAssembleTarget(_fileSystem, _processManager)];
 
   @override
   Map<String, Object?> get nativeAssetsConfig => const <String, Object?>{};
@@ -65,6 +72,10 @@ base class LinuxBuildService extends BuildService {
 }
 
 /// The compilation target for the Linux application.
+///
+/// This target compiles the Flutter application for Linux desktop.
+/// It handles copying dependencies, resolving and symlinking plugins on the extension side,
+/// generating CMake configuration files, and running CMake configure and build commands.
 base class LinuxAssembleTarget extends Target {
   LinuxAssembleTarget(this._fileSystem, this._processManager);
 
@@ -98,6 +109,11 @@ base class LinuxAssembleTarget extends Target {
   @override
   List<String> get outputs => const <String>[];
 
+  /// Compiles the Linux application.
+  ///
+  /// It sets up plugin symlinks in the ephemeral directory, classifies plugins
+  /// (MethodChannel vs FFI), generates `generated_plugins.cmake` and the C++ registrant
+  /// files (`generated_plugin_registrant.h`/`.cc`), configures CMake, and runs the build.
   @override
   Future<Map<String, Object?>> build(BuildEnvironment env) async {
     final String projectPath = _fileSystem.path.fromUri(env.projectRoot);
@@ -333,6 +349,7 @@ base class LinuxAssembleTarget extends Target {
     };
   }
 
+  /// Checks if the CMake cache was generated with the Ninja generator.
   bool _isNinjaGenerator(File cacheFile) {
     try {
       return cacheFile.readAsStringSync().contains(_expectedNinjaGeneratorLine);
@@ -341,6 +358,7 @@ base class LinuxAssembleTarget extends Target {
     }
   }
 
+  /// Deletes the CMakeCache.txt file and CMakeFiles directory to force a clean re-configure.
   void _cleanCMakeCache(String outputPath) {
     try {
       _fileSystem.file(_fileSystem.path.join(outputPath, _cmakeCacheFileName)).deleteSync();
@@ -367,6 +385,7 @@ base class LinuxArtifactService extends ArtifactService {
   @override
   Set<ArtifactDependency> get artifacts => _kLinuxArtifactDependencies.toSet();
 
+  /// Simulates downloading artifacts by writing mock content to a temporary directory.
   @override
   Future<void> downloadArtifacts(
     Set<ArtifactDependency> artifacts, {

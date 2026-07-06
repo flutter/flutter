@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Build target manager for tool extensions.
+///
+/// This library manages discovery of custom build targets from active tool
+/// extensions and handles routing build requests to them.
+library experimental.build_targets;
+
 import 'dart:async';
 
 import '../base/common.dart';
@@ -18,6 +24,10 @@ ExtensionBuildTargetManager? get extensionBuildTargetManager =>
     context.get<ExtensionBuildTargetManager>();
 
 /// Manages querying build targets and delegating builds to extension isolates.
+///
+/// This manager interacts with active [ToolExtension]s to discover custom
+/// build targets and delegate the compilation process to them over the
+/// extension protocol RPC.
 class ExtensionBuildTargetManager {
   /// Create a new instance of [ExtensionBuildTargetManager].
   ExtensionBuildTargetManager({
@@ -39,8 +49,14 @@ class ExtensionBuildTargetManager {
   List<core.Target>? _cachedTargets;
 
   /// Retrieve the cached targets synchronously.
+  ///
+  /// Returns the list of build targets cached from the last [getTargets] call.
   List<core.Target> get cachedTargets => _cachedTargets ?? const <core.Target>[];
 
+  /// Retrieves active extensions that support the build service namespace.
+  ///
+  /// If [throwOnFailure] is true and the prototype flag is disabled, it will
+  /// throw a [ToolExit].
   Future<List<ToolExtension>> _getActiveBuildExtensions({required bool throwOnFailure}) async {
     if (!_discoveryHelper.isPrototypeEnabled) {
       if (throwOnFailure) {
@@ -54,6 +70,7 @@ class ExtensionBuildTargetManager {
     );
   }
 
+  /// Decodes the raw RPC result into a list of [core.Target]s.
   static List<core.Target> _decodeTargets(Object? rpcResult) {
     final targets = <core.Target>[];
     if (rpcResult case final List<Object?> resultList) {
@@ -66,7 +83,9 @@ class ExtensionBuildTargetManager {
     return targets;
   }
 
-  /// Retrieve build targets by routing build.getTargets to active tool extensions.
+  /// Retrieve build targets by routing `build.getTargets` to active tool extensions.
+  ///
+  /// Results are cached after the first successful call.
   Future<List<core.Target>> getTargets() async {
     if (_cachedTargets != null) {
       return _cachedTargets!;
@@ -83,6 +102,9 @@ class ExtensionBuildTargetManager {
   }
 
   /// Request build execution over extension protocol RPC.
+  ///
+  /// Delegates the compilation of [targetName] to the active tool extension,
+  /// passing the [environment] configuration.
   Future<Map<String, Object?>> buildTarget(
     String targetName,
     core.BuildEnvironment environment,

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core artifacts service and dependency definitions for tool extensions.
+///
+/// This library defines the interface for downloading engine artifacts
+/// required by custom target platforms.
+library flutter_tools_core.artifacts;
+
 import '../../generic_extension_protocol.dart';
 
 /// The service responsible for acquiring the necessary files to develop
@@ -22,11 +28,15 @@ abstract base class ArtifactService extends ToolExtensionService {
     required String targetPlatform,
   });
 
+  /// Initializes the service by registering RPC methods with the extension provider.
+  ///
+  /// Registers `getArtifacts` to list dependencies and `download` to trigger downloads.
   @override
   Future<Map<String, Function>> initialize() async {
     return <String, Function>{'getArtifacts': _getArtifactsRpc, 'download': _downloadRpc};
   }
 
+  /// Shuts down the service and cleans up any resources.
   @override
   Future<void> shutdown() async {}
 
@@ -86,7 +96,7 @@ class ArtifactDependency {
     required this.targetPlatform,
   });
 
-  /// Create an ArtifactDependency from a JSON map.
+  /// Creates an [ArtifactDependency] from a JSON map.
   factory ArtifactDependency.fromJson(Map<String, Object?> json) {
     return ArtifactDependency(
       hostPlatform: json['hostPlatform']! as String,
@@ -112,6 +122,7 @@ class ArtifactDependency {
   /// A mapping of host/target keys to SHA-256 hashes for binary validation.
   final Map<String, String> sha256Checksums;
 
+  /// Converts this dependency to a JSON-compatible map.
   Map<String, Object?> toMap() => <String, Object?>{
     'hostPlatform': hostPlatform,
     'name': name,
@@ -120,6 +131,7 @@ class ArtifactDependency {
     'targetPlatform': targetPlatform,
   };
 
+  /// Parses a list of [ArtifactDependency] from an RPC result.
   static List<ArtifactDependency> listFromJson(Object? rpcResult) => <ArtifactDependency>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)

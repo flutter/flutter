@@ -204,6 +204,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         operatingSystemUtils: globals.os,
         customDevicesConfig: globals.customDevicesConfig,
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
+        // Pass the ToolExtensionManager to FlutterDeviceManager to support
+        // discovering devices managed by tool extensions.
         extensionManager: context.get<ToolExtensionManager>(),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
@@ -213,17 +215,22 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         botDetector: globals.botDetector,
       ),
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
+      // Register managers for the tool extension protocol in the context.
+      // ToolExtensionManager is the central manager for extension isolates.
       ToolExtensionManager: () => ToolExtensionManager(),
+      // ExtensionBuildTargetManager manages custom build targets from extensions.
       ExtensionBuildTargetManager: () => ExtensionBuildTargetManager(
         extensionManager: context.get<ToolExtensionManager>()!,
         logger: globals.logger,
         platform: globals.platform,
       ),
+      // ExtensionConfigurationManager manages configuration options from extensions.
       ExtensionConfigurationManager: () => ExtensionConfigurationManager(
         extensionManager: context.get<ToolExtensionManager>()!,
         logger: globals.logger,
         platform: globals.platform,
       ),
+      // ExtensionTemplateManager manages project templates from extensions.
       ExtensionTemplateManager: () => ExtensionTemplateManager(
         extensionManager: context.get<ToolExtensionManager>()!,
         fileSystem: globals.fs,

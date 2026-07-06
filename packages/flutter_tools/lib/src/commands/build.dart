@@ -199,6 +199,10 @@ class BuildCommand extends FlutterCommand {
     }
   }
 
+  /// Registers dynamic subcommands for tool extensions.
+  ///
+  /// This is a convenience wrapper around [registerExtensionSubcommands] called
+  /// during command runner initialization.
   void registerDynamicSubcommands() => registerExtensionSubcommands();
 
   void _addSubcommand(BuildSubCommand command) {
@@ -233,6 +237,8 @@ abstract class BuildSubCommand extends FlutterCommand {
   bool get supported => true;
 }
 
+/// Alias for [ExtensionBuildSubCommand] to maintain backwards compatibility
+/// with earlier prototype implementations.
 typedef BuildExtensionSubCommand = ExtensionBuildSubCommand;
 
 /// A [BuildSubCommand] that delegates compilation of a custom target to a tool extension.
