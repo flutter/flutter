@@ -999,12 +999,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// (see [addListener]).
   MultiFrameImageStreamCompleter({
     required Future<ui.Codec> codec,
-    required double scale,
+    required this._scale,
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-  }) : _informationCollector = informationCollector,
-       _scale = scale {
+  }) : _informationCollector = informationCollector {
     this.debugLabel = debugLabel;
     codec.then<void>(
       _handleCodecReady,

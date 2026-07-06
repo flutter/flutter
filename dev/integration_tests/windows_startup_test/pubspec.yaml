@@ -2,7 +2,7 @@ name: windows_startup_test
 description: Integration test for Windows app's startup.
 
 environment:
-  sdk: ^3.11.0-0
+  sdk: ^3.12.0-0
 
 resolution: workspace
 

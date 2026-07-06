@@ -257,7 +257,7 @@ class ScrollDragController implements Drag {
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
   ScrollDragController({
-    required ScrollActivityDelegate delegate,
+    required this._delegate,
     required DragStartDetails details,
     this.onDragCanceled,
     this.carriedVelocity,
@@ -266,7 +266,6 @@ class ScrollDragController implements Drag {
          motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
          'motionStartDistanceThreshold must be a positive number or null',
        ),
-       _delegate = delegate,
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
        _lastNonStationaryTimestamp = details.sourceTimeStamp,

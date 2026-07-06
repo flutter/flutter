@@ -20,10 +20,9 @@ import 'build.dart';
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
     required super.logger,
-    required OperatingSystemUtils operatingSystemUtils,
+    required this._operatingSystemUtils,
     bool verboseHelp = false,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser.addFlag(

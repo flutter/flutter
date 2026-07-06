@@ -299,15 +299,12 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
   /// Creates a new tooltip window controller for macOS.
   TooltipWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
-    required TooltipWindowControllerDelegate delegate,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _anchorRect = anchorRect,
-       _positioner = positioner,
-       _delegate = delegate,
-       _parent = parent,
+    required this._anchorRect,
+    required this._positioner,
+  }) : _parent = parent,
        super.empty() {
     _initController(owner);
 
@@ -396,15 +393,12 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   /// Creates a new tooltip window controller for macOS.
   PopupWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
-    required PopupWindowControllerDelegate delegate,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _anchorRect = anchorRect,
-       _positioner = positioner,
-       _delegate = delegate,
-       _parent = parent,
+    required this._anchorRect,
+    required this._positioner,
+  }) : _parent = parent,
        super.empty() {
     _initController(owner);
 
@@ -503,12 +497,11 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
   /// completes the FlutterView is created and framework is aware of it.
   RegularWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
-    required RegularWindowControllerDelegate delegate,
+    required this._delegate,
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createRegularWindow(
@@ -637,13 +630,12 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   /// completes the FlutterView is created and framework is aware of it.
   DialogWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     required Size? preferredSize,
     this.parent,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createDialogWindow(

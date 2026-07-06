@@ -2165,7 +2165,7 @@ class DefaultToKeyEventResultIntent extends Intent {
 }
 
 class DefaultToKeyEventResultAction extends Action<DefaultToKeyEventResultIntent> {
-  DefaultToKeyEventResultAction({required bool consumesKey}) : _consumesKey = consumesKey;
+  DefaultToKeyEventResultAction({required this._consumesKey});
 
   final bool _consumesKey;
 

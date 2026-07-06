@@ -51,9 +51,7 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem;
+  FlutterProjectFactory({required this._logger, required this._fileSystem});
 
   final Logger _logger;
   final FileSystem _fileSystem;

@@ -338,7 +338,7 @@ class RenderParagraph extends RenderBox
     InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     required TextDirection textDirection,
-    bool softWrap = true,
+    this._softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     @Deprecated(
       'Use textScaler instead. '
@@ -353,19 +353,16 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
-    Color? selectionColor,
+    this._selectionColor,
     SelectionRegistrar? registrar,
-    double devicePixelRatio = 1.0,
+    this._devicePixelRatio = 1.0,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
          identical(textScaler, const _UnspecifiedTextScaler()) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
-       _softWrap = softWrap,
        _overflow = overflow,
-       _devicePixelRatio = devicePixelRatio,
-       _selectionColor = selectionColor,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,

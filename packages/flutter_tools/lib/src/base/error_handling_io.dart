@@ -80,9 +80,8 @@ const int kSystemCodePrivilegeNotHeld = 1314;
 /// example, the tool should generally be able to continue executing even if it
 /// fails to delete a file.
 class ErrorHandlingFileSystem extends ForwardingFileSystem {
-  ErrorHandlingFileSystem({required FileSystem delegate, required Platform platform})
-    : _platform = platform,
-      super(delegate);
+  ErrorHandlingFileSystem({required FileSystem delegate, required this._platform})
+    : super(delegate);
 
   FileSystem get fileSystem => delegate;
 
@@ -216,8 +215,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 }
 
 class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
-  ErrorHandlingFile({required Platform platform, required this.fileSystem, required this.delegate})
-    : _platform = platform;
+  ErrorHandlingFile({required this._platform, required this.fileSystem, required this.delegate});
 
   @override
   final io.File delegate;
@@ -618,10 +616,10 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
 class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
     with ForwardingDirectory<Directory> {
   ErrorHandlingDirectory({
-    required Platform platform,
+    required this._platform,
     required this.fileSystem,
     required this.delegate,
-  }) : _platform = platform;
+  });
 
   @override
   final io.Directory delegate;
@@ -837,8 +835,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
 }
 
 class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
-  ErrorHandlingLink({required Platform platform, required this.fileSystem, required this.delegate})
-    : _platform = platform;
+  ErrorHandlingLink({required this._platform, required this.fileSystem, required this.delegate});
 
   @override
   final io.Link delegate;
@@ -1181,16 +1178,14 @@ T _runSync<T>(
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
 class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
-    required ProcessManager delegate,
-    required Platform platform,
+    required this._delegate,
+    required this._platform,
 
     /// A lazy callback to prevent eager circular dependency cycles during early
     /// bootstrapping of the Flutter CLI (where `Analytics` depends on
     /// `FlutterVersion`, which executes git process commands during construction).
-    required Analytics Function() analytics,
-  }) : _delegate = delegate,
-       _platform = platform,
-       _analytics = analytics;
+    required this._analytics,
+  });
 
   final ProcessManager _delegate;
   final Platform _platform;

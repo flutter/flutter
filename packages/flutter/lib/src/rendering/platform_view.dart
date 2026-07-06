@@ -79,9 +79,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
     required AndroidViewController viewController,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-    Clip clipBehavior = Clip.hardEdge,
+    this._clipBehavior = Clip.hardEdge,
   }) : _viewController = viewController,
-       _clipBehavior = clipBehavior,
        super(
          controller: viewController,
          hitTestBehavior: hitTestBehavior,
@@ -292,10 +291,10 @@ class RenderAndroidView extends PlatformViewRenderBox {
 abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> extends RenderBox {
   /// Creates a render object for a platform view.
   RenderDarwinPlatformView({
-    required T viewController,
+    required this._viewController,
     required this.hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) : _viewController = viewController {
+  }) {
     updateGestureRecognizers(gestureRecognizers);
   }
 

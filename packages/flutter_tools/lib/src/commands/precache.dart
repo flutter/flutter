@@ -14,14 +14,11 @@ import '../runner/flutter_command.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
     bool verboseHelp = false,
-    required Cache cache,
-    required Platform platform,
-    required Logger logger,
-    required FeatureFlags featureFlags,
-  }) : _cache = cache,
-       _platform = platform,
-       _logger = logger,
-       _featureFlags = featureFlags {
+    required this._cache,
+    required this._platform,
+    required this._logger,
+    required this._featureFlags,
+  }) {
     argParser.addFlag(
       'all-platforms',
       abbr: 'a',

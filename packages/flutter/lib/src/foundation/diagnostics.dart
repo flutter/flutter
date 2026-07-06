@@ -784,9 +784,9 @@ enum _WordWrapParseMode { inSpace, inWord, atBreak }
 class _PrefixedStringBuilder {
   _PrefixedStringBuilder({
     required this.prefixLineOne,
-    required String? prefixOtherLines,
+    required this._prefixOtherLines,
     this.wrapWidth,
-  }) : _prefixOtherLines = prefixOtherLines;
+  });
 
   /// Prefix to add to the first line.
   final String prefixLineOne;
@@ -1086,22 +1086,19 @@ class TextTreeRenderer {
   /// Creates a [TextTreeRenderer] object with the given arguments specifying
   /// how the tree is rendered.
   ///
-  /// Lines are wrapped to at the maximum of [wrapWidth] and the current indent
-  /// plus [wrapWidthProperties] characters. This ensures that wrapping does not
+  /// Lines are wrapped to at the maximum of [_wrapWidth] and the current indent
+  /// plus [_wrapWidthProperties] characters. This ensures that wrapping does not
   /// become too excessive when displaying very deep trees and that wrapping
-  /// only occurs at the overall [wrapWidth] when the tree is not very indented.
-  /// If [maxDescendentsTruncatableNode] is specified, [DiagnosticsNode] objects
+  /// only occurs at the overall [_wrapWidth] when the tree is not very indented.
+  /// If [_maxDescendentsTruncatableNode] is specified, [DiagnosticsNode] objects
   /// with `allowTruncate` set to `true` are truncated after including
-  /// [maxDescendentsTruncatableNode] descendants of the node to be truncated.
+  /// [_maxDescendentsTruncatableNode] descendants of the node to be truncated.
   TextTreeRenderer({
-    DiagnosticLevel minLevel = DiagnosticLevel.debug,
-    int wrapWidth = 100,
-    int wrapWidthProperties = 65,
-    int maxDescendentsTruncatableNode = -1,
-  }) : _minLevel = minLevel,
-       _wrapWidth = wrapWidth,
-       _wrapWidthProperties = wrapWidthProperties,
-       _maxDescendentsTruncatableNode = maxDescendentsTruncatableNode;
+    this._minLevel = DiagnosticLevel.debug,
+    this._wrapWidth = 100,
+    this._wrapWidthProperties = 65,
+    this._maxDescendentsTruncatableNode = -1,
+  });
 
   final int _wrapWidth;
   final int _wrapWidthProperties;
@@ -2570,7 +2567,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   DiagnosticsProperty(
     String? name,
     T? value, {
-    String? description,
+    this._description,
     String? ifNull,
     this.ifEmpty,
     super.showName,
@@ -2584,8 +2581,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     this.allowNameWrap = true,
     DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : _description = description,
-       _valueComputed = true,
+  }) : _valueComputed = true,
        _value = value,
        _computeValue = null,
        ifNull = ifNull ?? (missingIfNull ? 'MISSING' : null),
@@ -2604,7 +2600,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   DiagnosticsProperty.lazy(
     String? name,
     ComputePropertyValueCallback<T> computeValue, {
-    String? description,
+    this._description,
     String? ifNull,
     this.ifEmpty,
     super.showName,
@@ -2618,7 +2614,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(defaultValue == kNoDefaultValue || defaultValue is T?),
-       _description = description,
        _valueComputed = false,
        _value = null,
        _computeValue = computeValue,
@@ -3512,8 +3507,8 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
 ///
 /// This class is typically used for displaying complex nested error messages.
 class DiagnosticsBlock extends DiagnosticsNode {
-  /// Creates a diagnostic with properties specified by [properties] and
-  /// children specified by [children].
+  /// Creates a diagnostic with properties specified by [_properties] and
+  /// children specified by [_children].
   DiagnosticsBlock({
     super.name,
     DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.whitespace,
@@ -3524,11 +3519,9 @@ class DiagnosticsBlock extends DiagnosticsNode {
     String? description,
     this.level = DiagnosticLevel.info,
     this.allowTruncate = false,
-    List<DiagnosticsNode> children = const <DiagnosticsNode>[],
-    List<DiagnosticsNode> properties = const <DiagnosticsNode>[],
+    this._children = const <DiagnosticsNode>[],
+    this._properties = const <DiagnosticsNode>[],
   }) : _description = description ?? '',
-       _children = children,
-       _properties = properties,
        super(showName: showName && name != null);
 
   final List<DiagnosticsNode> _children;

@@ -66,7 +66,7 @@ class InkSparkle extends InteractiveInkFeature {
   /// The [controller] argument is typically obtained via
   /// `Material.of(context)`.
   ///
-  /// [textDirection] is used by [customBorder] if it is non-null. This allows
+  /// [_textDirection] is used by [customBorder] if it is non-null. This allows
   /// the [customBorder]'s path to be properly defined if it was the path was
   /// expressed in terms of "start" and "end" instead of
   /// "left" and "right".
@@ -104,7 +104,7 @@ class InkSparkle extends InteractiveInkFeature {
     required super.referenceBox,
     required super.color,
     required Offset position,
-    required TextDirection textDirection,
+    required this._textDirection,
     bool containedInkWell = true,
     RectCallback? rectCallback,
     BorderRadius? borderRadius,
@@ -116,7 +116,6 @@ class InkSparkle extends InteractiveInkFeature {
        _color = color,
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
-       _textDirection = textDirection,
        _targetRadius =
            (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) *
            _targetRadiusMultiplier,

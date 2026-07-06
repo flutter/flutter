@@ -560,13 +560,13 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   /// Creates a custom guideline which verifies that all elements specified
   /// by [finder] meet minimum contrast levels.
   ///
-  /// An optional description string can be given using the [description] parameter.
+  /// An optional description string can be given using the [_description] parameter.
   const CustomMinimumContrastGuideline({
     required this.finder,
     this.minimumRatio = 4.5,
     this.tolerance = 0.01,
-    String description = 'Contrast should follow custom guidelines',
-  }) : _description = description;
+    this._description = 'Contrast should follow custom guidelines',
+  });
 
   /// The minimum contrast ratio allowed.
   ///

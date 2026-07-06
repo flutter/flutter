@@ -2100,7 +2100,7 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
 }
 
 class SimpleGenericWidget<T> extends StatelessWidget {
-  const SimpleGenericWidget({required Widget child, super.key}) : _child = child;
+  const SimpleGenericWidget({required this._child, super.key});
 
   final Widget _child;
 

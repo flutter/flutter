@@ -179,8 +179,7 @@ class FakeViewPadding implements ViewPadding {
 class TestPlatformDispatcher implements PlatformDispatcher {
   /// Constructs a [TestPlatformDispatcher] that defers all behavior to the given
   /// [PlatformDispatcher] unless explicitly overridden for test purposes.
-  TestPlatformDispatcher({required PlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher {
+  TestPlatformDispatcher({required this._platformDispatcher}) {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
     _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
@@ -1009,12 +1008,10 @@ class TestFlutterView implements FlutterView {
   /// Constructs a [TestFlutterView] that defers all behavior to the given
   /// [FlutterView] unless explicitly overridden for testing.
   TestFlutterView({
-    required FlutterView view,
-    required TestPlatformDispatcher platformDispatcher,
-    required TestDisplay display,
-  }) : _view = view,
-       _platformDispatcher = platformDispatcher,
-       _display = display;
+    required this._view,
+    required this._platformDispatcher,
+    required this._display,
+  });
 
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;

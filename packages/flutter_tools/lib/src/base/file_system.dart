@@ -29,9 +29,7 @@ class FileNotFoundException implements IOException {
 
 /// Various convenience file system methods.
 class FileSystemUtils {
-  FileSystemUtils({required FileSystem fileSystem, required Platform platform})
-    : _fileSystem = fileSystem,
-      _platform = platform;
+  FileSystemUtils({required this._fileSystem, required this._platform});
 
   final FileSystem _fileSystem;
 

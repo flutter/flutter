@@ -42,8 +42,7 @@ class FakeDevFs extends Fake implements DevFS {
 }
 
 class FakeDevice extends Fake implements Device {
-  FakeDevice({TargetPlatform targetPlatform = TargetPlatform.tester})
-    : _targetPlatform = targetPlatform;
+  FakeDevice({this._targetPlatform = TargetPlatform.tester});
 
   final TargetPlatform _targetPlatform;
 

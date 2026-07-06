@@ -4557,13 +4557,12 @@ class FakeXcodeProject extends Fake implements IosProject {
     required this.logger,
     this.usesSwiftPackageManager = true,
     Directory? projectDir,
-    List<FakePlugin> plugins = const <FakePlugin>[],
+    this._plugins = const <FakePlugin>[],
   }) : hostAppRoot = projectDir ?? fileSystem.directory('app_name').childDirectory(platform),
        parent = FakeFlutterProject(
          fileSystem: fileSystem,
          appName: projectDir != null ? projectDir.parent.basename : 'app_name',
-       ),
-       _plugins = plugins;
+       );
 
   final Logger logger;
   late XcodeProjectInfo? _projectInfo = XcodeProjectInfo(

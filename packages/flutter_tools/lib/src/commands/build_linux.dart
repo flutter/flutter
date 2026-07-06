@@ -18,10 +18,9 @@ import 'build.dart';
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     required super.logger,
-    required OperatingSystemUtils operatingSystemUtils,
+    required this._operatingSystemUtils,
     bool verboseHelp = false,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     final String defaultTargetPlatform = switch (_operatingSystemUtils.hostPlatform) {
       HostPlatform.linux_arm64 => 'linux-arm64',

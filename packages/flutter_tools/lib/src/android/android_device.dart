@@ -64,16 +64,12 @@ class AndroidDevice extends Device {
     this.deviceCodeName,
     required super.logger,
     required ProcessManager processManager,
-    required Platform platform,
-    required AndroidSdk androidSdk,
-    required FileSystem fileSystem,
-    AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+    required this._platform,
+    required this._androidSdk,
+    required this._fileSystem,
+    this._androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
-       _androidSdk = androidSdk,
-       _platform = platform,
-       _fileSystem = fileSystem,
-       _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(category: Category.mobile, platformType: PlatformType.android, ephemeral: true);
 
@@ -1284,11 +1280,9 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
   AndroidDevicePortForwarder({
     required ProcessManager processManager,
     required Logger logger,
-    required String deviceId,
-    required String adbPath,
-  }) : _deviceId = deviceId,
-       _adbPath = adbPath,
-       _logger = logger,
+    required this._deviceId,
+    required this._adbPath,
+  }) : _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final String _deviceId;

@@ -6641,14 +6641,13 @@ abstract class Tag {
 }
 
 class NestedTag extends Tag {
-  const NestedTag(String name, {Tag? prefix, this.level = 0})
+  const NestedTag(String name, {this._prefix, this.level = 0})
     : assert(
         // Limit the nesting level to prevent stack overflow.
         level < 9,
         'NestedTag.level must be less than 9 (was $level).',
       ),
-      _name = name,
-      _prefix = prefix;
+      _name = name;
 
   final String _name;
   final Tag? _prefix;
@@ -6860,10 +6859,10 @@ enum DynamicTypeStyle {
 class DebugCupertinoMenuEntry extends StatelessWidget implements CupertinoMenuEntry {
   const DebugCupertinoMenuEntry({
     super.key,
-    bool hasLeading = false,
+    this._hasLeading = false,
     this.isDivider = false,
     this.child,
-  }) : _hasLeading = hasLeading;
+  });
 
   final bool _hasLeading;
 

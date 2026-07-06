@@ -20,12 +20,10 @@ import 'xcodeproj.dart';
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
   LLDB({
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-  }) : _logger = logger,
-       _processUtils = processUtils,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter;
+    required this._logger,
+    required this._processUtils,
+    required this._xcodeProjectInterpreter,
+  });
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -384,9 +382,8 @@ class _LLDBLogPatternCompleter {
 /// A container class for associating a [Process] that is running LLDB with
 /// the iOS device process of an application.
 class _LLDBProcess {
-  _LLDBProcess({required Process process, required this.appProcessId, required Logger logger})
-    : _lldbProcess = process,
-      _logger = logger;
+  _LLDBProcess({required Process process, required this.appProcessId, required this._logger})
+    : _lldbProcess = process;
 
   final Process _lldbProcess;
   final int appProcessId;

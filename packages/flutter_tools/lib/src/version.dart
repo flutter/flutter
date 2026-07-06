@@ -129,12 +129,11 @@ abstract class FlutterVersion {
   }
 
   FlutterVersion._({
-    required SystemClock clock,
-    required Git git,
+    required this._clock,
+    required this._git,
     required this.flutterRoot,
     required this.fs,
-  }) : _clock = clock,
-       _git = git;
+  });
 
   factory FlutterVersion.fromRevision({
     SystemClock clock = const SystemClock(),

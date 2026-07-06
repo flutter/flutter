@@ -13,14 +13,12 @@ import '../base/process.dart';
 /// See https://github.com/libimobiledevice/libusbmuxd.
 class IProxy {
   IProxy({
-    required String iproxyPath,
+    required this._iproxyPath,
     required Logger logger,
     required ProcessManager processManager,
-    required MapEntry<String, String> dyLdLibEntry,
-  }) : _dyLdLibEntry = dyLdLibEntry,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger,
-       _iproxyPath = iproxyPath;
+    required this._dyLdLibEntry,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _logger = logger;
 
   /// Create a [IProxy] for testing.
   ///

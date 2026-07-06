@@ -108,18 +108,13 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
 /// A launcher for Chromium browsers with devtools configured.
 class ChromiumLauncher {
   ChromiumLauncher({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required ProcessManager processManager,
-    required OperatingSystemUtils operatingSystemUtils,
-    required BrowserFinder browserFinder,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _processManager = processManager,
-       _operatingSystemUtils = operatingSystemUtils,
-       _browserFinder = browserFinder,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._processManager,
+    required this._operatingSystemUtils,
+    required this._browserFinder,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -487,12 +482,10 @@ class Chromium {
     this.debugPort,
     this.chromeConnection, {
     this.url,
-    required Process process,
-    required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-  }) : _process = process,
-       _chromiumLauncher = chromiumLauncher,
-       _logger = logger;
+    required this._process,
+    required this._chromiumLauncher,
+    required this._logger,
+  });
 
   final String? url;
   final int debugPort;

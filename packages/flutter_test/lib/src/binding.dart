@@ -307,14 +307,13 @@ mixin _ChildWindowHierarchyMixin {
 
 class _TestRegularWindowController extends RegularWindowController with _ChildWindowHierarchyMixin {
   _TestRegularWindowController({
-    required RegularWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _delegate = delegate,
-       _size = preferredSize ?? const Size(800, 600),
+  }) : _size = preferredSize ?? const Size(800, 600),
        _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
@@ -461,15 +460,14 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
 
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
   _TestDialogWindowController({
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     BaseWindowController? parent,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
+  }) : _parent = parent,
        _size = preferredSize ?? const Size(800, 600),
        _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
@@ -565,17 +563,14 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
 class _TestTooltipWindowController extends TooltipWindowController with _ChildWindowHierarchyMixin {
   _TestTooltipWindowController({
-    required TooltipWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BoxConstraints preferredConstraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = preferredConstraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
+  }) : _constraints = preferredConstraints,
        _parent = parent,
        super.empty() {
     rootView = _TestFlutterView(
@@ -631,17 +626,14 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
 
 class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
   _TestPopupWindowController({
-    required PopupWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BoxConstraints preferredConstraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = preferredConstraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
+  }) : _constraints = preferredConstraints,
        _parent = parent,
        super.empty() {
     rootView = _TestFlutterView(
@@ -701,21 +693,16 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 class _TestSatelliteWindowController extends SatelliteWindowController
     with _ChildWindowHierarchyMixin {
   _TestSatelliteWindowController({
-    required SatelliteWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BaseWindowController parent,
-    ui.Rect? anchorRect,
-    required WindowPositioner positioner,
+    this._anchorRect,
+    required this._positioner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
-       // ignore: unused_field
-       _anchorRect = anchorRect,
-       // ignore: unused_field
-       _positioner = positioner,
+  }) : _parent = parent,
        _size = preferredSize ?? const Size(800, 600),
        _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
@@ -814,8 +801,7 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 /// for tests.
 /// * [WindowingOwner], the base class.
 class _TestWindowingOwner extends WindowingOwner {
-  _TestWindowingOwner({required TestPlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher;
+  _TestWindowingOwner({required this._platformDispatcher});
 
   final TestPlatformDispatcher _platformDispatcher;
   BaseWindowController? _activeWindowController;

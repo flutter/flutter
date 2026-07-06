@@ -801,14 +801,13 @@ class FakeJava extends Fake implements Java {
     this.javaSource = JavaSource.androidStudio,
     String binary = '/android-studio/jbr/bin/java',
     Version? version,
-    bool canRun = true,
+    this._canRun = true,
   }) : binaryPath = binary,
        version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
        _environment = <String, String>{
          Java.javaHomeEnvironmentVariable: ?javaHome,
          'PATH': '/android-studio/jbr/bin',
-       },
-       _canRun = canRun;
+       };
 
   @override
   String? javaHome;
@@ -856,7 +855,7 @@ class FakeDartDevelopmentServiceLauncher extends Fake implements DartDevelopment
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  FakeDevtoolsLauncher({DevToolsServerAddress? serverAddress}) : _serverAddress = serverAddress;
+  FakeDevtoolsLauncher({this._serverAddress});
 
   @override
   Future<void> get processStart => _processStarted.future;

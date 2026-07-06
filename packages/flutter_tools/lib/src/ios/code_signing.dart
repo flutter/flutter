@@ -277,22 +277,15 @@ Directory? getProvisioningProfileDirectory({
 
 class XcodeCodeSigningSettings {
   XcodeCodeSigningSettings({
-    required Config config,
-    required Logger logger,
-    required Platform platform,
-    required ProcessUtils processUtils,
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
-    required Terminal terminal,
-    required PlistParser plistParser,
-  }) : _config = config,
-       _logger = logger,
-       _platform = platform,
-       _processUtils = processUtils,
-       _fileSystem = fileSystem,
-       _fileSystemUtils = fileSystemUtils,
-       _plistParser = plistParser,
-       _terminal = terminal;
+    required this._config,
+    required this._logger,
+    required this._platform,
+    required this._processUtils,
+    required this._fileSystem,
+    required this._fileSystemUtils,
+    required this._terminal,
+    required this._plistParser,
+  });
 
   final Config _config;
   final Logger _logger;

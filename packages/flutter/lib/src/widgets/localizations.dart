@@ -755,13 +755,13 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
   /// Creates a [LocalizationsResolver] that determines the best-fit locale from the set of
   /// [supportedLocales].
   ///
-  /// If provided, locale resolution will attempt to use [locale] as the current locale rather
+  /// If provided, locale resolution will attempt to use [_locale] as the current locale rather
   /// than the system locale.
   ///
-  /// Locale resolution behavior can be overridden by providing [localeListResolutionCallback]
-  /// or [localeResolutionCallback].
+  /// Locale resolution behavior can be overridden by providing [_localeListResolutionCallback]
+  /// or [_localeResolutionCallback].
   ///
-  /// The delegates set via [localizationsDelegates] collectively define all of the localized
+  /// The delegates set via [_localizationsDelegates] collectively define all of the localized
   /// resources for a [Localizations] widget.
   ///
   /// See also:
@@ -773,15 +773,11 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
   ///    [Localizations] widget.
   LocalizationsResolver({
     required Iterable<Locale> supportedLocales,
-    Locale? locale,
-    LocaleListResolutionCallback? localeListResolutionCallback,
-    LocaleResolutionCallback? localeResolutionCallback,
-    Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates,
-  }) : _locale = locale,
-       _localeListResolutionCallback = localeListResolutionCallback,
-       _localeResolutionCallback = localeResolutionCallback,
-       _localizationsDelegates = localizationsDelegates,
-       _supportedLocales = supportedLocales {
+    this._locale,
+    this._localeListResolutionCallback,
+    this._localeResolutionCallback,
+    this._localizationsDelegates,
+  }) : _supportedLocales = supportedLocales {
     _resolvedLocale = _resolveLocales(
       WidgetsBinding.instance.platformDispatcher.locales,
       supportedLocales,

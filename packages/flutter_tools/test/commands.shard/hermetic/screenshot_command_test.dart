@@ -198,8 +198,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
 }
 
 class _ScreenshotDevice extends Fake implements Device {
-  _ScreenshotDevice({required this.id, required this.name, required bool isSupportedForProject})
-    : _isSupportedForProject = isSupportedForProject;
+  _ScreenshotDevice({required this.id, required this.name, required this._isSupportedForProject});
 
   @override
   final String name;

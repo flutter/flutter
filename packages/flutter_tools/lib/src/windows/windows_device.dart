@@ -73,17 +73,12 @@ class WindowsDevice extends DesktopDevice {
 
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required WindowsWorkflow windowsWorkflow,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _processManager = processManager,
-       _operatingSystemUtils = operatingSystemUtils,
-       _windowsWorkflow = windowsWorkflow,
-       super('windows devices');
+    required this._processManager,
+    required this._logger,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
+    required this._windowsWorkflow,
+  }) : super('windows devices');
 
   final FileSystem _fileSystem;
   final Logger _logger;

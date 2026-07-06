@@ -309,7 +309,7 @@ class _FakeDisplay extends Fake implements Display {
 }
 
 class _FakeFlutterView extends Fake implements FlutterView {
-  _FakeFlutterView({this.devicePixelRatio = 1, Display? display}) : _display = display;
+  _FakeFlutterView({this.devicePixelRatio = 1, this._display});
 
   @override
   final double devicePixelRatio;

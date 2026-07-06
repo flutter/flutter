@@ -99,19 +99,13 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required Platform platform,
-    required MacOSWorkflow macOSWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
-       _macOSWorkflow = macOSWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('macOS devices');
+    required this._platform,
+    required this._macOSWorkflow,
+    required this._processManager,
+    required this._logger,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
+  }) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;

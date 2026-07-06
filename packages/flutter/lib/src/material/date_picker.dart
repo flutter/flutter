@@ -1339,7 +1339,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.initialDateRange,
     required this.firstDate,
     required this.lastDate,
-    DateTime? currentDate,
+    this._currentDate,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.helpText,
     this.cancelText,
@@ -1358,7 +1358,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
     this.calendarDelegate = const GregorianCalendarDelegate(),
-  }) : _currentDate = currentDate;
+  });
 
   /// The date range that the date range picker starts with when it opens.
   ///

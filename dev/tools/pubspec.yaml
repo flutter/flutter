@@ -2,7 +2,7 @@ name: dev_tools
 description: Various repository development tools for flutter.
 
 environment:
-  sdk: ^3.11.0-0
+  sdk: ^3.12.0-0
 
 resolution: workspace
 

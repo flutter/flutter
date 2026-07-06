@@ -8413,10 +8413,8 @@ class ColoredBox extends SingleChildRenderObjectWidget {
 }
 
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
-  _RenderColoredBox({required Color color, required bool isAntiAlias})
-    : _color = color,
-      _isAntiAlias = isAntiAlias,
-      super(behavior: HitTestBehavior.opaque);
+  _RenderColoredBox({required this._color, required this._isAntiAlias})
+    : super(behavior: HitTestBehavior.opaque);
 
   /// The fill color for this render object.
   Color get color => _color;

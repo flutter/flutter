@@ -42,19 +42,14 @@ import 'test_config.dart';
 final class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator({
-    required String flutterTesterBinPath,
-    required TestCompiler Function() compilerFactory,
-    required Logger logger,
+    required this._flutterTesterBinPath,
+    required this._compilerFactory,
+    required this._logger,
     required FileSystem fileSystem,
-    required ProcessManager processManager,
-    Map<String, String> environment = const <String, String>{},
+    required this._processManager,
+    this._environment = const <String, String>{},
   }) : _tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
-       _flutterTesterBinPath = flutterTesterBinPath,
-       _compilerFactory = compilerFactory,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _processManager = processManager,
-       _environment = environment;
+       _fileSystem = fileSystem;
 
   final String _flutterTesterBinPath;
   final Directory _tempDir;

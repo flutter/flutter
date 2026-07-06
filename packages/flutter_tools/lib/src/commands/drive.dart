@@ -56,21 +56,17 @@ import 'run.dart';
 class DriveCommand extends RunCommandBase {
   DriveCommand({
     bool verboseHelp = false,
-    @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
+    @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     required FileSystem fileSystem,
-    required Logger logger,
+    required this._logger,
     required Platform platform,
-    required Terminal terminal,
-    required OutputPreferences outputPreferences,
+    required this._terminal,
+    required this._outputPreferences,
     required this.signals,
-  }) : _flutterDriverFactory = flutterDriverFactory,
-       _fileSystem = fileSystem,
-       _logger = logger,
+  }) : _fileSystem = fileSystem,
        _platform = platform,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences,
        _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();

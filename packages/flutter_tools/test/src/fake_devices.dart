@@ -113,18 +113,15 @@ class FakeDevice extends Device {
     this.name,
     String id, {
     super.ephemeral = true,
-    bool isSupported = true,
-    bool isSupportedForProject = true,
+    this._isSupported = true,
+    this._isSupportedForProject = true,
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.attached,
     PlatformType type = PlatformType.web,
     LaunchResult? launchResult,
     this.deviceLogReader,
-    bool supportsFlavors = false,
-  }) : _isSupported = isSupported,
-       _isSupportedForProject = isSupportedForProject,
-       _launchResult = launchResult ?? LaunchResult.succeeded(),
-       _supportsFlavors = supportsFlavors,
+    this._supportsFlavors = false,
+  }) : _launchResult = launchResult ?? LaunchResult.succeeded(),
        super(id, platformType: type, category: Category.mobile, logger: FakeLogger());
 
   final bool _isSupported;

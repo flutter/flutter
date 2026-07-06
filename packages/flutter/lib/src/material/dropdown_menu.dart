@@ -1503,7 +1503,7 @@ class _RenderDropdownMenuBody extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _DropdownMenuBodyParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _DropdownMenuBodyParentData> {
-  _RenderDropdownMenuBody({double? width}) : _width = width;
+  _RenderDropdownMenuBody({this._width});
 
   double? get width => _width;
   double? _width;

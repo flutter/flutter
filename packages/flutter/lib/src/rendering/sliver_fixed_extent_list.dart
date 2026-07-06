@@ -518,8 +518,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that have a given
   /// extent in the main axis.
-  RenderSliverFixedExtentList({required super.childManager, required double itemExtent})
-    : _itemExtent = itemExtent;
+  RenderSliverFixedExtentList({required super.childManager, required this._itemExtent});
 
   @override
   double get itemExtent => _itemExtent;
@@ -540,8 +539,8 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// extent in the main axis.
   RenderSliverVariedExtentList({
     required super.childManager,
-    required ItemExtentBuilder itemExtentBuilder,
-  }) : _itemExtentBuilder = itemExtentBuilder;
+    required this._itemExtentBuilder,
+  });
 
   @override
   ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;

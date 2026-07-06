@@ -77,16 +77,12 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     required Platform platform,
     required FeatureFlags featureFlags,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
+    required this._operatingSystemUtils,
+    required this._fileSystem,
+    required this._processManager,
+    required this._logger,
   }) : _platform = platform,
        _linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags),
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _processManager = processManager,
-       _operatingSystemUtils = operatingSystemUtils,
        super('linux devices');
 
   final Platform _platform;

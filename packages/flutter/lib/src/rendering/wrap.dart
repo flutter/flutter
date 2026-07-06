@@ -225,24 +225,16 @@ class RenderWrap extends RenderBox
   /// runs are aligned to the start.
   RenderWrap({
     List<RenderBox>? children,
-    Axis direction = Axis.horizontal,
-    WrapAlignment alignment = WrapAlignment.start,
-    double spacing = 0.0,
-    WrapAlignment runAlignment = WrapAlignment.start,
-    double runSpacing = 0.0,
-    WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
-    TextDirection? textDirection,
-    VerticalDirection verticalDirection = VerticalDirection.down,
-    Clip clipBehavior = Clip.none,
-  }) : _direction = direction,
-       _alignment = alignment,
-       _spacing = spacing,
-       _runAlignment = runAlignment,
-       _runSpacing = runSpacing,
-       _crossAxisAlignment = crossAxisAlignment,
-       _textDirection = textDirection,
-       _verticalDirection = verticalDirection,
-       _clipBehavior = clipBehavior {
+    this._direction = Axis.horizontal,
+    this._alignment = WrapAlignment.start,
+    this._spacing = 0.0,
+    this._runAlignment = WrapAlignment.start,
+    this._runSpacing = 0.0,
+    this._crossAxisAlignment = WrapCrossAlignment.start,
+    this._textDirection,
+    this._verticalDirection = VerticalDirection.down,
+    this._clipBehavior = Clip.none,
+  }) {
     addAll(children);
   }
 

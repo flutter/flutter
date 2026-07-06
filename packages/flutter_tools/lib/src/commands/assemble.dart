@@ -94,9 +94,8 @@ var _kDefaultTargets = <Target>[
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand({bool verboseHelp = false, required BuildSystem buildSystem})
-    : _verboseHelp = verboseHelp,
-      _buildSystem = buildSystem {
+  AssembleCommand({bool verboseHelp = false, required this._buildSystem})
+    : _verboseHelp = verboseHelp {
     requiresPubspecYaml();
     argParser.addMultiOption(
       'define',

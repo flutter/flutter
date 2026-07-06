@@ -1707,8 +1707,7 @@ class _ExactWidgetFinder extends MatchFinder {
 }
 
 class _WidgetPredicateWidgetFinder extends MatchFinder {
-  _WidgetPredicateWidgetFinder(this.predicate, {String? description, super.skipOffstage})
-    : _description = description;
+  _WidgetPredicateWidgetFinder(this.predicate, {this._description, super.skipOffstage});
 
   final WidgetPredicate predicate;
   final String? _description;
@@ -1723,8 +1722,7 @@ class _WidgetPredicateWidgetFinder extends MatchFinder {
 }
 
 class _ElementPredicateWidgetFinder extends MatchFinder {
-  _ElementPredicateWidgetFinder(this.predicate, {String? description, super.skipOffstage})
-    : _description = description;
+  _ElementPredicateWidgetFinder(this.predicate, {this._description, super.skipOffstage});
 
   final ElementPredicate predicate;
   final String? _description;

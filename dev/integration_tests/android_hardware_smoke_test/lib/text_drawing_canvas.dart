@@ -45,8 +45,7 @@ class _TextDrawingCanvasState extends State<TextDrawingCanvas> {
 }
 
 class _TextDrawingPainter extends CustomPainter {
-  const _TextDrawingPainter({required TextPainter textPainter})
-    : _textPainter = textPainter;
+  const _TextDrawingPainter({required this._textPainter});
 
   final TextPainter _textPainter;
 

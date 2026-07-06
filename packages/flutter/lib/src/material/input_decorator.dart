@@ -722,20 +722,14 @@ class _RenderDecorationLayout {
 class _RenderDecoration extends RenderBox
     with SlottedContainerRenderObjectMixin<_DecorationSlot, RenderBox> {
   _RenderDecoration({
-    required _Decoration decoration,
-    required TextDirection textDirection,
-    required TextBaseline textBaseline,
-    required bool isFocused,
-    required bool expands,
-    required bool material3,
-    TextAlignVertical? textAlignVertical,
-  }) : _decoration = decoration,
-       _textDirection = textDirection,
-       _textBaseline = textBaseline,
-       _textAlignVertical = textAlignVertical,
-       _isFocused = isFocused,
-       _expands = expands,
-       _material3 = material3;
+    required this._decoration,
+    required this._textDirection,
+    required this._textBaseline,
+    required this._isFocused,
+    required this._expands,
+    required this._material3,
+    this._textAlignVertical,
+  });
 
   // TODO(bleroux): consider defining this value as a Material token and making it
   // configurable by InputDecorationThemeData.

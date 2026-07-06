@@ -338,13 +338,12 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
   @internal
   RegularWindowControllerWin32({
     required WindowingOwnerWin32 owner,
-    required RegularWindowControllerDelegate delegate,
+    required this._delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
     required bool resizable,
   }) : _owner = owner,
-       _delegate = delegate,
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -573,14 +572,13 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
   @internal
   DialogWindowControllerWin32({
     required WindowingOwnerWin32 owner,
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
     BaseWindowController? parent,
     required bool resizable,
   }) : _owner = owner,
-       _delegate = delegate,
        _parent = parent,
        super.empty() {
     if (!isWindowingEnabled) {
@@ -781,17 +779,13 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   /// * [TooltipWindowController], the base class for tooltip windows.
   @internal
   TooltipWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required TooltipWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _delegate = delegate,
-       _owner = owner,
-       _parent = parent,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
+    required this._anchorRect,
+    required this._positioner,
+  }) : _parent = parent,
        super.empty() {
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
@@ -967,17 +961,13 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   /// * [PopupWindowController], the base class for popup windows.
   @internal
   PopupWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required PopupWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _delegate = delegate,
-       _owner = owner,
-       _parent = parent,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
+    required this._anchorRect,
+    required this._positioner,
+  }) : _parent = parent,
        super.empty() {
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(

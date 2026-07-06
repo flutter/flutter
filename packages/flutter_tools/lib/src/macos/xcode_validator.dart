@@ -20,13 +20,10 @@ For more information, please visit:
 
 class XcodeValidator extends DoctorValidator {
   XcodeValidator({
-    required Xcode xcode,
-    required IOSSimulatorUtils iosSimulatorUtils,
-    required UserMessages userMessages,
-  }) : _xcode = xcode,
-       _iosSimulatorUtils = iosSimulatorUtils,
-       _userMessages = userMessages,
-       super('Xcode - develop for iOS and macOS');
+    required this._xcode,
+    required this._iosSimulatorUtils,
+    required this._userMessages,
+  }) : super('Xcode - develop for iOS and macOS');
 
   final Xcode _xcode;
   final IOSSimulatorUtils _iosSimulatorUtils;

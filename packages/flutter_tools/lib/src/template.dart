@@ -106,12 +106,10 @@ class Template {
     List<Directory> templateSources,
     this.imageSourceDirectories, {
     required FileSystem fileSystem,
-    required Logger logger,
-    required TemplateRenderer templateRenderer,
+    required this._logger,
+    required this._templateRenderer,
     required Set<Uri>? templateManifest,
   }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _templateRenderer = templateRenderer,
        _templateManifest = templateManifest ?? <Uri>{} {
     for (final sourceDirectory in templateSources) {
       if (!sourceDirectory.existsSync()) {

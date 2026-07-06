@@ -107,9 +107,7 @@ class _ProxyLayer extends Layer {
 /// secondary screenshot canvas so that a screenshot can be recorded at the same
 /// time as performing a normal paint.
 class _MulticastCanvas implements Canvas {
-  _MulticastCanvas({required Canvas main, required Canvas screenshot})
-    : _main = main,
-      _screenshot = screenshot;
+  _MulticastCanvas({required this._main, required this._screenshot});
 
   final Canvas _main;
   final Canvas _screenshot;
@@ -3391,7 +3389,7 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 }
 
 class _RenderInspectorOverlay extends RenderBox {
-  _RenderInspectorOverlay({required InspectorSelection selection}) : _selection = selection;
+  _RenderInspectorOverlay({required this._selection});
 
   InspectorSelection get selection => _selection;
   InspectorSelection _selection;

@@ -20,15 +20,12 @@ import 'android_workflow.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
   AndroidEmulators({
-    AndroidSdk? androidSdk,
-    required AndroidWorkflow androidWorkflow,
-    required FileSystem fileSystem,
+    this._androidSdk,
+    required this._androidWorkflow,
+    required this._fileSystem,
     required Logger logger,
     required ProcessManager processManager,
-  }) : _androidSdk = androidSdk,
-       _androidWorkflow = androidWorkflow,
-       _fileSystem = fileSystem,
-       _logger = logger,
+  }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -140,12 +137,11 @@ class AndroidEmulator extends Emulator {
     String id, {
     Map<String, String>? properties,
     required Logger logger,
-    AndroidSdk? androidSdk,
+    this._androidSdk,
     required ProcessManager processManager,
     this.avdDirectory,
   }) : _properties = properties,
        _logger = logger,
-       _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(id, properties != null && properties.isNotEmpty);
 

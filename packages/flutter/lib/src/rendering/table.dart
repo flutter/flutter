@@ -100,7 +100,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   /// there is any room left over when laying out the table. If `flex` is
   /// null (the default), the table will not distribute any extra space to the
   /// column.
-  const IntrinsicColumnWidth({double? flex}) : _flex = flex;
+  const IntrinsicColumnWidth({this._flex});
 
   @override
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
@@ -374,26 +374,20 @@ class RenderTable extends RenderBox {
     int? columns,
     int? rows,
     Map<int, TableColumnWidth>? columnWidths,
-    TableColumnWidth defaultColumnWidth = const FlexColumnWidth(),
-    required TextDirection textDirection,
-    TableBorder? border,
+    this._defaultColumnWidth = const FlexColumnWidth(),
+    required this._textDirection,
+    this._border,
     List<Decoration?>? rowDecorations,
-    ImageConfiguration configuration = ImageConfiguration.empty,
-    TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
-    TextBaseline? textBaseline,
+    this._configuration = ImageConfiguration.empty,
+    this._defaultVerticalAlignment = TableCellVerticalAlignment.top,
+    this._textBaseline,
     List<List<RenderBox>>? children,
   }) : assert(columns == null || columns >= 0),
        assert(rows == null || rows >= 0),
        assert(rows == null || children == null),
-       _textDirection = textDirection,
        _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0),
        _rows = rows ?? 0,
-       _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>(),
-       _defaultColumnWidth = defaultColumnWidth,
-       _border = border,
-       _textBaseline = textBaseline,
-       _defaultVerticalAlignment = defaultVerticalAlignment,
-       _configuration = configuration {
+       _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>() {
     _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);

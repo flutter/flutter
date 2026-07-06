@@ -848,9 +848,7 @@ void main() {
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({bool asyncCrash = false, Completer<void>? completer})
-    : _asyncCrash = asyncCrash,
-      _completer = completer;
+  CrashingFlutterCommand({this._asyncCrash = false, this._completer});
 
   final bool _asyncCrash;
   final Completer<void>? _completer;

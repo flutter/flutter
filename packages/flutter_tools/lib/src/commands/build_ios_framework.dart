@@ -33,14 +33,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildFrameworkCommand({
     // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
     @visibleForTesting FlutterVersion? flutterVersion,
-    required BuildSystem buildSystem,
+    required BuildSystem this._buildSystem,
     required bool verboseHelp,
     Cache? cache,
     Platform? platform,
     required this.codesign,
     required super.logger,
   }) : _injectedFlutterVersion = flutterVersion,
-       _buildSystem = buildSystem,
        _injectedCache = cache,
        _injectedPlatform = platform,
        super(verboseHelp: verboseHelp) {

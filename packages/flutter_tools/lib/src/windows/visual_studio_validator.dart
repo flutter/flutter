@@ -10,10 +10,8 @@ import 'visual_studio.dart';
 VisualStudioValidator? get visualStudioValidator => context.get<VisualStudioValidator>();
 
 class VisualStudioValidator extends DoctorValidator {
-  VisualStudioValidator({required VisualStudio visualStudio, required UserMessages userMessages})
-    : _visualStudio = visualStudio,
-      _userMessages = userMessages,
-      super('Visual Studio - develop Windows apps');
+  VisualStudioValidator({required this._visualStudio, required this._userMessages})
+    : super('Visual Studio - develop Windows apps');
 
   final VisualStudio _visualStudio;
   final UserMessages _userMessages;

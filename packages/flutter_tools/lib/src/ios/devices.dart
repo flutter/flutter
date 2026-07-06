@@ -89,14 +89,11 @@ enum IOSDeploymentMethod {
 
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
-    required Platform platform,
+    required this._platform,
     required this.xcdevice,
-    required IOSWorkflow iosWorkflow,
-    required Logger logger,
-  }) : _platform = platform,
-       _iosWorkflow = iosWorkflow,
-       _logger = logger,
-       super('iOS devices');
+    required this._iosWorkflow,
+    required this._logger,
+  }) : super('iOS devices');
 
   final Platform _platform;
   final IOSWorkflow _iosWorkflow;
@@ -307,7 +304,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(
     super.id, {
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required this.name,
     required this.cpuArchitecture,
     required this.connectionInterface,
@@ -315,27 +312,18 @@ class IOSDevice extends Device {
     required this.isPaired,
     required this.devModeEnabled,
     required this.isCoreDevice,
-    String? sdkVersion,
-    required Platform platform,
-    required IOSDeploy iosDeploy,
-    required IMobileDevice iMobileDevice,
-    required IOSCoreDeviceControl coreDeviceControl,
-    required IOSCoreDeviceLauncher coreDeviceLauncher,
-    required XcodeDebug xcodeDebug,
+    this._sdkVersion,
+    required this._platform,
+    required this._iosDeploy,
+    required this._iMobileDevice,
+    required this._coreDeviceControl,
+    required this._coreDeviceLauncher,
+    required this._xcodeDebug,
     required IProxy iProxy,
     required super.logger,
-    required Analytics analytics,
-  }) : _sdkVersion = sdkVersion,
-       _iosDeploy = iosDeploy,
-       _iMobileDevice = iMobileDevice,
-       _coreDeviceControl = coreDeviceControl,
-       _coreDeviceLauncher = coreDeviceLauncher,
-       _xcodeDebug = xcodeDebug,
-       _iproxy = iProxy,
-       _fileSystem = fileSystem,
+    required this._analytics,
+  }) : _iproxy = iProxy,
        _logger = logger,
-       _analytics = analytics,
-       _platform = platform,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
     if (!_platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
@@ -1982,14 +1970,11 @@ class CoreDeviceLoggingSource {
 class IOSDevicePortForwarder extends DevicePortForwarder {
   /// Create a new [IOSDevicePortForwarder].
   IOSDevicePortForwarder({
-    required Logger logger,
-    required String id,
-    required IProxy iproxy,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _id = id,
-       _iproxy = iproxy,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._logger,
+    required this._id,
+    required this._iproxy,
+    required this._operatingSystemUtils,
+  });
 
   /// Create a [IOSDevicePortForwarder] for testing.
   ///

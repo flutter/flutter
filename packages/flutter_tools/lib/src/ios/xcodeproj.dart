@@ -51,9 +51,9 @@ class XcodeProjectInterpreter {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required Analytics analytics,
+    required this._analytics,
     Version? version,
-    String? build,
+    this._build,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -65,9 +65,7 @@ class XcodeProjectInterpreter {
          processManager: processManager,
        ),
        _version = version,
-       _build = build,
-       _versionText = version?.toString(),
-       _analytics = analytics;
+       _versionText = version?.toString();
 
   /// Create an [XcodeProjectInterpreter] for testing.
   ///

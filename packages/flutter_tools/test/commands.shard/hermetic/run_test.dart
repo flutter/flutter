@@ -1922,18 +1922,13 @@ class TestDeviceManager extends DeviceManager {
 
 class FakeDevice extends Fake implements Device {
   FakeDevice({
-    bool isLocalEmulator = false,
-    TargetPlatform targetPlatform = TargetPlatform.ios,
-    String sdkNameAndVersion = '',
-    PlatformType platformType = PlatformType.ios,
-    bool isSupported = true,
-    bool supportsFlavors = false,
-  }) : _isLocalEmulator = isLocalEmulator,
-       _targetPlatform = targetPlatform,
-       _sdkNameAndVersion = sdkNameAndVersion,
-       _platformType = platformType,
-       _isSupported = isSupported,
-       _supportsFlavors = supportsFlavors;
+    this._isLocalEmulator = false,
+    this._targetPlatform = TargetPlatform.ios,
+    this._sdkNameAndVersion = '',
+    this._platformType = PlatformType.ios,
+    this._isSupported = true,
+    this._supportsFlavors = false,
+  });
 
   static const kSuccess = 1;
   static const kFailure = -1;
@@ -2057,10 +2052,9 @@ class FakeDevice extends Fake implements Device {
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     this.connectionInterface = DeviceConnectionInterface.attached,
-    bool isLocalEmulator = false,
-    String sdkNameAndVersion = '',
-  }) : _isLocalEmulator = isLocalEmulator,
-       _sdkNameAndVersion = sdkNameAndVersion;
+    this._isLocalEmulator = false,
+    this._sdkNameAndVersion = '',
+  });
 
   final bool _isLocalEmulator;
   final String _sdkNameAndVersion;

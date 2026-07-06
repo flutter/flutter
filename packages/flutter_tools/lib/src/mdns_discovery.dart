@@ -36,12 +36,10 @@ class MDnsVmServiceDiscovery {
   MDnsVmServiceDiscovery({
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
-    required Logger logger,
-    required Analytics analytics,
+    required this._logger,
+    required this._analytics,
   }) : _client = mdnsClient ?? MDnsClient(),
-       _preliminaryClient = preliminaryMDnsClient,
-       _logger = logger,
-       _analytics = analytics;
+       _preliminaryClient = preliminaryMDnsClient;
 
   final MDnsClient _client;
 

@@ -590,13 +590,13 @@ class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
   /// The `text` and `textDirection` arguments are optional but [text] and
-  /// [textDirection] must be non-null before calling [layout].
+  /// [_textDirection] must be non-null before calling [layout].
   ///
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     InlineSpan? text,
-    TextAlign textAlign = TextAlign.start,
-    TextDirection? textDirection,
+    this._textAlign = TextAlign.start,
+    this._textDirection,
     @Deprecated(
       'Use textScaler instead. '
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -605,11 +605,11 @@ class TextPainter {
     double textScaleFactor = 1.0,
     TextScaler textScaler = const _UnspecifiedTextScaler(),
     int? maxLines,
-    String? ellipsis,
-    Locale? locale,
-    StrutStyle? strutStyle,
-    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    TextHeightBehavior? textHeightBehavior,
+    this._ellipsis,
+    this._locale,
+    this._strutStyle,
+    this._textWidthBasis = TextWidthBasis.parent,
+    this._textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -617,17 +617,10 @@ class TextPainter {
          'Use textScaler instead.',
        ),
        _text = text,
-       _textAlign = textAlign,
-       _textDirection = textDirection,
        _textScaler = textScaler == const _UnspecifiedTextScaler()
            ? TextScaler.linear(textScaleFactor)
            : textScaler,
-       _maxLines = maxLines,
-       _ellipsis = ellipsis,
-       _locale = locale,
-       _strutStyle = strutStyle,
-       _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior {
+       _maxLines = maxLines {
     assert(debugMaybeDispatchCreated('painting', 'TextPainter', this));
   }
 

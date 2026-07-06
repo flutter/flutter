@@ -35,17 +35,14 @@ import 'xcodeproj.dart';
 /// - [launchAppWithXcodeDebugger]: Uses Xcode automation to install, launch, and debug the app.
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
-    required IOSCoreDeviceControl coreDeviceControl,
+    required this._coreDeviceControl,
     required Logger logger,
-    required XcodeDebug xcodeDebug,
-    required FileSystem fileSystem,
+    required this._xcodeDebug,
+    required this._fileSystem,
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     @visibleForTesting LLDB? lldb,
-  }) : _coreDeviceControl = coreDeviceControl,
-       _logger = logger,
-       _xcodeDebug = xcodeDebug,
-       _fileSystem = fileSystem,
+  }) : _logger = logger,
        _lldb =
            lldb ??
            LLDB(
@@ -339,12 +336,10 @@ class IOSCoreDeviceControl {
   IOSCoreDeviceControl({
     required Logger logger,
     required ProcessManager processManager,
-    required Xcode xcode,
-    required FileSystem fileSystem,
+    required this._xcode,
+    required this._fileSystem,
   }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _xcode = xcode,
-       _fileSystem = fileSystem;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Logger _logger;
   final ProcessUtils _processUtils;

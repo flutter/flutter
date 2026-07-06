@@ -39,14 +39,11 @@ const kDisableSwiftPMInstructions =
 ///     documentation on Swift Package Manager manifest file, Package.swift.
 class SwiftPackageManager {
   const SwiftPackageManager({
-    required FileSystem fileSystem,
-    required TemplateRenderer templateRenderer,
-    required ProcessUtils processUtils,
-    required Config config,
-  }) : _fileSystem = fileSystem,
-       _templateRenderer = templateRenderer,
-       _processUtils = processUtils,
-       _config = config;
+    required this._fileSystem,
+    required this._templateRenderer,
+    required this._processUtils,
+    required this._config,
+  });
 
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;

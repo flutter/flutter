@@ -824,9 +824,9 @@ class _ActivatorIntentPair with Diagnosticable {
 class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// Constructs a [ShortcutManager].
   ShortcutManager({
-    Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
+    this._shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
-  }) : _shortcuts = shortcuts {
+  }) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
@@ -1007,7 +1007,7 @@ class Shortcuts extends StatefulWidget {
   ///
   /// When using this constructor, [manager] will return null.
   ///
-  /// The [child] and [shortcuts] arguments are required.
+  /// The [child] and [_shortcuts] arguments are required.
   ///
   /// See also:
   ///
@@ -1015,12 +1015,11 @@ class Shortcuts extends StatefulWidget {
   ///    manage the shortcuts list instead.
   const Shortcuts({
     super.key,
-    required Map<ShortcutActivator, Intent> shortcuts,
+    required this._shortcuts,
     required this.child,
     this.debugLabel,
     this.includeSemantics = true,
-  }) : _shortcuts = shortcuts,
-       manager = null;
+  }) : manager = null;
 
   /// Creates a const [Shortcuts] widget that uses the [manager] to
   /// manage the map of shortcuts.
