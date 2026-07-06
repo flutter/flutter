@@ -259,6 +259,8 @@ Future<void> buildMacOS({
     );
   }
 
+  var hasMacOSMinDeploymentTargetIssue = false;
+  String? macOSMinDeploymentTarget;
   try {
     if (archs != null && excludedArchs != null && excludedArchs.contains(archs)) {
       throwToolExit(
@@ -302,15 +304,33 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: verboseLogging
-          ? null
-          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: (String line) {
+        if (line.contains("deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to") &&
+            line.contains('but the range of supported deployment target versions is')) {
+          hasMacOSMinDeploymentTargetIssue = true;
+          final pattern = RegExp(r'range of supported deployment target versions is ([0-9.]+) to');
+          final RegExpMatch? match = pattern.firstMatch(line);
+          if (match != null) {
+            macOSMinDeploymentTarget = match.group(1);
+          }
+        }
+        if (verboseLogging) {
+          return line;
+        }
+        return _filteredOutput.hasMatch(line) ? line : null;
+      },
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
+    if (hasMacOSMinDeploymentTargetIssue) {
+      globals.logger.printError(
+        _macOSDeploymentTargetTooLowMessage(macOSMinDeploymentTarget),
+        emphasis: true,
+      );
+    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
@@ -450,4 +470,19 @@ File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configura
     ),
   );
   return disabledSandboxEntitlementFile;
+}
+
+String _macOSDeploymentTargetTooLowMessage(String? minVersion) {
+  final String versionText = minVersion ?? 'the minimum supported version';
+  return '''
+════════════════════════════════════════════════════════════════════════════════
+The macOS deployment target is too low. Xcode requires at least $versionText.
+
+To upgrade your macOS deployment target, follow these steps:
+  1. Open the project in Xcode:
+     open macos/Runner.xcworkspace
+  2. Select the "Runner" project in the project navigator.
+  3. Select the "Runner" TARGET, and in the "General" tab:
+     Update "Minimum Deployments" to at least $versionText.
+════════════════════════════════════════════════════════════════════════════════''';
 }
