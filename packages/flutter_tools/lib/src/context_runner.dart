@@ -39,6 +39,8 @@ import 'doctor.dart';
 import 'emulator.dart';
 import 'experimental/build_targets.dart';
 import 'experimental/configuration.dart';
+import 'experimental/devices.dart';
+import 'experimental/diagnostics.dart';
 import 'experimental/templates.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
@@ -220,6 +222,18 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ToolExtensionManager: () => ToolExtensionManager(),
       // ExtensionBuildTargetManager manages custom build targets from extensions.
       ExtensionBuildTargetManager: () => ExtensionBuildTargetManager(
+        extensionManager: context.get<ToolExtensionManager>()!,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
+      // ExtensionDiagnosticsManager manages running diagnostics from extensions.
+      ExtensionDiagnosticsManager: () => ExtensionDiagnosticsManager(
+        extensionManager: context.get<ToolExtensionManager>()!,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
+      // ExtensionDeviceManager manages custom devices from extensions.
+      ExtensionDeviceManager: () => ExtensionDeviceManager(
         extensionManager: context.get<ToolExtensionManager>()!,
         logger: globals.logger,
         platform: globals.platform,

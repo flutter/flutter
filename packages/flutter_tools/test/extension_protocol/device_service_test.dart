@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/generic_extension_protocol.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart' as src_platform;
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/devices.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/device.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/extension_prototypes/linux_extension/extension
 import 'package:flutter_tools/src/flutter_tools_core/device.dart' show LocalDeviceLaunchHelper;
 import 'package:test/test.dart';
 
+import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 void main() {
@@ -268,7 +270,7 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    test(
+    testUsingContext(
       'ExtensionDeviceDiscovery discoverDevices respects DeviceDiscoveryFilter connectionInterface',
       () async {
         await manager.startExtension(linuxDeviceExtensionEntryPoint);
@@ -290,6 +292,11 @@ void main() {
         expect(attachedDevices, hasLength(1));
         expect(attachedDevices.first.id, 'linux-proto-1');
         expect(attachedDevices.first.connectionInterface, DeviceConnectionInterface.attached);
+      },
+      overrides: <Type, Generator>{
+        src_platform.Platform: () => src_platform.FakePlatform(
+          environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'},
+        ),
       },
     );
 

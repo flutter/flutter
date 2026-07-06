@@ -10,6 +10,7 @@ library experimental.diagnostics;
 
 import 'dart:async';
 
+import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../doctor_validator.dart' as host_doctor;
@@ -17,6 +18,55 @@ import '../flutter_tools_core/diagnostics.dart' as core;
 import '../generic_extension_protocol/manager.dart';
 import '../globals.dart' as globals;
 import 'extension_discovery.dart';
+
+/// Retrieve the [ExtensionDiagnosticsManager] from the context.
+ExtensionDiagnosticsManager? get extensionDiagnosticsManager =>
+    context.get<ExtensionDiagnosticsManager>();
+
+/// Manages executing diagnostics from extension isolates.
+base class ExtensionDiagnosticsManager extends core.DiagnosticsService {
+  ExtensionDiagnosticsManager({
+    required ToolExtensionManager extensionManager,
+    Logger? logger,
+    Platform? platform,
+  }) : _discoveryHelper = ExtensionDiscoveryHelper(
+         logger: logger ?? globals.logger,
+         extensionManager: extensionManager,
+         platform: platform ?? globals.platform,
+       );
+
+  final ExtensionDiscoveryHelper _discoveryHelper;
+
+  @override
+  Future<List<core.ValidationResult>> runDiagnostics() async {
+    if (!_discoveryHelper.isPrototypeEnabled) {
+      return const <core.ValidationResult>[];
+    }
+
+    final results = <core.ValidationResult>[];
+    final List<ToolExtension> extensions = await _discoveryHelper.getExtensionsSupporting(
+      core.DiagnosticsService.serviceNamespace,
+    );
+
+    for (final extension in extensions) {
+      try {
+        final Object? rpcResult = await extension
+            .callMethod(core.DiagnosticsService.runDiagnosticsMethod)
+            .timeout(const Duration(seconds: 5));
+
+        results.addAll(core.ValidationResult.listFromJson(rpcResult));
+      } on Object catch (e) {
+        _discoveryHelper.logger.printError('Failed to get diagnostics from extension: $e');
+        results.add(
+          core.ValidationResult(core.ValidationType.missing, <core.ValidationMessage>[
+            core.ValidationMessage.error('Diagnostics extension call failed: $e'),
+          ], statusInfo: 'error'),
+        );
+      }
+    }
+    return results;
+  }
+}
 
 /// A host-side doctor validator that delegates diagnostics to tool extensions.
 ///
@@ -28,14 +78,26 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
     ToolExtensionManager extensionManager, {
     Logger? logger,
     Platform? platform,
+    ExtensionDiagnosticsManager? diagnosticsManager,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
          logger: logger ?? globals.logger,
          extensionManager: extensionManager,
          platform: platform ?? globals.platform,
        ),
+       _diagnosticsManager =
+           diagnosticsManager ??
+           (context.get<ToolExtensionManager>() == extensionManager
+               ? extensionDiagnosticsManager
+               : null) ??
+           ExtensionDiagnosticsManager(
+             extensionManager: extensionManager,
+             logger: logger,
+             platform: platform,
+           ),
        super('Extension-backed Diagnostics');
 
   final ExtensionDiscoveryHelper _discoveryHelper;
+  final ExtensionDiagnosticsManager _diagnosticsManager;
 
   /// Runs the diagnostics by calling `diagnostics.runDiagnostics` on all supporting extensions.
   ///
@@ -52,35 +114,10 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
       );
     }
 
-    final subResults = <host_doctor.ValidationResult>[];
-
-    for (final ToolExtension extension in await _discoveryHelper.getExtensionsSupporting(
-      core.DiagnosticsService.serviceNamespace,
-    )) {
-      try {
-        final Object? diagnosticsResult = await extension.callMethod(
-          core.DiagnosticsService.runDiagnosticsMethod,
-        );
-        if (diagnosticsResult case final List<Object?> items) {
-          for (final item in items) {
-            if (item case final Map<Object?, Object?> rawMap) {
-              final coreResult = core.ValidationResult.fromJson(rawMap.cast<String, Object?>());
-              subResults.add(_mapCoreResultToHost(coreResult));
-            }
-          }
-        }
-      } on Object catch (e) {
-        subResults.add(
-          host_doctor.ValidationResult(
-            host_doctor.ValidationType.missing,
-            <host_doctor.ValidationMessage>[
-              host_doctor.ValidationMessage.error('Diagnostics extension call failed: $e'),
-            ],
-            statusInfo: 'error',
-          ),
-        );
-      }
-    }
+    final List<core.ValidationResult> coreResults = await _diagnosticsManager.runDiagnostics();
+    final List<host_doctor.ValidationResult> subResults = coreResults
+        .map(_mapCoreResultToHost)
+        .toList();
 
     return _mergeValidationResults(subResults);
   }

@@ -577,7 +577,8 @@ void main() {
             'environment': environment,
           });
 
-          return buildResponse ?? <String, Object?>{'success': true};
+          return buildResponse ??
+              <String, Object?>{'success': true, 'executablePath': 'file:///build/out/app'};
         });
       }
 
@@ -590,6 +591,30 @@ void main() {
 
       unawaited(mockExtensionPeer!.listen());
       return extension;
+    }
+
+    ExtensionBackedDevice createTestDevice(
+      ToolExtension extension, {
+      String id = 'linux-proto-1',
+      String name = 'Mock Device',
+      Category category = Category.desktop,
+    }) {
+      final hostDevice = HostDevice(
+        id,
+        extension,
+        name: name,
+        category: category == Category.mobile
+            ? 'mobile'
+            : category == Category.web
+            ? 'web'
+            : 'desktop',
+        isEmulator: false,
+        platform: 'linux-x64',
+        buildTarget: 'assemble_linux_app',
+        isSupportedVal: true,
+        isRunnableVal: true,
+      );
+      return ExtensionBackedDevice(hostDevice, logger: BufferLogger.test());
     }
 
     testUsingContext(
@@ -607,13 +632,7 @@ void main() {
         projectDir.childDirectory('linux').createSync(recursive: true);
         globals.fs.currentDirectory = projectDir;
 
-        final device = ExtensionBackedDevice(
-          'linux-proto-1',
-          extension,
-          category: Category.desktop,
-          logger: BufferLogger.test(),
-          name: 'Mock Device',
-        );
+        final ExtensionBackedDevice device = createTestDevice(extension);
 
         final LaunchResult result = await device.startApp(
           null, // package
@@ -645,6 +664,9 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
+        ToolExtensionManager: () => manager,
       },
     );
 
@@ -676,13 +698,7 @@ void main() {
         projectDir.childDirectory('linux').childFile('CMakeLists.txt').createSync(recursive: true);
         globals.fs.currentDirectory = projectDir;
 
-        final device = ExtensionBackedDevice(
-          'linux-proto-1',
-          extension,
-          category: Category.desktop,
-          logger: BufferLogger.test(),
-          name: 'Mock Device',
-        );
+        final ExtensionBackedDevice device = createTestDevice(extension);
 
         final LaunchResult result = await device.startApp(
           null,
@@ -706,6 +722,9 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
+        ToolExtensionManager: () => manager,
       },
     );
 
@@ -722,13 +741,7 @@ void main() {
         projectDir.childDirectory('linux').createSync(recursive: true);
         globals.fs.currentDirectory = projectDir;
 
-        final device = ExtensionBackedDevice(
-          'linux-proto-1',
-          extension,
-          category: Category.desktop,
-          logger: BufferLogger.test(),
-          name: 'Mock Device',
-        );
+        final ExtensionBackedDevice device = createTestDevice(extension);
 
         expect(
           () => device.startApp(null, debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)),
@@ -738,6 +751,9 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
+        ToolExtensionManager: () => manager,
       },
     );
 
@@ -758,13 +774,7 @@ void main() {
         projectDir.childDirectory('linux').createSync(recursive: true);
         globals.fs.currentDirectory = projectDir;
 
-        final device = ExtensionBackedDevice(
-          'linux-proto-1',
-          extension,
-          category: Category.desktop,
-          logger: BufferLogger.test(),
-          name: 'Mock Device',
-        );
+        final ExtensionBackedDevice device = createTestDevice(extension);
 
         expect(
           () => device.startApp(
@@ -786,6 +796,9 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
+        ToolExtensionManager: () => manager,
       },
     );
   });

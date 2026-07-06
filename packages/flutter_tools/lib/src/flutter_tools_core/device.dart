@@ -179,7 +179,7 @@ class ProcessLaunchHelper {
 /// Extensions implement this service to expose custom devices to the host tool.
 /// It handles discovering devices, installing and launching apps, and streaming logs.
 abstract base class DeviceService extends ToolExtensionService {
-  DeviceService({required this.onNotification});
+  DeviceService({this.onNotification});
 
   static const String serviceNamespace = 'device';
   static const String discoverDevicesMethod = 'device.discoverDevices';
@@ -190,7 +190,7 @@ abstract base class DeviceService extends ToolExtensionService {
   static const String logNotificationMethod = 'device.log';
 
   /// Callback to forward notifications back to the host tool.
-  final void Function(String method, Map<String, Object?> params) onNotification;
+  final void Function(String method, Map<String, Object?> params)? onNotification;
 
   @override
   String get namespace => serviceNamespace;
@@ -238,7 +238,7 @@ abstract base class DeviceService extends ToolExtensionService {
     for (final device in devices) {
       _devices[device.id] = device;
       _logSubscriptions[device.id] = device.getLogReader().listen((String line) {
-        onNotification(logNotificationMethod, <String, Object?>{
+        onNotification?.call(logNotificationMethod, <String, Object?>{
           'deviceId': device.id,
           'message': line,
         });

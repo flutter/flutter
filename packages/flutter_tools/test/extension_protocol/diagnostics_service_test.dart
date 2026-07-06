@@ -96,11 +96,15 @@ void main() {
   });
 
   group('ExtensionDoctorValidator (Host Side)', () {
+    late ToolExtensionManager manager;
+
+    setUp(() {
+      manager = ToolExtensionManager();
+    });
+
     testUsingContext(
       'ExtensionDoctorValidator queries diagnostics and merges results',
       () async {
-        final manager = ToolExtensionManager();
-
         final extensionReceivePort = ReceivePort();
         final Future<ToolExtension> extensionFuture = manager.connectExtension(
           extensionReceivePort,
@@ -169,6 +173,7 @@ void main() {
         extensionReceivePort.close();
       },
       overrides: <Type, Generator>{
+        ToolExtensionManager: () => manager,
         Platform: () =>
             FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
       },
@@ -177,8 +182,6 @@ void main() {
     testUsingContext(
       'ExtensionDoctorValidator merges results correctly for edge cases',
       () async {
-        final manager = ToolExtensionManager();
-
         final extensionReceivePort = ReceivePort();
         final Future<ToolExtension> extensionFuture = manager.connectExtension(
           extensionReceivePort,
@@ -244,6 +247,7 @@ void main() {
         extensionReceivePort.close();
       },
       overrides: <Type, Generator>{
+        ToolExtensionManager: () => manager,
         Platform: () =>
             FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
       },

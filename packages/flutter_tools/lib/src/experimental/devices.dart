@@ -12,72 +12,164 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 
+import '../../flutter_tools_core.dart' as core;
 import '../../generic_extension_protocol.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../flutter_plugins.dart';
-import '../flutter_tools_core/build.dart' as core;
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../vmservice.dart';
+import 'build_targets.dart';
 import 'extension_discovery.dart';
 
-/// A [DeviceDiscovery] implementation that delegates discovery to active tool extensions.
-///
-/// This class queries active [ToolExtension]s for devices they manage and
-/// registers them as [ExtensionBackedDevice]s.
-class ExtensionDeviceDiscovery extends DeviceDiscovery {
-  ExtensionDeviceDiscovery(ToolExtensionManager extensionManager, {required Logger logger})
-    : _extensionManager = extensionManager,
-      _logger = logger,
-      _discoveryHelper = ExtensionDiscoveryHelper(
-        logger: logger,
-        extensionManager: extensionManager,
-      );
+/// Retrieve the [ExtensionDeviceManager] from the context.
+ExtensionDeviceManager? get extensionDeviceManager => context.get<ExtensionDeviceManager>();
 
-  final ToolExtensionManager _extensionManager;
-  final Logger _logger;
-  final ExtensionDiscoveryHelper _discoveryHelper;
+Category parseCategory(String? category) => switch (category) {
+  'mobile' => Category.mobile,
+  'web' => Category.web,
+  _ => Category.desktop,
+};
 
-  /// Whether the host platform enables tool extension device discovery.
+/// A client-side [core.Device] implementation that delegates all commands to an extension isolate.
+class HostDevice implements core.Device {
+  HostDevice(
+    this.id,
+    this._extension, {
+    required this.name,
+    required this.category,
+    required this.isEmulator,
+    required this.platform,
+    required this.buildTarget,
+    required bool isSupportedVal,
+    required bool isRunnableVal,
+    this.connectionInterface = DeviceConnectionInterface.attached,
+  }) : _isSupportedVal = isSupportedVal,
+       _isRunnableVal = isRunnableVal;
+
+  final ToolExtension _extension;
+  final bool _isSupportedVal;
+  final bool _isRunnableVal;
+  final DeviceConnectionInterface connectionInterface;
+
   @override
-  bool get supportsPlatform => _discoveryHelper.isPrototypeEnabled;
+  final String id;
+  @override
+  final String name;
+  @override
+  final String category;
+  @override
+  final bool isEmulator;
+  @override
+  final String platform;
+  @override
+  final String buildTarget;
 
   @override
-  bool get canListAnything => true;
+  Future<bool> isSupported() async => _isSupportedVal;
 
   @override
-  List<String> get wellKnownIds => const <String>[];
+  bool isRunnable() => _isRunnableVal;
 
   @override
-  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async {
-    return discoverDevices(filter: filter);
+  bool isSupportedForProject(Uri projectRoot) => true;
+
+  @override
+  Future<void> installApp(Uri appBundlePath) async {
+    await _extension.callMethod(
+      core.DeviceService.installAppMethod,
+      params: <String, Object?>{'deviceId': id, 'appBundlePath': appBundlePath.toFilePath()},
+    );
   }
 
-  /// Discovers devices by querying all active tool extensions that support the
-  /// 'device' service.
   @override
-  Future<List<Device>> discoverDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
-    bool forWirelessDiscovery = false,
-  }) async {
-    final discoveredDevices = <Device>[];
+  Future<void> launchApp(Uri appBundlePath, List<String> args) async {
+    await _extension.callMethod(
+      core.DeviceService.launchAppMethod,
+      params: <String, Object?>{
+        'deviceId': id,
+        'appBundlePath': appBundlePath.toFilePath(),
+        'args': args,
+      },
+    );
+  }
 
-    final List<ToolExtension> extensions = await _discoveryHelper.getExtensionsSupporting('device');
+  @override
+  Future<Uri> getVmServiceUri() async {
+    final Object? result = await _extension.callMethod(
+      core.DeviceService.getVmServiceUriMethod,
+      params: <String, Object?>{'deviceId': id},
+    );
+    if (result is String) {
+      return Uri.parse(result);
+    }
+    throw StateError('Failed to get VM Service URI: invalid response');
+  }
+
+  @override
+  Future<void> stopApp() async {
+    await _extension.callMethod(
+      core.DeviceService.stopAppMethod,
+      params: <String, Object?>{'deviceId': id},
+    );
+  }
+
+  @override
+  Stream<String> getLogReader() {
+    return _extension.notifications.expand(
+      (Notification n) => switch (n) {
+        Notification(
+          method: core.DeviceService.logNotificationMethod,
+          params: {'deviceId': final String dId, 'message': final String msg},
+        )
+            when dId == id =>
+          <String>[msg],
+        _ => const <String>[],
+      },
+    );
+  }
+}
+
+/// Manages querying devices from active extensions.
+base class ExtensionDeviceManager extends core.DeviceService {
+  ExtensionDeviceManager({
+    required ToolExtensionManager extensionManager,
+    Logger? logger,
+    Platform? platform,
+  }) : _discoveryHelper = ExtensionDiscoveryHelper(
+         logger: logger ?? globals.logger,
+         extensionManager: extensionManager,
+         platform: platform ?? globals.platform,
+       );
+
+  final ExtensionDiscoveryHelper _discoveryHelper;
+
+  @override
+  Future<List<core.Device>> discoverDevices() async {
+    if (!_discoveryHelper.isPrototypeEnabled) {
+      return const <core.Device>[];
+    }
+
+    final devices = <core.Device>[];
+    final List<ToolExtension> extensions = await _discoveryHelper.getExtensionsSupporting(
+      core.DeviceService.serviceNamespace,
+    );
 
     for (final extension in extensions) {
       try {
         final Object? devicesResult = await extension
-            .callMethod('device.discoverDevices')
+            .callMethod(core.DeviceService.discoverDevicesMethod)
             .timeout(const Duration(seconds: 5));
         if (devicesResult is List) {
           for (final Object? item in devicesResult) {
@@ -92,25 +184,91 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
                   connectionInterface = DeviceConnectionInterface.attached;
                 }
               }
-              discoveredDevices.add(
-                ExtensionBackedDevice(
+              devices.add(
+                HostDevice(
                   deviceData['id']! as String,
                   extension,
-                  category: _parseCategory(deviceData['category'] as String?),
-                  logger: _logger,
                   name: deviceData['name']! as String,
-                  buildTargetName: deviceData['buildTarget'] as String?,
+                  category: deviceData['category'] as String? ?? 'desktop',
+                  isEmulator: deviceData['isEmulator'] as bool? ?? false,
+                  platform: deviceData['platform'] as String? ?? 'linux-x64',
+                  buildTarget: deviceData['buildTarget'] as String? ?? 'assemble_linux_app',
+                  isSupportedVal: deviceData['isSupported'] as bool? ?? true,
+                  isRunnableVal: deviceData['isRunnable'] as bool? ?? true,
                   connectionInterface: connectionInterface,
-                  extensionManager: _extensionManager,
-                  platformName: deviceData['platform'] as String?,
                 ),
               );
             }
           }
         }
-      } on Object {
-        // Ignore failures from individual extensions.
+      } on Object catch (e) {
+        _discoveryHelper.logger.printTrace('Failed to discover devices from extension: $e');
       }
+    }
+    return devices;
+  }
+
+  @override
+  Future<void> launchEmulator(String emulatorId) async {
+    // Not implemented for extension devices.
+  }
+}
+
+/// A [DeviceDiscovery] implementation that delegates discovery to active tool extensions.
+class ExtensionDeviceDiscovery extends DeviceDiscovery {
+  ExtensionDeviceDiscovery(
+    ToolExtensionManager extensionManager, {
+    required Logger logger,
+    Platform? platform,
+    ExtensionDeviceManager? deviceManager,
+  }) : _logger = logger,
+       _discoveryHelper = ExtensionDiscoveryHelper(
+         logger: logger,
+         extensionManager: extensionManager,
+         platform: platform,
+       ),
+       _deviceManager =
+           deviceManager ??
+           extensionDeviceManager ??
+           ExtensionDeviceManager(
+             extensionManager: extensionManager,
+             logger: logger,
+             platform: platform,
+           );
+
+  final Logger _logger;
+  final ExtensionDiscoveryHelper _discoveryHelper;
+  final ExtensionDeviceManager _deviceManager;
+
+  @override
+  bool get supportsPlatform => _discoveryHelper.isPrototypeEnabled;
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
+
+  @override
+  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async {
+    return discoverDevices(filter: filter);
+  }
+
+  @override
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) async {
+    final discoveredDevices = <Device>[];
+
+    try {
+      final List<core.Device> coreDevices = await _deviceManager.discoverDevices();
+      for (final coreDevice in coreDevices) {
+        discoveredDevices.add(ExtensionBackedDevice(coreDevice, logger: _logger));
+      }
+    } on Object catch (e) {
+      _logger.printTrace('Failed to discover devices: $e');
     }
 
     if (filter != null) {
@@ -118,84 +276,54 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
     }
     return discoveredDevices;
   }
-
-  Category _parseCategory(String? category) => switch (category) {
-    'mobile' => Category.mobile,
-    'web' => Category.web,
-    _ => Category.desktop,
-  };
 }
 
-/// A client-side [Device] implementation that delegates all commands to an extension isolate.
-///
-/// This class represents a device that is managed by a tool extension.
-/// Operations like installing, launching, and stopping apps are delegated
-/// to the extension over RPC.
+/// A client-side [Device] implementation that delegates all commands to a core.Device (HostDevice).
 class ExtensionBackedDevice extends Device {
-  ExtensionBackedDevice(
-    super.id,
-    this._extension, {
-    required super.category,
-    required super.logger,
-    required this.name,
-    this.buildTargetName,
-    this.connectionInterface = DeviceConnectionInterface.attached,
-    this.extensionManager,
-    this.platformName,
-  }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         logger: logger,
-         extensionManager: extensionManager ?? ToolExtensionManager(),
-       ),
-       super(platformType: PlatformType.custom, ephemeral: true) {
+  ExtensionBackedDevice(this._device, {required super.logger})
+    : connectionInterface = _device is HostDevice
+          ? _device.connectionInterface
+          : DeviceConnectionInterface.attached,
+      super(
+        _device.id,
+        platformType: PlatformType.custom,
+        ephemeral: true,
+        category: parseCategory(_device.category),
+      ) {
     _logReader = ExtensionDeviceLogReader(
-      logLines: _extension.notifications.expand(
-        (Notification n) => switch (n) {
-          Notification(
-            method: 'device.log',
-            params: {'deviceId': final String dId, 'message': final String msg},
-          )
-              when dId == id =>
-            <String>[msg],
-          _ => const <String>[],
-        },
-      ),
+      logLines: _device.getLogReader(),
       name: '$name log reader',
     );
   }
 
-  final ToolExtension _extension;
-  final ToolExtensionManager? extensionManager;
-  final ExtensionDiscoveryHelper _discoveryHelper;
-
-  final String? platformName;
-  final String? buildTargetName;
+  final core.Device _device;
 
   @override
   final DeviceConnectionInterface connectionInterface;
 
   @override
-  final String name;
+  String get name => _device.name;
 
   late final ExtensionDeviceLogReader _logReader;
 
   @override
-  Future<bool> isSupported() async => true;
+  Future<bool> isSupported() async => _device.isSupported();
 
-  /// Checks if the device supports the given project.
-  ///
-  /// For Linux devices, it checks if the project has a linux directory.
   @override
   bool isSupportedForProject(FlutterProject project) {
-    if (buildTargetName == 'assemble_linux_app' ||
-        platformName == 'linux-x64' ||
-        name.toLowerCase().contains('linux')) {
+    if (!_device.isSupportedForProject(project.directory.uri)) {
+      return false;
+    }
+    if (_device.buildTarget == 'assemble_linux_app' ||
+        _device.platform == 'linux-x64' ||
+        _device.name.toLowerCase().contains('linux')) {
       return project.linux.existsSync();
     }
     return true;
   }
 
   @override
-  Future<bool> get isLocalEmulator async => false;
+  Future<bool> get isLocalEmulator async => _device.isEmulator;
 
   @override
   Future<String?> get emulatorId async => null;
@@ -212,18 +340,13 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => false;
 
-  /// Returns the target platform of the device.
-  ///
-  /// Maps the platform name from the extension to a [TargetPlatform],
-  /// or falls back to category-based defaults if parsing fails.
   @override
   Future<TargetPlatform> get targetPlatform async {
-    if (platformName case final String name) {
-      try {
-        return TargetPlatform.fromName(name);
-      } on Exception {
-        // Fallback to category switch on parsing failure
-      }
+    final String platformName = _device.platform;
+    try {
+      return TargetPlatform.fromName(platformName);
+    } on Exception {
+      // Fallback
     }
     return switch (category) {
       Category.mobile => TargetPlatform.android,
@@ -235,26 +358,20 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async => 'Extension Custom SDK';
 
-  /// Installs the app on the device by calling `device.installApp` on the extension.
   @override
   Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
+    final String? appName = app.name;
+    if (appName == null) {
+      throwToolExit('Application package name is null, cannot install.');
+    }
     try {
-      await _extension
-          .callMethod(
-            'device.installApp',
-            params: <String, Object?>{'deviceId': id, 'appBundlePath': app.name},
-          )
-          .timeout(const Duration(seconds: 10));
+      await _device.installApp(Uri.file(appName));
       return true;
     } on Exception catch (e) {
       throwToolExit('Failed to install app on extension device: $e');
     }
   }
 
-  /// Starts the app on the device.
-  ///
-  /// If [prebuiltApplication] is false and the device supports building,
-  /// it first delegates the build to the extension before launching.
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
@@ -283,39 +400,19 @@ class ExtensionBackedDevice extends Device {
     String? executablePath;
 
     if (!prebuiltApplication) {
-      // Step 1: Verify tool extension build service support
-      // Query capabilities to check if the extension supports the 'build' service.
-      final bool isSupported;
-      try {
-        isSupported = await _discoveryHelper.isServiceSupported(
-          _extension,
-          'build',
-          throwOnFailure: true,
-        );
-      } on Object catch (e) {
-        throwToolExit('Failed to query capabilities: $e');
+      final ExtensionBuildTargetManager? buildManager = extensionBuildTargetManager;
+      if (buildManager == null) {
+        throwToolExit('ExtensionBuildTargetManager not found in context.');
       }
 
-      if (!isSupported) {
-        throwToolExit('Tool extension does not support the "build" service.');
-      }
+      final String buildTarget = _device.buildTarget;
 
-      final String buildTarget = buildTargetName ?? 'assemble_linux_app';
-
-      // Step 2: Query build targets
-      // Invoke 'build.getTargets' over the tool extension RPC to verify the target is supported
-      // by the extension and extract target platform config (like pluginPlatformKey).
       core.Target? foundTarget;
       try {
-        final Object? targetsResult = await _extension
-            .callMethod('build.getTargets')
-            .timeout(const Duration(seconds: 5));
-        if (targetsResult is! List) {
-          throwToolExit('Tool extension does not expose build targets.');
+        final List<core.Target> targets = await buildManager.getTargets();
+        if (targets.isEmpty) {
+          throwToolExit('Tool extension does not support the "build" service.');
         }
-        final List<core.ExtensionBuildTarget> targets = core.ExtensionBuildTarget.listFromJson(
-          targetsResult,
-        );
         final List<core.Target> matching = targets
             .where((core.Target t) => t.name == buildTarget)
             .toList();
@@ -338,8 +435,6 @@ class ExtensionBackedDevice extends Device {
       environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
       environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
 
-      // Step 3: Extract local engine overrides
-      // Propagate engine paths if compiling against a local engine build.
       final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
       if (localEngineInfo != null) {
         final String targetOutPath = localEngineInfo.targetOutPath;
@@ -350,9 +445,6 @@ class ExtensionBackedDevice extends Device {
         environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
       }
 
-      // Step 4: Host-side plugin resolution
-      // If the target platform supports plugins (has a pluginPlatformKey), resolve plugins
-      // on the host and package them as ExtensionPlugin DTOs for the extension to compile natively.
       final resolvedPlugins = <core.ExtensionPlugin>[];
       final String? pluginPlatformKey = foundTarget.pluginPlatformKey;
       if (pluginPlatformKey != null) {
@@ -388,25 +480,17 @@ class ExtensionBackedDevice extends Device {
 
       String? buildExecutablePath;
 
-      // Step 5: Invoke build over tool extension RPC
-      // Delegate compilation to the extension isolate.
       try {
-        final Object? buildResult = await _extension
-            .callMethod(
-              'build.build',
-              params: <String, Object?>{'targetName': buildTarget, 'environment': buildEnv.toMap()},
-            )
-            .timeout(const Duration(seconds: 60));
-
-        if (buildResult case final Map<Object?, Object?> rawMap) {
-          final result = core.BuildResult.fromJson(rawMap.cast<String, Object?>());
-          if (!result.success) {
-            throwToolExit('Build compilation failed: ${result.errorMessage ?? "Unknown error"}');
-          }
-          buildExecutablePath = result.executablePath;
-        } else {
-          throwToolExit('Build compilation failed: invalid response format.');
+        final Map<String, Object?> buildResultMap = await buildManager.buildTarget(
+          buildTarget,
+          buildEnv,
+        );
+        final buildResult = core.BuildResult.fromJson(buildResultMap);
+        // CRITICAL FIX: Verify buildResult.success as in Workspace 1!
+        if (!buildResult.success) {
+          throwToolExit('Build compilation failed: ${buildResult.errorMessage ?? "Unknown error"}');
         }
+        buildExecutablePath = buildResult.executablePath;
       } on Object catch (e) {
         if (e is ToolExit) {
           rethrow;
@@ -419,9 +503,7 @@ class ExtensionBackedDevice extends Device {
       }
     }
 
-    // 6. Fallback if not resolved from build result (or if prebuiltApplication is true)
     if (executablePath == null) {
-      // Fallback 1: Resolve CMake binary dynamically
       if (!prebuiltApplication && cmakeProject.existsSync()) {
         executablePath = globals.fs.path.join(
           buildDirectory.path,
@@ -435,38 +517,28 @@ class ExtensionBackedDevice extends Device {
       executablePath = globals.fs.path.absolute(executablePath);
     }
 
-    try {
-      await _extension
-          .callMethod(
-            'device.launchApp',
-            params: <String, Object?>{
-              'deviceId': id,
-              'appBundlePath': executablePath ?? package?.name,
-              'args': debuggingOptions.dartEntrypointArgs,
-            },
-          )
-          .timeout(const Duration(seconds: 5));
+    if (executablePath == null && package == null) {
+      throwToolExit('No executable path or application package provided to launch.');
+    }
+    final String? launchPath = executablePath ?? package?.name;
+    if (launchPath == null) {
+      throwToolExit('Application package name is null, cannot launch.');
+    }
 
-      final Object? uriString = await _extension
-          .callMethod('device.getVmServiceUri', params: <String, Object?>{'deviceId': id})
-          .timeout(const Duration(seconds: 5));
-      if (uriString is! String) {
-        return LaunchResult.failed();
-      }
-      final Uri vmServiceUri = Uri.parse(uriString);
+    try {
+      final appUri = Uri.file(launchPath);
+      await _device.launchApp(appUri, debuggingOptions.dartEntrypointArgs);
+      final Uri vmServiceUri = await _device.getVmServiceUri();
       return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
     } on Object {
       return LaunchResult.failed();
     }
   }
 
-  /// Stops the app on the device by calling `device.stopApp` on the extension.
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     try {
-      await _extension
-          .callMethod('device.stopApp', params: <String, Object?>{'deviceId': id})
-          .timeout(const Duration(seconds: 5));
+      await _device.stopApp();
       return true;
     } on Exception {
       return false;
