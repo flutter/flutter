@@ -1203,10 +1203,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_platform_interface
-      sha256: e4ae5bc934b528e5b95c5e47be2812860186260cd3eed3ac62f5ed380fdd1613
+      sha256: "92c0fbabe20c788e71fd10d26cea998d0d253282e65d145aed0818731cf593ce"
       url: "https://pub.dev"
     source: hosted
-    version: "6.8.0"
+    version: "6.9.0"
   video_player_web:
     dependency: "direct main"
     description:
