@@ -10,12 +10,12 @@ library experimental.templates;
 
 import 'dart:async';
 
+import '../../flutter_tools_core.dart' as core;
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../cache.dart';
-import '../flutter_tools_core/templates.dart' as core;
 import '../generic_extension_protocol/manager.dart';
 import '../globals.dart' as globals;
 import 'extension_discovery.dart';
@@ -28,7 +28,7 @@ ExtensionTemplateManager? get extensionTemplateManager => context.get<ExtensionT
 /// This manager interacts with active [ToolExtension]s to discover custom
 /// project templates, resolve their directories on the host, and generate
 /// template parameters over the extension protocol RPC.
-class ExtensionTemplateManager {
+base class ExtensionTemplateManager extends core.TemplateService {
   /// Create a new instance of [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required ToolExtensionManager extensionManager,
@@ -134,4 +134,22 @@ class ExtensionTemplateManager {
 
     return toolParameters;
   }
+
+  @override
+  String get namespace => core.TemplateService.serviceNamespace;
+
+  @override
+  Set<core.ProjectTemplate> get projectTemplates => cachedTemplates.toSet();
+
+  @override
+  Set<String> get appPlatformTemplates => const <String>{};
+
+  @override
+  Set<String> get pluginPlatformTemplates => const <String>{};
+
+  @override
+  Future<Map<String, Function>> initialize() async => const <String, Function>{};
+
+  @override
+  Future<void> shutdown() async {}
 }

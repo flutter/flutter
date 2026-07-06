@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/extension_prototypes/linux_extension/configura
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
-import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -391,7 +390,7 @@ void main() {
   });
 }
 
-class MockExtensionConfigurationManager extends Fake implements ExtensionConfigurationManager {
+base class MockExtensionConfigurationManager extends ExtensionConfigurationManager {
   MockExtensionConfigurationManager({
     required this.success,
     this.failureReason,
@@ -403,7 +402,10 @@ class MockExtensionConfigurationManager extends Fake implements ExtensionConfigu
                name: 'enable-custom-linux-feature',
                description: 'Enable custom linux feature.',
              ),
-           ];
+           ],
+       super(
+         extensionManager: ToolExtensionManager(),
+       );
 
   final bool success;
   final String? failureReason;

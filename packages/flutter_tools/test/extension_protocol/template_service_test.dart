@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/flutter_tools_core/templates.dart' as core;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
-import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -486,8 +485,12 @@ void main() {
   });
 }
 
-class MockExtensionTemplateManager extends Fake implements ExtensionTemplateManager {
-  MockExtensionTemplateManager({required this.templates, required this.fileSystem});
+base class MockExtensionTemplateManager extends ExtensionTemplateManager {
+  MockExtensionTemplateManager({required this.templates, required this.fileSystem})
+      : super(
+          extensionManager: tool_extension.ToolExtensionManager(),
+          fileSystem: fileSystem,
+        );
 
   final List<core.ProjectTemplate> templates;
   final FileSystem fileSystem;

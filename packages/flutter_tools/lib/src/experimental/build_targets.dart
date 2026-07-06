@@ -10,11 +10,11 @@ library experimental.build_targets;
 
 import 'dart:async';
 
+import '../../flutter_tools_core.dart' as core;
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../flutter_tools_core/build.dart' as core;
 import '../generic_extension_protocol/manager.dart';
 import '../globals.dart' as globals;
 import 'extension_discovery.dart';
@@ -28,7 +28,7 @@ ExtensionBuildTargetManager? get extensionBuildTargetManager =>
 /// This manager interacts with active [ToolExtension]s to discover custom
 /// build targets and delegate the compilation process to them over the
 /// extension protocol RPC.
-class ExtensionBuildTargetManager {
+base class ExtensionBuildTargetManager extends core.BuildService {
   /// Create a new instance of [ExtensionBuildTargetManager].
   ExtensionBuildTargetManager({
     required ToolExtensionManager extensionManager,
@@ -142,4 +142,22 @@ class ExtensionBuildTargetManager {
 
     throwToolExit('No extension service handled build for target: $targetName');
   }
+
+  @override
+  String get namespace => core.BuildService.serviceNamespace;
+
+  @override
+  List<core.Target> get targets => cachedTargets;
+
+  @override
+  Map<String, Object?> get nativeAssetsConfig => const <String, Object?>{};
+
+  @override
+  List<core.ArtifactDependency> get artifactDependencies => const <core.ArtifactDependency>[];
+
+  @override
+  Future<Map<String, Function>> initialize() async => const <String, Function>{};
+
+  @override
+  Future<void> shutdown() async {}
 }

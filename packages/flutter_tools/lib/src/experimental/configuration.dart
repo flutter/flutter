@@ -10,10 +10,10 @@ library experimental.configuration;
 
 import 'dart:async';
 
+import '../../flutter_tools_core.dart' as core;
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../flutter_tools_core/configuration.dart' as core;
 import '../generic_extension_protocol/manager.dart';
 import '../globals.dart' as globals;
 import 'extension_discovery.dart';
@@ -26,7 +26,7 @@ ExtensionConfigurationManager? get extensionConfigurationManager =>
 ///
 /// This manager interacts with active [ToolExtension]s to discover custom
 /// configuration options and validate their values over the extension protocol RPC.
-class ExtensionConfigurationManager {
+base class ExtensionConfigurationManager extends core.ConfigurationService {
   /// Create a new instance of [ExtensionConfigurationManager].
   ExtensionConfigurationManager({
     required ToolExtensionManager extensionManager,
@@ -120,4 +120,16 @@ class ExtensionConfigurationManager {
       'No extension service registered configuration option: $option',
     );
   }
+
+  @override
+  String get namespace => core.ConfigurationService.serviceNamespace;
+
+  @override
+  List<core.ConfigurationOption> get options => cachedOptions;
+
+  @override
+  Future<Map<String, Function>> initialize() async => const <String, Function>{};
+
+  @override
+  Future<void> shutdown() async {}
 }
