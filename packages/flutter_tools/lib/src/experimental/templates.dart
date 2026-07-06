@@ -136,9 +136,6 @@ base class ExtensionTemplateManager extends core.TemplateService {
   }
 
   @override
-  String get namespace => core.TemplateService.serviceNamespace;
-
-  @override
   Set<core.ProjectTemplate> get projectTemplates => cachedTemplates.toSet();
 
   @override
@@ -146,10 +143,4 @@ base class ExtensionTemplateManager extends core.TemplateService {
 
   @override
   Set<String> get pluginPlatformTemplates => const <String>{};
-
-  @override
-  Future<Map<String, Function>> initialize() async => const <String, Function>{};
-
-  @override
-  Future<void> shutdown() async {}
 }

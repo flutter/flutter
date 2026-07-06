@@ -144,9 +144,6 @@ base class ExtensionBuildTargetManager extends core.BuildService {
   }
 
   @override
-  String get namespace => core.BuildService.serviceNamespace;
-
-  @override
   List<core.Target> get targets => cachedTargets;
 
   @override
@@ -154,10 +151,4 @@ base class ExtensionBuildTargetManager extends core.BuildService {
 
   @override
   List<core.ArtifactDependency> get artifactDependencies => const <core.ArtifactDependency>[];
-
-  @override
-  Future<Map<String, Function>> initialize() async => const <String, Function>{};
-
-  @override
-  Future<void> shutdown() async {}
 }

@@ -122,14 +122,5 @@ base class ExtensionConfigurationManager extends core.ConfigurationService {
   }
 
   @override
-  String get namespace => core.ConfigurationService.serviceNamespace;
-
-  @override
   List<core.ConfigurationOption> get options => cachedOptions;
-
-  @override
-  Future<Map<String, Function>> initialize() async => const <String, Function>{};
-
-  @override
-  Future<void> shutdown() async {}
 }
