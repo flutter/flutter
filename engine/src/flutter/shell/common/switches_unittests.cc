@@ -139,6 +139,23 @@ TEST(SwitchesTest, ProfileStartup) {
   }
 }
 
+TEST(SwitchesTest, DisableServiceOriginCheck) {
+  {
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--disable-service-origin-check"});
+    EXPECT_TRUE(command_line.HasOption("disable-service-origin-check"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.disable_service_origin_check, true);
+  }
+  {
+    // default
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.disable_service_origin_check, false);
+  }
+}
+
 #if !FLUTTER_RELEASE
 TEST(SwitchesTest, EnableAsserts) {
   fml::CommandLine command_line = fml::CommandLineFromInitializerList(

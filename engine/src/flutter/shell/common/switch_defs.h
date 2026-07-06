@@ -126,6 +126,10 @@ DEF_SWITCH(DisableServiceAuthCodes,
            "disable-service-auth-codes",
            "Disable the requirement for authentication codes for communicating"
            " with the VM service.")
+DEF_SWITCH(DisableServiceOriginCheck,
+           "disable-service-origin-check",
+           "Disable the requirement for origin and host checks for communicating"
+           " with the VM service.")
 DEF_SWITCH(EnableServicePortFallback,
            "enable-service-port-fallback",
            "Allow the VM service to fallback to automatic port selection if"
