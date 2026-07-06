@@ -63,7 +63,10 @@ Future<void> runSmokeTests({
     // If we're in a container with no X display, then use the virtual framebuffer.
     if (_kPlatform.isLinux &&
         (_kPlatform.environment['DISPLAY'] == null || _kPlatform.environment['DISPLAY']!.isEmpty))
-      '/usr/bin/xvfb-run',
+      ...<String>[
+        '/usr/bin/xvfb-run',
+        '-a',
+      ],
     flutterExe.absolute.path,
     'test',
     '--reporter=expanded',
