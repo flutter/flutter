@@ -25,6 +25,10 @@ const String _kAssembleLinuxAppTarget = 'assemble_linux_app';
 const String _kCustomLinuxSubcommand = 'custom-linux';
 final RegExp _kAppNamePattern = RegExp(r'^name:\s+(\w+)', multiLine: true);
 
+// The artifact dependencies listed below are standard artifacts required for
+// Linux build targets. In the extension prototypes, they are mocked as custom
+// external dependencies to simulate how external third-party extensions would
+// declare their dependencies.
 final List<ArtifactDependency> _kLinuxArtifactDependencies = <ArtifactDependency>[
   ArtifactDependency(
     hostPlatform: _kTargetPlatformLinuxX64,

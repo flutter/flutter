@@ -15,7 +15,6 @@ import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../generic_extension_protocol/manager.dart';
-import '../globals.dart' as globals;
 import 'extension_discovery.dart';
 
 /// Retrieve the [ExtensionConfigurationManager] from the context.
@@ -30,12 +29,12 @@ base class ExtensionConfigurationManager extends core.ConfigurationService {
   /// Create a new instance of [ExtensionConfigurationManager].
   ExtensionConfigurationManager({
     required ToolExtensionManager extensionManager,
-    Logger? logger,
-    Platform? platform,
+    required Logger logger,
+    required Platform platform,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         logger: logger ?? globals.logger,
+         logger: logger,
          extensionManager: extensionManager,
-         platform: platform ?? globals.platform,
+         platform: platform,
        );
 
   final ExtensionDiscoveryHelper _discoveryHelper;
@@ -108,7 +107,7 @@ base class ExtensionConfigurationManager extends core.ConfigurationService {
               params: <String, Object?>{'option': option, 'value': value},
             )
             .timeout(const Duration(seconds: 5));
-        if (result case final Map<Object?, Object?> resultMap) {
+        if (result case final Map<dynamic, dynamic> resultMap) {
           return core.OptionValidationResult.fromJson(resultMap.cast<String, Object?>());
         }
       } on Object catch (e) {

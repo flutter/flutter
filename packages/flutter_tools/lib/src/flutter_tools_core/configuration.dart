@@ -106,7 +106,7 @@ final class OptionValidationResult {
   static List<OptionValidationResult> listFromJson(Object? rpcResult) => <OptionValidationResult>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<Object?, Object?> m)
+        if (item case final Map<dynamic, dynamic> m)
           OptionValidationResult.fromJson(m.cast<String, Object?>()),
   ];
 }
@@ -132,7 +132,7 @@ final class ExtensionConfigurationOption extends ConfigurationOption {
   static List<ExtensionConfigurationOption> listFromJson(Object? rpcResult) => [
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<Object?, Object?> m)
+        if (item case final Map<dynamic, dynamic> m)
           ExtensionConfigurationOption.fromJson(m.cast<String, Object?>()),
   ];
 

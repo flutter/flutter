@@ -16,7 +16,6 @@ import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../generic_extension_protocol/manager.dart';
-import '../globals.dart' as globals;
 import 'extension_discovery.dart';
 
 /// Retrieve the [ExtensionBuildTargetManager] from the context.
@@ -32,12 +31,12 @@ base class ExtensionBuildTargetManager extends core.BuildService {
   /// Create a new instance of [ExtensionBuildTargetManager].
   ExtensionBuildTargetManager({
     required ToolExtensionManager extensionManager,
-    Logger? logger,
-    Platform? platform,
+    required Logger logger,
+    required Platform platform,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         logger: logger ?? globals.logger,
+         logger: logger,
          extensionManager: extensionManager,
-         platform: platform ?? globals.platform,
+         platform: platform,
        );
 
   final ExtensionDiscoveryHelper _discoveryHelper;
@@ -57,6 +56,7 @@ base class ExtensionBuildTargetManager extends core.BuildService {
   ///
   /// If [throwOnFailure] is true and the prototype flag is disabled, it will
   /// throw a [ToolExit].
+  // TODO(bkonyi): Dynamically load user-installed extensions rather than unconditionally starting the prototype linux extension.
   Future<List<ToolExtension>> _getActiveBuildExtensions({required bool throwOnFailure}) async {
     if (!_discoveryHelper.isPrototypeEnabled) {
       if (throwOnFailure) {
@@ -75,7 +75,7 @@ base class ExtensionBuildTargetManager extends core.BuildService {
     final targets = <core.Target>[];
     if (rpcResult case final List<Object?> resultList) {
       for (final item in resultList) {
-        if (item case final Map<Object?, Object?> itemMap) {
+        if (item case final Map<dynamic, dynamic> itemMap) {
           targets.add(core.ExtensionBuildTarget.fromJson(itemMap.cast<String, Object?>()));
         }
       }
@@ -120,7 +120,7 @@ base class ExtensionBuildTargetManager extends core.BuildService {
               },
             )
             .timeout(const Duration(seconds: 60));
-        if (result case final Map<Object?, Object?> rawResultMap) {
+        if (result case final Map<dynamic, dynamic> rawResultMap) {
           final Map<String, Object?> resultMap = rawResultMap.cast<String, Object?>();
           if (resultMap case {'success': true}) {
             return resultMap;

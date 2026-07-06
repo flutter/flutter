@@ -561,6 +561,8 @@ void main() {
               'dependencies': <String>[],
               'inputs': <String>[],
               'outputs': <String>[],
+              'targetPlatformDirectory': 'linux-x64',
+              'targetDeviceDirectory': 'linux-proto-1',
             },
           ];
         });
@@ -614,7 +616,13 @@ void main() {
         isSupportedVal: true,
         isRunnableVal: true,
       );
-      return ExtensionBackedDevice(hostDevice, logger: BufferLogger.test());
+      return ExtensionBackedDevice(
+        hostDevice,
+        logger: BufferLogger.test(),
+        cache: globals.cache,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+      );
     }
 
     testUsingContext(

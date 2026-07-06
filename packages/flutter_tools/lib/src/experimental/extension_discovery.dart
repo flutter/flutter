@@ -14,7 +14,6 @@ import '../../generic_extension_protocol.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../extension_prototypes/linux_extension/extension.dart';
-import '../globals.dart' as globals;
 
 /// A helper class for abstracting extension isolate spawning and capability querying.
 ///
@@ -25,9 +24,9 @@ class ExtensionDiscoveryHelper {
   /// Create a new instance of [ExtensionDiscoveryHelper].
   ExtensionDiscoveryHelper({
     required Logger logger,
+    required Platform platform,
     Duration capabilitiesTimeout = const Duration(seconds: 5),
     ToolExtensionManager? extensionManager,
-    Platform? platform,
   }) : _logger = logger,
        _capabilitiesTimeout = capabilitiesTimeout,
        _extensionManager = extensionManager,
@@ -36,18 +35,15 @@ class ExtensionDiscoveryHelper {
   final Duration _capabilitiesTimeout;
   final ToolExtensionManager? _extensionManager;
   final Logger _logger;
-  final Platform? _platform;
+  final Platform _platform;
 
   /// Environment variable key to enable tool extension prototype features.
   static const String envPrototypeFlag = 'FLUTTER_TOOL_EXTENSION_PROTOTYPE';
 
   /// Whether the host platform enables tool extension prototype features.
   ///
-  /// Checks the injected platform's environment variables first, and falls back
-  /// to the global flag if no platform was injected.
-  bool get isPrototypeEnabled => _platform != null
-      ? _platform.environment[envPrototypeFlag] == 'true'
-      : globals.isToolExtensionPrototypeEnabled;
+  /// Checks the injected platform's environment variables.
+  bool get isPrototypeEnabled => _platform.environment[envPrototypeFlag] == 'true';
 
   bool get _isPrototypeEnabled => isPrototypeEnabled;
 

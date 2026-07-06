@@ -22,10 +22,10 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -145,12 +145,12 @@ class HostDevice implements core.Device {
 base class ExtensionDeviceManager extends core.DeviceService {
   ExtensionDeviceManager({
     required ToolExtensionManager extensionManager,
-    Logger? logger,
-    Platform? platform,
+    required Logger logger,
+    required Platform platform,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         logger: logger ?? globals.logger,
+         logger: logger,
          extensionManager: extensionManager,
-         platform: platform ?? globals.platform,
+         platform: platform,
        );
 
   final ExtensionDiscoveryHelper _discoveryHelper;
@@ -171,10 +171,10 @@ base class ExtensionDeviceManager extends core.DeviceService {
         final Object? devicesResult = await extension
             .callMethod(core.DeviceService.discoverDevicesMethod)
             .timeout(const Duration(seconds: 5));
-        if (devicesResult is List) {
-          for (final Object? item in devicesResult) {
-            if (item is Map) {
-              final Map<String, Object?> deviceData = item.cast<String, Object?>();
+        if (devicesResult case final List<Object?> resultList) {
+          for (final item in resultList) {
+            if (item case final Map<dynamic, dynamic> itemMap) {
+              final Map<String, Object?> deviceData = itemMap.cast<String, Object?>();
               final interfaceName = deviceData['connectionInterface'] as String?;
               DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
               if (interfaceName != null) {
@@ -218,10 +218,17 @@ base class ExtensionDeviceManager extends core.DeviceService {
 class ExtensionDeviceDiscovery extends DeviceDiscovery {
   ExtensionDeviceDiscovery(
     ToolExtensionManager extensionManager, {
+    required Cache cache,
+    required FileSystem fileSystem,
     required Logger logger,
-    Platform? platform,
+    required Platform platform,
+    Artifacts? artifacts,
     ExtensionDeviceManager? deviceManager,
-  }) : _logger = logger,
+  }) : _cache = cache,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _platform = platform,
+       _artifacts = artifacts,
        _discoveryHelper = ExtensionDiscoveryHelper(
          logger: logger,
          extensionManager: extensionManager,
@@ -236,7 +243,11 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
              platform: platform,
            );
 
+  final Cache _cache;
+  final FileSystem _fileSystem;
   final Logger _logger;
+  final Platform _platform;
+  final Artifacts? _artifacts;
   final ExtensionDiscoveryHelper _discoveryHelper;
   final ExtensionDeviceManager _deviceManager;
 
@@ -265,7 +276,16 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
     try {
       final List<core.Device> coreDevices = await _deviceManager.discoverDevices();
       for (final coreDevice in coreDevices) {
-        discoveredDevices.add(ExtensionBackedDevice(coreDevice, logger: _logger));
+        discoveredDevices.add(
+          ExtensionBackedDevice(
+            coreDevice,
+            cache: _cache,
+            fileSystem: _fileSystem,
+            logger: _logger,
+            platform: _platform,
+            artifacts: _artifacts,
+          ),
+        );
       }
     } on Object catch (e) {
       _logger.printTrace('Failed to discover devices: $e');
@@ -280,16 +300,26 @@ class ExtensionDeviceDiscovery extends DeviceDiscovery {
 
 /// A client-side [Device] implementation that delegates all commands to a core.Device (HostDevice).
 class ExtensionBackedDevice extends Device {
-  ExtensionBackedDevice(this._device, {required super.logger})
-    : connectionInterface = _device is HostDevice
-          ? _device.connectionInterface
-          : DeviceConnectionInterface.attached,
-      super(
-        _device.id,
-        platformType: PlatformType.custom,
-        ephemeral: true,
-        category: parseCategory(_device.category),
-      ) {
+  ExtensionBackedDevice(
+    this._device, {
+    required Cache cache,
+    required FileSystem fileSystem,
+    required Platform platform,
+    required super.logger,
+    Artifacts? artifacts,
+  }) : _cache = cache,
+       _fileSystem = fileSystem,
+       _platform = platform,
+       _artifacts = artifacts,
+       connectionInterface = _device is HostDevice
+           ? _device.connectionInterface
+           : DeviceConnectionInterface.attached,
+       super(
+         _device.id,
+         platformType: PlatformType.custom,
+         ephemeral: true,
+         category: parseCategory(_device.category),
+       ) {
     _logReader = ExtensionDeviceLogReader(
       logLines: _device.getLogReader(),
       name: '$name log reader',
@@ -297,6 +327,10 @@ class ExtensionBackedDevice extends Device {
   }
 
   final core.Device _device;
+  final Cache _cache;
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final Artifacts? _artifacts;
 
   @override
   final DeviceConnectionInterface connectionInterface;
@@ -310,17 +344,8 @@ class ExtensionBackedDevice extends Device {
   Future<bool> isSupported() async => _device.isSupported();
 
   @override
-  bool isSupportedForProject(FlutterProject project) {
-    if (!_device.isSupportedForProject(project.directory.uri)) {
-      return false;
-    }
-    if (_device.buildTarget == 'assemble_linux_app' ||
-        _device.platform == 'linux-x64' ||
-        _device.name.toLowerCase().contains('linux')) {
-      return project.linux.existsSync();
-    }
-    return true;
-  }
+  bool isSupportedForProject(FlutterProject project) =>
+      _device.isSupportedForProject(project.directory.uri);
 
   @override
   Future<bool> get isLocalEmulator async => _device.isEmulator;
@@ -351,7 +376,12 @@ class ExtensionBackedDevice extends Device {
     return switch (category) {
       Category.mobile => TargetPlatform.android,
       Category.web => TargetPlatform.web_javascript,
-      Category.desktop || null => TargetPlatform.linux_x64,
+      Category.desktop || null => switch (_platform.operatingSystem) {
+        'linux' => TargetPlatform.linux_x64,
+        'windows' => TargetPlatform.windows_x64,
+        'macos' => TargetPlatform.darwin,
+        _ => TargetPlatform.linux_x64,
+      },
     };
   }
 
@@ -384,15 +414,45 @@ class ExtensionBackedDevice extends Device {
   }) async {
     final TargetPlatform platform = await targetPlatform;
     final String buildModeName = debuggingOptions.buildInfo.mode.cliName;
-    final String platformName = platform.osName;
     final FlutterProject project = FlutterProject.current();
-    final cmakeProject = GenericCmakeProject(project, platformName);
-    final Directory buildDirectory = globals.fs.directory(
-      globals.fs.path.join(
+
+    final ExtensionBuildTargetManager? buildManager = extensionBuildTargetManager;
+    if (buildManager == null) {
+      throwToolExit('ExtensionBuildTargetManager not found in context.');
+    }
+
+    final String buildTarget = _device.buildTarget;
+
+    core.Target? foundTarget;
+    try {
+      final List<core.Target> targets = await buildManager.getTargets();
+      if (targets.isEmpty) {
+        throwToolExit('Tool extension does not support the "build" service.');
+      }
+      final List<core.Target> matching = targets
+          .where((core.Target t) => t.name == buildTarget)
+          .toList();
+      if (matching.isNotEmpty) {
+        foundTarget = matching.first;
+      } else {
+        throwToolExit('Tool extension does not expose build target "$buildTarget".');
+      }
+    } on Object catch (e) {
+      if (e is ToolExit) {
+        rethrow;
+      }
+      throwToolExit('Failed to query build targets: $e');
+    }
+
+    final String platformDir = foundTarget.targetPlatformDirectory ?? 'custom_device';
+    final String deviceDir = foundTarget.targetDeviceDirectory ?? foundTarget.name;
+
+    final Directory buildDirectory = _fileSystem.directory(
+      _fileSystem.path.join(
         project.directory.path,
         getBuildDirectory(),
-        platform.getName(),
-        id,
+        platformDir,
+        deviceDir,
         buildModeName,
       ),
     );
@@ -400,34 +460,6 @@ class ExtensionBackedDevice extends Device {
     String? executablePath;
 
     if (!prebuiltApplication) {
-      final ExtensionBuildTargetManager? buildManager = extensionBuildTargetManager;
-      if (buildManager == null) {
-        throwToolExit('ExtensionBuildTargetManager not found in context.');
-      }
-
-      final String buildTarget = _device.buildTarget;
-
-      core.Target? foundTarget;
-      try {
-        final List<core.Target> targets = await buildManager.getTargets();
-        if (targets.isEmpty) {
-          throwToolExit('Tool extension does not support the "build" service.');
-        }
-        final List<core.Target> matching = targets
-            .where((core.Target t) => t.name == buildTarget)
-            .toList();
-        if (matching.isNotEmpty) {
-          foundTarget = matching.first;
-        } else {
-          throwToolExit('Tool extension does not expose build target "$buildTarget".');
-        }
-      } on Object catch (e) {
-        if (e is ToolExit) {
-          rethrow;
-        }
-        throwToolExit('Failed to query build targets: $e');
-      }
-
       final Map<String, String> environmentConfig = debuggingOptions.buildInfo
           .toEnvironmentConfig();
       environmentConfig['FLUTTER_TARGET'] = mainPath ?? 'lib/main.dart';
@@ -435,11 +467,11 @@ class ExtensionBackedDevice extends Device {
       environmentConfig['FLUTTER_BUILD_MODE'] = buildModeName;
       environmentConfig['CMAKE_BUILD_TYPE'] = sentenceCase(buildModeName);
 
-      final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
+      final LocalEngineInfo? localEngineInfo = _artifacts?.localEngineInfo;
       if (localEngineInfo != null) {
         final String targetOutPath = localEngineInfo.targetOutPath;
-        environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(
-          globals.fs.path.dirname(targetOutPath),
+        environmentConfig['FLUTTER_ENGINE'] = _fileSystem.path.dirname(
+          _fileSystem.path.dirname(targetOutPath),
         );
         environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
         environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
@@ -467,7 +499,7 @@ class ExtensionBackedDevice extends Device {
       }
 
       final buildEnv = core.BuildEnvironment(
-        cacheDir: globals.cache.getRoot().uri,
+        cacheDir: _cache.getRoot().uri,
         defines: environmentConfig,
         flutterAssetsDir: project.directory
             .childDirectory('build')
@@ -486,7 +518,6 @@ class ExtensionBackedDevice extends Device {
           buildEnv,
         );
         final buildResult = core.BuildResult.fromJson(buildResultMap);
-        // CRITICAL FIX: Verify buildResult.success as in Workspace 1!
         if (!buildResult.success) {
           throwToolExit('Build compilation failed: ${buildResult.errorMessage ?? "Unknown error"}');
         }
@@ -499,22 +530,17 @@ class ExtensionBackedDevice extends Device {
       }
 
       if (buildExecutablePath != null) {
-        executablePath = globals.fs.file(Uri.parse(buildExecutablePath).toFilePath()).path;
+        executablePath = _fileSystem.file(Uri.parse(buildExecutablePath).toFilePath()).path;
       }
-    }
-
-    if (executablePath == null) {
-      if (!prebuiltApplication && cmakeProject.existsSync()) {
-        executablePath = globals.fs.path.join(
-          buildDirectory.path,
-          'bundle',
-          project.manifest.appName,
+      if (executablePath == null) {
+        throwToolExit(
+          'Build compilation succeeded, but build service returned no executable path.',
         );
       }
     }
 
     if (executablePath != null) {
-      executablePath = globals.fs.path.absolute(executablePath);
+      executablePath = _fileSystem.path.absolute(executablePath);
     }
 
     if (executablePath == null && package == null) {

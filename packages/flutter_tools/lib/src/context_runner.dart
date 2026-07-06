@@ -197,6 +197,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         fileSystem: globals.fs,
         iosWorkflow: globals.iosWorkflow!,
         artifacts: globals.artifacts!,
+        cache: globals.cache,
         flutterVersion: globals.flutterVersion,
         androidWorkflow: androidWorkflow!,
         xcDevice: globals.xcdevice!,

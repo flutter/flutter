@@ -28,7 +28,7 @@ abstract class Device {
   static List<Map<String, Object?>> listFromJson(Object? rpcResult) => <Map<String, Object?>>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<Object?, Object?> m) m.cast<String, Object?>(),
+        if (item case final Map<dynamic, dynamic> m) m.cast<String, Object?>(),
   ];
 
   Future<bool> isSupported() async => true;

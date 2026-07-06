@@ -154,7 +154,11 @@ void main() {
         unawaited(testPeer.listen());
 
         final bufferLogger = BufferLogger.test();
-        final validator = ExtensionDoctorValidator(manager, logger: bufferLogger);
+        final validator = ExtensionDoctorValidator(
+          manager,
+          logger: bufferLogger,
+          platform: globals.platform,
+        );
 
         final host_doctor.ValidationResult result = await validator.validate();
 
@@ -207,7 +211,11 @@ void main() {
         unawaited(testPeer.listen());
 
         final bufferLogger = BufferLogger.test();
-        final validator = ExtensionDoctorValidator(manager, logger: bufferLogger);
+        final validator = ExtensionDoctorValidator(
+          manager,
+          logger: bufferLogger,
+          platform: globals.platform,
+        );
 
         // Case 1: only notAvailable results
         mockDiagnosticsResponse = <Map<String, Object?>>[

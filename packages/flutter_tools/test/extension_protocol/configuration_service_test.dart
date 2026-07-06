@@ -151,6 +151,7 @@ void main() {
         final configManager = ExtensionConfigurationManager(
           extensionManager: manager,
           logger: bufferLogger,
+          platform: globals.platform,
         );
 
         final OptionValidationResult result1 = await configManager.validate(
@@ -320,8 +321,11 @@ void main() {
         Platform: () =>
             FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
         ToolExtensionManager: () => manager,
-        ExtensionConfigurationManager: () =>
-            ExtensionConfigurationManager(extensionManager: context.get<ToolExtensionManager>()!),
+        ExtensionConfigurationManager: () => ExtensionConfigurationManager(
+          extensionManager: context.get<ToolExtensionManager>()!,
+          logger: globals.logger,
+          platform: globals.platform,
+        ),
       },
     );
 
@@ -383,8 +387,11 @@ void main() {
         Platform: () =>
             FakePlatform(environment: <String, String>{'FLUTTER_TOOL_EXTENSION_PROTOTYPE': 'true'}),
         ToolExtensionManager: () => manager,
-        ExtensionConfigurationManager: () =>
-            ExtensionConfigurationManager(extensionManager: context.get<ToolExtensionManager>()!),
+        ExtensionConfigurationManager: () => ExtensionConfigurationManager(
+          extensionManager: context.get<ToolExtensionManager>()!,
+          logger: globals.logger,
+          platform: globals.platform,
+        ),
       },
     );
   });
@@ -405,6 +412,8 @@ base class MockExtensionConfigurationManager extends ExtensionConfigurationManag
            ],
        super(
          extensionManager: ToolExtensionManager(),
+         logger: BufferLogger.test(),
+         platform: FakePlatform(),
        );
 
   final bool success;

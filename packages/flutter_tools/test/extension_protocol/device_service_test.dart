@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/experimental/devices.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/device.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/extension.dart';
 import 'package:flutter_tools/src/flutter_tools_core/device.dart' show LocalDeviceLaunchHelper;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:test/test.dart';
 
 import '../src/context.dart';
@@ -275,7 +276,13 @@ void main() {
       () async {
         await manager.startExtension(linuxDeviceExtensionEntryPoint);
 
-        final discovery = ExtensionDeviceDiscovery(manager, logger: BufferLogger.test());
+        final discovery = ExtensionDeviceDiscovery(
+          manager,
+          logger: BufferLogger.test(),
+          cache: globals.cache,
+          fileSystem: globals.fs,
+          platform: globals.platform,
+        );
 
         final List<Device> wirelessDevices = await discovery.discoverDevices(
           filter: DeviceDiscoveryFilter(

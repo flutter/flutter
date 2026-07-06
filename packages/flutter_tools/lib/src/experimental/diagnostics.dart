@@ -16,7 +16,6 @@ import '../base/platform.dart';
 import '../doctor_validator.dart' as host_doctor;
 import '../flutter_tools_core/diagnostics.dart' as core;
 import '../generic_extension_protocol/manager.dart';
-import '../globals.dart' as globals;
 import 'extension_discovery.dart';
 
 /// Retrieve the [ExtensionDiagnosticsManager] from the context.
@@ -27,12 +26,12 @@ ExtensionDiagnosticsManager? get extensionDiagnosticsManager =>
 base class ExtensionDiagnosticsManager extends core.DiagnosticsService {
   ExtensionDiagnosticsManager({
     required ToolExtensionManager extensionManager,
-    Logger? logger,
-    Platform? platform,
+    required Logger logger,
+    required Platform platform,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         logger: logger ?? globals.logger,
+         logger: logger,
          extensionManager: extensionManager,
-         platform: platform ?? globals.platform,
+         platform: platform,
        );
 
   final ExtensionDiscoveryHelper _discoveryHelper;
@@ -76,13 +75,13 @@ base class ExtensionDiagnosticsManager extends core.DiagnosticsService {
 class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
   ExtensionDoctorValidator(
     ToolExtensionManager extensionManager, {
-    Logger? logger,
-    Platform? platform,
+    required Logger logger,
+    required Platform platform,
     ExtensionDiagnosticsManager? diagnosticsManager,
   }) : _discoveryHelper = ExtensionDiscoveryHelper(
-         logger: logger ?? globals.logger,
+         logger: logger,
          extensionManager: extensionManager,
-         platform: platform ?? globals.platform,
+         platform: platform,
        ),
        _diagnosticsManager =
            diagnosticsManager ??

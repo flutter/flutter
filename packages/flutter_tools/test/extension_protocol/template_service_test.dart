@@ -11,12 +11,14 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/flutter_tools_extension.dart' as tool_extension;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/template.dart';
 import 'package:flutter_tools/src/flutter_tools_core/templates.dart' as core;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
@@ -236,7 +238,12 @@ void main() {
 
         unawaited(testPeer.listen());
 
-        final templateManager = ExtensionTemplateManager(extensionManager: manager);
+        final templateManager = ExtensionTemplateManager(
+          extensionManager: manager,
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform,
+        );
 
         final List<core.ProjectTemplate> templates = await templateManager.getProjectTemplates();
         expect(templates, hasLength(1));
@@ -479,6 +486,8 @@ void main() {
         ExtensionTemplateManager: () => ExtensionTemplateManager(
           extensionManager: context.get<tool_extension.ToolExtensionManager>()!,
           fileSystem: memoryFileSystem,
+          logger: globals.logger,
+          platform: globals.platform,
         ),
       },
     );
@@ -487,10 +496,12 @@ void main() {
 
 base class MockExtensionTemplateManager extends ExtensionTemplateManager {
   MockExtensionTemplateManager({required this.templates, required this.fileSystem})
-      : super(
-          extensionManager: tool_extension.ToolExtensionManager(),
-          fileSystem: fileSystem,
-        );
+    : super(
+        extensionManager: tool_extension.ToolExtensionManager(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+      );
 
   final List<core.ProjectTemplate> templates;
   final FileSystem fileSystem;

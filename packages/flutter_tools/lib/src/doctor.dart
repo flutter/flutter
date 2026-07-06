@@ -48,10 +48,15 @@ import 'windows/windows_workflow.dart';
 abstract class DoctorValidatorsProvider {
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
   // [FeatureFlags].
-  factory DoctorValidatorsProvider.test({Platform? platform, required FeatureFlags featureFlags}) {
+  factory DoctorValidatorsProvider.test({
+    Platform? platform,
+    required FeatureFlags featureFlags,
+    Logger? logger,
+  }) {
     return _DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
+      logger: logger ?? BufferLogger.test(),
     );
   }
 
@@ -61,6 +66,7 @@ abstract class DoctorValidatorsProvider {
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
     platform: globals.platform,
     featureFlags: featureFlags,
+    logger: globals.logger,
   );
 
   List<DoctorValidator> get validators;
@@ -68,12 +74,17 @@ abstract class DoctorValidatorsProvider {
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  _DefaultDoctorValidatorsProvider({required this.platform, required this.featureFlags});
+  _DefaultDoctorValidatorsProvider({
+    required this.platform,
+    required this.featureFlags,
+    required this.logger,
+  });
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final Platform platform;
   final FeatureFlags featureFlags;
+  final Logger logger;
 
   late final linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags);
 
@@ -154,7 +165,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     final ToolExtensionManager? extensionManager = context.get<ToolExtensionManager>();
     if (extensionManager != null &&
         platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true') {
-      _validators!.add(ExtensionDoctorValidator(extensionManager, platform: platform));
+      _validators!.add(
+        ExtensionDoctorValidator(extensionManager, logger: logger, platform: platform),
+      );
     }
     return _validators!;
   }

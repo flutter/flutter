@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
 
@@ -67,7 +68,7 @@ void main() {
       final ToolExtension extension = await connectMockExtension(
         services: <String>['device', 'build'],
       );
-      final helper = ExtensionDiscoveryHelper(logger: logger);
+      final helper = ExtensionDiscoveryHelper(logger: logger, platform: globals.platform);
 
       final ToolExtensionCapabilities? capabilities = await helper.getExtensionCapabilities(
         extension,
@@ -81,7 +82,7 @@ void main() {
       'getExtensionCapabilities returns null and logs trace on failure when throwOnFailure is false',
       () async {
         final ToolExtension extension = await connectMockExtension(throwOnCapabilities: true);
-        final helper = ExtensionDiscoveryHelper(logger: logger);
+        final helper = ExtensionDiscoveryHelper(logger: logger, platform: globals.platform);
 
         final ToolExtensionCapabilities? capabilities = await helper.getExtensionCapabilities(
           extension,
@@ -93,7 +94,7 @@ void main() {
 
     testUsingContext('isServiceSupported correctly checks service namespace', () async {
       final ToolExtension extension = await connectMockExtension(services: <String>['device']);
-      final helper = ExtensionDiscoveryHelper(logger: logger);
+      final helper = ExtensionDiscoveryHelper(logger: logger, platform: globals.platform);
 
       expect(await helper.isServiceSupported(extension, 'device'), isTrue);
       expect(await helper.isServiceSupported(extension, 'template'), isFalse);

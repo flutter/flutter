@@ -13,6 +13,7 @@ import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
+import 'cache.dart';
 import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -54,6 +55,7 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required Cache cache,
     ToolExtensionManager? extensionManager,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
@@ -126,7 +128,15 @@ class FlutterDeviceManager extends DeviceManager {
          ),
          // Register the ExtensionDeviceDiscovery if a ToolExtensionManager is provided,
          // enabling discovery of custom devices managed by tool extensions.
-         if (extensionManager != null) ExtensionDeviceDiscovery(extensionManager, logger: logger),
+         if (extensionManager != null)
+           ExtensionDeviceDiscovery(
+             extensionManager,
+             artifacts: artifacts,
+             cache: cache,
+             fileSystem: fileSystem,
+             logger: logger,
+             platform: platform,
+           ),
        ];
 
   @override

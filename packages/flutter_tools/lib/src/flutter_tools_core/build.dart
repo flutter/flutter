@@ -64,7 +64,7 @@ abstract base class BuildService extends ToolExtensionService {
   Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
     if (params case {
       'targetName': final String targetName,
-      'environment': final Map<Object?, Object?> rawEnv,
+      'environment': final Map<dynamic, dynamic> rawEnv,
     }) {
       final BuildEnvironment env;
       try {
@@ -180,7 +180,9 @@ final class ExtensionBuildTarget extends Target {
           : const <String>[],
       cliSubcommand = json['cliSubcommand'] as String?,
       cliDescription = json['cliDescription'] as String?,
-      pluginPlatformKey = json['pluginPlatformKey'] as String?;
+      pluginPlatformKey = json['pluginPlatformKey'] as String?,
+      targetPlatformDirectory = json['targetPlatformDirectory'] as String?,
+      targetDeviceDirectory = json['targetDeviceDirectory'] as String?;
 
   @override
   final String name;
@@ -204,6 +206,12 @@ final class ExtensionBuildTarget extends Target {
   final String? pluginPlatformKey;
 
   @override
+  final String? targetPlatformDirectory;
+
+  @override
+  final String? targetDeviceDirectory;
+
+  @override
   Future<Map<String, Object?>> build(BuildEnvironment env) async {
     throw UnimplementedError(
       'ExtensionBuildTarget.build should not be called directly on host representation.',
@@ -213,7 +221,7 @@ final class ExtensionBuildTarget extends Target {
   static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) => <ExtensionBuildTarget>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<Object?, Object?> m)
+        if (item case final Map<dynamic, dynamic> m)
           ExtensionBuildTarget.fromJson(m.cast<String, Object?>()),
   ];
 }
@@ -236,7 +244,7 @@ class BuildEnvironment {
   factory BuildEnvironment.fromJson(Map<String, Object?> json) {
     return BuildEnvironment(
       cacheDir: Uri.parse(json['cacheDir']! as String),
-      defines: (json['defines']! as Map<Object?, Object?>).cast<String, String>(),
+      defines: (json['defines']! as Map<dynamic, dynamic>).cast<String, String>(),
       flutterAssetsDir: Uri.parse(json['flutterAssetsDir']! as String),
       outputDirectory: Uri.parse(json['outputDirectory']! as String),
       projectRoot: Uri.parse(json['projectRoot']! as String),
@@ -244,7 +252,7 @@ class BuildEnvironment {
           (json['plugins'] as List<Object?>?)
               ?.map(
                 (Object? item) => ExtensionPlugin.fromJson(
-                  (item! as Map<Object?, Object?>).cast<String, Object?>(),
+                  (item! as Map<dynamic, dynamic>).cast<String, Object?>(),
                 ),
               )
               .toList() ??
@@ -298,7 +306,7 @@ class ExtensionPlugin {
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
     return ExtensionPlugin(
       configuration:
-          (json['configuration'] as Map<Object?, Object?>?)?.cast<String, Object?>() ??
+          (json['configuration'] as Map<dynamic, dynamic>?)?.cast<String, Object?>() ??
           const <String, Object?>{},
       name: json['name']! as String,
       path: json['path']! as String,

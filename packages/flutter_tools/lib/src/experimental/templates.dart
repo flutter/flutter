@@ -17,7 +17,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../generic_extension_protocol/manager.dart';
-import '../globals.dart' as globals;
 import 'extension_discovery.dart';
 
 /// Retrieve the [ExtensionTemplateManager] from the context.
@@ -32,15 +31,15 @@ base class ExtensionTemplateManager extends core.TemplateService {
   /// Create a new instance of [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required ToolExtensionManager extensionManager,
-    FileSystem? fileSystem,
-    Logger? logger,
-    Platform? platform,
-  }) : _fileSystem = fileSystem ?? globals.fs,
-       _logger = logger ?? globals.logger,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
        _discoveryHelper = ExtensionDiscoveryHelper(
-         logger: logger ?? globals.logger,
+         logger: logger,
          extensionManager: extensionManager,
-         platform: platform ?? globals.platform,
+         platform: platform,
        );
 
   final FileSystem _fileSystem;
@@ -124,7 +123,7 @@ base class ExtensionTemplateManager extends core.TemplateService {
               },
             )
             .timeout(const Duration(seconds: 5));
-        if (result case final Map<Object?, Object?> resultMap) {
+        if (result case final Map<dynamic, dynamic> resultMap) {
           return resultMap.cast<String, Object?>();
         }
       } on Object catch (e) {

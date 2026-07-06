@@ -112,7 +112,7 @@ class ValidationMessage {
   static List<ValidationMessage> listFromJson(Object? rpcResult) => <ValidationMessage>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<Object?, Object?> m)
+        if (item case final Map<dynamic, dynamic> m)
           ValidationMessage.fromJson(m.cast<String, Object?>()),
   ];
 }
@@ -151,7 +151,7 @@ class ValidationResult {
   static List<ValidationResult> listFromJson(Object? rpcResult) => <ValidationResult>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<Object?, Object?> m)
+        if (item case final Map<dynamic, dynamic> m)
           ValidationResult.fromJson(m.cast<String, Object?>()),
   ];
 }
