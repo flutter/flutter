@@ -15,9 +15,11 @@ import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../globals.dart' as globals;
 import '../build_system.dart';
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
@@ -32,7 +34,7 @@ class DevelopmentShaderCompiler {
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
-  final _compilationPool = Pool(4);
+  final Pool _compilationPool = Pool(4);
   final math.Random _random;
 
   late TargetPlatform _targetPlatform;
@@ -95,15 +97,26 @@ class ShaderCompiler {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    Platform? platform,
   }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
-       _artifacts = artifacts;
+       _artifacts = artifacts,
+       _platform = platform ?? _lookupPlatform();
+
+  static Platform _lookupPlatform() {
+    try {
+      return globals.platform;
+    } on UnsupportedError {
+      return const LocalPlatform();
+    }
+  }
 
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  final Platform _platform;
   bool _hasLoggedSecurityBlockError = false;
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
@@ -188,17 +201,6 @@ class ShaderCompiler {
       '--include=$shaderLibPath',
     ];
 
-    Future<ProcessResult> runCommand(List<String> command) async {
-      try {
-        return await _processManager.run(command, stderrEncoding: utf8);
-      } on ProcessException catch (e) {
-        if (_isBlockedBySecurityPolicy(e)) {
-          throw _SecurityPolicyBlockException(e);
-        }
-        rethrow;
-      }
-    }
-
     try {
       var failure = false;
       var retryWithoutSksl = false;
@@ -206,7 +208,7 @@ class ShaderCompiler {
       final List<String> shaderTargets = _shaderTargetsFromTargetPlatform(targetPlatform);
       final List<String> cmd = makeImpellercCommand(shaderTargets);
       _logger.printTrace('impellerc command: $cmd');
-      final ProcessResult result = await runCommand(cmd);
+      final ProcessResult result = await _runCommand(cmd);
       if (result.exitCode != 0) {
         // Maybe retry impellerc command without --sksl.
         if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
@@ -223,7 +225,7 @@ class ShaderCompiler {
         shaderTargets.remove('--sksl');
         final List<String> retryCmd = makeImpellercCommand(shaderTargets);
         _logger.printTrace('Retrying impellerc command without sksl: $retryCmd');
-        final ProcessResult retryResult = await runCommand(retryCmd);
+        final ProcessResult retryResult = await _runCommand(retryCmd);
         if (retryResult.exitCode != 0) {
           // Retry failed.
           _logger.printError('impellerc failure: ${retryResult.stderr}');
@@ -261,12 +263,27 @@ class ShaderCompiler {
     return true;
   }
 
+  Future<ProcessResult> _runCommand(List<String> command) async {
+    try {
+      return await _processManager.run(command, stderrEncoding: utf8);
+    } on ProcessException catch (e) {
+      if (_isBlockedBySecurityPolicy(e)) {
+        throw _SecurityPolicyBlockException(e);
+      }
+      rethrow;
+    }
+  }
+
   bool _isBlockedBySecurityPolicy(ProcessException exception) {
+    if (!_platform.isWindows) {
+      return false;
+    }
+    const winErrorAccessDisabledByPolicy = 1260;
     final String message = exception.message.toLowerCase();
     return message.contains('application control policy') ||
         message.contains('blocked by your administrator') ||
         message.contains('blocked by group policy') ||
-        exception.errorCode == _winErrorAccessDisabledByPolicy;
+        exception.errorCode == winErrorAccessDisabledByPolicy;
   }
 
   void _logSecurityBlockError(String impellercPath) {
@@ -279,15 +296,13 @@ class ShaderCompiler {
       'Error: The Impeller shader compiler (impellerc) was blocked by system\n'
       'security policies (e.g., Windows Application Control or AppLocker).\n'
       '\n'
-      'To resolve this, please contact your system administrator to whitelist\n'
+      'To resolve this, please contact your system administrator to allowlist\n'
       'the binary at:\n'
       '  $impellercPath\n'
       '------------------------------------------------------------------------',
     );
   }
 }
-
-const int _winErrorAccessDisabledByPolicy = 1260;
 
 class _SecurityPolicyBlockException implements Exception {
   _SecurityPolicyBlockException(this.cause);

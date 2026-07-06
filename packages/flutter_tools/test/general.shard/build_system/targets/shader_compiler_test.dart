@@ -9,6 +9,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -570,6 +571,7 @@ void main() {
           logger: logger,
           fileSystem: fileSystem,
           artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
         );
 
         await expectLater(
@@ -616,6 +618,7 @@ void main() {
           logger: logger,
           fileSystem: fileSystem,
           artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
         );
 
         await expectLater(
@@ -662,6 +665,7 @@ void main() {
           logger: logger,
           fileSystem: fileSystem,
           artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
         );
 
         final bool success = await shaderCompiler.compileShader(
@@ -760,6 +764,7 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
       );
 
       final bool success1 = await shaderCompiler.compileShader(
