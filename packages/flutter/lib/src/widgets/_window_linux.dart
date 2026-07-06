@@ -112,8 +112,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
     _registrar.register(
       viewId: controller.rootView.viewId,
-      window: controller._window,
-      view: controller._view,
+      windowHandle: controller._window.instance.cast(),
+      viewHandle: controller._view.instance.cast(),
     );
     return controller;
   }
@@ -138,8 +138,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
     _registrar.register(
       viewId: controller.rootView.viewId,
-      window: controller._window,
-      view: controller._view,
+      windowHandle: controller._window.instance.cast(),
+      viewHandle: controller._view.instance.cast(),
     );
     return controller;
   }
@@ -163,8 +163,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
     _registrar.register(
       viewId: controller.rootView.viewId,
-      window: controller._window,
-      view: controller._view,
+      windowHandle: controller._window.instance.cast(),
+      viewHandle: controller._view.instance.cast(),
     );
     return controller;
   }
@@ -188,8 +188,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
     _registrar.register(
       viewId: controller.rootView.viewId,
-      window: controller._window,
-      view: controller._view,
+      windowHandle: controller._window.instance.cast(),
+      viewHandle: controller._view.instance.cast(),
     );
     return controller;
   }
@@ -210,13 +210,13 @@ class WindowingOwnerLinux extends WindowingOwner {
   }
 }
 
-/// Tracks the native GTK windows and Flutter views created by a
+/// Tracks the native GTK windows and Flutter views managed by a
 /// [WindowingOwnerLinux], keyed by their [FlutterView.viewId].
 ///
 /// A [WindowingOwnerLinux] uses this registrar to remember the native window
 /// and view backing each controller it creates. Out-of-tree owners that
-/// subclass [WindowingOwnerLinux] to implement additional window types should
-/// register the [GtkWindow] and [FlView] they create via [register], and remove
+/// subclass [WindowingOwnerLinux] to implement additional window types must
+/// register the native window and view they create via [register], and remove
 /// them via [unregister] when the window is destroyed. Doing so allows other
 /// windows (for example dialogs, popups, and tooltips) to locate a parent
 /// window or view by its view ID.
@@ -224,20 +224,29 @@ class WindowingOwnerLinux extends WindowingOwner {
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
 class GtkWindowRegistrar {
-  /// GTK windows keyed by view ID.
-  final Map<int, GtkWindow> _windows = <int, GtkWindow>{};
+  final Map<int, _GtkWindow> _windows = <int, _GtkWindow>{};
+  final Map<int, _FlView> _views = <int, _FlView>{};
 
-  /// Flutter views keyed by view ID.
-  final Map<int, FlView> _views = <int, FlView>{};
-
-  /// Registers the native [window] and [view] backing the window identified by
+  /// Registers the native window and view backing the window identified by
   /// [viewId].
+  ///
+  /// The [windowHandle] must be a pointer to a
+  /// [GtkWindow](https://docs.gtk.org/gtk3/class.Window.html) and the
+  /// [viewHandle] must be a pointer to an
+  /// [FlView](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_view.h).
+  ///
+  /// The handles must remain valid until the window is unregistered via
+  /// [unregister].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  void register({required int viewId, required GtkWindow window, required FlView view}) {
-    _windows[viewId] = window;
-    _views[viewId] = view;
+  void register({
+    required int viewId,
+    required ffi.Pointer<ffi.Void> windowHandle,
+    required ffi.Pointer<ffi.Void> viewHandle,
+  }) {
+    _windows[viewId] = _GtkWindow.fromHandle(windowHandle);
+    _views[viewId] = _FlView.fromHandle(viewHandle);
   }
 
   /// Removes any native window and view registered for [viewId].
@@ -252,19 +261,9 @@ class GtkWindowRegistrar {
     _views.remove(viewId);
   }
 
-  /// Returns the [GtkWindow] registered for [viewId], or null if none has been
-  /// registered.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  GtkWindow? windowForViewId(int viewId) => _windows[viewId];
+  _GtkWindow? _windowForViewId(int viewId) => _windows[viewId];
 
-  /// Returns the [FlView] registered for [viewId], or null if none has been
-  /// registered.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  FlView? viewForViewId(int viewId) => _views[viewId];
+  _FlView? _viewForViewId(int viewId) => _views[viewId];
 }
 
 ///
@@ -324,13 +323,13 @@ class RegularWindowControllerLinux extends RegularWindowController
     bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
-       _window = GtkWindow(GtkWindowType.toplevel),
+       _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _windowMonitor = FlWindowMonitor(
+    _windowMonitor = _FlWindowMonitor(
       _window,
       onConfigure: notifyListeners,
       onStateChanged: notifyListeners,
@@ -354,9 +353,9 @@ class RegularWindowControllerLinux extends RegularWindowController
     // Force creation as Flutter will try and render to it immediately.
     _window.realize();
 
-    final engine = FlEngine.current();
-    _view = FlView(engine);
-    _viewMonitor = FlViewMonitor(
+    final engine = _FlEngine.current();
+    _view = _FlView(engine);
+    _viewMonitor = _FlViewMonitor(
       _view,
       onFirstFrame: () {
         _window.present();
@@ -372,10 +371,10 @@ class RegularWindowControllerLinux extends RegularWindowController
 
   final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
-  final GtkWindow _window;
-  late final FlView _view;
-  late final FlViewMonitor _viewMonitor;
-  late final FlWindowMonitor _windowMonitor;
+  final _GtkWindow _window;
+  late final _FlView _view;
+  late final _FlViewMonitor _viewMonitor;
+  late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
   @override
@@ -406,16 +405,16 @@ class RegularWindowControllerLinux extends RegularWindowController
 
   @override
   @internal
-  bool get isMaximized => _window.getWindow().getState().contains(GdkWindowState.maximized);
+  bool get isMaximized => _window.getWindow().getState().contains(_GdkWindowState.maximized);
 
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => _window.getWindow().getState().contains(GdkWindowState.iconified);
+  bool get isMinimized => _window.getWindow().getState().contains(_GdkWindowState.iconified);
 
   @override
   @internal
-  bool get isFullscreen => _window.getWindow().getState().contains(GdkWindowState.fullscreen);
+  bool get isFullscreen => _window.getWindow().getState().contains(_GdkWindowState.fullscreen);
 
   @override
   @internal
@@ -528,15 +527,15 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = GtkWindow(GtkWindowType.toplevel),
+       _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _window.setTypeHint(GdkWindowTypeHint.dialog);
+    _window.setTypeHint(_GdkWindowTypeHint.dialog);
     if (parent != null) {
-      final GtkWindow? parentWindow = owner.registrar.windowForViewId(parent.rootView.viewId);
+      final _GtkWindow? parentWindow = owner.registrar._windowForViewId(parent.rootView.viewId);
       if (parentWindow == null) {
         throw Exception('Failed to find dialog parent window');
       }
@@ -546,7 +545,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
     // Force creation as Flutter will try and render to it immediately.
     _window.realize();
 
-    _windowMonitor = FlWindowMonitor(
+    _windowMonitor = _FlWindowMonitor(
       _window,
       onConfigure: notifyListeners,
       onStateChanged: notifyListeners,
@@ -567,9 +566,9 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
       setTitle(title);
     }
     _window.setDecorated(decorated);
-    final engine = FlEngine.current();
-    _view = FlView(engine);
-    _viewMonitor = FlViewMonitor(
+    final engine = _FlEngine.current();
+    _view = _FlView(engine);
+    _viewMonitor = _FlViewMonitor(
       _view,
       onFirstFrame: () {
         _window.present();
@@ -585,11 +584,11 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
 
   final WindowingOwnerLinux _owner;
   final DialogWindowControllerDelegate _delegate;
-  final GtkWindow _window;
+  final _GtkWindow _window;
   final BaseWindowController? _parent;
-  late final FlView _view;
-  late final FlViewMonitor _viewMonitor;
-  late final FlWindowMonitor _windowMonitor;
+  late final _FlView _view;
+  late final _FlViewMonitor _viewMonitor;
+  late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
   @override
@@ -625,7 +624,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => _window.getWindow().getState().contains(GdkWindowState.iconified);
+  bool get isMinimized => _window.getWindow().getState().contains(_GdkWindowState.iconified);
 
   @override
   @internal
@@ -713,26 +712,26 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = GtkWindow(GtkWindowType.popup),
+       _window = _GtkWindow(_GtkWindowType.popup),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _window.setTypeHint(GdkWindowTypeHint.tooltip);
+    _window.setTypeHint(_GdkWindowTypeHint.tooltip);
     _window.setDecorated(false);
     // Force creation as Flutter will try and render to it immediately.
     _window.realize();
 
-    _windowMonitor = FlWindowMonitor(
+    _windowMonitor = _FlWindowMonitor(
       _window,
       onConfigure: notifyListeners,
       onDestroy: _delegate.onWindowDestroyed,
     );
     setConstraints(preferredConstraints);
-    final engine = FlEngine.current();
-    _view = FlView(engine, isSizedToContent: true);
-    _viewMonitor = FlViewMonitor(
+    final engine = _FlEngine.current();
+    _view = _FlView(engine, isSizedToContent: true);
+    _viewMonitor = _FlViewMonitor(
       _view,
       onFirstFrame: () {
         _window.show();
@@ -745,7 +744,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     _view.show();
     _window.add(_view);
 
-    final GtkWindow? parentWindow = _owner.registrar.windowForViewId(_parent.rootView.viewId);
+    final _GtkWindow? parentWindow = _owner.registrar._windowForViewId(_parent.rootView.viewId);
     if (parentWindow == null) {
       throw Exception('Failed to find tooltip parent window');
     }
@@ -755,13 +754,13 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 
   final WindowingOwnerLinux _owner;
   final TooltipWindowControllerDelegate _delegate;
-  final GtkWindow _window;
+  final _GtkWindow _window;
   late Rect _anchorRect;
   late WindowPositioner _positioner;
   final BaseWindowController _parent;
-  late final FlView _view;
-  late final FlViewMonitor _viewMonitor;
-  late final FlWindowMonitor _windowMonitor;
+  late final _FlView _view;
+  late final _FlViewMonitor _viewMonitor;
+  late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
   @override
@@ -791,8 +790,8 @@ class TooltipWindowControllerLinux extends TooltipWindowController
       _positioner = positioner;
     }
 
-    final GtkWindow? parentWindow = _owner.registrar.windowForViewId(_parent.rootView.viewId);
-    final FlView? view = _owner.registrar.viewForViewId(_parent.rootView.viewId);
+    final _GtkWindow? parentWindow = _owner.registrar._windowForViewId(_parent.rootView.viewId);
+    final _FlView? view = _owner.registrar._viewForViewId(_parent.rootView.viewId);
     var offset = (0, 0);
     if (parentWindow != null && view != null) {
       offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
@@ -815,30 +814,30 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     );
   }
 
-  GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
+  _GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
     return switch (anchor) {
-      WindowPositionerAnchor.center => GdkGravity.center,
-      WindowPositionerAnchor.top => GdkGravity.north,
-      WindowPositionerAnchor.bottom => GdkGravity.south,
-      WindowPositionerAnchor.left => GdkGravity.west,
-      WindowPositionerAnchor.right => GdkGravity.east,
-      WindowPositionerAnchor.topLeft => GdkGravity.northWest,
-      WindowPositionerAnchor.bottomLeft => GdkGravity.southWest,
-      WindowPositionerAnchor.topRight => GdkGravity.northEast,
-      WindowPositionerAnchor.bottomRight => GdkGravity.southEast,
+      WindowPositionerAnchor.center => _GdkGravity.center,
+      WindowPositionerAnchor.top => _GdkGravity.north,
+      WindowPositionerAnchor.bottom => _GdkGravity.south,
+      WindowPositionerAnchor.left => _GdkGravity.west,
+      WindowPositionerAnchor.right => _GdkGravity.east,
+      WindowPositionerAnchor.topLeft => _GdkGravity.northWest,
+      WindowPositionerAnchor.bottomLeft => _GdkGravity.southWest,
+      WindowPositionerAnchor.topRight => _GdkGravity.northEast,
+      WindowPositionerAnchor.bottomRight => _GdkGravity.southEast,
     };
   }
 
-  Set<GdkAnchorHint> _constraintAdjustmentToHints(
+  Set<_GdkAnchorHint> _constraintAdjustmentToHints(
     WindowPositionerConstraintAdjustment adjustment,
   ) {
-    return <GdkAnchorHint>{
-      if (adjustment.flipX) GdkAnchorHint.flipX,
-      if (adjustment.flipY) GdkAnchorHint.flipY,
-      if (adjustment.slideX) GdkAnchorHint.slideX,
-      if (adjustment.slideY) GdkAnchorHint.slideY,
-      if (adjustment.resizeX) GdkAnchorHint.resizeX,
-      if (adjustment.resizeY) GdkAnchorHint.resizeY,
+    return <_GdkAnchorHint>{
+      if (adjustment.flipX) _GdkAnchorHint.flipX,
+      if (adjustment.flipY) _GdkAnchorHint.flipY,
+      if (adjustment.slideX) _GdkAnchorHint.slideX,
+      if (adjustment.slideY) _GdkAnchorHint.slideY,
+      if (adjustment.resizeX) _GdkAnchorHint.resizeX,
+      if (adjustment.resizeY) _GdkAnchorHint.resizeY,
     };
   }
 
@@ -903,7 +902,7 @@ class PopupWindowControllerLinux extends PopupWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = GtkWindow(GtkWindowType.popup),
+       _window = _GtkWindow(_GtkWindowType.popup),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -912,7 +911,7 @@ class PopupWindowControllerLinux extends PopupWindowController {
     _window.setDecorated(false);
     _window.realize();
 
-    _windowMonitor = FlWindowMonitor(
+    _windowMonitor = _FlWindowMonitor(
       _window,
       onConfigure: notifyListeners,
       onMovedToRect: (x, y, width, height) {
@@ -921,9 +920,9 @@ class PopupWindowControllerLinux extends PopupWindowController {
       onDestroy: _delegate.onWindowDestroyed,
     );
     setConstraints(preferredConstraints);
-    final engine = FlEngine.current();
-    _view = FlView(engine, isSizedToContent: true);
-    _viewMonitor = FlViewMonitor(
+    final engine = _FlEngine.current();
+    _view = _FlView(engine, isSizedToContent: true);
+    _viewMonitor = _FlViewMonitor(
       _view,
       onFirstFrame: () {
         _window.show();
@@ -936,7 +935,7 @@ class PopupWindowControllerLinux extends PopupWindowController {
     _view.show();
     _window.add(_view);
 
-    final GtkWindow? parentWindow = _owner.registrar.windowForViewId(_parent.rootView.viewId);
+    final _GtkWindow? parentWindow = _owner.registrar._windowForViewId(_parent.rootView.viewId);
     if (parentWindow == null) {
       throw Exception('Failed to find popup parent window');
     }
@@ -946,13 +945,13 @@ class PopupWindowControllerLinux extends PopupWindowController {
 
   final WindowingOwnerLinux _owner;
   final PopupWindowControllerDelegate _delegate;
-  final GtkWindow _window;
+  final _GtkWindow _window;
   late Rect _anchorRect;
   late WindowPositioner _positioner;
   final BaseWindowController _parent;
-  late final FlView _view;
-  late final FlViewMonitor _viewMonitor;
-  late final FlWindowMonitor _windowMonitor;
+  late final _FlView _view;
+  late final _FlViewMonitor _viewMonitor;
+  late final _FlWindowMonitor _windowMonitor;
   Offset? _offsetFromParent;
   bool _destroyed = false;
 
@@ -983,8 +982,8 @@ class PopupWindowControllerLinux extends PopupWindowController {
       _positioner = positioner;
     }
 
-    final GtkWindow? parentWindow = _owner.registrar.windowForViewId(_parent.rootView.viewId);
-    final FlView? view = _owner.registrar.viewForViewId(_parent.rootView.viewId);
+    final _GtkWindow? parentWindow = _owner.registrar._windowForViewId(_parent.rootView.viewId);
+    final _FlView? view = _owner.registrar._viewForViewId(_parent.rootView.viewId);
     var offset = (0, 0);
     if (parentWindow != null && view != null) {
       offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
@@ -1012,30 +1011,30 @@ class PopupWindowControllerLinux extends PopupWindowController {
     return _offsetFromParent ?? Offset.zero;
   }
 
-  GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
+  _GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
     return switch (anchor) {
-      WindowPositionerAnchor.center => GdkGravity.center,
-      WindowPositionerAnchor.top => GdkGravity.north,
-      WindowPositionerAnchor.bottom => GdkGravity.south,
-      WindowPositionerAnchor.left => GdkGravity.west,
-      WindowPositionerAnchor.right => GdkGravity.east,
-      WindowPositionerAnchor.topLeft => GdkGravity.northWest,
-      WindowPositionerAnchor.bottomLeft => GdkGravity.southWest,
-      WindowPositionerAnchor.topRight => GdkGravity.northEast,
-      WindowPositionerAnchor.bottomRight => GdkGravity.southEast,
+      WindowPositionerAnchor.center => _GdkGravity.center,
+      WindowPositionerAnchor.top => _GdkGravity.north,
+      WindowPositionerAnchor.bottom => _GdkGravity.south,
+      WindowPositionerAnchor.left => _GdkGravity.west,
+      WindowPositionerAnchor.right => _GdkGravity.east,
+      WindowPositionerAnchor.topLeft => _GdkGravity.northWest,
+      WindowPositionerAnchor.bottomLeft => _GdkGravity.southWest,
+      WindowPositionerAnchor.topRight => _GdkGravity.northEast,
+      WindowPositionerAnchor.bottomRight => _GdkGravity.southEast,
     };
   }
 
-  Set<GdkAnchorHint> _constraintAdjustmentToHints(
+  Set<_GdkAnchorHint> _constraintAdjustmentToHints(
     WindowPositionerConstraintAdjustment adjustment,
   ) {
-    return <GdkAnchorHint>{
-      if (adjustment.flipX) GdkAnchorHint.flipX,
-      if (adjustment.flipY) GdkAnchorHint.flipY,
-      if (adjustment.slideX) GdkAnchorHint.slideX,
-      if (adjustment.slideY) GdkAnchorHint.slideY,
-      if (adjustment.resizeX) GdkAnchorHint.resizeX,
-      if (adjustment.resizeY) GdkAnchorHint.resizeY,
+    return <_GdkAnchorHint>{
+      if (adjustment.flipX) _GdkAnchorHint.flipX,
+      if (adjustment.flipY) _GdkAnchorHint.flipY,
+      if (adjustment.slideX) _GdkAnchorHint.slideX,
+      if (adjustment.slideY) _GdkAnchorHint.slideY,
+      if (adjustment.resizeX) _GdkAnchorHint.resizeX,
+      if (adjustment.resizeY) _GdkAnchorHint.resizeY,
     };
   }
 
@@ -1061,11 +1060,8 @@ class PopupWindowControllerLinux extends PopupWindowController {
 // as possible, to minimize the amount of translation needed in the method
 // implementations.
 
-/// The type of a [GtkWindow]. Matches the GtkWindowType enum in gtk/gtktypes.h.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-enum GtkWindowType {
+/// The type of a GtkWindow. Matches the GtkWindowType enum in gtk/gtktypes.h.
+enum _GtkWindowType {
   toplevel,
   // ignore: unused_field
   popup,
@@ -1073,10 +1069,7 @@ enum GtkWindowType {
 
 /// States a toplevel window can be in. Matches the order of the GdkWindowState
 /// enum in gdk/gdkwindow.h, except these are bit positions when passed to GTK.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-enum GdkWindowState {
+enum _GdkWindowState {
   withdrawn,
   iconified,
   maximized,
@@ -1098,10 +1091,7 @@ enum GdkWindowState {
 
 /// Hints for the window manager on how to treat a window. Matches the
 /// GdkWindowTypeHint enum in gdk/gdkwindow.h.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-enum GdkWindowTypeHint {
+enum _GdkWindowTypeHint {
   // ignore: unused_field
   normal,
   dialog,
@@ -1131,10 +1121,7 @@ enum GdkWindowTypeHint {
 }
 
 /// Window reference points. Matches the GdkGravity enum in gdk/gdkwindow.h.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-enum GdkGravity {
+enum _GdkGravity {
   // ignore: unused_field
   none,
   northWest,
@@ -1153,10 +1140,7 @@ enum GdkGravity {
 /// Positioning hints for aligning a window relative to a rectangle. Matches
 /// the GdkAnchorHint enum in gdk/gdkwindow.h, except these are bit positions
 /// when passed to GTK.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-enum GdkAnchorHint { flipX, flipY, slideX, slideY, resizeX, resizeY }
+enum _GdkAnchorHint { flipX, flipY, slideX, slideY, resizeX, resizeY }
 
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
 external ffi.Pointer<ffi.NativeType> _gMalloc0(int count);
@@ -1182,26 +1166,14 @@ String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
 }
 
 /// Wraps GObject.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class GObject {
+class _GObject {
   /// Creates a wrapper to an existing [GObject] in [instance].
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  const GObject(this.instance);
+  const _GObject(this.instance);
 
   /// The pointer to the underlying [GObject].
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   final ffi.Pointer<ffi.NativeType> instance;
 
   /// Drop reference to this object.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void unref() {
     _unref(instance);
   }
@@ -1211,21 +1183,12 @@ class GObject {
 }
 
 /// Wraps GtkContainer.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class GtkContainer extends GtkWidget {
+class _GtkContainer extends _GtkWidget {
   /// Creates a wrapper to an existing [GtkContainer] in [instance].
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  const GtkContainer(super.instance);
+  const _GtkContainer(super.instance);
 
   /// Adds [child] widget to this container.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void add(GtkWidget child) {
+  void add(_GtkWidget child) {
     _gtkContainerAdd(instance, child.instance);
   }
 
@@ -1239,53 +1202,32 @@ class GtkContainer extends GtkWidget {
 }
 
 /// Wraps GtkWidget.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class GtkWidget extends GObject {
+class _GtkWidget extends _GObject {
   /// Creates a wrapper to an existing [GtkWidget] in [instance].
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  const GtkWidget(super.instance);
+  const _GtkWidget(super.instance);
 
   /// Creates the GDK resources associated with a widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void realize() {
     _gtkWidgetRealize(instance);
   }
 
   /// Show the widget (defaults to hidden).
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void show() {
     _gtkWidgetShow(instance);
   }
 
   /// Get the low level window backing this widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  GdkWindow getWindow() {
-    return GdkWindow(_gtkWidgetGetWindow(instance));
+  _GdkWindow getWindow() {
+    return _GdkWindow(_gtkWidgetGetWindow(instance));
   }
 
   /// Get the scale factor that maps window coordinates to device pixels.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   int getScaleFactor() {
     return _gtkWidgetGetScaleFactor(instance);
   }
 
   /// Translates coordinates from this widget to the [destWidget]. Returns null if the widgets do not have a common ancestor.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  (int, int)? translateCoordinates(GtkWidget destWidget, (int, int) src) {
+  (int, int)? translateCoordinates(_GtkWidget destWidget, (int, int) src) {
     final ffi.Pointer<ffi.Int> dest = _gMalloc0(ffi.sizeOf<ffi.Int>() * 2).cast<ffi.Int>();
     final bool translated = _gtkWidgetTranslateCoordinates(
       instance,
@@ -1301,9 +1243,6 @@ class GtkWidget extends GObject {
   }
 
   /// Destroy the widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void destroy() {
     _gtkWindowDestroy(instance);
   }
@@ -1348,24 +1287,15 @@ class GtkWidget extends GObject {
 }
 
 /// Wraps GdkWindow.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class GdkWindow extends GObject {
+class _GdkWindow extends _GObject {
   /// Creates a wrapper to an existing [GdkWindow] in [instance].
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  const GdkWindow(super.instance);
+  const _GdkWindow(super.instance);
 
   /// Gets the window state.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  Set<GdkWindowState> getState() {
+  Set<_GdkWindowState> getState() {
     final int stateBits = _gdkWindowGetState(instance);
-    final states = <GdkWindowState>{};
-    for (final GdkWindowState state in GdkWindowState.values) {
+    final states = <_GdkWindowState>{};
+    for (final _GdkWindowState state in _GdkWindowState.values) {
       if ((stateBits & (1 << state.index)) != 0) {
         states.add(state);
       }
@@ -1375,17 +1305,14 @@ class GdkWindow extends GObject {
   }
 
   /// Move the window to place it relative to the given rectangle according to the specified anchors.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void moveToRect({
     required int x,
     required int y,
     required int width,
     required int height,
-    required GdkGravity rectAnchor,
-    required GdkGravity windowAnchor,
-    required Set<GdkAnchorHint> anchorHints,
+    required _GdkGravity rectAnchor,
+    required _GdkGravity windowAnchor,
+    required Set<_GdkAnchorHint> anchorHints,
     int rectAnchorDx = 0,
     int rectAnchorDy = 0,
   }) {
@@ -1494,60 +1421,39 @@ final class _GdkGeometry extends ffi.Struct {
 }
 
 /// Wraps GtkWindow.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class GtkWindow extends GtkContainer {
+class _GtkWindow extends _GtkContainer {
   /// Create a new GtkWindow
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  GtkWindow(GtkWindowType type) : super(_gtkWindowNew(type.index));
+  _GtkWindow(_GtkWindowType type) : super(_gtkWindowNew(type.index));
+
+  /// Wraps an existing GtkWindow pointed to by [handle].
+  _GtkWindow.fromHandle(ffi.Pointer<ffi.Void> handle) : super(handle.cast());
 
   /// Make window visible and grab focus.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void present() {
     _gtkWindowPresent(instance);
   }
 
   /// Sets the parent window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setTransientFor(GtkWindow parent) {
+  void setTransientFor(_GtkWindow parent) {
     _gtkWindowSetTransientFor(instance, parent.instance);
   }
 
   /// Set if this window is modal to its parent.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void setModal(bool modal) {
     _gtkWindowSetModal(instance, modal);
   }
 
   /// Set the type of this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setTypeHint(GdkWindowTypeHint hint) {
+  void setTypeHint(_GdkWindowTypeHint hint) {
     _gtkWindowSetTypeHint(instance, hint.index);
   }
 
   /// Sets if this window has decorations (titlebar, borders, shadow).
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void setDecorated(bool decorated) {
     _gtkWindowSetDecorated(instance, decorated);
   }
 
   /// Sets the title of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void setTitle(String title) {
     final ffi.Pointer<ffi.Uint8> titleBuffer = _stringToNative(title);
     _gtkWindowSetTitle(instance, titleBuffer);
@@ -1555,25 +1461,16 @@ class GtkWindow extends GtkContainer {
   }
 
   /// Gets the current title of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   String getTitle() {
     return _nativeToString(_gtkWindowGetTitle(instance));
   }
 
   /// Set the default size of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void setDefaultSize(int width, int height) {
     _gtkWindowSetDefaultSize(instance, width, height);
   }
 
   /// Set minimum and maximum size of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void setGeometryHints({int? minWidth, int? minHeight, int? maxWidth, int? maxHeight}) {
     final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(
       ffi.sizeOf<_GdkGeometry>(),
@@ -1595,65 +1492,41 @@ class GtkWindow extends GtkContainer {
   }
 
   /// Resize to [width]x[height].
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void resize(int width, int height) {
     _gtkWindowResize(instance, width, height);
   }
 
   /// Maximize window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void maximize() {
     _gtkWindowMaximize(instance);
   }
 
   /// Unaximize window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void unmaximize() {
     _gtkWindowUnmaximize(instance);
   }
 
   /// Iconify (minimize) window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void iconify() {
     _gtkWindowIconify(instance);
   }
 
   /// Deconify (unminimize) window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void deiconify() {
     _gtkWindowDeiconify(instance);
   }
 
   /// Make window fullscreen.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void fullscreen() {
     _gtkWindowFullscreen(instance);
   }
 
   /// Leave fullscreen.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void unfullscreen() {
     _gtkWindowUnfullscreen(instance);
   }
 
   /// Get the current size of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   Size getSize() {
     final ffi.Pointer<ffi.Int> size = _gMalloc0(ffi.sizeOf<ffi.Int>() * 2).cast<ffi.Int>();
     _gtkWindowGetSize(instance, size.elementAt(0), size.elementAt(1));
@@ -1663,9 +1536,6 @@ class GtkWindow extends GtkContainer {
   }
 
   /// true if this window has keyboard focus.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   bool isActive() {
     return _gtkWindowIsActive(instance);
   }
@@ -1773,43 +1643,28 @@ class GtkWindow extends GtkContainer {
 }
 
 /// Wraps FlEngine.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class FlEngine extends GObject {
+class _FlEngine extends _GObject {
   /// Gets the FlEngine object for the engine with the given ID.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  FlEngine(int engineId) : super(ffi.Pointer<ffi.NativeType>.fromAddress(engineId));
+  _FlEngine(int engineId) : super(ffi.Pointer<ffi.NativeType>.fromAddress(engineId));
 
   /// Gets the engine object running in the current isolate.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  factory FlEngine.current() => FlEngine(WidgetsBinding.instance.platformDispatcher.engineId!);
+  factory _FlEngine.current() => _FlEngine(WidgetsBinding.instance.platformDispatcher.engineId!);
 }
 
 /// Wraps FlView.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class FlView extends GtkWidget {
+class _FlView extends _GtkWidget {
   /// Create a new FlView widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  FlView(FlEngine engine, {bool isSizedToContent = false})
+  _FlView(_FlEngine engine, {bool isSizedToContent = false})
     : super(
         isSizedToContent
             ? _flViewNewSizedToContent(engine.instance)
             : _flViewNewForEngine(engine.instance),
       );
 
+  /// Wraps an existing FlView pointed to by [handle].
+  _FlView.fromHandle(ffi.Pointer<ffi.Void> handle) : super(handle.cast());
+
   /// Get the ID for the Flutter view being shown in this widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   int getId() {
     return _flViewGetId(instance);
   }
@@ -1833,31 +1688,22 @@ class FlView extends GtkWidget {
 }
 
 /// Wraps FlViewMonitor (helper object for handling signals from FlView).
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class FlViewMonitor extends GObject {
+class _FlViewMonitor extends _GObject {
   /// Create a new FlViewMonitor.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  factory FlViewMonitor(FlView view, {VoidCallback? onFirstFrame}) {
+  factory _FlViewMonitor(_FlView view, {VoidCallback? onFirstFrame}) {
     void noop() {}
-    return FlViewMonitor._internal(
+    return _FlViewMonitor._internal(
       view.instance,
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onFirstFrame ?? noop),
     );
   }
 
-  FlViewMonitor._internal(ffi.Pointer<ffi.NativeType> view, this._onFirstFrameFunction)
+  _FlViewMonitor._internal(ffi.Pointer<ffi.NativeType> view, this._onFirstFrameFunction)
     : super(_flViewMonitorNew(view, _onFirstFrameFunction.nativeFunction));
 
   final ffi.NativeCallable<ffi.Void Function()> _onFirstFrameFunction;
 
   /// Close all FFI resources used in the monitor.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void close() {
     _onFirstFrameFunction.close();
   }
@@ -1875,16 +1721,10 @@ class FlViewMonitor extends GObject {
 }
 
 /// Wraps FlWindowMonitor (helper object for handling signals from GtkWindow).
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class FlWindowMonitor extends GObject {
+class _FlWindowMonitor extends _GObject {
   /// Create a new FlWindowMonitor.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  factory FlWindowMonitor(
-    GtkWindow window, {
+  factory _FlWindowMonitor(
+    _GtkWindow window, {
     VoidCallback? onConfigure,
     VoidCallback? onStateChanged,
     VoidCallback? onIsActiveNotify,
@@ -1895,7 +1735,7 @@ class FlWindowMonitor extends GObject {
   }) {
     void noop() {}
     void noopMovedToRect(int x, int y, int width, int height) {}
-    return FlWindowMonitor._internal(
+    return _FlWindowMonitor._internal(
       window.instance,
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure ?? noop),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged ?? noop),
@@ -1909,7 +1749,7 @@ class FlWindowMonitor extends GObject {
     );
   }
 
-  FlWindowMonitor._internal(
+  _FlWindowMonitor._internal(
     ffi.Pointer<ffi.NativeType> window,
     this._onConfigureFunction,
     this._onStateChangedFunction,
@@ -1941,9 +1781,6 @@ class FlWindowMonitor extends GObject {
   final ffi.NativeCallable<ffi.Void Function()> _onDestroyFunction;
 
   /// Close all FFI resources used in the monitor.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   void close() {
     _onConfigureFunction.close();
     _onStateChangedFunction.close();
