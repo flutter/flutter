@@ -833,9 +833,52 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint)) {
+    if (rect.IsEmpty()) {
+      // Empty rect doesn't need to be drawn.
+      return;
+    }
+
+    Vector2 transform_scaling = GetCurrentTransform().GetBasisScaleXY();
+    if (transform_scaling.x <= 0.0f || transform_scaling.y <= 0.0f) {
+      // Rectangle is scaled to 0 and doesn't need to be drawn.
+      return;
+    }
+
+    Rect effective_rect = rect;
+    Color effective_color = paint.color;
+
+    // Expand very small/thin rectangles to have a minimum 1 pixel width/height.
+    // Rectangles that are scaled up to meet this minimum get their alpha scaled
+    // down by the same ratio to maintain visual consistency.
+    //
+    // This only applies to filled rectangles with no perspective transform.
+    if (paint.style == Paint::Style::kFill &&
+        !GetCurrentTransform().HasPerspective2D()) {
+      // Convert local rectangle size to device pixel size.
+      Vector2 rect_pixel_size = Vector2(rect.GetSize()) * transform_scaling;
+
+      // Expand rect pixel size dimensions to a 1.0 minimum.
+      Vector2 expanded_rect_pixel_size =
+          rect_pixel_size.Max(Vector2(1.0f, 1.0f));
+
+      // Calculate the alpha scaling as the ratio of the original rectangle to
+      // the expanded rectangle.
+      Scalar alpha_scaling = (rect_pixel_size.x / expanded_rect_pixel_size.x) *
+                             (rect_pixel_size.y / expanded_rect_pixel_size.y);
+
+      // Convert expanded rectangle from pixel size back to local size.
+      Vector2 expanded_rect_local_size =
+          Vector2(expanded_rect_pixel_size / transform_scaling);
+
+      effective_rect = Rect::MakeEllipseBounds(rect.GetCenter(),
+                                               expanded_rect_local_size * 0.5f);
+      effective_color =
+          effective_color.WithAlpha(effective_color.alpha * alpha_scaling);
+    }
+
     auto params = UberSDFParameters::MakeRect(
-        /*color=*/paint.color,
-        /*rect=*/rect,
+        /*color=*/effective_color,
+        /*rect=*/effective_rect,
         /*stroke=*/paint.GetStroke());
     AddRenderSDFEntityToCurrentPass(paint, params);
     return;
