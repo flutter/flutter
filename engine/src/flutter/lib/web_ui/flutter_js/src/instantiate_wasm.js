@@ -12,12 +12,12 @@
 export const createWasmInstantiator = (url, filename) => {
   const wasmHashes = window._flutter?.buildConfig?.wasmHashes;
   let hash = wasmHashes?.[filename];
-  if (!hash && filename.includes('/')) {
+  if (!hash && filename?.includes('/')) {
     const basename = filename.split('/').pop();
     hash = wasmHashes?.[basename];
   }
 
-  const supportsCrossOriginStorage = 'crossOriginStorage' in navigator && 'requestFileHandle' in navigator.crossOriginStorage;
+  const supportsCrossOriginStorage = !!navigator.crossOriginStorage?.requestFileHandle;
   if (supportsCrossOriginStorage) {
     console.log('Cross-Origin Storage is supported. See https://wicg.github.io/cross-origin-storage/ for more details.');
   }
@@ -37,8 +37,10 @@ export const createWasmInstantiator = (url, filename) => {
       return new Response(fileBlob, {
         headers: { 'Content-Type': 'application/wasm' },
       });
-    } catch {
-      // Any error (not found, not allowed, …) — fall through to network fetch.
+    } catch {     
+      if (err && err.name !== 'NotFoundError' && err.name !== 'NotAllowedError') {
+        console.warn('Unexpected error during retrieval of ' + filename + ' (hash: ' + hash + ').', err);
+      }
     }
   }
 
