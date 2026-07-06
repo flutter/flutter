@@ -118,10 +118,11 @@ static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   GdkInputSource source = gdk_device_get_source(device);
   switch (source) {
     case GDK_SOURCE_PEN:
-    case GDK_SOURCE_ERASER:
     case GDK_SOURCE_CURSOR:
     case GDK_SOURCE_TABLET_PAD:
       return kFlutterPointerDeviceKindStylus;
+    case GDK_SOURCE_ERASER:
+      return kFlutterPointerDeviceKindInvertedStylus;
     case GDK_SOURCE_TOUCHSCREEN:
       return kFlutterPointerDeviceKindTouch;
     case GDK_SOURCE_TOUCHPAD:  // trackpad device type is reserved for gestures
@@ -130,6 +131,24 @@ static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
     case GDK_SOURCE_MOUSE:
       return kFlutterPointerDeviceKindMouse;
   }
+}
+
+// Gets the pointer state for a GDK event.
+static void get_pointer_device_state(GdkEvent* event,
+                                     gdouble* rotation,
+                                     gdouble* pressure) {
+  *rotation = 0.0;
+  *pressure = 0.0;
+  if (event == nullptr) {
+    return;
+  }
+
+  gdouble pressure_value = 0.0;
+  gdouble rotation_value = 0.0;
+  gdk_event_get_axis(event, GDK_AXIS_PRESSURE, &pressure_value);
+  gdk_event_get_axis(event, GDK_AXIS_ROTATION, &rotation_value);
+  *pressure = pressure_value;
+  *rotation = rotation_value;
 }
 
 // Called when the mouse cursor changes.
@@ -297,10 +316,13 @@ static gboolean button_press_event_cb(FlView* self,
   sync_modifier_if_needed(self, event);
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gdouble rotation = 0.0;
+  gdouble pressure = 0.0;
+  get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_button_press(
       self->pointer_manager, gdk_event_get_time(event),
       get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-      button);
+      button, rotation, pressure);
 }
 
 // Signal handler for GtkWidget::button-release-event
@@ -318,10 +340,13 @@ static gboolean button_release_event_cb(FlView* self,
   sync_modifier_if_needed(self, event);
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gdouble rotation = 0.0;
+  gdouble pressure = 0.0;
+  get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_button_release(
       self->pointer_manager, gdk_event_get_time(event),
       get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-      button);
+      button, rotation, pressure);
 }
 
 // Signal handler for GtkWidget::scroll-event
@@ -358,9 +383,13 @@ static gboolean motion_notify_event_cb(FlView* self,
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gdouble rotation = 0.0;
+  gdouble pressure = 0.0;
+  get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_motion(
       self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      rotation, pressure);
 }
 
 // Signal handler for GtkWidget::enter-notify-event
@@ -370,9 +399,13 @@ static gboolean enter_notify_event_cb(FlView* self,
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gdouble rotation = 0.0;
+  gdouble pressure = 0.0;
+  get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_enter(
       self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      rotation, pressure);
 }
 
 // Signal handler for GtkWidget::leave-notify-event
@@ -386,9 +419,13 @@ static gboolean leave_notify_event_cb(FlView* self,
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gdouble rotation = 0.0;
+  gdouble pressure = 0.0;
+  get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_leave(
       self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      rotation, pressure);
 }
 
 static void gesture_rotation_begin_cb(FlView* self) {
