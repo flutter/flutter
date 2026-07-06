@@ -53,7 +53,7 @@ runs:
     # Note: Use the Cocoon wait-for-tests action to poll the Cocoon API.
     - name: Wait for test check-in
       if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
-      uses: flutter/cocoon/packages/wait_for_tests@main
+      uses: flutter/cocoon/packages/wait_for_tests@c82f779e201b2d22f43b531268cfbd2ce4fbd4ab
       with:
         sha: ${{ github.event.pull_request.head.sha || github.sha }}
         repo: ${{ github.repository }}
