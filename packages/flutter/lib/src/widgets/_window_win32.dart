@@ -140,8 +140,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @internal
   @override
   RegularWindowController createRegularWindowController({
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
     required RegularWindowControllerDelegate delegate,
@@ -149,8 +149,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return RegularWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      preferredSize: size,
+      preferredConstraints: constraints,
       title: title,
       resizable: resizable,
     );
@@ -160,8 +160,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     BaseWindowController? parent,
     String? title,
@@ -169,8 +169,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return DialogWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      preferredSize: size,
+      preferredConstraints: constraints,
       title: title,
       parent: parent,
       resizable: resizable,
@@ -181,7 +181,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -189,7 +189,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return TooltipWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -200,7 +200,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -208,7 +208,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return PopupWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -222,8 +222,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {

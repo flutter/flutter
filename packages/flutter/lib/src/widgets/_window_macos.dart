@@ -77,15 +77,15 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
     final controller = RegularWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
+      preferredSize: size,
       title: title,
     );
     _activeControllers.add(controller);
@@ -95,8 +95,8 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     BaseWindowController? parent,
     String? title,
@@ -104,7 +104,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     final controller = DialogWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
+      preferredSize: size,
       parent: parent,
       title: title,
     );
@@ -116,7 +116,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -124,7 +124,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     final controller = TooltipWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -137,7 +137,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -145,7 +145,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     final controller = PopupWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       parent: parent,
       anchorRect: anchorRect,
       positioner: positioner,
@@ -174,8 +174,8 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     bool resizable = false,
     String? title,
   }) {

@@ -923,8 +923,8 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
@@ -932,8 +932,8 @@ class _TestWindowingOwner extends WindowingOwner {
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      preferredSize: size,
+      preferredConstraints: constraints,
       title: title,
     );
   }
@@ -942,8 +942,8 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     BaseWindowController? parent,
     String? title,
@@ -953,8 +953,8 @@ class _TestWindowingOwner extends WindowingOwner {
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
       parent: parent,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      preferredSize: size,
+      preferredConstraints: constraints,
       title: title,
     );
   }
@@ -962,7 +962,7 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -971,7 +971,7 @@ class _TestWindowingOwner extends WindowingOwner {
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
-      preferredConstraints: preferredConstraints,
+      preferredConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -981,7 +981,7 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -990,7 +990,7 @@ class _TestWindowingOwner extends WindowingOwner {
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
-      preferredConstraints: preferredConstraints,
+      preferredConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -1004,8 +1004,8 @@ class _TestWindowingOwner extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
@@ -1016,8 +1016,8 @@ class _TestWindowingOwner extends WindowingOwner {
       parent: parent,
       anchorRect: initialAnchorRect,
       positioner: initialPositioner,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      preferredSize: size,
+      preferredConstraints: constraints,
       title: title,
     );
   }

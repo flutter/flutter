@@ -139,7 +139,7 @@ class _DialogWindowRoute<T> extends Route<T> {
             parent: parentController,
             title: 'Dialog',
             delegate: _DialogWindowDelegate(this),
-            preferredSize: preferredSize,
+            size: preferredSize,
           )
         : DialogWindowController.sizedToContent(
             parent: parentController,
