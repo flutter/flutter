@@ -180,6 +180,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)registerViewController:(FlutterViewController*)controller
                  forIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
+- (void)removeFlutterViewControllerWillDeallocObserverForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
+
 /**
  * An internal method that removes the view controller with the given ID.
  *
@@ -578,14 +581,20 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   return [self viewControllerForIdentifier:flutter::kFlutterImplicitViewId];
 }
 
+- (void)removeFlutterViewControllerWillDeallocObserverForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier {
+  id<NSObject> observer =
+      [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
+  if (!observer) {
+    return;
+  }
+  [[NSNotificationCenter defaultCenter] removeObserver:observer];
+  [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
+}
+
 - (void)registerViewController:(FlutterViewController*)controller
                  forIdentifier:(FlutterViewIdentifier)viewIdentifier {
-  id<NSObject> existingObserver =
-      [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
-  if (existingObserver) {
-    [[NSNotificationCenter defaultCenter] removeObserver:existingObserver];
-    [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
-  }
+  [self removeFlutterViewControllerWillDeallocObserverForIdentifier:viewIdentifier];
 
   [_viewControllers setObject:controller forKey:@(viewIdentifier)];
   [controller setupViewIdentifier:viewIdentifier];
@@ -619,10 +628,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
-  id<NSObject> observer =
-      [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
-  [[NSNotificationCenter defaultCenter] removeObserver:observer];
-  [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
+  [self removeFlutterViewControllerWillDeallocObserverForIdentifier:viewIdentifier];
   {
     if (viewIdentifier != flutter::kFlutterImplicitViewId) {
       bool removed = NO;

@@ -133,6 +133,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// view
 - (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath;
 
+/// @brief Discards platform view composition state associated with the given FlutterView.
+///
+/// Called after the rasterizer collects a removed view.
 - (void)collectView:(int64_t)flutterViewId;
 
 - (void)attachToFlutterViewController:(__weak FlutterViewController*)controller;
