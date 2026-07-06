@@ -488,6 +488,13 @@ class SwiftPackageManager {
     );
   }
 
+  /// Cleans up any stale or unreferenced plugin symlinks from the project's
+  /// symlink directory.
+  ///
+  /// When plugins are removed from `pubspec.yaml` or updated to versions that
+  /// no longer use Swift Package Manager, their old symlinks remain on disk.
+  /// This method removes them to prevent Xcode compilation failures caused by
+  /// trying to resolve broken or obsolete symlinks.
   void _cleanStaleSymlinks({
     required Directory symlinkDirectory,
     required Set<String> expectedBasenames,
