@@ -7,7 +7,19 @@
 part of flutter_gpu;
 
 base class ShaderLibrary extends NativeFieldWrapperClass1 {
-  static ShaderLibrary? fromAsset(String assetName) {
+  /// Loads the shader bundle at [assetName] and returns its [ShaderLibrary],
+  /// or `null` if the bundle could not be parsed.
+  ///
+  /// This is async so it can work on every platform. Some platforms can only
+  /// read assets asynchronously, so loading is async everywhere for a
+  /// consistent API. On platforms that can read synchronously the returned
+  /// [Future] still completes in the same turn. A load failure is reported
+  /// through the [Future] rather than thrown synchronously.
+  ///
+  /// The library is cached by [assetName], so repeated loads of the same
+  /// asset return the same instance. The cache also backs hot reload (see
+  /// [reinitialize]), which looks the library up by asset path.
+  static Future<ShaderLibrary?> fromAsset(String assetName) async {
     final cached = _registry[assetName];
     if (cached != null) {
       return cached;
@@ -18,6 +30,32 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
       throw Exception("Failed to initialize ShaderLibrary: ${error}");
     }
     _registry[assetName] = lib;
+    assert(() {
+      _ensureHooksRegistered();
+      return true;
+    }());
+    return lib;
+  }
+
+  /// Loads a [ShaderLibrary] directly from a shader bundle's [bytes] (the
+  /// contents of a `.shaderbundle` compiled by `impellerc`), rather than from a
+  /// bundled asset. This suits shader bundles produced or fetched at runtime,
+  /// which have no entry in the asset manifest that [fromAsset] resolves.
+  ///
+  /// Async to match [fromAsset] and keep one entry point across platforms; on
+  /// native the [Future] still completes in the same turn. Throws through the
+  /// [Future] if [bytes] is not a parseable shader bundle.
+  ///
+  /// Unlike [fromAsset], the result is not cached (the bytes carry no stable
+  /// key), so the asset-path hot reload does not apply. The caller owns the
+  /// returned library and can refresh it in place with [reinitializeFromBytes]
+  /// (for example after recompiling the source).
+  static Future<ShaderLibrary?> fromBytes(ByteData bytes) async {
+    final lib = ShaderLibrary._();
+    final error = lib._initializeWithBytes(bytes);
+    if (error != null) {
+      throw Exception("Failed to initialize ShaderLibrary: ${error}");
+    }
     assert(() {
       _ensureHooksRegistered();
       return true;
@@ -81,6 +119,17 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
   String? debugReinitializeFromAsset(String assetName) =>
       _reinitializeWithAsset(assetName);
 
+  /// Reparses [bytes] into this library in place, preserving its identity so
+  /// any [Shader]s already handed out keep working (they are mutated and
+  /// marked dirty so the next pipeline build re-registers them). The
+  /// counterpart to [reinitialize] for a [fromBytes] library, which has no
+  /// asset path to re-fetch. Use it to swap in a recompiled shader bundle.
+  ///
+  /// Returns null on success, or an error message if [bytes] could not be
+  /// parsed (the live shaders are left unchanged in that case).
+  String? reinitializeFromBytes(ByteData bytes) =>
+      _reinitializeWithBytes(bytes);
+
   @Native<Handle Function(Handle, Handle)>(
     symbol: 'InternalFlutterGpu_ShaderLibrary_InitializeWithAsset',
   )
@@ -90,6 +139,16 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_ShaderLibrary_ReinitializeWithAsset',
   )
   external String? _reinitializeWithAsset(String assetName);
+
+  @Native<Handle Function(Handle, Handle)>(
+    symbol: 'InternalFlutterGpu_ShaderLibrary_InitializeWithBytes',
+  )
+  external String? _initializeWithBytes(ByteData bytes);
+
+  @Native<Handle Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_ShaderLibrary_ReinitializeWithBytes',
+  )
+  external String? _reinitializeWithBytes(ByteData bytes);
 
   @Native<Handle Function(Pointer<Void>, Handle, Handle)>(
     symbol: 'InternalFlutterGpu_ShaderLibrary_GetShader',
