@@ -968,7 +968,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> shutdown() async {
     if (_ddsStartedLocally) {
-      _localDds.shutdown();
+      await _localDds.shutdown();
       _ddsStartedLocally = false;
     } else {
       await connection.sendRequest('device.shutdownDartDevelopmentService', <String, Object?>{
