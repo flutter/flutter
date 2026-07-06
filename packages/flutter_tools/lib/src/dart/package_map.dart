@@ -57,7 +57,7 @@ Future<PackageConfig> currentPackageConfig() async {
 /// Searches [dir] and all parent directories.
 ///
 /// Returns `null` if no package_config.json was found.
-// TODO(sigurdom): Only call this once per run - and read in from BuildInfo.
+// TODO(sigurdm): Only call this once per run - and read in from BuildInfo.
 File? findPackageConfigFile(Directory dir) {
   final FileSystem fileSystem = dir.fileSystem;
   Directory candidateDir = fileSystem.directory(fileSystem.path.normalize(dir.absolute.path));
