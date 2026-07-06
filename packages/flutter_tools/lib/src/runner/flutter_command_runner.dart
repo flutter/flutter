@@ -247,7 +247,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Rebuilds the underlying [ArgParser] to register dynamic CLI options.
   ///
-  /// Since GEP extensions can dynamically register custom project templates,
+  /// Since tool extensions can dynamically register custom project templates,
   /// build targets, and configuration flags at runtime, the command runner
   /// must rebuild its parser and populate the newly registered commands and flags
   /// before executing.

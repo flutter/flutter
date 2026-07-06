@@ -170,7 +170,7 @@ class BuildCommand extends FlutterCommand {
   final Logger _logger;
   final bool _verboseHelp;
 
-  /// Dynamically registers custom build targets provided by GEP extensions
+  /// Dynamically registers custom build targets provided by tool extensions
   /// as CLI subcommands under `flutter build`.
   ///
   /// This queries the [ExtensionBuildTargetManager] for cached build targets

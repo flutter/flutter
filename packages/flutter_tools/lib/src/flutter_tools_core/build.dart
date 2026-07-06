@@ -143,7 +143,7 @@ abstract base class Target {
   Future<Map<String, String>> get extraDefines async => const <String, String>{};
 }
 
-/// A concrete implementation of [Target] that can be parsed from a JSON map returned over GEP RPC.
+/// A concrete implementation of [Target] that can be parsed from a JSON map returned over the tool extension RPC.
 final class ExtensionBuildTarget extends Target {
   ExtensionBuildTarget.fromJson(Map<String, Object?> json)
     : name = json['name']! as String,
@@ -312,12 +312,12 @@ class Depfile {
   final List<String> outputs;
 }
 
-/// A DTO representing the result of a compilation build operation over GEP RPC.
+/// A DTO representing the result of a compilation build operation over the tool extension RPC.
 class BuildResult {
   /// Create a new instance of [BuildResult].
   BuildResult({required this.success, this.errorMessage, this.executablePath, this.stackTrace});
 
-  /// Parse a [BuildResult] from a JSON map returned over GEP RPC.
+  /// Parse a [BuildResult] from a JSON map returned over the tool extension RPC.
   factory BuildResult.fromJson(Map<String, Object?> json) {
     return BuildResult(
       success: json['success'] == true,
