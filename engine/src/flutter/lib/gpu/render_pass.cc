@@ -561,7 +561,7 @@ void InternalFlutterGpu_RenderPass_SetDepthWriteEnable(
     flutter::gpu::RenderPass* wrapper,
     bool enable) {
   auto& depth = wrapper->GetDepthAttachmentDescriptor();
-  depth.depth_write_enabled = true;
+  depth.depth_write_enabled = enable;
 }
 
 void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(
