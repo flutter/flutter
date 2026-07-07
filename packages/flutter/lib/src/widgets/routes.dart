@@ -2514,6 +2514,21 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
       }
     }
   }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is R && previousRoute is R) {
+      _coveredRoutes[previousRoute] = null;
+    }
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (newRoute is R && oldRoute is R) {
+      _coveredRoutes[newRoute] = _coveredRoutes[oldRoute];
+      _coveredRoutes[oldRoute] = null;
+    }
+  }
 }
 
 /// An interface for objects that are aware of their current [Route].
