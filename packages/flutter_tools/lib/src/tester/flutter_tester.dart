@@ -162,6 +162,7 @@ class FlutterTesterDevice extends Device {
       '--flutter-assets-dir=${assetDirectory.path}',
       if (debuggingOptions.startPaused) '--start-paused',
       if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (debuggingOptions.disableServiceOriginCheck) '--disable-service-origin-check',
       if (debuggingOptions.hostVmServicePort != null)
         '--vm-service-port=${debuggingOptions.hostVmServicePort}',
       applicationKernelFilePath,

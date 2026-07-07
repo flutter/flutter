@@ -157,6 +157,9 @@ class CapabilitiesGLES final
   ISize GetMaximumRenderPassAttachmentSize() const override;
 
   // |Capabilities|
+  uint32_t GetMaxSamplerAnisotropy() const override;
+
+  // |Capabilities|
   size_t GetMinimumUniformAlignment() const override;
 
   // |Capabilities|
@@ -176,6 +179,7 @@ class CapabilitiesGLES final
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
+  uint32_t max_sampler_anisotropy_ = 1;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 };
 
