@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' show pi;
 import 'dart:typed_data' show Float64List;
 
 import 'package:test/bootstrap/browser.dart';
@@ -248,13 +249,197 @@ Future<void> testMain() async {
     expect(newFirstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
   });
 
-  test('path relativeLineTo', () {
-    final p = Path();
-    p.moveTo(100, 100);
-    p.relativeLineTo(-50, -50);
-    p.relativeLineTo(100, 0);
-    p.relativeLineTo(-50, 50);
-    expect(p.getBounds(), equals(const Rect.fromLTRB(50.0, 50.0, 150.0, 100.0)));
+  group('path building', () {
+    test('fillType', () {
+      final p = Path();
+      expect(p.fillType, equals(PathFillType.nonZero));
+      p.fillType = PathFillType.evenOdd;
+      expect(p.fillType, equals(PathFillType.evenOdd));
+    });
+
+    test('moveTo', () {
+      final p = Path();
+      p.moveTo(10, 10);
+      p.lineTo(20, 10);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 10.0, 20.0, 10.0)));
+    });
+
+    test('relativeMoveTo', () {
+      final p = Path();
+      p.relativeMoveTo(10, 10);
+      p.lineTo(20, 10);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 10.0, 20.0, 10.0)));
+    });
+
+    test('lineTo', () {
+      final p = Path();
+      p.lineTo(0, 10);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 0.0, 10.0)));
+    });
+
+    test('path relativeLineTo', () {
+      final p = Path();
+      p.moveTo(100, 100);
+      p.relativeLineTo(-50, -50);
+      p.relativeLineTo(100, 0);
+      p.relativeLineTo(-50, 50);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(50.0, 50.0, 150.0, 100.0)));
+    });
+
+    test('quadraticBezierTo', () {
+      final p = Path();
+      p.quadraticBezierTo(0, 10, 10, 0);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+    });
+
+    test('relativeQuadraticBezierTo', () {
+      final p = Path();
+      p.moveTo(10, 10);
+      // Relative control (0,10), end (10,0) → absolute control (10,20), end (20,10).
+      // getBounds() returns the control-polygon bbox: (10,10), (10,20), (20,10).
+      p.relativeQuadraticBezierTo(0, 10, 10, 0);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0)));
+    });
+
+    test('cubicTo', () {
+      final p = Path();
+      // getBounds() returns the control-polygon bbox: (0,0), (0,10), (10,10), (10,0).
+      p.cubicTo(0, 10, 10, 10, 10, 0);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+    });
+
+    test('relativeCubicTo', () {
+      final p = Path();
+      p.moveTo(5, 5);
+      // Absolute control points: (5,15), (15,15), end (15,5).
+      // getBounds() returns the control-polygon bbox: (5,5), (5,15), (15,15), (15,5).
+      p.relativeCubicTo(0, 10, 10, 10, 10, 0);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(5.0, 5.0, 15.0, 15.0)));
+    });
+
+    test('conicTo', () {
+      final p = Path();
+      // Conic with w=1 is equivalent to a quadratic bezier.
+      // getBounds() returns the control-polygon bbox: (0,0), (0,10), (10,0).
+      p.conicTo(0, 10, 10, 0, 1);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+    });
+
+    test('relativeConicTo', () {
+      final p = Path();
+      p.moveTo(10, 10);
+      // Relative conic with w=1: equivalent to relativeQuadraticBezierTo.
+      // getBounds() returns the control-polygon bbox: (10,10), (10,20), (20,10).
+      p.relativeConicTo(0, 10, 10, 0, 1);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0)));
+    });
+
+    test('arcTo', () {
+      final p = Path();
+      // Quarter-circle arc from (20,10) to (10,20), clockwise.
+      // Control-polygon bbox spans the bottom-right quadrant of the oval.
+      p.arcTo(const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), 0, pi / 2, true);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0)));
+    });
+
+    test('arcToPoint', () {
+      final p = Path();
+      p.moveTo(10, 0);
+      // Small clockwise quarter-circle from (10,0) to (0,10) with radius 10.
+      // Center at the origin; the arc spans the first quadrant.
+      p.arcToPoint(const Offset(0, 10), radius: const Radius.circular(10), clockwise: true);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+    });
+
+    test('relativeArcToPoint', () {
+      final p = Path();
+      p.moveTo(10, 0);
+      // Relative (-10, 10) from (10, 0) = absolute endpoint (0, 10): same arc as arcToPoint.
+      p.relativeArcToPoint(
+        const Offset(-10, 10),
+        radius: const Radius.circular(10),
+        clockwise: true,
+      );
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+    });
+
+    test('addRect', () {
+      final p = Path();
+      p.addRect(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0)));
+    });
+
+    test('addOval', () {
+      final p = Path();
+      p.addOval(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0)));
+    });
+
+    test('addArc', () {
+      final p = Path();
+      p.addArc(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), 0, 2 * pi);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0)));
+    });
+
+    test('addPolygon', () {
+      final p = Path();
+      p.addPolygon(const <Offset>[
+        Offset(10.0, 20.0),
+        Offset(30.0, 40.0),
+        Offset(50.0, 60.0),
+      ], true);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 50.0, 60.0)));
+    });
+
+    test('addRRect', () {
+      final p = Path();
+      p.addRRect(RRect.fromLTRBR(10.0, 20.0, 30.0, 40.0, const Radius.circular(5.0)));
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0)));
+    });
+
+    test('addRSuperellipse', () {
+      final p = Path();
+      p.addRSuperellipse(
+        RSuperellipse.fromLTRBR(10.0, 20.0, 30.0, 40.0, const Radius.circular(5.0)),
+      );
+      expect(p.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0)));
+    });
+
+    test('addPath', () {
+      final p1 = Path()..addRect(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+      final p2 = Path()..addRect(const Rect.fromLTRB(50.0, 60.0, 70.0, 80.0));
+      p1.addPath(p2, const Offset(10.0, 10.0));
+      expect(p1.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 80.0, 90.0)));
+    });
+
+    test('extendWithPath', () {
+      final p1 = Path()..addRect(const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+      final p2 = Path()..addRect(const Rect.fromLTRB(50.0, 60.0, 70.0, 80.0));
+      p1.extendWithPath(p2, const Offset(10.0, 10.0));
+      expect(p1.getBounds(), equals(const Rect.fromLTRB(10.0, 20.0, 80.0, 90.0)));
+    });
+
+    test('close', () {
+      final p = Path();
+      p.lineTo(10.0, 10.0);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+      p.close();
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+    });
+
+    test('reset', () {
+      final p = Path();
+      p.lineTo(10.0, 10.0);
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
+      p.reset();
+      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)));
+    });
+
+    test('contains', () {
+      final p = Path()..addRect(const Rect.fromLTRB(0, 0, 10, 10));
+      expect(p.contains(const Offset(5, 5)), isTrue);
+      expect(p.contains(const Offset(15, 5)), isFalse);
+    });
   });
 
   test('path containing polygon with thousands of points', () {
