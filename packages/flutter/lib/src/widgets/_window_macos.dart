@@ -198,6 +198,12 @@ abstract interface class WindowControllerMacOS {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   Pointer<Void> get windowHandle;
+
+  /// Whether or not the underlying native window is destroyed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isDestroyed;
 }
 
 mixin _WindowControllerMixin implements WindowControllerMacOS {
@@ -273,6 +279,8 @@ mixin _WindowControllerMixin implements WindowControllerMacOS {
     _MacOSPlatformInterface.destroyWindow(handle);
   }
 
+  @override
+  @internal
   bool get isDestroyed => _destroyed;
 
   bool _destroyed = false;
