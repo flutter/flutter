@@ -12,6 +12,7 @@ import 'auto_complete.dart';
 import 'back_button.dart';
 import 'badge.dart';
 import 'card.dart';
+import 'check_box.dart';
 import 'check_box_list_tile.dart';
 import 'close_button.dart';
 import 'date_picker.dart';
@@ -28,11 +29,13 @@ import 'navigation_drawer.dart';
 import 'navigation_rail.dart';
 import 'outlined_button.dart';
 import 'popup_menu_button.dart';
+import 'radio.dart';
 import 'radio_list_tile.dart';
 import 'range_slider.dart';
 import 'segmented_button.dart';
 import 'slider.dart';
 import 'snack_bar.dart';
+import 'switch.dart';
 import 'switch_list_tile.dart';
 import 'tab_bar_view.dart';
 import 'text_button.dart';
@@ -44,6 +47,7 @@ import 'toggle_buttons.dart';
 enum Tag {
   batch1('First batch of widgets for VPAT assessment'),
   batch2('Second batch of widgets for VPAT assessment, Q2 2026'),
+  batch3('Third batch of widgets for VPAT assessment, Q3 2023'),
   core('Essential use-cases requested for various a11y certifications'),
 
   /// An additional use-case that the team considers important to cover, even if
@@ -70,6 +74,7 @@ abstract class UseCase {
 
 final List<UseCase> useCases = <UseCase>[
   AboutListTileUseCase(),
+  CheckBoxUseCase(),
   CheckBoxListTile(),
   DialogUseCase(),
   SliderUseCase(),
@@ -82,9 +87,11 @@ final List<UseCase> useCases = <UseCase>[
   MaterialBannerUseCase(),
   NavigationBarUseCase(),
   TextButtonUseCase(),
+  RadioUseCase(),
   RadioListTileUseCase(),
   ActionChipUseCase(),
   SnackBarUseCase(),
+  SwitchUseCase(),
   SwitchListTileUseCase(),
   ExpansionTileUseCase(),
   CardUseCase(),
