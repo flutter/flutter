@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io show IOOverrides;
 
 import 'package:args/command_runner.dart';
 import 'package:collection/collection.dart';
@@ -20,6 +21,7 @@ import 'package:test/test.dart' hide test;
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'fakes.dart';
+import 'fs_safety.dart';
 
 export 'package:path/path.dart' show Context; // flutter_ignore: package_path_import
 export 'package:test/test.dart' hide isInstanceOf, test;
@@ -52,7 +54,7 @@ String getFlutterRoot() {
   }
 
   Error invalidScript() => StateError(
-    'Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.',
+    'Could not determine flutter_tools/ path from script URL (${platform.script}); consider setting FLUTTER_ROOT explicitly.',
   );
 
   Uri scriptUri;
@@ -189,7 +191,7 @@ void test(
         await globals.localFileSystem.dispose();
       });
 
-      return body();
+      return io.IOOverrides.runWithIOOverrides(() => body(), FSGuardIOOverrides());
     },
     skip: skip,
     tags: tags,

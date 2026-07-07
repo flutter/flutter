@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstddef>
 #include <future>
 
 #include "flutter/fml/make_copyable.h"
@@ -16,6 +17,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
@@ -36,8 +38,7 @@ TEST_P(RuntimeStageTest, CanReadValidBlob) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(stage);
   ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
 }
@@ -71,177 +72,284 @@ TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
   ASSERT_FALSE(stages.ok());
 }
 
+TEST_P(RuntimeStageTest, RejectsCorruptBufferWithValidIdentifier) {
+  ScopedValidationDisable disable_validation;
+  // Construct a buffer with a valid "IPLR" file identifier at bytes 4-7
+  // but a root table offset that points beyond the buffer. This passes
+  // the identifier check but fails FlatBuffer structural verification.
+  auto data = std::make_shared<std::vector<uint8_t>>(32, 0);
+  (*data)[4] = 'I';
+  (*data)[5] = 'P';
+  (*data)[6] = 'L';
+  (*data)[7] = 'R';
+  // Root offset (little-endian uint32 at offset 0) pointing out of bounds.
+  (*data)[0] = 0xFF;
+  (*data)[1] = 0xFF;
+
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      data->data(), data->size(), [data](auto, auto) {});
+  auto stages = RuntimeStage::DecodeRuntimeStages(mapping);
+  ASSERT_FALSE(stages.ok());
+  EXPECT_EQ(stages.status().code(), absl::StatusCode::kInvalidArgument);
+}
+
 TEST_P(RuntimeStageTest, CanReadUniforms) {
   const std::shared_ptr<fml::Mapping> fixture =
-      flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
+      flutter::testing::OpenFixtureAsMapping(
+          "all_supported_uniforms.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
 
   ASSERT_TRUE(stage);
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
       [[fallthrough]];
-    case PlaygroundBackend::kOpenGLES: {
-      ASSERT_EQ(stage->GetUniforms().size(), 17u);
+    case PlaygroundBackend::kMetalSDF:
+      [[fallthrough]];
+    case PlaygroundBackend::kOpenGLES:
+      [[fallthrough]];
+    case PlaygroundBackend::kOpenGLESSDF: {
+      ASSERT_EQ(stage->GetUniforms().size(), 14u);
       {
-        auto uni = stage->GetUniform("u_color");
+        // uFloat
+        auto uni = stage->GetUniform("uFloat");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.rows, 1u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 0u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_alpha");
+        // uVec2
+        auto uni = stage->GetUniform("uVec2");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
+        EXPECT_EQ(uni->dimensions.rows, 2u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 1u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_sparkle_color");
+        // uVec3
+        auto uni = stage->GetUniform("uVec3");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 2u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        auto padding = uni->padding_layout;
+        if (GetBackend() == PlaygroundBackend::kMetal ||
+            GetBackend() == PlaygroundBackend::kMetalSDF) {
+          EXPECT_EQ(padding.size(), 4u);
+          EXPECT_EQ(padding[0], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[1], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[2], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[3], RuntimePaddingType::kPadding);
+        } else {
+          EXPECT_TRUE(padding.empty());
+        }
       }
       {
-        auto uni = stage->GetUniform("u_sparkle_alpha");
+        // uVec4
+        auto uni = stage->GetUniform("uVec4");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 3u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_blur");
+        // uMat2
+        auto uni = stage->GetUniform("uMat2");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
+        EXPECT_EQ(uni->dimensions.rows, 2u);
+        EXPECT_EQ(uni->dimensions.cols, 2u);
         EXPECT_EQ(uni->location, 4u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_radius_scale");
+        // uMat3
+        auto uni = stage->GetUniform("uMat3");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 6u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
+        EXPECT_EQ(uni->dimensions.cols, 3u);
+        EXPECT_EQ(uni->location, 5u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
       }
       {
-        auto uni = stage->GetUniform("u_max_radius");
+        // uMat4
+        auto uni = stage->GetUniform("uMat4");
+        ASSERT_NE(uni, nullptr);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.cols, 4u);
+        EXPECT_EQ(uni->location, 6u);
+        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
+      }
+      {
+        // uFloatArray
+        auto uni = stage->GetUniform("uFloatArray");
         ASSERT_NE(uni, nullptr);
         EXPECT_EQ(uni->dimensions.rows, 1u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 7u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_resolution_scale");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 8u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-      }
-      {
-        auto uni = stage->GetUniform("u_noise_scale");
+        auto uni = stage->GetUniform("uVec2Array");
         ASSERT_NE(uni, nullptr);
         EXPECT_EQ(uni->dimensions.rows, 2u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 9u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_noise_phase");
+        // uVec3Array
+        auto uni = stage->GetUniform("uVec3Array");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 10u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-      }
-
-      {
-        auto uni = stage->GetUniform("u_circle1");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 11u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
       }
       {
-        auto uni = stage->GetUniform("u_circle2");
+        // uVec4Array
+        auto uni = stage->GetUniform("uVec4Array");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 12u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-      }
-      {
-        auto uni = stage->GetUniform("u_circle3");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 13u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_rotation1");
+        // uMat2Array
+        auto uni = stage->GetUniform("uMat2Array");
         ASSERT_NE(uni, nullptr);
         EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 14u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-      }
-      {
-        auto uni = stage->GetUniform("u_rotation2");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
+        EXPECT_EQ(uni->dimensions.cols, 2u);
         EXPECT_EQ(uni->location, 15u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_rotation3");
+        // uMat3Array
+        auto uni = stage->GetUniform("uMat3Array");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 16u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
+        EXPECT_EQ(uni->dimensions.cols, 3u);
+        EXPECT_EQ(uni->location, 17u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+      }
+      {
+        // uMat4Array
+        auto uni = stage->GetUniform("uMat4Array");
+        ASSERT_NE(uni, nullptr);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.cols, 4u);
+        EXPECT_EQ(uni->location, 19u);
+        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       break;
     }
     case PlaygroundBackend::kVulkan: {
       EXPECT_EQ(stage->GetUniforms().size(), 1u);
-      auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
+      const RuntimeUniformDescription* uni =
+          stage->GetUniform(RuntimeStage::kVulkanUBOName);
       ASSERT_TRUE(uni);
       EXPECT_EQ(uni->type, RuntimeUniformType::kStruct);
-      EXPECT_EQ(uni->struct_float_count, 32u);
+      EXPECT_EQ(uni->struct_float_count, 26u);
 
-      // There are 36 4 byte chunks in the UBO: 32 for the 32 floats, and 4 for
-      // padding. Initialize a vector as if they'll all be floats, then manually
-      // set the few padding bytes. If the shader changes, the padding locations
-      // will change as well. For example, if `u_alpha` was moved to the end,
-      // three bytes of padding could potentially be dropped - or if some of the
-      // scalar floats were changed to vec2 or vec4s, or if any vec3s are
-      // introduced.
-      // This means 36 * 4 = 144 bytes total.
+      EXPECT_EQ(uni->GetGPUSize(), 640u);
+      std::vector<RuntimePaddingType> layout(uni->GetGPUSize() / sizeof(float),
+                                             RuntimePaddingType::kFloat);
+      // uFloat and uVec2 are packed into a vec4 with 1 byte of padding between.
+      layout[1] = RuntimePaddingType::kPadding;
+      // uVec3 is packed as a vec4 with 1 byte of padding.
+      layout[7] = RuntimePaddingType::kPadding;
+      // uMat2 is packed as two vec4s, with the last 2 bytes of each being
+      // padding.
+      layout[14] = RuntimePaddingType::kPadding;
+      layout[15] = RuntimePaddingType::kPadding;
+      layout[18] = RuntimePaddingType::kPadding;
+      layout[19] = RuntimePaddingType::kPadding;
+      // uMat3 is packed as 3 vec4s, with the last byte of each being padding
+      layout[23] = RuntimePaddingType::kPadding;
+      layout[27] = RuntimePaddingType::kPadding;
+      layout[31] = RuntimePaddingType::kPadding;
+      // uFloatArray is packed as 2 vec4s, with the last 3 bytes of each
+      // being padding.
+      layout[49] = RuntimePaddingType::kPadding;
+      layout[50] = RuntimePaddingType::kPadding;
+      layout[51] = RuntimePaddingType::kPadding;
+      layout[53] = RuntimePaddingType::kPadding;
+      layout[54] = RuntimePaddingType::kPadding;
+      layout[55] = RuntimePaddingType::kPadding;
+      // uVec2Array is packed as 2 vec4s, with 2 bytes of padding at the end of
+      // each.
+      layout[58] = RuntimePaddingType::kPadding;
+      layout[59] = RuntimePaddingType::kPadding;
+      layout[62] = RuntimePaddingType::kPadding;
+      layout[63] = RuntimePaddingType::kPadding;
+      // uVec3Array is packed as 2 vec4s, with the last byte of each as padding.
+      layout[67] = RuntimePaddingType::kPadding;
+      layout[71] = RuntimePaddingType::kPadding;
+      // uVec4Array has no padding.
+      // uMat2Array[2] is packed as 4 vec4s, With the last 2 bytes of each being
+      // padding.
+      layout[82] = RuntimePaddingType::kPadding;
+      layout[83] = RuntimePaddingType::kPadding;
+      layout[86] = RuntimePaddingType::kPadding;
+      layout[87] = RuntimePaddingType::kPadding;
+      layout[90] = RuntimePaddingType::kPadding;
+      layout[91] = RuntimePaddingType::kPadding;
+      layout[94] = RuntimePaddingType::kPadding;
+      layout[95] = RuntimePaddingType::kPadding;
+      // uMat3Array[2] is packed as 6 vec4s, with the last byte of each being
+      // padding.
+      layout[99] = RuntimePaddingType::kPadding;
+      layout[103] = RuntimePaddingType::kPadding;
+      layout[107] = RuntimePaddingType::kPadding;
+      layout[111] = RuntimePaddingType::kPadding;
+      layout[115] = RuntimePaddingType::kPadding;
+      layout[119] = RuntimePaddingType::kPadding;
+      // uMat4Array[2] is packed as 8 vec4s with no padding.
+      layout[152] = RuntimePaddingType::kPadding;
+      layout[153] = RuntimePaddingType::kPadding;
+      layout[154] = RuntimePaddingType::kPadding;
+      layout[155] = RuntimePaddingType::kPadding;
+      layout[156] = RuntimePaddingType::kPadding;
+      layout[157] = RuntimePaddingType::kPadding;
+      layout[158] = RuntimePaddingType::kPadding;
+      layout[159] = RuntimePaddingType::kPadding;
 
-      EXPECT_EQ(uni->GetSize(), 144u);
-      std::vector<uint8_t> layout(uni->GetSize() / sizeof(float), 1);
-      layout[5] = 0;
-      layout[6] = 0;
-      layout[7] = 0;
-      layout[23] = 0;
+      EXPECT_THAT(uni->padding_layout, ::testing::ElementsAreArray(layout));
 
-      EXPECT_THAT(uni->struct_layout, ::testing::ElementsAreArray(layout));
+      std::vector<std::pair<std::string, unsigned int>> expected_uniforms = {
+          {"uFloat", 4},      {"uVec2", 8},       {"uVec3", 12},
+          {"uVec4", 16},      {"uMat2", 16},      {"uMat3", 36},
+          {"uMat4", 64},      {"uFloatArray", 8}, {"uVec2Array", 16},
+          {"uVec3Array", 24}, {"uVec4Array", 32}, {"uMat2Array", 32},
+          {"uMat3Array", 72}, {"uMat4Array", 128}};
+
+      ASSERT_EQ(uni->struct_fields.size(), expected_uniforms.size());
+
+      for (size_t i = 0; i < expected_uniforms.size(); ++i) {
+        const auto& element = uni->struct_fields[i];
+        const auto& expected = expected_uniforms[i];
+
+        EXPECT_EQ(element.name, expected.first) << "index: " << i;
+        EXPECT_EQ(element.byte_size, expected.second) << "index: " << i;
+      }
       break;
     }
   }
@@ -258,8 +366,7 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerBeforeUBO) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -285,8 +392,7 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerAfterUBO) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -308,8 +414,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(stage);
   std::promise<bool> registration;
   auto future = registration.get_future();
@@ -341,9 +446,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
   ABSL_ASSERT_OK(stages_result);
-  auto stage =
-      stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages_result.value()[GetRuntimeStageBackend()];
 
   ASSERT_TRUE(stage);
   ASSERT_NE(stage, nullptr);
@@ -388,15 +491,116 @@ TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
   ABSL_ASSERT_OK(stages_result);
   auto stages = stages_result.value();
-  // Right now, SkSL gets implicitly bundled regardless of what the build rule
-  // for this test requested. After
-  // https://github.com/flutter/flutter/issues/138919, this may require a build
-  // rule change or a new test.
   EXPECT_TRUE(stages[RuntimeStageBackend::kSkSL]);
-
   EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kVulkan]);
+}
+
+TEST_P(RuntimeStageTest, ContainsExpectedShaderTypesNoSksl) {
+  auto stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_simple_no_sksl.frag.iplr");
+  ABSL_ASSERT_OK(stages_result);
+  auto stages = stages_result.value();
+  EXPECT_FALSE(stages[RuntimeStageBackend::kSkSL]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kVulkan]);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameProducesScopedString) {
+  EXPECT_EQ(ShaderKey::MakeUserScopedName(ShaderKey::kScopeRuntimeEffect,
+                                          "assets/foo.frag", "main"),
+            "re:assets/foo.frag:main");
+  EXPECT_EQ(
+      ShaderKey::MakeUserScopedName(
+          ShaderKey::kScopeFlutterGPU,
+          "packages/pkg_a/assets/shaders.shaderbundle",
+          "solid_fill_fragment_main"),
+      "fg:packages/pkg_a/assets/shaders.shaderbundle:solid_fill_fragment_main");
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameContainsColonSeparator) {
+  // The colon separator is what makes user-scoped names unspoofable from
+  // engine-internal entrypoints, since impellerc-generated entrypoints are
+  // valid identifiers and cannot contain ':'.
+  std::string scoped = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeRuntimeEffect, "asset", "entry");
+  EXPECT_NE(scoped.find(':'), std::string::npos);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameDifferentLibraryIdsDoNotCollide) {
+  // Two user shaders that share an entrypoint name but come from different
+  // logical sources must produce different registry keys, so they cannot
+  // overwrite each other in the shared shader library.
+  std::string a = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, "packages/pkg_a/bundle", "main");
+  std::string b = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, "packages/pkg_b/bundle", "main");
+  EXPECT_NE(a, b);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameDifferentScopesDoNotCollide) {
+  // A FragmentProgram and a Flutter GPU shader can independently share an
+  // asset path and an entrypoint and must still produce different keys.
+  std::string runtime_effect = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeRuntimeEffect, "asset", "main");
+  std::string flutter_gpu = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, "asset", "main");
+  EXPECT_NE(runtime_effect, flutter_gpu);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameHandlesLongInputs) {
+  // The scoped name is used solely as a `std::string` key in the per-process
+  // shader library registry; there is no fixed length limit. Confirm that
+  // long inputs (e.g. deeply-nested package asset paths) round-trip through
+  // the builder without truncation.
+  const std::string long_library_id(4096, 'a');
+  const std::string long_entrypoint(2048, 'b');
+  std::string scoped = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, long_library_id, long_entrypoint);
+  EXPECT_EQ(scoped.size(), ShaderKey::kScopeFlutterGPU.size() + 1 +
+                               long_library_id.size() + 1 +
+                               long_entrypoint.size());
+  EXPECT_EQ(scoped.substr(0, 3), "fg:");
+  EXPECT_EQ(scoped.substr(3, long_library_id.size()), long_library_id);
+  EXPECT_EQ(scoped.substr(3 + long_library_id.size(), 1), ":");
+  EXPECT_EQ(scoped.substr(3 + long_library_id.size() + 1), long_entrypoint);
+}
+
+TEST_P(RuntimeStageTest, RuntimeStageHasUniqueLibraryIdByDefault) {
+  // Two stages decoded independently must get distinct fallback library ids
+  // so that programmatically-constructed stages cannot collide with each
+  // other in the shared shader library.
+  const std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
+  ASSERT_TRUE(fixture);
+  auto stages_a = RuntimeStage::DecodeRuntimeStages(fixture);
+  ABSL_ASSERT_OK(stages_a);
+  auto stages_b = RuntimeStage::DecodeRuntimeStages(fixture);
+  ABSL_ASSERT_OK(stages_b);
+  auto stage_a = stages_a.value()[GetRuntimeStageBackend()];
+  auto stage_b = stages_b.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(stage_a);
+  ASSERT_TRUE(stage_b);
+  EXPECT_FALSE(stage_a->GetLibraryId().empty());
+  EXPECT_FALSE(stage_b->GetLibraryId().empty());
+  EXPECT_NE(stage_a->GetLibraryId(), stage_b->GetLibraryId());
+}
+
+TEST_P(RuntimeStageTest, RuntimeStageLibraryIdCanBeOverridden) {
+  // FragmentProgram::initFromAsset overrides the fallback id with the asset
+  // path so that hot reload of the same asset evicts and replaces the same
+  // registry slot rather than leaking a new one.
+  const std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
+  ASSERT_TRUE(fixture);
+  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
+  ABSL_ASSERT_OK(stages);
+  auto stage = stages.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(stage);
+  stage->SetLibraryId("packages/my_pkg/assets/shader.frag");
+  EXPECT_EQ(stage->GetLibraryId(), "packages/my_pkg/assets/shader.frag");
 }
 
 }  // namespace testing

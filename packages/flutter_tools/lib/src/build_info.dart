@@ -61,6 +61,50 @@ class BuildInfo {
        dartDefines = dartDefines ?? const <String>[],
        dartExperiments = dartExperiments ?? const <String>[];
 
+  BuildInfo copyWith({
+    String? fileSystemScheme,
+    List<String>? fileSystemRoots,
+    List<String>? extraFrontEndOptions,
+    String? packageConfigPath,
+    PackageConfig? packageConfig,
+    String? initializeFromDill,
+    List<String>? dartDefines,
+    bool? includeUnsupportedPlatformLibraryStubs,
+  }) {
+    return BuildInfo(
+      mode,
+      flavor,
+      trackWidgetCreation: trackWidgetCreation,
+      frontendServerStarterPath: frontendServerStarterPath,
+      extraFrontEndOptions: extraFrontEndOptions ?? this.extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
+      fileSystemRoots: fileSystemRoots ?? this.fileSystemRoots,
+      androidProjectArgs: androidProjectArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
+      fileSystemScheme: fileSystemScheme ?? this.fileSystemScheme,
+      buildNumber: buildNumber,
+      buildName: buildName,
+      splitDebugInfoPath: splitDebugInfoPath,
+      dartObfuscation: dartObfuscation,
+      dartDefines: dartDefines ?? this.dartDefines,
+      dartExperiments: dartExperiments,
+      performanceMeasurementFile: performanceMeasurementFile,
+      packageConfigPath: packageConfigPath ?? this.packageConfigPath,
+      codeSizeDirectory: codeSizeDirectory,
+      androidGradleDaemon: androidGradleDaemon,
+      androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      packageConfig: packageConfig ?? this.packageConfig,
+      initializeFromDill: initializeFromDill ?? this.initializeFromDill,
+      assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
+      buildNativeAssets: buildNativeAssets,
+      useLocalCanvasKit: useLocalCanvasKit,
+      includeUnsupportedPlatformLibraryStubs:
+          includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
+      webEnableHotReload: webEnableHotReload,
+      treeShakeIcons: treeShakeIcons,
+    );
+  }
+
   final BuildMode mode;
 
   /// Whether the build should subset icon fonts.
@@ -577,105 +621,108 @@ bool isEmulatorBuildMode(BuildMode mode) {
 }
 
 enum TargetPlatform {
-  android,
-  ios,
-  darwin,
-  linux_x64,
-  linux_arm64,
-  linux_riscv64,
-  windows_x64,
-  windows_arm64,
-  fuchsia_arm64,
-  fuchsia_x64,
-  tester,
-  web_javascript,
+  android('android'),
+  ios('ios'),
+  darwin('darwin'),
+  linux_x64('linux-x64'),
+  linux_arm64('linux-arm64'),
+  linux_riscv64('linux-riscv64'),
+  windows_x64('windows-x64'),
+  windows_arm64('windows-arm64'),
+  fuchsia_arm64('fuchsia-arm64'),
+  fuchsia_x64('fuchsia-x64'),
+  tester('flutter-tester'),
+  web_javascript('web-javascript'),
   // The arch specific android target platforms are soft-deprecated.
   // Instead of using TargetPlatform as a combination arch + platform
   // the code will be updated to carry arch information in [DarwinArch]
   // and [AndroidArch].
-  android_arm,
-  android_arm64,
-  android_x64,
-  unsupported;
+  android_arm('android-arm'),
+  android_arm64('android-arm64'),
+  android_x64('android-x64'),
+  unsupported('unsupported');
 
-  String get fuchsiaArchForTargetPlatform {
-    switch (this) {
-      case TargetPlatform.fuchsia_arm64:
-        return 'arm64';
-      case TargetPlatform.fuchsia_x64:
-        return 'x64';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.darwin:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.unsupported:
-        throw UnsupportedError('Unexpected Fuchsia platform $this');
-    }
+  const TargetPlatform(this._defaultName);
+
+  factory TargetPlatform.fromName(String name) {
+    return switch (name) {
+      'android' => TargetPlatform.android,
+      'android-arm' => TargetPlatform.android_arm,
+      'android-arm64' => TargetPlatform.android_arm64,
+      'android-x64' => TargetPlatform.android_x64,
+      'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
+      'fuchsia-x64' => TargetPlatform.fuchsia_x64,
+      'ios' => TargetPlatform.ios,
+      // For backward-compatibility and also for Tester, where it must match
+      // host platform name (HostPlatform.darwin_x64)
+      'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
+      'linux-x64' => TargetPlatform.linux_x64,
+      'linux-arm64' => TargetPlatform.linux_arm64,
+      'linux-riscv64' => TargetPlatform.linux_riscv64,
+      'windows-x64' => TargetPlatform.windows_x64,
+      'windows-arm64' => TargetPlatform.windows_arm64,
+      'web-javascript' => TargetPlatform.web_javascript,
+      'flutter-tester' => TargetPlatform.tester,
+      _ => throw Exception('Unsupported platform name "$name"'),
+    };
   }
 
-  String get osName {
-    switch (this) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-        return 'linux';
-      case TargetPlatform.darwin:
-        return 'macos';
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-        return 'windows';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-        return 'android';
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-        return 'fuchsia';
-      case TargetPlatform.ios:
-        return 'ios';
-      case TargetPlatform.tester:
-        return 'flutter-tester';
-      case TargetPlatform.web_javascript:
-        return 'web';
-      case TargetPlatform.unsupported:
-        throw UnsupportedError('Unexpected target platform $this');
-    }
+  final String _defaultName;
+
+  String getName({DarwinArch? darwinArch}) {
+    return switch (this) {
+      TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
+      TargetPlatform.darwin when darwinArch != null => 'darwin-${darwinArch.name}',
+      _ => _defaultName,
+    };
   }
 
-  String get simpleName {
-    switch (this) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.darwin:
-      case TargetPlatform.windows_x64:
-        return 'x64';
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.windows_arm64:
-        return 'arm64';
-      case TargetPlatform.linux_riscv64:
-        return 'riscv64';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.unsupported:
-        throw UnsupportedError('Unexpected target platform $this');
-    }
-  }
+  String get fuchsiaArchForTargetPlatform => switch (this) {
+    fuchsia_arm64 => 'arm64',
+    fuchsia_x64 => 'x64',
+    android ||
+    android_arm ||
+    android_arm64 ||
+    android_x64 ||
+    darwin ||
+    ios ||
+    linux_arm64 ||
+    linux_riscv64 ||
+    linux_x64 ||
+    tester ||
+    web_javascript ||
+    windows_x64 ||
+    windows_arm64 ||
+    unsupported => throw UnsupportedError('Unexpected Fuchsia platform $this'),
+  };
+
+  String get osName => switch (this) {
+    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
+    darwin => 'macos',
+    windows_x64 || windows_arm64 => 'windows',
+    android || android_arm || android_arm64 || android_x64 => 'android',
+    fuchsia_arm64 || fuchsia_x64 => 'fuchsia',
+    ios => 'ios',
+    tester => 'flutter-tester',
+    web_javascript => 'web',
+    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  };
+
+  String get simpleName => switch (this) {
+    linux_x64 || darwin || windows_x64 => 'x64',
+    linux_arm64 || windows_arm64 => 'arm64',
+    linux_riscv64 => 'riscv64',
+    android ||
+    android_arm ||
+    android_arm64 ||
+    android_x64 ||
+    fuchsia_arm64 ||
+    fuchsia_x64 ||
+    ios ||
+    tester ||
+    web_javascript ||
+    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  };
 
   static Never throwUnsupportedTarget() =>
       throw UnsupportedError('Target platform is unsupported.');
@@ -697,9 +744,9 @@ enum DarwinArch {
   /// merged into a universal binary using the `lipo` tool.
   String get dartName {
     return switch (this) {
-      DarwinArch.armv7 => 'armv7',
-      DarwinArch.arm64 => 'arm64',
-      DarwinArch.x86_64 => 'x64',
+      armv7 => 'armv7',
+      arm64 => 'arm64',
+      x86_64 => 'x64',
     };
   }
 }
@@ -711,15 +758,15 @@ enum AndroidArch {
   x86_64;
 
   String get archName => switch (this) {
-    AndroidArch.armeabi_v7a => 'armeabi-v7a',
-    AndroidArch.arm64_v8a => 'arm64-v8a',
-    AndroidArch.x86_64 => 'x86_64',
+    armeabi_v7a => 'armeabi-v7a',
+    arm64_v8a => 'arm64-v8a',
+    x86_64 => 'x86_64',
   };
 
   String get platformName => switch (this) {
-    AndroidArch.armeabi_v7a => 'android-arm',
-    AndroidArch.arm64_v8a => 'android-arm64',
-    AndroidArch.x86_64 => 'android-x64',
+    armeabi_v7a => 'android-arm',
+    arm64_v8a => 'android-arm64',
+    x86_64 => 'android-x64',
   };
 }
 
@@ -784,52 +831,6 @@ List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
   const defaultDarwinArchitectures = <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
   return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
       defaultDarwinArchitectures;
-}
-
-String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
-  return switch (platform) {
-    TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
-    TargetPlatform.darwin when darwinArch != null => 'darwin-${darwinArch.name}',
-    TargetPlatform.ios => 'ios',
-    TargetPlatform.darwin => 'darwin',
-    TargetPlatform.android_arm => 'android-arm',
-    TargetPlatform.android_arm64 => 'android-arm64',
-    TargetPlatform.android_x64 => 'android-x64',
-    TargetPlatform.linux_x64 => 'linux-x64',
-    TargetPlatform.linux_arm64 => 'linux-arm64',
-    TargetPlatform.linux_riscv64 => 'linux-riscv64',
-    TargetPlatform.windows_x64 => 'windows-x64',
-    TargetPlatform.windows_arm64 => 'windows-arm64',
-    TargetPlatform.fuchsia_arm64 => 'fuchsia-arm64',
-    TargetPlatform.fuchsia_x64 => 'fuchsia-x64',
-    TargetPlatform.tester => 'flutter-tester',
-    TargetPlatform.web_javascript => 'web-javascript',
-    TargetPlatform.android => 'android',
-    TargetPlatform.unsupported => 'unsupported',
-  };
-}
-
-TargetPlatform getTargetPlatformForName(String platform) {
-  return switch (platform) {
-    'android' => TargetPlatform.android,
-    'android-arm' => TargetPlatform.android_arm,
-    'android-arm64' => TargetPlatform.android_arm64,
-    'android-x64' => TargetPlatform.android_x64,
-    'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
-    'fuchsia-x64' => TargetPlatform.fuchsia_x64,
-    'ios' => TargetPlatform.ios,
-    // For backward-compatibility and also for Tester, where it must match
-    // host platform name (HostPlatform.darwin_x64)
-    'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
-    'linux-x64' => TargetPlatform.linux_x64,
-    'linux-arm64' => TargetPlatform.linux_arm64,
-    'linux-riscv64' => TargetPlatform.linux_riscv64,
-    'windows-x64' => TargetPlatform.windows_x64,
-    'windows-arm64' => TargetPlatform.windows_arm64,
-    'web-javascript' => TargetPlatform.web_javascript,
-    'flutter-tester' => TargetPlatform.tester,
-    _ => throw Exception('Unsupported platform name "$platform"'),
-  };
 }
 
 AndroidArch getAndroidArchForName(String platform) {
@@ -907,13 +908,23 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.ios.name);
+String getIosBuildDirectory({Config? config, FileSystem? fileSystem}) {
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  return localFilesystem.path.join(
+    getBuildDirectory(localConfig, localFilesystem),
+    FlutterDarwinPlatform.ios.name,
+  );
 }
 
 /// Returns the macOS build output directory.
-String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.macos.name);
+String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  return localFilesystem.path.join(
+    getBuildDirectory(localConfig, localFilesystem),
+    FlutterDarwinPlatform.macos.name,
+  );
 }
 
 /// Returns the web build output directory.
@@ -931,9 +942,15 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
 }
 
 /// Returns the Windows build output directory.
-String getWindowsBuildDirectory(TargetPlatform targetPlatform) {
+///
+/// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
+/// different flavors can coexist on disk without overwriting each other.
+String getWindowsBuildDirectory(TargetPlatform targetPlatform, [String? flavor]) {
   final String arch = targetPlatform.simpleName;
-  return globals.fs.path.join(getBuildDirectory(), 'windows', arch);
+  final String subDirs = (flavor != null && flavor.isNotEmpty)
+      ? globals.fs.path.join('windows', arch, flavor)
+      : globals.fs.path.join('windows', arch);
+  return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Fuchsia build output directory.
@@ -1079,11 +1096,31 @@ const kBuildNumber = 'BuildNumber';
 /// Will be "build" when building and "install" when archiving.
 const kXcodeAction = 'Action';
 
-/// The define of the Xcode build Pre-action.
+// The define of the Xcode Build Script.
+/// This may be [kXcodeBuildScriptValuePrepare], [kXcodeBuildScriptValueBuild], or [kXcodeBuildScriptValueEmbed].
+const kXcodeBuildScript = 'XcodeBuildScript';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by a scheme pre-action.
+const kXcodeBuildScriptValuePrepare = 'prepare';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by the first Run Script in the Xcode build process that happens before compiling.
+const kXcodeBuildScriptValueBuild = 'build';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by the second Run Script in the Xcode build process that happens after compiling, linking, and
+/// embedding.
+const kXcodeBuildScriptValueEmbed = 'embed';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by a Run Script in the Xcode build process in a native app (add-to-app).
+const kXcodeBuildScriptValueAddToAppBuild = 'build-add-to-app';
+
+/// Whether the build is originating from the `flutter build swift-package` command.
 ///
-/// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
-/// to the BUILT_PRODUCTS_DIR prior to the build.
-const kXcodePreAction = 'PreBuildAction';
+/// Expects value of "true".
+const kBuildSwiftPackage = 'BuildSwiftPackage';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
@@ -1156,4 +1193,16 @@ String? _uncapitalize(String? s) {
     return s;
   }
   return s.substring(0, 1).toLowerCase() + s.substring(1);
+}
+
+// flutter_ignore: deprecation_syntax (see analyze.dart)
+@Deprecated('Use TargetPlatform.getName() instead')
+String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
+  return platform.getName(darwinArch: darwinArch);
+}
+
+// flutter_ignore: deprecation_syntax (see analyze.dart)
+@Deprecated('Use TargetPlatform.fromName() instead')
+TargetPlatform getTargetPlatformForName(String platform) {
+  return TargetPlatform.fromName(platform);
 }

@@ -39,6 +39,15 @@ static BOOL DoesHardwareSupportWideGamut() {
   return result;
 }
 
+NSNumber* _Nullable FLTEnableWideGamutFromBundle(NSBundle* _Nullable bundle,
+                                                 NSBundle* _Nullable mainBundle) {
+  NSNumber* nsEnableWideGamut = [bundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  if (nsEnableWideGamut == nil && bundle != mainBundle) {
+    nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  }
+  return nsEnableWideGamut;
+}
+
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* processInfoOrNil) {
   auto command_line = flutter::CommandLineFromNSProcessInfo(processInfoOrNil);
 
@@ -166,7 +175,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   // Removes unused function warning.
   (void)DoesHardwareSupportWideGamut;
 #else
-  NSNumber* nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  NSNumber* nsEnableWideGamut = FLTEnableWideGamutFromBundle(bundle, mainBundle);
   BOOL enableWideGamut =
       (nsEnableWideGamut ? nsEnableWideGamut.boolValue : YES) && DoesHardwareSupportWideGamut();
   settings.enable_wide_gamut = enableWideGamut;
@@ -176,6 +185,9 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   settings.impeller_antialiased_lines = (nsAntialiasLines ? nsAntialiasLines.boolValue : NO);
 
   settings.warn_on_impeller_opt_out = true;
+
+  NSNumber* nsEnableSDFs = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSDFs"];
+  settings.impeller_use_sdfs = (nsEnableSDFs ? nsEnableSDFs.boolValue : NO);
 
   NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTTraceSystrace"];
   // Change the default only if the option is present.

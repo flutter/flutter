@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/services.dart';
 ///
 /// @docImport 'app.dart';
@@ -129,6 +130,9 @@ enum _MediaQueryAspect {
 
   /// Specifies the aspect corresponding to [MediaQueryData.paragraphSpacingOverride].
   paragraphSpacingOverride,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.displayCornerRadii].
+  displayCornerRadii,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -234,6 +238,7 @@ class MediaQueryData {
     this.letterSpacingOverride,
     this.wordSpacingOverride,
     this.paragraphSpacingOverride,
+    this.displayCornerRadii,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -340,10 +345,25 @@ class MediaQueryData {
           platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
       paragraphSpacingOverride =
           platformData?.paragraphSpacingOverride ??
-          view.platformDispatcher.paragraphSpacingOverride;
+          view.platformDispatcher.paragraphSpacingOverride,
+      displayCornerRadii = _displayCornerRadiiFromView(view);
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
+  }
+
+  static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view) {
+    final ui.DisplayCornerRadii? displayCornerRadii = view.displayCornerRadii;
+    if (displayCornerRadii == null) {
+      return null;
+    }
+    final double devicePixelRatio = view.devicePixelRatio;
+    return BorderRadius.only(
+      topLeft: Radius.circular(displayCornerRadii.topLeft / devicePixelRatio),
+      topRight: Radius.circular(displayCornerRadii.topRight / devicePixelRatio),
+      bottomRight: Radius.circular(displayCornerRadii.bottomRight / devicePixelRatio),
+      bottomLeft: Radius.circular(displayCornerRadii.bottomLeft / devicePixelRatio),
+    );
   }
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -385,9 +405,13 @@ class MediaQueryData {
   ///   a [BuildContext].
   final Size size;
 
-  /// The number of device pixels for each logical pixel. This number might not
-  /// be a power of two. Indeed, it might not even be an integer. For example,
-  /// the Nexus 6 has a device pixel ratio of 3.5.
+  /// The number of device pixels for each logical pixel of the encompassing [FlutterView].
+  /// This number might not be a power of two. Indeed, it might not even be an integer.
+  /// For example, the Nexus 6 has a device pixel ratio of 3.5.
+  ///
+  /// This property is typically only informational. Overriding this property does not
+  /// rescale the app as the Flutter framework or its rendering pipeline usually
+  /// does not read this value.
   final double devicePixelRatio;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
@@ -560,6 +584,21 @@ class MediaQueryData {
   /// - On iOS this flag is set to true when the user setting called "24-Hour
   ///   Time" is set or the system-wide locale's default uses 24-hour
   ///   formatting.
+  /// - On macOS this flag reflects the current system locale's time format,
+  ///   which incorporates the "24-Hour Time" preference in System Settings.
+  ///   As on iOS, this only takes effect for the system locale; a custom
+  ///   locale passed to the application will ignore the 24-hour preference.
+  /// - On Windows this flag is derived from the user's "Short time" format
+  ///   in the Region settings; it is true when the configured format uses a
+  ///   24-hour pattern.
+  /// - On Linux this flag reflects the desktop environment's clock-format
+  ///   setting where available (for example,
+  ///   `org.gnome.desktop.interface.clock-format` on GNOME). On desktops
+  ///   that do not expose such a setting, it defaults to true (24-hour).
+  /// - On Web this flag is always false. The Flutter web engine does not
+  ///   currently populate it from the browser's locale settings, even though
+  ///   the browser exposes a preferred hour cycle via
+  ///   `Intl.DateTimeFormat.resolvedOptions().hourCycle`.
   final bool alwaysUse24HourFormat;
 
   /// Whether the user is using an accessibility service like TalkBack or
@@ -573,7 +612,15 @@ class MediaQueryData {
   ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
-  /// Whether the device is inverting the colors of the platform.
+  /// Whether the operating system is currently inverting the colors of the platform.
+  ///
+  /// This flag indicates that the underlying OS is already performing a global
+  /// color inversion at the screen level. It does not mean the Flutter framework
+  /// will automatically invert its own layout painting.
+  ///
+  /// Instead, this flag allows the application to react to the inversion. For
+  /// example, by selectively re-inverting images, maps, or video playback so that
+  /// they display with natural colors instead of looking like a film negative.
   ///
   /// This flag is currently only updated on iOS devices.
   ///
@@ -583,11 +630,25 @@ class MediaQueryData {
   ///    originates.
   final bool invertColors;
 
-  /// Whether the user requested a high contrast between foreground and background
-  /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
+  /// Whether the platform is requesting a high contrast between foreground and
+  /// background content.
   ///
-  /// This flag is currently only updated on iOS devices that are running iOS 13
-  /// or above.
+  /// On iOS, this corresponds to the "Increase Contrast" setting in
+  /// Settings -> Accessibility. On Android, this corresponds to the "High
+  /// contrast text" or similar accessibility settings.
+  ///
+  /// This flag indicates that the operating system is already performing
+  /// high-contrast adjustments or expects the application to adjust its
+  /// color palette to meet higher accessibility standards.
+  ///
+  /// Changing this value manually in a [MediaQuery] override will not
+  /// automatically trigger a theme change in [MaterialApp]. Instead, [MaterialApp]
+  /// uses this value to decide whether to use [MaterialApp.highContrastTheme]
+  /// or [MaterialApp.highContrastDarkTheme].
+
+  ///
+  /// This flag is currently only updated on iOS devices running iOS 13+
+  /// and Android devices running API 34+.
   final bool highContrast;
 
   /// Whether the user requested to show on/off labels inside switches on iOS,
@@ -602,8 +663,31 @@ class MediaQueryData {
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
+  /// This corresponds to Android's "Remove animations" accessibility setting.
+  ///
+  /// On iOS, reduced motion is exposed separately via
+  /// [dart:ui.AccessibilityFeatures.reduceMotion] and does not set this flag.
+  ///
+  /// This value is read directly from the engine via
+  /// [SemanticsBinding.disableAnimations]. As a result, it is used by
+  /// framework-level animation APIs such as [AnimationController] and cannot be
+  /// overridden using [MediaQuery].
+  ///
+  /// Manually overriding this value in a [MediaQuery] widget will not affect
+  /// framework animations (for example those driven by [AnimationController]).
+  /// However, it can still be useful for testing or for custom widgets that
+  /// explicitly read [MediaQueryData.disableAnimations].
+  ///
+  /// When implementing custom explicit animations, you should check this
+  /// property and adjust behavior accordingly (for example, by reducing
+  /// duration or skipping non-essential animations when it is true).
+  ///
   /// See also:
   ///
+  ///  * [AnimationController], which adjusts its playback behavior based on this setting.
+  ///  * [AnimationBehavior], which defines how animations behave when this setting is active.
+  ///  * [dart:ui.AccessibilityFeatures.disableAnimations], the underlying primitive
+  ///    flag provided by the platform.
   ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
   ///    originates.
   final bool disableAnimations;
@@ -617,7 +701,7 @@ class MediaQueryData {
   ///    originates.
   final bool boldText;
 
-  /// Whether accessibility announcements (like [SemanticsService.announce])
+  /// Whether accessibility announcements (like [SemanticsService.sendAnnouncement])
   /// are supported on the current platform.
   ///
   /// Returns `false` on platforms where announcements are deprecated or
@@ -688,7 +772,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.height] and [StrutStyle.height] are overriden by
+  ///  [TextStyle.height] and [StrutStyle.height] are overridden by
   ///  [lineHeightScaleFactorOverride].
   final double? lineHeightScaleFactorOverride;
 
@@ -703,7 +787,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.letterSpacing] is overriden by [letterSpacingOverride].
+  ///  [TextStyle.letterSpacing] is overridden by [letterSpacingOverride].
   final double? letterSpacingOverride;
 
   /// Overrides the amount of space (in logical pixels) to add at each
@@ -717,7 +801,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.wordSpacing] is overriden by [wordSpacingOverride].
+  ///  [TextStyle.wordSpacing] is overridden by [wordSpacingOverride].
   final double? wordSpacingOverride;
 
   /// The amount of space (in logical pixels) to add following each paragraph
@@ -726,6 +810,17 @@ class MediaQueryData {
   /// Returns `null` when the platform has not set an override
   /// for text paragraph spacing.
   final double? paragraphSpacingOverride;
+
+  /// The radii of the display corners in logical pixels.
+  ///
+  /// This is currently populated only on Android API 31+. On earlier Android
+  /// versions, iOS, and other platforms, this value is `null`.
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterView.displayCornerRadii], which returns the display corner
+  ///    radii in physical pixels.
+  final BorderRadius? displayCornerRadii;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -796,6 +891,7 @@ class MediaQueryData {
       letterSpacingOverride: letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
+      displayCornerRadii: displayCornerRadii,
     );
   }
 
@@ -842,6 +938,42 @@ class MediaQueryData {
       letterSpacingOverride: letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
+      displayCornerRadii: displayCornerRadii,
+    );
+  }
+
+  /// Creates a copy of this media query data but with the `displayCornerRadii`
+  /// replaced with the given value.
+  ///
+  /// If the argument is null (the default), then this [MediaQueryData]
+  /// is returned with the `displayCornerRadii` set to null.
+  MediaQueryData applyDisplayCornerRadii(BorderRadius? displayCornerRadii) {
+    return MediaQueryData(
+      size: size,
+      devicePixelRatio: devicePixelRatio,
+      textScaler: textScaler,
+      platformBrightness: platformBrightness,
+      padding: padding,
+      viewPadding: viewPadding,
+      viewInsets: viewInsets,
+      systemGestureInsets: systemGestureInsets,
+      alwaysUse24HourFormat: alwaysUse24HourFormat,
+      invertColors: invertColors,
+      highContrast: highContrast,
+      onOffSwitchLabels: onOffSwitchLabels,
+      disableAnimations: disableAnimations,
+      accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
+      supportsAnnounce: supportsAnnounce,
+      navigationMode: navigationMode,
+      gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
+      supportsShowingSystemContextMenu: supportsShowingSystemContextMenu,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride,
+      displayCornerRadii: displayCornerRadii,
     );
   }
 
@@ -1044,7 +1176,8 @@ class MediaQueryData {
         other.lineHeightScaleFactorOverride == lineHeightScaleFactorOverride &&
         other.letterSpacingOverride == letterSpacingOverride &&
         other.wordSpacingOverride == wordSpacingOverride &&
-        other.paragraphSpacingOverride == paragraphSpacingOverride;
+        other.paragraphSpacingOverride == paragraphSpacingOverride &&
+        other.displayCornerRadii == displayCornerRadii;
   }
 
   @override
@@ -1072,6 +1205,7 @@ class MediaQueryData {
       letterSpacingOverride,
       wordSpacingOverride,
       paragraphSpacingOverride,
+      displayCornerRadii,
     ),
   );
 
@@ -1101,6 +1235,7 @@ class MediaQueryData {
       'letterSpacingOverride: $letterSpacingOverride',
       'wordSpacingOverride: $wordSpacingOverride',
       'paragraphSpacingOverride: $paragraphSpacingOverride',
+      'displayCornerRadii: $displayCornerRadii',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -2081,6 +2216,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static double? maybeParagraphSpacingOverrideOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.paragraphSpacingOverride)?.paragraphSpacingOverride;
 
+  /// Returns [MediaQueryData.displayCornerRadii] for the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.displayCornerRadii] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static BorderRadius? displayCornerRadiiOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.displayCornerRadii).displayCornerRadii;
+
+  /// Returns [MediaQueryData.displayCornerRadii] for the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.displayCornerRadii] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static BorderRadius? maybeDisplayCornerRadiiOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.displayCornerRadii)?.displayCornerRadii;
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
@@ -2142,6 +2299,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               data.wordSpacingOverride != oldWidget.data.wordSpacingOverride,
             _MediaQueryAspect.paragraphSpacingOverride =>
               data.paragraphSpacingOverride != oldWidget.data.paragraphSpacingOverride,
+            _MediaQueryAspect.displayCornerRadii =>
+              data.displayCornerRadii != oldWidget.data.displayCornerRadii,
           },
     );
   }

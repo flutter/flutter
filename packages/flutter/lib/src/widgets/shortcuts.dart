@@ -88,10 +88,7 @@ class KeySet<T extends KeyboardKey> {
   /// Do not mutate the `keys` set after passing it to this object.
   ///
   /// The `keys` set must not be empty.
-  KeySet.fromSet(Set<T> keys)
-    : assert(keys.isNotEmpty),
-      assert(!keys.contains(null)),
-      _keys = HashSet<T>.of(keys);
+  KeySet.fromSet(Set<T> keys) : assert(keys.isNotEmpty), _keys = HashSet<T>.of(keys);
 
   /// Returns a copy of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => _keys.toSet();
@@ -924,8 +921,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   @protected
   KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
     // Marking some variables as "late" ensures that they aren't evaluated unless needed.
-    late final Intent? intent = _find(event, HardwareKeyboard.instance);
-    late final BuildContext? context = primaryFocus?.context;
+    final Intent? intent = _find(event, HardwareKeyboard.instance);
+    final BuildContext? context = primaryFocus?.context;
     late final Action<Intent>? action = Actions.maybeFind<Intent>(context!, intent: intent);
 
     if (intent != null && context != null && action != null) {
@@ -1137,7 +1134,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      debugLabel: '$Shortcuts',
+      debugLabel: widget.debugLabel != null ? '$Shortcuts: ${widget.debugLabel}' : '$Shortcuts',
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,
       includeSemantics: widget.includeSemantics,
@@ -1547,7 +1544,11 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   Widget build(BuildContext context) {
     return _ShortcutRegistrarScope(
       registry: registry,
-      child: Shortcuts.manager(manager: manager, child: widget.child),
+      child: Shortcuts.manager(
+        manager: manager,
+        debugLabel: '<Shortcut Registrar>',
+        child: widget.child,
+      ),
     );
   }
 }

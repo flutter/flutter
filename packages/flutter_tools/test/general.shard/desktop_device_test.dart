@@ -169,14 +169,13 @@ void main() {
             'FLUTTER_ENGINE_SWITCH_11': 'endless-trace-buffer=true',
             'FLUTTER_ENGINE_SWITCH_12': 'profile-microtasks=true',
             'FLUTTER_ENGINE_SWITCH_13': 'purge-persistent-cache=true',
-            'FLUTTER_ENGINE_SWITCH_14': 'enable-impeller=false',
-            'FLUTTER_ENGINE_SWITCH_15': 'enable-checked-mode=true',
-            'FLUTTER_ENGINE_SWITCH_16': 'verify-entry-points=true',
-            'FLUTTER_ENGINE_SWITCH_17': 'start-paused=true',
-            'FLUTTER_ENGINE_SWITCH_18': 'disable-service-auth-codes=true',
-            'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
-            'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
-            'FLUTTER_ENGINE_SWITCHES': '20',
+            'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
+            'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
+            'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
+            'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
+            'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
+            'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
+            'FLUTTER_ENGINE_SWITCHES': '19',
           },
         ),
       ]);
@@ -223,8 +222,7 @@ void main() {
             'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
             'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
             'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCH_4': 'enable-impeller=false',
-            'FLUTTER_ENGINE_SWITCHES': '4',
+            'FLUTTER_ENGINE_SWITCHES': '3',
           },
         ),
       ]);
@@ -450,20 +448,12 @@ FakeDesktopDevice setUpDesktopDevice({
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
   FakeDesktopDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
     this.nullExecutablePathForDevice = false,
-  }) : super(
-         'dummy',
-         platformType: PlatformType.linux,
-         ephemeral: false,
-         processManager: processManager,
-         logger: logger,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+  }) : super('dummy', platformType: PlatformType.linux, ephemeral: false);
 
   /// The `mainPath` last passed to [buildForDevice].
   String? lastBuiltMainPath;

@@ -5,6 +5,7 @@
 import("//build/toolchain/clang.gni")
 import("//flutter/common/config.gni")
 import("//flutter/examples/examples.gni")
+import("//flutter/shell/config.gni")
 import("//flutter/shell/platform/config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
@@ -158,6 +159,7 @@ group("flutter") {
       "//flutter/display_list:display_list_builder_benchmarks",
       "//flutter/display_list:display_list_region_benchmarks",
       "//flutter/display_list:display_list_transform_benchmarks",
+      "//flutter/display_list:primitive_rendering_benchmarks",
       "//flutter/fml:fml_benchmarks",
       "//flutter/impeller/geometry:geometry_benchmarks",
       "//flutter/lib/ui:ui_benchmarks",
@@ -214,6 +216,7 @@ group("unittests") {
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
       "//flutter/shell/geometry:geometry_unittests",
+      "//flutter/shell/gpu:gpu_surface_unittests",
       "//flutter/shell/platform/embedder:embedder_a11y_unittests",
       "//flutter/shell/platform/embedder:embedder_proctable_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
@@ -223,6 +226,10 @@ group("unittests") {
       "//flutter/third_party/tonic/tests:tonic_unittests",
       "//flutter/txt:txt_unittests",
     ]
+
+    if (!is_fuchsia) {
+      public_deps += [ "//flutter/lib/gpu:gpu_unittests" ]
+    }
 
     # The accessibility library only supports Mac and Windows at the moment.
     if (is_mac || is_win) {
@@ -245,7 +252,6 @@ group("unittests") {
     if (is_mac) {
       public_deps += [
         "//flutter/impeller/golden_tests:impeller_golden_tests",
-        "//flutter/shell/gpu:gpu_surface_metal_unittests",
         "//flutter/shell/platform/darwin/common:availability_version_check_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_swift_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_unittests",

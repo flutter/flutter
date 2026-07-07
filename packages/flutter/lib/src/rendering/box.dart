@@ -2254,8 +2254,8 @@ abstract class RenderBox extends RenderObject {
       if (size is _DebugSize) {
         assert(size._owner == this);
         final RenderObject? parent = this.parent;
-        // Whether the size getter is accessed during layout (but not in a
-        // layout callback).
+        // Size reads during an invokeLayoutCallback are outside regular layout
+        // because layout callbacks run in a special mutation-permitted phase.
         final bool doingRegularLayout =
             !(RenderObject.debugActiveLayout?.debugDoingThisLayoutWithCallback ?? true);
         final bool sizeAccessAllowed =
@@ -2269,7 +2269,7 @@ abstract class RenderBox extends RenderObject {
           'RenderBox.size accessed beyond the scope of resize, layout, or '
           'permitted parent access. RenderBox can always access its own size, '
           'otherwise, the only object that is allowed to read RenderBox.size '
-          'is its parent, if they have said they will. It you hit this assert '
+          'is its parent, if they have said they will. If you hit this assert '
           'trying to access a child\'s size, pass "parentUsesSize: true" to '
           "that child's layout() in ${objectRuntimeType(this, 'RenderBox')}.performLayout.",
         );
@@ -3041,11 +3041,18 @@ abstract class RenderBox extends RenderObject {
   /// Convert the given point from the global coordinate system in logical pixels
   /// to the local coordinate system for this box.
   ///
-  /// This method will un-project the point from the screen onto the widget,
-  /// which makes it different from [MatrixUtils.transformPoint].
+  /// This method will un-project the point from the screen onto the local
+  /// render plane, which makes it different from [MatrixUtils.transformPoint].
+  /// That extra step matters when transforms include perspective: a single 2D
+  /// screen point can correspond to many 3D points, and the framework needs the
+  /// point that lies on this render box's local coordinate plane for hit testing
+  /// and gestures.
   ///
   /// If the transform from global coordinates to local coordinates is
-  /// degenerate, this function returns [Offset.zero].
+  /// degenerate, or if the local plane is parallel to the view direction, this
+  /// function returns [Offset.zero]. A degenerate transform is one that
+  /// collapses the coordinate space so it cannot be inverted, such as a zero
+  /// scale.
   ///
   /// If `ancestor` is non-null, this function converts the given point from the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
@@ -3053,29 +3060,44 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This method is implemented in terms of [getTransformTo].
   Offset globalToLocal(Offset point, {RenderObject? ancestor}) {
-    // We want to find point (p) that corresponds to a given point on the
-    // screen (s), but that also physically resides on the local render plane,
-    // so that it is useful for visually accurate gesture processing in the
-    // local space. For that, we can't simply transform 2D screen point to
-    // the 3D local space since the screen space lacks the depth component |z|,
-    // and so there are many 3D points that correspond to the screen point.
-    // We must first unproject the screen point onto the render plane to find
-    // the true 3D point that corresponds to the screen point.
+    // We want to find the local point that corresponds to the given point on
+    // the screen, but that also physically resides on this RenderBox's local
+    // render plane, so that it is useful for visually accurate gesture
+    // processing in the local space. For that, we cannot simply transform the
+    // 2D screen point to the 3D local space since the screen space lacks the
+    // depth component |z|, and so there are many 3D points that correspond to
+    // the screen point. We must first unproject the screen point onto the local
+    // render plane to find the true 3D point that corresponds to the screen
+    // point.
+    //
     // We do orthogonal unprojection after undoing perspective, in local space.
-    // The render plane is specified by renderBox offset (o) and Z axis (n).
-    // Unprojection is done by finding the intersection of the view vector (d)
-    // with the local X-Y plane: (o-s).dot(n) == (p-s).dot(n), (p-s) == |z|*d.
+    // The local render plane is the XY plane with normal vector <0, 0, 1>.
+    // Unprojection is done by finding the intersection of the view vector with
+    // the local XY plane at z = 0.
     final Matrix4 transform = getTransformTo(ancestor);
     final double det = transform.invert();
     if (det == 0.0) {
       return Offset.zero;
     }
-    final n = Vector3(0.0, 0.0, 1.0);
-    final Vector3 i = transform.perspectiveTransform(Vector3(0.0, 0.0, 0.0));
-    final Vector3 d = transform.perspectiveTransform(Vector3(0.0, 0.0, 1.0)) - i;
-    final Vector3 s = transform.perspectiveTransform(Vector3(point.dx, point.dy, 0.0));
-    final Vector3 p = s - d * (n.dot(s) / n.dot(d));
-    return Offset(p.x, p.y);
+
+    // Two points with the same screen x and y but different depths define the
+    // view direction in local coordinates.
+    final Vector3 localScreenOrigin = transform.perspectiveTransform(Vector3(0.0, 0.0, 0.0));
+    final Vector3 localViewDirection =
+        transform.perspectiveTransform(Vector3(0.0, 0.0, 1.0)) - localScreenOrigin;
+    if (localViewDirection.z == 0.0) {
+      return Offset.zero;
+    }
+
+    // Convert the requested screen point into local coordinates.
+    final Vector3 localScreenPoint = transform.perspectiveTransform(
+      Vector3(point.dx, point.dy, 0.0),
+    );
+
+    // Move along the view direction until reaching the local render plane.
+    final Vector3 localPoint =
+        localScreenPoint - localViewDirection * (localScreenPoint.z / localViewDirection.z);
+    return Offset(localPoint.x, localPoint.y);
   }
 
   /// Convert the given point from the local coordinate system for this box to

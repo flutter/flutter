@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -47,7 +49,10 @@ void main() {
 
   testUsingContext(
     'does not throw if clang not present but no native assets present',
-    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
@@ -58,10 +63,13 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutClang(),
+        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+        buildDataAssets: true,
+        recordedUsesFile: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
-        isNot(contains('Building native assets for ')),
+        isNot(contains('Running build hooks for ')),
       );
     },
   );
@@ -72,14 +80,7 @@ void main() {
   testUsingContext(
     'cCompilerConfigLinux',
     overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <Pattern>['which', 'clang++'],
-          stdout: '''
-/some/path/to/clang++
-''', // Newline at the end of the string.
-        ),
-      ]),
+      ProcessManager: () => FakeProcessManager.empty(),
       FileSystem: () => fileSystem,
     },
     () async {
@@ -93,17 +94,29 @@ void main() {
       await fileSystem.file('/some/path/to/llvm-ar').create();
       await fileSystem.file('/some/path/to/ld.lld').create();
 
-      final CCompilerConfig result = (await cCompilerConfigLinux(throwIfNotFound: true))!;
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+//CXX compiler
+CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+
+//LLVM archiver
+CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+
+CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      final CCompilerConfig result = (await cCompilerConfigLinux(
+        cmakeDirectory: environment.outputDir,
+      ))!;
       expect(result.compiler, Uri.file('/some/path/to/clang'));
+      expect(result.archiver, Uri.file('/some/path/to/llvm-ar'));
+      expect(result.linker, Uri.file('/some/path/to/ld.lld'));
     },
   );
 
   testUsingContext(
-    'cCompilerConfigLinux using differing binary names for ld and ar',
+    'cCompilerConfigLinux gcc linker',
     overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/path/to/clang++'),
-      ]),
+      ProcessManager: () => FakeProcessManager.empty(),
       FileSystem: () => fileSystem,
     },
     () async {
@@ -111,23 +124,36 @@ void main() {
         return;
       }
 
-      for (final execName in ['clang++', 'clang', 'ar', 'ld']) {
-        await fileSystem.file('/path/to/$execName').create(recursive: true);
-      }
+      await fileSystem.directory('/some/path/to/').create(recursive: true);
+      await fileSystem.file('/some/path/to/clang++').create();
+      await fileSystem.file('/some/path/to/clang').create();
+      await fileSystem.directory('/usr/bin/').create(recursive: true);
+      await fileSystem.file('/usr/bin/ar').create();
+      await fileSystem.file('/usr/bin/ld').create();
 
-      final CCompilerConfig result = (await cCompilerConfigLinux(throwIfNotFound: true))!;
-      expect(result.linker, Uri.file('/path/to/ld'));
-      expect(result.compiler, Uri.file('/path/to/clang'));
-      expect(result.archiver, Uri.file('/path/to/ar'));
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+//CXX compiler
+CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+
+//LLVM archiver
+CMAKE_AR:FILEPATH=/usr/bin/ar
+
+CMAKE_LINKER:FILEPATH=/usr/bin/ld
+''');
+
+      final CCompilerConfig result = (await cCompilerConfigLinux(
+        cmakeDirectory: environment.outputDir,
+      ))!;
+      expect(result.compiler, Uri.file('/some/path/to/clang'));
+      expect(result.archiver, Uri.file('/usr/bin/ar'));
+      expect(result.linker, Uri.file('/usr/bin/ld'));
     },
   );
 
   testUsingContext(
-    'cCompilerConfigLinux with missing binaries when required',
+    'cCompilerConfigLinux missing CMakeCache',
     overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/a/path/to/clang++'),
-      ]),
+      ProcessManager: () => FakeProcessManager.empty(),
       FileSystem: () => fileSystem,
     },
     () async {
@@ -135,18 +161,56 @@ void main() {
         return;
       }
 
-      await fileSystem.file('/a/path/to/clang++').create(recursive: true);
+      expect(cCompilerConfigLinux(cmakeDirectory: environment.buildDir), throwsA(isA<ToolExit>()));
+    },
+  );
 
-      expect(cCompilerConfigLinux(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+  testUsingContext(
+    'cCompilerConfigLinux missing entry',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+//CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+//CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+# CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      expect(cCompilerConfigLinux(cmakeDirectory: environment.outputDir), throwsA(isA<ToolExit>()));
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux invalid paths',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      expect(cCompilerConfigLinux(cmakeDirectory: environment.outputDir), throwsA(isA<ToolExit>()));
     },
   );
 
   testUsingContext(
     'cCompilerConfigLinux with missing binaries when not required',
     overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/a/path/to/clang++'),
-      ]),
+      ProcessManager: () => FakeProcessManager.empty(),
       FileSystem: () => fileSystem,
     },
     () async {
@@ -155,9 +219,183 @@ void main() {
       }
 
       await fileSystem.file('/a/path/to/clang++').create(recursive: true);
-      expect(cCompilerConfigLinux(throwIfNotFound: false), completes);
+      expect(cCompilerConfigLinux(), completes);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux missing CMakeCache and throwIfNotFound: false',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      final CCompilerConfig? result = await cCompilerConfigLinux(
+        cmakeDirectory: environment.buildDir,
+        throwIfNotFound: false,
+      );
+      expect(result, isNull);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux missing entry and throwIfNotFound: false',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+//CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+//CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+# CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      final CCompilerConfig? result = await cCompilerConfigLinux(
+        cmakeDirectory: environment.outputDir,
+        throwIfNotFound: false,
+      );
+      expect(result, isNull);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux invalid paths and throwIfNotFound: false',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+CMAKE_CXX_COMPILER:FILEPATH=/some/path/to/clang++
+CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      final CCompilerConfig? result = await cCompilerConfigLinux(
+        cmakeDirectory: environment.outputDir,
+        throwIfNotFound: false,
+      );
+      expect(result, isNull);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: false',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => _ThrowingResolveFileSystem(
+            fileSystem,
+            '${environment.outputDir.path}/mock_clang++',
+          ),
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+CMAKE_CXX_COMPILER:FILEPATH=${environment.outputDir.path}/mock_clang++
+CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      // Create the file so requireTool passes existsSync()
+      await environment.outputDir.childFile('mock_clang++').create();
+
+      final CCompilerConfig? result = await cCompilerConfigLinux(
+        cmakeDirectory: environment.outputDir,
+        throwIfNotFound: false,
+      );
+      expect(result, isNull);
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: true',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => _ThrowingResolveFileSystem(
+            fileSystem,
+            '${environment.outputDir.path}/mock_clang++',
+          ),
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await environment.outputDir.childFile('CMakeCache.txt').writeAsString('''
+CMAKE_CXX_COMPILER:FILEPATH=${environment.outputDir.path}/mock_clang++
+CMAKE_AR:FILEPATH=/some/path/to/llvm-ar
+CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
+''');
+
+      // Create the file so requireTool passes existsSync()
+      await environment.outputDir.childFile('mock_clang++').create();
+
+      expect(
+        cCompilerConfigLinux(cmakeDirectory: environment.outputDir),
+        throwsA(isA<FileSystemException>()),
+      );
     },
   );
 }
 
 class _BuildRunnerWithoutClang extends FakeFlutterNativeAssetsBuildRunner {}
+
+class _ThrowingResolveFileSystem extends ForwardingFileSystem {
+  _ThrowingResolveFileSystem(super.delegate, this.throwingPath);
+
+  final String throwingPath;
+
+  @override
+  File file(dynamic path) {
+    final File delegateFile = super.file(path);
+    if (delegateFile.path == throwingPath) {
+      return _ThrowingResolveFile(this, delegateFile);
+    }
+    return delegateFile;
+  }
+}
+
+class _ThrowingResolveFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
+  _ThrowingResolveFile(this.fileSystem, this.delegate);
+
+  @override
+  final io.File delegate;
+
+  @override
+  final FileSystem fileSystem;
+
+  @override
+  File wrapFile(io.File delegate) => _ThrowingResolveFile(fileSystem, delegate);
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => throw UnimplementedError();
+
+  @override
+  Link wrapLink(io.Link delegate) => throw UnimplementedError();
+
+  @override
+  Future<String> resolveSymbolicLinks() async {
+    throw const FileSystemException('Mock FileSystemException during resolveSymbolicLinks');
+  }
+
+  @override
+  String resolveSymbolicLinksSync() {
+    throw const FileSystemException('Mock FileSystemException during resolveSymbolicLinksSync');
+  }
+}

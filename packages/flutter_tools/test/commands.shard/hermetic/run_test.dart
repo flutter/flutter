@@ -160,6 +160,22 @@ void main() {
       });
 
       testUsingContext(
+        'prebuiltApplicationBinaryPath is set when --use-application-binary is provided',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['run', '--no-pub', '--use-application-binary=path/to/binary']);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/binary');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
         'exits with a user message when no supported devices attached',
         () async {
           final command = RunCommand();
@@ -331,7 +347,7 @@ void main() {
           expect(
             logger.warningText,
             contains(
-              '--flavor is only supported for Android, macOS, and iOS devices. '
+              '--flavor is only supported for Android, macOS, iOS, and Windows devices. '
               'Flavor-related features may not function properly and could '
               'behave differently in a future release.',
             ),
@@ -412,6 +428,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -465,6 +482,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: true,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -513,6 +531,50 @@ void main() {
             Logger: () => MachineOutputLogger(parent: logger),
           },
         );
+
+        group('web', () {
+          late FakeWebRunnerFactory fakeWebRunnerFactory;
+
+          setUp(() {
+            fakeWebRunnerFactory = FakeWebRunnerFactory();
+          });
+
+          testUsingContext(
+            'can pass --web-define',
+            () async {
+              final command = RunCommand();
+              final device = FakeDevice(
+                platformType: PlatformType.web,
+                targetPlatform: TargetPlatform.web_javascript,
+              );
+              testDeviceManager.devices = <Device>[device];
+
+              await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+                  'run',
+                  '--no-pub',
+                  '--machine',
+                  '-d',
+                  device.id,
+                  '--web-define=NAME=VAL',
+                ]),
+                throwsToolExit(),
+              );
+              expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'NAME': 'VAL'});
+            },
+            overrides: <Type, Generator>{
+              Artifacts: () => artifacts,
+              Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+              DeviceManager: () => testDeviceManager,
+              FeatureFlags: () => FakeFeatureFlags(),
+              FileSystem: () => fs,
+              ProcessManager: () => FakeProcessManager.any(),
+              Stdio: () => FakeStdio(),
+              Logger: () => MachineOutputLogger(parent: logger),
+              WebRunnerFactory: () => fakeWebRunnerFactory,
+            },
+          );
+        });
 
         testUsingContext(
           'can disable devtools with --no-devtools',
@@ -727,6 +789,7 @@ void main() {
                 runProjectModule: false,
                 runProjectHostLanguage: '',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -777,6 +840,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -832,6 +896,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -888,6 +953,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -1339,6 +1405,115 @@ server:
         },
       );
     });
+
+    group('--base-href', () {
+      late FakeWebRunnerFactory fakeWebRunnerFactory;
+
+      setUp(() {
+        fakeWebRunnerFactory = FakeWebRunnerFactory();
+
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+        final device = FakeDevice(
+          isLocalEmulator: true,
+          platformType: PlatformType.web,
+          targetPlatform: TargetPlatform.web_javascript,
+        );
+        testDeviceManager.devices = <Device>[device];
+      });
+
+      testUsingContext(
+        'passes base-href to WebDevServerConfig',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, '/preview/');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws ToolExit when base-href does not start with /',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
+            throwsToolExit(message: '--base-href should start and end with /'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws ToolExit when base-href does not end with /',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
+            throwsToolExit(message: '--base-href should start and end with /'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'base-href defaults to null when not provided',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, isNull);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+    });
   });
 
   group('terminal', () {
@@ -1519,6 +1694,7 @@ server:
           'run',
           '--start-paused',
           '--disable-service-auth-codes',
+          '--disable-service-origin-check',
           '--use-test-fonts',
           '--trace-skia',
           '--trace-systrace',
@@ -1544,6 +1720,7 @@ server:
 
       expect(options.startPaused, true);
       expect(options.disableServiceAuthCodes, true);
+      expect(options.disableServiceOriginCheck, true);
       expect(options.useTestFonts, true);
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
@@ -1638,6 +1815,99 @@ server:
       Logger: () => BufferLogger.test(),
     },
   );
+
+  group('run --web-experimental-hot-reload flag', () {
+    late BufferLogger logger;
+    late TestDeviceManager testDeviceManager;
+    late FileSystem fileSystem;
+
+    setUp(() {
+      logger = BufferLogger.test();
+
+      final fakeDevice = FakeDevice();
+      testDeviceManager = TestDeviceManager(logger: logger)..devices = <Device>[fakeDevice];
+      testDeviceManager.specifiedDeviceId = fakeDevice.id;
+
+      fileSystem = MemoryFileSystem.test();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      final Directory libDir = fileSystem.currentDirectory.childDirectory('lib');
+      libDir.createSync();
+      final File mainFile = libDir.childFile('main.dart');
+      mainFile.writeAsStringSync('void main() {}');
+    });
+    testUsingContext(
+      'no warning triggered when web hot reload flag not present',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run']);
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when web hot reload flag is passed (enabled)',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--web-experimental-hot-reload']);
+        expect(
+          testLogger.warningText,
+          contains(
+            'Hot reload on the web is now enabled by default. '
+            'The "--web-experimental-hot-reload" flag is deprecated '
+            'and will be removed in an upcoming release.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when web hot reload flag is passed (disabled)',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--no-web-experimental-hot-reload']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'Hot reload on the web is now enabled by default. '
+            'The "--no-web-experimental-hot-reload" flag is deprecated '
+            'and will be removed in an upcoming release. '
+            'If your web development workflow depends on disabling hot reload, '
+            'please open an issue explaining why at '
+            'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
@@ -1723,8 +1993,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
 
   @override
-  Future<String> get targetPlatformDisplayName async =>
-      getNameForTargetPlatform(await targetPlatform);
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
@@ -1825,6 +2094,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool? forcedWebEnableHotReload,
   }) async {
     return const BuildInfo(
       BuildMode.debug,
@@ -1881,6 +2151,11 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     }
     return 0;
   }
+
+  @override
+  DebuggingOptions get debuggingOptions {
+    throwToolExit('');
+  }
 }
 
 class DaemonCapturingRunCommand extends RunCommand {
@@ -1910,6 +2185,7 @@ class CapturingAppDomain extends AppDomain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
+    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -1965,6 +2241,7 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
 /// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.
 class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   DebuggingOptions? lastOptions;
+  Map<String, String>? lastWebDefines;
 
   @override
   ResidentRunner createWebRunner(
@@ -1975,6 +2252,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required analytics.Analytics analytics,
     required FileSystem fileSystem,
     required FlutterProject flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     required Logger logger,
     required OutputPreferences outputPreferences,
     required Platform platform,
@@ -1985,6 +2263,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     Map<String, String> webDefines = const <String, String>{},
   }) {
     lastOptions = debuggingOptions;
+    lastWebDefines = webDefines;
     return FakeResidentRunner();
   }
 }

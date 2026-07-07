@@ -31,6 +31,7 @@ abstract class AndroidAssetBundle extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...IconTreeShaker.inputs,
   ];
 
@@ -71,7 +72,7 @@ abstract class AndroidAssetBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       outputDirectory,
@@ -93,7 +94,7 @@ abstract class AndroidAssetBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    DartBuildForNative(),
+    LinkHooks(),
     KernelSnapshot(),
     InstallCodeAssets(),
   ];
@@ -176,13 +177,13 @@ class AndroidAot extends AotElfBase {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
+    return getAndroidArchForName(targetPlatform.getName()).archName;
   }
 
   @override
   String get name =>
       'android_aot_${buildMode.cliName}_'
-      '${getNameForTargetPlatform(targetPlatform)}';
+      '${targetPlatform.getName()}';
 
   /// The specific Android ABI we are building for.
   final TargetPlatform targetPlatform;
@@ -303,13 +304,13 @@ class AndroidAotBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
+    return getAndroidArchForName(dependency.targetPlatform.getName()).archName;
   }
 
   @override
   String get name =>
       'android_aot_bundle_${dependency.buildMode.cliName}_'
-      '${getNameForTargetPlatform(dependency.targetPlatform)}';
+      '${dependency.targetPlatform.getName()}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
 
@@ -381,13 +382,13 @@ class AndroidAotDeferredComponentsBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
+    return getAndroidArchForName(dependency.targetPlatform.getName()).archName;
   }
 
   @override
   String get name =>
       'android_aot_deferred_components_bundle_${dependency.buildMode.cliName}_'
-      '${getNameForTargetPlatform(dependency.targetPlatform)}';
+      '${dependency.targetPlatform.getName()}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
 

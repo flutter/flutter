@@ -24,13 +24,31 @@ class DepfileService {
   /// This can be overridden with the [writeEmpty] parameter when
   /// both static and runtime dependencies exist and it is not desired
   /// to force a rerun due to no depfile.
-  void writeToFile(Depfile depfile, File output, {bool writeEmpty = false}) {
+  ///
+  /// If [filterOutputs] is true, files that are listed as both inputs and
+  /// outputs in the depfile are filtered out from the outputs list before
+  /// writing to avoid circular dependency cycles in external systems like Xcode.
+  void writeToFile(
+    Depfile depfile,
+    File output, {
+    bool writeEmpty = false,
+    bool filterOutputs = false,
+  }) {
     if (depfile.inputs.isEmpty && depfile.outputs.isEmpty && !writeEmpty) {
       ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
     final buffer = StringBuffer();
-    _writeFilesToBuffer(depfile.outputs, buffer);
+    final List<File> outputsToWrite;
+    if (filterOutputs) {
+      final Set<String> inputPaths = depfile.inputs.map((File f) => f.absolute.path).toSet();
+      outputsToWrite = depfile.outputs
+          .where((File file) => !inputPaths.contains(file.absolute.path))
+          .toList();
+    } else {
+      outputsToWrite = depfile.outputs;
+    }
+    _writeFilesToBuffer(outputsToWrite, buffer);
     buffer.write(': ');
     _writeFilesToBuffer(depfile.inputs, buffer);
     output.writeAsStringSync(buffer.toString());
@@ -39,15 +57,18 @@ class DepfileService {
   /// Parse the depfile contents from [file].
   ///
   /// If the syntax is invalid, returns an empty [Depfile].
-  Depfile parse(File file) {
+  ///
+  /// If [baseDirectory] is provided, any relative paths in the depfile
+  /// will be resolved relative to it.
+  Depfile parse(File file, [Directory? baseDirectory]) {
     final String contents = file.readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
       _logger.printError('Invalid depfile: ${file.path}');
       return const Depfile(<File>[], <File>[]);
     }
-    final List<File> inputs = _processList(colonSeparated[1].trim());
-    final List<File> outputs = _processList(colonSeparated[0].trim());
+    final List<File> inputs = _processList(colonSeparated[1].trim(), baseDirectory);
+    final List<File> outputs = _processList(colonSeparated[0].trim(), baseDirectory);
     return Depfile(inputs, outputs);
   }
 
@@ -82,12 +103,12 @@ class DepfileService {
     }
   }
 
-  List<File> _processList(String rawText) {
+  List<File> _processList(String rawText, [Directory? baseDirectory]) {
     return rawText
         // Put every file on right-hand side on the separate line
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
-        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
+        // Expand escape sequences, so that '\ ', for example, becomes ' '
         .map<String>(
           (String path) =>
               path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim(),
@@ -97,7 +118,14 @@ class DepfileService {
         // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
         // Normalize the path before creating a file object.
-        .map((String path) => _fileSystem.file(_fileSystem.path.normalize(path)))
+        .map((String path) {
+          if (baseDirectory != null && _fileSystem.path.isRelative(path)) {
+            return _fileSystem.file(
+              _fileSystem.path.normalize(_fileSystem.path.join(baseDirectory.path, path)),
+            );
+          }
+          return _fileSystem.file(_fileSystem.path.normalize(path));
+        })
         .toList();
   }
 }

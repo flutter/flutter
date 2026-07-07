@@ -7,12 +7,12 @@ import 'dart:ui' as ui;
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide NetworkImage;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/painting/_network_image_web.dart' hide NetworkImage;
 import 'package:flutter/src/painting/_web_image_info_web.dart';
 import 'package:flutter/src/web.dart' as web_shim;
 import 'package:flutter/src/widgets/_web_image_web.dart';
+import 'package:flutter/widgets.dart' hide NetworkImage;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
@@ -494,9 +494,8 @@ void runTests() {
       final image = WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement);
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 300,
-            height: 300,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: RawWebImage(image: image, fit: BoxFit.contain),
           ),
         ),
@@ -522,9 +521,8 @@ void runTests() {
       await tester.pumpWidget(
         RepaintBoundary(
           child: Center(
-            child: SizedBox(
-              width: 300,
-              height: 300,
+            child: SizedBox.square(
+              dimension: 300.0,
               child: RawWebImage(image: image, fit: BoxFit.cover, alignment: Alignment.bottomRight),
             ),
           ),
@@ -593,9 +591,8 @@ void runTests() {
       final image = WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement);
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 300,
-            height: 300,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: RawWebImage(image: image, fit: BoxFit.contain, alignment: Alignment.topLeft),
           ),
         ),
@@ -608,9 +605,8 @@ void runTests() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 300,
-            height: 300,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: RawWebImage(image: image, fit: BoxFit.contain, alignment: Alignment.bottomRight),
           ),
         ),

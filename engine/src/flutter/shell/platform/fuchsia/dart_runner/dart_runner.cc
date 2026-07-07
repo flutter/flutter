@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dart_runner.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_runner.h"
 
 #include <lib/async-loop/loop.h>
 #include <lib/async/default.h>
@@ -16,21 +16,16 @@
 #include <thread>
 #include <utility>
 
-#include "dart_component_controller.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "runtime/dart/utils/inlines.h"
-#include "runtime/dart/utils/vmservice_object.h"
-#include "service_isolate.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/service_isolate.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_state.h"
-
-#if defined(AOT_RUNTIME)
-extern "C" uint8_t _kDartVmSnapshotData[];
-extern "C" uint8_t _kDartVmSnapshotInstructions[];
-#endif
 
 namespace dart_runner {
 
@@ -214,16 +209,6 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
 
   Dart_InitializeParams params = {};
   params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
-#if defined(AOT_RUNTIME)
-  params.vm_snapshot_data = ::_kDartVmSnapshotData;
-  params.vm_snapshot_instructions = ::_kDartVmSnapshotInstructions;
-#else
-  if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "/pkg/data/vm_snapshot_data.bin", vm_snapshot_data_)) {
-    FML_LOG(FATAL) << "Failed to load vm snapshot data";
-  }
-  params.vm_snapshot_data = vm_snapshot_data_.address();
-#endif
   params.create_group = IsolateGroupCreateCallback;
   params.shutdown_isolate = IsolateShutdownCallback;
   params.cleanup_group = IsolateGroupCleanupCallback;

@@ -7,10 +7,13 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -248,10 +251,7 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
         lipoInfoFatCommand,
-        FakeCommand(
-          command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64'],
-          exitCode: 1,
-        ),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
       ]);
 
       await expectLater(
@@ -261,7 +261,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain architectures "arm64 x86_64".\n\nlipo -info:\nArchitectures in the fat file:',
+              'does not contain architecture "arm64" (expected "arm64 x86_64").\n\nlipo -info:\nArchitectures in the fat file:',
             ),
           ),
         ),
@@ -815,8 +815,12 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
+            '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
+            '--macho-min-os-version=12.0',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
           ],
         ),
@@ -824,79 +828,13 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
+            '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
+            '--macho-min-os-version=12.0',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-c',
-            environment.buildDir.childFile('arm64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'x86_64',
-            '-c',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-arch',
-            'arm64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childFile('arm64/App.framework/App').path,
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-arch',
-            'x86_64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childFile('x86_64/App.framework/App').path,
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
           ],
         ),
         FakeCommand(
@@ -971,18 +909,53 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+
+  group('FlutterMacOS output', () {
+    late MemoryFileSystem testFileSystem;
+
+    setUp(() {
+      testFileSystem = MemoryFileSystem.test();
+      testFileSystem.file('pubspec.yaml').createSync(recursive: true);
+      testFileSystem.directory('macos').createSync(recursive: true);
+      testFileSystem
+          .directory('macos/Flutter/ephemeral/Packages/.packages/FlutterFramework')
+          .createSync(recursive: true);
+    });
+    testUsingContext(
+      'included when not using SwiftPM',
+      () async {
+        const Target target = ReleaseUnpackMacOS();
+        expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.version,
+    this.schemes = const <String>['Runner'],
+  });
 
   @override
   final bool isInstalled;
 
+  @override
+  final Version? version;
+
   List<String> schemes;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    XcodeBasedProject xcodeProject, {
+    required Directory buildDirectory,
+    String? projectFilename,
+  }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 }

@@ -16,6 +16,10 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
 #include "third_party/abseil-cpp/absl/base/no_destructor.h"
@@ -54,6 +58,37 @@ const std::unique_ptr<PlaygroundImpl>& GetSharedVulkanPlayground(
     static fml::ScopedCleanupClosure context_cleanup(
         [&] { (*vulkan_playground)->GetContext()->Shutdown(); });
     return *vulkan_playground;
+  }
+}
+
+std::unique_ptr<PlaygroundImpl> MakeOpenGLESPlayground(bool use_sdfs = false) {
+  FML_CHECK(::glfwInit() == GLFW_TRUE);
+  PlaygroundSwitches playground_switches;
+  playground_switches.use_angle = true;
+  playground_switches.flags.use_sdfs = use_sdfs;
+  return PlaygroundImpl::Create(
+      use_sdfs ? PlaygroundBackend::kOpenGLESSDF : PlaygroundBackend::kOpenGLES,
+      playground_switches);
+}
+
+// Returns a static instance to an OpenGL ES playground that can be used across
+// tests.
+const std::unique_ptr<PlaygroundImpl>& GetSharedOpenGLESPlayground(
+    bool use_sdfs) {
+  if (use_sdfs) {
+    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/true));
+    static fml::ScopedCleanupClosure context_cleanup(
+        [&] { (*opengl_playground)->GetContext()->Shutdown(); });
+    return *opengl_playground;
+  } else {
+    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/false));
+    // TODO(142237): This can be removed when the thread local storage is
+    // removed.
+    static fml::ScopedCleanupClosure context_cleanup(
+        [&] { (*opengl_playground)->GetContext()->Shutdown(); });
+    return *opengl_playground;
   }
 }
 
@@ -149,6 +184,10 @@ bool DoesSupportWideGamutTests() {
 }
 }  // namespace
 
+bool GoldenPlaygroundTest::PlatformSupportsWideGamutTests() const {
+  return DoesSupportWideGamutTests() && GetParam() == PlaygroundBackend::kMetal;
+}
+
 void GoldenPlaygroundTest::SetUp() {
   std::filesystem::path testing_assets_path =
       flutter::testing::GetTestingAssetsPath();
@@ -166,6 +205,9 @@ void GoldenPlaygroundTest::SetUp() {
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines_") != std::string::npos;
   switch (GetParam()) {
+    case PlaygroundBackend::kMetalSDF:
+      switches.flags.use_sdfs = true;
+      [[fallthrough]];
     case PlaygroundBackend::kMetal:
       if (!DoesSupportWideGamutTests()) {
         GTEST_SKIP()
@@ -188,6 +230,9 @@ void GoldenPlaygroundTest::SetUp() {
           std::make_unique<testing::VulkanScreenshotter>(playground);
       break;
     }
+    case PlaygroundBackend::kOpenGLESSDF:
+      switches.flags.use_sdfs = true;
+      [[fallthrough]];
     case PlaygroundBackend::kOpenGLES: {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "OpenGLES doesn't support wide gamut golden tests.";
@@ -196,13 +241,12 @@ void GoldenPlaygroundTest::SetUp() {
         GTEST_SKIP()
             << "OpenGLES doesn't support antialiased lines golden tests.";
       }
-      FML_CHECK(::glfwInit() == GLFW_TRUE);
-      PlaygroundSwitches playground_switches;
-      playground_switches.use_angle = true;
-      pimpl_->test_opengl_playground = PlaygroundImpl::Create(
-          PlaygroundBackend::kOpenGLES, playground_switches);
-      pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
-          pimpl_->test_opengl_playground);
+      const std::unique_ptr<PlaygroundImpl>& playground =
+          GetSharedOpenGLESPlayground(switches.flags.use_sdfs);
+      ::glfwMakeContextCurrent(
+          reinterpret_cast<GLFWwindow*>(playground->GetWindowHandle()));
+      pimpl_->screenshotter =
+          std::make_unique<testing::VulkanScreenshotter>(playground);
       break;
     }
   }
@@ -245,6 +289,53 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
 bool GoldenPlaygroundTest::OpenPlaygroundHere(
     const sk_sp<flutter::DisplayList>& list) {
   return OpenPlaygroundHere([&list]() { return list; });
+}
+
+bool GoldenPlaygroundTest::OpenPlaygroundHere(
+    const Playground::SinglePassCallback& callback) {
+  AiksContext renderer(GetContext(), typographer_context_);
+  std::shared_ptr<Context> context = GetContext();
+  Point content_scale =
+      pimpl_->screenshotter->GetPlayground().GetContentScale();
+  ISize size(std::round(pimpl_->window_size.width * content_scale.x),
+             std::round(pimpl_->window_size.height * content_scale.y));
+
+  std::unique_ptr<testing::Screenshot> screenshot;
+  // Render twice so the second pass observes warmed pipeline and resource
+  // caches, matching the display list path above.
+  for (int i = 0; i < 2; ++i) {
+    RenderTargetAllocator render_target_allocator(
+        context->GetResourceAllocator());
+    RenderTarget render_target = render_target_allocator.CreateOffscreen(
+        *context, size, /*mip_count=*/1, "Golden Render Pass",
+        RenderTarget::kDefaultColorAttachmentConfig,
+        /*stencil_attachment_config=*/std::nullopt);
+    if (!render_target.IsValid()) {
+      return false;
+    }
+    std::shared_ptr<CommandBuffer> command_buffer =
+        context->CreateCommandBuffer();
+    if (!command_buffer) {
+      return false;
+    }
+    std::shared_ptr<RenderPass> render_pass =
+        command_buffer->CreateRenderPass(render_target);
+    if (!render_pass) {
+      return false;
+    }
+    if (!callback(*render_pass)) {
+      return false;
+    }
+    if (!render_pass->EncodeCommands()) {
+      return false;
+    }
+    if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
+      return false;
+    }
+    screenshot = pimpl_->screenshotter->MakeScreenshot(
+        renderer, render_target.GetRenderTargetTexture());
+  }
+  return SaveScreenshot(std::move(screenshot));
 }
 
 bool GoldenPlaygroundTest::ImGuiBegin(const char* name,
@@ -292,7 +383,8 @@ std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
-  if (GetParam() == PlaygroundBackend::kMetal) {
+  if (GetParam() == PlaygroundBackend::kMetal ||
+      GetParam() == PlaygroundBackend::kMetalSDF) {
     /// On Metal we create a context for each test.
     return GetContext();
   } else if (GetParam() == PlaygroundBackend::kVulkan) {
@@ -304,9 +396,18 @@ std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
     pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
         pimpl_->test_vulkan_playground);
     return pimpl_->test_vulkan_playground->GetContext();
+  } else if (GetParam() == PlaygroundBackend::kOpenGLES ||
+             GetParam() == PlaygroundBackend::kOpenGLESSDF) {
+    FML_CHECK(!pimpl_->test_opengl_playground)
+        << "We don't support creating multiple contexts for one test";
+    bool use_sdfs = (GetParam() == PlaygroundBackend::kOpenGLESSDF);
+    pimpl_->test_opengl_playground = MakeOpenGLESPlayground(use_sdfs);
+    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
+        pimpl_->test_opengl_playground);
+    return pimpl_->test_opengl_playground->GetContext();
   } else {
-    /// On OpenGL we create a context for each test.
-    return GetContext();
+    FML_CHECK(false);
+    return nullptr;
   }
 }
 
@@ -320,6 +421,10 @@ Scalar GoldenPlaygroundTest::GetSecondsElapsed() const {
 
 ISize GoldenPlaygroundTest::GetWindowSize() const {
   return pimpl_->window_size;
+}
+
+IRect GoldenPlaygroundTest::GetWindowBounds() const {
+  return IRect::MakeSize(pimpl_->window_size);
 }
 
 void GoldenPlaygroundTest::GoldenPlaygroundTest::SetWindowSize(ISize size) {
@@ -342,6 +447,10 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
       std::round(pimpl_->window_size.height * content_scale.y));
   return pimpl_->screenshotter->MakeScreenshot(
       renderer, DisplayListToTexture(list, physical_window_size, renderer));
+}
+
+RuntimeStageBackend GoldenPlaygroundTest::GetRuntimeStageBackend() const {
+  return pimpl_->screenshotter->GetPlayground().GetRuntimeStageBackend();
 }
 
 }  // namespace impeller

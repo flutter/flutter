@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -29,6 +30,8 @@ void main() {
   late StdoutHandler generatorWithSchemeStdoutHandler;
   late FakeProcessManager fakeProcessManager;
 
+  const expectedCachePath = 'build/98469b79d3a7ca103e61af5819c93b8c.cache.dill.track.dill';
+
   const frontendServerCommand = <String>[
     'Artifact.engineDartAotRuntime',
     'Artifact.frontendServerSnapshotForEngineDartSdk',
@@ -39,6 +42,8 @@ void main() {
     '--experimental-emit-debug-metadata',
     '--output-dill',
     '/build/',
+    '--packages',
+    '.dart_tool/package_config.json',
     '-Ddart.vm.profile=false',
     '-Ddart.vm.product=false',
     '--enable-asserts',
@@ -57,7 +62,7 @@ void main() {
     );
     generator = DefaultResidentCompiler(
       'sdkroot',
-      buildMode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       logger: testLogger,
       processManager: fakeProcessManager,
       artifacts: Artifacts.test(),
@@ -65,23 +70,26 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       stdoutHandler: generatorStdoutHandler,
       shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
     );
     generatorWithScheme = DefaultResidentCompiler(
       'sdkroot',
-      buildMode: BuildMode.debug,
+      buildInfo: BuildInfo.debug.copyWith(
+        fileSystemRoots: <String>['/foo/bar/fizz'],
+        fileSystemScheme: 'scheme',
+      ),
       logger: testLogger,
       processManager: fakeProcessManager,
       artifacts: Artifacts.test(),
       platform: FakePlatform(),
-      fileSystemRoots: <String>['/foo/bar/fizz'],
-      fileSystemScheme: 'scheme',
       fileSystem: MemoryFileSystem.test(),
       stdoutHandler: generatorWithSchemeStdoutHandler,
       shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
     );
     generatorWithPlatformDillAndLibrariesSpec = DefaultResidentCompiler(
       'sdkroot',
-      buildMode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       logger: testLogger,
       processManager: fakeProcessManager,
       artifacts: Artifacts.test(),
@@ -91,13 +99,19 @@ void main() {
       platformDill: '/foo/platform.dill',
       librariesSpec: '/bar/libraries.json',
       shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
     );
   });
 
   testWithoutContext('incremental compile single dart compile', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
-        command: const <String>[...frontendServerCommand, '--verbosity=error'],
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
         stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
         stdin: frontendServerStdIn,
       ),
@@ -126,6 +140,8 @@ void main() {
           '/foo/bar/fizz',
           '--filesystem-scheme',
           'scheme',
+          '--initialize-from-dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
@@ -150,7 +166,12 @@ void main() {
   testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
-        command: const <String>[...frontendServerCommand, '--verbosity=error'],
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
         stdin: frontendServerStdIn,
       ),
     );
@@ -176,7 +197,12 @@ void main() {
     () async {
       fakeProcessManager.addCommand(
         FakeCommand(
-          command: const <String>[...frontendServerCommand, '--verbosity=error'],
+          command: const <String>[
+            ...frontendServerCommand,
+            '--initialize-from-dill',
+            expectedCachePath,
+            '--verbosity=error',
+          ],
           stdin: frontendServerStdIn,
           exitCode: 1,
         ),
@@ -203,7 +229,12 @@ void main() {
     final completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
-        command: const <String>[...frontendServerCommand, '--verbosity=error'],
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
         stdin: frontendServerStdIn,
         completer: completer,
@@ -271,6 +302,8 @@ void main() {
           '/foo/bar/fizz',
           '--filesystem-scheme',
           'scheme',
+          '--initialize-from-dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
@@ -356,6 +389,8 @@ void main() {
             '/foo/bar/fizz',
             '--filesystem-scheme',
             'scheme',
+            '--initialize-from-dill',
+            expectedCachePath,
             '--verbosity=error',
           ],
           stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
@@ -433,7 +468,12 @@ void main() {
     final completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
-        command: const <String>[...frontendServerCommand, '--verbosity=error'],
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
         stdin: frontendServerStdIn,
         completer: completer,
@@ -479,7 +519,12 @@ void main() {
     final completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
-        command: const <String>[...frontendServerCommand, '--verbosity=error'],
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
         stdin: frontendServerStdIn,
         completer: completer,
@@ -529,6 +574,8 @@ void main() {
           '/foo/bar/fizz',
           '--filesystem-scheme',
           'scheme',
+          '--initialize-from-dill',
+          expectedCachePath,
           '--source',
           'some/dir/plugin_registrant.dart',
           '--source',
@@ -565,6 +612,8 @@ void main() {
       FakeCommand(
         command: const <String>[
           ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
           '--platform',
           '/foo/platform.dill',
           '--verbosity=error',

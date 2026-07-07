@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
@@ -709,8 +708,7 @@ abstract class Device {
   Future<TargetPlatform> get targetPlatform;
 
   /// Platform name for display only.
-  Future<String> get targetPlatformDisplayName async =>
-      getNameForTargetPlatform(await targetPlatform);
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   Future<String> get sdkNameAndVersion;
 
@@ -859,21 +857,8 @@ abstract class Device {
       ]);
     }
 
-    // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
-    }
-
     // Join columns into lines of text
-    return <String>[
-      for (final List<String> row in table)
-        indices
-            .map<String>((int i) => row[i].padRight(widths[i]))
-            .followedBy(<String>[row.last])
-            .join(' • '),
-    ];
+    return formatTable(table);
   }
 
   static Future<void> printDevices(
@@ -897,7 +882,7 @@ abstract class Device {
       'name': name,
       'id': id,
       'isSupported': await isSupported(),
-      'targetPlatform': getNameForTargetPlatform(await targetPlatform),
+      'targetPlatform': (await targetPlatform).getName(),
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
       'capabilities': <String, Object>{
@@ -957,6 +942,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
+    this.disableServiceOriginCheck = false,
     this.enableDds = true,
     this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
@@ -996,7 +982,9 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
+    this.enableHcpp = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1006,6 +994,8 @@ class DebuggingOptions {
     this.google3WorkspaceRoot,
     this.printDtd = false,
     this.webDevServerConfig,
+    this.testFlag = false,
+    this.iosProfileDebugger,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1029,24 +1019,29 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
+    this.enableHcpp = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
+    this.testFlag = false,
+    this.iosProfileDebugger,
+    this.traceSystrace = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
        dartFlags = '',
        disableServiceAuthCodes = false,
+       disableServiceOriginCheck = false,
        enableDds = false,
        cacheStartupProfile = false,
        enableSoftwareRendering = false,
        skiaDeterministicRendering = false,
        traceSkia = false,
        traceSkiaAllowlist = null,
-       traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
        profileMicrotasks = false,
@@ -1074,6 +1069,7 @@ class DebuggingOptions {
     required this.dartFlags,
     required this.dartEntrypointArgs,
     required this.disableServiceAuthCodes,
+    required this.disableServiceOriginCheck,
     required this.enableDds,
     required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
@@ -1111,7 +1107,9 @@ class DebuggingOptions {
     required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
+    required this.uninstallApp,
     required this.enableDartProfiling,
+    required this.enableHcpp,
     required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
@@ -1121,7 +1119,8 @@ class DebuggingOptions {
     required this.google3WorkspaceRoot,
     required this.printDtd,
     this.webDevServerConfig,
-  });
+    this.iosProfileDebugger,
+  }) : testFlag = false;
 
   final bool debuggingEnabled;
 
@@ -1130,6 +1129,7 @@ class DebuggingOptions {
   final String dartFlags;
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
+  final bool disableServiceOriginCheck;
   final bool enableDds;
   final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
@@ -1157,6 +1157,7 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
+  final bool enableHcpp;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1166,11 +1167,21 @@ class DebuggingOptions {
   final String? google3WorkspaceRoot;
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
+  final bool testFlag;
+
+  /// Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.
+  final bool? iosProfileDebugger;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
   /// This is not implemented for every platform.
   final bool uninstallFirst;
+
+  /// Whether the tool should uninstall the app after running.
+  ///
+  /// This is currently only implemented for integration tests.
+  /// Defaults to true.
+  final bool uninstallApp;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -1220,6 +1231,7 @@ class DebuggingOptions {
       if (enableDartProfiling) '--enable-dart-profiling',
       if (profileStartup) '--profile-startup',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (disableServiceOriginCheck) '--disable-service-origin-check',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
@@ -1260,10 +1272,12 @@ class DebuggingOptions {
 
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
+    'iosProfileDebugger': iosProfileDebugger,
     'startPaused': startPaused,
     'dartFlags': dartFlags,
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
+    'disableServiceOriginCheck': disableServiceOriginCheck,
     'enableDds': enableDds,
     'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
@@ -1305,7 +1319,9 @@ class DebuggingOptions {
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
+    'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
+    'enableHcpp': enableHcpp,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
@@ -1330,10 +1346,12 @@ class DebuggingOptions {
       DebuggingOptions._(
         buildInfo: buildInfo,
         debuggingEnabled: json['debuggingEnabled']! as bool,
+        iosProfileDebugger: json['iosProfileDebugger'] as bool?,
         startPaused: json['startPaused']! as bool,
         dartFlags: json['dartFlags']! as String,
         dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
         disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+        disableServiceOriginCheck: json['disableServiceOriginCheck'] as bool? ?? false,
         enableDds: json['enableDds']! as bool,
         cacheStartupProfile: json['cacheStartupProfile']! as bool,
         enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
@@ -1373,7 +1391,9 @@ class DebuggingOptions {
         enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+        uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+        enableHcpp: (json['enableHcpp'] as bool?) ?? false,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,

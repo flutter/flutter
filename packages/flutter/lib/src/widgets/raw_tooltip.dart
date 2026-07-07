@@ -226,8 +226,14 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// See also:
 ///
 ///   * [Tooltip], a Material-themed [RawTooltip].
-// TODO(victorsanni): https://github.com/flutter/flutter/issues/180318
-// Add an example of how to call ensureTooltipVisible.
+///
+/// {@tool dartpad}
+/// This example shows how [RawTooltip] can be shown manually with [TooltipTriggerMode.manual]
+/// by calling the [TooltipState.ensureTooltipVisible] function.
+///
+/// ** See code in examples/api/lib/widgets/raw_tooltip/raw_tooltip.0.dart **
+/// {@end-tool}
+///
 class RawTooltip extends StatefulWidget {
   /// Creates a raw tooltip.
   ///
@@ -246,6 +252,7 @@ class RawTooltip extends StatefulWidget {
     this.onTriggered,
     this.animationStyle = _kDefaultAnimationStyle,
     this.positionDelegate,
+    this.ignorePointer = false,
     required this.child,
   });
 
@@ -446,6 +453,16 @@ class RawTooltip extends StatefulWidget {
   ///  positioning.
   /// {@endtemplate}
   final TooltipPositionDelegate? positionDelegate;
+
+  /// Whether the tooltip should be invisible to hit testing.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///
+  /// * [IgnorePointer], for more information about how pointer events are
+  /// handled or ignored.
+  final bool ignorePointer;
 
   /// The widget below this widget in the tree.
   ///
@@ -792,10 +809,13 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     );
 
     // Keep the tooltip visible while the overlay child is hovered.
-    final Widget tooltip = _ExclusiveMouseRegion(
-      onEnter: _handleMouseEnter,
-      onExit: _handleMouseExit,
-      child: widget.tooltipBuilder(context, _overlayAnimation),
+    final Widget tooltip = IgnorePointer(
+      ignoring: widget.ignorePointer,
+      child: _ExclusiveMouseRegion(
+        onEnter: _handleMouseEnter,
+        onExit: _handleMouseExit,
+        child: widget.tooltipBuilder(context, _overlayAnimation),
+      ),
     );
 
     final Widget overlayChild = Positioned.fill(

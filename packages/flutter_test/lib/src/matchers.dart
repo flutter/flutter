@@ -689,6 +689,7 @@ Matcher matchesSemantics({
   ui.SemanticsInputType? inputType,
   String? maxValue,
   String? minValue,
+  ui.SemanticsRole? role,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -776,6 +777,7 @@ Matcher matchesSemantics({
     inputType: inputType,
     minValue: minValue,
     maxValue: maxValue,
+    role: role,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -1090,6 +1092,7 @@ Matcher isSemantics({
   ui.SemanticsInputType? inputType,
   String? maxValue,
   String? minValue,
+  ui.SemanticsRole? role,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -1177,6 +1180,7 @@ Matcher isSemantics({
     inputType: inputType,
     minValue: minValue,
     maxValue: maxValue,
+    role: role,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -1260,11 +1264,13 @@ Matcher isAccessibilityAnnouncement(
   String message, {
   TextDirection? textDirection,
   Assertiveness? assertiveness,
+  int? viewId,
 }) {
   return _MatchesAccessibilityAnnouncement(
     expectedMessage: message,
     expectedTextDirection: textDirection,
     expectedAssertiveness: assertiveness,
+    expectedViewId: viewId,
   );
 }
 
@@ -2640,6 +2646,7 @@ class _MatchesSemanticsData extends Matcher {
     required this.inputType,
     required this.minValue,
     required this.maxValue,
+    required this.role,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2789,6 +2796,7 @@ class _MatchesSemanticsData extends Matcher {
   final SemanticsValidationResult? validationResult;
   final String? maxValue;
   final String? minValue;
+  final ui.SemanticsRole? role;
 
   /// There are three possible states for these two maps:
   ///
@@ -2907,6 +2915,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (maxValue != null) {
       description.add(' with maxValue: $maxValue');
+    }
+    if (role != null) {
+      description.add(' with role: $role');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -3073,6 +3084,9 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValue != null && maxValue != data.maxValue) {
       return failWithDescription(matchState, 'maxValue was: ${data.maxValue}');
     }
+    if (role != null && role != data.role) {
+      return failWithDescription(matchState, 'role was: ${data.role}');
+    }
     if (actions.isNotEmpty) {
       final unexpectedActions = <SemanticsAction>[];
       final missingActions = <SemanticsAction>[];
@@ -3162,8 +3176,15 @@ class _MatchesSemanticsData extends Matcher {
     }
     var allMatched = true;
     if (children != null) {
+      final int actualChildrenCount = (node as SemanticsNode).childrenCount;
+      if (children!.length != actualChildrenCount) {
+        return failWithDescription(
+          matchState,
+          'expected ${children!.length} child${children!.length == 1 ? '' : 'ren'}, found $actualChildrenCount',
+        );
+      }
       var i = 0;
-      (node as SemanticsNode).visitChildren((SemanticsNode child) {
+      node.visitChildren((SemanticsNode child) {
         allMatched = children![i].matches(child, matchState) && allMatched;
         i += 1;
         return allMatched;
@@ -3197,11 +3218,13 @@ class _MatchesAccessibilityAnnouncement extends Matcher {
     required this.expectedMessage,
     required this.expectedTextDirection,
     required this.expectedAssertiveness,
+    required this.expectedViewId,
   });
 
   final String expectedMessage;
   final TextDirection? expectedTextDirection;
   final Assertiveness? expectedAssertiveness;
+  final int? expectedViewId;
 
   @override
   bool matches(
@@ -3210,7 +3233,8 @@ class _MatchesAccessibilityAnnouncement extends Matcher {
   ) {
     return event.message == expectedMessage &&
         (expectedTextDirection == null || event.textDirection == expectedTextDirection) &&
-        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness);
+        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness) &&
+        (expectedViewId == null || event.viewId == expectedViewId);
   }
 
   @override
@@ -3221,6 +3245,9 @@ class _MatchesAccessibilityAnnouncement extends Matcher {
     }
     if (expectedAssertiveness != null) {
       description.add(', assertiveness: $expectedAssertiveness');
+    }
+    if (expectedViewId != null) {
+      description.add(', viewId: $expectedViewId');
     }
     return description;
   }

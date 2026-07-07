@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mapped_resource.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h"
 
 #include <dlfcn.h>
 #include <fcntl.h>
@@ -18,10 +18,9 @@
 #include <zircon/status.h>
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmo.h"
 #include "third_party/dart/runtime/include/dart_api.h"
-
-#include "inlines.h"
-#include "vmo.h"
 
 namespace dart_utils {
 
@@ -157,13 +156,13 @@ bool ElfSnapshot::Load(const fml::UniqueFD& fd) {
   }
 
   vm_data_ =
-      reinterpret_cast<const uint8_t*>(dlsym(handle_, kVmSnapshotDataCSymbol));
-  vm_instrs_ = reinterpret_cast<const uint8_t*>(
-      dlsym(handle_, kVmSnapshotInstructionsCSymbol));
-  isolate_data_ = reinterpret_cast<const uint8_t*>(
-      dlsym(handle_, kIsolateSnapshotDataCSymbol));
-  isolate_instrs_ = reinterpret_cast<const uint8_t*>(
-      dlsym(handle_, kIsolateSnapshotInstructionsCSymbol));
+      reinterpret_cast<const uint8_t*>(dlsym(handle_, kSnapshotDataCSymbol));
+  vm_instrs_ =
+      reinterpret_cast<const uint8_t*>(dlsym(handle_, kSnapshotTextCSymbol));
+  isolate_data_ =
+      reinterpret_cast<const uint8_t*>(dlsym(handle_, kSnapshotDataCSymbol));
+  isolate_instrs_ =
+      reinterpret_cast<const uint8_t*>(dlsym(handle_, kSnapshotTextCSymbol));
   if (vm_data_ == nullptr || vm_instrs_ == nullptr ||
       isolate_data_ == nullptr || isolate_instrs_ == nullptr) {
     FML_LOG(ERROR) << "Failed to load ELF symbols";

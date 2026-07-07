@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -37,6 +39,8 @@ const _kStandardFlutterWebDefines = <String>[
   '-DFLUTTER_WEB_USE_SKIA=true',
   '-DFLUTTER_WEB_USE_SKWASM=false',
   '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+  '--write-resources',
+  '--enable-experiment=record-use',
 ];
 
 const _kDart2WasmLinuxArgs = <String>[
@@ -75,6 +79,9 @@ name: foo
         processManager = FakeProcessManager.empty();
         globals.fs
             .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
+            .createSync(recursive: true);
+        globals.fs
+            .file('engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf')
             .createSync(recursive: true);
 
         environment = Environment.test(
@@ -292,6 +299,120 @@ name: foo
       }),
     );
   });
+
+  group('--web-define', () {
+    test(
+      'WebTemplatedFiles substitutes web-define variables in index.html',
+      () => testbed.run(() async {
+        environment.defines['${kWebDefinePrefix}VERSION'] = 'v1.2.3';
+        environment.defines['${kWebDefinePrefix}API_URL'] = 'https://api.example.com';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href="/"></head><body>
+<script>
+  const version = '{{VERSION}}';
+  const apiUrl = '{{API_URL}}';
+</script>
+</body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        final String outputHtml = environment.outputDir.childFile('index.html').readAsStringSync();
+        expect(outputHtml, contains("const version = 'v1.2.3'"));
+        expect(outputHtml, contains("const apiUrl = 'https://api.example.com'"));
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles substitutes web-define variables in flutter_bootstrap.js',
+      () => testbed.run(() async {
+        environment.defines['${kWebDefinePrefix}APP_VERSION'] = 'test-build-42';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('flutter_bootstrap.js').createSync(recursive: true);
+        webResources.childFile('flutter_bootstrap.js').writeAsStringSync('''
+const appVersion = '{{APP_VERSION}}';
+_flutter.loader.load();
+''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        final String outputBootstrap = environment.outputDir
+            .childFile('flutter_bootstrap.js')
+            .readAsStringSync();
+        expect(outputBootstrap, contains("const appVersion = 'test-build-42'"));
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles works with no web-define variables',
+      () => testbed.run(() async {
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href="/"></head><body></body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('<base href="/">'),
+        );
+      }),
+    );
+  });
+
+  test(
+    'WebReleaseBundle bundles a local Roboto fallback when CDN assets are disabled',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kUseLocalCanvasKitFlag] = 'true';
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
+
+      final fontManifest =
+          jsonDecode(
+                environment.outputDir
+                    .childDirectory('assets')
+                    .childFile('FontManifest.json')
+                    .readAsStringSync(),
+              )
+              as List<dynamic>;
+      expect(
+        fontManifest,
+        contains(
+          predicate<dynamic>((dynamic entry) {
+            if (entry is! Map<dynamic, dynamic>) {
+              return false;
+            }
+            if (entry['family'] != 'Roboto') {
+              return false;
+            }
+            final dynamic fonts = entry['fonts'];
+            return fonts is List<dynamic> &&
+                fonts.length == 1 &&
+                fonts.single is Map<dynamic, dynamic> &&
+                (fonts.single as Map<dynamic, dynamic>)['asset'] ==
+                    'fonts/fallback/Roboto-Regular.ttf';
+          }),
+        ),
+      );
+      expect(
+        environment.outputDir
+            .childDirectory('assets')
+            .childFile('fonts/fallback/Roboto-Regular.ttf'),
+        exists,
+      );
+    }),
+  );
 
   test(
     'WebReleaseBundle copies dart2js output and resource files to output directory',
@@ -1163,7 +1284,7 @@ name: foo
       );
 
       await Dart2JSTarget(
-        const JsCompilerConfig(noFrequencyBasedMinification: true, sourceMaps: false),
+        const JsCompilerConfig(useFrequencyBasedMinification: false, sourceMaps: false),
       ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
@@ -1219,6 +1340,8 @@ name: foo
                           ],
                           '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
                           '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+                          '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path}',
+                          '--enable-experiment=record-use',
                           '-O$expectedLevel',
                           if (strip && buildMode == 'release')
                             '--strip-wasm'
@@ -1269,7 +1392,7 @@ name: foo
       JsCompilerConfig(dumpInfo: true),
       JsCompilerConfig(nativeNullAssertions: true),
       JsCompilerConfig(optimizationLevel: 0),
-      JsCompilerConfig(noFrequencyBasedMinification: true),
+      JsCompilerConfig(useFrequencyBasedMinification: false),
       JsCompilerConfig(sourceMaps: false),
       JsCompilerConfig(minify: false),
 
@@ -1279,7 +1402,7 @@ name: foo
         dumpInfo: true,
         nativeNullAssertions: true,
         optimizationLevel: 0,
-        noFrequencyBasedMinification: true,
+        useFrequencyBasedMinification: false,
         sourceMaps: false,
       ),
     ];

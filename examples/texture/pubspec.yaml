@@ -1,7 +1,7 @@
 name: texture
 
 environment:
-  sdk: ^3.9.0-0
+  sdk: ^3.11.0-0
 
 resolution: workspace
 
@@ -13,6 +13,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  test: any
 
 
-# PUBSPEC CHECKSUM: 60tfp7
+# PUBSPEC CHECKSUM: f9g2jl

@@ -7,11 +7,22 @@ import 'package:meta/meta.dart';
 import '../../artifacts.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../darwin/darwin.dart';
 import '../../globals.dart' as globals show stdio;
 import '../build_system.dart';
 
 abstract class UnpackDarwin extends Target {
   const UnpackDarwin();
+
+  @visibleForOverriding
+  FlutterDarwinPlatform get darwinPlatform;
+
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` command copies the Flutter.xcframework separately and therefore
+    // does not need it to be done by the build system.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
 
   /// Copies the [framework] artifact using `rsync` to the [Environment.outputDir].
   /// Throws an error if copy fails.
@@ -69,20 +80,22 @@ abstract class UnpackDarwin extends Target {
     ]);
     final lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = await environment.processManager.run(<String>[
-      'lipo',
-      frameworkBinaryPath,
-      '-verify_arch',
-      ...archList,
-    ]);
+    for (final arch in archList) {
+      final ProcessResult verifyResult = await environment.processManager.run(<String>[
+        'lipo',
+        frameworkBinaryPath,
+        '-verify_arch',
+        arch,
+      ]);
 
-    if (verifyResult.exitCode != 0) {
-      throw Exception(
-        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
-        '\n'
-        'lipo -info:\n'
-        '$lipoInfo',
-      );
+      if (verifyResult.exitCode != 0) {
+        throw Exception(
+          'Binary $frameworkBinaryPath does not contain architecture "$arch" (expected "$archs").\n'
+          '\n'
+          'lipo -info:\n'
+          '$lipoInfo',
+        );
+      }
     }
 
     // Skip thinning for non-fat executables.

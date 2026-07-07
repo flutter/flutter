@@ -31,11 +31,11 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
 
 std::optional<Rect> FillRectGeometry::GetCoverage(
     const Matrix& transform) const {
-  return rect_.TransformBounds(transform);
+  return rect_.TransformAndClipBounds(transform);
 }
 
 bool FillRectGeometry::CoversArea(const Matrix& transform,
-                                  const Rect& rect) const {
+                                  const IRect& rect) const {
   if (!transform.IsTranslationScaleOnly()) {
     return false;
   }

@@ -40,6 +40,8 @@ Being in the GitHub "flutter-hackers" group gives you the following:
 
 * PRs will run their tests slightly faster.
 
+* Exemption from the 2 concurrent open pull request limit on public Flutter repositories.
+
 Being in the Discord "team" group gives you the following:
 
 * The ability to talk without rate-limiting on the #hackers-* channels.
@@ -125,7 +127,10 @@ We currently have the following review teams:
 * [`android-reviewers`](https://github.com/orgs/flutter/teams/android-reviewers): for folks working on the Android port of Flutter; use `#hackers-android` for discussions.
 * [`devtools-reviewers`](https://github.com/orgs/flutter/teams/devtools-reviewers): for the [devtools](https://github.com/flutter/devtools) repo; use `#hackers-devexp` for discussions.
 * [`ios-reviewers`](https://github.com/orgs/flutter/teams/ios-reviewers): for folks working on the iOS port of Flutter; use `#hackers-ios` for discussions.
+* [`linux-reviewers`](https://github.com/orgs/flutter/teams/linux-reviewers): for folks working on the Linux port of Flutter; use `#hackers-desktop` for discussions.
+* [`macos-reviewers`](https://github.com/orgs/flutter/teams/macos-reviewers): for folks working on the macOS port of Flutter; use `#hackers-desktop` for discussions.
 * [`website-reviewers`](https://github.com/orgs/flutter/teams/website-reviewers): for folks working on www.flutter.dev and docs.flutter.dev; use `#hackers-devrel` for discussions.
+* [`windows-reviewers`](https://github.com/orgs/flutter/teams/windows-reviewers): for folks working on the Windows port of Flutter; use `#hackers-desktop` for discussions.
 
 To create a new team, contact @github-admin on Discord. You will also need to create a `CODEOWNERS` file to actually trigger the review assignment.
 

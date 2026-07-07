@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/config.dart';
+import '../base/file_system.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/swift_packages.dart';
+import '../platform_plugins.dart';
 import '../project.dart';
 
 /// Encapsulates platform-specific values for Darwin targets ([ios] and [macos]).
@@ -14,7 +17,6 @@ import '../project.dart';
 /// This includes details like binary names, artifact locations, and deployment versions.
 enum FlutterDarwinPlatform {
   ios(
-    name: 'ios',
     binaryName: 'Flutter',
     targetPlatform: TargetPlatform.ios,
     swiftPackagePlatform: SwiftPackagePlatform.ios,
@@ -24,7 +26,6 @@ enum FlutterDarwinPlatform {
     sdks: <XcodeSdk>[XcodeSdk.IPhoneOS, XcodeSdk.IPhoneSimulator],
   ),
   macos(
-    name: 'macos',
     binaryName: 'FlutterMacOS',
     targetPlatform: TargetPlatform.darwin,
     swiftPackagePlatform: SwiftPackagePlatform.macos,
@@ -35,7 +36,6 @@ enum FlutterDarwinPlatform {
   );
 
   const FlutterDarwinPlatform({
-    required this.name,
     required this.binaryName,
     required this.targetPlatform,
     required this.swiftPackagePlatform,
@@ -44,9 +44,6 @@ enum FlutterDarwinPlatform {
     required this.xcframeworkArtifact,
     required this.sdks,
   }) : _artifactName = artifactName;
-
-  /// The name of the platform in all lowercase. Matches the corresponding [TargetPlatform].
-  final String name;
 
   /// The name of the binary file within the [xcframeworkArtifact].
   final String binaryName;
@@ -69,14 +66,19 @@ enum FlutterDarwinPlatform {
   /// A list of supported [XcodeSdk].
   final List<XcodeSdk> sdks;
 
+  String get pluginConfigKey {
+    return switch (this) {
+      ios => IOSPlugin.kConfigKey,
+      macos => MacOSPlugin.kConfigKey,
+    };
+  }
+
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
-    switch (this) {
-      case FlutterDarwinPlatform.ios:
-        return Version(13, 0, null);
-      case FlutterDarwinPlatform.macos:
-        return Version(10, 15, null);
-    }
+    return switch (this) {
+      ios => Version(15, 0, null),
+      macos => Version(12, 0, null),
+    };
   }
 
   /// Artifact name for the platform and [mode].
@@ -115,13 +117,31 @@ enum FlutterDarwinPlatform {
     return null;
   }
 
+  /// Returns [FlutterDarwinPlatform] that matches the [name]. Returns null if no match is found.
+  static FlutterDarwinPlatform? fromName(String name) {
+    for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
+      if (name == darwinPlatform.name) {
+        return darwinPlatform;
+      }
+    }
+    return null;
+  }
+
   /// Returns corresponding [XcodeBasedProject] for the platform.
   XcodeBasedProject xcodeProject(FlutterProject project) {
+    return switch (this) {
+      ios => project.ios,
+      macos => project.macos,
+    };
+  }
+
+  /// Returns the corresponding build directory for the platform.
+  String buildDirectory({Config? config, FileSystem? fileSystem}) {
     switch (this) {
       case FlutterDarwinPlatform.ios:
-        return project.ios;
+        return getIosBuildDirectory(config: config, fileSystem: fileSystem);
       case FlutterDarwinPlatform.macos:
-        return project.macos;
+        return getMacOSBuildDirectory(config: config, fileSystem: fileSystem);
     }
   }
 }

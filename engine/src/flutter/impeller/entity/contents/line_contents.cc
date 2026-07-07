@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/contents/line_contents.h"
-#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
-#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/renderer/texture_util.h"
 
 namespace impeller {
@@ -152,6 +150,7 @@ bool LineContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_;
+  frag_info.cap_type = (geometry_->GetCap() == Cap::kRound) ? 1.0f : 0.0f;
 
   Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
 
@@ -203,6 +202,7 @@ std::vector<uint8_t> LineContents::CreateCurveData(Scalar width,
   // More simply written as rise / run:
   // double slope = 1.0 / ((radius * 2) / (scale * width + radius));
   double slope = (scale * width + radius) / (radius * 2);
+  slope = std::max(slope, 1.0);
   for (int i = 0; i < kCurveResolution; ++i) {
     double norm =
         (static_cast<double>(i)) / static_cast<double>(kCurveResolution - 1);

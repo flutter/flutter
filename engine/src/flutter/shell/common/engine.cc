@@ -404,7 +404,7 @@ bool Engine::HandleNavigationPlatformMessage(
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method->value != "setInitialRoute") {
     return false;
@@ -423,7 +423,7 @@ bool Engine::HandleLocalizationPlatformMessage(PlatformMessage* message) {
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method == root.MemberEnd()) {
     return false;
@@ -474,6 +474,14 @@ void Engine::DispatchPointerDataPacket(
                              /*flow_ids=*/&trace_flow_id);
   TRACE_FLOW_STEP("flutter", "PointerEvent", trace_flow_id);
   pointer_data_dispatcher_->DispatchPacket(std::move(packet), trace_flow_id);
+}
+
+HitTestResponse Engine::HitTest(int64_t view_id,
+                                const flutter::PointData offset) {
+  if (runtime_controller_) {
+    return runtime_controller_->HitTest(view_id, offset);
+  }
+  return {.has_platform_view = false};
 }
 
 void Engine::DispatchSemanticsAction(int64_t view_id,

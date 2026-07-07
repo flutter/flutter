@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1848,7 +1849,7 @@ void main() {
     final properties = DiagnosticPropertiesBuilder();
     ThemeData().debugFillProperties(properties);
     final List<String> propertyNameList = properties.properties
-        .map((final DiagnosticsNode node) => node.name)
+        .map((DiagnosticsNode node) => node.name)
         .whereType<String>()
         .toList();
     final Set<String> propertyNames = propertyNameList.toSet();

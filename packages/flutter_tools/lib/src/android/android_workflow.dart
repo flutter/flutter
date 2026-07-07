@@ -8,8 +8,10 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
@@ -89,7 +91,7 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
     } else {
       return null;
     }
-  } on Exception catch (e, _) {
+  } on Exception catch (_) {
     return null;
   } on Error catch (_) {
     return null;
@@ -111,12 +113,14 @@ class AndroidValidator extends DoctorValidator {
     required Platform platform,
     required UserMessages userMessages,
     required ProcessManager processManager,
+    required OperatingSystemUtils osUtils,
   }) : _java = java,
        _androidSdk = androidSdk,
        _logger = logger,
        _platform = platform,
        _userMessages = userMessages,
        _processManager = processManager,
+       _osUtils = osUtils,
        super('Android toolchain - develop for Android devices');
 
   final Java? _java;
@@ -125,10 +129,25 @@ class AndroidValidator extends DoctorValidator {
   final Platform _platform;
   final UserMessages _userMessages;
   final ProcessManager _processManager;
+  final OperatingSystemUtils _osUtils;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
   String? _task;
+
+  String androidCantRunJavaBinary(String javaBinary) =>
+      'Cannot execute $javaBinary to determine the version';
+
+  String get androidUnknownJavaVersion => 'Could not determine java version';
+
+  String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidJavaMinimumVersion(String javaVersion) =>
+      'Java version $javaVersion is older than the minimum recommended version of ${gradle_utils.warnJavaMinVersionAndroid}';
+
+  String get _androidMissingJdk =>
+      'No Java Development Kit (JDK) found; You must have the environment '
+      'variable JAVA_HOME set and the java binary in your PATH. '
+      'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
 
   /// Returns false if we cannot determine the Java version or if the version
   /// is older that the minimum allowed version.
@@ -136,16 +155,14 @@ class AndroidValidator extends DoctorValidator {
     _task = 'Checking Java status';
     try {
       if (_java?.binaryPath == null) {
-        messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
+        messages.add(ValidationMessage.error(_androidMissingJdk));
         return false;
       }
       messages.add(
         ValidationMessage(_androidJdkLocationMessage(_java!.binaryPath, _java.javaSource)),
       );
       if (!_java.canRun()) {
-        messages.add(
-          ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java.binaryPath)),
-        );
+        messages.add(ValidationMessage.error(androidCantRunJavaBinary(_java.binaryPath)));
         return false;
       }
       Version? javaVersion;
@@ -156,28 +173,29 @@ class AndroidValidator extends DoctorValidator {
       }
       if (javaVersion == null) {
         // Could not determine the java version.
-        messages.add(ValidationMessage.error(_userMessages.androidUnknownJavaVersion));
+        messages.add(ValidationMessage.error(androidUnknownJavaVersion));
         return false;
       }
       // Should this be modified to be evaluated based on gradle version used?
       if (javaVersion < gradle_utils.errorJavaMinVersionAndroid) {
-        messages.add(
-          ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersion.toString())),
-        );
+        messages.add(ValidationMessage.error(androidJavaMinimumVersion(javaVersion.toString())));
         return false;
       }
       if (javaVersion < gradle_utils.warnJavaMinVersionAndroid) {
-        messages.add(
-          ValidationMessage.hint(_userMessages.androidJavaMinimumVersion(javaVersion.toString())),
-        );
+        messages.add(ValidationMessage.hint(androidJavaMinimumVersion(javaVersion.toString())));
         return true;
       }
-      messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersion.toString())));
+      messages.add(ValidationMessage(androidJavaVersion(javaVersion.toString())));
       return true;
     } finally {
       _task = null;
     }
   }
+
+  String _androidSdkLocation(String directory) => 'Android SDK at $directory';
+
+  String _androidSdkPlatformToolsVersion(String platform, String tools) =>
+      'Platform $platform, build-tools $tools';
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -200,7 +218,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
+    messages.add(ValidationMessage(_androidSdkLocation(androidSdk.directory.path)));
     messages.add(
       ValidationMessage(
         'Emulator version ${await getEmulatorVersion(androidSdk, _processManager) ?? 'unknown'}',
@@ -249,7 +267,7 @@ class AndroidValidator extends DoctorValidator {
 
       messages.add(
         ValidationMessage(
-          _userMessages.androidSdkPlatformToolsVersion(
+          _androidSdkPlatformToolsVersion(
             androidSdkLatestVersion.platformName,
             androidSdkLatestVersion.buildToolsVersionName,
           ),
@@ -280,6 +298,37 @@ class AndroidValidator extends DoctorValidator {
       );
       messages.add(ValidationMessage(_userMessages.androidSdkInstallHelp(_platform)));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+    }
+
+    _task = 'Checking for multiple ADB binaries';
+    final List<File> adbCandidates = _osUtils.whichAll('adb');
+    final String? sdkAdbPath = androidSdk.adbPath;
+    final uniqueAdbPaths = <String>{};
+
+    void addAdbPath(String path, FileSystem fs) {
+      try {
+        uniqueAdbPaths.add(fs.file(path).resolveSymbolicLinksSync());
+      } on Exception catch (_) {
+        uniqueAdbPaths.add(path);
+      }
+    }
+
+    if (sdkAdbPath != null) {
+      addAdbPath(sdkAdbPath, androidSdk.directory.fileSystem);
+    }
+    for (final adbFile in adbCandidates) {
+      addAdbPath(adbFile.path, adbFile.fileSystem);
+    }
+
+    if (uniqueAdbPaths.length > 1) {
+      final warningMessage = StringBuffer(
+        'Multiple adb binaries found. This can cause conflicts '
+        'and device detection issues:\n',
+      );
+      for (final adbPath in uniqueAdbPaths) {
+        warningMessage.write('  - $adbPath\n');
+      }
+      messages.add(ValidationMessage.hint(warningMessage.toString().trim()));
     }
 
     _task = 'Finding Java binary';
@@ -325,6 +374,16 @@ class AndroidLicenseValidator extends DoctorValidator {
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
 
+  String get _androidLicensesAll => 'All Android licenses accepted.';
+
+  String get _androidLicensesSome =>
+      'Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+
+  String get _androidLicensesNone =>
+      'Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+
+  String get _androidSdkShort => 'Unable to locate Android SDK.';
+
   @override
   Future<ValidationResult> validateImpl() async {
     final messages = <ValidationMessage>[];
@@ -344,12 +403,12 @@ class AndroidLicenseValidator extends DoctorValidator {
     // Check for licenses.
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
-        messages.add(ValidationMessage(_userMessages.androidLicensesAll));
+        messages.add(ValidationMessage(_androidLicensesAll));
       case LicensesAccepted.some:
-        messages.add(ValidationMessage.hint(_userMessages.androidLicensesSome));
+        messages.add(ValidationMessage.hint(_androidLicensesSome));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.none:
-        messages.add(ValidationMessage.error(_userMessages.androidLicensesNone));
+        messages.add(ValidationMessage.error(_androidLicensesNone));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.unknown:
         messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
@@ -438,7 +497,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   /// Run the Android SDK manager tool in order to accept SDK licenses.
   Future<bool> runLicenseManager() async {
     if (_androidSdk == null) {
-      _logger.printStatus(_userMessages.androidSdkShort);
+      _logger.printStatus(_androidSdkShort);
       return false;
     }
 

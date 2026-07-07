@@ -137,7 +137,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool forceUpgrade = boolArg(_keyForceUpgrade);
     final bool updateHashes = boolArg(_keyUpdateHashes);
     final bool offline = boolArg(_keyOffline);
-    final List<CherryPick> cherryPicks = stringsArg(_keyCherryPick)
+    final List<PackageVersion> cherryPicks = stringsArg(_keyCherryPick)
         .map((String e) => e.split(':'))
         .map((List<String> e) => (package: e[0], version: e[1]))
         .toList();
@@ -172,14 +172,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
     );
 
-    // This package is intentionally not part of the workspace as it's a rehydrated template.
-    final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
-      rootProject.directory
-          .childDirectory('dev')
-          .childDirectory('integration_tests')
-          .childDirectory('widget_preview_scaffold'),
-    );
-
     // This package is intentionally not part of the workspace to test
     // user-defines in its local pubspec.
     final Directory hooksUserDefineIntegrationTestDirectory = rootDirectory
@@ -193,31 +185,36 @@ class UpdatePackagesCommand extends FlutterCommand {
       _verifyPubspecs(packages);
     }
     if (forceUpgrade || cherryPicks.isNotEmpty) {
-      if (!excludeTools) {
-        final List<_ProjectDeps> toolDeps = await _upgrade(forceUpgrade, cherryPicks, [
-          // The widget_preview_scaffold project has a path dependency on flutter_tools, so we must
-          // upgrade the projects together.
-          toolProject,
-          widgetPreviewScaffoldProject,
-        ], relaxToAny);
-        for (final (:project, :deps) in toolDeps) {
-          _updatePubspec(project.directory, deps);
-        }
-      }
-
-      final (project: _, :ResolvedDependencies deps) = (await _upgrade(forceUpgrade, cherryPicks, [
-        rootProject,
-      ], relaxToAny)).single;
+      final (project: _, :ResolvedDependencies deps) = (await _upgrade(
+        forceUpgrade: forceUpgrade,
+        cherryPicks: cherryPicks,
+        projects: [rootProject],
+        relaxToAny: relaxToAny,
+      )).single;
 
       for (final package in <Directory>[
         rootDirectory,
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
-        widgetPreviewScaffoldProject.directory,
         hooksUserDefineIntegrationTestDirectory,
       ]) {
         _updatePubspec(package, deps);
+      }
+
+      if (!excludeTools) {
+        final List<_ProjectDeps> toolDeps = await _upgrade(
+          forceUpgrade: forceUpgrade,
+          cherryPicks: cherryPicks,
+          // Ensure that flutter_tools uses the same versions for packages that are also
+          // used by the Flutter SDK.
+          pinned: deps.toVersions(),
+          projects: <FlutterProject>[toolProject],
+          relaxToAny: relaxToAny,
+        );
+        for (final (:project, :deps) in toolDeps) {
+          _updatePubspec(project.directory, deps);
+        }
       }
     }
     globals.printStatus('Running pub get only...');
@@ -234,7 +231,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
-    await _pubGet(widgetPreviewScaffoldProject, false);
     await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
 
     await _downloadCoverageData();
@@ -245,24 +241,29 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _pubGet(FlutterProject project, bool enforceLockfile) async =>
       pub.get(context: PubContext.pubGet, project: project, enforceLockfile: enforceLockfile);
 
-  Future<List<_ProjectDeps>> _upgrade(
-    bool forceUpgrade,
-    List<CherryPick> cherryPicks,
-    List<FlutterProject> projects,
-    bool relaxToAny,
-  ) async {
+  Future<List<_ProjectDeps>> _upgrade({
+    required bool forceUpgrade,
+    required List<PackageVersion> cherryPicks,
+    required bool relaxToAny,
+    required List<FlutterProject> projects,
+    List<PackageVersion>? pinned,
+  }) async {
     final Map<String, String> pinnedDeps;
     if (forceUpgrade) {
       globals.printStatus('Upgrading packages versions...');
-      pinnedDeps = kManuallyPinnedDependencies;
+      pinnedDeps = {...kManuallyPinnedDependencies};
     } else if (cherryPicks.isNotEmpty) {
       globals.printStatus('Pinning packages "$cherryPicks"...');
       pinnedDeps = <String, String>{
-        for (final CherryPick cherryPick in cherryPicks) cherryPick.package: cherryPick.version,
+        for (final PackageVersion cherryPick in cherryPicks) cherryPick.package: cherryPick.version,
       };
     } else {
       throw StateError('To get here, either forceUpgrade or cherry pick should be set.');
     }
+
+    pinnedDeps.addAll({
+      for (final (:package, :version) in pinned ?? <PackageVersion>[]) package: version,
+    });
 
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
       'flutter_upgrade_packages.',
@@ -489,6 +490,17 @@ class ResolvedDependencies {
   static const _devDependencies = 'dev_dependencies';
   final Map<String, Map<String, String>> data;
 
+  List<PackageVersion> toVersions() {
+    final versions = <PackageVersion>[];
+    for (final dependencyType in <String>[_dependencies, _devDependencies]) {
+      data[dependencyType] ??= <String, String>{};
+      for (final MapEntry(key: package, value: version) in data[dependencyType]!.entries) {
+        versions.add((package: package, version: version));
+      }
+    }
+    return versions;
+  }
+
   void forEach({
     required YamlEditor yamlEditor,
     required void Function(
@@ -514,7 +526,7 @@ class ResolvedDependencies {
   static ResolvedDependencies mergeDeps(
     ResolvedDependencies oldDeps,
     ResolvedDependencies newDeps,
-    List<CherryPick> cherryPicks,
+    List<PackageVersion> cherryPicks,
   ) {
     final mergedDeps = ResolvedDependencies(<String, Map<String, String>>{...newDeps.data});
     for (final MapEntry<String, Map<String, String>> entry in mergedDeps.data.entries) {
@@ -525,8 +537,8 @@ class ResolvedDependencies {
         final String newVersion = dep.value;
         final String? oldVersion =
             cherryPicks
-                .where((CherryPick pick) => pick.package == packageName)
-                .map((CherryPick pick) => pick.version)
+                .where((PackageVersion pick) => pick.package == packageName)
+                .map((PackageVersion pick) => pick.version)
                 .firstOrNull ??
             oldData?[packageName];
         mergedDeps.data[dependencyType]![packageName] = oldVersion?.startsWith('^') ?? false
@@ -538,7 +550,7 @@ class ResolvedDependencies {
   }
 }
 
-typedef CherryPick = ({String package, String version});
+typedef PackageVersion = ({String package, String version});
 
 /// How much dependencies should be relaxed when fetching new versions.
 enum RelaxMode {

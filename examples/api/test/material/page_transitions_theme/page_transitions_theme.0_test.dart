@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/material/page_transitions_theme/page_transitions_theme.0.dart'
     as example;
@@ -24,24 +25,24 @@ void main() {
     // Check defined page transitions builder for each platform.
     for (final TargetPlatform platform in TargetPlatform.values) {
       switch (platform) {
-        case TargetPlatform.iOS:
+        case .iOS:
           expect(
             theme.builders[platform],
             isA<CupertinoPageTransitionsBuilder>(),
           );
-        case TargetPlatform.linux:
+        case .linux:
           expect(
             theme.builders[platform],
             isA<OpenUpwardsPageTransitionsBuilder>(),
           );
-        case TargetPlatform.macOS:
+        case .macOS:
           expect(
             theme.builders[platform],
             isA<FadeUpwardsPageTransitionsBuilder>(),
           );
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.windows:
+        case .android:
+        case .fuchsia:
+        case .windows:
           expect(theme.builders[platform], isNull);
       }
     }

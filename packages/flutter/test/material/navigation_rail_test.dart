@@ -4037,6 +4037,7 @@ void main() {
       const trailingKey = Key('trailing');
       tester.view.physicalSize = const Size(800, 600);
       tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -4091,6 +4092,7 @@ void main() {
     const trailingKey = Key('trailing');
     tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -6144,6 +6146,27 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(NavigationRail)), Size.zero);
+  });
+
+  testWidgets('NavigationRail respects mainAxisAlignment', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        selectedIndex: 0,
+        destinations: _destinations(),
+      ),
+    );
+
+    // Find the exact column by checking both alignment and size
+    final Finder columnFinder = find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is Column &&
+          widget.mainAxisAlignment == MainAxisAlignment.spaceEvenly &&
+          widget.mainAxisSize == MainAxisSize.max,
+    );
+
+    expect(columnFinder, findsOneWidget);
   });
 }
 

@@ -28,6 +28,7 @@ var _stateInitialized = false;
 // Global state that must be cleaned up by `tearDown` in initializeTestPreviewDetectorState.
 void Function(PreviewDependencyGraph)? _onChangeDetectedImpl;
 void Function(String path)? _onPubspecChangeDetected;
+void Function(String path)? _onPackageConfigChangeDetected;
 Directory? _projectRoot;
 
 late FileSystem _fs;
@@ -43,6 +44,7 @@ void initializeTestPreviewDetectorState() {
   tearDown(() {
     _onChangeDetectedImpl = null;
     _onPubspecChangeDetected = null;
+    _onPackageConfigChangeDetected = null;
     _projectRoot?.deleteSync(recursive: true);
     _projectRoot = null;
   });
@@ -96,6 +98,7 @@ PreviewDetector createTestPreviewDetector() {
     fs: _fs,
     onChangeDetected: _onChangeDetectedRoot,
     onPubspecChangeDetected: _onPubspecChangeDetectedRoot,
+    onPackageConfigChangeDetected: _onPackageConfigChangeDetectedRoot,
   );
 }
 
@@ -119,10 +122,14 @@ void _onPubspecChangeDetectedRoot(String path) {
   _onPubspecChangeDetected?.call(path);
 }
 
+void _onPackageConfigChangeDetectedRoot(String path) {
+  _onPackageConfigChangeDetected?.call(path);
+}
+
 /// Test the files included in [filesWithErrors] contain errors after executing [changeOperation].
 Future<void> expectHasErrors({
   required WidgetPreviewProject project,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
   required Set<WidgetPreviewSourceFile> filesWithErrors,
 }) async {
   await waitForChangeDetected(
@@ -139,7 +146,7 @@ Future<void> expectHasErrors({
 /// errors.
 Future<void> expectHasNoErrors({
   required WidgetPreviewProject project,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
   await expectHasErrors(
     project: project,
@@ -149,7 +156,9 @@ Future<void> expectHasNoErrors({
 }
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
-Future<String> waitForPubspecChangeDetected({required void Function() changeOperation}) {
+Future<String> waitForPubspecChangeDetected({
+  required FutureOr<void> Function() changeOperation,
+}) async {
   final completer = Completer<String>();
   _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
@@ -157,7 +166,22 @@ Future<String> waitForPubspecChangeDetected({required void Function() changeOper
     }
     completer.complete(path);
   };
-  changeOperation();
+  await changeOperation();
+  return completer.future;
+}
+
+/// Waits for a package_config.json changed event to be detected after executing [changeOperation].
+Future<String> waitForPackageConfigChangeDetected({
+  required FutureOr<void> Function() changeOperation,
+}) async {
+  final completer = Completer<String>();
+  _onPackageConfigChangeDetected = (String path) {
+    if (completer.isCompleted) {
+      return;
+    }
+    completer.complete(path);
+  };
+  await changeOperation();
   return completer.future;
 }
 
@@ -183,7 +207,7 @@ Future<void> waitForChangeDetected({
 /// Waits for [n] change detected events after executing [changeOperation].
 Future<void> waitForNChangesDetected({
   required int n,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
   var changeCount = 0;
   final completer = Completer<void>();
@@ -196,7 +220,7 @@ Future<void> waitForNChangesDetected({
       completer.complete();
     }
   };
-  changeOperation();
+  await changeOperation();
   await completer.future;
 }
 

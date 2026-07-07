@@ -26,7 +26,6 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
 import 'flutter_command_runner.dart';
@@ -151,6 +150,8 @@ abstract final class FlutterOptions {
   static const kWebWasmFlag = 'wasm';
   static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
+  static const kCodesignIdentity = 'codesign-identity';
+  static const kCodesign = 'codesign';
 }
 
 /// flutter command categories for usage.
@@ -372,7 +373,9 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       FlutterOptions.kWebExperimentalHotReload,
-      help: 'Enables new module format that supports hot reload.',
+      help:
+          '(deprecated; will be removed in a future release) '
+          'Enables new module format that supports hot reload.',
       defaultsTo: true,
       hide: !verboseHelp,
     );
@@ -401,6 +404,18 @@ abstract class FlutterCommand extends Command<void> {
           'and this flag can be used to override the default. To disable this for the '
           'skwasm renderer, use "--no-cross-origin-isolation".',
       hide: !verboseHelp,
+    );
+    usesBaseHrefOption();
+  }
+
+  void usesBaseHrefOption() {
+    argParser.addOption(
+      'base-href',
+      help:
+          'Overrides the href attribute of the <base> tag in web/index.html. '
+          'No change is made to web/index.html file if this flag is not provided. '
+          'The value must start and end with "/". '
+          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
     );
   }
 
@@ -772,7 +787,7 @@ abstract class FlutterCommand extends Command<void> {
           'Variables are replaced in the format {{VARIABLE_NAME}}.\n'
           'Multiple defines can be passed by repeating "--${FlutterOptions.kWebDefinesOption}" multiple times.\n'
           'If a template contains a variable placeholder but no corresponding "--web-define" is provided, '
-          'the build will fail with an error.',
+          'it will warn that you have an unhandled variable.',
       valueHelp: 'API_URL=https://api.example.com',
       splitCommas: false,
     );
@@ -1203,6 +1218,22 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesDarwinCodeSignXCFrameworksOption() {
+    argParser.addFlag(
+      FlutterOptions.kCodesign,
+      defaultsTo: true,
+      help: 'Whether to code-sign XCFrameworks.',
+    );
+    argParser.addOption(
+      FlutterOptions.kCodesignIdentity,
+      help:
+          'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
+          '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
+          "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
+          'a list of valid identities run "security find-identity -p codesigning -v".',
+    );
+  }
+
   void usesTrackWidgetCreation({bool hasEffect = true, required bool verboseHelp}) {
     argParser.addFlag(
       'track-widget-creation',
@@ -1290,6 +1321,22 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableHcppFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'enable-hcpp',
+      hide: !verboseHelp,
+      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
+    );
+  }
+
+  void addTestFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'test-flag',
+      hide: !verboseHelp,
+      help: 'No-op flag for testing purposes; use for testing flag priorities only.',
+    );
+  }
+
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject get project => FlutterProject.current();
@@ -1317,6 +1364,9 @@ abstract class FlutterCommand extends Command<void> {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    // TODO(nshahan): Delete when fully migrated to new module system,
+    // https://github.com/flutter/flutter/issues/142060.
+    bool? forcedWebEnableHotReload,
   }) async {
     final bool trackWidgetCreation =
         argParser.options.containsKey('track-widget-creation') && boolArg('track-widget-creation');
@@ -1355,8 +1405,9 @@ abstract class FlutterCommand extends Command<void> {
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
     final bool webEnableHotReload =
-        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload);
+        forcedWebEnableHotReload ??
+        (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+            boolArg(FlutterOptions.kWebExperimentalHotReload));
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -1836,7 +1887,6 @@ abstract class FlutterCommand extends Command<void> {
   ) {
     // Send command result.
     final int? maxRss = getMaxRss(processInfo);
-    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
     analytics.send(
       Event.flutterCommandResult(
         commandPath: commandPath,
@@ -1884,6 +1934,15 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
 
+    if (globals.os.hostPlatform == .darwin_x64 &&
+        globals.persistentToolState!.shouldShowIntelMacWarning) {
+      globals.logger.printWarning(
+        'Flutter is deprecating support for Intel-based Macs. '
+        'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+      );
+      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+    }
+
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.
       _targetDevices.startExtendedWirelessDeviceDiscovery(
@@ -1891,35 +1950,11 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    // Populate the cache. We call this before pub get below so that the
-    // sky_engine package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache) {
-      // First always update universal artifacts, as some of these (e.g.
-      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      final bool offline;
-      if (argParser.options.containsKey('offline')) {
-        offline = boolArg('offline');
-      } else {
-        offline = false;
-      }
-      await globals.cache.updateAll(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-      }, offline: offline);
-      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
-    }
-    globals.cache.releaseLock();
-
-    await validateCommand();
-
-    final FlutterProject project = FlutterProject.current();
-    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
-
-    if (shouldRunPub) {
-      await pub.get(
-        context: PubContext.getVerifyContext(name),
-        project: project,
-        checkUpToDate: cachePubGet,
-      );
+    final FlutterProject project;
+    try {
+      project = await _updateCacheAndRunPubGet();
+    } finally {
+      globals.cache.releaseLock();
     }
 
     if (regeneratePlatformSpecificToolingDuringVerify) {
@@ -1936,6 +1971,38 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return runCommand();
+  }
+
+  Future<FlutterProject> _updateCacheAndRunPubGet() async {
+    // Populate the cache. We call this before pub get below so that the
+    // sky_engine package is available in the flutter cache for pub to find.
+    if (shouldUpdateCache) {
+      // First always update universal artifacts, as some of these (e.g.
+      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
+      final bool offline;
+      if (argParser.options.containsKey('offline')) {
+        offline = boolArg('offline');
+      } else {
+        offline = false;
+      }
+      await globals.cache.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      }, offline: offline);
+      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
+    }
+    await validateCommand();
+
+    final FlutterProject project = FlutterProject.current();
+    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+
+    if (shouldRunPub) {
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        project: project,
+        checkUpToDate: cachePubGet,
+      );
+    }
+    return project;
   }
 
   /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].

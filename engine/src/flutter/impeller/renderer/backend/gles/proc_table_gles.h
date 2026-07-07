@@ -51,9 +51,21 @@ struct AutoErrorCheck {
   }
 };
 
+template <typename Type>
+struct ArgLogger {
+  static void log(std::stringstream& stream, Type arg) { stream << arg; }
+};
+
+template <typename R, typename... Args>
+struct ArgLogger<R (*)(Args...)> {
+  static void log(std::stringstream& stream, R (*val)(Args...)) {
+    stream << reinterpret_cast<void*>(val);
+  }
+};
+
 template <class Type>
 void BuildGLArgumentsStream(std::stringstream& stream, Type arg) {
-  stream << arg;
+  ArgLogger<Type>::log(stream, arg);
 }
 
 constexpr void BuildGLArgumentsStream(std::stringstream& stream) {}
@@ -212,6 +224,8 @@ struct GLProc {
   PROC(StencilOpSeparate);                   \
   PROC(TexImage2D);                          \
   PROC(TexSubImage2D);                       \
+  PROC(CompressedTexImage2D);                \
+  PROC(CompressedTexSubImage2D);             \
   PROC(TexParameteri);                       \
   PROC(TexParameterfv);                      \
   PROC(Uniform1fv);                          \
@@ -219,6 +233,8 @@ struct GLProc {
   PROC(Uniform2fv);                          \
   PROC(Uniform3fv);                          \
   PROC(Uniform4fv);                          \
+  PROC(UniformMatrix2fv);                    \
+  PROC(UniformMatrix3fv);                    \
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \
   PROC(VertexAttribPointer);                 \
@@ -251,11 +267,13 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(UniformBlockBinding);               \
   PROC(BindBufferRange);                   \
   PROC(WaitSync);                          \
-  PROC(RenderbufferStorageMultisample)     \
-  PROC(BlitFramebuffer);
+  PROC(RenderbufferStorageMultisample);    \
+  PROC(BlitFramebuffer);                   \
+  PROC(InvalidateFramebuffer);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \
+  PROC(DebugMessageCallbackKHR);            \
   PROC(DiscardFramebufferEXT);              \
   PROC(FramebufferTexture2DMultisampleEXT); \
   PROC(PushDebugGroupKHR);                  \
@@ -268,7 +286,13 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(BeginQueryEXT);                      \
   PROC(EndQueryEXT);                        \
   PROC(GetQueryObjectuivEXT);               \
-  PROC(BlitFramebufferANGLE);
+  PROC(BlitFramebufferANGLE);               \
+  PROC(VertexAttribDivisor);                \
+  PROC(VertexAttribDivisorEXT);             \
+  PROC(DrawArraysInstanced);                \
+  PROC(DrawArraysInstancedEXT);             \
+  PROC(DrawElementsInstanced);              \
+  PROC(DrawElementsInstancedEXT);
 
 enum class DebugResourceType {
   kTexture,

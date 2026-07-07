@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// We use `print` for logging here.
+// ignore_for_file: avoid_print
+
 /// @docImport 'dart:io';
 library;
 
@@ -669,7 +672,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         'https://flutter-gold.skia.org.\n'
         'Validate image output found at $basedir',
       );
-      update(golden, imageBytes);
+      await update(golden, imageBytes);
       return true;
     }
 

@@ -60,6 +60,27 @@ typedef enum {
   RunOnSeparateThread,
 } FlutterDesktopUIThreadPolicy;
 
+// Configures the accessibility implementation used by Flutter.
+typedef enum {
+  // Default value. Flutter will automatically select the best available
+  // implementation.
+  DefaultAccessibilityMode,
+  // Use the IAccessible implementation.
+  IAccessibleMode,
+  // Use the experimental IAccessibleEx implementation.
+  IAccessibleExMode,
+} FlutterDesktopAccessibilityMode;
+
+// Configures the Impeller enablement switch.
+typedef enum {
+  // Use the default Impeller enablement behavior.
+  DefaultImpeller,
+  // Enable Impeller.
+  EnabledImpeller,
+  // Disable Impeller.
+  DisabledImpeller,
+} FlutterDesktopImpellerSwitch;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -94,10 +115,19 @@ typedef struct {
   const char** dart_entrypoint_argv;
 
   // GPU choice preference
+  // If not set defaults to NoPreference;
   FlutterDesktopGpuPreference gpu_preference;
 
   // Policy for the thread that runs UI isolate.
+  // If not set defaults to Default;
   FlutterDesktopUIThreadPolicy ui_thread_policy;
+
+  // The accessibility mode.
+  // This can be used to enable the experimental IAccessibleEx implementation.
+  FlutterDesktopAccessibilityMode accessibility_mode;
+
+  // Policy for enabling the Impeller renderer.
+  FlutterDesktopImpellerSwitch impeller_switch;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
@@ -240,14 +270,43 @@ FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
     VoidCallback callback,
     void* user_data);
 
+// Returns true if the current thread is the platform thread.
+// This can be called on any thread.
+FLUTTER_EXPORT bool FlutterDesktopEngineIsPlatformThread(
+    FlutterDesktopEngineRef engine);
+
+// Schedule a callback to be called on the platform thread.
+//
+// This can be called on any thread. The callback is executed only
+// once on the platform thread.
+//
+// If the task is discarded without being executed (e.g. during engine
+// shutdown), |on_cancel| is called on the platform thread so the caller can
+// cleanup allocations. |on_cancel| can be nullptr if no cleanup is needed.
+FLUTTER_EXPORT void FlutterDesktopEnginePostPlatformThreadTask(
+    FlutterDesktopEngineRef engine,
+    VoidCallback callback,
+    VoidCallback on_cancel,
+    void* user_data);
+
 // ========== View ==========
 
 // Returns the backing HWND for manipulation in host application.
 FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 
 // Returns the DXGI adapter used for rendering or nullptr in case of error.
+// The caller must release the adapter.
+// DEPRECATED: Use |FlutterDesktopEngineGetGraphicsAdapter| instead.
 FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(
     FlutterDesktopViewRef view);
+
+// Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+// was successfully retrieved, or false if an error occured.
+// The caller must provide a valid pointer to an IDXGIAdapter* and is
+// responsible for releasing the adapter.
+FLUTTER_EXPORT bool FlutterDesktopEngineGetGraphicsAdapter(
+    FlutterDesktopEngineRef engine,
+    IDXGIAdapter** adapter_out);
 
 // Called to pass an external window message to the engine for lifecycle
 // state updates. Non-Flutter windows must call this method in their WndProc
@@ -305,6 +364,14 @@ FLUTTER_EXPORT void
 FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate);
+
+// Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+// was successfully retrieved, or false if an error occured.
+// The caller must provide a valid pointer to an IDXGIAdapter* and is
+// responsible for releasing the adapter.
+FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar,
+    IDXGIAdapter** adapter_out);
 
 // ========== Freestanding Utilities ==========
 

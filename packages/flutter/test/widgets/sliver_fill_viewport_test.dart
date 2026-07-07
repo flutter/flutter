@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
     final children = List<Widget>.generate(20, (int i) {
@@ -127,6 +129,7 @@ void main() {
         '   │     │ softWrap: wrapping at box width\n'
         '   │     │ overflow: clip\n'
         '   │     │ maxLines: unlimited\n'
+        '   │     │ devicePixelRatio: 3.0\n'
         '   │     ╘═╦══ text ═══\n'
         '   │       ║ TextSpan:\n'
         '   │       ║   <all styles inherited>\n'
@@ -158,6 +161,7 @@ void main() {
         '         │ softWrap: wrapping at box width\n'
         '         │ overflow: clip\n'
         '         │ maxLines: unlimited\n'
+        '         │ devicePixelRatio: 3.0\n'
         '         ╘═╦══ text ═══\n'
         '           ║ TextSpan:\n'
         '           ║   <all styles inherited>\n'
@@ -203,5 +207,54 @@ void main() {
       find.byType(SliverFillViewport),
     );
     expect(boxWithoutPadding.geometry!.paintExtent, equals(300.0));
+  });
+
+  testWidgets('SliverFillViewport semantics respects allowImplicitScrolling', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFillViewport(
+              delegate: SliverChildListDelegate(
+                const <Widget>[Text('Page 1'), Text('Page 2')],
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
+              allowImplicitScrolling: false,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page 2')));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFillViewport(
+              delegate: SliverChildListDelegate(
+                const <Widget>[Text('Page 1'), Text('Page 2')],
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, includesNodeWith(label: 'Page 2'));
+
+    semantics.dispose();
   });
 }

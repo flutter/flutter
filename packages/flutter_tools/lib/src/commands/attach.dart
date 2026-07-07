@@ -17,7 +17,6 @@ import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../commands/daemon.dart';
 import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
@@ -34,6 +33,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
+import 'daemon.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -357,7 +357,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       target: targetFile,
-      targetModel: TargetModel(stringArg('target-model')!),
+      targetModelOverride: TargetModel(stringArg('target-model')!),
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       platform: _platform,

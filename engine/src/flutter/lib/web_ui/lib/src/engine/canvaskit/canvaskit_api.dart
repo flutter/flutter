@@ -95,9 +95,14 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
 
-  external BidiNamespace get Bidi;
-
-  external CodeUnitsNamespace get CodeUnits;
+  @JS('Bidi')
+  external BidiNamespace? get _Bidi;
+  BidiNamespace get Bidi {
+    if (_Bidi == null) {
+      throw StateError('The downloaded CanvasKit version does not support WebParagraph');
+    }
+    return _Bidi!;
+  }
 
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
@@ -156,8 +161,8 @@ extension type CanvasKit(JSObject _) implements JSObject {
   /// parameters specified in [SkImageInfo] passed [SkImage.readPixels] must
   /// match [info].
   @JS('MakeImage')
-  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, double bytesPerRow);
-  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, double bytesPerRow) =>
+  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, int bytesPerRow);
+  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, int bytesPerRow) =>
       _MakeImage(info, pixels.toJS, bytesPerRow);
 
   @JS('MakeLazyImageFromTextureSource')
@@ -170,11 +175,23 @@ extension type CanvasKit(JSObject _) implements JSObject {
     bool srcIsPremultiplied,
   );
 
-  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) =>
-      _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromTextureSourceWithInfo` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  }
 
-  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) =>
-      _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromImageBitmap` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  }
+
+  external SkImage? MakeImageFromCanvasImageSource(JSAny src);
 }
 
 extension type CanvasKitModule(JSObject _) implements JSObject {
@@ -478,6 +495,16 @@ final List<SkFillType> _skFillTypes = <SkFillType>[
 
 SkFillType toSkFillType(ui.PathFillType fillType) {
   return _skFillTypes[fillType.index];
+}
+
+ui.PathFillType fromSkFillType(SkFillType fillType) {
+  if (fillType == canvasKit.FillType.Winding) {
+    return ui.PathFillType.nonZero;
+  }
+  if (fillType == canvasKit.FillType.EvenOdd) {
+    return ui.PathFillType.evenOdd;
+  }
+  throw UnimplementedError('Unsupported SkFillType: $fillType');
 }
 
 extension type SkPathOpEnum(JSObject _) implements JSObject {
@@ -1033,12 +1060,12 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
   );
 
   @JS('MakeMatrixTransform')
-  external SkImageFilter _MakeMatrixTransform(
+  external SkImageFilter? _MakeMatrixTransform(
     JSFloat32Array matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
   );
-  SkImageFilter MakeMatrixTransform(
+  SkImageFilter? MakeMatrixTransform(
     Float32List matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
@@ -1289,6 +1316,7 @@ final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
 extension type SkPath._(JSObject _) implements JSObject {
+  external SkFillType getFillType();
   external void setFillType(SkFillType fillType);
 
   @JS('getBounds')
@@ -1826,16 +1854,6 @@ extension type BidiNamespace(JSObject _) implements JSObject {
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
 }
 
-extension type CodeUnitInfo(JSObject _) implements JSObject {
-  external int get flags;
-}
-
-extension type CodeUnitsNamespace(JSObject _) implements JSObject {
-  @JS('compute')
-  external JSArray<JSAny?> _compute(String text);
-  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
-}
-
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   external SkParagraphBuilder MakeFromFontCollection(
     SkParagraphStyle paragraphStyle,
@@ -2102,7 +2120,10 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
   external set value(double? v);
 }
 
-extension type SkTypeface(JSObject _) implements JSObject {}
+extension type SkTypeface(JSObject _) implements JSObject {
+  /// Returns the family name of the typeface.
+  external String? getFamilyName();
+}
 
 @JS('window.flutterCanvasKit.Font')
 extension type SkFont._(JSObject _) implements JSObject {
@@ -2238,6 +2259,13 @@ extension type SkParagraph(JSObject _) implements JSObject {
   external SkGlyphClusterInfo? _getClosestGlyphInfoAtCoordinate(double x, double y);
   ui.GlyphInfo? getClosestGlyphInfoAt(double x, double y) =>
       _getClosestGlyphInfoAtCoordinate(x, y)?._glyphInfo;
+
+  @JS('unresolvedCodepoints')
+  external JSArray<JSNumber> _getUnresolvedCodePoints();
+  List<int> getUnresolvedCodePoints() {
+    final List<JSNumber> jsNumbers = _getUnresolvedCodePoints().toDart;
+    return List<int>.generate(jsNumbers.length, (int i) => jsNumbers[i].toDartInt);
+  }
 
   external SkTextRange getWordBoundary(double position);
   external void layout(double width);
@@ -2392,21 +2420,25 @@ SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
-const String _kWebParagraphCanvasKitJsFileName = 'experimental_webparagraph/canvaskit.js';
+const String _kWebParagraphCanvasKitJsFileName = 'webparagraph/canvaskit.js';
 
 String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
 @visibleForTesting
 List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
-  return switch (variant) {
-    CanvasKitVariant.auto => <String>[
-      if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
-      _kFullCanvasKitJsFileName,
-    ],
-    CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
-    CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
-    CanvasKitVariant.experimentalWebParagraph => <String>[_kWebParagraphCanvasKitJsFileName],
-  };
+  if (isWebParagraphEnabled) {
+    return <String>[_kWebParagraphCanvasKitJsFileName];
+  }
+  return [
+    ...switch (variant) {
+      CanvasKitVariant.auto => <String>[
+        if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
+        _kFullCanvasKitJsFileName,
+      ],
+      CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
+      CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
+    },
+  ];
 }
 
 Iterable<String> get _canvasKitJsUrls {

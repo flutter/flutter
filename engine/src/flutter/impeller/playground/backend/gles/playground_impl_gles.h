@@ -7,10 +7,16 @@
 
 #include "impeller/playground/playground_impl.h"
 
+#include "impeller/renderer/backend/gles/context_gles.h"
+
+struct GLFWwindow;
+
 namespace impeller {
 
 class PlaygroundImplGLES final : public PlaygroundImpl {
  public:
+  struct ShareableContext;
+
   explicit PlaygroundImplGLES(PlaygroundSwitches switches);
 
   ~PlaygroundImplGLES();
@@ -22,11 +28,19 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   class ReactorWorker;
 
   static void DestroyWindowHandle(WindowHandle handle);
-  using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
+  using UniqueHandle =
+      std::unique_ptr<GLFWwindow, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
-  std::shared_ptr<ReactorWorker> worker_;
   const bool use_angle_;
   void* angle_glesv2_;
+  std::shared_ptr<Context> context_;
+  std::unique_ptr<ShareableContext> unique_context_;
+
+  // Return the best ShareableContext holder to store the context for
+  // this Playground. Note that this might be either the instance-specific
+  // |unique_context_| field or it might be one of the globally shared
+  // contexts fields used for most of the tests.
+  std::unique_ptr<PlaygroundImplGLES::ShareableContext>& GetShareableContext();
 
   // |PlaygroundImpl|
   std::shared_ptr<Context> GetContext() const override;
@@ -41,6 +55,17 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   // |PlaygroundImpl|
   Playground::GLProcAddressResolver CreateGLProcAddressResolver()
       const override;
+
+  static Playground::GLProcAddressResolver CreateGLProcAddressResolver(
+      const PlaygroundSwitches& switches);
+
+  static GLFWwindow* CreateGLWindow(const PlaygroundSwitches& switches,
+                                    GLFWwindow* share_window);
+
+  static std::unique_ptr<ShareableContext> MakeShareableContext(
+      const PlaygroundSwitches& switches);
+
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
 
   PlaygroundImplGLES(const PlaygroundImplGLES&) = delete;
 

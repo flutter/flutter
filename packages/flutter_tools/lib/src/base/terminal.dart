@@ -8,6 +8,7 @@ import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
+import 'utils.dart';
 
 enum TerminalColor { red, green, blue, cyan, yellow, magenta, grey }
 
@@ -129,6 +130,11 @@ abstract class Terminal {
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes;
 
+  /// Reads a full line from the console.
+  ///
+  /// Useful when the console is not in [singleCharMode].
+  Future<String> readLine();
+
   /// Prompts the user to input a character within a given list. Re-prompts if
   /// entered character is not in the list.
   ///
@@ -196,6 +202,10 @@ class AnsiTerminal implements Terminal {
 
   // Clear the entire line, cursor position does not change.
   static const clearEntireLineCode = '\u001b[2K';
+
+  // Move cursor to column 0 and erase from cursor to end of line (\x1B[K = \x1B[0K).
+  // Clears the entire current line regardless of cursor position.
+  static const clearAndReturnCode = '\r\x1B[K';
 
   static const _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
@@ -356,6 +366,16 @@ class AnsiTerminal implements Terminal {
         .asBroadcastStream();
   }
 
+  Stream<String>? _broadcastStdInLines;
+
+  @override
+  Future<String> readLine() {
+    return (_broadcastStdInLines ??= _stdio.stdin
+            .transform<String>(utf8AllowMalformedLineDecoder)
+            .asBroadcastStream())
+        .first;
+  }
+
   @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
@@ -415,6 +435,11 @@ class _TestTerminal implements Terminal {
 
   @override
   Stream<String> get keystrokes => const Stream<String>.empty();
+
+  @override
+  Future<String> readLine() {
+    throw UnsupportedError('readLine not supported in the test terminal.');
+  }
 
   @override
   Future<String> promptForCharInput(

@@ -29,6 +29,7 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'application_package.dart';
+import 'devices.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
@@ -161,7 +162,13 @@ class SimControl {
       '--json',
     ];
     _logger.printTrace(command.join(' '));
-    final RunResult results = await _processUtils.run(command);
+    final RunResult results;
+    try {
+      results = await _processUtils.run(command);
+    } on Exception catch (exception) {
+      _logger.printError('Error executing simctl:\n$exception');
+      return <String, Map<String, Object?>>{};
+    }
     if (results.exitCode != 0) {
       _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, Object?>>{};
@@ -184,6 +191,11 @@ class SimControl {
 
   /// Returns all the connected simulator devices.
   Future<List<BootedSimDevice>> getConnectedDevices() async {
+    if (!_xcode.isSimctlInstalled) {
+      _logger.printTrace('Skipping iOS simulator discovery because simctl is not available.');
+      return <BootedSimDevice>[];
+    }
+
     final Map<String, Object?> devicesSection = await _listBootedDevices();
 
     return <BootedSimDevice>[
@@ -558,6 +570,7 @@ class IOSSimulator extends Device {
         logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
     }
@@ -770,6 +783,9 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
       'senderImagePath ENDSWITH "/Flutter"',
       'senderImagePath ENDSWITH "/libswiftCore.dylib"',
       'processImageUUID == senderImageUUID',
+      'eventMessage CONTAINS "UIScene life cycle is required"',
+      'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
+      'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
     ]),
     // Filter out some messages that clearly aren't related to Flutter.
     notP('eventMessage CONTAINS ": could not find icon for representation -> com.apple."'),
@@ -808,8 +824,18 @@ Future<Process?> launchSystemLogTool(IOSSimulator device) async {
   return null;
 }
 
-class _IOSSimulatorLogReader extends DeviceLogReader {
-  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '');
+class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
+  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '') {
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    addLogInterceptor(uisceneCrashInterceptor);
+  }
 
   final IOSSimulator device;
 
@@ -819,6 +845,10 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     onListen: _start,
     onCancel: _stop,
   );
+
+  @override
+  @visibleForTesting
+  StreamController<String> get linesController => _linesController;
 
   // We log from two files: the device and the system log.
   Process? _deviceProcess;
@@ -958,13 +988,13 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
         int repeat = int.parse(multi.group(1)!);
         repeat = math.max(0, math.min(100, repeat));
         for (var i = 1; i < repeat; i++) {
-          _linesController.add(_lastLine!);
+          addLogToStream(_lastLine!);
         }
       }
     } else {
       _lastLine = _filterDeviceLine(line);
       if (_lastLine != null) {
-        _linesController.add(_lastLine!);
+        addLogToStream(_lastLine!);
         _lastLineMatched = true;
       } else {
         _lastLineMatched = false;
@@ -982,7 +1012,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       try {
         final Object? decodedJson = jsonDecode(message);
         if (decodedJson is String) {
-          _linesController.add(decodedJson);
+          addLogToStream(decodedJson);
         }
       } on FormatException {
         globals.printError('Logger returned non-JSON response: $message');
@@ -1003,7 +1033,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
     final String filteredLine = _filterSystemLog(line);
 
-    _linesController.add(filteredLine);
+    addLogToStream(filteredLine);
   }
 
   void _stop() {

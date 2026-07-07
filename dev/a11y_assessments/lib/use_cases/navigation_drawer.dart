@@ -21,13 +21,16 @@ const List<ExampleDestination> destinations = <ExampleDestination>[
 ];
 
 class NavigationDrawerUseCase extends UseCase {
-  NavigationDrawerUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  NavigationDrawerUseCase();
 
   @override
   String get name => 'NavigationDrawer';
 
   @override
   String get route => '/navigation-drawer';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const NavigationDrawerExample();
@@ -61,10 +64,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   Widget buildDrawerScaffold(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: SafeArea(
         bottom: false,
         top: false,

@@ -495,6 +495,22 @@ void main() {
       await terminalHandler.processTerminalInput('O');
     });
 
+    testWithoutContext('o,O - debugTogglePlatform with null vmService does not crash', () async {
+      for (final key in <String>['o', 'O']) {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          nullVmService: true,
+        );
+        await terminalHandler.processTerminalInput(key);
+
+        expect(
+          terminalHandler.logger.statusText,
+          contains('Platform toggle is not supported for this device.'),
+          reason: 'Expected message when pressing "$key"',
+        );
+      }
+    });
+
     testWithoutContext('p - debugToggleDebugPaintSizeEnabled', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
@@ -862,6 +878,25 @@ void main() {
       expect(runner.calledReload, true);
       expect(runner.calledRestart, false);
     });
+
+    testWithoutContext(
+      'r - reloadIsRestart when canHotReload is false (web --no-hot case)',
+      () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          supportsHotReload: false,
+        );
+        final runner = terminalHandler.residentRunner as FakeResidentRunner;
+        runner.reloadIsRestart = true;
+
+        await terminalHandler.processTerminalInput('r');
+
+        // When reloadIsRestart is true, 'r' should still trigger a restart
+        // even though canHotReload is false
+        expect(runner.calledReload, false);
+        expect(runner.calledRestart, true);
+      },
+    );
 
     testWithoutContext('R - hotRestart', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
@@ -1258,6 +1293,7 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
+        targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         generator: FakeResidentCompiler(),
         developmentShaderCompiler: const FakeShaderCompiler(),
@@ -1532,6 +1568,9 @@ class FakeResidentRunner extends ResidentHandlers {
   bool supportsServiceProtocol = true;
 
   @override
+  bool reloadIsRestart = false; // Defaults to false, only true when web --no-hot
+
+  @override
   Future<void> cleanupAfterSignal() async {}
 
   @override
@@ -1562,6 +1601,10 @@ class FakeResidentRunner extends ResidentHandlers {
     bool pause = false,
     String? reason,
   }) async {
+    // When reloadIsRestart is true, treat a reload as a restart
+    if (reloadIsRestart && !fullRestart) {
+      fullRestart = true;
+    }
     if (fullRestart && !supportsRestart) {
       throw StateError('illegal restart');
     }
@@ -1610,6 +1653,7 @@ TerminalHandler setUpTerminalHandler(
   bool web = false,
   bool fatalReloadError = false,
   bool supportsScreenshot = false,
+  bool nullVmService = false,
   int reloadExitCode = 0,
   BuildMode buildMode = BuildMode.debug,
   Logger? logger,
@@ -1632,7 +1676,7 @@ TerminalHandler setUpTerminalHandler(
     developmentShaderCompiler: const FakeShaderCompiler(),
     targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
-  device.vmService = FakeVmServiceHost(requests: requests).vmService;
+  device.vmService = nullVmService ? null : FakeVmServiceHost(requests: requests).vmService;
   final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
     ..supportsServiceProtocol = supportsServiceProtocol
     ..supportsRestart = supportsRestart

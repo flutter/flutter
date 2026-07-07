@@ -8,6 +8,7 @@
 #include <optional>
 #include <utility>
 
+#include "fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
@@ -138,7 +139,6 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = entity.GetShaderTransform(pass);
-  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
 
 #ifdef IMPELLER_DEBUG
   if (label_.empty()) {

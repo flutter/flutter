@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 
+#include <cstdint>
 #include <cstring>
 #include <vector>
 
@@ -51,7 +52,7 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
         return false;
       }
       attrib.size = input.vec_size;
-      auto type = ToVertexAttribType(input.type);
+      auto type = ToVertexAttribType(input.GetVertexAttributeFormat());
       if (!type.has_value()) {
         return false;
       }
@@ -59,6 +60,8 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
       attrib.normalized = GL_FALSE;
       attrib.offset = input.offset;
       attrib.stride = layout.stride;
+      attrib.vertex_attrib_divisor =
+          layout.input_rate == VertexInputRate::kInstance ? 1u : 0u;
       vertex_attrib_arrays[layout_i].push_back(attrib);
     }
   }
@@ -193,9 +196,26 @@ bool BufferBindingsGLES::ReadUniformsBindingsV2(const ProcTableGLES& gl,
 
 bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
                                               size_t binding,
-                                              size_t vertex_offset) {
+                                              size_t vertex_offset,
+                                              size_t instance) {
   if (binding >= vertex_attrib_arrays_.size()) {
     return false;
+  }
+
+  // For an emulated instanced draw (instance > 0), a binding whose attributes
+  // are all vertex-rate (divisor 0) does not change across instances, so the
+  // state bound for instance 0 still applies. Skip the redundant re-binding.
+  if (instance > 0u) {
+    bool has_instance_rate = false;
+    for (const auto& array : vertex_attrib_arrays_[binding]) {
+      if (array.vertex_attrib_divisor != 0u) {
+        has_instance_rate = true;
+        break;
+      }
+    }
+    if (!has_instance_rate) {
+      return true;
+    }
   }
 
   if (!gl.GetCapabilities()->IsES()) {
@@ -206,14 +226,33 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
 
   for (const auto& array : vertex_attrib_arrays_[binding]) {
     gl.EnableVertexAttribArray(array.index);
+    // For an emulated instanced draw, an instance-rate attribute is
+    // re-pointed at instance `instance`, since there is no hardware divisor
+    // to advance it. A non-instanced or hardware-instanced draw passes
+    // instance 0 and lets the divisor (if any) do the stepping.
+    size_t attribute_offset = vertex_offset + array.offset;
+    if (array.vertex_attrib_divisor != 0u) {
+      attribute_offset += instance * static_cast<size_t>(array.stride);
+    }
     gl.VertexAttribPointer(array.index,       // index
                            array.size,        // size (must be 1, 2, 3, or 4)
                            array.type,        // type
                            array.normalized,  // normalized
                            array.stride,      // stride
-                           reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                               vertex_offset + array.offset))  // pointer
+                           reinterpret_cast<const GLvoid*>(
+                               static_cast<uintptr_t>(attribute_offset))  // ptr
     );
+    // Set the instancing divisor when the driver supports it. It is core
+    // on ES 3.0+ and comes from GL_EXT_instanced_arrays on ES 2.0. When
+    // unavailable, only per-vertex (divisor 0) bindings are possible,
+    // which is the default. Setting it for every attribute (including
+    // divisor 0) also clears any stale divisor left by a prior pipeline,
+    // which matters on ES, where there is no vertex array object.
+    if (gl.VertexAttribDivisor.IsAvailable()) {
+      gl.VertexAttribDivisor(array.index, array.vertex_attrib_divisor);
+    } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+      gl.VertexAttribDivisorEXT(array.index, array.vertex_attrib_divisor);
+    }
   }
 
   return true;
@@ -294,9 +333,8 @@ const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
       continue;
     }
 
-    size_t element_count = member.array_elements.value_or(1);
-    const std::string member_key =
-        CreateUniformMemberKey(metadata->name, member.name, element_count > 1);
+    const std::string member_key = CreateUniformMemberKey(
+        metadata->name, member.name, member.array_elements.has_value());
     const absl::flat_hash_map<std::string, GLint>::iterator computed_location =
         uniform_locations_.find(member_key);
     if (computed_location == uniform_locations_.end()) {
@@ -335,6 +373,9 @@ bool BufferBindingsGLES::BindUniformBufferV3(
   absl::flat_hash_map<std::string, std::pair<GLint, GLuint>>::iterator it =
       ubo_locations_.find(metadata->name);
   if (it == ubo_locations_.end()) {
+    // This should only happen if we have GLESv3 but are using v2 shaders,
+    // as GLESv3 shaders compiled by impeller always have
+    // **named** uniform buffer blocks
     return BindUniformBufferV2(gl, buffer, metadata, device_buffer_gles);
   }
   const auto& [block_index, binding_point] = it->second;
@@ -375,17 +416,7 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       continue;
     }
 
-    // The reflector/runtime stage data is confused as to whether 0 means
-    // no elements or whether it is not an array. Specifically:
-    //   * The built-in generated header files use std::nullopt to mean not
-    //   an array. Setting the array_elements count to 1 generates incorrect
-    //   code that tries to create 1 length arrays.
-    //   * The runtime stage flatbuffer serializes the std::nullopt as 0,
-    //     and thus needs to treat array length of 0 as a scalar element.
     size_t element_count = member.array_elements.value_or(1);
-    if (element_count == 0) {
-      element_count = 1;
-    }
     size_t element_stride = member.byte_length / element_count;
     auto* buffer_data =
         reinterpret_cast<const GLfloat*>(buffer_ptr + member.offset);
@@ -413,41 +444,33 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       return false;
     }
 
-    switch (member.size) {
-      case sizeof(Matrix):
-        gl.UniformMatrix4fv(location,       // location
-                            element_count,  // count
-                            GL_FALSE,       // normalize
-                            buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector4):
-        gl.Uniform4fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector3):
-        gl.Uniform3fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector2):
-        gl.Uniform2fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Scalar):
-        gl.Uniform1fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      default:
-        VALIDATION_LOG << "Invalid member size binding: " << member.size;
-        return false;
+    if (!member.float_type.has_value()) {
+      VALIDATION_LOG << "Float uniform should have a float type.";
+      return false;
+    }
+
+    switch (member.float_type.value()) {
+      case ShaderFloatType::kFloat:
+        gl.Uniform1fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec2:
+        gl.Uniform2fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec3:
+        gl.Uniform3fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec4:
+        gl.Uniform4fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kMat2:
+        gl.UniformMatrix2fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat3:
+        gl.UniformMatrix3fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat4:
+        gl.UniformMatrix4fv(location, element_count, GL_FALSE, buffer_data);
+        break;
     }
   }
   return true;
@@ -490,7 +513,13 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     //--------------------------------------------------------------------------
     /// Bind the texture.
     ///
-    if (!texture_gles.Bind()) {
+    // The `texture_gles` reference is bound `const` because it is reached
+    // via a const view into the bound texture list, but `Bind()` mutates
+    // GLES-specific lazy-init bookkeeping (`slice_mip_initialized_`,
+    // `fence_`). The mutation is implementation detail of the GLES backend
+    // and is invisible to the higher abstraction; the `const_cast` is
+    // confined to this one call site.
+    if (!const_cast<TextureGLES&>(texture_gles).Bind()) {
       return std::nullopt;
     }
 

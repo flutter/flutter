@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/safe_math.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
@@ -91,10 +92,26 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
 
   APNGImage& frame = images_[image_index];
   SkImageInfo frame_info = frame.codec->getInfo();
-  auto frame_row_bytes = frame_info.bytesPerPixel() * frame_info.width();
+
+  fml::SafeMath safe;
+  size_t frame_row_bytes =
+      safe.mul(frame_info.bytesPerPixel(), frame_info.width());
+  if (safe.overflow_detected()) {
+    FML_DLOG(ERROR) << "Failed to decode image at index " << image_index
+                    << " (frame index: " << frame_index
+                    << ") of APNG due to frame row bytes overflow.";
+    return false;
+  }
 
   if (frame.pixels.empty()) {
-    frame.pixels.resize(frame_row_bytes * frame_info.height());
+    size_t pixels_bytes = safe.mul(frame_row_bytes, frame_info.height());
+    if (safe.overflow_detected()) {
+      FML_DLOG(ERROR) << "Failed to decode image at index " << image_index
+                      << " (frame index: " << frame_index
+                      << ") of APNG due to pixel buffer size overflow.";
+      return false;
+    }
+    frame.pixels.resize(pixels_bytes);
     SkCodec::Result result = frame.codec->getPixels(
         frame.codec->getInfo(), frame.pixels.data(), frame_row_bytes);
     if (result != SkCodec::kSuccess) {
@@ -236,12 +253,12 @@ std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
     sk_sp<SkData> data) {
   // Ensure the buffer is large enough to at least contain the PNG signature
   // and a chunk header.
-  if (data->size() < sizeof(kPngSignature) + sizeof(ChunkHeader)) {
+  if (data->size() < kPngSignature.size() + sizeof(ChunkHeader)) {
     return nullptr;
   }
   // Validate the full PNG signature.
   const uint8_t* data_p = static_cast<const uint8_t*>(data.get()->data());
-  if (memcmp(data_p, kPngSignature, sizeof(kPngSignature))) {
+  if (memcmp(data_p, kPngSignature.data(), kPngSignature.size())) {
     return nullptr;
   }
 
@@ -269,6 +286,9 @@ std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
     }
   }
 
+  if (chunk->get_data_length() < sizeof(AnimationControlChunkData)) {
+    return nullptr;
+  }
   const AnimationControlChunkData* animation_data =
       CastChunkData<AnimationControlChunkData>(chunk);
 
@@ -305,23 +325,28 @@ std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
 bool APNGImageGenerator::IsValidChunkHeader(const void* buffer,
                                             size_t size,
                                             const ChunkHeader* chunk) {
-  // Ensure the chunk doesn't start before the beginning of the buffer.
-  if (reinterpret_cast<const uint8_t*>(chunk) <
-      static_cast<const uint8_t*>(buffer)) {
+  // Ensure that the chunk starts within the bounds of the buffer.
+  const uint8_t* chunk_ptr = reinterpret_cast<const uint8_t*>(chunk);
+  const uint8_t* buffer_ptr = static_cast<const uint8_t*>(buffer);
+  if (chunk_ptr < buffer_ptr || chunk_ptr >= buffer_ptr + size) {
     return false;
   }
 
-  // Ensure the buffer is large enough to contain at least the chunk header.
-  if (reinterpret_cast<const uint8_t*>(chunk) + sizeof(ChunkHeader) >
-      static_cast<const uint8_t*>(buffer) + size) {
+  // Ensure that the buffer has enough space for the chunk header before using
+  // any fields in the header.
+  size_t buffer_bytes_remaining = size - (chunk_ptr - buffer_ptr);
+  if (buffer_bytes_remaining < sizeof(ChunkHeader)) {
     return false;
   }
-
-  // Ensure the buffer is large enough to contain the chunk's given data size
-  // and CRC.
-  const uint8_t* chunk_end =
-      reinterpret_cast<const uint8_t*>(chunk) + GetChunkSize(chunk);
-  if (chunk_end > static_cast<const uint8_t*>(buffer) + size) {
+  // Ensure that the buffer has enough space for the chunk data and CRC.
+  // Do not use the chunk data length in pointer arithmetic until it is known to
+  // be valid.
+  size_t data_length = chunk->get_data_length();
+  if (buffer_bytes_remaining - sizeof(ChunkHeader) < data_length) {
+    return false;
+  }
+  if (buffer_bytes_remaining - sizeof(ChunkHeader) - data_length <
+      kChunkCrcSize) {
     return false;
   }
 
@@ -356,8 +381,7 @@ const APNGImageGenerator::ChunkHeader* APNGImageGenerator::GetNextChunk(
 
 std::pair<std::optional<std::vector<uint8_t>>, const void*>
 APNGImageGenerator::ExtractHeader(const void* buffer_p, size_t buffer_size) {
-  std::vector<uint8_t> result(sizeof(kPngSignature));
-  memcpy(result.data(), kPngSignature, sizeof(kPngSignature));
+  std::vector<uint8_t> result(kPngSignature.begin(), kPngSignature.end());
 
   const ChunkHeader* chunk = reinterpret_cast<const ChunkHeader*>(
       static_cast<const uint8_t*>(buffer_p) + sizeof(kPngSignature));
@@ -413,6 +437,9 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
   // The presence of an fcTL chunk is optional for the first (default) image
   // of a PNG. Both cases are handled in APNGImage.
   if (chunk->get_type() == kFrameControlChunkType) {
+    if (chunk->get_data_length() < sizeof(FrameControlChunkData)) {
+      return std::make_pair(std::nullopt, nullptr);
+    }
     control_data = CastChunkData<FrameControlChunkData>(chunk);
 
     ImageGenerator::FrameInfo frame_info;
@@ -474,7 +501,10 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
       // sequence number prepended to its data, so subtract that space from
       // the buffer.
       if (chunk->get_type() == kFrameDataChunkType) {
-        chunk_space -= 4;
+        if (chunk->get_data_length() < kFrameDataSequenceNumberSize) {
+          return std::make_pair(std::nullopt, nullptr);
+        }
+        chunk_space -= kFrameDataSequenceNumberSize;
       }
     }
 
@@ -510,17 +540,21 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
     // Copy the image data/ancillary chunks.
     for (const ChunkHeader* c : image_chunks) {
       if (c->get_type() == kFrameDataChunkType) {
+        FML_DCHECK(c->get_data_length() >= kFrameDataSequenceNumberSize);
+
         // Write a new IDAT chunk header.
         ChunkHeader* write_header =
             reinterpret_cast<ChunkHeader*>(write_cursor);
-        write_header->set_data_length(c->get_data_length() - 4);
+        write_header->set_data_length(c->get_data_length() -
+                                      kFrameDataSequenceNumberSize);
         write_header->set_type(kImageDataChunkType);
         write_cursor += sizeof(ChunkHeader);
 
         // Copy all of the data except for the 4 byte sequence number at the
         // beginning of the fdAT data.
         memcpy(write_cursor,
-               reinterpret_cast<const uint8_t*>(c) + sizeof(ChunkHeader) + 4,
+               reinterpret_cast<const uint8_t*>(c) + sizeof(ChunkHeader) +
+                   kFrameDataSequenceNumberSize,
                write_header->get_data_length());
         write_cursor += write_header->get_data_length();
 
@@ -628,8 +662,13 @@ void APNGImageGenerator::ChunkHeader::UpdateChunkCrc32() {
 uint32_t APNGImageGenerator::ChunkHeader::ComputeChunkCrc32() {
   // Exclude the length field at the beginning of the chunk header.
   size_t length = sizeof(ChunkHeader) - 4 + get_data_length();
-  uint8_t* chunk_data_p = reinterpret_cast<uint8_t*>(this) + 4;
+  const uint8_t* chunk_data = reinterpret_cast<const uint8_t*>(this) + 4;
+  return ComputeCrc32(chunk_data, length);
+}
+
+uint32_t APNGImageGenerator::ComputeCrc32(const uint8_t* data, size_t length) {
   uint32_t crc = 0;
+  const uint8_t* data_p = data;
 
   // zlib's crc32 can only take 16 bits at a time for the length, but PNG
   // supports a 32 bit chunk length, so looping is necessary here.
@@ -641,9 +680,9 @@ uint32_t APNGImageGenerator::ChunkHeader::ComputeChunkCrc32() {
       length16 = std::numeric_limits<uint16_t>::max();
     }
 
-    crc = crc32(crc, chunk_data_p, length16);
+    crc = crc32(crc, data_p, length16);
     length -= length16;
-    chunk_data_p += length16;
+    data_p += length16;
   } while (length > 0);
 
   return crc;

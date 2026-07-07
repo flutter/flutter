@@ -22,7 +22,7 @@ enum Branch { beta, stable, master, main }
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
-class PreparePackageException implements Exception {
+final class PreparePackageException implements Exception {
   PreparePackageException(this.message, [this.result]);
 
   final String message;
@@ -31,8 +31,7 @@ class PreparePackageException implements Exception {
 
   @override
   String toString() {
-    var output = runtimeType.toString();
-    output += ': $message';
+    var output = '$PreparePackageException: $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';

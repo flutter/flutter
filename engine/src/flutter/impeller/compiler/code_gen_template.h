@@ -39,6 +39,13 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // The generator used to prepare these bindings. Metal generators may be used
   // by GLES backends but GLES generators are unsuitable for the metal backend.
   static constexpr std::string_view kGeneratorName = "{{get_generator_name()}}";
+{% if shader_stage == "compute" %}
+  // The workgroup (threadgroup) size declared by the shader. A dimension of 0
+  // is sized by a specialization constant and resolved by the backend at
+  // dispatch (for example, to the device maximum).
+  static constexpr std::array<uint32_t, 3> kWorkgroupSize = {
+      {{workgroup_size_x}}u, {{workgroup_size_y}}u, {{workgroup_size_z}}u};
+{% endif %}
 {% if length(struct_definitions) > 0 %}
   // ===========================================================================
   // Struct Definitions ========================================================
@@ -233,12 +240,13 @@ ShaderMetadata Shader::kMetadata{{camel_case(buffer.name)}} = {
   std::vector<ShaderStructMemberMetadata> {
     {% for member in buffer.type.members %}
       ShaderStructMemberMetadata {
-        {{ member.base_type }},      // type
-        "{{ member.name }}",         // name
-        {{ member.offset }},         // offset
-        {{ member.size }},           // size
-        {{ member.byte_length }},    // byte_length
-        {{ member.array_elements }}, // array_elements
+        /*type=*/{{ member.base_type }},
+        /*name=*/"{{ member.name }}",
+        /*offset=*/{{ member.offset }},
+        /*size=*/{{ member.size }},
+        /*byte_length=*/{{ member.byte_length }},
+        /*array_elements=*/{{ member.array_elements }},
+        /*float_type=*/{{ member.float_type }},
       },
     {% endfor %}
   } // members

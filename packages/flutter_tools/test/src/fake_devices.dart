@@ -112,7 +112,7 @@ class FakeDevice extends Device {
   FakeDevice(
     this.name,
     String id, {
-    bool ephemeral = true,
+    super.ephemeral = true,
     bool isSupported = true,
     bool isSupportedForProject = true,
     this.isConnected = true,
@@ -125,13 +125,7 @@ class FakeDevice extends Device {
        _isSupportedForProject = isSupportedForProject,
        _launchResult = launchResult ?? LaunchResult.succeeded(),
        _supportsFlavors = supportsFlavors,
-       super(
-         id,
-         platformType: type,
-         category: Category.mobile,
-         ephemeral: ephemeral,
-         logger: FakeLogger(),
-       );
+       super(id, platformType: type, category: Category.mobile, logger: FakeLogger());
 
   final bool _isSupported;
   final bool _isSupportedForProject;

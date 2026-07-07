@@ -137,32 +137,51 @@ constexpr GLenum ToBlendOperation(BlendOperation op) {
   FML_UNREACHABLE();
 }
 
-constexpr std::optional<GLenum> ToVertexAttribType(ShaderType type) {
+/// Returns the GL scalar type for a vertex attribute, or `std::nullopt` when
+/// the format cannot be consumed as a vertex attribute on this backend. The
+/// component count is supplied separately to `glVertexAttribPointer`, so only
+/// the scalar kind matters here. Half-float and 32-bit integer attributes are
+/// not available on the GLES 2.0 floor.
+constexpr std::optional<GLenum> ToVertexAttribType(VertexAttributeFormat type) {
   switch (type) {
-    case ShaderType::kSignedByte:
+    case VertexAttributeFormat::kSInt8:
+    case VertexAttributeFormat::kSInt8x2:
+    case VertexAttributeFormat::kSInt8x3:
+    case VertexAttributeFormat::kSInt8x4:
       return GL_BYTE;
-    case ShaderType::kUnsignedByte:
+    case VertexAttributeFormat::kUInt8:
+    case VertexAttributeFormat::kUInt8x2:
+    case VertexAttributeFormat::kUInt8x3:
+    case VertexAttributeFormat::kUInt8x4:
       return GL_UNSIGNED_BYTE;
-    case ShaderType::kSignedShort:
+    case VertexAttributeFormat::kSInt16:
+    case VertexAttributeFormat::kSInt16x2:
+    case VertexAttributeFormat::kSInt16x3:
+    case VertexAttributeFormat::kSInt16x4:
       return GL_SHORT;
-    case ShaderType::kUnsignedShort:
+    case VertexAttributeFormat::kUInt16:
+    case VertexAttributeFormat::kUInt16x2:
+    case VertexAttributeFormat::kUInt16x3:
+    case VertexAttributeFormat::kUInt16x4:
       return GL_UNSIGNED_SHORT;
-    case ShaderType::kFloat:
+    case VertexAttributeFormat::kFloat32:
+    case VertexAttributeFormat::kFloat32x2:
+    case VertexAttributeFormat::kFloat32x3:
+    case VertexAttributeFormat::kFloat32x4:
       return GL_FLOAT;
-    case ShaderType::kUnknown:
-    case ShaderType::kVoid:
-    case ShaderType::kBoolean:
-    case ShaderType::kSignedInt:
-    case ShaderType::kUnsignedInt:
-    case ShaderType::kSignedInt64:
-    case ShaderType::kUnsignedInt64:
-    case ShaderType::kAtomicCounter:
-    case ShaderType::kHalfFloat:
-    case ShaderType::kDouble:
-    case ShaderType::kStruct:
-    case ShaderType::kImage:
-    case ShaderType::kSampledImage:
-    case ShaderType::kSampler:
+    case VertexAttributeFormat::kInvalid:
+    case VertexAttributeFormat::kFloat16:
+    case VertexAttributeFormat::kFloat16x2:
+    case VertexAttributeFormat::kFloat16x3:
+    case VertexAttributeFormat::kFloat16x4:
+    case VertexAttributeFormat::kSInt32:
+    case VertexAttributeFormat::kSInt32x2:
+    case VertexAttributeFormat::kSInt32x3:
+    case VertexAttributeFormat::kSInt32x4:
+    case VertexAttributeFormat::kUInt32:
+    case VertexAttributeFormat::kUInt32x2:
+    case VertexAttributeFormat::kUInt32x3:
+    case VertexAttributeFormat::kUInt32x4:
       return std::nullopt;
   }
   FML_UNREACHABLE();
@@ -195,6 +214,18 @@ constexpr std::optional<GLenum> ToTextureTarget(TextureType type) {
   }
   FML_UNREACHABLE();
 }
+
+struct PixelFormatGLES {
+  GLint internal_format = 0;
+  GLenum external_format = GL_NONE;
+  GLenum type = GL_NONE;
+  // When true, the data must be uploaded with glCompressedTexImage2D and only
+  // `internal_format` is meaningful.
+  bool is_compressed = false;
+};
+
+std::optional<PixelFormatGLES> ToPixelFormatGLES(PixelFormat format,
+                                                 bool supports_bgra);
 
 std::string DebugToFramebufferError(int status);
 

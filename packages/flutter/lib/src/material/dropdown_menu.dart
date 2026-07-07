@@ -173,7 +173,7 @@ enum DropdownMenuCloseBehavior {
 ///   The [DropdownMenu] uses a [TextField] as the "anchor".
 /// * [TextField], which is a text input widget that uses an [InputDecoration].
 /// * [DropdownMenuEntry], which is used to build the [MenuItemButton] in the [DropdownMenu] list.
-class DropdownMenu<T extends Object> extends StatefulWidget {
+class DropdownMenu<T> extends StatefulWidget {
   /// Creates a const [DropdownMenu].
   ///
   /// The leading and trailing icons in the text field can be customized by using
@@ -224,6 +224,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
     this.cursorHeight,
     this.restorationId,
     this.menuController,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
@@ -686,11 +687,14 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// other widgets.
   final MenuController? menuController;
 
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
 
-class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
+class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   static const Map<ShortcutActivator, Intent> _editableShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
       forward: false,
@@ -1307,6 +1311,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               inputFormatters: widget.inputFormatters,
               decoration: textFieldDecoration,
               restorationId: widget.restorationId,
+              scrollPadding: widget.scrollPadding,
             ),
           ),
         );

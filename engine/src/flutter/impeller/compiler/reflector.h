@@ -39,6 +39,14 @@ struct StructMember {
   size_t byte_length = 0u;
   std::optional<size_t> array_elements = std::nullopt;
   size_t element_padding = 0u;
+  std::optional<std::string> float_type = std::nullopt;
+  // Component count of a single column. For non-matrix types this is the
+  // vector length; for matrices this is the row count. Combined with
+  // `columns`, this disambiguates types that share the same `size`, e.g.
+  // vec4 and mat2.
+  size_t vec_size = 0u;
+  // The number of columns. 1 for scalars and vectors; N for an NxN matrix.
+  size_t columns = 0u;
   UnderlyingType underlying_type = UnderlyingType::kOther;
 
   static std::string BaseTypeToString(spirv_cross::SPIRType::BaseType type) {
@@ -121,6 +129,28 @@ struct StructMember {
     FML_UNREACHABLE();
   }
 
+  /// @brief Constructs a new StructMember.
+  ///
+  /// @param p_type The string type name (e.g. "float", "Point", "Matrix").
+  /// @param p_base_type The SPIR-V base type.
+  /// @param p_name The name of the struct member.
+  /// @param p_offset The offset in bytes from the start of the parent struct.
+  /// @param p_size The size in bytes of a single element of this type
+  /// (ignoring padding/stride).
+  /// @param p_byte_length The total size in bytes this member occupies in
+  /// the struct, including all array elements and padding.
+  /// @param p_array_elements The number of array elements. For matrices
+  /// treated as arrays of columns, this includes the column count.
+  /// @param p_element_padding The padding in bytes after each array
+  /// element to satisfy alignment requirements (stride - size).
+  /// @param p_float_type The float type of the member.
+  /// @param p_vec_size The component count of a single column (vector
+  /// length for non-matrix types, row count for matrices). 0 if not
+  /// applicable.
+  /// @param p_columns The number of columns. 1 for scalars and vectors;
+  /// N for an NxN matrix. 0 if not applicable.
+  /// @param p_underlying_type The underlying type category, used for
+  /// runtime validation.
   StructMember(std::string p_type,
                spirv_cross::SPIRType::BaseType p_base_type,
                std::string p_name,
@@ -129,6 +159,9 @@ struct StructMember {
                size_t p_byte_length,
                std::optional<size_t> p_array_elements,
                size_t p_element_padding,
+               std::optional<std::string> p_float_type = std::nullopt,
+               size_t p_vec_size = 0u,
+               size_t p_columns = 0u,
                UnderlyingType p_underlying_type = UnderlyingType::kOther)
       : type(std::move(p_type)),
         base_type(p_base_type),
@@ -138,6 +171,9 @@ struct StructMember {
         byte_length(p_byte_length),
         array_elements(p_array_elements),
         element_padding(p_element_padding),
+        float_type(std::move(p_float_type)),
+        vec_size(p_vec_size),
+        columns(p_columns),
         underlying_type(DetermineUnderlyingType(p_base_type)) {}
 };
 

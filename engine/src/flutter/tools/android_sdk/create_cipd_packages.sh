@@ -108,7 +108,7 @@ for platform in "${platforms[@]}"; do
   export REPO_OS_OVERRIDE=$platform
 
   # Download all the packages with sdkmanager.
-  for package in $(cat $package_file_name); do
+  for package in $(< $package_file_name); do
     echo $package
     split=(${package//:/ })
     IFS=',' read -ra ADDR <<< "${split[0]}"
@@ -142,7 +142,7 @@ for platform in "${platforms[@]}"; do
     fi
 
     echo "Uploading $upload_dir as $cipd_name to CIPD"
-    cipd create -in $upload_dir -name "flutter/android/sdk/all/$cipd_name" -install-mode copy -tag version:$first_argument
+    cipd create -in $upload_dir -name "flutter/android/sdk/all/$cipd_name" -install-mode copy -tag version:$first_argument -ref $first_argument
   done
 
   rm -rf $sdk_root

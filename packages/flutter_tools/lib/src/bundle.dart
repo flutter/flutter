@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'base/config.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
@@ -25,13 +26,17 @@ String getDefaultApplicationKernelPath({required bool trackWidgetCreation}) {
 String getDefaultCachedKernelPath({
   required bool trackWidgetCreation,
   required List<String> dartDefines,
+  required Config config,
+  required FileSystem fileSystem,
+  TargetModel? targetModel,
   List<String> extraFrontEndOptions = const <String>[],
-  FileSystem? fileSystem,
-  Config? config,
 }) {
   final buffer = StringBuffer();
   final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()
     ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
+  if (targetModel != null) {
+    buffer.write('$targetModel;');
+  }
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
   var buildPrefix = '';
@@ -41,10 +46,7 @@ String getDefaultCachedKernelPath({
     buildPrefix = '${hex.encode(digest.bytes)}.';
   }
   return getKernelPathForTransformerOptions(
-    (fileSystem ?? globals.fs).path.join(
-      getBuildDirectory(config ?? globals.config, fileSystem ?? globals.fs),
-      '${buildPrefix}cache.dill',
-    ),
+    fileSystem.path.join(getBuildDirectory(config, fileSystem), '${buildPrefix}cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
@@ -55,5 +57,3 @@ String getKernelPathForTransformerOptions(String path, {required bool trackWidge
   }
   return path;
 }
-
-const defaultPrivateKeyPath = 'privatekey.der';

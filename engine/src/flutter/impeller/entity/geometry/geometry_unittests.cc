@@ -9,9 +9,12 @@
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/renderer/testing/mocks.h"
@@ -72,10 +75,48 @@ namespace testing {
 
 TEST(EntityGeometryTest, RectGeometryCoversArea) {
   auto geometry = Geometry::MakeRect(Rect::MakeLTRB(0, 0, 100, 100));
-  ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(0, 0, 100, 100)));
-  ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
-  ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(1, 1, 100, 100)));
-  ASSERT_TRUE(geometry->CoversArea({}, Rect()));
+  ASSERT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(0, 0, 100, 100)));
+  ASSERT_FALSE(geometry->CoversArea({}, IRect::MakeLTRB(-1, 0, 100, 100)));
+  ASSERT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(1, 1, 100, 100)));
+  ASSERT_TRUE(geometry->CoversArea({}, IRect()));
+}
+
+TEST(EntityGeometryTest, UberSDFGeometryPaddingIsAdjustedByInverseMaxBasis) {
+  UberSDFGeometry geometry(UberSDFParameters::MakeRect(
+      Color::Red(), Rect::MakeLTRB(0, 0, 100, 100), /*stroke=*/std::nullopt));
+
+  // At scale 1, padding should be 1.
+  {
+    auto coverage = geometry.GetCoverage(Matrix());
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-1, -1, 101, 101));
+    }
+  }
+
+  // At scale 2, padding should be 0.5 in local coordinates, which becomes 1.0
+  // in screen coordinates.
+  {
+    auto matrix = Matrix::MakeScale({2.0, 2.0, 1.0});
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-0.5, -0.5, 100.5, 100.5)
+                                      .TransformAndClipBounds(matrix));
+    }
+  }
+
+  // At scale 0.5, padding should be 2.0 in local coordinates, which becomes 1.0
+  // in screen coordinates.
+  {
+    auto matrix = Matrix::MakeScale({0.5, 0.5, 1.0});
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-2.0, -2.0, 102.0, 102.0)
+                                      .TransformAndClipBounds(matrix));
+    }
+  }
 }
 
 TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
@@ -84,10 +125,10 @@ TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
                   .TakePath();
   auto geometry = Geometry::MakeFillPath(
       path, /* inner rect */ Rect::MakeLTRB(0, 0, 100, 100));
-  ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(0, 0, 100, 100)));
-  ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
-  ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(1, 1, 100, 100)));
-  ASSERT_TRUE(geometry->CoversArea({}, Rect()));
+  ASSERT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(0, 0, 100, 100)));
+  ASSERT_FALSE(geometry->CoversArea({}, IRect::MakeLTRB(-1, 0, 100, 100)));
+  ASSERT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(1, 1, 100, 100)));
+  ASSERT_TRUE(geometry->CoversArea({}, IRect()));
 }
 
 TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
@@ -95,10 +136,10 @@ TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
                   .AddRect(Rect::MakeLTRB(0, 0, 100, 100))
                   .TakePath();
   auto geometry = Geometry::MakeFillPath(path);
-  ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(0, 0, 100, 100)));
-  ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
-  ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(1, 1, 100, 100)));
-  ASSERT_FALSE(geometry->CoversArea({}, Rect()));
+  ASSERT_FALSE(geometry->CoversArea({}, IRect::MakeLTRB(0, 0, 100, 100)));
+  ASSERT_FALSE(geometry->CoversArea({}, IRect::MakeLTRB(-1, 0, 100, 100)));
+  ASSERT_FALSE(geometry->CoversArea({}, IRect::MakeLTRB(1, 1, 100, 100)));
+  ASSERT_FALSE(geometry->CoversArea({}, IRect()));
 }
 
 TEST(EntityGeometryTest, FillArcGeometryCoverage) {
@@ -480,18 +521,18 @@ TEST(EntityGeometryTest, FillRoundRectGeometryCoversArea) {
   FillRoundRectGeometry geom(round_rect);
 
   // Tall middle rect should barely be covered.
-  EXPECT_TRUE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 196, 200)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(102, 100, 196, 200)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 99, 196, 200)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 197, 200)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 196, 201)));
+  EXPECT_TRUE(geom.CoversArea({}, IRect::MakeLTRB(103, 100, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(102, 100, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(103, 99, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(103, 100, 197, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(103, 100, 196, 201)));
 
   // Wide middle rect should barely be covered.
-  EXPECT_TRUE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 200, 186)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(99, 112, 200, 186)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 111, 200, 186)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 201, 186)));
-  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 200, 187)));
+  EXPECT_TRUE(geom.CoversArea({}, IRect::MakeLTRB(100, 112, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(99, 112, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(100, 111, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(100, 112, 201, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, IRect::MakeLTRB(100, 112, 200, 187)));
 }
 
 TEST(EntityGeometryTest, LineGeometryCoverage) {
@@ -499,38 +540,38 @@ TEST(EntityGeometryTest, LineGeometryCoverage) {
     auto geometry = Geometry::MakeLine(  //
         {10, 10}, {20, 10}, {.width = 2, .cap = Cap::kButt});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(10, 9, 20, 11));
-    EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(10, 9, 20, 11)));
+    EXPECT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(10, 9, 20, 11)));
   }
 
   {
     auto geometry = Geometry::MakeLine(  //
         {10, 10}, {20, 10}, {.width = 2, .cap = Cap::kSquare});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(9, 9, 21, 11));
-    EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(9, 9, 21, 11)));
+    EXPECT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(9, 9, 21, 11)));
   }
 
   {
     auto geometry = Geometry::MakeLine(  //
         {10, 10}, {10, 20}, {.width = 2, .cap = Cap::kButt});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(9, 10, 11, 20));
-    EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(9, 10, 11, 20)));
+    EXPECT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(9, 10, 11, 20)));
   }
 
   {
     auto geometry = Geometry::MakeLine(  //
         {10, 10}, {10, 20}, {.width = 2, .cap = Cap::kSquare});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(9, 9, 11, 21));
-    EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(9, 9, 11, 21)));
+    EXPECT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(9, 9, 11, 21)));
   }
 }
 
 TEST(EntityGeometryTest, RoundRectGeometryCoversArea) {
   auto geometry =
       Geometry::MakeRoundRect(Rect::MakeLTRB(0, 0, 100, 100), Size(20, 20));
-  EXPECT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(15, 15, 85, 85)));
-  EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(20, 20, 80, 80)));
-  EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(30, 1, 70, 99)));
-  EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(1, 30, 99, 70)));
+  EXPECT_FALSE(geometry->CoversArea({}, IRect::MakeLTRB(15, 15, 85, 85)));
+  EXPECT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(20, 20, 80, 80)));
+  EXPECT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(30, 1, 70, 99)));
+  EXPECT_TRUE(geometry->CoversArea({}, IRect::MakeLTRB(1, 30, 99, 70)));
 }
 
 TEST(EntityGeometryTest, GeometryResultHasReasonableDefaults) {
@@ -769,7 +810,7 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesBevelJoin) {
       Point(30, 25),
       Point(30, 15),
 
-      // The points for the second segment (120, 20) -> (130, 20)
+      // The points for the second segment (30, 20) -> (30, 30)
       Point(25, 20),
       Point(35, 20),
       Point(25, 30),
@@ -803,11 +844,58 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesBevelJoin) {
       Point(30, 25),
       Point(30, 15),
 
-      // The points for the second segment (120, 20) -> (130, 20)
+      // The points for the second segment (30, 20) -> (30, 10)
       Point(35, 20),
       Point(25, 20),
       Point(35, 10),
       Point(25, 10),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TwoLineSegmentsInDifferentContoursAreNotJoined) {
+  flutter::DlPathBuilder path_builder;
+  // First contour with a single line.
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  // Starts a new contour with a MoveTo command. The start of the new contour is
+  // specified to be the same as the end of the previous contour.
+  path_builder.MoveTo({30, 20});
+  // Add a line in the second contour.
+  path_builder.LineTo({30, 30});
+  flutter::DlPath path = path_builder.TakePath();
+
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kButt,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+
+      // The glue points that allow us to "pick up the pen" between segments.
+      // This prevents segments in different contours from being unintentionally
+      // joined with a bevel.
+      Point(30, 20),
+      Point(30, 20),
+      Point(30, 20),
+      Point(30, 20),
+
+      // The points for the second segment (30, 20) -> (30, 30)
+      Point(25, 20),
+      Point(35, 20),
+      Point(25, 30),
+      Point(35, 30),
   };
 
   EXPECT_EQ(points, expected);

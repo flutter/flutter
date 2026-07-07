@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -12,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
@@ -140,8 +142,28 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // This completes a view resize if one is pending.
   virtual void OnFramePresented();
 
+  // Set a callback that is invoked on the platform thread after the first
+  // frame is presented for this view. The callback is called exactly once
+  // and then cleared. This can be used to defer showing the host window
+  // until the first frame is rendered, avoiding a blank window flash.
+  void SetFirstFrameCallback(fml::closure callback);
+
   // |WindowBindingHandlerDelegate|
   bool OnWindowSizeChanged(size_t width, size_t height) override;
+
+  // Enables or disables content-based sizing for this view.
+  //
+  // When enabled, the view ignores externally-driven resizes and instead
+  // sizes itself to the rendered content after each frame. When disabled,
+  // the view follows the normal platform-driven resize flow.
+  //
+  // This may be called on any thread.
+  void SetSizedToContent(bool sized_to_content);
+
+  // Returns true if the view is currently sized to its rendered content.
+  //
+  // This may be called from the platform or raster threads.
+  bool IsSizedToContent() const;
 
   // |WindowBindingHandlerDelegate|
   void OnWindowRepaint() override;
@@ -151,6 +173,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
+                     uint64_t buttons,
+                     uint32_t rotation,
+                     uint32_t pressure,
                      int modifiers_state) override;
 
   // |WindowBindingHandlerDelegate|
@@ -158,14 +183,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
-                     FlutterPointerMouseButtons button) override;
+                     uint64_t buttons,
+                     uint32_t rotation,
+                     uint32_t pressure) override;
 
   // |WindowBindingHandlerDelegate|
   void OnPointerUp(double x,
                    double y,
                    FlutterPointerDeviceKind device_kind,
                    int32_t device_id,
-                   FlutterPointerMouseButtons button) override;
+                   uint64_t buttons) override;
 
   // |WindowBindingHandlerDelegate|
   void OnPointerLeave(double x,
@@ -300,6 +327,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
     // The y position where the last pan/zoom started.
     double pan_zoom_start_y = 0;
+
+    // The clockwise rotation of the current pointer, from 0-359.
+    uint32_t rotation = 0;
+
+    // The pressure of the current pointer from 0-1024.
+    uint32_t pressure = 0;
   };
 
   // States a resize event can be in.
@@ -424,15 +457,13 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   void SendPointerEventWithData(const FlutterPointerEvent& event_data,
                                 PointerState* state);
 
+  // Fires |first_frame_callback_| on the platform thread if set, then clears
+  // it. Called from the raster thread after a frame is presented.
+  void FireFirstFrameCallbackIfSet();
+
   // If true, rendering to the window should synchronize with the vsync
   // to prevent screen tearing.
   bool NeedsVsync() const;
-
-  // If true, the view is sized to its content via a sizing delegate.
-  // If false, the view is sized by its parent HWND or by the user.
-  //
-  // This method can be called from the platform or raster threads.
-  bool IsSizedToContent() const;
 
   // Gets the constraints for this view.
   BoxConstraints GetConstraints() const;
@@ -481,13 +512,20 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // If `true`, the view is sized to its content via a sizing delegate.
   // If `false`, the view is sized by its parent HWND.
-  bool is_sized_to_content_ = false;
+  std::atomic<bool> is_sized_to_content_{false};
 
   // The constraints for this view.
   BoxConstraints box_constraints_;
 
   // Optional sizing delegate for views that are sized to content.
   FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
+
+  // Mutex protecting |first_frame_callback_|.
+  std::mutex first_frame_callback_mutex_;
+
+  // Callback invoked on the platform thread after the first frame is
+  // presented. Set via |SetFirstFrameCallback| and cleared after invocation.
+  fml::closure first_frame_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsView);
 };

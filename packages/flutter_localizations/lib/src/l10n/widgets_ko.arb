@@ -12,7 +12,7 @@
   "shareButtonLabel": "공유",
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "검색 결과 찾음",
+  "noResultsFound": "검색 결과 없음",
+  "radioButtonUnselectedLabel": "선택되지 않음"
 }

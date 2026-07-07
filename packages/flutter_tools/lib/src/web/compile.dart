@@ -38,6 +38,9 @@ const kStaticAssetsUrl = 'staticAssetsUrl';
 /// The caching strategy to use for service worker generation.
 const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
+/// Prefix for web-define variables stored in [Environment.defines].
+const kWebDefinePrefix = 'webDefine:';
+
 class WebBuilder {
   WebBuilder({
     required Logger logger,
@@ -60,6 +63,8 @@ class WebBuilder {
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
 
+  /// Builds the web application using the specified compiler configurations
+  /// and generates the necessary web assets in the output directory.
   Future<void> buildWeb(
     FlutterProject flutterProject,
     String target,
@@ -69,6 +74,7 @@ class WebBuilder {
     String? baseHref,
     String? staticAssetsUrl,
     String? outputDirectoryPath,
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (serviceWorkerStrategy != null) {
       _logger.printWarning(
@@ -114,6 +120,7 @@ class WebBuilder {
             kServiceWorkerStrategy:
                 serviceWorkerStrategy?.cliName ?? ServiceWorkerStrategy.offlineFirst.cliName,
             ...buildInfo.toBuildSystemEnvironment(),
+            for (final MapEntry(:key, :value) in webDefines.entries) '$kWebDefinePrefix$key': value,
           },
           packageConfigPath: buildInfo.packageConfigPath,
           artifacts: globals.artifacts!,
@@ -136,7 +143,9 @@ class WebBuilder {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
           _logger.printError(
             'Target ${measurement.target} failed: ${measurement.exception}',
-            stackTrace: measurement.fatal ? measurement.stackTrace : null,
+            stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
+                ? measurement.stackTrace
+                : null,
           );
         }
         throwToolExit('Failed to compile application for the Web.');

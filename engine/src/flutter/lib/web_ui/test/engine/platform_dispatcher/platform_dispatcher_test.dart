@@ -59,20 +59,6 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.displays.length, greaterThan(0));
     });
 
-    test('high contrast in accessibilityFeatures has the correct value', () {
-      final mockHighContrast = MockHighContrastSupport();
-      HighContrastSupport.instance = mockHighContrast;
-
-      final dispatcher = EnginePlatformDispatcher();
-
-      expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
-      mockHighContrast.isEnabled = false;
-      mockHighContrast.invokeListeners(mockHighContrast.isEnabled);
-      expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
-
-      dispatcher.dispose();
-    });
-
     test('AppLifecycleState transitions through all states', () {
       final states = <ui.AppLifecycleState>[];
       void listener(ui.AppLifecycleState state) {
@@ -442,6 +428,32 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
     });
 
+    test('does not detect override when initialized with browser zoom', () {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+
+      // Simulate a browser zoom of 1.25x (20px / 16px) by forcing a global font-size.
+      style.text = '*{ font-size: 20px !important; }';
+      root.append(style);
+
+      try {
+        // Create a new dispatcher while the zoom is active.
+        final testDispatcher = EnginePlatformDispatcher();
+
+        // It should have textScaleFactor of 1.25.
+        expect(testDispatcher.textScaleFactor, 1.25);
+
+        // It should NOT have a line-height override because we measured the
+        // baseline while the zoom was already active.
+        expect(testDispatcher.lineHeightScaleFactorOverride, null);
+
+        // Clean up the test dispatcher to stop its observer and remove its element.
+        testDispatcher.dispose();
+      } finally {
+        style.remove();
+      }
+    });
+
     test('disposes all its views', () {
       final view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
       final view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
@@ -579,6 +591,90 @@ void testMain() {
       await drawFrameCalled.future;
       expect(beginFrameCalled, true);
       expect(drawFrameCalled.isCompleted, true);
+    });
+
+    group('Media query values', () {
+      late EnginePlatformDispatcher dispatcher;
+
+      setUp(() {
+        dispatcher = EnginePlatformDispatcher();
+      });
+
+      tearDown(() {
+        dispatcher.dispose();
+      });
+
+      test('high contrast in accessibilityFeatures has the correct value', () {
+        const String mediaQuery = MediaQueryManager.FORCED_COLORS;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
+      });
+
+      test('configuration.platformBrightness (dark mode) has the correct value', () {
+        const String mediaQuery = MediaQueryManager.DARK_MODE;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(dispatcher.configuration.platformBrightness, ui.Brightness.light);
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(dispatcher.configuration.platformBrightness, ui.Brightness.dark);
+      });
+
+      test('reduced motion (disable animations) has the correct value', () {
+        const String mediaQuery = MediaQueryManager.REDUCED_MOTION;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isFalse,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isFalse,
+          reason: 'disableAnimations is wrong',
+        );
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isTrue,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isTrue,
+          reason: 'disableAnimations is wrong',
+        );
+      });
     });
 
     group('NavigationTarget', () {
@@ -803,31 +899,6 @@ void testMain() {
       });
     });
   }, skip: ui_web.browser.isFirefox);
-}
-
-class MockHighContrastSupport implements HighContrastSupport {
-  bool isEnabled = true;
-
-  final List<HighContrastListener> _listeners = <HighContrastListener>[];
-
-  @override
-  bool get isHighContrastEnabled => isEnabled;
-
-  void invokeListeners(bool val) {
-    for (final HighContrastListener listener in _listeners) {
-      listener(val);
-    }
-  }
-
-  @override
-  void addListener(HighContrastListener listener) {
-    _listeners.add(listener);
-  }
-
-  @override
-  void removeListener(HighContrastListener listener) {
-    _listeners.remove(listener);
-  }
 }
 
 class MockAppLifecycleState extends AppLifecycleState {

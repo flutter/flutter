@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <thread>
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/common/constants.h"
@@ -13,14 +14,23 @@
 
 #include <gdk/gdkwayland.h>
 
-TEST(FlCompositorSoftwareTest, Render) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+class FlCompositorSoftwareTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    task_runner = fl_task_runner_new(engine);
+    compositor = fl_compositor_software_new(task_runner);
+  }
 
-  g_autoptr(FlCompositorSoftware) compositor =
-      fl_compositor_software_new(task_runner);
+  ~FlCompositorSoftwareTest() {
+    g_clear_object(&compositor);
+    g_clear_object(&task_runner);
+  }
 
+  FlTaskRunner* task_runner = nullptr;
+  FlCompositorSoftware* compositor = nullptr;
+};
+
+TEST_F(FlCompositorSoftwareTest, Render) {
   // Present layer from a thread.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
@@ -40,6 +50,12 @@ TEST(FlCompositorSoftwareTest, Render) {
     fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
   }).join();
 
+  size_t frame_width, frame_height;
+  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor), &frame_width,
+                               &frame_height);
+  EXPECT_EQ(frame_width, width);
+  EXPECT_EQ(frame_height, height);
+
   // Render presented layer.
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -47,19 +63,12 @@ TEST(FlCompositorSoftwareTest, Render) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
 
-TEST(FlCompositorSoftwareTest, Resize) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
-
-  g_autoptr(FlCompositorSoftware) compositor =
-      fl_compositor_software_new(task_runner);
-
+TEST_F(FlCompositorSoftwareTest, Resize) {
   // Present a layer that is the old size.
   constexpr size_t width1 = 90;
   constexpr size_t height1 = 90;
@@ -109,7 +118,7 @@ TEST(FlCompositorSoftwareTest, Resize) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width2, height2, stride2);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 

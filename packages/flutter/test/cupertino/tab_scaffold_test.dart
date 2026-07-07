@@ -7,11 +7,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
-import '../rendering/rendering_tester.dart' show TestCallbackPainter;
-import '../widgets/navigator_utils.dart';
+import '../widgets/widget_inspector_test_utils.dart';
+import 'navigator_utils.dart';
 
 late List<int> selectedTabs;
+
+/// A [CustomPainter] that invokes the [onPaint] callback when it is painted.
+class _TestCallbackPainter extends CustomPainter {
+  const _TestCallbackPainter({required this.onPaint});
+
+  /// The callback that is invoked when the painter paints.
+  final VoidCallback onPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    onPaint();
+  }
+
+  @override
+  bool shouldRepaint(covariant _TestCallbackPainter oldDelegate) => true;
+}
 
 class MockCupertinoTabController extends CupertinoTabController {
   MockCupertinoTabController({required super.initialIndex});
@@ -38,17 +53,18 @@ class MockCupertinoTabController extends CupertinoTabController {
   }
 }
 
+BottomNavigationBarItem tabGenerator(int index) {
+  return BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab ${index + 1}');
+}
+
 void main() {
+  // Must be called before any testWidgets so the service is set before
+  // binding initialization triggers initServiceExtensions.
+  _TabScaffoldWidgetInspectorService.runTests();
+
   setUp(() {
     selectedTabs = <int>[];
   });
-
-  BottomNavigationBarItem tabGenerator(int index) {
-    return BottomNavigationBarItem(
-      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-      label: 'Tab ${index + 1}',
-    );
-  }
 
   testWidgets('Tab switching', (WidgetTester tester) async {
     final tabsPainted = <int>[];
@@ -59,7 +75,7 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -234,7 +250,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -274,7 +290,7 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -297,7 +313,7 @@ void main() {
           controller: controller, // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -634,7 +650,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -656,7 +672,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -691,7 +707,7 @@ void main() {
           controller: oldController,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -711,7 +727,7 @@ void main() {
           tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(10, tabGenerator)),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -822,7 +838,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
                   );
                 },
               ),
@@ -833,7 +849,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted1.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted1.add(index)),
                   );
                 },
               ),
@@ -865,7 +881,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
                   );
                 },
               ),
@@ -895,7 +911,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
                   );
                 },
               ),
@@ -1069,13 +1085,7 @@ void main() {
               maxScaleFactor: 99,
               child: CupertinoTabScaffold(
                 tabBar: CupertinoTabBar(
-                  items: List<BottomNavigationBarItem>.generate(
-                    10,
-                    (int i) => BottomNavigationBarItem(
-                      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                      label: '$i',
-                    ),
-                  ),
+                  items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
                 ),
                 tabBuilder: (BuildContext context, int index) => const Text('content'),
               ),
@@ -1116,13 +1126,7 @@ void main() {
         restorationScopeId: 'app',
         home: CupertinoTabScaffold(
           restorationId: 'scaffold',
-          tabBar: CupertinoTabBar(
-            items: List<BottomNavigationBarItem>.generate(
-              4,
-              (int i) =>
-                  BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
-            ),
-          ),
+          tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(4, tabGenerator)),
           tabBuilder: (BuildContext context, int i) => Text('Content $i'),
         ),
       ),
@@ -1133,7 +1137,7 @@ void main() {
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
 
-    await tester.tap(find.text('Tab 2'));
+    await tester.tap(find.text('Tab 3'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1150,7 +1154,7 @@ void main() {
 
     final TestRestorationData data = await tester.getRestorationData();
 
-    await tester.tap(find.text('Tab 1'));
+    await tester.tap(find.text('Tab 2'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1175,13 +1179,7 @@ void main() {
         home: CupertinoTabScaffold(
           controller: controller,
           restorationId: 'scaffold',
-          tabBar: CupertinoTabBar(
-            items: List<BottomNavigationBarItem>.generate(
-              4,
-              (int i) =>
-                  BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
-            ),
-          ),
+          tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(4, tabGenerator)),
           tabBuilder: (BuildContext context, int i) => Text('Content $i'),
         ),
       );
@@ -1194,7 +1192,7 @@ void main() {
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
 
-    await tester.tap(find.text('Tab 2'));
+    await tester.tap(find.text('Tab 3'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1343,8 +1341,6 @@ void main() {
         expect(find.text('Page 1 of tab 2'), findsOneWidget);
         expect(find.text('Page 2 of tab 2'), findsNothing);
         expect(lastFrameworkHandlesBack, isFalse);
-
-        imageCache.clear();
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
@@ -1365,22 +1361,124 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(CupertinoTabScaffold)), Size.zero);
-    imageCache.clear();
   });
+
+  testWidgets('dark mode background color', (WidgetTester tester) async {
+    const backgroundColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFF123456),
+      darkColor: Color(0xFF654321),
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoTabScaffold(
+          backgroundColor: backgroundColor,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    // The DecoratedBox with the smallest depth is the DecoratedBox of the
+    // CupertinoTabScaffold.
+    var tabDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabScaffold),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color!.value, backgroundColor.color.value);
+
+    // Dark mode
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoTabScaffold(
+          backgroundColor: backgroundColor,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    tabDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabScaffold),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
+  });
+}
+
+class _TabScaffoldWidgetInspectorService extends TestWidgetInspectorService {
+  // These tests need access to protected members of WidgetInspectorService.
+  static void runTests() {
+    final service = _TabScaffoldWidgetInspectorService();
+    final WidgetInspectorService previousInstance = WidgetInspectorService.instance;
+    WidgetInspectorService.instance = service;
+
+    tearDown(() {
+      service.resetAllState();
+      WidgetInspectorService.instance = previousInstance;
+    });
+
+    testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/115228
+      const group = 'test-group';
+      const Key leafKey = ValueKey<String>('ColoredBox');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Tab 1'),
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.search), label: 'Tab 2'),
+              ],
+            ),
+            tabBuilder: (BuildContext context, int index) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return ColoredBox(key: leafKey, color: CupertinoTheme.of(context).primaryColor);
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      final Element leaf = tester.element(find.byKey(leafKey));
+      service.setSelection(leaf, group);
+      final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
+      final String id = service.toId(diagnostic, group)!;
+
+      await service.testExtension(
+        WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+        <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+      );
+    });
+  }
 }
 
 CupertinoTabBar _buildTabBar({int selectedTab = 0}) {
   return CupertinoTabBar(
-    items: <BottomNavigationBarItem>[
-      BottomNavigationBarItem(
-        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        label: 'Tab 1',
-      ),
-      BottomNavigationBarItem(
-        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        label: 'Tab 2',
-      ),
-    ],
+    items: <BottomNavigationBarItem>[tabGenerator(0), tabGenerator(1)],
     currentIndex: selectedTab,
     onTap: (int newTab) => selectedTabs.add(newTab),
   );

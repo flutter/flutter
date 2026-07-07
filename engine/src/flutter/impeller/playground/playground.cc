@@ -20,16 +20,18 @@
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
 #include "flutter/fml/paths.h"
+#include "flutter/testing/test_swiftshader_utils.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
-#include "impeller/playground/backend/vulkan/swiftshader_utilities.h"
 #include "impeller/playground/image/compressed_image.h"
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_impl.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui.h"
 
@@ -47,8 +49,12 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
       return "Metal";
+    case PlaygroundBackend::kMetalSDF:
+      return "MetalSDF";
     case PlaygroundBackend::kOpenGLES:
       return "OpenGLES";
+    case PlaygroundBackend::kOpenGLESSDF:
+      return "OpenGLESSDF";
     case PlaygroundBackend::kVulkan:
       return "Vulkan";
   }
@@ -81,32 +87,96 @@ static void InitializeGLFWOnce() {
   });
 }
 
-Playground::Playground(PlaygroundSwitches switches) : switches_(switches) {
+Playground::Playground(PlaygroundBackend backend,
+                       const PlaygroundSwitches& switches)
+    : backend_(backend), switches_(switches) {
   InitializeGLFWOnce();
-  SetupSwiftshaderOnce(switches_.use_swiftshader);
+  flutter::testing::SetupSwiftshaderOnce(switches_.use_swiftshader);
 }
 
 Playground::~Playground() = default;
 
+void Playground::EnsureContextIsUnique() {
+  FML_CHECK(!context_) << "Must be called before a context is created.";
+  switches_.can_share_context = false;
+}
+
+bool Playground::PlatformSupportsWideGamutTests() const {
+#if __arm64__ && FML_OS_MACOSX
+  return backend_ == PlaygroundBackend::kMetal;
+#else
+  return false;
+#endif
+}
+
+bool Playground::EnsureContextSupportsWideGamut() {
+  FML_CHECK(!context_) << "Must be called before a context is created.";
+  if (!PlatformSupportsWideGamutTests()) {
+    return false;
+  }
+  switches_.enable_wide_gamut = true;
+  return true;
+}
+
+void Playground::EnsureContextSupportsAntialiasLines() {
+  FML_CHECK(!context_) << "Must be called before a context is created.";
+  switches_.flags.antialiased_lines = true;
+}
+
 std::shared_ptr<Context> Playground::GetContext() const {
+  if (!context_) {
+    SetupContext();
+  }
   return context_;
 }
 
 std::shared_ptr<Context> Playground::MakeContext() const {
-  // Playgrounds are already making a context for each test, so we can just
-  // return the `context_`.
+  // This method is used to get a unique context that is not shared with
+  // other playground tests. It requires that the test has called the
+  // |EnsureContextIsUnique| method before it calls this method. We
+  // verify those conditions here and then set up the context.
+  FML_CHECK(!context_) << "MakeContext can only be called once";
+  FML_CHECK(!switches_.can_share_context)
+      << "MakeContext should only be called after EnsureContextIsUnique()";
+  SetupContext();
+
   return context_;
+}
+
+ContentContext& Playground::GetContentContext() const {
+  if (!content_context_) {
+    content_context_ =
+        std::make_unique<ContentContext>(GetContext(), GetTypographerContext());
+    FML_CHECK(content_context_) << "Failed to create ContentContext";
+  }
+  return *content_context_;
+}
+
+std::shared_ptr<TypographerContext> Playground::GetTypographerContext() const {
+  if (!typographer_context_) {
+    typographer_context_ = TypographerContextSkia::Make();
+  }
+  return typographer_context_;
+}
+
+void Playground::SetTypographerContext(
+    std::shared_ptr<TypographerContext> typographer_context) {
+  FML_CHECK(!typographer_context_)
+      << "SetTypographerContext called after it has already been initialized";
+  typographer_context_ = std::move(typographer_context);
 }
 
 bool Playground::SupportsBackend(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
 #if IMPELLER_ENABLE_METAL
       return true;
 #else   // IMPELLER_ENABLE_METAL
       return false;
 #endif  // IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
 #if IMPELLER_ENABLE_OPENGLES
       return true;
 #else   // IMPELLER_ENABLE_OPENGLES
@@ -122,11 +192,18 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
-void Playground::SetupContext(PlaygroundBackend backend,
-                              const PlaygroundSwitches& switches) {
-  FML_CHECK(SupportsBackend(backend));
+std::unique_ptr<PlaygroundImpl>& Playground::GetImpl() const {
+  if (!impl_) {
+    SetupContext();
+  }
+  FML_CHECK(impl_);
+  return impl_;
+}
 
-  impl_ = PlaygroundImpl::Create(backend, switches);
+void Playground::SetupContext() const {
+  FML_CHECK(SupportsBackend(backend_));
+
+  impl_ = PlaygroundImpl::Create(backend_, switches_);
   if (!impl_) {
     FML_LOG(WARNING) << "PlaygroundImpl::Create failed.";
     return;
@@ -148,7 +225,12 @@ bool Playground::IsPlaygroundEnabled() const {
   return switches_.enable_playground;
 }
 
-void Playground::TeardownWindow() {
+void Playground::TearDownContextData() {
+  if (content_context_) {
+    FML_CHECK(context_);
+    [[maybe_unused]] auto result = context_->FlushCommandBuffers();
+    content_context_.reset();
+  }
   if (host_buffer_) {
     host_buffer_.reset();
   }
@@ -186,8 +268,12 @@ ISize Playground::GetWindowSize() const {
   return window_size_;
 }
 
+IRect Playground::GetWindowBounds() const {
+  return IRect::MakeSize(window_size_);
+}
+
 Point Playground::GetContentScale() const {
-  return impl_->GetContentScale();
+  return GetImpl()->GetContentScale();
 }
 
 Scalar Playground::GetSecondsElapsed() const {
@@ -200,6 +286,9 @@ void Playground::SetCursorPosition(Point pos) {
 
 bool Playground::OpenPlaygroundHere(
     const Playground::RenderCallback& render_callback) {
+  std::shared_ptr<Context> context = GetContext();
+  FML_CHECK(context);
+
   if (!switches_.enable_playground) {
     return true;
   }
@@ -219,7 +308,7 @@ bool Playground::OpenPlaygroundHere(
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   io.ConfigWindowsResizeFromEdges = true;
 
-  auto window = reinterpret_cast<GLFWwindow*>(impl_->GetWindowHandle());
+  auto window = reinterpret_cast<GLFWwindow*>(GetImpl()->GetWindowHandle());
   if (!window) {
     return false;
   }
@@ -244,7 +333,7 @@ bool Playground::OpenPlaygroundHere(
   ImGui_ImplGlfw_InitForOther(window, true);
   fml::ScopedCleanupClosure shutdown_imgui([]() { ImGui_ImplGlfw_Shutdown(); });
 
-  ImGui_ImplImpeller_Init(context_);
+  ImGui_ImplImpeller_Init(context);
   fml::ScopedCleanupClosure shutdown_imgui_impeller(
       []() { ImGui_ImplImpeller_Shutdown(); });
 
@@ -266,18 +355,18 @@ bool Playground::OpenPlaygroundHere(
 
     ImGui_ImplGlfw_NewFrame();
 
-    auto surface = impl_->AcquireSurfaceFrame(context_);
+    auto surface = GetImpl()->AcquireSurfaceFrame(context);
     RenderTarget render_target = surface->GetRenderTarget();
 
     ImGui::NewFrame();
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(),
                                  ImGuiDockNodeFlags_PassthruCentralNode);
     bool result = render_callback(render_target);
     ImGui::Render();
 
     // Render ImGui overlay.
     {
-      auto buffer = context_->CreateCommandBuffer();
+      auto buffer = context->CreateCommandBuffer();
       if (!buffer) {
         VALIDATION_LOG << "Could not create command buffer.";
         return false;
@@ -303,8 +392,8 @@ bool Playground::OpenPlaygroundHere(
       pass->SetLabel("ImGui Render Pass");
       if (!host_buffer_) {
         host_buffer_ = HostBuffer::Create(
-            context_->GetResourceAllocator(), context_->GetIdleWaiter(),
-            context_->GetCapabilities()->GetMinimumUniformAlignment());
+            context->GetResourceAllocator(), context->GetIdleWaiter(),
+            context->GetCapabilities()->GetMinimumUniformAlignment());
       }
 
       ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass,
@@ -312,7 +401,7 @@ bool Playground::OpenPlaygroundHere(
 
       pass->EncodeCommands();
 
-      if (!context_->GetCommandQueue()->Submit({buffer}).ok()) {
+      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
         return false;
       }
     }
@@ -447,7 +536,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {
   auto texture = CreateTextureForMapping(
-      context_, OpenAssetAsMapping(fixture_name), enable_mipmapping);
+      GetContext(), OpenAssetAsMapping(fixture_name), enable_mipmapping);
   if (texture == nullptr) {
     return nullptr;
   }
@@ -475,24 +564,25 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
   texture_descriptor.mip_count = 1u;
 
   auto texture =
-      context_->GetResourceAllocator()->CreateTexture(texture_descriptor);
+      GetContext()->GetResourceAllocator()->CreateTexture(texture_descriptor);
   if (!texture) {
     VALIDATION_LOG << "Could not allocate texture cube.";
     return nullptr;
   }
   texture->SetLabel("Texture cube");
 
-  auto cmd_buffer = context_->CreateCommandBuffer();
+  auto cmd_buffer = GetContext()->CreateCommandBuffer();
   auto blit_pass = cmd_buffer->CreateBlitPass();
   for (size_t i = 0; i < fixture_names.size(); i++) {
-    auto device_buffer = context_->GetResourceAllocator()->CreateBufferWithCopy(
-        *images[i].GetAllocation());
+    auto device_buffer =
+        GetContext()->GetResourceAllocator()->CreateBufferWithCopy(
+            *images[i].GetAllocation());
     blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer), texture, {},
                        "", /*mip_level=*/0, /*slice=*/i);
   }
 
   if (!blit_pass->EncodeCommands() ||
-      !context_->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok()) {
+      !GetContext()->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok()) {
     VALIDATION_LOG << "Could not upload texture to device memory.";
     return nullptr;
   }
@@ -510,7 +600,7 @@ bool Playground::ShouldKeepRendering() const {
 
 fml::Status Playground::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
-  return impl_->SetCapabilities(capabilities);
+  return GetImpl()->SetCapabilities(capabilities);
 }
 
 bool Playground::WillRenderSomething() const {
@@ -519,16 +609,20 @@ bool Playground::WillRenderSomething() const {
 
 Playground::GLProcAddressResolver Playground::CreateGLProcAddressResolver()
     const {
-  return impl_->CreateGLProcAddressResolver();
+  return GetImpl()->CreateGLProcAddressResolver();
 }
 
 Playground::VKProcAddressResolver Playground::CreateVKProcAddressResolver()
     const {
-  return impl_->CreateVKProcAddressResolver();
+  return GetImpl()->CreateVKProcAddressResolver();
 }
 
 void Playground::SetGPUDisabled(bool value) const {
-  impl_->SetGPUDisabled(value);
+  GetImpl()->SetGPUDisabled(value);
+}
+
+RuntimeStageBackend Playground::GetRuntimeStageBackend() const {
+  return GetImpl()->GetRuntimeStageBackend();
 }
 
 }  // namespace impeller

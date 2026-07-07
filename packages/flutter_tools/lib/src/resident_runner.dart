@@ -9,7 +9,6 @@ import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
-import 'artifacts.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
@@ -22,6 +21,7 @@ import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/tools/shader_compiler.dart';
@@ -44,35 +44,11 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     required this.buildInfo,
-    TargetModel targetModel = TargetModel.flutter,
-    this.targetPlatform,
-    ResidentCompiler? generator,
-    this.userIdentifier,
+    required this.targetPlatform,
+    required this.generator,
     required this.developmentShaderCompiler,
-  }) : generator =
-           generator ??
-           ResidentCompiler(
-             globals.artifacts!.getArtifactPath(
-               Artifact.flutterPatchedSdkPath,
-               platform: targetPlatform,
-               mode: buildInfo.mode,
-             ),
-             buildMode: buildInfo.mode,
-             trackWidgetCreation: buildInfo.trackWidgetCreation,
-             fileSystemRoots: buildInfo.fileSystemRoots,
-             fileSystemScheme: buildInfo.fileSystemScheme,
-             targetModel: targetModel,
-             dartDefines: buildInfo.dartDefines,
-             packagesPath: buildInfo.packageConfigPath,
-             frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-             extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-             artifacts: globals.artifacts!,
-             processManager: globals.processManager,
-             logger: globals.logger,
-             platform: globals.platform,
-             fileSystem: globals.fs,
-             shutdownHooks: globals.shutdownHooks,
-           );
+    this.userIdentifier,
+  });
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
@@ -80,14 +56,10 @@ class FlutterDevice {
     required String? target,
     required BuildInfo buildInfo,
     required Platform platform,
-    TargetModel targetModel = TargetModel.flutter,
-    List<String>? experimentalFlags,
     String? userIdentifier,
+    TargetModel? targetModelOverride,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    if (device.platformType == PlatformType.fuchsia) {
-      targetModel = TargetModel.flutterRunner;
-    }
     final shaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
         artifacts: globals.artifacts!,
@@ -98,104 +70,21 @@ class FlutterDevice {
       fileSystem: globals.fs,
     );
 
-    final ResidentCompiler generator;
-
-    // For both web and non-web platforms we initialize dill to/from
-    // a shared location for faster bootstrapping. If the compiler fails
-    // due to a kernel target or version mismatch, no error is reported
-    // and the compiler starts up as normal. Unexpected errors will print
-    // a warning message and dump some debug information which can be
-    // used to file a bug, but the compiler will still start up correctly.
-    if (targetPlatform == TargetPlatform.web_javascript) {
-      // TODO(zanderso): consistently provide these flags across platforms.
-      const platformDillName = 'ddc_outline.dill';
-
-      final String platformDillPath = globals.fs.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
-        platformDillName,
-      );
-      final extraFrontEndOptions = <String>[
-        ...buildInfo.extraFrontEndOptions,
-        if (buildInfo.webEnableHotReload)
-        // These flags are only valid to be passed when compiling with DDC.
-        ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
-      ];
-
-      generator = ResidentCompiler(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
-        buildMode: buildInfo.mode,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        includeUnsupportedPlatformLibraryStubs: buildInfo.includeUnsupportedPlatformLibraryStubs,
-        fileSystemRoots: buildInfo.fileSystemRoots,
-        // Override the filesystem scheme so that the frontend_server can find
-        // the generated entrypoint code.
-        fileSystemScheme: 'org-dartlang-app',
-        initializeFromDill:
-            buildInfo.initializeFromDill ??
-            getDefaultCachedKernelPath(
-              trackWidgetCreation: buildInfo.trackWidgetCreation,
-              dartDefines: buildInfo.dartDefines,
-              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-            ),
-        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
-        targetModel: TargetModel.dartdevc,
-        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: extraFrontEndOptions,
-        platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
-        dartDefines: buildInfo.dartDefines,
-        librariesSpec: globals.fs
-            .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
-            .uri
-            .toString(),
-        packagesPath: buildInfo.packageConfigPath,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        platform: platform,
-        shutdownHooks: globals.shutdownHooks,
-      );
-    } else {
-      List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      extraFrontEndOptions = <String>[
-        '--enable-experiment=alternative-invalidation-strategy',
-        ...extraFrontEndOptions,
-      ];
-      generator = ResidentCompiler(
-        globals.artifacts!.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: targetPlatform,
-          mode: buildInfo.mode,
-        ),
-        buildMode: buildInfo.mode,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        fileSystemRoots: buildInfo.fileSystemRoots,
-        fileSystemScheme: buildInfo.fileSystemScheme,
-        targetModel: targetModel,
-        dartDefines: buildInfo.dartDefines,
-        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: extraFrontEndOptions,
-        initializeFromDill:
-            buildInfo.initializeFromDill ??
-            getDefaultCachedKernelPath(
-              trackWidgetCreation: buildInfo.trackWidgetCreation,
-              dartDefines: buildInfo.dartDefines,
-              extraFrontEndOptions: extraFrontEndOptions,
-            ),
-        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
-        packagesPath: buildInfo.packageConfigPath,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        platform: platform,
-        fileSystem: globals.fs,
-        shutdownHooks: globals.shutdownHooks,
-      );
-    }
+    final ResidentCompiler generator = residentCompilerFactory.create(
+      artifacts: globals.artifacts!,
+      processManager: globals.processManager,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      platform: platform,
+      shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
+      targetPlatform: targetPlatform,
+      buildInfo: buildInfo,
+      targetModelOverride: targetModelOverride,
+    );
 
     return FlutterDevice(
       device,
-      targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
       buildInfo: buildInfo,
@@ -204,7 +93,7 @@ class FlutterDevice {
     );
   }
 
-  final TargetPlatform? targetPlatform;
+  final TargetPlatform targetPlatform;
   final Device? device;
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
@@ -317,6 +206,9 @@ class FlutterDevice {
               await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
                 vmServiceUri!,
                 debuggingOptions: debuggingOptions,
+                appName:
+                    'Kind: Flutter - Device: ${device!.displayName} - '
+                    'Package: ${FlutterProject.current().manifest.appName}',
               );
               break;
             } on DartDevelopmentServiceException catch (e, st) {
@@ -685,6 +577,12 @@ abstract class ResidentHandlers {
   /// Whether an application can be detached without being stopped.
   bool get supportsDetach;
 
+  /// Whether a hot reload should be treated as a hot restart.
+  ///
+  /// This is used by platforms like web where hot reload must always perform
+  /// a full restart instead of updating code in-place.
+  bool get reloadIsRestart;
+
   @protected
   Logger get logger;
 
@@ -922,8 +820,13 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
-    final String from = await flutterDevices.first!.vmService!.flutterPlatformOverride(
+    final FlutterVmService? vmService = flutterDevices.firstOrNull?.vmService;
+    if (vmService == null) {
+      logger.printStatus('Platform toggle is not supported for this device.', emphasis: true);
+      return false;
+    }
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final String from = await vmService.flutterPlatformOverride(
       isolateId: views.first.uiIsolate!.id!,
     );
     final String to = nextPlatform(from);
@@ -1210,6 +1113,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get canHotReload => hotMode;
 
   /// Whether the hot reload support is implemented as hot restart.
+  @override
   bool get reloadIsRestart => false;
 
   /// Start the app and keep the process running during its lifetime.
@@ -1277,7 +1181,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp(); // calls appFinished
-    shutdownDartDevelopmentService();
+    await shutdownDartDevelopmentService();
   }
 
   @override
@@ -1296,9 +1200,22 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
   }
 
-  void shutdownDartDevelopmentService() {
-    for (final FlutterDevice device in flutterDevices) {
-      device.device?.dds.shutdown();
+  Future<void> shutdownDartDevelopmentService() async {
+    try {
+      await Future.wait<void>(
+        flutterDevices.map<Future<void>>((FlutterDevice device) async {
+          final DartDevelopmentService? dds = device.device?.dds;
+          if (dds != null) {
+            try {
+              await dds.shutdown();
+            } on Object catch (error) {
+              globals.printTrace('Warning: Failed to shut down DDS for device: $error');
+            }
+          }
+        }),
+      ).timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      globals.printTrace('Warning: shutdownDartDevelopmentService timed out.');
     }
   }
 
@@ -1310,10 +1227,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
+      final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
+      final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: targetModel,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
@@ -1403,6 +1325,21 @@ abstract class ResidentRunner extends ResidentHandlers {
       return;
     }
     globals.printStatus('Lost connection to device.');
+
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    for (final FlutterDevice device in flutterDevices) {
+      final Device? rawDevice = device.device;
+      if (rawDevice is IOSDevice &&
+          debuggingOptions.buildInfo.isProfile &&
+          !(debuggingOptions.iosProfileDebugger ??
+              (xcodeVersion == null || xcodeVersion.major < 26))) {
+        globals.printStatus(
+          'If the application crashed, you can attach a debugger to get a more complete '
+          'stack trace by running again with the "--ios-profile-debugger" flag.',
+        );
+      }
+    }
+
     _finished.complete(0);
   }
 
@@ -1447,7 +1384,11 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get reportedDebuggers => _reportedDebuggers;
   var _reportedDebuggers = false;
 
-  void printDebuggerList() {
+  /// Prints connection information for various services and tools.
+  ///
+  /// [connectionInfo] should be provided if the [DartDevelopmentService] for
+  /// the target device if not set (e.g., web targets).
+  void printDebuggerList({DebugConnectionInfo? connectionInfo}) {
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.vmService == null) {
         continue;
@@ -1457,9 +1398,10 @@ abstract class ResidentRunner extends ResidentHandlers {
         'A Dart VM Service on ${device.device!.name} is available at: '
         '${device.vmService!.httpAddress}',
       );
-
-      final DartDevelopmentService dds = device.device!.dds;
-      final Uri? dtdUri = dds.dtdUri;
+      // DWDS hosts its own DDS, so the instance associated with the device won't actually be
+      // active for web targets. Use the connectionInfo to get the DTD URI instead.
+      // See https://github.com/flutter/flutter/issues/182052
+      final Uri? dtdUri = connectionInfo?.dtdUri ?? device.device!.dds.dtdUri;
       if (debuggingOptions.printDtd && dtdUri != null) {
         globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
       }
@@ -1550,6 +1492,90 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.g.print();
       }
     }
+  }
+
+  /// Configures the asset directory path on the target device's VM Service.
+  ///
+  /// This is called during hot reload to ensure the Flutter engine is pointing
+  /// at the correct synced asset bundle directory inside the local DevFS before
+  /// assets are evicted and reloaded.
+  ///
+  /// Native runners (like 'HotRunner') override this to invoke the
+  /// `setAssetDirectory` VM Service extension. Web runners (like 'ResidentWebRunner')
+  /// keep this as a no-op because asset paths are already resolved relative
+  /// to the web server base URI.
+  @protected
+  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {}
+
+  @internal
+  Future<void> evictDirtyAssets() async {
+    final futures = <Future<void>>[];
+    for (final FlutterDevice device in flutterDevices) {
+      final DevFS? devFS = device.devFS;
+      if (devFS == null) {
+        continue;
+      }
+      if (devFS.assetPathsToEvict.isEmpty && devFS.shaderPathsToEvict.isEmpty) {
+        continue;
+      }
+      final FlutterVmService vmService = device.vmService!;
+      final List<FlutterView> views = await vmService.getFlutterViews();
+
+      final FlutterView? firstViewWithIsolate = views
+          .where((FlutterView v) => v.uiIsolate != null)
+          .firstOrNull;
+      final vm_service.IsolateRef? firstUiIsolate = firstViewWithIsolate?.uiIsolate;
+      if (firstUiIsolate == null) {
+        continue;
+      }
+
+      // 1. Delegate platform-specific asset directory setup to the subclass.
+      await confirmAssetDirectory(device, views);
+
+      // 2. Perform font manifest reloading if it was updated.
+      if (devFS.didUpdateFontManifest) {
+        futures.add(
+          vmService.reloadAssetFonts(
+            isolateId: firstUiIsolate.id!,
+            viewId: firstViewWithIsolate!.id,
+          ),
+        );
+      }
+
+      // 3. Perform the standard, cross-platform eviction calls.
+      final supportsShaderReload = device.targetPlatform != TargetPlatform.web_javascript;
+      for (final String assetPath in devFS.assetPathsToEvict) {
+        // Flutter GPU shader bundles reload the compiled ShaderLibrary in place
+        // via the `ext.ui.gpu.reinitializeShaderLibrary` extension. It is
+        // registered lazily on the first `ShaderLibrary.fromAsset` and the engine
+        // no-ops if nothing is registered at the asset key, so dispatch is gated
+        // only by the `.shaderbundle` suffix. The extension is unavailable on the
+        // web engine, where the bundle falls back to the generic asset eviction.
+        if (supportsShaderReload && assetPath.endsWith('.shaderbundle')) {
+          futures.add(
+            vmService.flutterReinitializeShaderLibrary(assetPath, isolateId: firstUiIsolate.id!),
+          );
+        } else {
+          futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        }
+      }
+      // Shaders are not supported during hot reload on the web yet. Attempting
+      // to evict shaders will call the `ext.ui.window.reinitializeShader` service
+      // extension which is not registered/supported by the Web engine. On web clients,
+      // this throws an internal RPCError (-32603) instead of a standard MethodNotFound
+      // error, which would break the hot reload.
+      // See https://github.com/flutter/flutter/issues/137265
+      if (device.targetPlatform != TargetPlatform.web_javascript) {
+        for (final String assetPath in devFS.shaderPathsToEvict) {
+          futures.add(vmService.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
+        }
+      }
+
+      devFS.assetPathsToEvict.clear();
+      devFS.shaderPathsToEvict.clear();
+      devFS.didUpdateFontManifest = false;
+    }
+    await Future.wait<void>(futures);
   }
 
   @override
@@ -1831,7 +1857,10 @@ class TerminalHandler {
         await residentRunner.exit();
         return true;
       case 'r':
-        if (!residentRunner.canHotReload) {
+        // Allow hot reload if enabled. Also allow it if reloadIsRestart is true
+        // (e.g., web with --no-hot), since in that case the reload will be
+        // converted to a restart internally.
+        if (!(residentRunner.canHotReload || residentRunner.reloadIsRestart)) {
           return false;
         }
         final OperationResult result = await residentRunner.restart();

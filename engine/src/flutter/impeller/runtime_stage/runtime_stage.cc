@@ -5,8 +5,11 @@
 #include "impeller/runtime_stage/runtime_stage.h"
 
 #include <array>
+#include <atomic>
+#include <cstdint>
 #include <memory>
 #include <sstream>
+#include <string>
 
 #include "fml/mapping.h"
 #include "impeller/base/validation.h"
@@ -16,6 +19,19 @@
 #include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
+
+namespace {
+// Process-unique fallback library id for runtime stages decoded without an
+// asset path (e.g. tests, future in-memory APIs). Kept local to this
+// translation unit because `impeller::renderer` (where the equivalent
+// `ShaderKey::MakeFallbackLibraryId` lives) already depends on
+// `impeller::runtime_stage`, so it is not reachable from here.
+std::string MakeFallbackLibraryId() {
+  static std::atomic<uint64_t> counter{0};
+  return "auto:" +
+         std::to_string(counter.fetch_add(1, std::memory_order_relaxed));
+}
+}  // namespace
 
 static RuntimeUniformType ToType(fb::UniformDataType type) {
   switch (type) {
@@ -58,6 +74,7 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
   RuntimeStage stage(payload);
   stage.stage_ = ToShaderStage(runtime_stage->stage());
   stage.entrypoint_ = runtime_stage->entrypoint()->str();
+  stage.library_id_ = MakeFallbackLibraryId();
 
   auto* uniforms = runtime_stage->uniforms();
 
@@ -81,9 +98,25 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
           static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
       desc.bit_width = i->bit_width();
       desc.array_elements = i->array_elements();
-      if (i->struct_layout()) {
-        for (const auto& byte_type : *i->struct_layout()) {
-          desc.struct_layout.push_back(static_cast<uint8_t>(byte_type));
+      if (i->padding_layout()) {
+        for (const auto& byte_type : *i->padding_layout()) {
+          impeller::RuntimePaddingType type;
+          switch (byte_type) {
+            case fb::PaddingType::kPadding:
+              type = impeller::RuntimePaddingType::kPadding;
+              break;
+            case fb::PaddingType::kFloat:
+              type = impeller::RuntimePaddingType::kFloat;
+              break;
+          }
+          desc.padding_layout.push_back(type);
+        }
+      }
+      if (i->struct_fields()) {
+        for (const auto& elem : *i->struct_fields()) {
+          desc.struct_fields.emplace_back(
+              StructField{.name = elem->name()->str(),
+                          .byte_size = static_cast<size_t>(elem->byte_size())});
         }
       }
       desc.struct_float_count = i->struct_float_count();
@@ -148,6 +181,12 @@ absl::StatusOr<RuntimeStage::Map> RuntimeStage::DecodeRuntimeStages(
   if (!fb::RuntimeStagesBufferHasIdentifier(payload->GetMapping())) {
     return absl::InvalidArgumentError(
         "Payload does not have valid identifier.");
+  }
+
+  flatbuffers::Verifier verifier(payload->GetMapping(), payload->GetSize());
+  if (!fb::VerifyRuntimeStagesBuffer(verifier)) {
+    return absl::InvalidArgumentError(
+        "Runtime stages buffer failed verification.");
   }
 
   auto raw_stages = fb::GetRuntimeStages(payload->GetMapping());
@@ -219,6 +258,14 @@ bool RuntimeStage::IsDirty() const {
 
 void RuntimeStage::SetClean() {
   is_dirty_ = false;
+}
+
+void RuntimeStage::SetLibraryId(std::string library_id) {
+  library_id_ = std::move(library_id);
+}
+
+const std::string& RuntimeStage::GetLibraryId() const {
+  return library_id_;
 }
 
 const std::vector<DescriptorSetLayout>& RuntimeStage::GetDescriptorSetLayouts()

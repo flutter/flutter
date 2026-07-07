@@ -28,6 +28,7 @@ import static org.robolectric.Shadows.shadowOf;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.hardware.SyncFence;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Looper;
@@ -44,6 +45,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowBuild;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterRendererTest {
@@ -329,6 +332,10 @@ public class FlutterRendererTest {
             boundsCaptor.capture(),
             typeCaptor.capture(),
             stateCaptor.capture(),
+            anyInt(),
+            anyInt(),
+            anyInt(),
+            anyInt(),
             anyInt(),
             anyInt(),
             anyInt(),
@@ -820,6 +827,23 @@ public class FlutterRendererTest {
   }
 
   @Test
+  @Config(sdk = 29)
+  public void createSurfaceProducer_usesSurfaceTextureWhenHardwareBufferDefect() {
+    // Setup: Simulate a Huawei device on API 29 where HardwareBuffer has known defects.
+    // See: https://github.com/flutter/flutter/issues/166481
+    ShadowBuild.setManufacturer("HUAWEI");
+
+    // Execute the behavior under test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Verify: Should return SurfaceTextureSurfaceProducer instead of ImageReaderSurfaceProducer.
+    assertTrue(
+        "Expected SurfaceTextureSurfaceProducer on Huawei API <= 29 due to HardwareBuffer defect causing video playback failures",
+        producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
   public void ImageReaderSurfaceProducerDoesNotCropOrRotate() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
@@ -1050,5 +1074,17 @@ public class FlutterRendererTest {
     verify(imageReaderProducer2.callback).onSurfaceAvailable();
     assertFalse(imageReaderProducer1.notifiedDestroy);
     assertFalse(imageReaderProducer2.notifiedDestroy);
+  }
+
+  @Test
+  public void waitOnFence_closesFence() throws Exception {
+    FlutterRenderer.ImageReaderSurfaceProducer producer =
+        (FlutterRenderer.ImageReaderSurfaceProducer)
+            engineRule.getFlutterEngine().getRenderer().createSurfaceProducer();
+    Image image = mock(Image.class);
+    SyncFence fence = mock(SyncFence.class);
+    when(image.getFence()).thenReturn(fence);
+    producer.waitOnFence(image);
+    verify(fence, times(1)).close();
   }
 }

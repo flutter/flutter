@@ -8,7 +8,7 @@
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/raster_cache_item.h"
-#include "include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkMatrix.h"
 
 namespace flutter {
 namespace testing {

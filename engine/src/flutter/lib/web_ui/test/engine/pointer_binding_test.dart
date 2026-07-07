@@ -61,6 +61,8 @@ void testMain() {
 
     ui.PlatformDispatcher.instance.onPointerDataPacket = null;
     dpi = EngineFlutterDisplay.instance.devicePixelRatio;
+    debugSetIframeEmbeddingForTests(false);
+    debugSetFullPageAppForTests(null);
   });
 
   tearDown(() {
@@ -747,6 +749,134 @@ void testMain() {
     rootElement.dispatchEvent(event);
     expect(EngineSemantics.instance.gestureMode, GestureMode.pointerEvents);
   });
+
+  test('wheel event in full-page iframe calls preventDefault when handled', () {
+    addTearDown(() {
+      debugResetIframeDetectionCache();
+      debugResetFullPageAppCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugSetIframeEmbeddingForTests(true);
+    debugSetFullPageAppForTests(true);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: false);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 10,
+      clientY: 10,
+      deltaX: 5,
+      deltaY: 15,
+    );
+    rootElement.dispatchEvent(event);
+
+    expect(event.defaultPrevented, isTrue);
+  });
+
+  test('wheel event in full-page iframe allows browser scroll when platform default allowed', () {
+    // When Flutter scrollables are at boundary (allowPlatformDefault: true),
+    // we skip preventDefault() to let the browser handle scroll bubbling
+    // to the parent window naturally.
+    addTearDown(() {
+      debugResetIframeDetectionCache();
+      debugResetFullPageAppCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugSetIframeEmbeddingForTests(true);
+    debugSetFullPageAppForTests(true);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: true);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 20,
+      clientY: 30,
+      deltaX: 7,
+      deltaY: 21,
+    );
+    rootElement.dispatchEvent(event);
+
+    expect(event.defaultPrevented, isFalse);
+  });
+
+  test('wheel event in custom-element iframe uses original behavior when handled', () {
+    // Custom element apps in iframes should NOT use the special iframe handling.
+    // They should use original behavior: only preventDefault when handled.
+    addTearDown(() {
+      debugResetIframeDetectionCache();
+      debugResetFullPageAppCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugSetIframeEmbeddingForTests(true);
+    debugSetFullPageAppForTests(false); // Custom element, not full-page
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: false);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 10,
+      clientY: 10,
+      deltaX: 5,
+      deltaY: 15,
+    );
+    rootElement.dispatchEvent(event);
+
+    // Original behavior: preventDefault called because allowPlatformDefault=false
+    expect(event.defaultPrevented, isTrue);
+  });
+
+  test(
+    'wheel event in custom-element iframe allows browser scroll when platform default allowed',
+    () {
+      // Custom element apps in iframes should let browser handle natural scroll flow.
+      // When allowPlatformDefault=true, the browser should scroll the iframe content.
+      addTearDown(() {
+        debugResetIframeDetectionCache();
+        debugResetFullPageAppCache();
+        ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+      });
+      debugSetIframeEmbeddingForTests(true);
+      debugSetFullPageAppForTests(false); // Custom element, not full-page
+
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        for (final ui.PointerData datum in packet.data) {
+          if (datum.signalKind == ui.PointerSignalKind.scroll) {
+            datum.respond(allowPlatformDefault: true);
+          }
+        }
+      };
+
+      final DomEvent event = _PointerEventContext().wheel(
+        buttons: 0,
+        clientX: 20,
+        clientY: 30,
+        deltaX: 7,
+        deltaY: 21,
+      );
+      rootElement.dispatchEvent(event);
+
+      // Original behavior: don't preventDefault when allowPlatformDefault=true
+      expect(event.defaultPrevented, isFalse);
+    },
+  );
 
   test('does synthesize add or hover or move for scroll', () {
     final _ButtonedEventMixin context = _PointerEventContext();
@@ -2912,51 +3042,47 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, isEmpty);
   });
 
-  testWithSemantics(
-    'Dedupes click if pointer down/up flushed recently',
-    () async {
-      expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-      expect(PointerBinding.clickDebouncer.isDebouncing, false);
+  testWithSemantics('Dedupes click if pointer down/up flushed recently', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
-      final DomElement testElement = createDomElement('flt-semantics');
-      testElement.setAttribute('flt-tappable', '');
-      view.dom.semanticsHost.appendChild(testElement);
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
 
-      testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(context.primaryDown());
 
-      // Simulate the user holding the pointer down for some time before releasing,
-      // such that the pointerup event happens close to timer expiration. This
-      // will create the situation that the click event arrives just after the
-      // pointerup is flushed. Forwarding the click to the framework would look
-      // like a double-click, so the click event is deduped.
-      await Future<void>.delayed(const Duration(milliseconds: 190));
+    // Simulate the user holding the pointer down for some time before releasing,
+    // such that the pointerup event happens close to timer expiration. This
+    // will create the situation that the click event arrives just after the
+    // pointerup is flushed. Forwarding the click to the framework would look
+    // like a double-click, so the click event is deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 190));
 
-      testElement.dispatchEvent(context.primaryUp());
-      expect(PointerBinding.clickDebouncer.isDebouncing, true);
-      expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
+    testElement.dispatchEvent(context.primaryUp());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+    expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
 
-      // Wait for the timer to expire to make sure pointer events are flushed.
-      await Future<void>.delayed(const Duration(milliseconds: 20));
+    // Wait for the timer to expire to make sure pointer events are flushed.
+    await Future<void>.delayed(const Duration(milliseconds: 20));
 
-      expect(
-        reason:
-            'Queued up events should be flushed to the framework because the '
-            'time expired before the click event arrived.',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
-      );
+    expect(
+      reason:
+          'Queued up events should be flushed to the framework because the '
+          'time expired before the click event arrived.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
+    );
 
-      final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
-        'clientX': testElement.getBoundingClientRect().x,
-        'clientY': testElement.getBoundingClientRect().y,
-      });
-      PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
-      expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
-    },
-    skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows,
-  );
+    expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   // Regression test for https://github.com/flutter/flutter/issues/147050
   //
@@ -2968,53 +3094,49 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   // followed by a "click". Since we sent the "pointerdown" and "pointerup" to
   // the framework already, the framework registered a tap. Forwarding the
   // "click" would lead to a double-tap. This was the bug.
-  testWithSemantics(
-    'Dedupes click if pointer up happened recently without debouncing',
-    () async {
-      expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-      expect(PointerBinding.clickDebouncer.isDebouncing, false);
+  testWithSemantics('Dedupes click if pointer up happened recently without debouncing', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
-      final DomElement testElement = createDomElement('flt-semantics');
-      testElement.setAttribute('flt-tappable', '');
-      view.dom.semanticsHost.appendChild(testElement);
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
 
-      // Begin a long-press with a "pointerdown".
-      testElement.dispatchEvent(context.primaryDown());
+    // Begin a long-press with a "pointerdown".
+    testElement.dispatchEvent(context.primaryDown());
 
-      // Expire the timer causing the debouncer to reset itself.
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-      expect(
-        reason: '"pointerdown" should be flushed when the timer expires.',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down],
-      );
-      pointerPackets.clear();
+    // Expire the timer causing the debouncer to reset itself.
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    expect(
+      reason: '"pointerdown" should be flushed when the timer expires.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down],
+    );
+    pointerPackets.clear();
 
-      // Send a "pointerup" while the debouncer is not debouncing anything.
-      testElement.dispatchEvent(context.primaryUp());
+    // Send a "pointerup" while the debouncer is not debouncing anything.
+    testElement.dispatchEvent(context.primaryUp());
 
-      // A standalone "pointerup" should not start debouncing anything.
-      expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
-      expect(
-        reason: 'The "pointerup" should be forwarded to the framework immediately',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.up],
-      );
+    // A standalone "pointerup" should not start debouncing anything.
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(
+      reason: 'The "pointerup" should be forwarded to the framework immediately',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.up],
+    );
 
-      // Use a delay that's short enough for the click to be deduped.
-      await Future<void>.delayed(const Duration(milliseconds: 10));
+    // Use a delay that's short enough for the click to be deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 10));
 
-      final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
-        'clientX': testElement.getBoundingClientRect().x,
-        'clientY': testElement.getBoundingClientRect().y,
-      });
-      PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
-      expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
-    },
-    skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows,
-  );
+    expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   testWithSemantics(
     'Forwards click if enough time passed after the last flushed pointerup',

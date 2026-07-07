@@ -8,7 +8,7 @@
 #include <lib/zx/channel.h>
 #include <lib/zx/eventpair.h>
 #include "flutter/fml/macros.h"
-#include "unique_fdio_ns.h"
+#include "flutter/shell/platform/fuchsia/flutter/unique_fdio_ns.h"
 
 namespace flutter_runner {
 

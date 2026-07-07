@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fakes/scenic/fake_flatland.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/scenic/fake_flatland.h"
 
+#include <fuchsia/ui/composition/cpp/fidl.h>
 #include <lib/async-testing/test_loop.h>
 #include <lib/async/dispatcher.h>
 
 #include <string>
 
 #include "flutter/fml/logging.h"
-#include "fuchsia/ui/composition/cpp/fidl.h"
 #include "gtest/gtest.h"
 
 namespace flutter_runner::testing {

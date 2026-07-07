@@ -12,8 +12,11 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const Color _pink = Color(0xFFE91E63);
+const Color _white = Color(0xFFFFFFFF);
 
 void main() {
   testWidgets(
@@ -202,7 +205,7 @@ void main() {
 
       await tester.pumpWidget(
         ColoredBox(
-          color: Colors.white,
+          color: _white,
           child: Align(
             alignment: Alignment.topLeft,
             child: RepaintBoundary(
@@ -592,7 +595,7 @@ void main() {
 
       await tester.pumpWidget(
         ColoredBox(
-          color: Colors.white,
+          color: _white,
           child: Align(
             alignment: Alignment.topLeft,
             child: RepaintBoundary(
@@ -1116,7 +1119,7 @@ void main() {
 
       await tester.pumpWidget(
         ColoredBox(
-          color: Colors.pink,
+          color: _pink,
           child: Align(
             alignment: Alignment.topLeft,
             child: Wrap(
@@ -1401,9 +1404,8 @@ class _TestImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(2.0),
-      child: SizedBox(
-        width: 20,
-        height: 20,
+      child: SizedBox.square(
+        dimension: 20.0,
         child: DecoratedBox(decoration: BoxDecoration(image: image)),
       ),
     );

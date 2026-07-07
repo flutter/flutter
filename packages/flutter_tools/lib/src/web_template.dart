@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/utils.dart';
 
 /// Placeholder for base href
@@ -107,6 +108,7 @@ class WebTemplate {
     String? buildConfig,
     String? flutterBootstrapJs,
     String? staticAssetsUrl,
+    required Logger logger,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     String newContent = _content;
@@ -133,7 +135,7 @@ class WebTemplate {
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $_kServiceWorkerDeprecationNotice */",
           );
     }
-    newContent = _applyVariableSubstitutions(newContent, <String, String>{
+    newContent = _applyVariableSubstitutions(newContent, logger, <String, String>{
       ...webDefines,
       if (buildConfig != null) 'flutter_build_config': buildConfig,
       if (flutterBootstrapJs != null) 'flutter_bootstrap_js': flutterBootstrapJs,
@@ -149,8 +151,13 @@ class WebTemplate {
   /// Applies web-define variable substitutions and validates all variables are provided.
   ///
   /// Replaces {{VARIABLE}} placeholders with values from webDefines. Built-in Flutter
-  /// variables are preserved if missing; user-defined variables throw ToolExit.
-  String _applyVariableSubstitutions(String content, Map<String, String> webDefines) {
+  /// variables are preserved if missing; user-defined variables will log a warning
+  /// and be skipped.
+  String _applyVariableSubstitutions(
+    String content,
+    Logger logger,
+    Map<String, String> webDefines,
+  ) {
     final variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
     final missingVariables = <String>{};
 
@@ -188,13 +195,16 @@ class WebTemplate {
         .map((String name) => '--web-define=$name=VALUE')
         .join(' ');
     final String variablesList = pluralize('variable', missingVariables.length);
-    throwToolExit(
-      'Missing web-define $variablesList: $variables\n\n'
-      'Please provide the missing $variablesList using:\n'
+    logger.printWarning(
+      'Warning: Missing web-define $variablesList: $variables\n\n'
+      'You can provide the missing $variablesList using:\n'
       'flutter run $suggestion\n'
       'or\n'
-      'flutter build web $suggestion',
+      'flutter build web $suggestion\n'
+      'This variable will be skipped.\n',
     );
+
+    return result;
   }
 }
 

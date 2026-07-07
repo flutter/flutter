@@ -11,7 +11,7 @@
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
-#include "flutter/impeller/renderer/render_target.h"
+#include "flutter/impeller/runtime_stage/runtime_stage.h"
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
 #include "impeller/typographer/typographer_context.h"
@@ -53,6 +53,16 @@ class GoldenPlaygroundTest
 
   bool OpenPlaygroundHere(const sk_sp<flutter::DisplayList>& list);
 
+  /// Renders `callback` into an offscreen render pass and saves the result as
+  /// a golden image. The render target is single-sampled, uses the context's
+  /// default color format, and has no depth or stencil attachment, so a
+  /// pipeline built from `PipelineBuilder<>::MakeDefaultPipelineDescriptor`
+  /// must be reduced to match by calling `SetSampleCount(kCount1)`,
+  /// `ClearStencilAttachments()`, and `ClearDepthAttachment()` on it. Calling
+  /// only `SetStencilAttachmentDescriptors(nullopt)` leaves the stencil pixel
+  /// format set and trips Metal's render pipeline validation.
+  bool OpenPlaygroundHere(const Playground::SinglePassCallback& callback);
+
   std::unique_ptr<testing::Screenshot> MakeScreenshot(
       const sk_sp<flutter::DisplayList>& list);
 
@@ -84,14 +94,35 @@ class GoldenPlaygroundTest
 
   ISize GetWindowSize() const;
 
+  IRect GetWindowBounds() const;
+
   [[nodiscard]] fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
 
   /// Returns true if `OpenPlaygroundHere` will actually render anything.
   bool WillRenderSomething() const { return true; }
 
+  RuntimeStageBackend GetRuntimeStageBackend() const;
+
+  bool IsGoldenTest() { return true; }
+
  protected:
   void SetWindowSize(ISize size);
+
+  // See |Playground::PlatformSupportsWideGamutTests|
+  [[nodiscard]] bool PlatformSupportsWideGamutTests() const;
+
+  // See |Playground::EnsureContextIsUnique|
+  // GoldenPlaygroundTest uses context replacement on the fly to support this.
+  void EnsureContextIsUnique() {}
+
+  // See |Playground::EnsureContextSupportsWideGamut|
+  // GoldenPlaygroundTest uses name matching to support this.
+  [[nodiscard]] bool EnsureContextSupportsWideGamut() { return true; }
+
+  // See |Playground::EnsureContextSupportsAntialiasLines|
+  // GoldenPlaygroundTest uses name matching to support this.
+  void EnsureContextSupportsAntialiasLines() {}
 
  private:
 #if FML_OS_MACOSX

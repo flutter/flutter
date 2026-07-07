@@ -167,11 +167,21 @@ Future<void> testMain() async {
 
     final ui.TextBox top0 = rectsTop[0];
     final ui.TextBox top1 = rectsTop[1];
+    final ui.TextBox bottom0 = rectsBottom[0];
     final ui.TextBox bottom1 = rectsBottom[1];
+    final ui.TextBox middle0 = rectsMiddle[0];
     final ui.TextBox middle1 = rectsMiddle[1];
-    expect((top0.bottom - bottom1.top).abs() < EPSILON, true);
-    expect(middle1.top > bottom1.top, true);
-    expect(middle1.top < top1.top, true);
+
+    expect((top0.top - bottom0.top).abs() < EPSILON, true);
+    expect((top0.top - middle0.top).abs() < EPSILON, true);
+    expect(top0.bottom < middle0.bottom, true);
+    expect(middle0.bottom < bottom0.bottom, true);
+
+    expect((top0.bottom - top1.top).abs() < EPSILON, true);
+    expect((middle0.bottom - middle1.top).abs() < EPSILON, true);
+    expect((bottom0.bottom - bottom1.top).abs() < EPSILON, true);
+    expect(top1.bottom < middle1.bottom, true);
+    expect(middle1.bottom < bottom1.bottom, true);
   });
 
   test('Paragraph getBoxesForRange 1 finite line', () {
@@ -201,5 +211,100 @@ Future<void> testMain() async {
     expect(rects2.length, 1);
     expect(rects2.first.toRect().width, paragraph.longestLine);
     expect(rects2.first.toRect().height, paragraph.height);
+  });
+
+  test('getBoxesForRange returns correct positions for text selection', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Get boxes for a range
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 5);
+
+    expect(boxes.isNotEmpty, true);
+    for (final box in boxes) {
+      expect(box.left >= 0, true);
+      expect(box.top >= 0, true);
+      expect(box.right > box.left, true);
+      expect(box.bottom > box.top, true);
+    }
+  });
+
+  test('getBoxesForRange handles full text range', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, text.length);
+
+    expect(boxes.isNotEmpty, true);
+  });
+
+  test('getBoxesForRange handles RTL text correctly', () {
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 20,
+      textDirection: ui.TextDirection.rtl,
+    );
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('مرحبا'); // Arabic (RTL)
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 'مرحبا'.length);
+
+    expect(boxes.isNotEmpty, true);
+    for (final box in boxes) {
+      expect(box.left >= 0, true);
+      expect(box.right > box.left, true);
+    }
+  });
+
+  test('getBoxesForRange handles empty range', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(5, 5);
+
+    // Empty range should return empty list or minimal box
+    expect(boxes.isEmpty || boxes.every((box) => box.toRect().width == 0), true);
+  });
+
+  test('getBoxesForRange handles multiline text with strut style', () {
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 20,
+      strutStyle: ui.StrutStyle(fontSize: 20),
+    );
+    const text = 'Hello \nWorld';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes1 = paragraph.getBoxesForRange(
+      0,
+      1,
+      boxHeightStyle: ui.BoxHeightStyle.strut,
+    );
+    final List<ui.TextBox> boxes2 = paragraph.getBoxesForRange(
+      text.length - 1,
+      text.length,
+      boxHeightStyle: ui.BoxHeightStyle.strut,
+    );
+
+    expect(boxes1.isNotEmpty && boxes1.length == 1, true);
+    expect(boxes2.isNotEmpty && boxes2.length == 1, true);
+    expect(boxes1.first.toRect().bottom, boxes2.first.toRect().top);
   });
 }

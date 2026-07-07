@@ -1,8 +1,8 @@
 <a href="https://flutter.dev/">
   <h1 align="center">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://storage.googleapis.com/cms-storage-bucket/6e19fee6b47b36ca613f.png">
-      <img alt="Flutter" src="https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png">
+      <source media="(prefers-color-scheme: dark)" srcset="https://docs.flutter.dev/logo_dark.png">
+      <img alt="Flutter" src="https://docs.flutter.dev/logo.png">
     </picture>
   </h1>
 </a>
@@ -12,6 +12,7 @@
 [![Twitter handle][]][Twitter badge]
 [![BlueSky badge][]][BlueSky handle]
 [![codecov](https://codecov.io/gh/flutter/flutter/branch/master/graph/badge.svg?token=11yDrJU2M2)](https://codecov.io/gh/flutter/flutter)
+[![LFX Health Score](https://insights.linuxfoundation.org/api/badge/health-score?project=flutter)](https://insights.linuxfoundation.org/project/flutter)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5631/badge)](https://bestpractices.coreinfrastructure.org/projects/5631)
 [![SLSA 1](https://slsa.dev/images/gh-badge-level1.svg)](https://slsa.dev)
 
@@ -62,7 +63,7 @@ graphics, video, text, and controls without limitation. Flutter includes a full
 you're building for iOS ([Cupertino]) or other platforms ([Material]), along with
 support for customizing or creating entirely new visual components.
 
-<p align="center"><img src="https://github.com/flutter/website/blob/main/site/web/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
+<p align="center"><img src="https://github.com/flutter/website/blob/main/sites/docs/web/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
 
 ### Fast results
 
@@ -76,7 +77,7 @@ compilation to 32-bit and 64-bit ARM machine code for iOS and Android,
 JavaScript and WebAssembly for the web, as well as Intel x64 and ARM
 for desktop devices.
 
-<p align="center"><img src="https://github.com/flutter/website/blob/main/site/web/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
+<p align="center"><img src="https://github.com/flutter/website/blob/main/sites/docs/web/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
 
 ### Productive development
 
@@ -113,7 +114,7 @@ Information on how to get started can be found in our
 [Material]: https://docs.flutter.dev/ui/widgets/material
 [Skia]: https://skia.org/
 [Dart programming language]: https://dart.dev/
-[Hot reload animation]: https://github.com/flutter/website/blob/main/site/web/assets/images/docs/tools/android-studio/hot-reload.gif?raw=true
+[Hot reload animation]: https://github.com/flutter/website/blob/main/sites/docs/web/assets/images/docs/tools/android-studio/hot-reload.gif?raw=true
 [Hot reload]: https://docs.flutter.dev/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter

@@ -4,6 +4,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
+#include <string.h>
+#include <vector>
 #include "flutter/fml/logging.h"
 
 using namespace flutter::testing;
@@ -384,6 +386,10 @@ EGLImageKHR _eglCreateImageKHR(EGLDisplay dpy,
   return &mock_image;
 }
 
+EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImage image) {
+  return mock->eglDestroyImageKHR(dpy, image);
+}
+
 static GLuint bound_texture_2d;
 
 static std::map<GLenum, GLuint> framebuffer_renderbuffers;
@@ -575,7 +581,18 @@ static void _glTexImage2D(GLenum target,
                           GLint border,
                           GLenum format,
                           GLenum type,
-                          const void* pixels) {}
+                          const void* pixels) {
+  if (pixels != nullptr) {
+    FML_CHECK(internalformat == GL_RGBA || internalformat == GL_RGBA8);
+    FML_CHECK(format == GL_RGBA);
+    FML_CHECK(type == GL_UNSIGNED_BYTE);
+
+    // Simple mock read to detect out-of-bounds reads in tests.
+    size_t size = width * height * 4;
+    std::vector<uint8_t> temp(size);
+    memcpy(temp.data(), pixels, size);
+  }
+}
 
 static GLenum _glGetError() {
   return GL_NO_ERROR;
@@ -663,6 +680,7 @@ EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
                                        EGLenum target,
                                        EGLClientBuffer buffer,
                                        const EGLint* attrib_list);
+EGLBoolean (*epoxy_eglDestroyImageKHR)(EGLDisplay dpy, EGLImage image);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -739,6 +757,7 @@ static void library_init() {
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
   epoxy_eglCreateImageKHR = _eglCreateImageKHR;
+  epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;

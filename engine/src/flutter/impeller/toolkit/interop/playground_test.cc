@@ -59,9 +59,11 @@ void PlaygroundTest::TearDown() {
 ScopedObject<Context> PlaygroundTest::CreateContext() const {
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       return Adopt<Context>(
           ImpellerContextCreateMetalNew(ImpellerGetVersion()));
-    case PlaygroundBackend::kOpenGLES: {
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF: {
       Playground::GLProcAddressResolver playground_gl_proc_address_callback =
           CreateGLProcAddressResolver();
       ImpellerProcAddressCallback gl_proc_address_callback =
@@ -80,7 +82,8 @@ ScopedObject<Context> PlaygroundTest::CreateContext() const {
       } user_data;
       user_data.resolver = CreateVKProcAddressResolver();
       settings.user_data = &user_data;
-      settings.enable_vulkan_validation = switches_.enable_vulkan_validation;
+      settings.enable_vulkan_validation =
+          GetSwitches().enable_vulkan_validation;
       settings.proc_address_callback = [](void* instance,         //
                                           const char* proc_name,  //
                                           void* user_data         //
@@ -105,11 +108,13 @@ static ScopedObject<Surface> CreateSharedSurface(
   switch (backend) {
 #if IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       return Adopt<Surface>(new SurfaceMTL(context, std::move(shared_surface)));
 #endif
 
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
       return Adopt<Surface>(
           new SurfaceGLES(context, std::move(shared_surface)));
 #endif
@@ -149,10 +154,12 @@ static ScopedObject<Context> CreateSharedContext(
   switch (backend) {
 #if IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       return ContextMTL::Create(shared_context);
 #endif
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
       return ContextGLES::Create(std::move(shared_context));
 #endif
 #if IMPELLER_ENABLE_VULKAN

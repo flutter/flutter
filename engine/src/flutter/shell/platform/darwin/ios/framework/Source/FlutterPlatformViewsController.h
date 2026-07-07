@@ -18,6 +18,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
@@ -32,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /// The task runner used to post rendering tasks to the platform thread.
-@property(nonatomic, assign) const fml::RefPtr<fml::TaskRunner>& taskRunner;
+@property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
 /// The flutter view.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
@@ -155,7 +156,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
 
-- (std::vector<int64_t>&)previousCompositionOrder;
+/// @brief The composition order from the previous frame.
+///
+/// Only accessed from the platform thread.
+- (NSArray<NSNumber*>*)previousCompositionOrder;
 
 @end
 

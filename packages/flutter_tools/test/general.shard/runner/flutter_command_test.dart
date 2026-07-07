@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart' show OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -20,10 +21,12 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
@@ -50,6 +53,8 @@ void main() {
     late BufferLogger logger;
     late FakeProcessManager processManager;
     late PreRunValidator preRunValidator;
+    late FakeLockTrackingCache lockTrackingCache;
+    late FakeLockCheckingPub lockCheckingPub;
 
     setUpAll(() {
       Cache.flutterRoot = '/path/to/sdk/flutter';
@@ -67,6 +72,8 @@ void main() {
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
       preRunValidator = PreRunValidator(fileSystem: fileSystem);
+      lockTrackingCache = FakeLockTrackingCache();
+      lockCheckingPub = FakeLockCheckingPub(lockTrackingCache);
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -119,6 +126,31 @@ void main() {
     );
 
     testUsingContext(
+      'cache lock is held during pub get',
+      () async {
+        final flutterCommand = DummyFlutterCommandWithPub();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummypub']);
+
+        expect(lockCheckingPub.pubGetCalled, isTrue);
+        expect(
+          lockCheckingPub.lockWasHeldDuringPubGet,
+          isTrue,
+          reason:
+              'The cache lock should still be held when pub.get() is called '
+              'during verifyThenRunCommand, to prevent parallel flutter '
+              'commands from racing on pub state.',
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => lockTrackingCache,
+        Pub: () => lockCheckingPub,
+      },
+    );
+
+    testUsingContext(
       "throws toolExit if flutter_tools source dir doesn't exist",
       () async {
         final flutterCommand = DummyFlutterCommand();
@@ -162,6 +194,44 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not print Intel Mac warning on macOS ARM64',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        await flutterCommand.run();
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_arm64),
+      },
+    );
+
+    testUsingContext(
+      'prints Intel Mac warning on macOS X64 once',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+
+        await flutterCommand.run();
+
+        final String warningText = testLogger.warningText;
+        expect(warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+
+        // Run the command again, the message shouldn't be printed again.
+        await flutterCommand.run();
+
+        // BufferLogger.clear() does not clear warnings.
+        expect(testLogger.warningText, equals(warningText));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
       },
     );
 
@@ -1703,6 +1773,70 @@ class FakeFeature extends Feature {
   const FakeFeature({required super.name, super.runtimeId, required this.enabled});
 
   final bool enabled;
+}
+
+class DummyFlutterCommandWithPub extends FlutterCommand {
+  DummyFlutterCommandWithPub() {
+    usesPubOption();
+  }
+
+  @override
+  String get description => 'does nothing, with pub';
+
+  @override
+  String get name => 'dummypub';
+
+  @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
+class FakeLockTrackingCache extends Fake implements Cache {
+  bool isLockHeld = false;
+
+  @override
+  Future<void> lock() async {
+    isLockHeld = true;
+  }
+
+  @override
+  Future<void> updateAll(
+    Set<DevelopmentArtifact> requiredArtifacts, {
+    bool offline = false,
+  }) async {}
+
+  @override
+  void releaseLock() {
+    isLockHeld = false;
+  }
+}
+
+class FakeLockCheckingPub extends Fake implements Pub {
+  FakeLockCheckingPub(this._cache);
+
+  final FakeLockTrackingCache _cache;
+  bool pubGetCalled = false;
+  bool lockWasHeldDuringPubGet = false;
+
+  @override
+  Future<void> get({
+    PubContext? context,
+    required FlutterProject project,
+    bool upgrade = false,
+    bool offline = false,
+    String? flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
+    PubOutputMode outputMode = PubOutputMode.all,
+  }) async {
+    pubGetCalled = true;
+    lockWasHeldDuringPubGet = _cache.isLockHeld;
+  }
 }
 
 class FakeFeatureFlags implements FeatureFlags {

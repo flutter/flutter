@@ -19,7 +19,7 @@ Presubmits run (and are required to be passing) to merge a PR:
 
 <p>
 
-For example, the `linux_host_engine` target above runs based on the configuration in [`ci/builders/linux_host_engine.json`](https://github.com/flutter/engine/blob/458956228dad9837956aeb78b2988879e764a0b2/ci/builders/linux_host_engine.json).
+For example, the `linux_host_engine` target above runs based on the configuration in [`ci/builders/linux_host_engine.json`](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/ci/builders/linux_host_engine.json).
 
 ### Nuances
 
@@ -34,7 +34,6 @@ Typically, pre-submits _always_ run on every PR, and don't need any special atte
 >
 > `runIf` will skip certain targets if a particular file (or commonly, sets of files) are not changed in a given PR.
 >
-> For example, the [`linux_clang_tidy_presubmit`](https://github.com/flutter/engine/blob/991676f3bc9482eaaeb3764b6b835f0e3ff8b3c5/.ci.yaml#L219-L235) target will not run if only markdown (`*.md`) files are changed.
 
 Clang Tidy, on the other hand, is only run on _files that have changed in a given PR_. For example, if you have:
 

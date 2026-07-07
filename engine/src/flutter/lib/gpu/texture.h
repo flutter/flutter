@@ -25,11 +25,10 @@ class Texture : public RefCountedDartWrappable<Texture> {
 
   std::shared_ptr<impeller::Texture> GetTexture();
 
-  void SetCoordinateSystem(impeller::TextureCoordinateSystem coordinate_system);
-
-  bool Overwrite(Context& gpu_context, const tonic::DartByteData& source_bytes);
-
-  size_t GetBytesPerTexel();
+  bool Overwrite(Context& gpu_context,
+                 const tonic::DartByteData& source_bytes,
+                 uint32_t mip_level,
+                 uint32_t slice);
 
   Dart_Handle AsImage() const;
 
@@ -57,30 +56,40 @@ extern bool InternalFlutterGpu_Texture_Initialize(
     int width,
     int height,
     int sample_count,
-    int coordinate_system,
     int texture_type,
     bool enable_render_target_usage,
     bool enable_shader_read_usage,
-    bool enable_shader_write_usage);
-
-FLUTTER_GPU_EXPORT
-extern void InternalFlutterGpu_Texture_SetCoordinateSystem(
-    flutter::gpu::Texture* wrapper,
-    int coordinate_system);
+    bool enable_shader_write_usage,
+    int mip_level_count);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_Texture_Overwrite(
     flutter::gpu::Texture* wrapper,
     flutter::gpu::Context* gpu_context,
-    Dart_Handle source_byte_data);
-
-FLUTTER_GPU_EXPORT
-extern int InternalFlutterGpu_Texture_BytesPerTexel(
-    flutter::gpu::Texture* wrapper);
+    Dart_Handle source_byte_data,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_Texture_AsImage(
     flutter::gpu::Texture* wrapper);
+
+// Returns an Int32List describing the texture that backs the given ui.Image,
+// or an empty list if the image is not backed by a Flutter GPU compatible
+// texture. See the Dart `Texture.fromImage` for the field layout.
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
+    flutter::gpu::Context* gpu_context,
+    Dart_Handle image_wrapper);
+
+// Associates `wrapper` with the impeller texture that backs the given
+// ui.Image, without copying. Returns false if the image is not backed by a
+// Flutter GPU compatible texture.
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Texture_InitializeFromImage(
+    Dart_Handle wrapper,
+    flutter::gpu::Context* gpu_context,
+    Dart_Handle image_wrapper);
 
 }  // extern "C"
 

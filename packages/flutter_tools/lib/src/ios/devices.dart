@@ -47,11 +47,12 @@ import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
 
+const kJITCrashLogInterceptorIdentifier = 'jit_crash_log';
 const kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
 
 @visibleForTesting
-String jITCrashFailureInstructions(String deviceVersion) =>
+String jitCrashFailureInstructions(String deviceVersion) =>
     '''
 ════════════════════════════════════════════════════════════════════════════════
 A change to iOS has caused a temporary break in Flutter's debug mode on
@@ -64,6 +65,17 @@ In the meantime, we recommend these temporary workarounds:
 * Use a simulator for development rather than a physical device.
 * If you must use a device updated to $deviceVersion, use Flutter's release or
   profile mode via --release or --profile flags.
+════════════════════════════════════════════════════════════════════════════════''';
+
+/// The error message shown when an iOS app fails to launch because it has not
+/// been migrated to the UIScene lifecycle.
+const String kUISceneMigrationRequiredError = '''
+════════════════════════════════════════════════════════════════════════════════
+Your iOS app has not been migrated to the UIScene lifecycle.
+UIScene lifecycle is required on iOS 27 and later.
+
+To migrate your app, please follow the migration guide at:
+  https://flutter.dev/to/uiscene-migration
 ════════════════════════════════════════════════════════════════════════════════''';
 
 enum IOSDeploymentMethod {
@@ -530,6 +542,7 @@ class IOSDevice extends Device {
           logger: globals.logger,
           platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
+          device: this,
         );
         _logger.printError('');
         return LaunchResult.failed();
@@ -559,6 +572,19 @@ class IOSDevice extends Device {
     try {
       ProtocolDiscovery? vmServiceDiscovery;
       var installationResult = 1;
+
+      final DeviceLogReader deviceLogReader = getLogReader(
+        app: package,
+        usingCISystem: debuggingOptions.usingCISystem,
+      );
+
+      // This completer is used to intercept when the app crashes after the app launches but
+      // before the Dart VM service is found.
+      final appTerminatedCompleter = Completer<Uri?>();
+      if (deviceLogReader is SharedIOSDeviceLogReader) {
+        await _addLogInterceptors(deviceLogReader, appTerminatedCompleter);
+      }
+
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to vmService');
         vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
@@ -665,6 +691,8 @@ class IOSDevice extends Device {
           packageId: packageId,
           vmServiceDiscovery: vmServiceDiscovery,
           package: package,
+          deviceLogReader: deviceLogReader,
+          appTerminatedCompleter: appTerminatedCompleter,
         );
       } else if (isWirelesslyConnected) {
         // Wait for the Dart VM url to be discovered via logs (from `ios-deploy`)
@@ -824,6 +852,53 @@ class IOSDevice extends Device {
     _logger.printError('');
   }
 
+  Future<void> _addLogInterceptors(
+    SharedIOSDeviceLogReader deviceLogReader,
+    Completer<Uri?> appTerminatedCompleter,
+  ) async {
+    final String? uisceneWarning = globals.userMessages.uiSceneMigrationWarning;
+    if (uisceneWarning != null) {
+      final uisceneWarningInterceptor = LogInterceptor(
+        identifier: 'uiscene_requirement',
+        pattern: RegExp(
+          '`UIScene` lifecycle will soon be required|This process does not adopt UIScene lifecycle',
+        ),
+        action: () {
+          globals.printWarning(uisceneWarning);
+        },
+        excludeFromStream: true,
+      );
+      deviceLogReader.addLogInterceptor(uisceneWarningInterceptor);
+    }
+
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(uisceneCrashInterceptor);
+
+    final LogInterceptor? jitCrashInterceptor = await _jitCrashInterceptor();
+    if (jitCrashInterceptor != null) {
+      deviceLogReader.addLogInterceptor(jitCrashInterceptor);
+    }
+
+    final appTerminatedInterceptor = LogInterceptor(
+      identifier: 'app_terminated',
+      pattern: RegExp('^App terminated due to signal'),
+      action: () {
+        if (!appTerminatedCompleter.isCompleted) {
+          appTerminatedCompleter.complete();
+        }
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(appTerminatedInterceptor);
+  }
+
   /// Find the Dart VM url using ProtocolDiscovery (logs from `idevicesyslog`)
   /// and mDNS simultaneously, using whichever is found first. `idevicesyslog`
   /// does not work on wireless devices, so only use mDNS for wireless devices.
@@ -833,52 +908,9 @@ class IOSDevice extends Device {
     required DebuggingOptions debuggingOptions,
     ProtocolDiscovery? vmServiceDiscovery,
     IOSApp? package,
+    required DeviceLogReader deviceLogReader,
+    required Completer<Uri?> appTerminatedCompleter,
   }) async {
-    Timer? maxWaitForCI;
-    final cancelCompleter = Completer<Uri?>();
-
-    // When testing in CI, wait a max of 10 minutes for the Dart VM to be found.
-    // Afterwards, stop the app from running and upload DerivedData Logs to debug
-    // logs directory. CoreDevices are run through Xcode and launch logs are
-    // therefore found in DerivedData.
-    if (debuggingOptions.usingCISystem && debuggingOptions.debugLogsDirectoryPath != null) {
-      maxWaitForCI = Timer(const Duration(minutes: 10), () async {
-        _logger.printError('Failed to find Dart VM after 10 minutes.');
-        await _xcodeDebug.exit();
-        final String? homePath = _platform.environment['HOME'];
-        Directory? derivedData;
-        if (homePath != null) {
-          derivedData = _fileSystem.directory(
-            _fileSystem.path.join(homePath, 'Library', 'Developer', 'Xcode', 'DerivedData'),
-          );
-        }
-        if (derivedData != null && derivedData.existsSync()) {
-          final Directory debugLogsDirectory = _fileSystem.directory(
-            debuggingOptions.debugLogsDirectoryPath,
-          );
-          debugLogsDirectory.createSync(recursive: true);
-          for (final FileSystemEntity entity in derivedData.listSync()) {
-            if (entity is! Directory || !entity.childDirectory('Logs').existsSync()) {
-              continue;
-            }
-            final Directory logsToCopy = entity.childDirectory('Logs');
-            final Directory copyDestination = debugLogsDirectory
-                .childDirectory('DerivedDataLogs')
-                .childDirectory(entity.basename)
-                .childDirectory('Logs');
-            _logger.printTrace('Copying logs ${logsToCopy.path} to ${copyDestination.path}...');
-            copyDirectory(logsToCopy, copyDestination);
-          }
-        }
-        cancelCompleter.complete();
-      });
-    }
-
-    final StreamSubscription<String>? errorListener = await _interceptErrorsFromLogs(
-      package,
-      debuggingOptions: debuggingOptions,
-    );
-
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
     // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
@@ -897,52 +929,50 @@ class IOSDevice extends Device {
       if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
-    Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
+    Uri? localUri = await Future.any(<Future<Uri?>>[
+      ...discoveryOptions,
+      appTerminatedCompleter.future,
+    ]);
 
     // If the first future to return is null, wait for the other to complete
-    // unless canceled.
-    if (localUri == null && !cancelCompleter.isCompleted) {
+    // unless the app was terminated.
+    if (localUri == null && !appTerminatedCompleter.isCompleted) {
       final Future<List<Uri?>> allDiscoveryOptionsComplete = Future.wait(discoveryOptions);
-      await Future.any(<Future<Object?>>[allDiscoveryOptionsComplete, cancelCompleter.future]);
-      if (!cancelCompleter.isCompleted) {
-        // If it wasn't cancelled, that means one of the discovery options completed.
+      await Future.any(<Future<Object?>>[
+        allDiscoveryOptionsComplete,
+        appTerminatedCompleter.future,
+      ]);
+      if (!appTerminatedCompleter.isCompleted) {
+        // If it wasn't terminated, that means one of the discovery options completed.
         final List<Uri?> vmUrls = await allDiscoveryOptionsComplete;
         localUri = vmUrls.where((Uri? vmUrl) => vmUrl != null).firstOrNull;
       }
     }
-    maxWaitForCI?.cancel();
-    await errorListener?.cancel();
+
+    if (deviceLogReader is SharedIOSDeviceLogReader) {
+      deviceLogReader.removeLogInterceptorByIdentifier(kJITCrashLogInterceptorIdentifier);
+    }
     return localUri;
   }
 
   /// Listen to device logs for crash on iOS 18.4+ due to JIT restriction. If
   /// found, give guided error and throw tool exit. Returns null and does not
   /// listen if device is less than iOS 18.4.
-  Future<StreamSubscription<String>?> _interceptErrorsFromLogs(
-    IOSApp? package, {
-    required DebuggingOptions debuggingOptions,
-  }) async {
+  Future<LogInterceptor?> _jitCrashInterceptor() async {
     // Currently only checking for kJITCrashFailureMessage, which only should
     // be checked on iOS 18.4+.
     if (sdkVersion == null || sdkVersion! < Version(18, 4, null)) {
       return null;
     }
-    final DeviceLogReader deviceLogReader = getLogReader(
-      app: package,
-      usingCISystem: debuggingOptions.usingCISystem,
-    );
-
-    final Stream<String> logStream = deviceLogReader.logLines;
-
     final String deviceSdkVersion = await sdkNameAndVersion;
-
-    final StreamSubscription<String> errorListener = logStream.listen((String line) {
-      if (line.contains(kJITCrashFailureMessage)) {
-        throwToolExit(jITCrashFailureInstructions(deviceSdkVersion));
-      }
-    });
-
-    return errorListener;
+    return LogInterceptor(
+      identifier: kJITCrashLogInterceptorIdentifier,
+      pattern: kJITCrashFailureMessage,
+      action: () {
+        throwToolExit(jitCrashFailureInstructions(deviceSdkVersion));
+      },
+      excludeFromStream: false,
+    );
   }
 
   ProtocolDiscovery _setupDebuggerAndVmServiceDiscovery({
@@ -957,7 +987,6 @@ class IOSDevice extends Device {
       app: package,
       usingCISystem: debuggingOptions.usingCISystem,
     );
-
     // If the device supports syslog reading, prefer launching the app without
     // attaching the debugger to avoid the overhead of the unnecessary extra running process.
     if (majorSdkVersion >= IOSDeviceLogReader.minimumUniversalLoggingSdkVersion) {
@@ -1050,27 +1079,53 @@ class IOSDevice extends Device {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
 
-      final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
-        deviceId: id,
-        bundlePath: package.deviceBundlePath,
-        bundleId: package.id,
-        launchArguments: launchArguments,
-        shutdownHooks: globals.shutdownHooks,
-      );
+      final bool shouldAttachDebugger =
+          debuggingOptions.buildInfo.isDebug ||
+          (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
 
-      // If it succeeds to launch with LLDB, return, otherwise continue on to
-      // try launching with Xcode.
-      if (launchSuccess) {
-        return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
-      } else {
-        deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
-        _analytics.send(
-          Event.appleUsageEvent(
-            workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
-            result: 'launch failed',
-          ),
+      if (shouldAttachDebugger) {
+        final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
+          deviceId: id,
+          bundlePath: package.deviceBundlePath,
+          bundleId: package.id,
+          launchArguments: launchArguments,
+          shutdownHooks: globals.shutdownHooks,
+          mode: debuggingOptions.buildInfo.mode,
         );
+
+        if (launchSuccess) {
+          return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
+        } else {
+          deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
+          _analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
+              result: 'launch failed',
+            ),
+          );
+        }
+      } else {
+        final bool launchSuccess = await _coreDeviceLauncher.launchAppAndStreamLogsWithoutDebugger(
+          deviceId: id,
+          bundlePath: package.deviceBundlePath,
+          bundleId: package.id,
+          launchArguments: launchArguments,
+          shutdownHooks: globals.shutdownHooks,
+        );
+
+        if (launchSuccess) {
+          return (launchSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
+        } else {
+          deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
+          _analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+              result: 'launch failed',
+            ),
+          );
+        }
       }
     }
 
@@ -1352,6 +1407,83 @@ String decodeSyslog(String line) {
   }
 }
 
+/// When receiving logs from a device, a [LogInterceptor] can be used to match against a log and
+/// perform an [action] if the [pattern] matches.
+class LogInterceptor {
+  LogInterceptor({
+    required this.identifier,
+    required this.pattern,
+    required this.action,
+    required this.excludeFromStream,
+  });
+
+  /// Unique identifier to make for easy removal from a list.
+  final String identifier;
+
+  /// Logs will be checked to see if they contain the [pattern].
+  final Pattern pattern;
+
+  /// If the log contain the [pattern], the [action] will be called.
+  final void Function() action;
+
+  /// If `true`, the log will be excluded from being added to the stream.
+  final bool excludeFromStream;
+}
+
+/// Shared logic between iOS device log readers, such as [IOSDeviceLogReader]
+/// for physical iOS devices and _IOSSimulatorLogReader for simulators.
+abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
+  @visibleForOverriding
+  /// [StreamController] for iOS device logs.
+  StreamController<String> get linesController;
+
+  /// Interceptors that should be checked with every log.
+  final List<LogInterceptor> _logInterceptors = [];
+
+  void addLogInterceptor(LogInterceptor interceptor) {
+    _logInterceptors.add(interceptor);
+  }
+
+  /// Once removed, the [LogInterceptor] will no longer intercept logs.
+  void removeLogInterceptor(LogInterceptor interceptor) {
+    _logInterceptors.remove(interceptor);
+  }
+
+  /// Remove where [LogInterceptor.identifier] matches [identifier]. Once removed, the
+  /// [LogInterceptor] will no longer intercept logs.
+  void removeLogInterceptorByIdentifier(String identifier) {
+    _logInterceptors.removeWhere((item) => item.identifier == identifier);
+  }
+
+  /// Checks if the [message] matches any [_logInterceptors] and performs the corresponding action
+  /// of the first matched interceptor.
+  ///
+  /// Returns `true` if the log should be not added to the [StreamController] to be displayed to the user.
+  bool _interceptLog(String message) {
+    for (final LogInterceptor interceptor in _logInterceptors) {
+      if (message.contains(interceptor.pattern)) {
+        interceptor.action();
+        if (interceptor.excludeFromStream) {
+          return true;
+        }
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /// Adds [message] to the [linesController] if the [StreamController] is open and the log is not
+  /// intercepted.
+  void addLogToStream(String message) {
+    // Sometimes (race condition?) we try to send a log after the controller has
+    // been closed. See https://github.com/flutter/flutter/issues/99021 for more
+    // context.
+    if (!linesController.isClosed && !_interceptLog(message)) {
+      linesController.add(message);
+    }
+  }
+}
+
 /// Listens to multiple logging sources to get the logs from the physical iOS device.
 ///
 /// Potential logging sources include:
@@ -1364,7 +1496,7 @@ String decodeSyslog(String line) {
 ///
 /// Logs are added to the [linesController] and consumed through the [logLines] stream by
 /// [FlutterDevice.startEchoingDeviceLog].
-class IOSDeviceLogReader extends DeviceLogReader {
+class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   IOSDeviceLogReader._(
     this._xcode,
     this._iMobileDevice,
@@ -1453,23 +1585,19 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Logging from the dart code has no prefixing metadata.
   final _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
 
+  @override
   @visibleForTesting
   late final linesController = StreamController<String>.broadcast(
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
 
-  // Sometimes (race condition?) we try to send a log after the controller has
-  // been closed. See https://github.com/flutter/flutter/issues/99021 for more
-  // context.
   @visibleForTesting
   void addToLinesController(String message, IOSDeviceLogSource source) {
-    if (!linesController.isClosed) {
-      if (_excludeLog(message, source)) {
-        return;
-      }
-      linesController.add(message);
+    if (_excludeLog(message, source)) {
+      return;
     }
+    addLogToStream(message);
   }
 
   /// Used to track messages prefixed with "flutter:" from the fallback log source.

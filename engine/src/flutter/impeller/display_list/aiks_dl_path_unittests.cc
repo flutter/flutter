@@ -265,12 +265,14 @@ TEST_P(AiksTest, HairlinePath) {
   Scalar scale = 1.f;
   Scalar rotation = 0.f;
   Scalar offset = 0.f;
+  Scalar width = 0.f;
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("Scale", &scale, 0, 6);
       ImGui::SliderFloat("Rotate", &rotation, 0, 90);
       ImGui::SliderFloat("Offset", &offset, 0, 2);
+      ImGui::SliderFloat("Width", &width, 0, 2);
       ImGui::End();
     }
 
@@ -279,7 +281,7 @@ TEST_P(AiksTest, HairlinePath) {
     builder.DrawPaint(DlPaint(DlColor(0xff111111)));
 
     DlPaint paint;
-    paint.setStrokeWidth(0.f);
+    paint.setStrokeWidth(width);
     paint.setColor(DlColor::kWhite());
     paint.setStrokeCap(DlStrokeCap::kRound);
     paint.setStrokeJoin(DlStrokeJoin::kRound);
@@ -626,6 +628,10 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
 // the antialiasing. The amount of blurring should be the same for both
 // horizontal lines.
 TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is run with the antialias flag.
+  EnsureContextSupportsAntialiasLines();
+
   Scalar scale = 5.0;
   Scalar line_width = 10.f;
   auto callback = [&]() -> sk_sp<DisplayList> {
@@ -678,6 +684,10 @@ TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
 }
 
 TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is run with the antialias flag.
+  EnsureContextSupportsAntialiasLines();
+
   float scale = 5.0f;
   float line_width = 10.f;
   float rotation = 0.f;
@@ -741,6 +751,10 @@ TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
 }
 
 TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is run with the antialias flag.
+  EnsureContextSupportsAntialiasLines();
+
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
@@ -926,10 +940,7 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
 
   const Scalar kTriangleHeight = 100;
   DlRoundRect rrect = DlRoundRect::MakeRectRadii(
-      DlRect::MakeXYWH(-kTriangleHeight / 2.0f, -kTriangleHeight / 2.0f,
-                       kTriangleHeight, kTriangleHeight),
-      radii  //
-  );
+      DlRect::MakeCircleBounds({0, 0}, kTriangleHeight * 0.5f), radii);
   // We use the factory method to convert the rrect to a path so that it
   // uses the legacy conics for legacy golden output.
   DlPath rrect_path = DlPath::MakeRoundRect(rrect);
@@ -980,6 +991,32 @@ TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
   path_builder.LineTo(DlPoint(200, 200));
 
   builder.DrawPath(path_builder.TakePath(), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, TwoContourPathWithConnectingLines) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(15.0);
+
+  builder.Translate(100, 0);
+  for (auto join : std::vector<DlStrokeJoin>{
+           DlStrokeJoin::kMiter, DlStrokeJoin::kRound, DlStrokeJoin::kBevel}) {
+    builder.Translate(0, 100);
+    paint.setStrokeJoin(join);
+
+    DlPathBuilder path_builder;
+    path_builder.MoveTo(DlPoint(0, 0));
+    path_builder.LineTo(DlPoint(50, 50));
+    path_builder.MoveTo(DlPoint(50, 50));
+    path_builder.LineTo(DlPoint(100, 0));
+
+    builder.DrawPath(path_builder.TakePath(), paint);
+  }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

@@ -69,7 +69,7 @@ abstract class AotAssemblyBase extends Target {
       kExtraGenSnapshotOptions,
     );
     final buildMode = BuildMode.fromCliName(environmentBuildMode);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
+    final targetPlatform = TargetPlatform.fromName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> darwinArchs =
@@ -263,6 +263,9 @@ abstract class UnpackIOS extends UnpackDarwin {
   BuildMode get buildMode;
 
   @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -291,10 +294,11 @@ abstract class UnpackIOS extends UnpackDarwin {
         .childDirectory(FlutterDarwinPlatform.ios.frameworkName)
         .childFile(FlutterDarwinPlatform.ios.binaryName);
     final String frameworkBinaryPath = frameworkBinary.path;
-    if (!await frameworkBinary.exists()) {
+    if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
+
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
@@ -516,6 +520,12 @@ class DebugIosLLDBInit extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` is not run on a device and therefore does not need an LLDB Init File.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -612,13 +622,14 @@ abstract class IosAssetBundle extends Target {
     KernelSnapshot(),
     InstallCodeAssets(),
     _IssueLaunchRootViewControllerAccess(),
-    DartBuildForNative(),
+    LinkHooks(),
   ];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -699,7 +710,7 @@ abstract class IosAssetBundle extends Target {
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
@@ -909,7 +920,7 @@ Future<void> _createStubAppFramework(
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     binary,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),
     environment.logger,

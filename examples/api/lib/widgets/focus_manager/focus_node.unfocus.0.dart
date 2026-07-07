@@ -25,7 +25,7 @@ class UnfocusExample extends StatefulWidget {
 }
 
 class _UnfocusExampleState extends State<UnfocusExample> {
-  UnfocusDisposition disposition = UnfocusDisposition.scope;
+  UnfocusDisposition disposition = .scope;
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +33,14 @@ class _UnfocusExampleState extends State<UnfocusExample> {
       child: ColoredBox(
         color: Colors.white,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Wrap(
               children: List<Widget>.generate(4, (int index) {
                 return const SizedBox(
                   width: 200,
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: .all(8.0),
                     child: TextField(
                       decoration: InputDecoration(border: OutlineInputBorder()),
                     ),
@@ -48,45 +48,39 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                 );
               }),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                ...List<Widget>.generate(UnfocusDisposition.values.length, (
-                  int index,
-                ) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Radio<UnfocusDisposition>(
-                        // TODO(loic-sharma): Migrate to RadioGroup.
-                        // https://github.com/flutter/flutter/issues/179088
-                        // ignore: deprecated_member_use
-                        groupValue: disposition,
-                        // TODO(loic-sharma): Migrate to RadioGroup.
-                        // https://github.com/flutter/flutter/issues/179088
-                        // ignore: deprecated_member_use
-                        onChanged: (UnfocusDisposition? value) {
-                          setState(() {
-                            if (value != null) {
-                              disposition = value;
-                            }
-                          });
-                        },
-                        value: UnfocusDisposition.values[index],
-                      ),
-                      Text(UnfocusDisposition.values[index].name),
-                    ],
-                  );
-                }),
-                OutlinedButton(
-                  child: const Text('UNFOCUS'),
-                  onPressed: () {
-                    setState(() {
+            RadioGroup<UnfocusDisposition>(
+              groupValue: disposition,
+              onChanged: (UnfocusDisposition? value) {
+                setState(() {
+                  if (value != null) {
+                    disposition = value;
+                  }
+                });
+              },
+              child: Row(
+                mainAxisAlignment: .spaceAround,
+                children: <Widget>[
+                  ...List<Widget>.generate(UnfocusDisposition.values.length, (
+                    int index,
+                  ) {
+                    return Row(
+                      mainAxisSize: .min,
+                      children: <Widget>[
+                        Radio<UnfocusDisposition>(
+                          value: UnfocusDisposition.values[index],
+                        ),
+                        Text(UnfocusDisposition.values[index].name),
+                      ],
+                    );
+                  }),
+                  OutlinedButton(
+                    child: const Text('UNFOCUS'),
+                    onPressed: () {
                       primaryFocus!.unfocus(disposition: disposition);
-                    });
-                  },
-                ),
-              ],
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -80,7 +80,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        _tester.start();
+        unawaited(_tester.start());
         registerDidStop(_tester.stop);
       });
     }
@@ -96,9 +96,8 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
       textDirection: TextDirection.ltr,
       child: Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 400,
-          height: 400,
+        child: SizedBox.square(
+          dimension: 400,
           child: ListView.builder(
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,

@@ -92,20 +92,19 @@ public class PlatformViewsChannel {
                   : null;
 
           try {
-            // TODO(gmackall): Enable hcpp path in a follow up PR to
-            //                 https://github.com/flutter/flutter/pull/170553/.
-            //                 with a new more externally friendly flag name.
-            //            if (handler.isHcppEnabled()) {
-            //              final PlatformViewCreationRequest request =
-            //                  PlatformViewCreationRequest.createHCPPRequest(
-            //                      (int) createArgs.get("id"),
-            //                      (String) createArgs.get("viewType"),
-            //                      (int) createArgs.get("direction"),
-            //                      additionalParams);
-            //              handler.createPlatformViewHcpp(request);
-            //              result.success(null);
-            //              return;
-            //            }
+            if (handler.isHcppEnabled()) {
+              Log.i(TAG, "Using HCPP platform view rendering strategy.");
+              final PlatformViewCreationRequest request =
+                  PlatformViewCreationRequest.createHCPPRequest(
+                      (int) createArgs.get("id"),
+                      (String) createArgs.get("viewType"),
+                      (int) createArgs.get("direction"),
+                      additionalParams);
+              handler.createPlatformViewHcpp(request);
+              result.success(null);
+              return;
+            }
+            Log.i(TAG, "Using legacy platform view rendering strategy.");
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createHybridCompositionRequest(
@@ -298,7 +297,7 @@ public class PlatformViewsChannel {
      * This can only be returned if the {@code PlatformViewCreationRequest} sets
      * {@code TEXTURE_WITH_HYBRID_FALLBACK} as the requested display mode.
      */
-    static final long NON_TEXTURE_FALLBACK = -2;
+    long NON_TEXTURE_FALLBACK = -2;
 
     /**
      * The Flutter application would like to display a new Android {@code View}, i.e., platform

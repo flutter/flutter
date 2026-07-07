@@ -13,6 +13,12 @@
 
 namespace impeller {
 
+namespace android::testing {
+FML_TEST_CLASS(AndroidAHBSwapchainTest, AHBSwapchainDtorCallsWaitIdle);
+FML_TEST_CLASS(AndroidAHBSwapchainTest,
+               AHBSwapchainNoFenceWaitAfterAcquireNextImageFailure);
+}  // namespace android::testing
+
 using CreateTransactionCB = std::function<android::SurfaceTransaction()>;
 
 //------------------------------------------------------------------------------
@@ -55,6 +61,10 @@ class AHBSwapchainVK final : public SwapchainVK {
 
  private:
   friend class SwapchainVK;
+  FML_FRIEND_TEST(android::testing::AndroidAHBSwapchainTest,
+                  AHBSwapchainDtorCallsWaitIdle);
+  FML_FRIEND_TEST(android::testing::AndroidAHBSwapchainTest,
+                  AHBSwapchainNoFenceWaitAfterAcquireNextImageFailure);
 
   std::weak_ptr<Context> context_;
   std::shared_ptr<android::SurfaceControl> surface_control_;
@@ -62,11 +72,12 @@ class AHBSwapchainVK final : public SwapchainVK {
   CreateTransactionCB cb_;
   std::shared_ptr<AHBSwapchainImplVK> impl_;
 
-  explicit AHBSwapchainVK(const std::shared_ptr<Context>& context,
-                          ANativeWindow* window,
-                          const CreateTransactionCB& cb,
-                          const ISize& size,
-                          bool enable_msaa);
+  explicit AHBSwapchainVK(
+      const std::shared_ptr<Context>& context,
+      const std::shared_ptr<android::SurfaceControl>& surface_control,
+      const CreateTransactionCB& cb,
+      const ISize& size,
+      bool enable_msaa);
 };
 
 }  // namespace impeller

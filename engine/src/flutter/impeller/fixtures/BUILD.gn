@@ -51,6 +51,8 @@ impeller_shaders("shader_fixtures") {
     "impeller.vert",
     "inactive_uniforms.frag",
     "inactive_uniforms.vert",
+    "instanced_attributes.frag",
+    "instanced_attributes.vert",
     "instanced_draw.frag",
     "instanced_draw.vert",
     "mipmaps.frag",
@@ -88,6 +90,7 @@ impellerc("runtime_stages") {
   mnemonic = "IMPELLERC_IPLR"
   shaders = [
     "ink_sparkle.frag",
+    "all_supported_uniforms.frag",
     "runtime_stage_example.frag",
     "runtime_stage_filter_example.frag",
     "interop_runtime_stage_cs.frag",
@@ -99,12 +102,30 @@ impellerc("runtime_stages") {
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",
     "runtime_stage_border.frag",
+    "runtime_stage_vector_array.frag",
   ]
+  sl_file_extension = "iplr"
+
+  shader_target_flags = [
+    "--sksl",
+    "--runtime-stage-metal",
+    "--runtime-stage-gles",
+    "--runtime-stage-gles3",
+    "--runtime-stage-vulkan",
+  ]
+
+  iplr = true
+}
+
+impellerc("runtime_stages_non_sksl") {
+  mnemonic = "IMPELLERC_IPLR"
+  shaders = [ "runtime_stage_simple_no_sksl.frag" ]
   sl_file_extension = "iplr"
 
   shader_target_flags = [
     "--runtime-stage-metal",
     "--runtime-stage-gles",
+    "--runtime-stage-gles3",
     "--runtime-stage-vulkan",
   ]
 
@@ -118,13 +139,20 @@ test_fixtures("file_fixtures") {
     "//flutter/txt/third_party/fonts/NotoColorEmoji.ttf",
     "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
     "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
+    "//flutter/txt/third_party/fonts/RobotoSlab-VariableFont_wght.ttf",
     "airplane.jpg",
+    "array_assignment.frag",
+    "array_initializer_with_constants.frag",
+    "array_initializer_with_variables.frag",
+    "array_initialization_without_initializer.frag",
     "bay_bridge.jpg",
     "blend_mode_dst.png",
     "blend_mode_src.png",
     "blue_noise.png",
     "boston.jpg",
     "embarcadero.jpg",
+    "flutter_gpu_instanced.frag",
+    "flutter_gpu_instanced.vert",
     "flutter_gpu_texture.frag",
     "flutter_gpu_texture.vert",
     "flutter_gpu_unlit.frag",
@@ -139,6 +167,7 @@ test_fixtures("file_fixtures") {
     "sample.frag",
     "sample.vert",
     "check_gles_definition.frag",
+    "check_gles_unflipped_definition.frag",
     "sample_with_binding.vert",
     "sample_with_positioned_uniforms.frag",
     "sample_with_uniforms.frag",
@@ -158,18 +187,27 @@ test_fixtures("file_fixtures") {
     "types.h",
     "wtf.otf",
     "texture_lookup.frag",
+    "mat2_test.frag",
+    "y_flip_early_return.vert",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]
   }
   fixtures +=
       filter_include(get_target_outputs(":runtime_stages"), [ "*.iplr" ])
-  deps = [ ":runtime_stages" ]
+  fixtures += filter_include(get_target_outputs(":runtime_stages_non_sksl"),
+                             [ "*.iplr" ])
+  deps = [
+    ":runtime_stages",
+    ":runtime_stages_non_sksl",
+  ]
 }
 
 impellerc("flutter_gpu_shaders") {
   shaders = [
     # Temporarily build Flutter GPU test shaders as runtime stages.
+    "flutter_gpu_instanced.frag",
+    "flutter_gpu_instanced.vert",
     "flutter_gpu_unlit.frag",
     "flutter_gpu_unlit.vert",
     "flutter_gpu_texture.frag",
@@ -177,7 +215,7 @@ impellerc("flutter_gpu_shaders") {
   ]
 
   fixtures = rebase_path("//flutter/impeller/fixtures")
-  shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
+  shader_bundle = "{\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_instanced.frag\"}, \"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_instanced.vert\"}, \"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
   shader_bundle_output = "playground.shaderbundle"
 }
 
