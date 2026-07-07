@@ -82,6 +82,27 @@ void testMain() {
       expect(canvas.canvasElement.style.height, '714px');
     });
 
+    test('preserves canvas logical size when inline CSS size is within tolerance', () async {
+      final canvas = RenderCanvas();
+
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.0);
+      canvas.render(await newBitmap(1201, 2143));
+
+      expect(canvas.canvasElement.width, 1201);
+      expect(canvas.canvasElement.height, 2143);
+
+      canvas.canvasElement.style
+        ..width = '400.33px'
+        ..height = '714.34px';
+
+      canvas.render(await newBitmap(1201, 2143));
+
+      expect(canvas.canvasElement.width, 1201);
+      expect(canvas.canvasElement.height, 2143);
+      expect(canvas.canvasElement.style.width, '400.33px');
+      expect(canvas.canvasElement.style.height, '714.34px');
+    });
+
     test('rounds physical size to nearest integer size', () async {
       final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.debugPhysicalSizeOverride = const ui.Size(199.999999, 200.000001);

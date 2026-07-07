@@ -52,37 +52,50 @@ class RenderCanvas extends DisplayCanvas {
 
   late final DomCanvasRenderingContext2D renderContext2d = canvasElement.context2D;
 
+  static const double _logicalHtmlCanvasSizeEpsilon = 0.01;
+
   double _currentDevicePixelRatio = -1;
 
   /// Sets the CSS size of the canvas so that canvas pixels are 1:1 with device
   /// pixels.
   void _updateLogicalHtmlCanvasSize() {
-    final ({double devicePixelRatio, String height, String width}) logicalSize =
+    final ({double devicePixelRatio, double height, double width}) logicalSize =
         _computeLogicalHtmlCanvasSize();
     final DomCSSStyleDeclaration style = canvasElement.style;
-    style.width = logicalSize.width;
-    style.height = logicalSize.height;
+    style.width = '${logicalSize.width}px';
+    style.height = '${logicalSize.height}px';
     _currentDevicePixelRatio = logicalSize.devicePixelRatio;
   }
 
-  ({double devicePixelRatio, String height, String width}) _computeLogicalHtmlCanvasSize() {
+  ({double devicePixelRatio, double height, double width}) _computeLogicalHtmlCanvasSize() {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     final double logicalWidth = _pixelWidth / devicePixelRatio;
     final double logicalHeight = _pixelHeight / devicePixelRatio;
-    return (
-      devicePixelRatio: devicePixelRatio,
-      height: '${logicalHeight}px',
-      width: '${logicalWidth}px',
-    );
+    return (devicePixelRatio: devicePixelRatio, height: logicalHeight, width: logicalWidth);
   }
 
   bool _isLogicalHtmlCanvasSizeCurrent() {
-    final ({double devicePixelRatio, String height, String width}) logicalSize =
+    final ({double devicePixelRatio, double height, double width}) logicalSize =
         _computeLogicalHtmlCanvasSize();
+    if (logicalSize.devicePixelRatio != _currentDevicePixelRatio) {
+      return false;
+    }
     final DomCSSStyleDeclaration style = canvasElement.style;
-    return logicalSize.devicePixelRatio == _currentDevicePixelRatio &&
-        style.width == logicalSize.width &&
-        style.height == logicalSize.height;
+    final double? actualWidth = _parseCssPixelLength(style.width);
+    final double? actualHeight = _parseCssPixelLength(style.height);
+    if (actualWidth == null || actualHeight == null) {
+      return false;
+    }
+    return (actualWidth - logicalSize.width).abs() < _logicalHtmlCanvasSizeEpsilon &&
+        (actualHeight - logicalSize.height).abs() < _logicalHtmlCanvasSizeEpsilon;
+  }
+
+  double? _parseCssPixelLength(String value) {
+    final String trimmed = value.trim();
+    if (!trimmed.endsWith('px')) {
+      return null;
+    }
+    return double.tryParse(trimmed.substring(0, trimmed.length - 2).trim());
   }
 
   /// Render the given [bitmap] with this [RenderCanvas].
