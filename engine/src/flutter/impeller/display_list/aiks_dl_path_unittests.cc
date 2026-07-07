@@ -263,16 +263,16 @@ TEST_P(AiksTest, CanRenderStrokedConicPaths) {
 
 namespace {
 using DrawLinesCallback = std::function<void(DisplayListBuilder& builder,
-                                             DlPaint paint,
-                                             Scalar yoffset,
+                                             const DlPaint& paint,
+                                             const Point& p0,
+                                             const Point& p1,
                                              Scalar width)>;
 
-static void DrawLinesTest(AiksTest* test,
-                          const DrawLinesCallback& draw_line_fn,
-                          Scalar width,
-                          Scalar rotation) {
+static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
   Scalar scale = 1.f;
+  Scalar rotation = 0.f;
   Scalar offset = 0.f;
+  Scalar width_adjustment = 0.f;
   bool invert_colors = false;
 
   auto callback = [=]() mutable -> sk_sp<DisplayList> {
@@ -281,7 +281,7 @@ static void DrawLinesTest(AiksTest* test,
       ImGui::SliderFloat("Scale", &scale, 0, 6);
       ImGui::SliderFloat("Rotate", &rotation, 0, 90);
       ImGui::SliderFloat("Offset", &offset, 0, 2);
-      ImGui::SliderFloat("Width", &width, 0, 2);
+      ImGui::SliderFloat("Width Adjustment", &width_adjustment, -1, 2);
       ImGui::Checkbox("Invert colors", &invert_colors);
       ImGui::End();
     }
@@ -292,17 +292,36 @@ static void DrawLinesTest(AiksTest* test,
         DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
 
     DlPaint paint;
-    paint.setStrokeWidth(width);
     paint.setColor(invert_colors ? DlColor::kBlack() : DlColor::kWhite());
 
-    builder.Translate(512, 384);
-    builder.Scale(scale, scale);
-    builder.Rotate(rotation);
-    builder.Translate(-512, -384 + offset);
+    std::vector<Scalar> col_offsets = {170.67f, 512.0f, 853.33f};
+    std::vector<Scalar> row_offsets = {96.0f, 288.0f, 480.0f, 672.0f};
 
-    for (int i = 0; i < 5; ++i) {
-      Scalar yoffset = i * 25.25f + 300.f;
-      draw_line_fn(builder, paint, yoffset, width);
+    std::vector<Scalar> widths = {0.0f, 0.3f, 1.0f};
+    std::vector<Scalar> angles = {0.0f, 3.0f, 45.0f, 90.0f};
+
+    for (size_t col = 0; col < col_offsets.size(); ++col) {
+      Scalar width = std::max(0.0f, widths[col] + width_adjustment);
+      for (size_t row = 0; row < row_offsets.size(); ++row) {
+        builder.Save();
+        builder.Translate(col_offsets[col], row_offsets[row]);
+        builder.Scale(scale, scale);
+        builder.Rotate(angles[row] + rotation);
+
+        // Draw 4 parallel lines centered around y = 0. Each line is spaced 8px
+        // apart (-12, -4, +4, +12), plus a 0.25px increment per line to test
+        // fractional subpixel alignment (0.0, 0.25, 0.5, 0.75).
+        for (int i = 0; i < 4; ++i) {
+          Scalar base_y = i * 8.0f - 12.0f;
+          Scalar subpixel_y = i * 0.25f;
+          Scalar line_y = base_y + subpixel_y + offset;
+          Point p0 = Point(-75.0f, line_y);
+          Point p1 = Point(75.0f, line_y);
+          draw_fn(builder, paint, p0, p1, width);
+        }
+
+        builder.Restore();
+      }
     }
 
     return builder.Build();
@@ -312,176 +331,47 @@ static void DrawLinesTest(AiksTest* test,
 }
 }  // namespace
 
-TEST_P(AiksTest, HairlinePath) {
+TEST_P(AiksTest, DrawLinesWithPath) {
   DrawLinesTest(
       this,
-      [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
+      [](DisplayListBuilder& builder, const DlPaint& paint, Point p0, Point p1,
          Scalar width) {
-        paint.setDrawStyle(DlDrawStyle::kStroke);
+        DlPaint stroke_paint = paint;
+        stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+        stroke_paint.setStrokeWidth(width);
         DlPathBuilder path_builder;
-        path_builder.MoveTo(DlPoint(100, yoffset));
-        path_builder.LineTo(DlPoint(924, yoffset));
-        builder.DrawPath(path_builder.TakePath(), paint);
-      },
-      /*width=*/0.0f,
-      /*rotation=*/0.0f);
+        path_builder.MoveTo(DlPoint(p0.x, p0.y));
+        path_builder.LineTo(DlPoint(p1.x, p1.y));
+        builder.DrawPath(path_builder.TakePath(), stroke_paint);
+      });
 }
 
-TEST_P(AiksTest, ThinPath) {
+TEST_P(AiksTest, DrawLinesWithDrawLine) {
   DrawLinesTest(
       this,
-      [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
+      [](DisplayListBuilder& builder, const DlPaint& paint, Point p0, Point p1,
          Scalar width) {
-        paint.setDrawStyle(DlDrawStyle::kStroke);
-        DlPathBuilder path_builder;
-        path_builder.MoveTo(DlPoint(100, yoffset));
-        path_builder.LineTo(DlPoint(924, yoffset));
-        builder.DrawPath(path_builder.TakePath(), paint);
-      },
-      /*width=*/0.3f,
-      /*rotation=*/0.0f);
+        DlPaint stroke_paint = paint;
+        stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+        stroke_paint.setStrokeWidth(width);
+        builder.DrawLine(DlPoint(p0.x, p0.y), DlPoint(p1.x, p1.y),
+                         stroke_paint);
+      });
 }
 
-TEST_P(AiksTest, OnePixelPath) {
+TEST_P(AiksTest, DrawLinesWithFilledRects) {
   DrawLinesTest(
       this,
-      [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
+      [](DisplayListBuilder& builder, const DlPaint& paint, Point p0, Point p1,
          Scalar width) {
-        paint.setDrawStyle(DlDrawStyle::kStroke);
-        DlPathBuilder path_builder;
-        path_builder.MoveTo(DlPoint(100, yoffset));
-        path_builder.LineTo(DlPoint(924, yoffset));
-        builder.DrawPath(path_builder.TakePath(), paint);
-      },
-      /*width=*/1.0f,
-      /*rotation=*/0.0f);
-}
-
-TEST_P(AiksTest, ThinPathRotated) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
-         Scalar width) {
-        paint.setDrawStyle(DlDrawStyle::kStroke);
-        DlPathBuilder path_builder;
-        path_builder.MoveTo(DlPoint(100, yoffset));
-        path_builder.LineTo(DlPoint(924, yoffset));
-        builder.DrawPath(path_builder.TakePath(), paint);
-      },
-      /*width=*/0.3f,
-      /*rotation=*/2.0f);
-}
-
-TEST_P(AiksTest, HairlineDrawLine) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        builder.DrawLine(DlPoint(100, yoffset), DlPoint(924, yoffset), paint);
-      },
-      /*width=*/0.0f,
-      /*rotation=*/0.0f);
-}
-
-TEST_P(AiksTest, ThinDrawLine) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        builder.DrawLine(DlPoint(100, yoffset), DlPoint(924, yoffset), paint);
-      },
-      /*width=*/0.3f,
-      /*rotation=*/0.0f);
-}
-
-TEST_P(AiksTest, ThinDrawLineRotated) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        builder.DrawLine(DlPoint(100, yoffset), DlPoint(924, yoffset), paint);
-      },
-      /*width=*/0.3f,
-      /*rotation=*/2.0f);
-}
-
-TEST_P(AiksTest, OnePixelDrawLine) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        builder.DrawLine(DlPoint(100, yoffset), DlPoint(924, yoffset), paint);
-      },
-      /*width=*/1.0f,
-      /*rotation=*/0.0f);
-}
-
-TEST_P(AiksTest, HairlineDrawFilledRect) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        Scalar start = 100;
-        Scalar end = 924;
-        Scalar length = end - start;
-        Point center = {(start + end) / 2.0f, yoffset};
+        DlPaint fill_paint = paint;
+        fill_paint.setDrawStyle(DlDrawStyle::kFill);
+        Scalar length = p0.GetDistance(p1);
+        Point center = {(p0.x + p1.x) * 0.5f, (p0.y + p1.y) * 0.5f};
         builder.DrawRect(
-            DlRect::MakeEllipseBounds(center, Size(length, width) / 2.0f),
-            paint);
-      },
-      /*width=*/0.0f,
-      /*rotation=*/0.0f);
-}
-
-TEST_P(AiksTest, ThinDrawFilledRect) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        Scalar start = 100;
-        Scalar end = 924;
-        Scalar length = end - start;
-        Point center = {(start + end) / 2.0f, yoffset};
-        builder.DrawRect(
-            DlRect::MakeEllipseBounds(center, Size(length, width) / 2.0f),
-            paint);
-      },
-      /*width=*/0.3f,
-      /*rotation=*/0.0f);
-}
-
-TEST_P(AiksTest, ThinDrawFilledRectRotated) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        Scalar start = 100;
-        Scalar end = 924;
-        Scalar length = end - start;
-        Point center = {(start + end) / 2.0f, yoffset};
-        builder.DrawRect(
-            DlRect::MakeEllipseBounds(center, Size(length, width) / 2.0f),
-            paint);
-      },
-      /*width=*/0.3f,
-      /*rotation=*/2.0f);
-}
-
-TEST_P(AiksTest, OnePixelDrawFilledRect) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
-         Scalar width) {
-        Scalar start = 100;
-        Scalar end = 924;
-        Scalar length = end - start;
-        Point center = {(start + end) / 2.0f, yoffset};
-        builder.DrawRect(
-            DlRect::MakeEllipseBounds(center, Size(length, width) / 2.0f),
-            paint);
-      },
-      /*width=*/1.0f,
-      /*rotation=*/0.0f);
+            DlRect::MakeEllipseBounds(center, Size(length, width) * 0.5f),
+            fill_paint);
+      });
 }
 
 TEST_P(AiksTest, CanRenderTightConicPath) {
