@@ -273,7 +273,7 @@ mixin _WindowControllerMixin implements WindowControllerMacOS {
     _MacOSPlatformInterface.destroyWindow(handle);
   }
 
-  bool get destroyed => _destroyed;
+  bool get isDestroyed => _destroyed;
 
   bool _destroyed = false;
 

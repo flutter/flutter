@@ -378,6 +378,10 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize {
     _ensureNotDestroyed();
     final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(windowHandle);
@@ -622,6 +626,10 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize {
     _ensureNotDestroyed();
     final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(windowHandle);
@@ -824,6 +832,10 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   Rect _anchorRect;
   bool _destroyed = false;
 
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
+
   ffi.Pointer<_Rect> _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
@@ -1009,6 +1021,10 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   WindowPositioner _positioner;
   Rect _anchorRect;
   bool _destroyed = false;
+
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
 
   ffi.Pointer<_Rect> _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,

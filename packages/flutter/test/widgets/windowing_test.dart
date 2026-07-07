@@ -73,7 +73,13 @@ class _StubRegularWindowController extends RegularWindowController {
   void setFullscreen(bool fullscreen, {Display? display}) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 class _StubDialogWindowController extends DialogWindowController {
@@ -112,7 +118,13 @@ class _StubDialogWindowController extends DialogWindowController {
   void setMinimized(bool minimized) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 class _StubTooltipWindowController extends TooltipWindowController {
@@ -135,7 +147,13 @@ class _StubTooltipWindowController extends TooltipWindowController {
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 class _StubPopupWindowController extends PopupWindowController {
@@ -155,7 +173,13 @@ class _StubPopupWindowController extends PopupWindowController {
   void setConstraints(BoxConstraints constraints) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
@@ -199,7 +223,13 @@ class _StubSatelliteWindowController extends SatelliteWindowController {
   void activate() {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 // A controller that mutates its aspect values and notifies listeners, used to

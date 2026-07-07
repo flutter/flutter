@@ -379,6 +379,10 @@ class RegularWindowControllerLinux extends RegularWindowController
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize => _window.getSize();
 
   @override
@@ -593,6 +597,10 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize => _window.getSize();
 
   @override
@@ -762,6 +770,10 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   late final _FlViewMonitor _viewMonitor;
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
+
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
 
   @override
   @internal
@@ -954,6 +966,10 @@ class PopupWindowControllerLinux extends PopupWindowController {
   late final _FlWindowMonitor _windowMonitor;
   Offset? _offsetFromParent;
   bool _destroyed = false;
+
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
 
   @override
   @internal

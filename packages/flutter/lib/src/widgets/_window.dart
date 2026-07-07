@@ -97,6 +97,12 @@ sealed class BaseWindowController extends ChangeNotifier {
   set rootView(FlutterView view) {
     _view = view;
   }
+
+  /// Whether or not the underlying native window is destroyed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isDestroyed;
 }
 
 /// Delegate class for regular window controller.
