@@ -62,6 +62,11 @@ void testMain() {
     test('repairs canvas logical size when inline CSS size drifts', () async {
       final canvas = RenderCanvas();
 
+      final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+      addTearDown(() {
+        EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+      });
+
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.0);
       canvas.render(await newBitmap(1206, 2142));
 
@@ -84,6 +89,11 @@ void testMain() {
 
     test('preserves canvas logical size when inline CSS size is within tolerance', () async {
       final canvas = RenderCanvas();
+
+      final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+      addTearDown(() {
+        EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+      });
 
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.0);
       canvas.render(await newBitmap(1201, 2143));
