@@ -6115,6 +6115,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.clipBehavior = Clip.none,
+    this.ignoreZeroSizeChildrenForSpacing = false,
     super.children,
   });
 
@@ -6153,6 +6154,9 @@ class Wrap extends MultiChildRenderObjectWidget {
   ///
   /// Defaults to 0.0.
   final double spacing;
+
+  /// {@macro flutter.rendering.RenderWrap.ignoreZeroSizeChildrenForSpacing}
+  final bool ignoreZeroSizeChildrenForSpacing;
 
   /// How the runs themselves should be placed in the cross axis.
   ///
@@ -6267,6 +6271,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.maybeOf(context),
       verticalDirection: verticalDirection,
       clipBehavior: clipBehavior,
+      ignoreZeroSizeChildrenForSpacing: ignoreZeroSizeChildrenForSpacing,
     );
   }
 
@@ -6281,7 +6286,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..verticalDirection = verticalDirection
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..ignoreZeroSizeChildrenForSpacing = ignoreZeroSizeChildrenForSpacing;
   }
 
   @override
@@ -6290,6 +6296,14 @@ class Wrap extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<Axis>('direction', direction));
     properties.add(EnumProperty<WrapAlignment>('alignment', alignment));
     properties.add(DoubleProperty('spacing', spacing));
+    properties.add(
+      FlagProperty(
+        'ignoreZeroSizeChildrenForSpacing',
+        value: ignoreZeroSizeChildrenForSpacing,
+        ifTrue: 'ignoring zero-size children for spacing',
+        defaultValue: false,
+      ),
+    );
     properties.add(EnumProperty<WrapAlignment>('runAlignment', runAlignment));
     properties.add(DoubleProperty('runSpacing', runSpacing));
     properties.add(EnumProperty<WrapCrossAlignment>('crossAxisAlignment', crossAxisAlignment));

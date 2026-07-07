@@ -1041,4 +1041,89 @@ void main() {
     );
     verify(tester, <Offset>[const Offset(700.0, 0.0)]);
   });
+
+  group('ignoreZeroSizeChildrenForSpacing', () {
+    Widget wrap({
+      required bool ignoreZeroSizeChildrenForSpacing,
+      required List<Widget> children,
+      double? maxWidth,
+    }) {
+      Widget wrap = Wrap(
+        spacing: 16.0,
+        ignoreZeroSizeChildrenForSpacing: ignoreZeroSizeChildrenForSpacing,
+        children: children,
+      );
+      if (maxWidth != null) {
+        wrap = ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: wrap,
+        );
+      }
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(alignment: Alignment.topLeft, child: wrap),
+      );
+    }
+
+    const childrenWithGap = <Widget>[
+      SizedBox(key: Key('a'), width: 20.0, height: 10.0),
+      SizedBox.shrink(),
+      SizedBox(key: Key('b'), width: 20.0, height: 10.0),
+    ];
+
+    testWidgets('defaults to false so zero-size children still take spacing', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(ignoreZeroSizeChildrenForSpacing: false, children: childrenWithGap),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dx, 52.0);
+      expect(tester.getSize(find.byType(Wrap)).width, 72.0);
+    });
+
+    testWidgets('true removes the gap around a zero-size child in a run', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(ignoreZeroSizeChildrenForSpacing: true, children: childrenWithGap),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dx, 36.0);
+      expect(tester.getSize(find.byType(Wrap)).width, 56.0);
+    });
+
+    testWidgets('true ignores a child that builds to zero size at layout time', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          ignoreZeroSizeChildrenForSpacing: true,
+          children: <Widget>[
+            const SizedBox(key: Key('a'), width: 20.0, height: 10.0),
+            Builder(builder: (BuildContext context) => const SizedBox.shrink()),
+            const SizedBox(key: Key('b'), width: 20.0, height: 10.0),
+          ],
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dx, 36.0);
+      expect(tester.getSize(find.byType(Wrap)).width, 56.0);
+    });
+
+    testWidgets('true prevents a zero-size child from forcing a new run', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          ignoreZeroSizeChildrenForSpacing: true,
+          maxWidth: 50.0,
+          children: const <Widget>[
+            SizedBox(key: Key('a'), width: 40.0, height: 10.0),
+            SizedBox.shrink(),
+            SizedBox(key: Key('b'), width: 40.0, height: 10.0),
+          ],
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('a'))), Offset.zero);
+      expect(tester.getTopLeft(find.byKey(const Key('b'))), const Offset(0.0, 10.0));
+    });
+  });
 }
