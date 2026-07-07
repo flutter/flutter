@@ -12,6 +12,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   check-membership:
     runs-on: ubuntu-latest
@@ -54,6 +57,7 @@ jobs:
         with:
           ref: ${{ inputs.commit_hash }}
           token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          persist-credentials: false
 
       - name: Set Environment Variables
         env:

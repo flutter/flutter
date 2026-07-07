@@ -5,7 +5,9 @@
 name: Remove outdated CICD Label
 
 on:
-  pull_request_target:
+  # Safe because this workflow does not check out untrusted pull request code or execute arbitrary user-controlled scripts.
+  # It only reads repository metadata and labels to manage outdated tags.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [synchronize]
 
 permissions:

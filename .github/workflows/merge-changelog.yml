@@ -22,6 +22,7 @@ jobs:
           repository: flutteractionsbot/flutter
           token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ref: master
+          persist-credentials: false
 
       - name: Configure git
         run: |
