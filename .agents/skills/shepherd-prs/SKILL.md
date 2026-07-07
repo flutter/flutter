@@ -38,20 +38,30 @@ When running the `run` command, inspect the returned JSON logs and handle specif
   - *Action*: If a log contains `ERROR: ... lacks the "workflow" scope`, do not try to rerun. Output a highly prominent note to the user asking them to refresh their CLI scope:
     `gh auth refresh -h github.com -s workflow`
 
-### 2. Failed Checks & Manual Re-runs
-* Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the API.
-* When a PR has failed checks, the tool will log a warning instructing you to ask the user to manually trigger the re-run via the LUCI build page or the Flutter Build Dashboard.
+### 2. Pre-Autosubmit Verification (Flaky or Failing Checks)
+* The Flutter `autosubmit` bot automatically strips the `autosubmit` label from a PR whenever any CI check fails.
+* **CRITICAL RULE**: Before applying or re-applying the `autosubmit` label, always verify that all status checks are 100% passing (`SUCCESS`/`pass`).
+* If a check is flaky or currently failing/pending a retry:
+  1. Do **NOT** apply `autosubmit` immediately.
+  2. Inform the user of the failing check and instruct them to retry it first.
+  3. Only re-apply `autosubmit` after the retried check completes successfully.
+
+### 3. Third-Party Contributor PRs (2-Reviewer Requirement)
+* Pull requests authored by third-party contributors (`CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, `NONE`) require **two explicit approvals** from Flutter team members (`MEMBER` or `OWNER`) before the `autosubmit` bot will merge them.
+* If only one team member has approved a third-party PR and `autosubmit` is applied, the `autosubmit` bot will remove the label.
+* *Action*: When a third-party contributor PR has passing CI checks, verify that **2 team member approvals** are present. If only 1 approval exists, remind the user to request a second reviewer before applying `autosubmit`.
+
+### 4. Failed Checks & Manual LUCI Re-runs
+* Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the GitHub API.
 * *Action*:
-  1. Print the warning and ask the user to click the "Details" link on the failed check in GitHub to go to the LUCI build page and click the "Retry Build" button.
-  2. If the check run continues to fail after manual re-runs, inspect the failure logs using `gh pr view <number> --repo flutter/flutter` or through the checks details, and write a summary of the failure for the user.
+  1. Print the exact LUCI Buildbucket link (e.g., `https://cr-buildbucket.appspot.com/build/<build_id>`) for the failing check.
+  2. Instruct the user to open the URL and click **Retry Build** on the LUCI page.
+  3. If a check continues to fail after manual retries, inspect the failure logs (`gh pr view <number> --repo flutter/flutter` or `flutter-pr-checks-finder`) and summarize the failure for the user.
 
-### 3. Target Branch Correction
+### 5. Target Branch Correction & Merge Conflicts
 * **Dismissed Reviews Warning**: Changing the target branch of a PR often causes GitHub to automatically dismiss existing approvals.
-  - *Action*: If the target branch was changed, the PR will disappear from the approved list. Output a clear note to the user informing them that the base was corrected, and they need to go to the PR page on GitHub to **re-approve the PR** so the automation can resume shepherding it.
-
-### 4. Merge Conflicts
-* The tool will log: `WARNING: PR has merge conflicts. Manual intervention required.`
-  - *Action*: Inform the user about the conflict so they can ask the contributor to resolve it.
+  - *Action*: Inform the user that changing the target branch cleared existing approvals and they need to re-approve the PR on GitHub.
+* **Merge Conflicts**: If a PR has conflicts (`WARNING: PR has merge conflicts`), notify the user so the author can resolve them.
 
 ## Examples
 
