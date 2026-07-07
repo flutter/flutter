@@ -348,6 +348,13 @@ class FallbackFontService {
           if (candidateFonts.contains(font)) {
             fontCoverCounts[font] = fontCoverCounts[font]! - count;
           }
+          final String? parentName = font.monolithicParent;
+          if (parentName != null) {
+            final NotoFont? parent = manager.findFontByName(parentName);
+            if (parent != null && candidateFonts.contains(parent)) {
+              fontCoverCounts[parent] = fontCoverCounts[parent]! - count;
+            }
+          }
         }
         componentCoverCounts[component] = 0;
       }

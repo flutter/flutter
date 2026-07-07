@@ -331,6 +331,11 @@ void testMain() {
           checkedAtLeastOnce = true;
         }
       }
+      expect(loadedFamilies, isNot(contains('Noto Sans KR')));
+      expect(loadedFamilies, isNot(contains('Noto Sans SC')));
+      expect(loadedFamilies, isNot(contains('Noto Sans TC')));
+      expect(loadedFamilies, isNot(contains('Noto Sans JP')));
+      expect(loadedFamilies, isNot(contains('Noto Sans HK')));
       expect(checkedAtLeastOnce, isTrue);
     });
 

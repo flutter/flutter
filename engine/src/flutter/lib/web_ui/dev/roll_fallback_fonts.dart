@@ -602,7 +602,7 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Pahawh Hmong',
   'Noto Sans Palmyrene',
   'Noto Sans Pau Cin Hau',
-  'Noto Sans Phags Pa',
+  'Noto Sans PhagsPa',
   'Noto Sans Phoenician',
   'Noto Sans Psalter Pahlavi',
   'Noto Sans Rejang',
