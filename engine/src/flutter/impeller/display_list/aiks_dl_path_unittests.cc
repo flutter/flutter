@@ -287,7 +287,7 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
     }
 
     DisplayListBuilder builder;
-    // builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+    builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
     builder.DrawPaint(
         DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
 
