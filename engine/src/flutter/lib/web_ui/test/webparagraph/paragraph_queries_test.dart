@@ -132,7 +132,7 @@ Future<void> testMain() async {
     paragraph.layout(const ui.ParagraphConstraints(width: 50));
 
     expect(paragraph.numberOfLines, 2);
-    
+
     // Line 1: "Hello "
     final ui.TextRange line1Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 0));
     expect(line1Boundary.start, 0);
