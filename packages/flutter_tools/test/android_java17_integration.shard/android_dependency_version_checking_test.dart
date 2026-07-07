@@ -41,9 +41,9 @@ void main() {
       'successfully and prints warning', () async {
     // Create a new flutter project.
     final versionTuple = VersionTuple(
-      agpVersion: '9.1.0',
+      agpVersion: '8.11.1',
       gradleVersion: '8.14',
-      kotlinVersion: '2.4.0',
+      kotlinVersion: '2.3.20',
     );
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
       versions: versionTuple,
