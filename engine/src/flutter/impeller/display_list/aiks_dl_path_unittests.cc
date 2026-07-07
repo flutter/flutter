@@ -317,8 +317,6 @@ TEST_P(AiksTest, HairlinePath) {
       this,
       [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
          Scalar width) {
-        paint.setStrokeCap(DlStrokeCap::kRound);
-        paint.setStrokeJoin(DlStrokeJoin::kRound);
         paint.setDrawStyle(DlDrawStyle::kStroke);
         DlPathBuilder path_builder;
         path_builder.MoveTo(DlPoint(100, yoffset));
@@ -334,8 +332,6 @@ TEST_P(AiksTest, ThinPath) {
       this,
       [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
          Scalar width) {
-        paint.setStrokeCap(DlStrokeCap::kRound);
-        paint.setStrokeJoin(DlStrokeJoin::kRound);
         paint.setDrawStyle(DlDrawStyle::kStroke);
         DlPathBuilder path_builder;
         path_builder.MoveTo(DlPoint(100, yoffset));
@@ -351,8 +347,6 @@ TEST_P(AiksTest, OnePixelPath) {
       this,
       [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
          Scalar width) {
-        paint.setStrokeCap(DlStrokeCap::kRound);
-        paint.setStrokeJoin(DlStrokeJoin::kRound);
         paint.setDrawStyle(DlDrawStyle::kStroke);
         DlPathBuilder path_builder;
         path_builder.MoveTo(DlPoint(100, yoffset));
@@ -368,8 +362,6 @@ TEST_P(AiksTest, ThinPathRotated) {
       this,
       [](DisplayListBuilder& builder, DlPaint paint, Scalar yoffset,
          Scalar width) {
-        paint.setStrokeCap(DlStrokeCap::kRound);
-        paint.setStrokeJoin(DlStrokeJoin::kRound);
         paint.setDrawStyle(DlDrawStyle::kStroke);
         DlPathBuilder path_builder;
         path_builder.MoveTo(DlPoint(100, yoffset));
@@ -424,7 +416,7 @@ TEST_P(AiksTest, OnePixelDrawLine) {
       /*rotation=*/0.0f);
 }
 
-TEST_P(AiksTest, HairlineDrawRect) {
+TEST_P(AiksTest, HairlineDrawFilledRect) {
   DrawLinesTest(
       this,
       [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
@@ -441,7 +433,7 @@ TEST_P(AiksTest, HairlineDrawRect) {
       /*rotation=*/0.0f);
 }
 
-TEST_P(AiksTest, ThinDrawRect) {
+TEST_P(AiksTest, ThinDrawFilledRect) {
   DrawLinesTest(
       this,
       [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
@@ -458,7 +450,7 @@ TEST_P(AiksTest, ThinDrawRect) {
       /*rotation=*/0.0f);
 }
 
-TEST_P(AiksTest, ThinDrawRectRotated) {
+TEST_P(AiksTest, ThinDrawFilledRectRotated) {
   DrawLinesTest(
       this,
       [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
@@ -475,7 +467,7 @@ TEST_P(AiksTest, ThinDrawRectRotated) {
       /*rotation=*/2.0f);
 }
 
-TEST_P(AiksTest, OnePixelDrawRect) {
+TEST_P(AiksTest, OnePixelDrawFilledRect) {
   DrawLinesTest(
       this,
       [](DisplayListBuilder& builder, const DlPaint& paint, Scalar yoffset,
