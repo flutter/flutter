@@ -287,7 +287,7 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
     }
 
     DisplayListBuilder builder;
-    builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+    // builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
     builder.DrawPaint(
         DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
 
@@ -332,46 +332,39 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
 }  // namespace
 
 TEST_P(AiksTest, DrawLinesWithPath) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Point p0, Point p1,
-         Scalar width) {
-        DlPaint stroke_paint = paint;
-        stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
-        stroke_paint.setStrokeWidth(width);
-        DlPathBuilder path_builder;
-        path_builder.MoveTo(DlPoint(p0.x, p0.y));
-        path_builder.LineTo(DlPoint(p1.x, p1.y));
-        builder.DrawPath(path_builder.TakePath(), stroke_paint);
-      });
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint stroke_paint = paint;
+    stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+    stroke_paint.setStrokeWidth(width);
+    DlPathBuilder path_builder;
+    path_builder.MoveTo(DlPoint(p0.x, p0.y));
+    path_builder.LineTo(DlPoint(p1.x, p1.y));
+    builder.DrawPath(path_builder.TakePath(), stroke_paint);
+  });
 }
 
 TEST_P(AiksTest, DrawLinesWithDrawLine) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Point p0, Point p1,
-         Scalar width) {
-        DlPaint stroke_paint = paint;
-        stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
-        stroke_paint.setStrokeWidth(width);
-        builder.DrawLine(DlPoint(p0.x, p0.y), DlPoint(p1.x, p1.y),
-                         stroke_paint);
-      });
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint stroke_paint = paint;
+    stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+    stroke_paint.setStrokeWidth(width);
+    builder.DrawLine(DlPoint(p0.x, p0.y), DlPoint(p1.x, p1.y), stroke_paint);
+  });
 }
 
 TEST_P(AiksTest, DrawLinesWithFilledRects) {
-  DrawLinesTest(
-      this,
-      [](DisplayListBuilder& builder, const DlPaint& paint, Point p0, Point p1,
-         Scalar width) {
-        DlPaint fill_paint = paint;
-        fill_paint.setDrawStyle(DlDrawStyle::kFill);
-        Scalar length = p0.GetDistance(p1);
-        Point center = {(p0.x + p1.x) * 0.5f, (p0.y + p1.y) * 0.5f};
-        builder.DrawRect(
-            DlRect::MakeEllipseBounds(center, Size(length, width) * 0.5f),
-            fill_paint);
-      });
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint fill_paint = paint;
+    fill_paint.setDrawStyle(DlDrawStyle::kFill);
+    Scalar length = p0.GetDistance(p1);
+    Point center = {(p0.x + p1.x) * 0.5f, (p0.y + p1.y) * 0.5f};
+    builder.DrawRect(
+        DlRect::MakeEllipseBounds(center, Size(length, width) * 0.5f),
+        fill_paint);
+  });
 }
 
 TEST_P(AiksTest, CanRenderTightConicPath) {
