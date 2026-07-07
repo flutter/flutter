@@ -267,8 +267,8 @@ class RegularWindowControllerLinux extends RegularWindowController
 
     final _LinuxWindowingWindow createdWindow = _LinuxWindowing.createRegularWindow(
       _FlEngine.current(),
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      preferredSize: size,
+      preferredConstraints: constraints,
       title: title,
       decorated: decorated,
       resizable: resizable,
@@ -475,8 +475,8 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
     final _LinuxWindowingWindow createdWindow = _LinuxWindowing.createDialogWindow(
       _FlEngine.current(),
       parent: parentWindow,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      preferredSize: size,
+      preferredConstraints: constraints,
       title: title,
       decorated: decorated,
       resizable: resizable,
