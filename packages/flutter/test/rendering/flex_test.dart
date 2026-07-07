@@ -1263,6 +1263,82 @@ void main() {
     }
     expect(exceptions, hasLength(1));
   });
+
+  group('RenderFlex.ignoreZeroSizeChildrenForSpacing', () {
+    RenderBox sized(double width, double height) {
+      return RenderConstrainedBox(additionalConstraints: BoxConstraints.tight(Size(width, height)));
+    }
+
+    test('false (default) applies spacing around zero-size children', () {
+      final a = sized(10.0, 20.0);
+      final empty = sized(0.0, 0.0);
+      final b = sized(10.0, 20.0);
+      final flex = RenderFlex(
+        direction: Axis.vertical,
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16.0,
+        children: <RenderBox>[a, empty, b],
+      );
+      layout(flex, constraints: const BoxConstraints(maxWidth: 1000.0, maxHeight: 1000.0));
+
+      expect(flex.size.height, 72.0);
+      expect((b.parentData! as FlexParentData).offset.dy, 52.0);
+    });
+
+    test('true excludes zero-size children from spacing and sizing', () {
+      final a = sized(10.0, 20.0);
+      final empty = sized(0.0, 0.0);
+      final b = sized(10.0, 20.0);
+      final flex = RenderFlex(
+        direction: Axis.vertical,
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16.0,
+        ignoreZeroSizeChildrenForSpacing: true,
+        children: <RenderBox>[a, empty, b],
+      );
+      layout(flex, constraints: const BoxConstraints(maxWidth: 1000.0, maxHeight: 1000.0));
+
+      expect(flex.size.height, 56.0);
+      expect((b.parentData! as FlexParentData).offset.dy, 36.0);
+    });
+
+    test('true is reflected by the intrinsic main-axis size', () {
+      final flex = RenderFlex(
+        direction: Axis.vertical,
+        textDirection: TextDirection.ltr,
+        spacing: 16.0,
+        ignoreZeroSizeChildrenForSpacing: true,
+        children: <RenderBox>[sized(10.0, 20.0), sized(0.0, 0.0), sized(10.0, 20.0)],
+      );
+
+      expect(flex.getMinIntrinsicHeight(10.0), 56.0);
+      expect(flex.getMaxIntrinsicHeight(10.0), 56.0);
+    });
+
+    test('setter marks needs layout and updates behavior', () {
+      final a = sized(10.0, 20.0);
+      final empty = sized(0.0, 0.0);
+      final b = sized(10.0, 20.0);
+      final flex = RenderFlex(
+        direction: Axis.vertical,
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16.0,
+        children: <RenderBox>[a, empty, b],
+      );
+      layout(flex, constraints: const BoxConstraints(maxWidth: 1000.0, maxHeight: 1000.0));
+      expect(flex.size.height, 72.0);
+
+      flex.ignoreZeroSizeChildrenForSpacing = true;
+      pumpFrame();
+      expect(flex.size.height, 56.0);
+    });
+  });
 }
 
 class RenderFlowBaselineTestBox extends RenderBox {

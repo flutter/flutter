@@ -347,4 +347,160 @@ void main() {
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
     expect(tester.takeException(), isAssertionError);
   });
+
+  group('ignoreZeroSizeChildrenForSpacing', () {
+    Widget column({
+      required bool ignoreZeroSizeChildrenForSpacing,
+      required List<Widget> children,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16.0,
+            ignoreZeroSizeChildrenForSpacing: ignoreZeroSizeChildrenForSpacing,
+            children: children,
+          ),
+        ),
+      );
+    }
+
+    const childrenWithGap = <Widget>[
+      SizedBox(key: Key('a'), width: 10.0, height: 20.0),
+      SizedBox.shrink(),
+      SizedBox(key: Key('b'), width: 10.0, height: 20.0),
+    ];
+
+    testWidgets('defaults to false so zero-size children still take spacing', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        column(ignoreZeroSizeChildrenForSpacing: false, children: childrenWithGap),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 52.0);
+      expect(tester.getSize(find.byType(Column)).height, 72.0);
+    });
+
+    testWidgets('true removes the gap around a zero-size child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        column(ignoreZeroSizeChildrenForSpacing: true, children: childrenWithGap),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 36.0);
+      expect(tester.getSize(find.byType(Column)).height, 56.0);
+    });
+
+    testWidgets('true ignores a child that builds to zero size at layout time', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        column(
+          ignoreZeroSizeChildrenForSpacing: true,
+          children: <Widget>[
+            const SizedBox(key: Key('a'), width: 10.0, height: 20.0),
+            Builder(builder: (BuildContext context) => const SizedBox.shrink()),
+            const SizedBox(key: Key('b'), width: 10.0, height: 20.0),
+          ],
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 36.0);
+      expect(tester.getSize(find.byType(Column)).height, 56.0);
+    });
+
+    testWidgets('true keeps spacing between every visible child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        column(
+          ignoreZeroSizeChildrenForSpacing: true,
+          children: const <Widget>[
+            SizedBox(key: Key('a'), width: 10.0, height: 20.0),
+            SizedBox(key: Key('b'), width: 10.0, height: 20.0),
+            SizedBox(key: Key('c'), width: 10.0, height: 20.0),
+          ],
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 36.0);
+      expect(tester.getTopLeft(find.byKey(const Key('c'))).dy, 72.0);
+      expect(tester.getSize(find.byType(Column)).height, 92.0);
+    });
+
+    testWidgets('true distributes spaceBetween across visible children only', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 100.0,
+              width: 10.0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                ignoreZeroSizeChildrenForSpacing: true,
+                children: <Widget>[
+                  SizedBox(key: Key('a'), width: 10.0, height: 20.0),
+                  SizedBox.shrink(),
+                  SizedBox(key: Key('b'), width: 10.0, height: 20.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('a'))).dy, 0.0);
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 80.0);
+    });
+
+    testWidgets('true still lays out Expanded children', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 100.0,
+              width: 10.0,
+              child: Column(
+                spacing: 16.0,
+                ignoreZeroSizeChildrenForSpacing: true,
+                children: <Widget>[
+                  SizedBox(key: Key('a'), width: 10.0, height: 20.0),
+                  SizedBox.shrink(),
+                  Expanded(child: SizedBox(key: Key('b'), width: 10.0)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 36.0);
+      expect(tester.getSize(find.byKey(const Key('b'))).height, 64.0);
+    });
+
+    testWidgets('true applies to a horizontal Row', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 16.0,
+              ignoreZeroSizeChildrenForSpacing: true,
+              children: <Widget>[
+                SizedBox(key: Key('a'), width: 20.0, height: 10.0),
+                SizedBox.shrink(),
+                SizedBox(key: Key('b'), width: 20.0, height: 10.0),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dx, 36.0);
+      expect(tester.getSize(find.byType(Row)).width, 56.0);
+    });
+  });
 }
