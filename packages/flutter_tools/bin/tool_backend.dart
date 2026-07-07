@@ -21,6 +21,7 @@ Future<void> main(List<String> arguments) async {
   final String flutterTarget =
       Platform.environment['FLUTTER_TARGET'] ?? pathJoin(<String>['lib', 'main.dart']);
   final String? codeSizeDirectory = Platform.environment['CODE_SIZE_DIRECTORY'];
+  final String? flavor = Platform.environment['FLAVOR'];
   final String? localEngine = Platform.environment['LOCAL_ENGINE'];
   final String? localEngineHost = Platform.environment['LOCAL_ENGINE_HOST'];
   final String? projectDirectory = Platform.environment['PROJECT_DIR'];
@@ -95,6 +96,7 @@ or
     '-dTreeShakeIcons=$treeShakeIcons',
     '-dDartObfuscation=$dartObfuscation',
     if (codeSizeDirectory != null) '-dCodeSizeDirectory=$codeSizeDirectory',
+    if (flavor != null && flavor.isNotEmpty) '-dFlavor=$flavor',
     if (splitDebugInfo != null) '-dSplitDebugInfo=$splitDebugInfo',
     if (dartDefines != null) '--DartDefines=$dartDefines',
     if (extraGenSnapshotOptions != null) '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
