@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
-      - uses: dessant/lock-threads@7266a7ce5c1df01b1c6db85bf8cd86c737dadbe7
+      - uses: dessant/lock-threads@89ae32b08ed1a541efecbab17912962a5e38981c
         with:
           process-only: 'issues'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ github.token }}
           # Number of days of inactivity before a closed issue is locked.
           issue-inactive-days: '14'
           issue-comment: >
