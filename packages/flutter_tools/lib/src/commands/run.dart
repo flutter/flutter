@@ -89,6 +89,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             '(Not recommended! This can open your device to remote code execution attacks!)',
       )
       ..addFlag(
+        'disable-service-origin-check',
+        negatable: false,
+        hide: !verboseHelp,
+        help:
+            'Allow connections to the VM service from any origin. '
+            '(Not recommended. This can open your device to remote code execution attacks.)',
+      )
+      ..addFlag(
         'start-paused',
         defaultsTo: startPausedDefault,
         help: 'Start in a paused mode and wait for a debugger to connect.',
@@ -228,7 +236,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag(
         'ios-profile-debugger',
         negatable: false,
-        help: 'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
+        help:
+            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -256,6 +265,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get disableServiceOriginCheck => boolArg('disable-service-origin-check');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
   String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
@@ -345,6 +355,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableServiceOriginCheck: boolArg('disable-service-origin-check'),
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
@@ -484,7 +495,8 @@ class RunCommand extends RunCommandBase {
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
-        help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
+        help:
+            'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
       )
       ..addFlag(
         'resident',

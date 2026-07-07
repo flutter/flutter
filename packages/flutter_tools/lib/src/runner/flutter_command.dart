@@ -817,7 +817,8 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceUserOption() {
     argParser.addOption(
       FlutterOptions.kDeviceUser,
-      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
+      help:
+          'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
       valueHelp: '10',
     );
   }
@@ -825,7 +826,8 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceTimeoutOption() {
     argParser.addOption(
       FlutterOptions.kDeviceTimeout,
-      help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
+      help:
+          'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
       valueHelp: '10',
     );
   }
@@ -838,8 +840,10 @@ abstract class FlutterCommand extends Command<void> {
       allowed: <String>['attached', 'wireless', 'both'],
       allowedHelp: <String, String>{
         'both': 'Searches for both attached and wireless devices.',
-        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
-        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
+        'attached':
+            'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless':
+            'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
       },
     );
   }
@@ -1681,8 +1685,9 @@ abstract class FlutterCommand extends Command<void> {
     });
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      final Iterable<String> defines = stringsArg(FlutterOptions.kDartDefinesOption)
-          .where((string) => string.isNotEmpty);
+      final Iterable<String> defines = stringsArg(
+        FlutterOptions.kDartDefinesOption,
+      ).where((string) => string.isNotEmpty);
       dartDefines.addAll(defines);
     }
 
@@ -1928,6 +1933,15 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
+
+    if (globals.os.hostPlatform == .darwin_x64 &&
+        globals.persistentToolState!.shouldShowIntelMacWarning) {
+      globals.logger.printWarning(
+        'Flutter is deprecating support for Intel-based Macs. '
+        'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+      );
+      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+    }
 
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.

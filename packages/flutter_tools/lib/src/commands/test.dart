@@ -104,12 +104,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'tags',
         abbr: 't',
-        help: 'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help:
+            'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
       )
       ..addOption(
         'exclude-tags',
         abbr: 'x',
-        help: 'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help:
+            'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
       )
       ..addFlag(
         'start-paused',
@@ -129,6 +131,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         help:
             '(deprecated) Allow connections to the VM service without using authentication codes. '
             '(Not recommended! This can open your device to remote code execution attacks!)',
+      )
+      ..addFlag(
+        'disable-service-origin-check',
+        negatable: false,
+        hide: !verboseHelp,
+        help:
+            'Allow connections to the VM service from any origin. '
+            '(Not recommended. This can open your device to remote code execution attacks.)',
       )
       ..addFlag('coverage', negatable: false, help: 'Whether to collect coverage information.')
       ..addFlag(
@@ -241,13 +251,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'reporter',
         abbr: 'r',
-        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
+        help:
+            'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
           'compact': 'A single line, updated continuously (the default).',
-          'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'expanded':
+              'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
           'failures-only': 'A separate line for failing tests, with no output for passing tests.',
-          'github': 'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
+          'github':
+              'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json': 'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
           'silent':
               'A reporter with no output. May be useful when only the exit code is meaningful.',
@@ -468,6 +481,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      disableServiceOriginCheck: boolArg('disable-service-origin-check'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart' show Version;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -68,6 +69,22 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
+  }
+}
+
+class FakeXcodeProjectInterpreterWithVersion extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithVersion({required this.version});
+
+  @override
+  final Version version;
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+    XcodeBasedProject xcodeProject, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
   }
 }
 
@@ -355,7 +372,8 @@ STDERR STUFF
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']),
         throwsToolExit(
-          message: '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".',
+          message:
+              '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".',
         ),
       );
     },
@@ -392,8 +410,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
       expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.errorText, contains('STDOUT STUFF'));
@@ -489,8 +508,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -527,8 +547,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub', '-v']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub', '-v']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -566,8 +587,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--profile', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -605,8 +627,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--release', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -761,8 +784,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -911,9 +935,9 @@ STDERR STUFF
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
       expect(
-        () =>
-            createTestCommandRunner(command)
-                .run(const <String>['build', 'macos', '--no-pub', '--analyze-size']),
+        () => createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--no-pub', '--analyze-size']),
         throwsA(
           isA<StateError>().having(
             (StateError err) => err.message,
@@ -967,8 +991,9 @@ STDERR STUFF
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--no-pub', '--analyze-size']);
 
       expect(
         testLogger.statusText,
@@ -1051,8 +1076,9 @@ STDERR STUFF
 
 ''');
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
 
       final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile(
         'flutter_disable_sandbox_entitlement.rand0/DebugProfileWithDisabledSandboxing.entitlements',
@@ -1130,8 +1156,9 @@ STDERR STUFF
 
 ''');
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--release', '--no-pub']);
 
       final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile(
         'flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
@@ -1194,8 +1221,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       Platform: () => macosPlatform,
@@ -1234,8 +1262,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       Platform: () => macosPlatform,
@@ -1372,8 +1401,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(<String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1476,8 +1506,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(<String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1545,13 +1576,15 @@ STDERR STUFF
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           exitCode: 1,
-          stdout: "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is 12.0 to 27.0.x. (in target 'Runner' from project 'Runner')",
+          stdout:
+              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is 12.0 to 27.0.x. (in target 'Runner' from project 'Runner')",
         ),
       );
 
       await expectLater(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
         throwsToolExit(),
       );
 
@@ -1625,13 +1658,15 @@ STDERR STUFF
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           exitCode: 1,
-          stdout: "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x. (in target 'Runner' from project 'Runner')",
+          stdout:
+              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x. (in target 'Runner' from project 'Runner')",
         ),
       );
 
       await expectLater(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
         throwsToolExit(),
       );
 
@@ -1655,6 +1690,58 @@ STDERR STUFF
       ProcessManager: () => fakeProcessManager,
       Platform: () => macosPlatform,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Prints warning when building a release app for macOS that contains an x86_64 slice and Xcode version is 27 or greater',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: testLogger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
+
+      expect(
+        testLogger.warningText,
+        contains(
+          'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+          'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+          'This will become the default behavior in a future Flutter release.',
+        ),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithVersion(version: Version(27, 0, 0)),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

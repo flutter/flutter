@@ -47,7 +47,8 @@ class DaemonCommand extends FlutterCommand {
   DaemonCommand({this.hidden = false}) {
     argParser.addOption(
       'listen-on-tcp-port',
-      help: 'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
+      help:
+          'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
       valueHelp: 'port',
     );
   }
@@ -164,10 +165,8 @@ class DaemonServer {
 }
 
 typedef CommandHandler = Future<Object?>? Function(Map<String, Object?> args);
-typedef CommandHandlerWithBinary = Future<Object?> Function(
-  Map<String, Object?> args,
-  Stream<List<int>>? binary,
-);
+typedef CommandHandlerWithBinary =
+    Future<Object?> Function(Map<String, Object?> args, Stream<List<int>>? binary);
 
 class Daemon {
   Daemon(
@@ -634,10 +633,11 @@ class DaemonDomain extends Domain {
 /// The [name] of this value will be sent as a response to daemon client.
 enum _ReasonCode { create, config }
 
-typedef RunOrAttach = Future<void> Function({
-  Completer<DebugConnectionInfo>? connectionInfoCompleter,
-  Completer<void>? appStartedCompleter,
-});
+typedef RunOrAttach =
+    Future<void> Function({
+      Completer<DebugConnectionInfo>? connectionInfoCompleter,
+      Completer<void>? appStartedCompleter,
+    });
 
 /// This domain responds to methods like [startApp] and [stop].
 ///
@@ -844,6 +844,13 @@ class AppDomain extends Domain {
       }),
       appRunFuture,
     ]);
+
+    // If appRunFuture completes early due to a fatal initialization error
+    // without actually starting the app, we must explicitly throw an exception
+    // to prevent the IDE/client from hanging indefinitely.
+    if (!appStartedCompleter.isCompleted) {
+      throw DaemonException('App failed to start');
+    }
     return app;
   }
 
