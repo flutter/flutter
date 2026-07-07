@@ -107,7 +107,6 @@ class DependencyVersionCheckerTest {
         val exampleWarnAgpVersion = AndroidPluginVersion(8, 12, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleWarnAgpVersion)
 
-
         val mockExtraPropertiesExtension = mockProject.extra
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
         val mockLogger = mockProject.logger
@@ -155,7 +154,6 @@ class DependencyVersionCheckerTest {
     fun `KGP version in warn range results in warning logs`() {
         val exampleWarnKgpVersion = "2.3.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleWarnKgpVersion)
-
 
         val mockExtraPropertiesExtension = mockProject.extra
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
@@ -230,7 +228,6 @@ class DependencyVersionCheckerTest {
     fun `Gradle version in warn range results in warning logs`() {
         val exampleWarnGradleVersion = "8.14.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
-
 
         val mockExtraPropertiesExtension = mockProject.extra
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
