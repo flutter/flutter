@@ -32,6 +32,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
@@ -581,6 +582,228 @@ void main() {
         expect(process2.killed, true);
         expect(process3.killed, true);
       });
+    });
+
+    group('screenshot', () {
+      late FakeIOSCoreDeviceControl fakeCoreDeviceControl;
+      late IOSDevice device;
+      late File outputFile;
+
+      setUp(() {
+        fakeCoreDeviceControl = coreDeviceControl as FakeIOSCoreDeviceControl;
+        outputFile = fileSystem.file('screenshot.png');
+      });
+
+      testUsingContext(
+        'supportsScreenshot and takeScreenshot on non-CoreDevice with iMobileDevice',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '13.3',
+            cpuArchitecture: DarwinArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: false,
+          );
+
+          expect(device.supportsScreenshot, isTrue);
+        },
+      );
+
+      testUsingContext('supportsScreenshot is false on CoreDevice with Xcode < 26', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArchitecture: DarwinArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+        );
+
+        expect(device.supportsScreenshot, isFalse);
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))});
+
+      testUsingContext(
+        'supportsScreenshot is true on CoreDevice with Xcode 26+ and devicectl installed',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArchitecture: DarwinArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+          );
+
+          fakeCoreDeviceControl.isDevicectlInstalled = true;
+          expect(device.supportsScreenshot, isTrue);
+
+          fakeCoreDeviceControl.isDevicectlInstalled = false;
+          expect(device.supportsScreenshot, isFalse);
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))},
+      );
+
+      testUsingContext('takeScreenshot uses devicectl on CoreDevice with Xcode 26+', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArchitecture: DarwinArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+        );
+
+        fakeCoreDeviceControl.takeScreenshotSuccess = true;
+        await device.takeScreenshot(outputFile);
+
+        fakeCoreDeviceControl.takeScreenshotSuccess = false;
+        expect(() => device.takeScreenshot(outputFile), throwsToolExit());
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
+
+      testUsingContext(
+        'takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArchitecture: DarwinArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+          );
+
+          fakeCoreDeviceControl.takeScreenshotException = Exception(
+            'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
+          );
+          expect(
+            () => device.takeScreenshot(outputFile),
+            throwsToolExit(
+              message:
+                  'Failed to establish a connection to the device. Please make sure the device is unlocked and try again.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))},
+      );
+
+      testUsingContext(
+        'takeScreenshot falls back to iMobileDevice on CoreDevice with Xcode < 26',
+        () async {
+          final testProcessManager = FakeProcessManager.empty();
+          final File outputFile = fileSystem.file('screenshot.png');
+
+          testProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'HostArtifact.idevicescreenshot',
+                outputFile.path,
+                '--udid',
+                'device-123',
+              ],
+              environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+            ),
+          );
+
+          final testIMobileDevice = IMobileDevice(
+            artifacts: Artifacts.test(),
+            cache: cache,
+            logger: logger,
+            processManager: testProcessManager,
+          );
+
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: testIMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArchitecture: DarwinArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+          );
+
+          await device.takeScreenshot(outputFile);
+          expect(testProcessManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(25, 0, 0))},
+      );
     });
   });
 
@@ -1161,10 +1384,29 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   bool get debugStarted => false;
 }
 
-class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
+class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
+  bool takeScreenshotSuccess = true;
+  Exception? takeScreenshotException;
+
+  @override
+  bool isDevicectlInstalled = true;
+
+  @override
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    if (takeScreenshotException != null) {
+      throw takeScreenshotException!;
+    }
+    return takeScreenshotSuccess;
+  }
+}
 
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
 
 class FakeAnalytics extends Fake implements Analytics {}
 
-class FakeXcode extends Fake implements Xcode {}
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({this.currentVersion});
+
+  @override
+  final Version? currentVersion;
+}
