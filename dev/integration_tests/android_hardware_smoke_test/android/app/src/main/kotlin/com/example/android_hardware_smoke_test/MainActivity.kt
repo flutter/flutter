@@ -49,7 +49,7 @@ class MainActivity : FlutterActivity() {
         // creating a surface/window with a cached engine.
         if (backend == "vulkan") {
             val cache = FlutterEngineCache.getInstance()
-            return cache.get("smoke_test_engine") ?: FlutterEngine(context).also {
+            return cache.get("smoke_test_engine") ?: FlutterEngine(context.applicationContext).also {
                 cache.put("smoke_test_engine", it)
             }
         }
