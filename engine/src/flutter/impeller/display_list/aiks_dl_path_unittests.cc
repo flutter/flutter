@@ -287,24 +287,25 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
     }
 
     DisplayListBuilder builder;
-    builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
     builder.DrawPaint(
         DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
 
     DlPaint paint;
     paint.setColor(invert_colors ? DlColor::kBlack() : DlColor::kWhite());
 
-    std::vector<Scalar> col_offsets = {170.67f, 512.0f, 853.33f};
-    std::vector<Scalar> row_offsets = {96.0f, 288.0f, 480.0f, 672.0f};
-
     std::vector<Scalar> widths = {0.0f, 0.3f, 1.0f};
-    std::vector<Scalar> angles = {0.0f, 3.0f, 45.0f, 90.0f};
+    std::vector<Scalar> angles = {0.0f, 3.0f, 45.0f, 87.0f, 90.0f};
 
-    for (size_t col = 0; col < col_offsets.size(); ++col) {
+    const Scalar column_spacing = 1024.0f / widths.size();
+    const Scalar row_spacing = 768.0f / angles.size();
+
+    for (size_t col = 0; col < widths.size(); ++col) {
+      Scalar col_x = (col + 0.5f) * column_spacing;
       Scalar width = std::max(0.0f, widths[col] + width_adjustment);
-      for (size_t row = 0; row < row_offsets.size(); ++row) {
+      for (size_t row = 0; row < angles.size(); ++row) {
+        Scalar row_y = (row + 0.5f) * row_spacing;
         builder.Save();
-        builder.Translate(col_offsets[col], row_offsets[row]);
+        builder.Translate(col_x, row_y);
         builder.Scale(scale, scale);
         builder.Rotate(angles[row] + rotation);
 
@@ -315,8 +316,8 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
           Scalar base_y = i * 8.0f - 12.0f;
           Scalar subpixel_y = i * 0.25f;
           Scalar line_y = base_y + subpixel_y + offset;
-          Point p0 = Point(-75.0f, line_y);
-          Point p1 = Point(75.0f, line_y);
+          Point p0 = Point(-60.0f, line_y);
+          Point p1 = Point(60.0f, line_y);
           draw_fn(builder, paint, p0, p1, width);
         }
 
