@@ -13,7 +13,7 @@ void main() {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     final RegularWindowController controller = RegularWindowController(
-      preferredSize: const Size(800, 600),
+      size: const Size(800, 600),
     );
     runWidget(
       WindowManager(
@@ -55,7 +55,7 @@ class MainWindowState extends State<MainWindow> {
     entry = WindowEntry(
       controller: DialogWindowController(
         parent: WindowScope.of(context),
-        preferredSize: const Size(400, 300),
+        size: const Size(400, 300),
         delegate: _DialogWindowControllerDelegate(
           mainWindow: this,
           registry: registry!,

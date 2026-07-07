@@ -32,12 +32,15 @@ impeller_component("base") {
   ]
 
   deps = [ "//flutter/fml" ]
+
+  public_deps = [ "//third_party/abseil-cpp/absl/status:statusor" ]
 }
 
 impeller_component("base_unittests") {
   testonly = true
   sources = [
     "allocation_size_unittests.cc",
+    "allocation_unittests.cc",
     "base_unittests.cc",
   ]
   deps = [
