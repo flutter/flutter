@@ -46,7 +46,7 @@ class _OverlayPortalLayoutBuilderExampleState
           // Translate the child widget's local coordinates to the overlay's
           // coordinate space. This assumes the child paint transform is invertible
           // (e.g., not a transform that collapses the child to a line or point),
-          // otherwise the resulting childRect would be NaN.
+          // otherwise the resulting childRect would contain NaN.
           final Rect childRect = MatrixUtils.transformRect(
             info.childPaintTransform,
             Offset.zero & info.childSize,
