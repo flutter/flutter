@@ -419,14 +419,31 @@ class ResidentWebRunner extends ResidentRunner {
     }
   }
 
-  /// Compiler configurations to build for `flutter run`.
+  /// Compiler configurations for the [WebBuilder.buildWeb] path of
+  /// `flutter run`.
   ///
-  /// When `--wasm` is set, this returns both a Wasm and a JS configuration so
-  /// the Flutter web loader can fall back to JS at runtime on browsers that
-  /// don't support WasmGC. This matches `flutter build web --wasm`, which
-  /// already builds both variants for the same reason.
+  /// This getter is only consulted when `flutter run` goes through
+  /// [WebBuilder.buildWeb] rather than the DDC-based [WebDevFS] path. That
+  /// happens in every mode when `--wasm` is set (DDC does not compile to
+  /// Wasm) and in profile/release mode without `--wasm`. See the branch in
+  /// `_runOnce` guarded by `isDebug && !webUseWasm`.
   ///
-  /// Without `--wasm`, only a single JS config is returned.
+  /// | mode    | `--wasm` off                                 | `--wasm` on                        |
+  /// |---------|----------------------------------------------|------------------------------------|
+  /// | debug   | DDC via `WebDevFS` (this getter not called)  | `WasmCompilerConfig` + `JsCompilerConfig` (dart2js) |
+  /// | profile | `JsCompilerConfig` (dart2js)                 | `WasmCompilerConfig` + `JsCompilerConfig` (dart2js) |
+  /// | release | `JsCompilerConfig` (dart2js)                 | `WasmCompilerConfig` + `JsCompilerConfig` (dart2js) |
+  ///
+  /// The JS build always uses [JsCompilerConfig] (dart2js), not DDC. Hot
+  /// reload requires DDC and is therefore unavailable whenever `--wasm` is
+  /// set (see [reloadIsRestart]) — this was already the case before the JS
+  /// fallback was added; the fallback only widens browser compatibility, it
+  /// does not remove any dev tooling that would otherwise be present.
+  ///
+  /// When `--wasm` is set, the Flutter web loader picks between the two
+  /// builds at runtime: WasmGC-capable browsers load the wasm build; older
+  /// browsers fall back to the dart2js build. This matches what
+  /// `flutter build web --wasm` already emits for the same reason.
   ///
   /// See https://github.com/flutter/flutter/issues/172006.
   @visibleForTesting
