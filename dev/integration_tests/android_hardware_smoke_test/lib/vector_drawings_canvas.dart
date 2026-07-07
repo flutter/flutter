@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
 import 'constants.dart';
 
 /// A custom widget wrapping a CustomPaint canvas to render different vector

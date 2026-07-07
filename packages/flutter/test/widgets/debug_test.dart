@@ -331,11 +331,12 @@ void main() {
   group('debugPaintFocusBoxes', () {
     const kPrimaryFocusColor = Color(0xF000FF00);
     const kAncestorOfPrimaryFocusColor = Color(0xF00000FF);
-    const kFocusableColor = Color(0xF000FFFF);
-    const kSkipTraversalColor = Color(0xF0FFFF00);
+    const kFocusableColor =  Color(0xF000FFFF);
+    const kSkipTraversalColor =  Color(0xF0FFFF00);
     const kNotFocusableColor = Color(0xF0FF0000);
 
-    testWidgets('adds a border on each Focus widget if enabled', (WidgetTester tester) async {
+    testWidgets('adds a border on each Focus widget if enabled',
+        (WidgetTester tester) async {
       debugPaintFocusBoxes = true;
 
       final nodePrimary = FocusNode(debugLabel: 'primary');
@@ -357,7 +358,10 @@ void main() {
             children: <Widget>[
               Focus(
                 focusNode: nodeParent,
-                child: Focus(focusNode: nodePrimary, child: const SizedBox(width: 10, height: 10)),
+                child: Focus(
+                  focusNode: nodePrimary,
+                  child: const SizedBox(width: 10, height: 10),
+                ),
               ),
               Focus(focusNode: nodeFocusable, child: const SizedBox(width: 10, height: 10)),
               Focus(focusNode: nodeSkipTraversal, child: const SizedBox(width: 10, height: 10)),
@@ -388,14 +392,18 @@ void main() {
       debugPaintFocusBoxes = false;
     });
 
-    testWidgets('does not add a border if disabled', (WidgetTester tester) async {
+    testWidgets('does not add a border if disabled',
+        (WidgetTester tester) async {
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Focus(focusNode: focusNode, child: const SizedBox(width: 100, height: 100)),
+          child: Focus(
+            focusNode: focusNode,
+            child: const SizedBox(width: 100, height: 100),
+          ),
         ),
       );
 
@@ -410,7 +418,10 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Focus(focusNode: focusNode, child: const SizedBox(width: 100, height: 100)),
+          child: Focus(
+            focusNode: focusNode,
+            child: const SizedBox(width: 100, height: 100),
+          ),
         ),
       );
 

@@ -40,9 +40,8 @@ Future<String> _handleCommand(String? command) async {
     throw ArgumentError.value(command, 'command', 'must not be null or empty');
   }
   if (command == 'getSystemUiVisibility') {
-    final Map<Object?, Object?>? raw = await _nativeDriver.invokeMethod<Map<Object?, Object?>>(
-      'get_system_ui_visibility',
-    );
+    final Map<Object?, Object?>? raw = await _nativeDriver
+        .invokeMethod<Map<Object?, Object?>>('get_system_ui_visibility');
     final int flags = (raw?['system_ui_visibility'] as int?) ?? 0;
     return json.encode(<String, Object?>{'systemUiVisibility': flags});
   }
@@ -63,6 +62,8 @@ class _App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ColoredBox(color: Color(0xFF202020)));
+    return const MaterialApp(
+      home: ColoredBox(color: Color(0xFF202020)),
+    );
   }
 }

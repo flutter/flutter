@@ -30,7 +30,10 @@ Future<TaskResult> run() async {
 
       // Step 1: Test using default (should be enabled).
       {
-        final Process process = await startFlutter('run', options: <String>['-d', 'linux']);
+        final Process process = await startFlutter(
+          'run',
+          options: <String>['-d', 'linux'],
+        );
 
         final completer = Completer<void>();
         var sawImpellerBackendMessage = false;
@@ -104,8 +107,7 @@ Future<TaskResult> run() async {
                 if (line.contains(vulkanBackendMessage) || line.contains(openGLBackendMessage)) {
                   sawImpellerBackendMessage = true;
                 }
-                if (line.contains('The Dart VM service is listening on') ||
-                    line.contains('A Dart VM Service')) {
+                if (line.contains('The Dart VM service is listening on') || line.contains('A Dart VM Service')) {
                   sawVMServiceMessage = true;
                   if (!completer.isCompleted) {
                     completer.complete();
@@ -159,8 +161,7 @@ Future<TaskResult> run() async {
               if (line.contains(vulkanBackendMessage) || line.contains(openGLBackendMessage)) {
                 sawImpellerBackendMessage = true;
               }
-              if (line.contains('The Dart VM service is listening on') ||
-                  line.contains('A Dart VM Service')) {
+              if (line.contains('The Dart VM service is listening on') || line.contains('A Dart VM Service')) {
                 sawVMServiceMessage = true;
                 if (!completer.isCompleted) {
                   completer.complete();
