@@ -12,13 +12,14 @@ import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.plugin.common.BasicMessageChannel
 import io.flutter.plugin.common.JSONMessageCodec
 import io.flutter.plugin.common.MethodChannel
+import java.lang.ref.WeakReference
 
 class MainActivity : FlutterActivity() {
     companion object {
         private const val TAG = "MainActivity"
         const val CHANNEL_NAME = "com.example.android_hardware_smoke_test/test_channel"
         private const val METHOD_CHANNEL_NAME = "com.example.android_hardware_smoke_test/native_support"
-        private var lastConfiguredEngine: FlutterEngine? = null
+        private var lastConfiguredEngine: WeakReference<FlutterEngine>? = null
     }
 
     var messageChannel: BasicMessageChannel<Any>? = null
@@ -47,12 +48,10 @@ class MainActivity : FlutterActivity() {
         // crashes are specific to Vulkan, and OpenGLES can crash when
         // creating a surface/window with a cached engine.
         if (backend == "vulkan") {
-            var engine = FlutterEngineCache.getInstance().get("smoke_test_engine")
-            if (engine == null) {
-                engine = FlutterEngine(context)
-                FlutterEngineCache.getInstance().put("smoke_test_engine", engine)
+            val cache = FlutterEngineCache.getInstance()
+            return cache.get("smoke_test_engine") ?: FlutterEngine(context).also {
+                cache.put("smoke_test_engine", it)
             }
-            return engine
         }
         return FlutterEngine(context)
     }
@@ -81,7 +80,7 @@ class MainActivity : FlutterActivity() {
                 JSONMessageCodec.INSTANCE
             )
 
-        if (flutterEngine != lastConfiguredEngine) {
+        if (flutterEngine != lastConfiguredEngine?.get()) {
             flutterEngine
                 .platformViewsController
                 .registry
@@ -89,7 +88,7 @@ class MainActivity : FlutterActivity() {
                     "com.example.android_hardware_smoke_test/native_text_view",
                     NativeTextViewFactory()
                 )
-            lastConfiguredEngine = flutterEngine
+            lastConfiguredEngine = WeakReference(flutterEngine)
         }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
@@ -124,5 +123,13 @@ class MainActivity : FlutterActivity() {
                     }
                 }
             }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        super.cleanUpFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
+            .setMethodCallHandler(null)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "native_driver")
+            .setMethodCallHandler(null)
     }
 }
