@@ -17,8 +17,10 @@ import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
@@ -246,9 +248,15 @@ class FlutterPlugin : Plugin<Project> {
             }
             localEngineHost = engineHostOut.name
         }
-        FlutterPluginUtils.getLegacyAndroidExtension(project).buildTypes.all {
+        val androidExtension = FlutterPluginUtils.getLegacyAndroidExtension(project)
+        androidExtension.buildTypes.all {
             addFlutterDependencies(this)
         }
+        androidExtension.productFlavors.all(object : Action<com.android.builder.model.ProductFlavor> {
+            override fun execute(flavor: com.android.builder.model.ProductFlavor) {
+                (flavor as ExtensionAware).extensions.create("flutter", FlutterExtension::class.java)
+            }
+        })
     }
 
     private fun addFlutterDependencies(buildType: com.android.builder.model.BuildType) {
@@ -717,7 +725,7 @@ class FlutterPlugin : Plugin<Project> {
                     localEngine = flutterPlugin.localEngine
                     localEngineHost = flutterPlugin.localEngineHost
                     localEngineSrcPath = flutterPlugin.localEngineSrcPath
-                    targetPath = FlutterPluginUtils.getFlutterTarget(project)
+                    targetPath = FlutterPluginUtils.getFlutterTarget(project, variant)
                     verbose = FlutterPluginUtils.isProjectVerbose(project)
                     fileSystemRoots = fileSystemRootsValue
                     fileSystemScheme = fileSystemSchemeValue

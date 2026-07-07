@@ -10,6 +10,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
+import org.gradle.api.plugins.ExtensionAware
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
@@ -400,6 +401,35 @@ object FlutterPluginUtils {
         val target: String = getFlutterExtensionOrNull(project)!!.target ?: "lib/main.dart"
         return target
     }
+
+    /**
+     * Gets the target file for a specific variant.
+     *
+     * Precedence:
+     *  1. the target path defined as a project property (PROP_TARGET)
+     *  2. the target path defined in one of the variant's product flavors (the first non-null target found)
+     *  3. the project-level target fallback
+     *  4. `lib/main.dart` otherwise
+     */
+    @JvmStatic
+    @JvmName("getFlutterTarget")
+    internal fun getFlutterTarget(
+        project: Project,
+        @Suppress("DEPRECATION") variant: com.android.build.gradle.api.BaseVariant
+    ): String {
+        if (project.hasProperty(PROP_TARGET)) {
+            return project.property(PROP_TARGET).toString()
+        }
+        for (flavor in variant.productFlavors) {
+            val extensionAware = flavor as? ExtensionAware
+            val flavorExtension = extensionAware?.extensions?.findByType(FlutterExtension::class.java)
+            if (flavorExtension?.target != null) {
+                return flavorExtension.target!!
+            }
+        }
+        return getFlutterTarget(project)
+    }
+
 
     @JvmStatic
     @JvmName("isBuiltAsApp")
