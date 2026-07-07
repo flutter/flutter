@@ -347,7 +347,7 @@ void main() {
           expect(
             logger.warningText,
             contains(
-              '--flavor is only supported for Android, macOS, and iOS devices. '
+              '--flavor is only supported for Android, macOS, iOS, and Windows devices. '
               'Flavor-related features may not function properly and could '
               'behave differently in a future release.',
             ),
@@ -1694,6 +1694,7 @@ server:
           'run',
           '--start-paused',
           '--disable-service-auth-codes',
+          '--disable-service-origin-check',
           '--use-test-fonts',
           '--trace-skia',
           '--trace-systrace',
@@ -1719,6 +1720,7 @@ server:
 
       expect(options.startPaused, true);
       expect(options.disableServiceAuthCodes, true);
+      expect(options.disableServiceOriginCheck, true);
       expect(options.useTestFonts, true);
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
@@ -2092,6 +2094,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool? forcedWebEnableHotReload,
   }) async {
     return const BuildInfo(
       BuildMode.debug,

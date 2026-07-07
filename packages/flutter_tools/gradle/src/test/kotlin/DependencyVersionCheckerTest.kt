@@ -30,6 +30,7 @@ import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
 import com.flutter.gradle.DependencyVersionChecker.warnKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnMinSdkVersion
+import com.flutter.gradle.testing.setAgpKotlinVersionToNull
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -53,10 +54,10 @@ private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
 // are updated in DependencyVersionChecker.kt
 // These values should also match the flutter create template values.
 // In //packages/flutter_tools/lib/src/android/gradle_utils.dart
-private const val SUPPORTED_GRADLE_VERSION: String = "9.1.0"
+private const val SUPPORTED_GRADLE_VERSION: String = "9.3.1"
 private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_17
-private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(9, 0, 1)
-private const val SUPPORTED_KGP_VERSION: String = "2.3.20"
+private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(9, 1, 0)
+private const val SUPPORTED_KGP_VERSION: String = "2.4.0"
 private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
 class DependencyVersionCheckerTest {
@@ -500,6 +501,7 @@ private object MockProjectFactory {
             }
             return@answers Unit
         }
+        setAgpKotlinVersionToNull(mockProject)
 
         return mockProject
     }

@@ -54,6 +54,8 @@ impeller_component("allocator_unittests") {
   sources = [
     "allocator_unittests.cc",
     "buffer_view_unittests.cc",
+    "sampler_descriptor_unittests.cc",
+    "shader_types_unittests.cc",
   ]
 
   deps = [
