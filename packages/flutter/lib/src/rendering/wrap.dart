@@ -183,20 +183,14 @@ class _RunMetrics {
     bool flipMainAxis,
     double spacing,
     double maxMainExtent,
-    bool ignoreZeroSizeChildrenForSpacing,
   ) {
-    final effectiveSpacing =
-        ignoreZeroSizeChildrenForSpacing &&
-            (childSize.mainAxisExtent == 0.0 || visibleChildCount == 0)
-        ? 0.0
-        : spacing;
     final bool needsNewRun =
-        axisSize.mainAxisExtent + childSize.mainAxisExtent + effectiveSpacing - maxMainExtent >
+        axisSize.mainAxisExtent + childSize.mainAxisExtent + spacing - maxMainExtent >
         precisionErrorTolerance;
     if (needsNewRun) {
       return _RunMetrics(child, childSize);
     } else {
-      axisSize += childSize + _AxisSize(mainAxisExtent: effectiveSpacing, crossAxisExtent: 0.0);
+      axisSize += childSize + _AxisSize(mainAxisExtent: spacing, crossAxisExtent: 0.0);
       childCount += 1;
       if (childSize.mainAxisExtent > 0.0) {
         visibleChildCount += 1;
@@ -730,12 +724,8 @@ class RenderWrap extends RenderBox
       }
       runMainAxisExtent += childMainAxisExtent;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
-      if (ignoreZeroSizeChildrenForSpacing) {
-        if (childMainAxisExtent > 0.0 && runVisibleChildCount > 0) {
-          runMainAxisExtent += spacing;
-        }
-      } else if (childCount > 0) {
-        runMainAxisExtent += spacing;
+      if (childCount > 0) {
+        runMainAxisExtent += effectiveSpacing;
       }
       if (childMainAxisExtent > 0.0) {
         runVisibleChildCount += 1;
@@ -807,15 +797,19 @@ class RenderWrap extends RenderBox
         size: layoutChild(child, childConstraints),
         direction: direction,
       );
+      final effectiveSpacing =
+          ignoreZeroSizeChildrenForSpacing &&
+              (childSize.mainAxisExtent == 0.0 || (currentRun?.visibleChildCount ?? 0) == 0)
+          ? 0.0
+          : spacing;
       final _RunMetrics? newRun = currentRun == null
           ? _RunMetrics(child, childSize)
           : currentRun.tryAddingNewChild(
               child,
               childSize,
               flipMainAxis,
-              spacing,
+              effectiveSpacing,
               mainAxisLimit,
-              ignoreZeroSizeChildrenForSpacing,
             );
       if (newRun != null) {
         runMetrics.add(newRun);
@@ -875,7 +869,7 @@ class RenderWrap extends RenderBox
       );
 
       var childMainAxisOffset = childLeadingSpace;
-      var hasVisibleChild = false;
+      var hasSpacedChild = false;
 
       int remainingChildCount = run.childCount;
       for (
@@ -892,21 +886,16 @@ class RenderWrap extends RenderBox
         );
         final double childCrossAxisOffset =
             effectiveCrossAlignment._alignment * (runCrossAxisExtent - childCrossAxisExtent);
-        if (ignoreZeroSizeChildrenForSpacing && childMainAxisExtent > 0.0 && hasVisibleChild) {
+        final bool spaced = !ignoreZeroSizeChildrenForSpacing || childMainAxisExtent > 0.0;
+        if (spaced && hasSpacedChild) {
           childMainAxisOffset += childBetweenSpace;
         }
         positionChild(
           _getOffset(childMainAxisOffset, runCrossAxisOffset + childCrossAxisOffset),
           child,
         );
-        if (ignoreZeroSizeChildrenForSpacing) {
-          childMainAxisOffset += childMainAxisExtent;
-          if (childMainAxisExtent > 0.0) {
-            hasVisibleChild = true;
-          }
-        } else {
-          childMainAxisOffset += childMainAxisExtent + childBetweenSpace;
-        }
+        childMainAxisOffset += childMainAxisExtent;
+        hasSpacedChild = hasSpacedChild || spaced;
       }
       runCrossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }

@@ -1125,5 +1125,23 @@ void main() {
       expect(tester.getTopLeft(find.byKey(const Key('a'))), Offset.zero);
       expect(tester.getTopLeft(find.byKey(const Key('b'))), const Offset(0.0, 10.0));
     });
+
+    testWidgets('can be toggled on an existing render object', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(ignoreZeroSizeChildrenForSpacing: false, children: childrenWithGap),
+      );
+      expect(tester.getSize(find.byType(Wrap)).width, 72.0);
+
+      await tester.pumpWidget(
+        wrap(ignoreZeroSizeChildrenForSpacing: true, children: childrenWithGap),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dx, 36.0);
+      expect(tester.getSize(find.byType(Wrap)).width, 56.0);
+
+      await tester.pumpWidget(
+        wrap(ignoreZeroSizeChildrenForSpacing: false, children: childrenWithGap),
+      );
+      expect(tester.getSize(find.byType(Wrap)).width, 72.0);
+    });
   });
 }

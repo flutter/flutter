@@ -502,5 +502,72 @@ void main() {
       expect(tester.getTopLeft(find.byKey(const Key('b'))).dx, 36.0);
       expect(tester.getSize(find.byType(Row)).width, 56.0);
     });
+
+    testWidgets('true ignores a Flexible child that lays out to zero size', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        column(
+          ignoreZeroSizeChildrenForSpacing: true,
+          children: const <Widget>[
+            SizedBox(key: Key('a'), width: 10.0, height: 20.0),
+            Flexible(child: SizedBox.shrink()),
+            SizedBox(key: Key('b'), width: 10.0, height: 20.0),
+          ],
+        ),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 36.0);
+      expect(tester.getSize(find.byType(Column)).height, 56.0);
+    });
+
+    testWidgets('true ignores an Expanded child that receives no free space', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 66.0,
+              width: 10.0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16.0,
+                ignoreZeroSizeChildrenForSpacing: true,
+                children: <Widget>[
+                  SizedBox(key: Key('a'), width: 10.0, height: 20.0),
+                  Expanded(child: SizedBox.shrink()),
+                  SizedBox(key: Key('b'), width: 10.0, height: 20.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      // The Expanded child gets no free space, lays out to zero size, and so
+      // takes no spacing: the last visible child stays flush with the end.
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 46.0);
+      expect(tester.getBottomLeft(find.byKey(const Key('b'))).dy, 66.0);
+    });
+
+    testWidgets('can be toggled on an existing render object', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        column(ignoreZeroSizeChildrenForSpacing: false, children: childrenWithGap),
+      );
+      expect(tester.getSize(find.byType(Column)).height, 72.0);
+
+      await tester.pumpWidget(
+        column(ignoreZeroSizeChildrenForSpacing: true, children: childrenWithGap),
+      );
+      expect(tester.getTopLeft(find.byKey(const Key('b'))).dy, 36.0);
+      expect(tester.getSize(find.byType(Column)).height, 56.0);
+
+      await tester.pumpWidget(
+        column(ignoreZeroSizeChildrenForSpacing: false, children: childrenWithGap),
+      );
+      expect(tester.getSize(find.byType(Column)).height, 72.0);
+    });
   });
 }

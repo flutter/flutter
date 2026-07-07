@@ -750,28 +750,38 @@ class RenderFlex extends RenderBox
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
       var totalFlex = 0.0;
-      double inflexibleSpace = ignoreZeroSizeChildrenForSpacing ? 0.0 : spacing * (childCount - 1);
+      var inflexibleSpace = 0.0;
       var maxFlexFractionSoFar = 0.0;
       var spacedChildCount = 0;
+      var zeroSizeTightFlexChildCount = 0;
       for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
         final int flex = _getFlex(child);
         totalFlex += flex;
+        final double childMainSize = childSize(child, extent);
         if (flex > 0) {
-          final double flexFraction = childSize(child, extent) / flex;
-          maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
-          spacedChildCount += 1;
+          maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, childMainSize / flex);
+          if (childMainSize > 0) {
+            spacedChildCount += 1;
+          } else if (_getFit(child) == FlexFit.tight) {
+            zeroSizeTightFlexChildCount += 1;
+          }
         } else {
-          final double childMainSize = childSize(child, extent);
           inflexibleSpace += childMainSize;
           if (childMainSize > 0) {
             spacedChildCount += 1;
           }
         }
       }
-      if (ignoreZeroSizeChildrenForSpacing) {
-        inflexibleSpace += spacing * math.max(0, spacedChildCount - 1);
+      // A tight flex child with no intrinsic extent still stretches to a
+      // positive extent when there is free space to distribute, so it takes
+      // spacing in that case.
+      if (maxFlexFractionSoFar > 0) {
+        spacedChildCount += zeroSizeTightFlexChildCount;
       }
-      return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
+      final int spacedItemCount = ignoreZeroSizeChildrenForSpacing ? spacedChildCount : childCount;
+      return maxFlexFractionSoFar * totalFlex +
+          inflexibleSpace +
+          spacing * math.max(0, spacedItemCount - 1);
     } else {
       // INTRINSIC CROSS SIZE
       // Intrinsic cross size is the max of the intrinsic cross sizes of the
@@ -1097,24 +1107,18 @@ class RenderFlex extends RenderBox
         ? (childBefore, lastChild)
         : (childAfter, firstChild);
     var pos = leadingSpace;
-    var hasVisibleChild = false;
+    var hasSpacedChild = false;
     for (var child = startChild; child != null; child = nextChildPaintOrder(child)) {
       final BoxConstraints cc = constraintsForChild(child);
       final Size cs = child.getDryLayout(cc);
       final double childMainSize = _getMainSize(cs);
-      if (ignoreZeroSizeChildrenForSpacing) {
-        if (childMainSize > 0 && hasVisibleChild) {
-          pos += betweenSpace;
-        }
-        mainPositions[child] = pos;
-        pos += childMainSize;
-        if (childMainSize > 0) {
-          hasVisibleChild = true;
-        }
-      } else {
-        mainPositions[child] = pos;
-        pos += childMainSize + betweenSpace;
+      final bool spaced = !ignoreZeroSizeChildrenForSpacing || childMainSize > 0;
+      if (spaced && hasSpacedChild) {
+        pos += betweenSpace;
       }
+      mainPositions[child] = pos;
+      pos += childMainSize;
+      hasSpacedChild = hasSpacedChild || spaced;
     }
 
     // Then, find the first child with a baseline in child-list order and return its baseline + position.
@@ -1278,13 +1282,10 @@ class RenderFlex extends RenderBox
     // The first pass lays out non-flex children and computes total flex.
     var totalFlex = 0;
     var flexChildCount = 0;
-    var visibleChildCount = 0;
+    var spacedChildCount = 0;
     RenderBox? firstFlexChild;
     _AscentDescent accumulatedAscentDescent = _AscentDescent.none;
-    // Initially, accumulatedSize is the sum of the spaces between children in the main axis.
-    _AxisSize accumulatedSize = ignoreZeroSizeChildrenForSpacing
-        ? _AxisSize.empty
-        : _AxisSize._(Size(spacing * (childCount - 1), 0.0));
+    _AxisSize accumulatedSize = _AxisSize.empty;
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
       final int flex;
       if (canFlex && (flex = _getFlex(child)) > 0) {
@@ -1297,8 +1298,8 @@ class RenderFlex extends RenderBox
           direction: direction,
         );
         accumulatedSize += childSize;
-        if (childSize.mainAxisExtent > 0) {
-          visibleChildCount += 1;
+        if (!ignoreZeroSizeChildrenForSpacing || childSize.mainAxisExtent > 0) {
+          spacedChildCount += 1;
         }
         // Baseline-aligned children contributes to the cross axis extent separately.
         final double? baselineOffset = textBaseline == null
@@ -1316,18 +1317,17 @@ class RenderFlex extends RenderBox
       firstFlexChild == null || canFlex,
     ); // If we are given infinite space there's no need for this extra step.
 
-    final int spacedItemCount = ignoreZeroSizeChildrenForSpacing
-        ? visibleChildCount + flexChildCount
-        : childCount;
-    if (ignoreZeroSizeChildrenForSpacing) {
-      accumulatedSize += _AxisSize(
-        mainAxisExtent: spacing * math.max(0, spacedItemCount - 1),
-        crossAxisExtent: 0.0,
-      );
-    }
+    // Spacing must be reserved before the free space is distributed, but
+    // whether a flex child takes spacing is only known once it has laid out, so
+    // every flex child reserves a gap here and a zero-size one returns its
+    // unused gap to the free space after the second pass.
+    final double reservedSpacing = spacing * math.max(0, spacedChildCount + flexChildCount - 1);
 
     // The second pass distributes free space to flexible children.
-    final double flexSpace = math.max(0.0, maxMainSize - accumulatedSize.mainAxisExtent);
+    final double flexSpace = math.max(
+      0.0,
+      maxMainSize - reservedSpacing - accumulatedSize.mainAxisExtent,
+    );
     final double spacePerFlex = flexSpace / totalFlex;
     for (var child = firstFlexChild; child != null && totalFlex > 0; child = childAfter(child)) {
       final int flex = _getFlex(child);
@@ -1348,6 +1348,9 @@ class RenderFlex extends RenderBox
         direction: direction,
       );
       accumulatedSize += childSize;
+      if (!ignoreZeroSizeChildrenForSpacing || childSize.mainAxisExtent > 0) {
+        spacedChildCount += 1;
+      }
       final double? baselineOffset = textBaseline == null
           ? null
           : getBaseline(child, childConstraints, textBaseline);
@@ -1357,6 +1360,13 @@ class RenderFlex extends RenderBox
       );
     }
     assert(totalFlex == 0);
+
+    // The number of children that take spacing is now known, so the spacing
+    // between them joins the accumulated size.
+    accumulatedSize += _AxisSize(
+      mainAxisExtent: spacing * math.max(0, spacedChildCount - 1),
+      crossAxisExtent: 0.0,
+    );
 
     // The overall height of baseline-aligned children contributes to the cross axis extent.
     accumulatedSize += switch (accumulatedAscentDescent) {
@@ -1381,7 +1391,7 @@ class RenderFlex extends RenderBox
       mainAxisFreeSpace: constrainedSize.mainAxisExtent - accumulatedSize.mainAxisExtent,
       baselineOffset: accumulatedAscentDescent.baselineOffset,
       spacePerFlex: firstFlexChild == null ? null : spacePerFlex,
-      spacedItemCount: spacedItemCount,
+      spacedItemCount: spacedChildCount,
     );
   }
 
@@ -1430,10 +1440,11 @@ class RenderFlex extends RenderBox
     // Position all children in visual order: starting from the top-left child and
     // work towards the child that's farthest away from the origin.
     var childMainPosition = leadingSpace;
-    var hasVisibleChild = false;
+    var hasSpacedChild = false;
     for (var child = topLeftChild; child != null; child = nextChild(child)) {
       final double childMainSize = _getMainSize(child.size);
-      if (ignoreZeroSizeChildrenForSpacing && childMainSize > 0 && hasVisibleChild) {
+      final bool spaced = !ignoreZeroSizeChildrenForSpacing || childMainSize > 0;
+      if (spaced && hasSpacedChild) {
         childMainPosition += betweenSpace;
       }
       final double? childBaselineOffset;
@@ -1465,14 +1476,8 @@ class RenderFlex extends RenderBox
         Axis.horizontal => Offset(childMainPosition, childCrossPosition),
         Axis.vertical => Offset(childCrossPosition, childMainPosition),
       };
-      if (ignoreZeroSizeChildrenForSpacing) {
-        childMainPosition += childMainSize;
-        if (childMainSize > 0) {
-          hasVisibleChild = true;
-        }
-      } else {
-        childMainPosition += childMainSize + betweenSpace;
-      }
+      childMainPosition += childMainSize;
+      hasSpacedChild = hasSpacedChild || spaced;
     }
   }
 
