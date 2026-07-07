@@ -183,7 +183,7 @@ Future<void> testMain() async {
     // Line 1: "Hello \n" (with trailing space)
     final ui.TextRange line1Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 0));
     expect(line1Boundary.start, 0);
-    expect(line1Boundary.end, 6); // Should include the space and newline
+    expect(line1Boundary.end, 6); // Should include the space and exclude the newline
 
     // Position at the space should return line 1 boundary
     final ui.TextRange line1BoundaryAtSpace = paragraph.getLineBoundary(
