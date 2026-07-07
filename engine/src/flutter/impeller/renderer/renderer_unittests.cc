@@ -417,6 +417,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
   VS::BindUniformBuffer(*r2t_pass, data_host_buffer->EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->Draw().ok());
   ASSERT_TRUE(r2t_pass->EncodeCommands());
+  ASSERT_TRUE(context->FlushCommandBuffers());
 }
 
 TEST_P(RendererTest, CanRenderInstanced) {

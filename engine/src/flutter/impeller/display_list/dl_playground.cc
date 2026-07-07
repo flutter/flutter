@@ -30,7 +30,7 @@ bool DlPlayground::OpenPlaygroundHere(sk_sp<flutter::DisplayList> list) {
 }
 
 bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
-  if (!switches_.enable_playground) {
+  if (!IsPlaygroundEnabled()) {
     return true;
   }
 
