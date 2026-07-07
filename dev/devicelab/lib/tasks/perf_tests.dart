@@ -1133,10 +1133,12 @@ class StartupTest {
       if (event is Map<String, dynamic> && event['name'] == eventName) {
         if (event['ph'] == 'b') {
           // Begin phase
-          beginTs = event['ts'] as int?;
+          final Object? ts = event['ts'];
+          beginTs = ts is num ? ts.toInt() : null;
         } else if (event['ph'] == 'e') {
           // End phase
-          endTs = event['ts'] as int?;
+          final Object? ts = event['ts'];
+          endTs = ts is num ? ts.toInt() : null;
         }
       }
     }
