@@ -86,8 +86,15 @@ const Brightness brightnessConstant = Brightness.dark;
 
 const kThemeDart = '''
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter/widgets.dart';
 
-PreviewThemeData myThemeData() => PreviewThemeData();
+final class MyThemeData extends PreviewThemeData {
+  const MyThemeData();
+  @override
+  Widget apply(BuildContext context, Widget child) => child;
+}
+
+PreviewThemeData myThemeData() => const MyThemeData();
 ''';
 
 const kWrapperDart = '''
