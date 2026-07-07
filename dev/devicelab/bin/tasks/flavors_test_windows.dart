@@ -45,9 +45,9 @@ Future<void> main() async {
         ),
       ).readAsBytesSync();
 
-      final assetManifest = const StandardMessageCodec().decodeMessage(
-        ByteData.sublistView(assetManifestFileData),
-      ) as Map<Object?, Object?>;
+      final assetManifest =
+          const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestFileData))
+              as Map<Object?, Object?>;
 
       if (assetManifest.containsKey('assets/free/free.txt')) {
         return TaskResult.failure(

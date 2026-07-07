@@ -755,8 +755,9 @@ void main() async {
 
   test('CommandBuffer.copyTextureToBuffer appends successfully', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4);
-    final ByteData pixels = Uint8List.fromList(List<int>.filled(4 * 4 * 4, 0xFF)).buffer
-        .asByteData();
+    final ByteData pixels = Uint8List.fromList(
+      List<int>.filled(4 * 4 * 4, 0xFF),
+    ).buffer.asByteData();
     texture.overwrite(pixels);
 
     final gpu.DeviceBuffer destination = gpu.gpuContext.createDeviceBuffer(

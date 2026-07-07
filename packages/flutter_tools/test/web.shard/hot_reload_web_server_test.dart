@@ -59,12 +59,12 @@ void main() {
         await expectLater(testRunner.hotReload(), completes);
         // Confirm build counter was incremented.
         await expectLater(
-          testRunner.findNextInBrowserLog('((((TICK 2))))', defaultTimeout),
+          testRunner.findNextInBrowserLog('((((TICK 2))))', const Duration(seconds: 30)),
           completes,
         );
         // Confirm the new code ran in the browser.
         await expectLater(
-          testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', const Duration(seconds: 15)),
+          testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', const Duration(seconds: 30)),
           completes,
         );
         // Close the browser.

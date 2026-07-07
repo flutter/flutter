@@ -2413,7 +2413,8 @@ let package = Package(
         final processManager = FakeProcessManager.list([
           const FakeCommand(
             command: ['swift', 'package', 'dump-package'],
-            stdout: '{"platforms": [{"platformName": "ios", "version": "15.0"}], "targets": [{"name": "PluginA", "type": "regular"}], "dependencies": []}',
+            stdout:
+                '{"platforms": [{"platformName": "ios", "version": "15.0"}], "targets": [{"name": "PluginA", "type": "regular"}], "dependencies": []}',
           ),
           const FakeCommand(
             command: [
@@ -2438,7 +2439,8 @@ let package = Package(
           ),
           const FakeCommand(
             command: ['swift', 'package', 'dump-package'],
-            stdout: '{"platforms": [{"platformName": "ios", "version": "14.0"}], "targets": [{"name": "PluginC", "type": "regular"}], "dependencies": []}',
+            stdout:
+                '{"platforms": [{"platformName": "ios", "version": "14.0"}], "targets": [{"name": "PluginC", "type": "regular"}], "dependencies": []}',
           ),
           const FakeCommand(
             command: [
@@ -2502,30 +2504,32 @@ let package = Package(
         expect(pluginSwiftDependencies.copiedPlugins.length, 2);
       });
 
-      testWithoutContext('processPlugins selects the platform version that matches the target platform when multiple platforms are defined', () async {
-        final fs = MemoryFileSystem.test();
-        final logger = BufferLogger.test();
-        const FlutterDarwinPlatform targetPlatform = .ios;
+      testWithoutContext(
+        'processPlugins selects the platform version that matches the target platform when multiple platforms are defined',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          const FlutterDarwinPlatform targetPlatform = .ios;
 
-        final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
+          final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
 
-        final Directory appDirectory = fs.directory('/path/to/my_flutter_app')
-          ..createSync(recursive: true);
-        fs.currentDirectory = appDirectory;
+          final Directory appDirectory = fs.directory('/path/to/my_flutter_app')
+            ..createSync(recursive: true);
+          fs.currentDirectory = appDirectory;
 
-        fs.file(commandFilePath).createSync(recursive: true);
-        fs
-            .directory(pluginA.path)
-            .childDirectory('ios')
-            .childDirectory('PluginA')
-            .childFile('Package.swift')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(_pluginManifest(pluginName: 'PluginA'));
+          fs.file(commandFilePath).createSync(recursive: true);
+          fs
+              .directory(pluginA.path)
+              .childDirectory('ios')
+              .childDirectory('PluginA')
+              .childFile('Package.swift')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(_pluginManifest(pluginName: 'PluginA'));
 
-        final processManager = FakeProcessManager.list([
-          const FakeCommand(
-            command: ['swift', 'package', 'dump-package'],
-            stdout: '''
+          final processManager = FakeProcessManager.list([
+            const FakeCommand(
+              command: ['swift', 'package', 'dump-package'],
+              stdout: '''
 {
   "platforms": [
     {
@@ -2546,69 +2550,70 @@ let package = Package(
   "dependencies": []
 }
 ''',
-          ),
-          const FakeCommand(
-            command: [
-              'swift',
-              'package',
-              'add-dependency',
-              '../FlutterFramework',
-              '--type',
-              'path',
-            ],
-          ),
-          const FakeCommand(
-            command: [
-              'swift',
-              'package',
-              'add-target-dependency',
-              'FlutterFramework',
-              'PluginA',
-              '--package',
-              'FlutterFramework',
-            ],
-          ),
-        ]);
+            ),
+            const FakeCommand(
+              command: [
+                'swift',
+                'package',
+                'add-dependency',
+                '../FlutterFramework',
+                '--type',
+                'path',
+              ],
+            ),
+            const FakeCommand(
+              command: [
+                'swift',
+                'package',
+                'add-target-dependency',
+                'FlutterFramework',
+                'PluginA',
+                '--package',
+                'FlutterFramework',
+              ],
+            ),
+          ]);
 
-        final testUtils = BuildSwiftPackageUtils(
-          analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(
-            '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
-          ),
-          buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, '/path/to/flutter'),
-          fileSystem: fs,
-          flutterRoot: '/path/to/flutter',
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          platform: FakePlatform(),
-          processManager: processManager,
-          project: FakeFlutterProject(directory: appDirectory),
-          templateRenderer: const MustacheTemplateRenderer(),
-          xcode: FakeXcode(),
-        );
+          final testUtils = BuildSwiftPackageUtils(
+            analytics: FakeAnalytics(),
+            artifacts: FakeArtifacts(
+              '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
+            ),
+            buildSystem: FakeBuildSystem(),
+            cache: FakeCache(fs, '/path/to/flutter'),
+            fileSystem: fs,
+            flutterRoot: '/path/to/flutter',
+            flutterVersion: FakeFlutterVersion(),
+            logger: logger,
+            platform: FakePlatform(),
+            processManager: processManager,
+            project: FakeFlutterProject(directory: appDirectory),
+            templateRenderer: const MustacheTemplateRenderer(),
+            xcode: FakeXcode(),
+          );
 
-        final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
-          targetPlatform: targetPlatform,
-          utils: testUtils,
-        );
+          final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
+            targetPlatform: targetPlatform,
+            utils: testUtils,
+          );
 
-        final Directory cacheDir = fs.directory('output/.cache')..createSync(recursive: true);
-        final Directory pluginsDir = appDirectory.childDirectory(
-          'output/FlutterPluginRegistrant/Plugins',
-        )..createSync(recursive: true);
+          final Directory cacheDir = fs.directory('output/.cache')..createSync(recursive: true);
+          final Directory pluginsDir = appDirectory.childDirectory(
+            'output/FlutterPluginRegistrant/Plugins',
+          )..createSync(recursive: true);
 
-        await pluginSwiftDependencies.processPlugins(
-          cacheDirectory: cacheDir,
-          plugins: [pluginA],
-          pluginsDirectory: pluginsDir,
-        );
+          await pluginSwiftDependencies.processPlugins(
+            cacheDirectory: cacheDir,
+            plugins: [pluginA],
+            pluginsDirectory: pluginsDir,
+          );
 
-        expect(processManager, hasNoRemainingExpectations);
-        expect(pluginSwiftDependencies.copiedPlugins.length, 1);
-        expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
-      });
+          expect(processManager, hasNoRemainingExpectations);
+          expect(pluginSwiftDependencies.copiedPlugins.length, 1);
+          expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
+          expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
+        },
+      );
 
       testWithoutContext(
         'processPlugins skips injecting Flutter dependency if already present',

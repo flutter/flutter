@@ -159,7 +159,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       )
       ..addOption(
         kDtdUrl,
-        help: 'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
+        help:
+            'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
         hide: !verbose,
       )
       ..addFlag(

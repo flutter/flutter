@@ -43,13 +43,14 @@ BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
 
 /// Signature for the callback that's called when a traversal policy
 /// requests focus.
-typedef TraversalRequestFocusCallback = void Function(
-  FocusNode node, {
-  ScrollPositionAlignmentPolicy? alignmentPolicy,
-  double? alignment,
-  Duration? duration,
-  Curve? curve,
-});
+typedef TraversalRequestFocusCallback =
+    void Function(
+      FocusNode node, {
+      ScrollPositionAlignmentPolicy? alignmentPolicy,
+      double? alignment,
+      Duration? duration,
+      Curve? curve,
+    });
 
 // A class to temporarily hold information about FocusTraversalGroups when
 // sorting their contents.
@@ -1453,8 +1454,9 @@ class _ReadingOrderSortData with Diagnosticable {
           .getElementForInheritedWidgetOfExactType<Directionality>();
       while (directionalityElement != null) {
         result.add(directionalityElement.widget as Directionality);
-        directionalityElement = _getAncestor(directionalityElement)
-            ?.getElementForInheritedWidgetOfExactType<Directionality>();
+        directionalityElement = _getAncestor(
+          directionalityElement,
+        )?.getElementForInheritedWidgetOfExactType<Directionality>();
       }
       return result;
     }

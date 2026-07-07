@@ -100,7 +100,8 @@ class _MyState extends State<MyWidget> {
       if (!isHcpp) {
         return <String, Object?>{
           keyMessage: 'Skipped',
-          keyReason: 'HCPP is not supported on this device/configuration (requires Vulkan and Android 14+)',
+          keyReason:
+              'HCPP is not supported on this device/configuration (requires Vulkan and Android 14+)',
         };
       }
     }

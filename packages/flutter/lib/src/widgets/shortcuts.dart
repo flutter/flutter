@@ -926,8 +926,9 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
     late final Action<Intent>? action = Actions.maybeFind<Intent>(context!, intent: intent);
 
     if (intent != null && context != null && action != null) {
-      final (bool enabled, Object? invokeResult) = Actions.of(context)
-          .invokeActionIfEnabled(action, intent, context);
+      final (bool enabled, Object? invokeResult) = Actions.of(
+        context,
+      ).invokeActionIfEnabled(action, intent, context);
 
       if (enabled) {
         return action.toKeyEventResult(intent, invokeResult);

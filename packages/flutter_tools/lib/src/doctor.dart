@@ -783,9 +783,9 @@ class DeviceValidator extends DoctorValidator {
     );
     var installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = (await Device.descriptions(devices))
-          .map<ValidationMessage>((String msg) => ValidationMessage(msg))
-          .toList();
+      installedMessages = (await Device.descriptions(
+        devices,
+      )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
     var diagnosticMessages = <ValidationMessage>[];

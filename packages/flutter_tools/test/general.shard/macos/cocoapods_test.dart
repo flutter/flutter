@@ -337,39 +337,44 @@ environement:
       },
     );
 
-    testUsingContext('does not include Pod config in xcconfig files, if flavor include present', () async {
-      final FlutterProject projectUnderTest = setupProjectUnderTest();
-      projectUnderTest.ios.podfile
-        ..createSync()
-        ..writeAsStringSync('Existing Podfile');
+    testUsingContext(
+      'does not include Pod config in xcconfig files, if flavor include present',
+      () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest();
+        projectUnderTest.ios.podfile
+          ..createSync()
+          ..writeAsStringSync('Existing Podfile');
 
-      const flavorDebugInclude =
-          '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"';
-      projectUnderTest.ios.xcodeConfigFor('Debug')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(flavorDebugInclude);
-      const flavorReleaseInclude =
-          '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.release free.xcconfig"';
-      projectUnderTest.ios.xcodeConfigFor('Release')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(flavorReleaseInclude);
+        const flavorDebugInclude =
+            '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"';
+        projectUnderTest.ios.xcodeConfigFor('Debug')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(flavorDebugInclude);
+        const flavorReleaseInclude =
+            '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.release free.xcconfig"';
+        projectUnderTest.ios.xcodeConfigFor('Release')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(flavorReleaseInclude);
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(
-        fileSystem.directory('project'),
-      );
-      await cocoaPodsUnderTest.setupPodfile(project.ios);
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.directory('project'),
+        );
+        await cocoaPodsUnderTest.setupPodfile(project.ios);
 
-      final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
-      // Redundant contains check, but this documents what we're testing--that the optional
-      // #include? doesn't get written in addition to the previous style #include.
-      expect(debugContents, isNot(contains('Pods-Runner/Pods-Runner.debug')));
-      expect(debugContents, equals(flavorDebugInclude));
-      final String releaseContents = projectUnderTest.ios
-          .xcodeConfigFor('Release')
-          .readAsStringSync();
-      expect(releaseContents, isNot(contains('Pods-Runner/Pods-Runner.release')));
-      expect(releaseContents, equals(flavorReleaseInclude));
-    });
+        final String debugContents = projectUnderTest.ios
+            .xcodeConfigFor('Debug')
+            .readAsStringSync();
+        // Redundant contains check, but this documents what we're testing--that the optional
+        // #include? doesn't get written in addition to the previous style #include.
+        expect(debugContents, isNot(contains('Pods-Runner/Pods-Runner.debug')));
+        expect(debugContents, equals(flavorDebugInclude));
+        final String releaseContents = projectUnderTest.ios
+            .xcodeConfigFor('Release')
+            .readAsStringSync();
+        expect(releaseContents, isNot(contains('Pods-Runner/Pods-Runner.release')));
+        expect(releaseContents, equals(flavorReleaseInclude));
+      },
+    );
   });
 
   group('Update xcconfig', () {
@@ -1191,9 +1196,12 @@ end''');
     );
 
     final possibleErrors = <String, String>{
-      'symbol not found': 'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
-      'incompatible architecture': "LoadError - (mach-o file, but is an incompatible architecture (have 'arm64', need 'x86_64')), '/usr/lib/ffi_c.bundle' (no such file) - /Library/Ruby/Gems/2.6.0/gems/ffi-1.15.4/lib/ffi_c.bundle",
-      'bus error': '/Library/Ruby/Gems/2.6.0/gems/ffi-1.15.5/lib/ffi/library.rb:275: [BUG] Bus Error at 0x000000010072c000',
+      'symbol not found':
+          'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
+      'incompatible architecture':
+          "LoadError - (mach-o file, but is an incompatible architecture (have 'arm64', need 'x86_64')), '/usr/lib/ffi_c.bundle' (no such file) - /Library/Ruby/Gems/2.6.0/gems/ffi-1.15.4/lib/ffi_c.bundle",
+      'bus error':
+          '/Library/Ruby/Gems/2.6.0/gems/ffi-1.15.5/lib/ffi/library.rb:275: [BUG] Bus Error at 0x000000010072c000',
     };
     possibleErrors.forEach((String errorName, String cocoaPodsError) {
       void testToolExitsWithCocoapodsMessage(_StdioStream outputStream) {
@@ -1283,7 +1291,8 @@ end''');
           workingDirectory: 'project/ios',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
           exitCode: 1,
-          stderr: 'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
+          stderr:
+              'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
         ),
         kWhichSysctlCommand,
         kx64CheckCommand,

@@ -3433,10 +3433,8 @@ typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
 ///
 ///  * [EditableTextContextMenuBuilder], which performs the same role for
 ///    [EditableText].
-typedef SelectableRegionContextMenuBuilder = Widget Function(
-  BuildContext context,
-  SelectableRegionState selectableRegionState,
-);
+typedef SelectableRegionContextMenuBuilder =
+    Widget Function(BuildContext context, SelectableRegionState selectableRegionState);
 
 /// The status of the selection under a [SelectableRegion].
 ///

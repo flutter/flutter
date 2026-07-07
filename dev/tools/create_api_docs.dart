@@ -1085,9 +1085,9 @@ Future<Process> runPubProcess({
 }
 
 List<String> findPackageNames(FileSystem filesystem) {
-  return findPackages(filesystem)
-      .map<String>((FileSystemEntity file) => path.basename(file.path))
-      .toList();
+  return findPackages(
+    filesystem,
+  ).map<String>((FileSystemEntity file) => path.basename(file.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK

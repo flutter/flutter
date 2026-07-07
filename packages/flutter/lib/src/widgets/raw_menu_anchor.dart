@@ -100,10 +100,8 @@ class RawMenuOverlayInfo {
 /// The `info` describes the anchor's [Rect], the [Size] of the overlay,
 /// the [TapRegion.groupId] used by members of the menu system, and the
 /// `position` argument passed to [MenuController.open].
-typedef RawMenuAnchorOverlayBuilder = Widget Function(
-  BuildContext context,
-  RawMenuOverlayInfo info,
-);
+typedef RawMenuAnchorOverlayBuilder =
+    Widget Function(BuildContext context, RawMenuOverlayInfo info);
 
 /// Signature for the builder function used by [RawMenuAnchor.builder] to build
 /// the widget that the [RawMenuAnchor] surrounds.
@@ -116,20 +114,15 @@ typedef RawMenuAnchorOverlayBuilder = Widget Function(
 /// The `child` is an optional child supplied as the [RawMenuAnchor.child]
 /// attribute. The child is intended to be incorporated in the result of the
 /// function.
-typedef RawMenuAnchorChildBuilder = Widget Function(
-  BuildContext context,
-  MenuController controller,
-  Widget? child,
-);
+typedef RawMenuAnchorChildBuilder =
+    Widget Function(BuildContext context, MenuController controller, Widget? child);
 
 /// Signature for the callback used by [RawMenuAnchor.onOpenRequested] to
 /// intercept requests to open a menu.
 ///
 /// See [RawMenuAnchor.onOpenRequested] for more information.
-typedef RawMenuAnchorOpenRequestedCallback = void Function(
-  Offset? position,
-  VoidCallback showOverlay,
-);
+typedef RawMenuAnchorOpenRequestedCallback =
+    void Function(Offset? position, VoidCallback showOverlay);
 
 /// Signature for the callback used by [RawMenuAnchor.onCloseRequested] to
 /// intercept requests to close a menu.

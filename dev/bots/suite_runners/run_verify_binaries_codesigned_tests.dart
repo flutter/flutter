@@ -428,9 +428,9 @@ Future<List<String>> findXcframeworksPaths(
     '-name',
     '*xcframework',
   ]);
-  final List<String> allXcframeworkPaths = LineSplitter.split(result.stdout as String)
-      .where((String s) => s.isNotEmpty)
-      .toList();
+  final List<String> allXcframeworkPaths = LineSplitter.split(
+    result.stdout as String,
+  ).where((String s) => s.isNotEmpty).toList();
   for (final path in allXcframeworkPaths) {
     print('Found: $path\n');
   }

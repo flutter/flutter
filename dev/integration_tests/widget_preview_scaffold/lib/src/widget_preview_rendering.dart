@@ -638,8 +638,9 @@ class WidgetPreviewMediaQueryOverride extends StatelessWidget {
     required BuildContext context,
     required Brightness brightness,
   }) {
-    var mediaQueryData = MediaQuery.of(context)
-        .copyWith(platformBrightness: brightness);
+    var mediaQueryData = MediaQuery.of(
+      context,
+    ).copyWith(platformBrightness: brightness);
 
     if (preview.textScaleFactor != null) {
       mediaQueryData = mediaQueryData.copyWith(

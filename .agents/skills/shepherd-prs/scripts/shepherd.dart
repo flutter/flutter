@@ -183,9 +183,9 @@ class GhClient {
 
   Future<int> getCommitsBehind(String defaultBranchName, String headSha) async {
     try {
-      final response = await _getApi(
-        '/repos/$owner/$repo/compare/$defaultBranchName...$headSha',
-      ) as Map<String, dynamic>;
+      final response =
+          await _getApi('/repos/$owner/$repo/compare/$defaultBranchName...$headSha')
+              as Map<String, dynamic>;
       return response['behind_by'] as int? ?? 0;
     } catch (_) {
       return 0;

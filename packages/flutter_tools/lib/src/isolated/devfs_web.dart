@@ -45,11 +45,12 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
-typedef VmServiceFactory = Future<vm_service.VmService> Function(
-  Uri, {
-  CompressionOptions compression,
-  required Logger logger,
-});
+typedef VmServiceFactory =
+    Future<vm_service.VmService> Function(
+      Uri, {
+      CompressionOptions compression,
+      required Logger logger,
+    });
 
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
@@ -392,8 +393,9 @@ class WebDevFS implements DevFS {
         return UpdateFSReport();
       }
       if (dirtyEntries.isNotEmpty) {
-        await LocalDevFSWriter(fileSystem: fileSystem)
-            .write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
+        await LocalDevFSWriter(
+          fileSystem: fileSystem,
+        ).write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
       }
     }
     await _validateTemplateFile('index.html');

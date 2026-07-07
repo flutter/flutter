@@ -251,20 +251,26 @@ class FlutterDevice {
         // shuts down, including after an error. If `done` completes before `connectToVmService`,
         // something went wrong that caused DDS to shutdown early.
         try {
-          service = await Future.any<dynamic>(<Future<dynamic>>[
-            connectToVmService(
-              debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri!) : vmServiceUri!,
-              reloadSources: reloadSources,
-              restart: restart,
-              compileExpression: compileExpression,
-              flutterProject: FlutterProject.current(),
-              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-              device: device,
-              logger: globals.logger,
-            ),
-            if (!existingDds)
-              device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
-          ]) as FlutterVmService?;
+          service =
+              await Future.any<dynamic>(<Future<dynamic>>[
+                    connectToVmService(
+                      debuggingOptions.enableDds
+                          ? (device!.dds.uri ?? vmServiceUri!)
+                          : vmServiceUri!,
+                      reloadSources: reloadSources,
+                      restart: restart,
+                      compileExpression: compileExpression,
+                      flutterProject: FlutterProject.current(),
+                      printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+                      device: device,
+                      logger: globals.logger,
+                    ),
+                    if (!existingDds)
+                      device!.dds.done.whenComplete(
+                        () => throw Exception('DDS shut down too early'),
+                      ),
+                  ])
+                  as FlutterVmService?;
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {

@@ -244,8 +244,9 @@ return False
   Future<void> _attachToAppProcess(int appProcessId) async {
     // Since the app starts stopped (--start-stopped), we expect a stopped state
     // after attaching.
-    final Future<String> futureLog = _startWaitingForLog(_lldbProcessStopped)
-        .then((value) => value, onError: _handleAsyncError);
+    final Future<String> futureLog = _startWaitingForLog(
+      _lldbProcessStopped,
+    ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('device process attach --pid $appProcessId');
     await futureLog;
@@ -254,8 +255,9 @@ return False
   /// Sets a breakpoint, waits for it print the breakpoint id, and adds a python
   /// script command to be executed whenever the breakpoint is hit.
   Future<void> _setBreakpoint() async {
-    final Future<String> futureLog = _startWaitingForLog(_breakpointPattern)
-        .then((value) => value, onError: _handleAsyncError);
+    final Future<String> futureLog = _startWaitingForLog(
+      _breakpointPattern,
+    ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln(
       r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
@@ -297,8 +299,9 @@ return False
   ///
   /// Without this, the debugger would remain attached to the process and the app will hang on crash.
   Future<void> _setupStopHooks() async {
-    final Future<String> futureLog = _startWaitingForLog(_stopHookAddedPattern)
-        .then((value) => value, onError: _handleAsyncError);
+    final Future<String> futureLog = _startWaitingForLog(
+      _stopHookAddedPattern,
+    ).then((value) => value, onError: _handleAsyncError);
     await _lldbProcess?.stdinWriteln('target stop-hook add -o "thread backtrace all" -o "detach"');
     await futureLog;
   }

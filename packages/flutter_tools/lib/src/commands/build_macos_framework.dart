@@ -259,9 +259,9 @@ end
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: TargetPlatform.darwin.getName(),
-          kDarwinArchs: defaultMacOSArchsForEnvironment(globals.artifacts!)
-              .map((DarwinArch e) => e.name)
-              .join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(
+            globals.artifacts!,
+          ).map((DarwinArch e) => e.name).join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,

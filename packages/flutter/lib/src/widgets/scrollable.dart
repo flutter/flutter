@@ -54,11 +54,12 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 
 /// Signature used by [TwoDimensionalScrollable] to build the viewport through
 /// which the scrollable content is displayed.
-typedef TwoDimensionalViewportBuilder = Widget Function(
-  BuildContext context,
-  ViewportOffset verticalPosition,
-  ViewportOffset horizontalPosition,
-);
+typedef TwoDimensionalViewportBuilder =
+    Widget Function(
+      BuildContext context,
+      ViewportOffset verticalPosition,
+      ViewportOffset horizontalPosition,
+    );
 
 // The return type of _performEnsureVisible.
 //

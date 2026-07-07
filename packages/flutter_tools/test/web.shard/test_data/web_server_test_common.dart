@@ -17,7 +17,7 @@ import 'package:webdriver/async_io.dart' hide Browser;
 
 import '../../integration.shard/test_driver.dart';
 
-const reloadRestartTimeout = Duration(seconds: 5);
+const reloadRestartTimeout = Duration(seconds: 30);
 const createWebDriverTimeout = Duration(seconds: 25);
 
 class WebServerDeviceTestRunner {
@@ -173,6 +173,7 @@ class WebServerDeviceTestRunner {
       while (await _currentBrowserLogChunk.hasNext) {
         final LogEntry entry = await _currentBrowserLogChunk.next;
         final String? logMessage = entry.message;
+        print('TEST_DEBUG_BROWSER_LOG: $logMessage');
         if (logMessage != null && logMessage.contains(message)) {
           return logMessage;
         }

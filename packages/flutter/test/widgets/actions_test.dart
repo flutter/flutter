@@ -1008,13 +1008,15 @@ void main() {
       WidgetTester tester,
     ) async {
       expect(
-        DefaultToKeyEventResultAction(consumesKey: false)
-            .toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        DefaultToKeyEventResultAction(
+          consumesKey: false,
+        ).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
         KeyEventResult.skipRemainingHandlers,
       );
       expect(
-        DefaultToKeyEventResultAction(consumesKey: true)
-            .toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        DefaultToKeyEventResultAction(
+          consumesKey: true,
+        ).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
         KeyEventResult.handled,
       );
     });
@@ -1998,11 +2000,8 @@ void main() {
   });
 }
 
-typedef PostInvokeCallback = void Function({
-  Action<Intent> action,
-  Intent intent,
-  ActionDispatcher dispatcher,
-});
+typedef PostInvokeCallback =
+    void Function({Action<Intent> action, Intent intent, ActionDispatcher dispatcher});
 
 class TestIntent extends Intent {
   const TestIntent();

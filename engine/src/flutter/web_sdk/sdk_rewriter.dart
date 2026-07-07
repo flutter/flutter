@@ -146,8 +146,9 @@ void main(List<String> arguments) {
   }
 
   final inputFiles = <String>[];
-  final List<FileSystemEntity> entries = Directory(inputDirectoryPath)
-      .listSync(recursive: true, followLinks: false);
+  final List<FileSystemEntity> entries = Directory(
+    inputDirectoryPath,
+  ).listSync(recursive: true, followLinks: false);
   for (final File inputFile in entries.whereType<File>()) {
     if (excludePattern != null && inputFile.path.startsWith(excludePattern)) {
       continue;

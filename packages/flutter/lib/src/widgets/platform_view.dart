@@ -1187,10 +1187,8 @@ class PlatformViewCreationParams {
 /// See also:
 ///
 ///  * [PlatformViewSurface], a common widget for presenting platform views.
-typedef PlatformViewSurfaceFactory = Widget Function(
-  BuildContext context,
-  PlatformViewController controller,
-);
+typedef PlatformViewSurfaceFactory =
+    Widget Function(BuildContext context, PlatformViewController controller);
 
 /// Constructs a [PlatformViewController].
 ///
@@ -1200,9 +1198,8 @@ typedef PlatformViewSurfaceFactory = Widget Function(
 /// See also:
 ///
 ///  * [PlatformViewLink], which links a platform view with the Flutter framework.
-typedef CreatePlatformViewCallback = PlatformViewController Function(
-  PlatformViewCreationParams params,
-);
+typedef CreatePlatformViewCallback =
+    PlatformViewController Function(PlatformViewCreationParams params);
 
 /// Links a platform view with the Flutter framework.
 ///

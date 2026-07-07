@@ -82,138 +82,144 @@ void main() {
     );
   });
 
-  testWithoutContext('logs useful error information when transformation process returns a nonzero exit code', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final artifacts = Artifacts.test();
+  testWithoutContext(
+    'logs useful error information when transformation process returns a nonzero exit code',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final artifacts = Artifacts.test();
 
-    final File asset = fileSystem.file('asset.txt')..createSync();
-    const outputPath = 'output.txt';
+      final File asset = fileSystem.file('asset.txt')..createSync();
+      const outputPath = 'output.txt';
 
-    final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <Pattern>[
-          dartBinaryPath,
-          'run',
-          'my_copy_transformer',
-          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+      final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            dartBinaryPath,
+            'run',
+            'my_copy_transformer',
+            '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+            '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+          ],
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output'))
+                    .parse(args);
+            fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
+          },
+          exitCode: 1,
+          stdout: 'Beginning transformation',
+          stderr: 'Something went wrong',
+        ),
+      ]);
+
+      final transformer = AssetTransformer(
+        processManager: processManager,
+        fileSystem: fileSystem,
+        dartBinaryPath: dartBinaryPath,
+        buildMode: BuildMode.debug,
+      );
+
+      final AssetTransformationResult result = await transformer.transformAsset(
+        asset: asset,
+        outputPath: outputPath,
+        workingDirectory: fileSystem.currentDirectory.path,
+        transformerEntries: <AssetTransformerEntry>[
+          const AssetTransformerEntry(package: 'my_copy_transformer', args: <String>[]),
         ],
-        onRun: (List<String> args) {
-          final ArgResults parsedArgs =
-              (ArgParser()
-                    ..addOption('input')
-                    ..addOption('output'))
-                  .parse(args);
-          fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
-        },
-        exitCode: 1,
-        stdout: 'Beginning transformation',
-        stderr: 'Something went wrong',
-      ),
-    ]);
+        logger: BufferLogger.test(),
+      );
 
-    final transformer = AssetTransformer(
-      processManager: processManager,
-      fileSystem: fileSystem,
-      dartBinaryPath: dartBinaryPath,
-      buildMode: BuildMode.debug,
-    );
+      expect(asset, exists);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(result.failure, isNotNull);
+      expect(
+        result.failure!.message,
+        matches(
+          'Transformer process terminated with non-zero exit code: 1\n'
+          'Transformer package: my_copy_transformer\n'
+          'Full command: $dartBinaryPath run my_copy_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt\n'
+          'stdout:\n'
+          'Beginning transformation\n'
+          'stderr:\n'
+          'Something went wrong',
+        ),
+      );
+      expect(
+        fileSystem.directory('.tmp_rand0').listSync(),
+        isEmpty,
+        reason: 'Transformer did not clean up after itself.',
+      );
+    },
+  );
 
-    final AssetTransformationResult result = await transformer.transformAsset(
-      asset: asset,
-      outputPath: outputPath,
-      workingDirectory: fileSystem.currentDirectory.path,
-      transformerEntries: <AssetTransformerEntry>[
-        const AssetTransformerEntry(package: 'my_copy_transformer', args: <String>[]),
-      ],
-      logger: BufferLogger.test(),
-    );
+  testWithoutContext(
+    'prints error message when the transformer does not produce an output file',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final artifacts = Artifacts.test();
 
-    expect(asset, exists);
-    expect(processManager, hasNoRemainingExpectations);
-    expect(result.failure, isNotNull);
-    expect(
-      result.failure!.message,
-      matches(
-        'Transformer process terminated with non-zero exit code: 1\n'
-        'Transformer package: my_copy_transformer\n'
-        'Full command: $dartBinaryPath run my_copy_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt\n'
-        'stdout:\n'
-        'Beginning transformation\n'
-        'stderr:\n'
-        'Something went wrong',
-      ),
-    );
-    expect(
-      fileSystem.directory('.tmp_rand0').listSync(),
-      isEmpty,
-      reason: 'Transformer did not clean up after itself.',
-    );
-  });
+      final File asset = fileSystem.file('asset.txt')..createSync();
+      const outputPath = 'output.txt';
 
-  testWithoutContext('prints error message when the transformer does not produce an output file', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final artifacts = Artifacts.test();
+      final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            dartBinaryPath,
+            'run',
+            'my_transformer',
+            '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+            '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+          ],
+          onRun: (_) {
+            // Do nothing.
+          },
+          stderr: 'Transformation failed, but I forgot to exit with a non-zero code.',
+        ),
+      ]);
 
-    final File asset = fileSystem.file('asset.txt')..createSync();
-    const outputPath = 'output.txt';
+      final transformer = AssetTransformer(
+        processManager: processManager,
+        fileSystem: fileSystem,
+        dartBinaryPath: dartBinaryPath,
+        buildMode: BuildMode.debug,
+      );
 
-    final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <Pattern>[
-          dartBinaryPath,
-          'run',
-          'my_transformer',
-          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+      final AssetTransformationResult result = await transformer.transformAsset(
+        asset: asset,
+        outputPath: outputPath,
+        workingDirectory: fileSystem.currentDirectory.path,
+        transformerEntries: <AssetTransformerEntry>[
+          const AssetTransformerEntry(package: 'my_transformer', args: <String>[]),
         ],
-        onRun: (_) {
-          // Do nothing.
-        },
-        stderr: 'Transformation failed, but I forgot to exit with a non-zero code.',
-      ),
-    ]);
+        logger: BufferLogger.test(),
+      );
 
-    final transformer = AssetTransformer(
-      processManager: processManager,
-      fileSystem: fileSystem,
-      dartBinaryPath: dartBinaryPath,
-      buildMode: BuildMode.debug,
-    );
-
-    final AssetTransformationResult result = await transformer.transformAsset(
-      asset: asset,
-      outputPath: outputPath,
-      workingDirectory: fileSystem.currentDirectory.path,
-      transformerEntries: <AssetTransformerEntry>[
-        const AssetTransformerEntry(package: 'my_transformer', args: <String>[]),
-      ],
-      logger: BufferLogger.test(),
-    );
-
-    expect(processManager, hasNoRemainingExpectations);
-    expect(result.failure, isNotNull);
-    expect(
-      result.failure!.message,
-      matches(
-        'Asset transformer my_transformer did not produce an output file.\n'
-        'Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput0.txt"\n'
-        'Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"\n'
-        'Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt\n'
-        'stdout:\n'
-        '\n'
-        'stderr:\n'
-        'Transformation failed, but I forgot to exit with a non-zero code.',
-      ),
-    );
-    expect(
-      fileSystem.directory('.tmp_rand0').listSync(),
-      isEmpty,
-      reason: 'Transformer did not clean up after itself.',
-    );
-  });
+      expect(processManager, hasNoRemainingExpectations);
+      expect(result.failure, isNotNull);
+      expect(
+        result.failure!.message,
+        matches(
+          'Asset transformer my_transformer did not produce an output file.\n'
+          'Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput0.txt"\n'
+          'Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"\n'
+          'Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt\n'
+          'stdout:\n'
+          '\n'
+          'stderr:\n'
+          'Transformation failed, but I forgot to exit with a non-zero code.',
+        ),
+      );
+      expect(
+        fileSystem.directory('.tmp_rand0').listSync(),
+        isEmpty,
+        reason: 'Transformer did not clean up after itself.',
+      );
+    },
+  );
 
   testWithoutContext('correctly chains transformations when there are multiple of them', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -307,97 +313,102 @@ void main() {
     );
   });
 
-  testWithoutContext("prints an error when a transformer in a chain (that's not the first) does not produce an output", () async {
-    final FileSystem fileSystem = MemoryFileSystem();
-    final artifacts = Artifacts.test();
+  testWithoutContext(
+    "prints an error when a transformer in a chain (that's not the first) does not produce an output",
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final artifacts = Artifacts.test();
 
-    final File asset = fileSystem.file('asset.txt')
-      ..createSync()
-      ..writeAsStringSync('ABC');
-    const outputPath = 'output.txt';
+      final File asset = fileSystem.file('asset.txt')
+        ..createSync()
+        ..writeAsStringSync('ABC');
+      const outputPath = 'output.txt';
 
-    final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <Pattern>[
-          dartBinaryPath,
-          'run',
-          'my_lowercase_transformer',
-          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
-        ],
-        onRun: (List<String> args) {
-          final ArgResults parsedArgs =
-              (ArgParser()
-                    ..addOption('input')
-                    ..addOption('output'))
-                  .parse(args);
+      final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            dartBinaryPath,
+            'run',
+            'my_lowercase_transformer',
+            '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+            '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+          ],
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output'))
+                    .parse(args);
 
-          final String inputFileContents = fileSystem.file(parsedArgs['input']).readAsStringSync();
-          fileSystem.file(parsedArgs['output'])
-            ..createSync()
-            ..writeAsStringSync(inputFileContents.toLowerCase());
-        },
-      ),
-      FakeCommand(
-        command: <Pattern>[
-          dartBinaryPath,
-          'run',
-          'my_distance_from_ascii_a_transformer',
-          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
-          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt',
-        ],
-        onRun: (List<String> args) {
-          // Do nothing.
-        },
-        stderr: 'Transformation failed, but I forgot to exit with a non-zero code.',
-        environment: const <String, String>{'FLUTTER_BUILD_MODE': 'debug'},
-      ),
-    ]);
-
-    final transformer = AssetTransformer(
-      processManager: processManager,
-      fileSystem: fileSystem,
-      dartBinaryPath: dartBinaryPath,
-      buildMode: BuildMode.debug,
-    );
-
-    final AssetTransformationResult result = await transformer.transformAsset(
-      asset: asset,
-      outputPath: outputPath,
-      workingDirectory: fileSystem.currentDirectory.path,
-      transformerEntries: <AssetTransformerEntry>[
-        const AssetTransformerEntry(package: 'my_lowercase_transformer', args: <String>[]),
-        const AssetTransformerEntry(
-          package: 'my_distance_from_ascii_a_transformer',
-          args: <String>[],
+            final String inputFileContents = fileSystem
+                .file(parsedArgs['input'])
+                .readAsStringSync();
+            fileSystem.file(parsedArgs['output'])
+              ..createSync()
+              ..writeAsStringSync(inputFileContents.toLowerCase());
+          },
         ),
-      ],
-      logger: BufferLogger.test(),
-    );
+        FakeCommand(
+          command: <Pattern>[
+            dartBinaryPath,
+            'run',
+            'my_distance_from_ascii_a_transformer',
+            '--input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+            '--output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt',
+          ],
+          onRun: (List<String> args) {
+            // Do nothing.
+          },
+          stderr: 'Transformation failed, but I forgot to exit with a non-zero code.',
+          environment: const <String, String>{'FLUTTER_BUILD_MODE': 'debug'},
+        ),
+      ]);
 
-    expect(result.failure, isNotNull);
-    expect(
-      result.failure!.message,
-      matches(
-        'Asset transformer my_distance_from_ascii_a_transformer did not produce an output file.\n'
-        'Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"\n'
-        'Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput2.txt"\n'
-        'Full command: Artifact.engineDartBinary run my_distance_from_ascii_a_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt\n'
-        'stdout:\n'
-        '\n'
-        'stderr:\n'
-        'Transformation failed, but I forgot to exit with a non-zero code.',
-      ),
-    );
-    expect(processManager, hasNoRemainingExpectations);
-    expect(fileSystem.file(outputPath), isNot(exists));
-    expect(
-      fileSystem.directory('.tmp_rand0').listSync(),
-      isEmpty,
-      reason: 'Transformer did not clean up after itself.',
-    );
-  });
+      final transformer = AssetTransformer(
+        processManager: processManager,
+        fileSystem: fileSystem,
+        dartBinaryPath: dartBinaryPath,
+        buildMode: BuildMode.debug,
+      );
+
+      final AssetTransformationResult result = await transformer.transformAsset(
+        asset: asset,
+        outputPath: outputPath,
+        workingDirectory: fileSystem.currentDirectory.path,
+        transformerEntries: <AssetTransformerEntry>[
+          const AssetTransformerEntry(package: 'my_lowercase_transformer', args: <String>[]),
+          const AssetTransformerEntry(
+            package: 'my_distance_from_ascii_a_transformer',
+            args: <String>[],
+          ),
+        ],
+        logger: BufferLogger.test(),
+      );
+
+      expect(result.failure, isNotNull);
+      expect(
+        result.failure!.message,
+        matches(
+          'Asset transformer my_distance_from_ascii_a_transformer did not produce an output file.\n'
+          'Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"\n'
+          'Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput2.txt"\n'
+          'Full command: Artifact.engineDartBinary run my_distance_from_ascii_a_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt\n'
+          'stdout:\n'
+          '\n'
+          'stderr:\n'
+          'Transformation failed, but I forgot to exit with a non-zero code.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+      expect(fileSystem.file(outputPath), isNot(exists));
+      expect(
+        fileSystem.directory('.tmp_rand0').listSync(),
+        isEmpty,
+        reason: 'Transformer did not clean up after itself.',
+      );
+    },
+  );
 
   testWithoutContext('Parses depfile and returns dependencies', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
