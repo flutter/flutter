@@ -567,7 +567,7 @@ void main() {
     );
 
     testWidgets(
-      'didPushNext is NOT called on newly pushed route when pushed simultaneously with a non-R route',
+      'didPushNext is not called on newly pushed route when pushed simultaneously with a non-PageRoute',
       (WidgetTester tester) async {
         final observer = RouteObserver<PageRoute<dynamic>>();
         final eventsA = <String>[];
