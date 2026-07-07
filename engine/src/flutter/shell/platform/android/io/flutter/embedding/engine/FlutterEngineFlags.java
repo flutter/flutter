@@ -342,6 +342,9 @@ public final class FlutterEngineFlags {
   private static final Flag DISABLE_SERVICE_AUTH_CODES =
       new Flag("--disable-service-auth-codes", "DisableServiceAuthCodes");
 
+  private static final Flag DISABLE_SERVICE_ORIGIN_CHECK =
+      new Flag("--disable-service-origin-check", "DisableServiceOriginCheck");
+
   /**
    * Enables an endless trace buffer for timeline events.
    *
@@ -447,6 +450,7 @@ public final class FlutterEngineFlags {
               ENABLE_VULKAN_VALIDATION,
               START_PAUSED,
               DISABLE_SERVICE_AUTH_CODES,
+              DISABLE_SERVICE_ORIGIN_CHECK,
               ENDLESS_TRACE_BUFFER,
               ENABLE_DART_PROFILING,
               PROFILE_STARTUP,
