@@ -1327,6 +1327,10 @@ class IOSDevice extends Device {
   @override
   bool get supportsScreenshot {
     if (isCoreDevice) {
+      final Version? xcodeVersion = globals.xcode?.currentVersion;
+      if (xcodeVersion != null && xcodeVersion.major >= 26) {
+        return _coreDeviceControl.isDevicectlInstalled;
+      }
       // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
       // (https://github.com/flutter/flutter/issues/128598).
       return false;
@@ -1336,6 +1340,34 @@ class IOSDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
+    if (isCoreDevice) {
+      final Version? xcodeVersion = globals.xcode?.currentVersion;
+      if (xcodeVersion != null && xcodeVersion.major >= 26) {
+        var success = false;
+        try {
+          success = await _coreDeviceControl.takeScreenshot(
+            deviceId: id,
+            destination: outputFile.path,
+          );
+        } on Exception catch (error) {
+          final errorMessage = error.toString();
+          if (errorMessage.contains('CoreDeviceError error 4000') ||
+              errorMessage.contains('CoreDeviceError error 4016') ||
+              errorMessage.contains('RemotePairingError error 2') ||
+              errorMessage.contains('Connection was invalidated')) {
+            throwToolExit(
+              'Failed to establish a connection to the device. '
+              'Please make sure the device is available and try again.',
+            );
+          }
+          throwToolExit('Failed to take screenshot with devicectl: $error');
+        }
+        if (success) {
+          return;
+        }
+        throwToolExit('Failed to take screenshot with devicectl.');
+      }
+    }
     await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
   }
 
