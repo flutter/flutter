@@ -2518,7 +2518,8 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is R && previousRoute is R) {
-      _coveredRoutes[previousRoute] = null;
+      _coveredRoutes[previousRoute] = _coveredRoutes[route];
+      _coveredRoutes[route] = null;
     }
   }
 
