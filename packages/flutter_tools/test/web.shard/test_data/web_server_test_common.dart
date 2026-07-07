@@ -173,6 +173,7 @@ class WebServerDeviceTestRunner {
       while (await _currentBrowserLogChunk.hasNext) {
         final LogEntry entry = await _currentBrowserLogChunk.next;
         final String? logMessage = entry.message;
+        // ignore: avoid_print
         print('TEST_DEBUG_BROWSER_LOG: $logMessage');
         if (logMessage != null && logMessage.contains(message)) {
           return logMessage;
