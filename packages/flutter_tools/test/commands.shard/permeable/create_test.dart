@@ -3338,7 +3338,7 @@ void main() {
 
     for (final templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '13.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '15.0'"));
     }
 
     final command = CreateCommand();
@@ -3356,7 +3356,7 @@ void main() {
         .childDirectory('ios')
         .childFile('flutter_project.podspec')
         .readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '13.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '15.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -3465,8 +3465,8 @@ void main() {
 
     final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
     final String podspecContent = await podspec.readAsString();
-    expect(podspecContent, contains("s.ios.deployment_target = '13.0'"));
-    expect(podspecContent, contains("s.osx.deployment_target = '10.15'"));
+    expect(podspecContent, contains("s.ios.deployment_target = '15.0'"));
+    expect(podspecContent, contains("s.osx.deployment_target = '12.0'"));
 
     final File swiftFile = projectDir
         .childDirectory('darwin')
@@ -3554,8 +3554,8 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
-      expect(packageSwiftContent, contains('.iOS("13.0")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
+      expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
@@ -3594,8 +3594,8 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
-      expect(packageSwiftContent, contains('.iOS("13.0")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
+      expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');

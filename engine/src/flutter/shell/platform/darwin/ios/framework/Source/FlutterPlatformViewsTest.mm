@@ -4010,8 +4010,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
-    // TODO(hellohuanlin): find a solution for iOS 26,
-    // https://github.com/flutter/flutter/issues/175099.
+    // We use a different workaround for iOS 26 and it is tested separately.
+    // See:
+    // testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView.
   } else if (@available(iOS 18.2, *)) {
     shouldReAddDelayingRecognizer = YES;
   }
@@ -4209,7 +4210,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView {
-  if (@available(iOS 26.0, *)) {
+  if (@available(iOS 26.4, *)) {
+    // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+  } else if (@available(iOS 26.0, *)) {
     flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
     FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
@@ -4320,7 +4323,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForMultipleWebViewInDifferentBranches {
-  if (@available(iOS 26.0, *)) {
+  if (@available(iOS 26.4, *)) {
+    // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+  } else if (@available(iOS 26.0, *)) {
     flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
     FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
@@ -4464,7 +4469,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForNestedMultipleWebView {
-  if (@available(iOS 26.0, *)) {
+  if (@available(iOS 26.4, *)) {
+    // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+  } else if (@available(iOS 26.0, *)) {
     flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
     FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);

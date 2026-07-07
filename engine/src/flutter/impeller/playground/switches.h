@@ -33,6 +33,13 @@ struct PlaygroundSwitches {
   ///
   bool use_angle = false;
 
+  /// Whether the Playground instance can share contexts among multiple
+  /// instantiations. This value is initialized by the Playground before
+  /// it instantiates the |PlaygroundImpl| object. Implementations are free
+  /// to share or not share contexts if this switch is true, but must create
+  /// a new context for each Impl object created if the value is false.
+  bool can_share_context = true;
+
   bool enable_wide_gamut = false;
 
   Flags flags;
@@ -40,6 +47,8 @@ struct PlaygroundSwitches {
   PlaygroundSwitches();
 
   explicit PlaygroundSwitches(const fml::CommandLine& args);
+
+  bool operator==(const PlaygroundSwitches&) const = default;
 };
 
 }  // namespace impeller

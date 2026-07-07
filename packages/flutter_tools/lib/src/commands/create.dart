@@ -1386,15 +1386,35 @@ void _generatePubspecLock(Directory directory) {
 List<String> gatherSdkPackageDependencies(Directory directory) {
   final sdkPackages = <String>[];
   final FileSystem fs = directory.fileSystem;
-  final pubspecYaml = loadYaml(directory.childFile('pubspec.yaml').readAsStringSync()) as YamlMap;
+  final File pubspecFile = directory.childFile('pubspec.yaml');
+  Object? parsedPubspec;
+  try {
+    parsedPubspec = loadYaml(pubspecFile.readAsStringSync());
+  } on YamlException catch (e) {
+    throwToolExit(
+      'Failed to parse pubspec.yaml at ${pubspecFile.path}.\n'
+      'It may be malformed: $e\n'
+      'If you want to recreate it, re-run "flutter create" with the --overwrite flag.',
+    );
+  }
+  if (parsedPubspec is! YamlMap) {
+    throwToolExit(
+      'Failed to parse pubspec.yaml at ${pubspecFile.path}.\n'
+      'It may be empty or malformed. If you want to recreate it, '
+      're-run "flutter create" with the --overwrite flag.',
+    );
+  }
+  final YamlMap pubspecYaml = parsedPubspec;
 
-  for (final MapEntry<dynamic, dynamic> dependency
-      in (pubspecYaml['dependencies'] as YamlMap).entries) {
-    final descriptor = dependency.value as Object?;
-    if (descriptor is YamlMap && descriptor['sdk'] == 'flutter') {
-      // a flutter dependency.
-      final name = dependency.key as String;
-      sdkPackages.add(name);
+  final Object? dependencies = pubspecYaml['dependencies'];
+  if (dependencies is YamlMap) {
+    for (final MapEntry<dynamic, dynamic> dependency in dependencies.entries) {
+      final descriptor = dependency.value as Object?;
+      if (descriptor is YamlMap && descriptor['sdk'] == 'flutter') {
+        // a flutter dependency.
+        final name = dependency.key as String;
+        sdkPackages.add(name);
+      }
     }
   }
 
@@ -1403,13 +1423,16 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   // So it is safe to access it here.
   final String flutterRoot = Cache.flutterRoot!;
   for (final sdkPackage in sdkPackages) {
+    final Directory? packageDir = _resolveSdkPackageDir(fs, flutterRoot, sdkPackage);
+    if (packageDir == null) {
+      // This resolves the same locations as pub's FlutterSdk.packagePath, so a
+      // package we cannot find here is one pub cannot find either, and the
+      // `pub get` that runs next reports it. Skipping avoids turning that case
+      // (such as a mistyped SDK dependency) into an unhandled crash here.
+      continue;
+    }
     final pubspecYaml =
-        loadYaml(
-              fs
-                  .file(fs.path.join(flutterRoot, 'packages', sdkPackage, 'pubspec.yaml'))
-                  .readAsStringSync(),
-            )
-            as YamlMap;
+        loadYaml(packageDir.childFile('pubspec.yaml').readAsStringSync()) as YamlMap;
     for (final MapEntry<dynamic, dynamic> dependency
         in (pubspecYaml['dependencies'] as YamlMap).entries) {
       final descriptor = dependency.value as Object?;
@@ -1421,4 +1444,26 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
     }
   }
   return result.toList();
+}
+
+/// Returns the directory of the `sdk: flutter` package [packageName], or null
+/// if it is not present under [flutterRoot].
+///
+/// Such packages live in one of two locations, searched here in the same order
+/// as pub's `FlutterSdk.packagePath`
+/// (third_party/pkg/pub/lib/src/sdk/flutter.dart), the source of truth for how
+/// `sdk: flutter` dependencies are resolved: in-tree under
+/// `<flutter_root>/packages`, or shipped with the engine artifact under
+/// `<flutter_root>/bin/cache/pkg` (for example, `flutter_gpu`).
+Directory? _resolveSdkPackageDir(FileSystem fs, String flutterRoot, String packageName) {
+  final candidates = <Directory>[
+    fs.directory(fs.path.join(flutterRoot, 'packages', packageName)),
+    fs.directory(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', packageName)),
+  ];
+  for (final candidate in candidates) {
+    if (candidate.childFile('pubspec.yaml').existsSync()) {
+      return candidate;
+    }
+  }
+  return null;
 }

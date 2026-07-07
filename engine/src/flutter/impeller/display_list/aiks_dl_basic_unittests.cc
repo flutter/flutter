@@ -1909,6 +1909,12 @@ TEST_P(AiksTest,
 
 // This makes sure the WideGamut named tests use 10-bit wide gamut pixel format.
 TEST_P(AiksTest, FormatWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
 }
@@ -2494,6 +2500,59 @@ TEST_P(AiksTest, CanRenderFilledRoundSuperellipses) {
   builder.DrawRoundSuperellipse(
       DlRoundSuperellipse::MakeRectRadius(
           /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/20),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderAsymmetricRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(60.0f, 240.0f),
+              .top_right = Size(200.0f, 40.0f),
+              .bottom_left = Size(180.0f, 20.0f),
+              .bottom_right = Size(40.0f, 200.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(240.0f, 40.0f),
+              .top_right = Size(40.0f, 240.0f),
+              .bottom_left = Size(40.0f, 240.0f),
+              .bottom_right = Size(240.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(40.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(240.0f, 240.0f),
+          }),
       paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

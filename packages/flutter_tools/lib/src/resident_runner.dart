@@ -21,6 +21,7 @@ import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/tools/shader_compiler.dart';
@@ -1180,7 +1181,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp(); // calls appFinished
-    shutdownDartDevelopmentService();
+    await shutdownDartDevelopmentService();
   }
 
   @override
@@ -1199,9 +1200,22 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
   }
 
-  void shutdownDartDevelopmentService() {
-    for (final FlutterDevice device in flutterDevices) {
-      device.device?.dds.shutdown();
+  Future<void> shutdownDartDevelopmentService() async {
+    try {
+      await Future.wait<void>(
+        flutterDevices.map<Future<void>>((FlutterDevice device) async {
+          final DartDevelopmentService? dds = device.device?.dds;
+          if (dds != null) {
+            try {
+              await dds.shutdown();
+            } on Object catch (error) {
+              globals.printTrace('Warning: Failed to shut down DDS for device: $error');
+            }
+          }
+        }),
+      ).timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      globals.printTrace('Warning: shutdownDartDevelopmentService timed out.');
     }
   }
 
@@ -1213,12 +1227,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
+      final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
+      final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
         fileSystem: globals.fs,
+        targetModel: targetModel,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
@@ -1308,6 +1325,21 @@ abstract class ResidentRunner extends ResidentHandlers {
       return;
     }
     globals.printStatus('Lost connection to device.');
+
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    for (final FlutterDevice device in flutterDevices) {
+      final Device? rawDevice = device.device;
+      if (rawDevice is IOSDevice &&
+          debuggingOptions.buildInfo.isProfile &&
+          !(debuggingOptions.iosProfileDebugger ??
+              (xcodeVersion == null || xcodeVersion.major < 26))) {
+        globals.printStatus(
+          'If the application crashed, you can attach a debugger to get a more complete '
+          'stack trace by running again with the "--ios-profile-debugger" flag.',
+        );
+      }
+    }
+
     _finished.complete(0);
   }
 
@@ -1460,6 +1492,90 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.g.print();
       }
     }
+  }
+
+  /// Configures the asset directory path on the target device's VM Service.
+  ///
+  /// This is called during hot reload to ensure the Flutter engine is pointing
+  /// at the correct synced asset bundle directory inside the local DevFS before
+  /// assets are evicted and reloaded.
+  ///
+  /// Native runners (like 'HotRunner') override this to invoke the
+  /// `setAssetDirectory` VM Service extension. Web runners (like 'ResidentWebRunner')
+  /// keep this as a no-op because asset paths are already resolved relative
+  /// to the web server base URI.
+  @protected
+  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {}
+
+  @internal
+  Future<void> evictDirtyAssets() async {
+    final futures = <Future<void>>[];
+    for (final FlutterDevice device in flutterDevices) {
+      final DevFS? devFS = device.devFS;
+      if (devFS == null) {
+        continue;
+      }
+      if (devFS.assetPathsToEvict.isEmpty && devFS.shaderPathsToEvict.isEmpty) {
+        continue;
+      }
+      final FlutterVmService vmService = device.vmService!;
+      final List<FlutterView> views = await vmService.getFlutterViews();
+
+      final FlutterView? firstViewWithIsolate = views
+          .where((FlutterView v) => v.uiIsolate != null)
+          .firstOrNull;
+      final vm_service.IsolateRef? firstUiIsolate = firstViewWithIsolate?.uiIsolate;
+      if (firstUiIsolate == null) {
+        continue;
+      }
+
+      // 1. Delegate platform-specific asset directory setup to the subclass.
+      await confirmAssetDirectory(device, views);
+
+      // 2. Perform font manifest reloading if it was updated.
+      if (devFS.didUpdateFontManifest) {
+        futures.add(
+          vmService.reloadAssetFonts(
+            isolateId: firstUiIsolate.id!,
+            viewId: firstViewWithIsolate!.id,
+          ),
+        );
+      }
+
+      // 3. Perform the standard, cross-platform eviction calls.
+      final supportsShaderReload = device.targetPlatform != TargetPlatform.web_javascript;
+      for (final String assetPath in devFS.assetPathsToEvict) {
+        // Flutter GPU shader bundles reload the compiled ShaderLibrary in place
+        // via the `ext.ui.gpu.reinitializeShaderLibrary` extension. It is
+        // registered lazily on the first `ShaderLibrary.fromAsset` and the engine
+        // no-ops if nothing is registered at the asset key, so dispatch is gated
+        // only by the `.shaderbundle` suffix. The extension is unavailable on the
+        // web engine, where the bundle falls back to the generic asset eviction.
+        if (supportsShaderReload && assetPath.endsWith('.shaderbundle')) {
+          futures.add(
+            vmService.flutterReinitializeShaderLibrary(assetPath, isolateId: firstUiIsolate.id!),
+          );
+        } else {
+          futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        }
+      }
+      // Shaders are not supported during hot reload on the web yet. Attempting
+      // to evict shaders will call the `ext.ui.window.reinitializeShader` service
+      // extension which is not registered/supported by the Web engine. On web clients,
+      // this throws an internal RPCError (-32603) instead of a standard MethodNotFound
+      // error, which would break the hot reload.
+      // See https://github.com/flutter/flutter/issues/137265
+      if (device.targetPlatform != TargetPlatform.web_javascript) {
+        for (final String assetPath in devFS.shaderPathsToEvict) {
+          futures.add(vmService.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
+        }
+      }
+
+      devFS.assetPathsToEvict.clear();
+      devFS.shaderPathsToEvict.clear();
+      devFS.didUpdateFontManifest = false;
+    }
+    await Future.wait<void>(futures);
   }
 
   @override

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io show IOOverrides;
 
 import 'package:args/command_runner.dart';
 import 'package:collection/collection.dart';
@@ -20,6 +21,7 @@ import 'package:test/test.dart' hide test;
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'fakes.dart';
+import 'fs_safety.dart';
 
 export 'package:path/path.dart' show Context; // flutter_ignore: package_path_import
 export 'package:test/test.dart' hide isInstanceOf, test;
@@ -189,7 +191,7 @@ void test(
         await globals.localFileSystem.dispose();
       });
 
-      return body();
+      return io.IOOverrides.runWithIOOverrides(() => body(), FSGuardIOOverrides());
     },
     skip: skip,
     tags: tags,
@@ -332,6 +334,7 @@ FakeAnalytics getInitializedFakeAnalyticsInstance({
   required FakeFlutterVersion fakeFlutterVersion,
   String? clientIde,
   String? enabledFeatures,
+  String? agent,
 }) {
   final Directory homeDirectory = fs.directory('/');
   final FakeAnalytics initialAnalytics = Analytics.fake(
@@ -353,6 +356,7 @@ FakeAnalytics getInitializedFakeAnalyticsInstance({
     flutterVersion: fakeFlutterVersion.getVersionString(),
     clientIde: clientIde,
     enabledFeatures: enabledFeatures,
+    agent: agent,
   );
 }
 

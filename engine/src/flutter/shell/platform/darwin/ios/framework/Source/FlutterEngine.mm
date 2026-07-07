@@ -361,6 +361,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   UIScene* scene = notification.object;
   if (!FlutterSharedApplication.application.supportsMultipleScenes) {
     // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
@@ -1587,10 +1590,16 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 #pragma mark - Notifications
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self flutterWillEnterForeground:notification];
 }
 
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self flutterDidEnterBackground:notification];
 }
 

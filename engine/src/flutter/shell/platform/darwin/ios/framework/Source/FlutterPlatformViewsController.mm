@@ -761,10 +761,8 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
-        if (@available(iOS 13.0, *)) {
-          visualEffectView.layer.cornerCurve =
-              isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
-        }
+        visualEffectView.layer.cornerCurve =
+            isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
         visualEffectView.clipsToBounds = YES;
 
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView

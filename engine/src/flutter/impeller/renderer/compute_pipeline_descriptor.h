@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_COMPUTE_PIPELINE_DESCRIPTOR_H_
 #define FLUTTER_IMPELLER_RENDERER_COMPUTE_PIPELINE_DESCRIPTOR_H_
 
+#include <array>
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -33,6 +35,17 @@ class ComputePipelineDescriptor final
 
   std::shared_ptr<const ShaderFunction> GetStageEntrypoint() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Set the workgroup (threadgroup) size declared by the shader.
+  ///
+  ///             A dimension of 0 is sized by a specialization constant and
+  ///             resolved by the backend at dispatch (for example, to the
+  ///             device maximum).
+  ///
+  ComputePipelineDescriptor& SetWorkgroupSize(std::array<uint32_t, 3> size);
+
+  std::array<uint32_t, 3> GetWorkgroupSize() const;
+
   // Comparable<ComputePipelineDescriptor>
   std::size_t GetHash() const override;
 
@@ -53,6 +66,7 @@ class ComputePipelineDescriptor final
  private:
   std::string label_;
   std::shared_ptr<const ShaderFunction> entrypoint_;
+  std::array<uint32_t, 3> workgroup_size_ = {0u, 0u, 0u};
   std::vector<DescriptorSetLayout> descriptor_set_layouts_;
 };
 
