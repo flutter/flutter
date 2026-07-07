@@ -21,7 +21,7 @@ List<VersionTuple> versionTuples = <VersionTuple>[
   // Template
   VersionTuple(agpVersion: '9.1.0', gradleVersion: '9.3.1', kotlinVersion: '2.4.0'),
   // Max known
-  VersionTuple(agpVersion: '9.2.0', gradleVersion: '9.3.1', kotlinVersion: '2.4.0'),
+  VersionTuple(agpVersion: '9.2.0', gradleVersion: '9.4.1', kotlinVersion: '2.4.0'),
   /* Others */
   VersionTuple(agpVersion: '8.12.0', gradleVersion: '8.14', kotlinVersion: '2.3.0'),
   VersionTuple(agpVersion: '8.13.0', gradleVersion: '9.1.0', kotlinVersion: '2.3.20'),
