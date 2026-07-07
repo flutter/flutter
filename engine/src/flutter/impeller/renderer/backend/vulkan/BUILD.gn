@@ -215,7 +215,10 @@ if (is_android) {
 
     output_name = "impeller_vulkan_android_unittests"
 
-    deps = [ ":unittests_lib" ]
+    deps = [
+      ":unittests_lib",
+      "//flutter/testing",
+    ]
   }
 
   native_activity_apk("vulkan_android_apk_unittests") {
