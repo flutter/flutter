@@ -22,6 +22,7 @@ platform_properties:
       device_type: none
       os: Ubuntu
       cores: "8"
+      cpu: x86
   mac:
     properties:
       # CIPD flutter/java/openjdk/$platform
@@ -80,6 +81,10 @@ targets:
           "builder",
           "git"
         ]
+      ignore_cache_paths: >-
+        [
+          "builder/engine/src/third_party/fuchsia-sdk/sdk/.build-id"
+        ]
       gclient_variables: >-
         {
           "download_emsdk": "true",
@@ -99,6 +104,10 @@ targets:
         [
           "builder",
           "git"
+        ]
+      ignore_cache_paths: >-
+        [
+          "builder/engine/src/third_party/fuchsia-sdk/sdk/.build-id"
         ]
       gclient_variables: >-
         {
@@ -121,6 +130,7 @@ targets:
         ]
       ignore_cache_paths: >-
         [
+          "builder/engine/src/third_party/fuchsia-sdk/sdk/.build-id",
           "builder/src/flutter/prebuilts/SDKs",
           "builder/src/flutter/prebuilts/Library"
         ]

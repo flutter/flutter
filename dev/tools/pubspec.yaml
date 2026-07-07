@@ -2,15 +2,15 @@ name: dev_tools
 description: Various repository development tools for flutter.
 
 environment:
-  sdk: ^3.13.0-0
+  sdk: ^3.11.0-0
 
 resolution: workspace
 
 dependencies:
   archive: any
   args: any
+  convert: any
   http: any
-  intl: any
   meta: any
   path: any
   process: any
@@ -36,4 +36,4 @@ dev_dependencies:
 
   matcher: any
 
-# PUBSPEC CHECKSUM: oojo9a
+# PUBSPEC CHECKSUM: oeqba8

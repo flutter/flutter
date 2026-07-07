@@ -1062,6 +1062,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   }
 
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void putImageData(DomImageData imagedata, int dx, int dy);
   external void lineTo(num x, num y);
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
@@ -1646,11 +1647,8 @@ extension type DomFontFaceSet._(JSObject _) implements DomEventTarget {
   void forEach(DomFontFaceSetForEachCallback callback) => _forEach(callback.toJS);
 }
 
-typedef DomFontFaceSetForEachCallback = void Function(
-  DomFontFace fontFace,
-  DomFontFace fontFaceAgain,
-  DomFontFaceSet set,
-);
+typedef DomFontFaceSetForEachCallback =
+    void Function(DomFontFace fontFace, DomFontFace fontFaceAgain, DomFontFaceSet set);
 
 @JS('VisualViewport')
 extension type DomVisualViewport._(JSObject _) implements DomEventTarget {
@@ -2334,10 +2332,8 @@ extension type DomResizeObserverObserveOptions._(JSObject _) implements JSObject
 }
 
 /// Type of the function used to create a Resize Observer.
-typedef DomResizeObserverCallbackFn = void Function(
-  List<DomResizeObserverEntry> entries,
-  DomResizeObserver observer,
-);
+typedef DomResizeObserverCallbackFn =
+    void Function(List<DomResizeObserverEntry> entries, DomResizeObserver observer);
 
 /// The object passed to the [DomResizeObserverCallbackFn], which allows access to the new dimensions of the observed element.
 ///
@@ -2706,6 +2702,11 @@ extension JSArrayExtension on JSArray<JSAny?> {
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
 }
+
+@JS('window.TextCluster')
+external JSAny? get _textClusterConstructor;
+
+bool browserSupportsTextCluster = _textClusterConstructor != null;
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {

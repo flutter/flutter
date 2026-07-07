@@ -844,6 +844,13 @@ class AppDomain extends Domain {
       }),
       appRunFuture,
     ]);
+
+    // If appRunFuture completes early due to a fatal initialization error
+    // without actually starting the app, we must explicitly throw an exception
+    // to prevent the IDE/client from hanging indefinitely.
+    if (!appStartedCompleter.isCompleted) {
+      throw DaemonException('App failed to start');
+    }
     return app;
   }
 
@@ -1311,7 +1318,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
 
-    device.dds.shutdown();
+    await device.dds.shutdown();
   }
 
   @override

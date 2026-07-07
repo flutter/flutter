@@ -132,6 +132,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             '(deprecated) Allow connections to the VM service without using authentication codes. '
             '(Not recommended! This can open your device to remote code execution attacks!)',
       )
+      ..addFlag(
+        'disable-service-origin-check',
+        negatable: false,
+        hide: !verboseHelp,
+        help:
+            'Allow connections to the VM service from any origin. '
+            '(Not recommended. This can open your device to remote code execution attacks.)',
+      )
       ..addFlag('coverage', negatable: false, help: 'Whether to collect coverage information.')
       ..addFlag(
         'merge-coverage',
@@ -425,6 +433,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final BuildInfo buildInfo = await getBuildInfo(
       forcedBuildMode: BuildMode.debug,
       forcedUseLocalCanvasKit: true,
+      forcedWebEnableHotReload: true,
     );
 
     TestTimeRecorder? testTimeRecorder;
@@ -472,6 +481,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      disableServiceOriginCheck: boolArg('disable-service-origin-check'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
@@ -845,9 +855,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         .map((AssetBundleEntry asset) => asset.content)
         .whereType<DevFSFileContent>();
     for (final entry in files) {
-      // Calling isModified to access file stats first in order for isModifiedAfter
-      // to work.
-      if (entry.isModified && entry.isModifiedAfter(lastModified)) {
+      if (entry.isModifiedAfter(lastModified)) {
         return true;
       }
     }
