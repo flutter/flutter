@@ -132,6 +132,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             '(deprecated) Allow connections to the VM service without using authentication codes. '
             '(Not recommended! This can open your device to remote code execution attacks!)',
       )
+      ..addFlag(
+        'disable-service-origin-check',
+        negatable: false,
+        hide: !verboseHelp,
+        help:
+            'Allow connections to the VM service from any origin. '
+            '(Not recommended. This can open your device to remote code execution attacks.)',
+      )
       ..addFlag('coverage', negatable: false, help: 'Whether to collect coverage information.')
       ..addFlag(
         'merge-coverage',
@@ -473,6 +481,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      disableServiceOriginCheck: boolArg('disable-service-origin-check'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
