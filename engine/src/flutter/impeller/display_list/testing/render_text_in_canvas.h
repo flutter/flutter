@@ -23,11 +23,12 @@ struct TextRenderOptions {
   bool is_subpixel = false;
 };
 
-bool RenderTextInCanvasSkia(DlCanvas* canvas,
-                            const std::string& text,
-                            const std::string_view& font_fixture,
-                            DlPoint position,
-                            const TextRenderOptions& options = {});
+std::optional<DlRect> RenderTextInCanvasSkia(
+    DlCanvas* canvas,
+    const std::string& text,
+    const std::string_view& font_fixture,
+    DlPoint position,
+    const TextRenderOptions& options = {});
 
 }  // namespace testing
 }  // namespace flutter

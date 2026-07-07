@@ -392,9 +392,10 @@ int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
 }
 
 std::optional<int32_t> CalculateSpaceBetweenUI(
-    const impeller::testing::Screenshot* img) {
+    const impeller::testing::Screenshot* img,
+    int32_t y) {
   const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
-  ptr += img->GetWidth() * static_cast<int32_t>(img->GetHeight() / 2.0);
+  ptr += img->GetWidth() * y;
   std::vector<size_t> boundaries;
   uint32_t value = *ptr++;
   for (size_t i = 1; i < img->GetWidth(); ++i) {
@@ -446,6 +447,7 @@ TEST_P(DlGoldenTest, BaselineHE) {
 TEST_P(DlGoldenTest, MaintainsSpace) {
   SetWindowSize(impeller::ISize(1024, 200));
   impeller::Scalar font_size = 300;
+  std::optional<DlRect> text_bounds;
   auto callback = [&](const char* text,
                       impeller::Scalar scale) -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
@@ -453,24 +455,31 @@ TEST_P(DlGoldenTest, MaintainsSpace) {
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
-    RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(10, 300),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                           });
+    text_bounds = RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
+                                         DlPoint::MakeXY(10, 300),
+                                         TextRenderOptions{
+                                             .font_size = font_size,
+                                         });
     return builder.Build();
   };
 
+  int32_t middle = 0;
   std::optional<int32_t> last_space;
   for (int i = 0; i <= 100; ++i) {
     Scalar scale = 0.440 + i / 1000.0;
+    text_bounds.reset();
     std::unique_ptr<impeller::testing::Screenshot> right =
         MakeScreenshot(callback("ui", scale));
     if (!right) {
       GTEST_SKIP() << "making screenshots not supported.";
     }
+    if (text_bounds.has_value()) {
+      middle = std::rint(scale * text_bounds->GetCenter().y);
+    } else {
+      ASSERT_TRUE(text_bounds) << "text rendering did not return bounds";
+    }
 
-    std::optional<int32_t> space = CalculateSpaceBetweenUI(right.get());
+    std::optional<int32_t> space = CalculateSpaceBetweenUI(right.get(), middle);
     ASSERT_TRUE(space.has_value());
     if (space.has_value() && last_space.has_value()) {
       int32_t diff = abs(*space - *last_space);
