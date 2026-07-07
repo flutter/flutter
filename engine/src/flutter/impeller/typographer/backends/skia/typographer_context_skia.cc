@@ -4,6 +4,7 @@
 
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -424,6 +425,11 @@ TypographerContextSkia::CollectNewGlyphs(
             frame.origin_transform);
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
                                      frame.properties);
+
+        // ATLAS CACHE FIX: Check if the glyph already exists in the atlas
+        if (font_glyph_atlas->FindGlyphBounds(subpixel_glyph).has_value()) {
+          continue;
+        }
 
         FontGlyphPair font_glyph_pair{scaled_font, subpixel_glyph};
 
