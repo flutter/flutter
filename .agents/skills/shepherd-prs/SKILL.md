@@ -19,15 +19,19 @@ This skill defines the canonical runbook for shepherding pull requests in the `f
 ## 1. Checking PR Status
 
 When the user asks for the status of open or approved PRs:
-1. **List Open PRs**:
+1. **List Your Own Open PRs**:
    ```bash
    gh pr list --repo flutter/flutter --author <username> --state open --json number,title,url,mergeable,reviewDecision
    ```
-2. **Inspect Detailed PR Checks**:
+2. **List Shepherded / Reviewed Third-Party PRs**:
+   ```bash
+   gh pr list --repo flutter/flutter --search "reviewed-by:<username> -author:<username> is:open" --json number,title,url,mergeable,reviewDecision
+   ```
+3. **Inspect Detailed PR Checks**:
    ```bash
    gh pr checks <number> --repo flutter/flutter
    ```
-3. **Inspect Reviews and Labels**:
+4. **Inspect Reviews and Labels**:
    ```bash
    gh pr view <number> --repo flutter/flutter --json labels,reviewDecision,reviews
    ```
@@ -37,9 +41,9 @@ When the user asks for the status of open or approved PRs:
 * The Flutter `autosubmit` bot automatically strips the `autosubmit` label from a PR whenever any CI check fails.
 * **CRITICAL RULE**: Before applying or re-applying the `autosubmit` label, always verify that all status checks are 100% passing (`SUCCESS`/`pass`).
 * If a check is flaky or currently failing/pending a retry:
-  1. Do **NOT** apply `autosubmit` immediately.
+  1. Do **NOT** apply the `autosubmit` label immediately.
   2. Inform the user of the failing check and instruct them to retry it first.
-  3. Only apply `autosubmit` after the retried check completes successfully:
+  3. Only apply the `autosubmit` label after the retried check completes successfully:
      ```bash
      gh pr edit <number> --repo flutter/flutter --add-label autosubmit
      ```
@@ -47,8 +51,8 @@ When the user asks for the status of open or approved PRs:
 ## 3. Third-Party Contributor PRs (2-Reviewer Requirement)
 
 * Pull requests authored by third-party contributors (`CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, `NONE`) require **two explicit approvals** from Flutter team members (`MEMBER` or `OWNER`) before the `autosubmit` bot will merge them.
-* If only one team member has approved a third-party PR and `autosubmit` is applied, the `autosubmit` bot will remove the label.
-* *Action*: When a third-party contributor PR has passing CI checks, check `reviews` in `gh pr view` to verify that **2 team member approvals** are present. If only 1 approval exists, remind the user to request a second reviewer before applying `autosubmit`.
+* If only one team member has approved a third-party PR and the `autosubmit` label is applied, the `autosubmit` bot will remove the label.
+* *Action*: When a third-party contributor PR has passing CI checks, check `reviews` in `gh pr view` to verify that **2 team member approvals** are present. If only 1 approval exists, remind the user to request a second reviewer before applying the `autosubmit` label.
 
 ## 4. Failed Checks & Manual LUCI Re-runs
 
