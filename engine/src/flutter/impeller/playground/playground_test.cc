@@ -67,7 +67,14 @@ class PlaygroundTestEnvironment : public ::testing::Environment {
 
   void TearDown() override {
     if (golden_manager_) {
-      golden_manager_->Write();
+      if (::testing::UnitTest::GetInstance()->Passed()) {
+        golden_manager_->Write();
+      } else {
+        FML_LOG(ERROR)
+            << ::testing::UnitTest::GetInstance()->failed_test_count()
+            << " tests failed, not writing golden digest";
+        golden_manager_->ClearDigestData();
+      }
       golden_manager_.reset();
     }
     PlaygroundImpl::OnTearDownTestEnvironment();
