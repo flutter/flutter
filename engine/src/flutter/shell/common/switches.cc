@@ -277,6 +277,10 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.disable_service_auth_codes =
       command_line.HasOption(FlagForSwitch(Switch::DisableServiceAuthCodes));
 
+  // Disable WebSocket origin checks for the VM service, if specified.
+  settings.disable_service_origin_check =
+      command_line.HasOption(FlagForSwitch(Switch::DisableServiceOriginCheck));
+
   // Allow fallback to automatic port selection if binding to a specified port
   // fails.
   settings.enable_service_port_fallback =
