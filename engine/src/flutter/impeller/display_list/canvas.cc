@@ -861,6 +861,11 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
       Scalar alpha_scaling = (rect_pixel_size.x / expanded_rect_pixel_size.x) *
                              (rect_pixel_size.y / expanded_rect_pixel_size.y);
 
+      if (alpha_scaling <= kEhCloseEnough) {
+        // Rect is effectively invisible and doesn't need to be drawn.
+        return;
+      }
+
       // Convert expanded rectangle from pixel size back to local size.
       Vector2 expanded_rect_local_size =
           Vector2(expanded_rect_pixel_size / transform_scaling);
