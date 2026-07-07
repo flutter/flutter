@@ -1854,7 +1854,10 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertNotNil(gMockPlatformView);
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
-  flutterPlatformViewsController.flutterView = flutterView;
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([flutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+  OCMStub([flutterViewController view]).andReturn(flutterView);
+  flutterPlatformViewsController.flutterViewController = flutterViewController;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack

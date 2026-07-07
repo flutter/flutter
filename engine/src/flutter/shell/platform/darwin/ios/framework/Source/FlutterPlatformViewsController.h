@@ -36,9 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
-/// The flutter view.
-@property(nonatomic, weak) UIView* _Nullable flutterView;
-
 /// @brief The flutter view controller.
 @property(nonatomic, weak) UIViewController<FlutterViewResponder>* _Nullable flutterViewController;
 

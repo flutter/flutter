@@ -1276,7 +1276,6 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
 - (void)resetFrameState {
   _currentFrameContext.reset();
-  self.flutterView = nil;
 }
 
 - (void)pushVisitedPlatformViewId:(int64_t)viewId {
@@ -1366,14 +1365,7 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 - (UIView*)flutterViewForIdentifier:(int64_t)flutterViewId {
   FlutterViewController* flutterViewController =
       [self.flutterViewControllers objectForKey:@(flutterViewId)];
-  UIView* flutterView = flutterViewController.view;
-  if (flutterView != nil) {
-    return flutterView;
-  }
-  if (flutterViewId == flutter::kFlutterImplicitViewId) {
-    return self.flutterView;
-  }
-  return nil;
+  return flutterViewController.view;
 }
 
 - (flutter::OverlayLayerPool*)layerPoolForFlutterViewId:(int64_t)flutterViewId {
