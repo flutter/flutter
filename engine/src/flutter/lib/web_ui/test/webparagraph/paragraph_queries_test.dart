@@ -164,7 +164,7 @@ Future<void> testMain() async {
     expect(line2Boundary.start, 6);
     expect(line2Boundary.end, 11); // Should not include the newline
 
-    // Position at the newline should return the line boundary
+    // Position past the end of the text should return an empty range
     final ui.TextRange line2BoundaryAtNewline = paragraph.getLineBoundary(
       const ui.TextPosition(offset: 12),
     );
