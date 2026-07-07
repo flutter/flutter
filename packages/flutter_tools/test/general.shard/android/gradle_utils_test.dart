@@ -702,9 +702,9 @@ dependencies {
         // Minimums as defined in
         // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
         GradleAgpTestData(true, agpVersion: '9.0', gradleVersion: '9.0.0'),
-        GradleAgpTestData(true, agpVersion: '8.13', gradleVersion: '8.13'),
-        GradleAgpTestData(true, agpVersion: '8.12', gradleVersion: '8.13'),
-        GradleAgpTestData(true, agpVersion: '8.11', gradleVersion: '8.13'),
+        GradleAgpTestData(true, agpVersion: '8.13', gradleVersion: '8.14'),
+        GradleAgpTestData(true, agpVersion: '8.12', gradleVersion: '8.14'),
+        GradleAgpTestData(true, agpVersion: '8.11', gradleVersion: '8.14'),
         GradleAgpTestData(true, agpVersion: '8.10', gradleVersion: '8.11.1'),
         GradleAgpTestData(true, agpVersion: '8.9', gradleVersion: '8.11.1'),
         GradleAgpTestData(true, agpVersion: '8.8', gradleVersion: '8.10.2'),
@@ -1494,9 +1494,9 @@ allprojects {
       expect(getGradleVersionFor('8.8'), '8.10.2');
       expect(getGradleVersionFor('8.9'), '8.11.1');
       expect(getGradleVersionFor('8.10'), '8.11.1');
-      expect(getGradleVersionFor('8.11'), '8.13');
-      expect(getGradleVersionFor('8.12'), '8.13');
-      expect(getGradleVersionFor('8.13'), '8.13');
+      expect(getGradleVersionFor('8.11'), '8.14');
+      expect(getGradleVersionFor('8.12'), '8.14');
+      expect(getGradleVersionFor('8.13'), '8.14');
       expect(getGradleVersionFor('9.0.1'), '9.1.0');
       expect(getGradleVersionFor('9.1.0'), '9.3.1');
     });
