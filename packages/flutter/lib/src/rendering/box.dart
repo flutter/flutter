@@ -2254,8 +2254,8 @@ abstract class RenderBox extends RenderObject {
       if (size is _DebugSize) {
         assert(size._owner == this);
         final RenderObject? parent = this.parent;
-        // Whether the size getter is accessed during layout (but not in a
-        // layout callback).
+        // Size reads during an invokeLayoutCallback are outside regular layout
+        // because layout callbacks run in a special mutation-permitted phase.
         final bool doingRegularLayout =
             !(RenderObject.debugActiveLayout?.debugDoingThisLayoutWithCallback ?? true);
         final bool sizeAccessAllowed =
