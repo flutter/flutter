@@ -22,11 +22,11 @@ template("embed_blob") {
       "--symbol-name",
       invoker.symbol_name,
       "--output-header",
-      rebase_path(invoker.hdr),
+      rebase_path(invoker.hdr, root_build_dir),
       "--output-source",
-      rebase_path(invoker.cc),
+      rebase_path(invoker.cc, root_build_dir),
       "--source",
-      rebase_path(invoker.blob),
+      rebase_path(invoker.blob, root_build_dir),
     ]
     script = "//flutter/impeller/tools/xxd.py"
     deps = invoker.deps

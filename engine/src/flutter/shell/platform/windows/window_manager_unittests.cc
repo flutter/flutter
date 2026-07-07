@@ -3,15 +3,36 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_context.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_window_surface.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/window_manager.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
 
 namespace {
+
+using ::testing::NiceMock;
+using ::testing::Return;
+
+// Builds a mock |WindowSurface| whose lifecycle operations all succeed. Used to
+// keep the EGL surface lifecycle deterministic in tests so that resize paths
+// (e.g. |FlutterWindowsView::OnFrameGenerated|) do not perform real, flaky
+// cross-thread ANGLE/D3D calls against an actual GPU surface.
+std::unique_ptr<egl::MockWindowSurface> CreateMockWindowSurface() {
+  auto surface = std::make_unique<NiceMock<egl::MockWindowSurface>>();
+  ON_CALL(*surface, IsValid).WillByDefault(Return(true));
+  ON_CALL(*surface, MakeCurrent).WillByDefault(Return(true));
+  ON_CALL(*surface, SetVSyncEnabled).WillByDefault(Return(true));
+  ON_CALL(*surface, Destroy).WillByDefault(Return(true));
+  return surface;
+}
 
 class WindowManagerTest : public WindowsTest {
  public:
@@ -39,6 +60,23 @@ class WindowManagerTest : public WindowsTest {
     while (!signalled) {
       engine_->task_runner()->ProcessTasks();
     }
+
+    // Replace the engine's EGL manager with a permissive mock so that EGL
+    // surface creation and resizing are deterministic and never issue real,
+    // cross-thread GPU calls. These tests do not exercise real EGL rendering,
+    // and without this, tests that drive |FlutterWindowsView::OnFrameGenerated|
+    // from the test thread race the engine's raster thread for the EGL context,
+    // intermittently producing an EGL_BAD_ACCESS and a crash. Installed here,
+    // before any windows (and thus render surfaces) are created.
+    auto egl_manager = std::make_unique<NiceMock<egl::MockManager>>();
+    ON_CALL(*egl_manager, CreateWindowSurface)
+        .WillByDefault(
+            [](HWND, size_t, size_t) { return CreateMockWindowSurface(); });
+    ON_CALL(*egl_manager, render_context)
+        .WillByDefault(Return(&mock_egl_context_));
+    ON_CALL(mock_egl_context_, ClearCurrent).WillByDefault(Return(true));
+    ON_CALL(mock_egl_context_, MakeCurrent).WillByDefault(Return(true));
+    EngineModifier{engine_.get()}.SetEGLManager(std::move(egl_manager));
   }
 
   void TearDown() override { engine_->Stop(); }
@@ -52,6 +90,7 @@ class WindowManagerTest : public WindowsTest {
 
  private:
   std::unique_ptr<FlutterWindowsEngine> engine_;
+  NiceMock<egl::MockContext> mock_egl_context_;
   std::optional<flutter::Isolate> isolate_;
   RegularWindowCreationRequest regular_creation_request_{
       .preferred_size =
@@ -350,6 +389,38 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
   HostWindow* host_window = HostWindow::GetThisFromHandle(window_handle);
   EXPECT_EQ(host_window->GetOwnerWindow()->GetWindowHandle(),
             parent_window_handle);
+}
+
+TEST_F(WindowManagerTest, DeactivatedRegularWindowDoesNotReactivateItself) {
+  IsolateScope isolate_scope(isolate());
+
+  // Two independent top-level regular windows (regular windows have no Win32
+  // owner). |window_handle| is deactivated while |active_window_handle| holds
+  // activation.
+  const int64_t window_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), window_view_id);
+
+  const int64_t active_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND active_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), active_view_id);
+
+  SetActiveWindow(active_window_handle);
+  ASSERT_EQ(GetActiveWindow(), active_window_handle);
+
+  // A window receiving WM_ACTIVATE with WA_INACTIVE must not focus its own
+  // content: SetFocus activates the parent of the focused window (the window
+  // itself), which would reactivate the deactivated window, pull it back to the
+  // top of the z-order, and take activation away from the active window.
+  SendMessage(window_handle, WM_ACTIVATE, MAKEWPARAM(WA_INACTIVE, 0), 0);
+
+  EXPECT_EQ(GetActiveWindow(), active_window_handle);
 }
 
 TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {

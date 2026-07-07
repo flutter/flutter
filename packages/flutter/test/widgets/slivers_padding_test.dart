@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _MockRenderSliver extends RenderSliver {
   @override
@@ -389,6 +390,31 @@ void main() {
       const Offset(409.0, 0.0),
     );
   });
+
+  testWidgets(
+    'Viewport+SliverPadding changing padding to negative asserts',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final offset = ViewportOffset.fixed(0.0);
+      addTearDown(offset.dispose);
+
+      Widget buildApp(EdgeInsetsGeometry padding) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Viewport(
+            offset: offset,
+            slivers: <Widget>[SliverPadding(padding: padding)],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(EdgeInsets.zero));
+
+      await tester.pumpWidget(buildApp(const EdgeInsets.all(-1.0)));
+      expect(tester.takeException(), isAssertionError);
+    },
+  );
 
   testWidgets('Viewport+SliverPadding changing direction', (WidgetTester tester) async {
     final offset1 = ViewportOffset.fixed(0.0);
