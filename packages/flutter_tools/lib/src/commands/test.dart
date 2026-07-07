@@ -657,7 +657,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
 
       if (stringArg('flavor') != null && !integrationTestDevice.supportsFlavors) {
-        throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
+        throwToolExit('--flavor is only supported for Android, Linux, macOS, and iOS devices.');
       }
     }
 
