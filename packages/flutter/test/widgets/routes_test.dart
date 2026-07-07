@@ -513,6 +513,58 @@ void main() {
       expect(observer.debugObservingRoute(pageRoute), false);
       expect(observer.debugObservingRoute(nextPageRoute), false);
     });
+
+    testWidgets(
+      'didPushNext is called on newly pushed route when pushed simultaneously with another',
+      (WidgetTester tester) async {
+        final observer = RouteObserver<PageRoute<dynamic>>();
+        final eventsA = <String>[];
+
+        await tester.pumpWidget(
+          WidgetsApp(
+            navigatorObservers: <NavigatorObserver>[observer],
+            color: const Color(0xFFFFFFFF),
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) => const SizedBox(),
+              );
+            },
+          ),
+        );
+
+        final BuildContext context = tester.element(find.byType(SizedBox));
+        Navigator.of(context)
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+            ),
+          )
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => const Text('Route B', textDirection: TextDirection.ltr),
+            ),
+          );
+
+        await tester.pumpAndSettle();
+
+        expect(eventsA, <String>['didPush', 'didPushNext']);
+      },
+    );
   });
 
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (
@@ -1847,81 +1899,77 @@ void main() {
       expect(modalBarrierAnimation.value, _white);
     });
 
-    testWidgets(
-      'modal route semantics order',
-      (WidgetTester tester) async {
-        // Regression test for https://github.com/flutter/flutter/issues/46625.
-        final semantics = SemanticsTester(tester);
-        await tester.pumpWidget(
-          TestWidgetsApp(
-            home: Builder(
-              builder: (BuildContext context) {
-                return Center(
-                  child: TestButton(
-                    child: const Text('X'),
-                    onPressed: () {
-                      Navigator.of(context).push<void>(
-                        _TestDialogRouteWithCustomBarrierCurve<void>(
-                          child: const Text('Hello World'),
-                          barrierLabel: 'test label',
-                          barrierCurve: Curves.linear,
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+    testWidgets('modal route semantics order', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/46625.
+      final semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: TestButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
+                        child: const Text('Hello World'),
+                        barrierLabel: 'test label',
+                        barrierCurve: Curves.linear,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
-        );
+        ),
+      );
 
-        await tester.tap(find.text('X'));
-        await tester.pumpAndSettle();
-        expect(find.text('Hello World'), findsOneWidget);
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Hello World'), findsOneWidget);
 
-        final expectedSemantics = TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              id: 1,
-              rect: TestSemantics.fullScreen,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 6,
-                  rect: TestSemantics.fullScreen,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 7,
-                      rect: TestSemantics.fullScreen,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 8,
-                          label: 'Hello World',
-                          rect: TestSemantics.fullScreen,
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                // Modal barrier is put after modal scope
-                TestSemantics(
-                  id: 5,
-                  rect: TestSemantics.fullScreen,
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'test label',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ],
-        );
+      final expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 6,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 7,
+                    rect: TestSemantics.fullScreen,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 8,
+                        label: 'Hello World',
+                        rect: TestSemantics.fullScreen,
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              // Modal barrier is put after modal scope
+              TestSemantics(
+                id: 5,
+                rect: TestSemantics.fullScreen,
+                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                label: 'test label',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      );
 
-        expect(semantics, hasSemantics(expectedSemantics));
-        semantics.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-    );
+      expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
     testWidgets('focus traversal is correct when popping multiple pages simultaneously', (
       WidgetTester tester,
@@ -2834,9 +2882,21 @@ double _getOpacity(GlobalKey key, WidgetTester tester) {
   });
 }
 
-class MockPageRoute extends Fake implements PageRoute<dynamic> {}
+class MockPageRoute extends Fake implements PageRoute<dynamic> {
+  @override
+  bool get isActive => true;
 
-class MockRoute extends Fake implements Route<dynamic> {}
+  @override
+  bool get isCurrent => true;
+}
+
+class MockRoute extends Fake implements Route<dynamic> {
+  @override
+  bool get isActive => true;
+
+  @override
+  bool get isCurrent => true;
+}
 
 class MockRouteAware extends Fake implements RouteAware {
   int didPushCount = 0;
@@ -3089,4 +3149,37 @@ class _ConstantVelocitySimulation extends Simulation {
     final double nowX = x(time);
     return nowX > 1.0 || nowX < 0;
   }
+}
+
+class _TestRouteAwareWidget extends StatefulWidget {
+  const _TestRouteAwareWidget({required this.observer, required this.onEvent});
+  final RouteObserver<PageRoute<dynamic>> observer;
+  final ValueChanged<String> onEvent;
+  @override
+  State<_TestRouteAwareWidget> createState() => _TestRouteAwareWidgetState();
+}
+
+class _TestRouteAwareWidgetState extends State<_TestRouteAwareWidget> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.observer.subscribe(this, ModalRoute.of(context)! as PageRoute<dynamic>);
+  }
+
+  @override
+  void dispose() {
+    widget.observer.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() => widget.onEvent('didPush');
+  @override
+  void didPop() => widget.onEvent('didPop');
+  @override
+  void didPushNext() => widget.onEvent('didPushNext');
+  @override
+  void didPopNext() => widget.onEvent('didPopNext');
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }

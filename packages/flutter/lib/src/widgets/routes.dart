@@ -2455,6 +2455,9 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
     final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => <RouteAware>{});
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
+      if (route.isActive && !route.isCurrent) {
+        routeAware.didPushNext();
+      }
     }
   }
 
