@@ -7,6 +7,7 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
+#include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 #include "impeller/renderer/command.h"
 
@@ -14,6 +15,29 @@ namespace impeller {
 namespace testing {
 
 using ::testing::_;
+
+TEST(BufferBindingsGLESTest, ToVertexAttribTypeSupportedFormats) {
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kFloat32x3),
+            std::optional<GLenum>(GL_FLOAT));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt8x4),
+            std::optional<GLenum>(GL_BYTE));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt8),
+            std::optional<GLenum>(GL_UNSIGNED_BYTE));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt16x2),
+            std::optional<GLenum>(GL_SHORT));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt16),
+            std::optional<GLenum>(GL_UNSIGNED_SHORT));
+}
+
+TEST(BufferBindingsGLESTest, ToVertexAttribTypeRejectsUnsupportedFormats) {
+  // Half-float and 32-bit integer vertex attributes are not available on the
+  // GLES 2.0 floor.
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kFloat16).has_value());
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kSInt32).has_value());
+  EXPECT_FALSE(
+      ToVertexAttribType(VertexAttributeFormat::kUInt32x4).has_value());
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kInvalid).has_value());
+}
 
 TEST(BufferBindingsGLESTest, BindUniformData) {
   BufferBindingsGLES bindings;
@@ -190,8 +214,8 @@ TEST(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType) {
 // per-vertex binding keeps a divisor of 0.
 TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
   auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
-  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisorEXT(0, 0)).Times(1);
-  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisorEXT(1, 1)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(0, 0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(1, 1)).Times(1);
   std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
 
   BufferBindingsGLES bindings;

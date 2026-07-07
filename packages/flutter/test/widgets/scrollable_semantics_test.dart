@@ -158,6 +158,33 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Scrollable exposes implicit scrolling before dimensions are available', (
+    WidgetTester tester,
+  ) async {
+    semantics = SemanticsTester(tester);
+    final controller = _NoDimensionsDuringSemanticsScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: List<Widget>.generate(60, (int i) => Text('$i')),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]));
+    expect(
+      semantics.nodesWith(
+        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+      ),
+      isEmpty,
+    );
+    semantics.dispose();
+  });
+
   testWidgets('scrollToOffset respects implicit scrolling configuration', (
     WidgetTester tester,
   ) async {
@@ -856,4 +883,48 @@ class _NoImplicitScrollingScrollPhysics extends ScrollPhysics {
 
   @override
   ScrollPhysics applyTo(ScrollPhysics? ancestor) => this;
+}
+
+class _NoDimensionsDuringSemanticsScrollController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _NoDimensionsDuringSemanticsScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+      initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      debugLabel: debugLabel,
+    );
+  }
+}
+
+class _NoDimensionsDuringSemanticsScrollPosition extends ScrollPositionWithSingleContext {
+  _NoDimensionsDuringSemanticsScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+    super.initialPixels,
+    super.keepScrollOffset,
+    super.debugLabel,
+  });
+
+  bool _useRealDimensionsForLayout = false;
+
+  @override
+  bool get haveDimensions => _useRealDimensionsForLayout && super.haveDimensions;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    // Let ScrollPosition update its layout state normally, then hide dimensions
+    // again so semantics sees the transient no-dimensions state.
+    _useRealDimensionsForLayout = true;
+    final bool result = super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    _useRealDimensionsForLayout = false;
+    return result;
+  }
 }

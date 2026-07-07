@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -311,10 +312,14 @@ name: my_app
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
-      expect(
-        await fileSystem.file(fileSystem.path.join('build', 'cache.dill')).readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        config: globals.config,
+        fileSystem: fileSystem,
+        targetModel: TargetModel.dartdevc,
       );
+      expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -335,12 +340,14 @@ name: my_app
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
-      expect(
-        await fileSystem
-            .file(fileSystem.path.join('build', 'cache.dill.track.dill'))
-            .readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: true,
+        dartDefines: const <String>[],
+        config: globals.config,
+        fileSystem: fileSystem,
+        targetModel: TargetModel.dartdevc,
       );
+      expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1363,6 +1370,39 @@ name: my_app
   );
 
   testUsingContext(
+    'ResidentWebRunner forwards platform args when starting a web app',
+    () async {
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      final ResidentRunner runner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        platformArgs: <String, Object?>{'no-launch-chrome': true},
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+      );
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(runner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(mockDevice.lastPlatformArgs, isNotNull);
+      expect(mockDevice.lastPlatformArgs!['no-launch-chrome'], true);
+      expect(mockDevice.lastPlatformArgs!['uri'], isNotNull);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
     'Exits when initial compile fails',
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
@@ -2180,6 +2220,7 @@ class FakeDevice extends Fake implements WebDevice {
   int count = 0;
 
   bool isRunning = false;
+  Map<String, dynamic>? lastPlatformArgs;
 
   @override
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
@@ -2202,6 +2243,7 @@ class FakeDevice extends Fake implements WebDevice {
     String? userIdentifier,
   }) async {
     isRunning = true;
+    lastPlatformArgs = platformArgs;
     return LaunchResult.succeeded();
   }
 
@@ -2252,7 +2294,10 @@ class FakeAppConnection extends Fake implements AppConnection {
   }
 }
 
-class FakeChromeDevice extends Fake implements ChromiumDevice {}
+class FakeChromeDevice extends FakeDevice implements ChromiumDevice {
+  @override
+  final ChromiumLauncher chromeLauncher = TestChromiumLauncher();
+}
 
 class FakeWipDebugger extends Fake implements WipDebugger {}
 

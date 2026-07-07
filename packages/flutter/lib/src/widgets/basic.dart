@@ -24,6 +24,8 @@ import 'debug.dart';
 import 'framework.dart';
 import 'indexed_stack.dart';
 import 'localizations.dart';
+import 'media_query.dart';
+import 'view.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -1932,10 +1934,15 @@ class Transform extends SingleChildRenderObjectWidget {
 /// The [CompositedTransformTarget] must come earlier in the paint order than
 /// any linked [CompositedTransformFollower]s.
 ///
+/// {@macro flutter.widgets.CompositedTransformFollower.overlayPortal}
+///
 /// See also:
 ///
 ///  * [CompositedTransformFollower], the widget that can target this one.
 ///  * [LeaderLayer], the layer that implements this widget's logic.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformTarget extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///
@@ -1983,11 +1990,21 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// this widget is usually used as the root of an [OverlayEntry] in an app-wide
 /// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
 ///
+/// {@template flutter.widgets.CompositedTransformFollower.overlayPortal}
+/// [CompositedTransformFollower] and [CompositedTransformTarget] are
+/// incompatible with [OverlayPortal.overlayChildLayoutBuilder] and thus
+/// must not be used together. Consider using
+/// [OverlayPortal.overlayChildLayoutBuilder] instead
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [CompositedTransformTarget], the widget that this widget can target.
 ///  * [FollowerLayer], the layer that implements this widget's logic.
 ///  * [Transform], which applies an arbitrary transform to a child.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///
@@ -4785,6 +4802,10 @@ class Stack extends MultiChildRenderObjectWidget {
   /// To clip children whose geometry does not overflow the stack, consider
   /// using a [ClipRect] widget.
   ///
+  /// Even when this is set to [Clip.none], the stack itself does not extend its
+  /// hit-test region: pointer events that fall outside the stack's own bounds
+  /// will not reach a child even if that child is painted in that area.
+  ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
@@ -6429,9 +6450,14 @@ class Flow extends MultiChildRenderObjectWidget {
 /// subtree of a [SelectionArea] or [SelectableRegion] and a
 /// [SelectionRegistrar] needs to be assigned to the
 /// [RichText.selectionRegistrar]. One can use
-/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a
-/// context. This enables users to select the text in [RichText]s with mice or
-/// touch events.
+/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a context
+/// that is below the [SelectionArea] or [SelectableRegion] in the widget tree.
+/// This enables users to select the text in [RichText]s with mice or touch
+/// events.
+///
+/// If the same build method creates both the [SelectionArea] and the
+/// [RichText], use a [Builder] so that [SelectionContainer.maybeOf] is called
+/// with a [BuildContext] below the [SelectionArea] in the widget tree.
 ///
 /// The [selectionColor] also needs to be set if the selection is enabled to
 /// draw the selection highlights.
@@ -6444,10 +6470,16 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
 ///
 /// ```dart
-/// RichText(
-///   text: const TextSpan(text: 'Hello'),
-///   selectionRegistrar: SelectionContainer.maybeOf(context),
-///   selectionColor: const Color(0xAF6694e8),
+/// SelectionArea(
+///   child: Builder(
+///     builder: (BuildContext context) {
+///       return RichText(
+///         text: const TextSpan(text: 'Hello'),
+///         selectionRegistrar: SelectionContainer.maybeOf(context),
+///         selectionColor: const Color(0xAF6694e8),
+///       );
+///     },
+///   ),
 /// )
 /// ```
 /// {@end-tool}
@@ -6599,6 +6631,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// widgets.
   final Color? selectionColor;
 
+  double _getDevicePixelRatio(BuildContext context) =>
+      MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6616,6 +6651,7 @@ class RichText extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
+      devicePixelRatio: _getDevicePixelRatio(context),
     );
   }
 
@@ -6635,7 +6671,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textHeightBehavior = textHeightBehavior
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
-      ..selectionColor = selectionColor;
+      ..selectionColor = selectionColor
+      ..devicePixelRatio = _getDevicePixelRatio(context);
   }
 
   @override
