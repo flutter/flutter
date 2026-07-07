@@ -268,6 +268,16 @@ void main() {
         FakeDevice.output = 'Some garbage output';
         expect(device.getMemoryStats('com.example'), throwsA(isA<DeviceException>()));
       });
+
+      test('getMemoryStats returns memory stats if dumpsys meminfo parses successfully', () async {
+        FakeDevice.resetLog();
+        FakeDevice.output = 'TOTAL      12345';
+        final Map<String, dynamic> stats = await device.getMemoryStats('com.example');
+        expect(stats, <String, dynamic>{'total_kb': 12345});
+        expectLog(const <CommandArgs>[
+          CommandArgs(command: 'dumpsys', arguments: <String>['meminfo', 'com.example']),
+        ]);
+      });
     });
   });
 }
