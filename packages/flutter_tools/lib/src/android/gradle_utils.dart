@@ -1462,6 +1462,8 @@ class AgpKgpCompat {
 }
 
 const _kgpGradleCompatList = <KgpGradleCompat>[
+  // Documented max KGP is 2.3.10, using 2.3.29 covers patch versions.
+  // Documented max Gradle is 9.5.0, using 9.5.99 non inclusive covers patch versions.
   KgpGradleCompat(
     kgpMin: '2.3.0',
     kgpMax: '2.3.29',
@@ -1469,6 +1471,8 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '9.5.99',
     inclusiveMaxGradle: false,
   ),
+  // Documented max KGP is 2.2.21, using 2.3.0 covers patch versions.
+  // Documented max Gradle is 8.14, using 8.14.99 non inclusive covers patch versions.
   KgpGradleCompat(
     kgpMin: '2.2.20',
     kgpMax: '2.3.0',
@@ -1476,6 +1480,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '8.14.99',
     inclusiveMaxGradle: false,
   ),
+  // Documented max Gradle is 8.14, using 8.14.99 non inclusive covers patch versions.
   KgpGradleCompat(
     kgpMin: '2.2.0',
     kgpMax: '2.2.10',
@@ -1483,6 +1488,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '8.14.99',
     inclusiveMaxGradle: false,
   ),
+  // Documented max Gradle is 8.12.1, using 8.12.99 non inclusive covers patch versions.
   KgpGradleCompat(
     kgpMin: '2.1.20',
     kgpMax: '2.1.21',
@@ -1490,6 +1496,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '8.12.99',
     inclusiveMaxGradle: false,
   ),
+  // Documented max Gradle is 8.10, using 8.11 non inclusive covers patch versions.
   KgpGradleCompat(
     kgpMin: '2.1.0',
     kgpMax: '2.1.10',
@@ -1497,6 +1504,8 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '8.11',
     inclusiveMaxGradle: false,
   ),
+  // Documented max KGP is 2.0.21.
+  // Documented max Gradle is 8.5, using 8.9 non inclusive covers patch versions.
   KgpGradleCompat(
     kgpMin: '2.0.20',
     kgpMax: '2.1',
@@ -1505,6 +1514,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     inclusiveMaxKgp: false,
     inclusiveMaxGradle: false,
   ),
+  // Documented max Gradle is 8.5, using 8.6 non inclusive covers patch versions.
   KgpGradleCompat(
     kgpMin: '2.0',
     kgpMax: '2.0.20',
@@ -1513,6 +1523,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     inclusiveMaxKgp: false,
     inclusiveMaxGradle: false,
   ),
+  // Documented max KGP is 1.9.25.
   KgpGradleCompat(
     kgpMin: '1.9.20',
     kgpMax: '2.0',
@@ -1520,6 +1531,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '8.1.1',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.9.10.
   KgpGradleCompat(
     kgpMin: '1.8.20',
     kgpMax: '1.9.20',
@@ -1527,6 +1539,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '7.6.0',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.8.11.
   KgpGradleCompat(
     kgpMin: '1.8.0',
     kgpMax: '1.8.20',
@@ -1534,6 +1547,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '7.3.3',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.7.22.
   KgpGradleCompat(
     kgpMin: '1.7.20',
     kgpMax: '1.8.0',
@@ -1541,6 +1555,7 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '7.1.1',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.7.10.
   KgpGradleCompat(
     kgpMin: '1.7.0',
     kgpMax: '1.7.20',
@@ -1548,8 +1563,9 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
     gradleMax: '7.0.2',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.6.21.
   KgpGradleCompat(
-    kgpMin: '1.6.20',
+    kgpMin: oldestDocumentedKgpCompatabilityVersion,
     kgpMax: '1.7.0',
     gradleMin: '6.1.1',
     gradleMax: '7.0.2',
@@ -1558,6 +1574,8 @@ const _kgpGradleCompatList = <KgpGradleCompat>[
 ];
 
 const _agpKgpCompatList = <AgpKgpCompat>[
+  // Documented max KGP is 2.3.10.
+  // Documented max AGP is 9.2.0.
   AgpKgpCompat(
     kgpMin: '2.3.10',
     kgpMax: '2.3.29',
@@ -1565,6 +1583,8 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '9.2.99',
     inclusiveMaxAgp: false,
   ),
+  // Documented max KGP is 2.3.0.
+  // Documented max AGP is 8.13.0.
   AgpKgpCompat(
     kgpMin: '2.3.0',
     kgpMax: '2.3.10',
@@ -1573,6 +1593,8 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     inclusiveMaxKgp: false,
     inclusiveMaxAgp: false,
   ),
+  // Documented max KGP is 2.2.20.
+  // Documented max AGP is 8.11.1.
   AgpKgpCompat(
     kgpMin: '2.2.20',
     kgpMax: '2.3.0',
@@ -1581,6 +1603,8 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     inclusiveMaxKgp: false,
     inclusiveMaxAgp: false,
   ),
+  // Documented max KGP is 2.2.10.
+  // Documented max AGP is 8.10.0.
   AgpKgpCompat(
     kgpMin: '2.2.0',
     kgpMax: '2.2.19',
@@ -1588,7 +1612,10 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '8.11',
     inclusiveMaxAgp: false,
   ),
+  // Documented max KGP is 2.1.21.
   AgpKgpCompat(kgpMin: '2.1.0', kgpMax: '2.1.21', agpMin: '7.3.1', agpMax: '8.7.2'),
+  // Documented max KGP is 2.0.21.
+  // Documented max AGP is 8.5.
   AgpKgpCompat(
     kgpMin: '2.0.20',
     kgpMax: '2.1.0',
@@ -1597,6 +1624,7 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     inclusiveMaxKgp: false,
     inclusiveMaxAgp: false,
   ),
+  // Documented max KGP is 2.0.0.
   AgpKgpCompat(
     kgpMin: '2.0.0',
     kgpMax: '2.0.20',
@@ -1604,6 +1632,7 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '8.3.1',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.9.25.
   AgpKgpCompat(
     kgpMin: '1.9.20',
     kgpMax: '2.0.0',
@@ -1611,6 +1640,7 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '8.1.0',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.9.10.
   AgpKgpCompat(
     kgpMin: '1.9.0',
     kgpMax: '1.9.20',
@@ -1618,6 +1648,7 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '7.4.0',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.8.22.
   AgpKgpCompat(
     kgpMin: '1.8.20',
     kgpMax: '1.9',
@@ -1625,6 +1656,7 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '7.4.0',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.8.11.
   AgpKgpCompat(
     kgpMin: '1.8.0',
     kgpMax: '1.8.20',
@@ -1632,6 +1664,7 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '7.2.1',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.7.22.
   AgpKgpCompat(
     kgpMin: '1.7.20',
     kgpMax: '1.8.0',
@@ -1639,6 +1672,8 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '7.0.4',
     inclusiveMaxKgp: false,
   ),
+  // Documented max KGP is 1.7.10.
+  // Documented gap between 1.6.21 and 1.7.0.
   AgpKgpCompat(
     kgpMin: '1.6.20',
     kgpMax: '1.7.20',

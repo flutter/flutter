@@ -103,47 +103,6 @@ distributionUrl=https://services.gradle.org/distributions/gradle-$gradleV-all.zi
       final Directory fakeFlutterRoot = testFileSystem.directory(flutterRoot);
       insertFakeGradleArtifactDir(testFileSystem, flutterRoot: fakeFlutterRoot);
 
-      // Set up templates directory
-      final Directory templatesSrc = globals.fs
-          .directory(flutterRoot)
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .childDirectory('templates');
-
-      // Copy templates recursively
-      void copyDirectory(Directory source, Directory destination) {
-        destination.createSync(recursive: true);
-        for (final FileSystemEntity entity in source.listSync()) {
-          final String name = source.fileSystem.path.basename(entity.path);
-          if (entity is Directory) {
-            copyDirectory(entity, destination.childDirectory(name));
-          } else if (entity is File) {
-            destination.childFile(name).writeAsBytesSync(entity.readAsBytesSync());
-          }
-        }
-      }
-
-      copyDirectory(
-        templatesSrc,
-        fakeFlutterRoot
-            .childDirectory('packages')
-            .childDirectory('flutter_tools')
-            .childDirectory('templates'),
-      );
-
-      final Directory dummyTemplateImagesDirectory = fakeFlutterRoot.parent;
-      dummyTemplateImagesDirectory.createSync(recursive: true);
-      writePackageConfigFiles(
-        directory: testFileSystem
-            .directory(flutterRoot)
-            .childDirectory('packages')
-            .childDirectory('flutter_tools'),
-        mainLibName: 'app_name',
-        packages: <String, String>{
-          'flutter_template_images': dummyTemplateImagesDirectory.uri.toString(),
-        },
-      );
-
       testUsingContext(
         description,
         testMethod,
@@ -194,7 +153,7 @@ distributionUrl=https://services.gradle.org/distributions/gradle-$gradleV-all.zi
       },
       java: FakeJava(version: Version(17, 0, 2)),
       processManager: FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
+        const FakeCommand(
           command: <String>['./gradlew', 'kgpVersion', '-q'],
           stdout: 'KGP Version: 1.7.22\n',
         ),
@@ -226,7 +185,7 @@ distributionUrl=https://services.gradle.org/distributions/gradle-$gradleV-all.zi
       },
       java: FakeJava(version: Version(17, 0, 2)),
       processManager: FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
+        const FakeCommand(
           command: <String>['./gradlew', 'kgpVersion', '-q'],
           stdout: 'KGP Version: 2.1.10\n',
         ),
@@ -258,7 +217,7 @@ distributionUrl=https://services.gradle.org/distributions/gradle-$gradleV-all.zi
       },
       java: FakeJava(version: Version(17, 0, 2)),
       processManager: FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
+        const FakeCommand(
           command: <String>['./gradlew', 'kgpVersion', '-q'],
           stdout: 'KGP Version: 2.0.20\n',
         ),
