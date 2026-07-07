@@ -90,8 +90,8 @@ class WindowingOwnerLinux extends WindowingOwner {
   @internal
   @override
   RegularWindowController createRegularWindowController({
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
     required RegularWindowControllerDelegate delegate,
@@ -99,8 +99,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = RegularWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
       resizable: resizable,
     );
@@ -113,8 +113,8 @@ class WindowingOwnerLinux extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     BaseWindowController? parent,
     String? title,
@@ -122,8 +122,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = DialogWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       parent: parent,
       title: title,
       resizable: resizable,
@@ -137,7 +137,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -149,7 +149,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = TooltipWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -163,7 +163,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -175,7 +175,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     final controller = PopupWindowControllerLinux(
       owner: this,
       delegate: delegate,
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -192,8 +192,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     bool resizable = false,
     String? title,
   }) {
@@ -253,8 +253,8 @@ class RegularWindowControllerLinux extends RegularWindowController
   RegularWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
     bool decorated = true,
     required bool resizable,
@@ -450,8 +450,8 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
   DialogWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,
@@ -631,7 +631,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   TooltipWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -654,7 +654,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
       onConfigure: notifyListeners,
       onDestroy: _delegate.onWindowDestroyed,
     );
-    setConstraints(preferredConstraints);
+    setConstraints(constraints);
     final engine = _FlEngine.current();
     _view = _FlView(engine, isSizedToContent: true);
     _viewMonitor = _FlViewMonitor(
@@ -822,7 +822,7 @@ class PopupWindowControllerLinux extends PopupWindowController {
   PopupWindowControllerLinux({
     required WindowingOwnerLinux owner,
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -846,7 +846,7 @@ class PopupWindowControllerLinux extends PopupWindowController {
       },
       onDestroy: _delegate.onWindowDestroyed,
     );
-    setConstraints(preferredConstraints);
+    setConstraints(constraints);
     final engine = _FlEngine.current();
     _view = _FlView(engine, isSizedToContent: true);
     _viewMonitor = _FlViewMonitor(

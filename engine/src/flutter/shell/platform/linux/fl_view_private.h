@@ -5,10 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 
-#include "flutter/shell/platform/linux/fl_compositor.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
+#include "flutter/shell/platform/linux/fl_view_renderer.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
@@ -24,13 +24,9 @@ struct _FlView {
   GtkWidget* event_box;
   GtkGesture* zoom_gesture;
   GtkGesture* rotate_gesture;
-  GtkWidget* render_area;
-  GdkGLContext* render_context;
+  FlViewRenderer* renderer;
   FlEngine* engine;
-  FlCompositor* compositor;
   FlutterViewId view_id;
-  GdkRGBA* background_color;
-  gboolean have_first_frame;
   FlWindowStateMonitor* window_state_monitor;
   FlScrollingManager* scrolling_manager;
   FlPointerManager* pointer_manager;
@@ -40,10 +36,6 @@ struct _FlView {
 #endif
   guint cursor_changed_cb_id;
   gboolean sized_to_content;
-#if FLUTTER_LINUX_GTK4
-  gboolean native_texture_ready;
-  guint native_texture_retry_source_id;
-#endif
   GCancellable* cancellable;
 };
 

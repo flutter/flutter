@@ -184,7 +184,7 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
         ,
         event_time * kMicrosecondsPerMillisecond, event_x * scale_factor,
         event_y * scale_factor, kFlutterPointerDeviceKindMouse, scroll_delta_x,
-        scroll_delta_y, 0);
+        scroll_delta_y, 0, 0, 0);
   }
 }
 

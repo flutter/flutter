@@ -19,8 +19,6 @@
 #include <cstring>
 
 #include "flutter/common/constants.h"
-#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
-#include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
@@ -28,9 +26,6 @@
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
-#if FLUTTER_LINUX_GTK4
-#include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
-#endif
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #if !FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
@@ -38,6 +33,7 @@
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #endif
 #include "flutter/shell/platform/linux/fl_view_private.h"
+#include "flutter/shell/platform/linux/fl_view_renderer.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -54,11 +50,6 @@ static void handle_geometry_changed(FlView* self);
 static void handle_geometry_changed_with_size(FlView* self,
                                               int width,
                                               int height);
-#if FLUTTER_LINUX_GTK4
-static gboolean retry_native_texture_cb(gpointer user_data);
-static void fl_view_gtk4_update_accessible_name(FlView* self);
-static void fl_view_gtk4_update_accessible_tree(FlView* self);
-#endif
 
 G_DEFINE_TYPE_WITH_CODE(
     FlView,
@@ -68,153 +59,10 @@ G_DEFINE_TYPE_WITH_CODE(
         G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                               fl_view_plugin_registry_iface_init))
 
-#if FLUTTER_LINUX_GTK4
-static void fl_view_gtk4_update_accessible_name(FlView* self) {
-  GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
-  GtkAccessibleProperty properties[] = {property};
-  GValue value = G_VALUE_INIT;
-  gtk_accessible_property_init_value(property, &value);
-  g_value_set_string(&value, "Flutter view");
-  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
-                                       &value);
-  g_value_unset(&value);
+// Called when the renderer has rendered its first frame.
+static void first_frame_cb(FlView* self) {
+  g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
 }
-
-static void fl_view_gtk4_update_accessible_tree(FlView* self) {
-#if GTK_CHECK_VERSION(4, 10, 0)
-  // Keep the render surface attached to the view in the accessibility tree.
-  gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(self->render_area),
-                                       GTK_ACCESSIBLE(self), nullptr);
-#else
-  (void)self;
-#endif
-}
-#endif
-
-// Redraw the view from the GTK thread.
-static gboolean redraw_cb(gpointer user_data) {
-  g_autoptr(FlView) self = FL_VIEW(user_data);
-
-  if (!self->have_first_frame) {
-    self->have_first_frame = TRUE;
-    g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
-  }
-
-  // If Flutter is controlling the window size, then resize the view if
-  // necessary.
-  gint scale_factor =
-      gtk_widget_get_scale_factor(GTK_WIDGET(self->render_area));
-  size_t width;
-  size_t height;
-#if FLUTTER_LINUX_GTK4
-  width =
-      static_cast<size_t>(gtk_widget_get_width(GTK_WIDGET(self->render_area))) *
-      scale_factor;
-  height = static_cast<size_t>(
-               gtk_widget_get_height(GTK_WIDGET(self->render_area))) *
-           scale_factor;
-#else
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(GTK_WIDGET(self->render_area), &allocation);
-  width = allocation.width * scale_factor;
-  height = allocation.height * scale_factor;
-#endif
-  size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
-  gboolean frame_size_matches = width == frame_width && height == frame_height;
-  if (self->sized_to_content && !frame_size_matches) {
-    gtk_widget_set_size_request(
-        GTK_WIDGET(self->render_area),
-        MAX(static_cast<gint>(frame_width / scale_factor), 1),
-        MAX(static_cast<gint>(frame_height / scale_factor), 1));
-#if FLUTTER_LINUX_GTK4
-    GtkWidget* toplevel_window = fl_view_gtk4_get_toplevel_window(self);
-    if (toplevel_window != nullptr) {
-      gtk_window_set_default_size(
-          GTK_WINDOW(toplevel_window),
-          MAX(static_cast<gint>(frame_width / scale_factor), 1),
-          MAX(static_cast<gint>(frame_height / scale_factor), 1));
-    }
-#else
-    GtkWidget* toplevel =
-        gtk_widget_get_toplevel(GTK_WIDGET(self->render_area));
-    if (GTK_IS_WINDOW(toplevel)) {
-      // Resize to smallest size, so that the window will shrink to fit the new
-      // size of the render area.
-      gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
-    }
-#endif
-    return G_SOURCE_REMOVE;
-  }
-
-#if FLUTTER_LINUX_GTK4
-  if (!self->sized_to_content && !frame_size_matches && width > 1 &&
-      height > 1) {
-    handle_geometry_changed(self);
-    return G_SOURCE_REMOVE;
-  }
-#endif
-
-#if FLUTTER_LINUX_GTK4
-  if (width == 0 || height == 0) {
-    if (self->native_texture_retry_source_id == 0) {
-      self->native_texture_retry_source_id =
-          g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
-                             g_object_ref(self), g_object_unref);
-    }
-    return G_SOURCE_REMOVE;
-  }
-
-  g_autoptr(GdkTexture) texture = nullptr;
-  FlGdkSurface* surface =
-      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
-  if (surface != nullptr) {
-    GdkGLContext* old_gl_context = gdk_gl_context_get_current();
-    if (self->render_context != nullptr) {
-      gdk_gl_context_make_current(self->render_context);
-    }
-
-    texture = fl_compositor_acquire_texture(
-        self->compositor, surface, self->render_context, width, height,
-        !self->sized_to_content || !self->native_texture_ready);
-
-    if (gdk_gl_context_get_current() != old_gl_context) {
-      gdk_gl_context_clear_current();
-    }
-
-    if (texture != nullptr && FL_IS_RENDER_TEXTURE_GTK4(self->render_area)) {
-      fl_render_texture_gtk4_set_flip_y(
-          FL_RENDER_TEXTURE_GTK4(self->render_area),
-          self->render_context != nullptr);
-      fl_render_texture_gtk4_set_texture(
-          FL_RENDER_TEXTURE_GTK4(self->render_area), texture);
-      self->native_texture_ready = TRUE;
-      if (self->native_texture_retry_source_id != 0) {
-        g_source_remove(self->native_texture_retry_source_id);
-        self->native_texture_retry_source_id = 0;
-      }
-    } else if (!self->native_texture_ready &&
-               self->native_texture_retry_source_id == 0) {
-      self->native_texture_retry_source_id =
-          g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
-                             g_object_ref(self), g_object_unref);
-    }
-  }
-#else
-  gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
-#endif
-
-  return G_SOURCE_REMOVE;
-}
-
-#if FLUTTER_LINUX_GTK4
-static gboolean retry_native_texture_cb(gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
-  self->native_texture_retry_source_id = 0;
-  redraw_cb(g_object_ref(self));
-  return G_SOURCE_REMOVE;
-}
-#endif
 
 // Signal handler for GtkWidget::delete-event / GtkWindow::close-request.
 static gboolean window_delete_event_cb(FlView* self) {
@@ -320,8 +168,8 @@ static void handle_geometry_changed_with_size(FlView* self,
 
 static void handle_geometry_changed(FlView* self) {
 #if FLUTTER_LINUX_GTK4
-  int width = gtk_widget_get_width(GTK_WIDGET(self->render_area));
-  int height = gtk_widget_get_height(GTK_WIDGET(self->render_area));
+  int width = gtk_widget_get_width(GTK_WIDGET(self->renderer));
+  int height = gtk_widget_get_height(GTK_WIDGET(self->renderer));
   handle_geometry_changed_with_size(self, width, height);
 #else
   GtkAllocation allocation;
@@ -377,10 +225,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
                                    size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
 
-  fl_compositor_present_layers(self->compositor, layers, layers_count);
-
-  // Perform the redraw in the GTK thead.
-  g_idle_add(redraw_cb, g_object_ref(self));
+  fl_view_renderer_present_layers(self->renderer, layers, layers_count);
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -403,52 +248,7 @@ static void fl_view_plugin_registry_iface_init(
   iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
 }
 
-static void setup_opengl(FlView* self) {
-  g_autoptr(GError) error = nullptr;
-
-  FlGdkSurface* surface =
-      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
-  if (surface == nullptr) {
-    return;
-  }
-  self->render_context = fl_gtk_surface_create_gl_context(surface, &error);
-  if (self->render_context == nullptr) {
-    g_warning("Failed to create OpenGL context: %s", error->message);
-    return;
-  }
-
-  if (!gdk_gl_context_realize(self->render_context, &error)) {
-    g_warning("Failed to realize OpenGL context: %s", error->message);
-    return;
-  }
-
-  // If using Wayland, then EGL is in use and we can access the frame
-  // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
-  // then we have to copy the texture via the CPU.
-  gboolean shareable =
-      GDK_IS_WAYLAND_DISPLAY(fl_gtk_surface_get_display(surface));
-  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
-      fl_engine_get_task_runner(self->engine),
-      fl_engine_get_opengl_manager(self->engine), shareable));
-}
-
-static void setup_software(FlView* self) {
-  self->compositor = FL_COMPOSITOR(
-      fl_compositor_software_new(fl_engine_get_task_runner(self->engine)));
-}
-
 static void realize_cb(FlView* self) {
-  switch (fl_engine_get_renderer_type(self->engine)) {
-    case kOpenGL:
-      setup_opengl(self);
-      break;
-    case kSoftware:
-      setup_software(self);
-      break;
-    default:
-      break;
-  }
-
   if (self->view_id != flutter::kFlutterImplicitViewId) {
     setup_cursor(self);
     return;
@@ -493,45 +293,9 @@ static void realize_cb(FlView* self) {
 static void size_allocate_cb(FlView* self) {
   handle_geometry_changed(self);
 }
-#endif
-
-#if FLUTTER_LINUX_GTK4
+#else
 static void resize_cb(FlView* self, int width, int height) {
   handle_geometry_changed_with_size(self, width, height);
-}
-#endif
-
-#if !FLUTTER_LINUX_GTK4
-static void paint_background(FlView* self, cairo_t* cr) {
-  // Don't bother drawing if fully transparent - the widget above this will
-  // already be drawn by GTK.
-  if (self->background_color->red == 0 && self->background_color->green == 0 &&
-      self->background_color->blue == 0 && self->background_color->alpha == 0) {
-    return;
-  }
-
-  gdk_cairo_set_source_rgba(cr, self->background_color);
-  cairo_paint(cr);
-}
-
-static gboolean draw_cb(FlView* self, cairo_t* cr) {
-  paint_background(self, cr);
-
-  if (self->render_context) {
-    gdk_gl_context_make_current(self->render_context);
-  }
-
-  gboolean wait_for_frame = !self->sized_to_content;
-  FlGdkSurface* render_surface =
-      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
-  gboolean result = fl_compositor_render(self->compositor, cr, render_surface,
-                                         wait_for_frame);
-
-  if (self->render_context) {
-    gdk_gl_context_clear_current();
-  }
-
-  return result;
 }
 #endif
 
@@ -553,21 +317,30 @@ static void fl_view_dispose(GObject* object) {
   g_cancellable_cancel(self->cancellable);
 
 #if FLUTTER_LINUX_GTK4
-  if (self->render_area != nullptr) {
+  if (self->renderer != nullptr) {
     if (self->zoom_gesture != nullptr) {
-      gtk_widget_remove_controller(GTK_WIDGET(self->render_area),
+      gtk_widget_remove_controller(GTK_WIDGET(self->renderer),
                                    GTK_EVENT_CONTROLLER(self->zoom_gesture));
     }
     if (self->rotate_gesture != nullptr) {
-      gtk_widget_remove_controller(GTK_WIDGET(self->render_area),
+      gtk_widget_remove_controller(GTK_WIDGET(self->renderer),
                                    GTK_EVENT_CONTROLLER(self->rotate_gesture));
     }
   }
 #endif
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
-  if (self->engine != nullptr &&
-      self->view_id != flutter::kFlutterImplicitViewId) {
+  if (self->engine != nullptr) {
+    // If this view holds the text input focus, clear the handler's widget
+    // pointer so it does not dangle once this view is finalized.
+    FlTextInputHandler* text_input_handler =
+        fl_engine_get_text_input_handler(self->engine);
+    if (text_input_handler != nullptr &&
+        fl_text_input_handler_get_widget(text_input_handler) ==
+            GTK_WIDGET(self)) {
+      fl_text_input_handler_set_widget(text_input_handler, nullptr);
+    }
+
     FlMouseCursorHandler* handler =
         fl_engine_get_mouse_cursor_handler(self->engine);
     if (self->cursor_changed_cb_id != 0) {
@@ -575,29 +348,20 @@ static void fl_view_dispose(GObject* object) {
       self->cursor_changed_cb_id = 0;
     }
 
-    // The implicit view is owned by the engine and cannot be removed through
-    // the embedder RemoveView API. Only views created with AddView need
-    // releasing. This matches the embedder API contract and avoids a
-    // pre-existing shutdown warning in the Linux shell.
-    fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
-                          nullptr);
+    if (self->view_id != flutter::kFlutterImplicitViewId) {
+      fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
+                            nullptr);
+    }
   }
 
-  g_clear_object(&self->render_context);
+  g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
-  g_clear_object(&self->compositor);
-  g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
   g_clear_object(&self->pointer_manager);
   g_clear_object(&self->touch_manager);
 #if !FLUTTER_LINUX_GTK4
   g_clear_object(&self->view_accessible);
-#else
-  if (self->native_texture_retry_source_id != 0) {
-    g_source_remove(self->native_texture_retry_source_id);
-    self->native_texture_retry_source_id = 0;
-  }
 #endif
   g_clear_object(&self->cancellable);
 
@@ -606,10 +370,12 @@ static void fl_view_dispose(GObject* object) {
 
 // Implements GtkWidget::realize.
 static void fl_view_realize(GtkWidget* widget) {
+  FlView* self = FL_VIEW(widget);
+
   GTK_WIDGET_CLASS(fl_view_parent_class)->realize(widget);
 
   // Realize the child widgets.
-  gtk_widget_realize(GTK_WIDGET(FL_VIEW(widget)->render_area));
+  gtk_widget_realize(GTK_WIDGET(self->renderer));
 }
 
 // GTK3 event handling.
@@ -721,6 +487,28 @@ static void setup_engine(FlView* self) {
   g_signal_connect_object(self->engine, "update-semantics",
                           G_CALLBACK(update_semantics_cb), self,
                           G_CONNECT_SWAPPED);
+
+  self->renderer = fl_view_renderer_new(self->engine, self->sized_to_content);
+#if FLUTTER_LINUX_GTK4
+  gtk_widget_set_hexpand(GTK_WIDGET(self->renderer), TRUE);
+  gtk_widget_set_vexpand(GTK_WIDGET(self->renderer), TRUE);
+  fl_view_gtk4_setup(self);
+  gtk_widget_set_visible(GTK_WIDGET(self->renderer), TRUE);
+#else
+  gtk_widget_show(GTK_WIDGET(self->renderer));
+  gtk_container_add(GTK_CONTAINER(self->event_box), GTK_WIDGET(self->renderer));
+#endif
+  g_signal_connect_swapped(self->renderer, "realize", G_CALLBACK(realize_cb),
+                           self);
+#if FLUTTER_LINUX_GTK4
+  g_signal_connect_swapped(self->renderer, "resize", G_CALLBACK(resize_cb),
+                           self);
+#else
+  g_signal_connect_swapped(self->renderer, "size-allocate",
+                           G_CALLBACK(size_allocate_cb), self);
+#endif
+  g_signal_connect_swapped(self->renderer, "first-frame",
+                           G_CALLBACK(first_frame_cb), self);
 }
 
 static void fl_view_init(FlView* self) {
@@ -730,41 +518,8 @@ static void fl_view_init(FlView* self) {
 
   self->view_id = -1;
 
-  GdkRGBA default_background = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  self->background_color = gdk_rgba_copy(&default_background);
-
-#if FLUTTER_LINUX_GTK4
-  self->render_area = fl_render_texture_gtk4_new();
-  fl_view_gtk4_update_accessible_name(self);
-#else
-  self->render_area = GTK_WIDGET(gtk_drawing_area_new());
-#endif
-  gtk_widget_set_hexpand(GTK_WIDGET(self->render_area), TRUE);
-  gtk_widget_set_vexpand(GTK_WIDGET(self->render_area), TRUE);
-#if FLUTTER_LINUX_GTK4
-  fl_view_gtk4_setup(self);
-  fl_view_gtk4_update_accessible_tree(self);
-#else
-  fl_view_gtk3_setup(self);
-#endif
-#if FLUTTER_LINUX_GTK4
-  gtk_widget_set_visible(GTK_WIDGET(self->render_area), TRUE);
-#else
-  gtk_widget_show(GTK_WIDGET(self->render_area));
-#endif
-  g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
-                           self);
-#if FLUTTER_LINUX_GTK4
-  g_signal_connect_swapped(self->render_area, "resize", G_CALLBACK(resize_cb),
-                           self);
-#else
-  g_signal_connect_swapped(self->render_area, "size-allocate",
-                           G_CALLBACK(size_allocate_cb), self);
-#endif
 #if !FLUTTER_LINUX_GTK4
-  g_signal_connect_swapped(self->render_area, "draw", G_CALLBACK(draw_cb),
-                           self);
+  fl_view_gtk3_setup(self);
 #endif
 }
 
@@ -830,8 +585,7 @@ int64_t fl_view_get_id(FlView* self) {
 G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
                                                   const GdkRGBA* color) {
   g_return_if_fail(FL_IS_VIEW(self));
-  gdk_rgba_free(self->background_color);
-  self->background_color = gdk_rgba_copy(color);
+  fl_view_renderer_set_background_color(self->renderer, color);
 }
 
 #if !FLUTTER_LINUX_GTK4

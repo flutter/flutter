@@ -172,8 +172,8 @@ mixin class RegularWindowControllerDelegate {
 ///   runWidget(
 ///     RegularWindow(
 ///       controller: RegularWindowController(
-///         preferredSize: const Size(800, 600),
-///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         size: const Size(800, 600),
+///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
 ///       child: MaterialApp(home: Container()),
@@ -192,16 +192,16 @@ abstract class RegularWindowController extends BaseWindowController {
   /// Creates a [RegularWindowController] with a specific size.
   ///
   /// Upon construction, the window is created by the platform with the
-  /// given [preferredSize].
+  /// given [size].
   ///
   /// {@template flutter.widgets.windowing.sizedConstructor}
   ///
-  /// The [preferredSize] is the preferred content size of the window. The
+  /// The [size] is the preferred content size of the window. The
   /// platform will try to apply this size when the window is created, but it
   /// might not be honored.
   ///
-  /// The [preferredConstraints] field enforces the minimum and maximum size of
-  /// the window. The [preferredSize] must satisfy the [preferredConstraints].
+  /// The [constraints] field enforces the minimum and maximum size of
+  /// the window. The [size] must satisfy the [constraints].
   /// If the user attempts to resize the window beyond these constraints, the
   /// platform will enforce the constraints according to its own policy. For
   /// example, the platform might clip the content to fit within the resized
@@ -225,8 +225,8 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   factory RegularWindowController({
-    required Size preferredSize,
-    BoxConstraints? preferredConstraints,
+    required Size size,
+    BoxConstraints? constraints,
     String? title,
     RegularWindowControllerDelegate? delegate,
   }) {
@@ -234,15 +234,15 @@ abstract class RegularWindowController extends BaseWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    if (preferredConstraints != null) {
-      assert(preferredConstraints.isSatisfiedBy(preferredSize));
+    if (constraints != null) {
+      assert(constraints.isSatisfiedBy(size));
     }
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createRegularWindowController(
       delegate: delegate ?? RegularWindowControllerDelegate(),
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
       resizable: true,
     );
@@ -258,12 +258,12 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// * If `false`, the window remains fixed to its content size. If the
   ///   content changes size, the window will automatically resize to match,
-  ///   subject to [preferredConstraints]. This is the default.
+  ///   subject to [constraints]. This is the default.
   /// * If `true`, the user can manually resize the window, subject to
-  ///   [preferredConstraints]. After the initial automatic sizing,
+  ///   [constraints]. After the initial automatic sizing,
   ///   the window will no longer track the size of its content.
   ///
-  /// The [preferredConstraints] field enforces the minimum and maximum size of
+  /// The [constraints] field enforces the minimum and maximum size of
   /// the window. If the user attempts to resize the window beyond these
   /// constraints, the platform will enforce the constraints according to its
   /// own policy. For example, the platform might clip the content to fit
@@ -281,7 +281,7 @@ abstract class RegularWindowController extends BaseWindowController {
   @internal
   factory RegularWindowController.sizedToContent({
     bool resizable = false,
-    BoxConstraints? preferredConstraints,
+    BoxConstraints? constraints,
     String? title,
     RegularWindowControllerDelegate? delegate,
   }) {
@@ -294,7 +294,7 @@ abstract class RegularWindowController extends BaseWindowController {
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createRegularWindowController(
       delegate: delegate ?? RegularWindowControllerDelegate(),
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       resizable: resizable,
       title: title,
     );
@@ -507,8 +507,8 @@ mixin class DialogWindowControllerDelegate {
 ///   runWidget(
 ///     RegularWindow(
 ///       controller: RegularWindowController(
-///         preferredSize: const Size(800, 600),
-///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         size: const Size(800, 600),
+///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
 ///       child: const MyApp()
@@ -524,7 +524,7 @@ mixin class DialogWindowControllerDelegate {
 ///     return MaterialApp(
 ///       home: DialogWindow(
 ///         controller: DialogWindowController(
-///           preferredSize: const Size(400, 300),
+///           size: const Size(400, 300),
 ///           parent: WindowScope.of(context),
 ///           title: 'Example Dialog'
 ///         ),
@@ -544,7 +544,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// Creates a [DialogWindowController] with a specific size.
   ///
   /// Upon construction, the window is created by the platform with
-  /// the given [preferredSize].
+  /// the given [size].
   ///
   /// {@macro flutter.widgets.windowing.sizedConstructor}
   ///
@@ -566,8 +566,8 @@ abstract class DialogWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   factory DialogWindowController({
-    required Size preferredSize,
-    BoxConstraints? preferredConstraints,
+    required Size size,
+    BoxConstraints? constraints,
     BaseWindowController? parent,
     String? title,
     DialogWindowControllerDelegate? delegate,
@@ -578,15 +578,15 @@ abstract class DialogWindowController extends BaseWindowController {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    if (preferredConstraints != null) {
-      assert(preferredConstraints.isSatisfiedBy(preferredSize));
+    if (constraints != null) {
+      assert(constraints.isSatisfiedBy(size));
     }
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createDialogWindowController(
       delegate: delegate ?? DialogWindowControllerDelegate(),
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
       parent: parent,
       resizable: true,
@@ -607,7 +607,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   factory DialogWindowController.sizedToContent({
     bool resizable = false,
-    BoxConstraints? preferredConstraints,
+    BoxConstraints? constraints,
     BaseWindowController? parent,
     String? title,
     DialogWindowControllerDelegate? delegate,
@@ -620,7 +620,7 @@ abstract class DialogWindowController extends BaseWindowController {
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createDialogWindowController(
       delegate: delegate ?? DialogWindowControllerDelegate(),
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       resizable: resizable,
       title: title,
       parent: parent,
@@ -789,7 +789,7 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// The [positioner] argument specifies how the tooltip should be positioned
   /// relative to the [anchorRect].
   ///
-  /// The [preferredConstraints] are the constraints placed upon the size
+  /// The [constraints] are the constraints placed upon the size
   /// of the window.
   ///
   /// {@macro flutter.widgets.windowing.constraints}
@@ -803,7 +803,7 @@ abstract class TooltipWindowController extends BaseWindowController {
     required BaseWindowController parent,
     required Rect anchorRect,
     required WindowPositioner positioner,
-    BoxConstraints preferredConstraints = const BoxConstraints(),
+    BoxConstraints constraints = const BoxConstraints(),
     TooltipWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
@@ -814,7 +814,7 @@ abstract class TooltipWindowController extends BaseWindowController {
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     final TooltipWindowController controller = owner.createTooltipWindowController(
       parent: parent,
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       delegate: delegate ?? TooltipWindowControllerDelegate(),
       anchorRect: anchorRect,
       positioner: positioner,
@@ -942,7 +942,7 @@ abstract class PopupWindowController extends BaseWindowController {
     required BaseWindowController parent,
     required Rect anchorRect,
     required WindowPositioner positioner,
-    BoxConstraints? preferredConstraints,
+    BoxConstraints? constraints,
     PopupWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
@@ -953,7 +953,7 @@ abstract class PopupWindowController extends BaseWindowController {
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createPopupWindowController(
       parent: parent,
-      preferredConstraints: preferredConstraints ?? const BoxConstraints(),
+      constraints: constraints ?? const BoxConstraints(),
       delegate: delegate ?? PopupWindowControllerDelegate(),
       anchorRect: anchorRect,
       positioner: positioner,
@@ -1149,7 +1149,7 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// Creates a [SatelliteWindowController] with the provided properties.
   ///
   /// Upon construction, the window is created by the platform with
-  /// the given [preferredSize].
+  /// the given [size].
   ///
   /// {@template flutter.widgets.windowing.satelliteConstructorCommon}
   /// The [parent] argument specifies the parent window of this satellite.
@@ -1181,8 +1181,8 @@ abstract class SatelliteWindowController extends BaseWindowController {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
     SatelliteWindowControllerDelegate? delegate,
   }) {
@@ -1190,8 +1190,8 @@ abstract class SatelliteWindowController extends BaseWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    if (preferredSize != null && preferredConstraints != null) {
-      assert(preferredConstraints.isSatisfiedBy(preferredSize));
+    if (size != null && constraints != null) {
+      assert(constraints.isSatisfiedBy(size));
     }
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
@@ -1200,8 +1200,8 @@ abstract class SatelliteWindowController extends BaseWindowController {
       parent: parent,
       initialAnchorRect: initialAnchorRect,
       initialPositioner: initialPositioner,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
       resizable: true,
     );
@@ -1224,7 +1224,7 @@ abstract class SatelliteWindowController extends BaseWindowController {
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
     bool resizable = false,
-    BoxConstraints? preferredConstraints,
+    BoxConstraints? constraints,
     String? title,
     SatelliteWindowControllerDelegate? delegate,
   }) {
@@ -1239,7 +1239,7 @@ abstract class SatelliteWindowController extends BaseWindowController {
       parent: parent,
       initialAnchorRect: initialAnchorRect,
       initialPositioner: initialPositioner,
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       resizable: resizable,
       title: title,
     );
@@ -1350,8 +1350,8 @@ abstract class WindowingOwner {
   @internal
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   });
@@ -1366,8 +1366,8 @@ abstract class WindowingOwner {
   @internal
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     BaseWindowController? parent,
     String? title,
@@ -1383,7 +1383,7 @@ abstract class WindowingOwner {
   @internal
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1399,7 +1399,7 @@ abstract class WindowingOwner {
   @internal
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1418,8 +1418,8 @@ abstract class WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   });
@@ -1451,8 +1451,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   @override
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     bool resizable = true,
     String? title,
   }) {
@@ -1462,8 +1462,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     bool resizable = true,
     BaseWindowController? parent,
     String? title,
@@ -1474,7 +1474,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1485,7 +1485,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1499,8 +1499,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     bool resizable = true,
     String? title,
   }) {
@@ -1535,8 +1535,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 ///   runWidget(
 ///     RegularWindow(
 ///       controller: RegularWindowController(
-///         preferredSize: const Size(800, 600),
-///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         size: const Size(800, 600),
+///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
 ///       child: MaterialApp(home: Container()),
@@ -1618,8 +1618,8 @@ class RegularWindow extends StatelessWidget {
 ///   runWidget(
 ///     RegularWindow(
 ///       controller: RegularWindowController(
-///         preferredSize: const Size(800, 600),
-///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         size: const Size(800, 600),
+///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
 ///       child: const MyApp()
@@ -1635,7 +1635,7 @@ class RegularWindow extends StatelessWidget {
 ///     return MaterialApp(
 ///       home: DialogWindow(
 ///         controller: DialogWindowController(
-///           preferredSize: const Size(400, 300),
+///           size: const Size(400, 300),
 ///           parent: WindowScope.of(context),
 ///           title: 'Example Dialog'
 ///         ),

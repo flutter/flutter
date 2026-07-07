@@ -38,7 +38,7 @@ struct _FlCompositorOpenGL {
   // Last rendered frame.
   FlFramebuffer* framebuffer;
 
-  // Last rendered frame pixels (only set if shareable is TRUE).
+  // Last rendered frame pixels (only set if shareable is FALSE).
   uint8_t* pixels;
 
   // Size of the allocated pixel buffer.
@@ -356,8 +356,6 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
       }
     }
   }
-
-  self->had_first_frame = true;
 
   // FIXME(robert-ancell): The vertex array is the same for all views, but
   // cannot be shared in OpenGL. Find a way to not generate this every time.
