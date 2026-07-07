@@ -679,13 +679,13 @@ dependencies {
         // Newer AGP version supports max gradle version.
         GradleAgpTestData(
           true,
-          agpVersion: '9.1',
+          agpVersion: '9.2',
           gradleVersion: maxKnownAndSupportedGradleVersion,
         ),
         // Newer AGP version does not even meet current gradle version requirements.
-        GradleAgpTestData(false, agpVersion: '9.1', gradleVersion: '7.3'),
+        GradleAgpTestData(false, agpVersion: '9.2', gradleVersion: '7.3'),
         // Newer AGP version requires newer gradle version.
-        GradleAgpTestData(true, agpVersion: '9.1', gradleVersion: '9.1'),
+        GradleAgpTestData(true, agpVersion: '9.2', gradleVersion: '9.3.1'),
 
         // Template versions of Gradle/AGP.
         GradleAgpTestData(
@@ -1498,6 +1498,7 @@ allprojects {
       expect(getGradleVersionFor('8.12'), '8.13');
       expect(getGradleVersionFor('8.13'), '8.13');
       expect(getGradleVersionFor('9.0.1'), '9.1.0');
+      expect(getGradleVersionFor('9.1.0'), '9.3.1');
     });
 
     testWithoutContext('throws on unsupported versions', () {
@@ -1910,7 +1911,7 @@ allprojects {
     });
 
     testWithoutContext('getCompatibleKgpRangeForGradle', () {
-      expect(getCompatibleKgpRangeForGradle('8.11'), '>= 2.1.20 and <= 2.3.29');
+      expect(getCompatibleKgpRangeForGradle('8.11'), '>= 2.1.20 and <= 2.4.29');
       expect(getCompatibleKgpRangeForGradle('8.4'), '>= 2.0 and <= 2.3.29');
       expect(getCompatibleKgpRangeForGradle('4.0'), isNull);
       expect(getCompatibleKgpRangeForGradle('10.0'), isNull);
@@ -1923,8 +1924,8 @@ allprojects {
     });
 
     testWithoutContext('getCompatibleKgpRangeForAgp', () {
-      expect(getCompatibleKgpRangeForAgp('8.7.2'), '>= 2.1.0 and <= 2.3.29');
-      expect(getCompatibleKgpRangeForAgp('8.5'), '>= 2.0.20 and <= 2.3.29');
+      expect(getCompatibleKgpRangeForAgp('8.7.2'), '>= 2.1.0 and <= 2.4.29');
+      expect(getCompatibleKgpRangeForAgp('8.5'), '>= 2.0.20 and <= 2.4.29');
       expect(getCompatibleKgpRangeForAgp('3.0.0'), isNull);
     });
   });
