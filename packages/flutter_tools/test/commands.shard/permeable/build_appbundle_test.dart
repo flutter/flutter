@@ -4,8 +4,8 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show templateAndroidGradlePluginVersion;
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -69,7 +69,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -148,7 +148,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -176,7 +176,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         ProcessInfo: () => processInfo,
       },
@@ -240,7 +240,7 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          AndroidBuilder: () => FakeAndroidBuilder(),
+          AndroidGradleBuilder: () => FakeAndroidBuilder(),
           Analytics: () => fakeAnalytics,
           ProcessInfo: () => processInfo,
         },
@@ -278,7 +278,7 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          AndroidBuilder: () => FakeAndroidBuilder(),
+          AndroidGradleBuilder: () => FakeAndroidBuilder(),
           Analytics: () => fakeAnalytics,
           ProcessInfo: () => processInfo,
         },
@@ -316,7 +316,7 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          AndroidBuilder: () => FakeAndroidBuilder(),
+          AndroidGradleBuilder: () => FakeAndroidBuilder(),
           Analytics: () => fakeAnalytics,
           ProcessInfo: () => processInfo,
         },
@@ -361,7 +361,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
+        AndroidGradleBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         ProcessInfo: () => processInfo,
       },

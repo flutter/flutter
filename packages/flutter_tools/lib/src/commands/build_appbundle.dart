@@ -4,9 +4,9 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
+import '../android/gradle.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_builder.dart';
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -90,7 +90,7 @@ void main() {
       builder.variants = <String>['debug', 'release'];
       await runner.run(<String>['analyze', '--android', '--list-build-variants', tempDir.path]);
       expect(logger.statusText, contains('["debug","release"]'));
-    }, overrides: <Type, Generator>{AndroidBuilder: () => builder});
+    }, overrides: <Type, Generator>{AndroidGradleBuilder: () => builder});
 
     testUsingContext('throw if provide multiple path', () async {
       final Directory anotherTempDir = fileSystem.systemTempDirectory.createTempSync('another');
@@ -123,7 +123,7 @@ void main() {
       ]);
       expect(builder.outputVariant, buildVariant);
       expect(logger.statusText, contains(builder.outputPath));
-    }, overrides: <Type, Generator>{AndroidBuilder: () => builder});
+    }, overrides: <Type, Generator>{AndroidGradleBuilder: () => builder});
 
     testUsingContext('output app link settings throws if no build variant', () async {
       await expectLater(
@@ -140,7 +140,7 @@ void main() {
   });
 }
 
-class FakeAndroidBuilder extends Fake implements AndroidBuilder {
+class FakeAndroidBuilder extends Fake implements AndroidGradleBuilder {
   List<String> variants = const <String>[];
   String? outputVariant;
   final outputPath = '/';
