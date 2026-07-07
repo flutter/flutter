@@ -1919,6 +1919,15 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
 
+    if (globals.os.hostPlatform == .darwin_x64 &&
+        globals.persistentToolState!.shouldShowIntelMacWarning) {
+      globals.logger.printWarning(
+        'Flutter is deprecating support for Intel-based Macs. '
+        'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+      );
+      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+    }
+
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.
       _targetDevices.startExtendedWirelessDeviceDiscovery(
