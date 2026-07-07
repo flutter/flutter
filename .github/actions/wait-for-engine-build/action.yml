@@ -1,0 +1,67 @@
+name: 'Wait for Engine Build'
+description: 'Wait for an engine build and redirect engine.version if engine files changed'
+inputs:
+  github-token:
+    description: 'GitHub token'
+    required: true
+  check-name:
+    description: 'The name of the check to wait on'
+    required: false
+    default: 'Linux linux_host_engine'
+  check-regexp:
+    description: 'Filter checks using regex pattern'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Check Engine Changes
+      id: check_engine
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+        PUSH_BEFORE_SHA: ${{ github.event.before }}
+      run: |
+        # 1. Determine local base tracking SHA
+        if [ "$EVENT_NAME" = "pull_request" ]; then
+          BASE_REF="$PR_BASE_SHA"
+        elif [ "$EVENT_NAME" = "merge_group" ]; then
+          BASE_REF="$MERGE_GROUP_BASE_SHA"
+        elif [ "$EVENT_NAME" = "push" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+          BASE_REF="$PUSH_BEFORE_SHA"
+        else
+          BASE_REF="origin/master"
+        fi
+
+        echo "Comparing against base SHA: $BASE_REF"
+
+        # 2. Get the changed files using the helper script
+        CHANGED_FILES=$(.github/scripts/git_files_changed.sh "$BASE_REF")
+        echo "Changed files in this branch:"
+        echo "$CHANGED_FILES"
+
+        # 3. Check if any file matches engine pattern using the helper script:
+        if [ "$(printf '%s\n' "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
+          echo "Engine file changed - forced to wait for check-name: '${{ inputs.check-name }}', check-regexp: '${{ inputs.check-regexp }}'"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    # Note: Use the Cocoon wait-for-tests action to poll the Cocoon API.
+    - name: Wait for test check-in
+      if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
+      uses: flutter/cocoon/packages/wait_for_tests@c82f779e201b2d22f43b531268cfbd2ce4fbd4ab
+      with:
+        sha: ${{ github.event.pull_request.head.sha || github.sha }}
+        repo: ${{ github.repository }}
+        required-tests: ${{ inputs.check-name }}
+
+    - name: Redirect engine.version
+      if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV
+        echo "FLUTTER_PREBUILT_ENGINE_VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
