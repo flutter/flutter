@@ -253,7 +253,7 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
       <String, String>{
         'input': '015d172c98400a03       no permissions',
         'expectedId': '015d172c98400a03',
-        'expectedStatus': 'success',
+        'expectedStatus': 'no permissions',
       },
       <String, String>{
         'input': '015d172c98400a03       bootloader',
@@ -375,6 +375,12 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
           expect(
             diagnostics.first,
             contains('is not authorized'),
+            reason: 'Failed diagnostics for input: $input',
+          );
+        } else if (expectedStatus == 'no permissions') {
+          expect(
+            diagnostics.first,
+            contains('has no permissions'),
             reason: 'Failed diagnostics for input: $input',
           );
         }
