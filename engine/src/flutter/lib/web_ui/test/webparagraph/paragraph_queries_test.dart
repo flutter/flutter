@@ -123,6 +123,27 @@ Future<void> testMain() async {
     );
   });
 
+  test('getLineBoundary correctly handles text with soft line break at the end', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello world';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 50));
+
+    expect(paragraph.numberOfLines, 2);
+    
+    // Line 1: "Hello "
+    final ui.TextRange line1Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 0));
+    expect(line1Boundary.start, 0);
+    expect(line1Boundary.end, 6); // Should not include the newline
+
+    // Line 2: "World"
+    final ui.TextRange line2Boundary = paragraph.getLineBoundary(const ui.TextPosition(offset: 6));
+    expect(line2Boundary.start, 6);
+    expect(line2Boundary.end, 11); // Should not include the newline
+  });
+
   test('getLineBoundary correctly handles text with hard line break at the end', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
     const text = 'Hello\nWorld\n';

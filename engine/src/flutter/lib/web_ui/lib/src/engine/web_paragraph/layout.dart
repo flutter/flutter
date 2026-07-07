@@ -850,10 +850,24 @@ class TextLayout {
 
   ui.TextRange getLineBoundary(int codepointPosition) {
     for (final TextLine line in lines) {
-      if (line.allLineTextRange.start <= codepointPosition &&
-          line.hardLineBreakStart >= codepointPosition) {
-        return ui.TextRange(start: line.allLineTextRange.start, end: line.hardLineBreakStart);
+      if (line.allLineTextRange.start > codepointPosition) {
+        // We checked the line that starts after the codepoint position, but it didn't
+        break;
+      } else if (line.hardLineBreak) {
+        // The hard line break is part of the line.
+        // We only have the start position of the hard line break
+        // so we check for ">=" instead of ">" to include the hard line break in the range
+        if (line.hardLineBreakStart >= codepointPosition) {
+          return ui.TextRange(start: line.allLineTextRange.start, end: line.hardLineBreakStart);
+        }
+      } else {
+        // The line has no hard line break, so we can use the end of the line
+        // as the end of the range including hanging whitespaces
+        if (line.allLineTextRange.end > codepointPosition) {
+          return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
+        }
       }
+      // The codepoint position is after the end of the line, so we continue to the next line
     }
     return ui.TextRange.empty;
   }
