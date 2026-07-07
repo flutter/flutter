@@ -565,6 +565,60 @@ void main() {
         expect(eventsA, <String>['didPush', 'didPushNext']);
       },
     );
+
+    testWidgets(
+      'didPushNext is NOT called on newly pushed route when pushed simultaneously with a non-R route',
+      (WidgetTester tester) async {
+        final observer = RouteObserver<PageRoute<dynamic>>();
+        final eventsA = <String>[];
+
+        await tester.pumpWidget(
+          WidgetsApp(
+            navigatorObservers: <NavigatorObserver>[observer],
+            color: const Color(0xFFFFFFFF),
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) => const SizedBox(),
+              );
+            },
+          ),
+        );
+
+        final BuildContext context = tester.element(find.byType(SizedBox));
+        Navigator.of(context)
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+            ),
+          )
+          ..push(
+            RawDialogRoute<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => const Text('Route B', textDirection: TextDirection.ltr),
+            ),
+          );
+
+        await tester.pumpAndSettle();
+
+        expect(eventsA, <String>[
+          'didPush',
+        ]); // didPushNext should NOT be called because RawDialogRoute is not a PageRoute
+      },
+    );
   });
 
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (
