@@ -122,8 +122,8 @@ base class ExtensionTemplateManager extends core.TemplateService {
               },
             )
             .timeout(const Duration(seconds: 5));
-        if (result case final Map<dynamic, dynamic> resultMap) {
-          return resultMap.cast<String, Object?>();
+        if (result case final Map<String, Object?> resultMap) {
+          return resultMap;
         }
       } on Object catch (e) {
         _logger.printError('Failed to generate template parameters from extension: $e');

@@ -74,8 +74,8 @@ base class ExtensionBuildTargetManager extends core.BuildService {
     final targets = <core.Target>[];
     if (rpcResult case final List<Object?> resultList) {
       for (final item in resultList) {
-        if (item case final Map<dynamic, dynamic> itemMap) {
-          targets.add(core.ExtensionBuildTarget.fromJson(itemMap.cast<String, Object?>()));
+        if (item case final Map<String, Object?> itemMap) {
+          targets.add(core.ExtensionBuildTarget.fromJson(itemMap));
         }
       }
     }
@@ -119,8 +119,7 @@ base class ExtensionBuildTargetManager extends core.BuildService {
               },
             )
             .timeout(const Duration(seconds: 60));
-        if (result case final Map<dynamic, dynamic> rawResultMap) {
-          final Map<String, Object?> resultMap = rawResultMap.cast<String, Object?>();
+        if (result case final Map<String, Object?> resultMap) {
           if (resultMap case {'success': true}) {
             return resultMap;
           }

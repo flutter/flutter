@@ -104,7 +104,7 @@ class ValidationMessage {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'type': type.name,
-    'contextUrl': contextUrl,
+    'contextUrl': ?contextUrl,
     'message': message,
     'piiStrippedMessage': piiStrippedMessage,
   };
@@ -112,8 +112,7 @@ class ValidationMessage {
   static List<ValidationMessage> listFromJson(Object? rpcResult) => <ValidationMessage>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<dynamic, dynamic> m)
-          ValidationMessage.fromJson(m.cast<String, Object?>()),
+        if (item case final Map<String, Object?> m) ValidationMessage.fromJson(m),
   ];
 }
 
@@ -144,14 +143,13 @@ class ValidationResult {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'type': type.name,
-    'statusInfo': statusInfo,
+    'statusInfo': ?statusInfo,
     'messages': messages.map((ValidationMessage m) => m.toMap()).toList(),
   };
 
   static List<ValidationResult> listFromJson(Object? rpcResult) => <ValidationResult>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<dynamic, dynamic> m)
-          ValidationResult.fromJson(m.cast<String, Object?>()),
+        if (item case final Map<String, Object?> m) ValidationResult.fromJson(m),
   ];
 }

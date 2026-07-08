@@ -99,14 +99,13 @@ final class OptionValidationResult {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'success': success,
-    if (failureReason case final failureReason?) 'failureReason': failureReason,
+    'failureReason': ?failureReason,
   };
 
   static List<OptionValidationResult> listFromJson(Object? rpcResult) => <OptionValidationResult>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<dynamic, dynamic> m)
-          OptionValidationResult.fromJson(m.cast<String, Object?>()),
+        if (item case final Map<String, Object?> m) OptionValidationResult.fromJson(m),
   ];
 }
 
@@ -130,8 +129,7 @@ final class ExtensionConfigurationOption extends ConfigurationOption {
   static List<ExtensionConfigurationOption> listFromJson(Object? rpcResult) => [
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<dynamic, dynamic> m)
-          ExtensionConfigurationOption.fromJson(m.cast<String, Object?>()),
+        if (item case final Map<String, Object?> m) ExtensionConfigurationOption.fromJson(m),
   ];
 
   @override

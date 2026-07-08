@@ -62,9 +62,8 @@ abstract base class TemplateService extends ToolExtensionService {
   Future<Map<String, Object?>> _generateTemplateParametersRpc(Map<String, Object?> params) async {
     if (params case {
       'templateName': final String templateName,
-      'toolParameters': final Map<dynamic, dynamic> rawParameters,
+      'toolParameters': final Map<String, Object?> toolParameters,
     }) {
-      final Map<String, Object?> toolParameters = rawParameters.cast<String, Object?>();
       for (final ProjectTemplate template in projectTemplates) {
         if (template.name == templateName) {
           return template.generateTemplateParameters(toolParameters);
@@ -156,7 +155,6 @@ final class ExtensionProjectTemplate extends ProjectTemplate {
       <ExtensionProjectTemplate>[
         if (rpcResult case final List<Object?> l)
           for (final item in l)
-            if (item case final Map<dynamic, dynamic> m)
-              ExtensionProjectTemplate.fromJson(m.cast<String, Object?>()),
+            if (item case final Map<String, Object?> m) ExtensionProjectTemplate.fromJson(m),
       ];
 }

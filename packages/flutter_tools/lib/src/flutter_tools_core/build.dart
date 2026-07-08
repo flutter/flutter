@@ -49,14 +49,11 @@ abstract base class BuildService extends ToolExtensionService {
             'dependencies': target.dependencies,
             'inputs': target.inputs,
             'outputs': target.outputs,
-            if (target.cliSubcommand case final cliSubcommand?) 'cliSubcommand': cliSubcommand,
-            if (target.cliDescription case final cliDescription?) 'cliDescription': cliDescription,
-            if (target.targetPlatformDirectory case final targetPlatformDirectory?)
-              'targetPlatformDirectory': targetPlatformDirectory,
-            if (target.targetDeviceDirectory case final targetDeviceDirectory?)
-              'targetDeviceDirectory': targetDeviceDirectory,
-            if (target.pluginPlatformKey case final pluginPlatformKey?)
-              'pluginPlatformKey': pluginPlatformKey,
+            'cliSubcommand': ?target.cliSubcommand,
+            'cliDescription': ?target.cliDescription,
+            'targetPlatformDirectory': ?target.targetPlatformDirectory,
+            'targetDeviceDirectory': ?target.targetDeviceDirectory,
+            'pluginPlatformKey': ?target.pluginPlatformKey,
           },
         )
         .toList();
@@ -65,11 +62,11 @@ abstract base class BuildService extends ToolExtensionService {
   Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
     if (params case {
       'targetName': final String targetName,
-      'environment': final Map<dynamic, dynamic> rawEnv,
+      'environment': final Map<String, Object?> rawEnv,
     }) {
       final BuildEnvironment env;
       try {
-        env = BuildEnvironment.fromJson(rawEnv.cast<String, Object?>());
+        env = BuildEnvironment.fromJson(rawEnv);
       } on Object catch (e, stackTrace) {
         return <String, Object?>{
           'success': false,
@@ -222,8 +219,7 @@ final class ExtensionBuildTarget extends Target {
   static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) => <ExtensionBuildTarget>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<dynamic, dynamic> m)
-          ExtensionBuildTarget.fromJson(m.cast<String, Object?>()),
+        if (item case final Map<String, Object?> m) ExtensionBuildTarget.fromJson(m),
   ];
 }
 
@@ -245,16 +241,14 @@ class BuildEnvironment {
   factory BuildEnvironment.fromJson(Map<String, Object?> json) {
     return BuildEnvironment(
       cacheDir: Uri.parse(json['cacheDir']! as String),
-      defines: (json['defines']! as Map<dynamic, dynamic>).cast<String, String>(),
+      defines: (json['defines']! as Map<Object?, Object?>).cast<String, String>(),
       flutterAssetsDir: Uri.parse(json['flutterAssetsDir']! as String),
       outputDirectory: Uri.parse(json['outputDirectory']! as String),
       projectRoot: Uri.parse(json['projectRoot']! as String),
       plugins:
           (json['plugins'] as List<Object?>?)
               ?.map(
-                (Object? item) => ExtensionPlugin.fromJson(
-                  (item! as Map<dynamic, dynamic>).cast<String, Object?>(),
-                ),
+                (Object? item) => ExtensionPlugin.fromJson(item! as Map<String, Object?>),
               )
               .toList() ??
           const <ExtensionPlugin>[],
@@ -306,9 +300,7 @@ class ExtensionPlugin {
   /// Creates an [ExtensionPlugin] from a JSON map.
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
     return ExtensionPlugin(
-      configuration:
-          (json['configuration'] as Map<dynamic, dynamic>?)?.cast<String, Object?>() ??
-          const <String, Object?>{},
+      configuration: (json['configuration'] as Map<String, Object?>?) ?? const <String, Object?>{},
       name: json['name']! as String,
       path: json['path']! as String,
     );
@@ -372,8 +364,8 @@ class BuildResult {
   /// Convert to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     'success': success,
-    if (errorMessage case final errorMessage?) 'errorMessage': errorMessage,
-    if (executablePath case final executablePath?) 'executablePath': executablePath,
-    if (stackTrace case final stackTrace?) 'stackTrace': stackTrace,
+    'errorMessage': ?errorMessage,
+    'executablePath': ?executablePath,
+    'stackTrace': ?stackTrace,
   };
 }

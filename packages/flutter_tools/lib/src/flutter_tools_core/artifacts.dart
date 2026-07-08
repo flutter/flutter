@@ -101,7 +101,7 @@ class ArtifactDependency {
     return ArtifactDependency(
       hostPlatform: json['hostPlatform']! as String,
       name: json['name']! as String,
-      sha256Checksums: (json['sha256Checksums']! as Map<dynamic, dynamic>).cast<String, String>(),
+      sha256Checksums: (json['sha256Checksums']! as Map<Object?, Object?>).cast<String, String>(),
       targetArchitecture: json['targetArchitecture']! as String,
       targetPlatform: json['targetPlatform']! as String,
     );
@@ -135,7 +135,6 @@ class ArtifactDependency {
   static List<ArtifactDependency> listFromJson(Object? rpcResult) => <ArtifactDependency>[
     if (rpcResult case final List<Object?> l)
       for (final item in l)
-        if (item case final Map<dynamic, dynamic> m)
-          ArtifactDependency.fromJson(m.cast<String, Object?>()),
+        if (item case final Map<String, Object?> m) ArtifactDependency.fromJson(m),
   ];
 }

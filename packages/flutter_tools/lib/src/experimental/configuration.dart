@@ -106,8 +106,8 @@ base class ExtensionConfigurationManager extends core.ConfigurationService {
               params: <String, Object?>{'option': option, 'value': value},
             )
             .timeout(const Duration(seconds: 5));
-        if (result case final Map<dynamic, dynamic> resultMap) {
-          return core.OptionValidationResult.fromJson(resultMap.cast<String, Object?>());
+        if (result case final Map<String, Object?> resultMap) {
+          return core.OptionValidationResult.fromJson(resultMap);
         }
       } on Object catch (e) {
         return core.OptionValidationResult.failed('Validation extension call failed: $e');

@@ -221,8 +221,9 @@ class Plugin {
     required bool isDevDependency,
   }) {
     final platforms = <String, PluginPlatform>{};
-    final pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
-    if (pluginClass != null) {
+    if (pluginYaml case final Map<String, Object?> pluginMap) {
+      final pluginClass = pluginMap['pluginClass'] as String?;
+      if (pluginClass != null) {
       final androidPackage = pluginYaml['androidPackage'] as String?;
       if (androidPackage != null) {
         platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
@@ -241,6 +242,7 @@ class Plugin {
         pluginClass: pluginClass,
       );
     }
+  }
     return Plugin(
       name: name,
       path: path,

@@ -173,8 +173,7 @@ base class ExtensionDeviceManager extends core.DeviceService {
             .timeout(const Duration(seconds: 5));
         if (devicesResult case final List<Object?> resultList) {
           for (final item in resultList) {
-            if (item case final Map<dynamic, dynamic> itemMap) {
-              final Map<String, Object?> deviceData = itemMap.cast<String, Object?>();
+            if (item case final Map<String, Object?> deviceData) {
               final interfaceName = deviceData['connectionInterface'] as String?;
               DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
               if (interfaceName != null) {
