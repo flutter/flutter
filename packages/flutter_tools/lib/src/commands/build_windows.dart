@@ -25,6 +25,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
+    usesFlavorOption();
     argParser.addFlag(
       'config-only',
       help: 'Update the project configuration without performing a build.',
@@ -67,7 +68,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     final defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64)
         ? 'windows-arm64'
         : 'windows-x64';
-    final TargetPlatform targetPlatform = getTargetPlatformForName(defaultTargetPlatform);
+    final targetPlatform = TargetPlatform.fromName(defaultTargetPlatform);
 
     await buildWindows(
       project.windows,

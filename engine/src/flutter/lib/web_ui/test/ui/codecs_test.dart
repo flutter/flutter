@@ -423,9 +423,12 @@ Future<void> testMain() async {
       createTestCodecs().forEach(runCodecTest);
     });
 
-    if (browserSupportsImageDecoder) {
+    if (browserSupportsImageDecoder && !browserSupportsCanvaskitChromium) {
       // For the sake of completeness, test codec fallback logic on browsers that support
       // `ImageDecoder`.
+      //
+      // We skip this on Canvaskit Chromium because there is no fallback; the
+      // `ImageDecoder`-based codec is always used.
       group('Codecs (browserSupportsImageDecoder=false)', () {
         setUpAll(() {
           browserSupportsImageDecoder = false;
