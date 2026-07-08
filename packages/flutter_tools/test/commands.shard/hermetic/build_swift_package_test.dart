@@ -3785,6 +3785,9 @@ class FakeAnalytics extends Fake implements Analytics {}
 
 class FakeXcode extends Fake implements Xcode {
   @override
+  bool get isInstalled => true;
+
+  @override
   Version get currentVersion => Version(15, 0, 0);
 
   @override
