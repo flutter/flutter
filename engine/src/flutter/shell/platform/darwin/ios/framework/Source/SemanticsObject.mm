@@ -991,12 +991,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (id)accessibilityContainer {
-  if (!_bridge) {
+  if (!_bridge || [self.semanticsObject uid] == kRootNodeId) {
     return nil;
   }
-  return ([self.semanticsObject uid] == kRootNodeId)
-             ? _bridge->accessibilityContainerView()
-             : self.semanticsObject.parent.accessibilityContainer;
+  return self.semanticsObject.parent.accessibilityContainer;
 }
 
 #pragma mark - UIAccessibilityAction overrides

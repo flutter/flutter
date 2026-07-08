@@ -23,8 +23,8 @@ class AccessibilityBridgeIos {
   virtual UIView* view() const = 0;
   // Returns the current Flutter view without forcing the owner view controller to load its view.
   virtual UIView* viewIfLoaded() const = 0;
-  // Returns a nonnull accessibility container without forcing the owner view controller to load
-  // its view.
+  // Returns the current accessibility container without forcing the owner view controller to load
+  // its view. Returns nil if the owner view is not loaded.
   virtual UIView* accessibilityContainerView() const = 0;
   virtual bool isVoiceOverRunning() const = 0;
   virtual UIView<UITextInput>* textInputView() = 0;
