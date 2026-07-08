@@ -559,13 +559,12 @@ class TextLayout {
             bottom = line.advance.bottom;
             assert((line.advance.height - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.strut:
-            final double baseline = line.fontBoundingBoxAscent;
             final WebStrutStyle? strutStyle = paragraph.paragraphStyle.strutStyle;
-
             if (strutStyle == null) {
               top = line.advance.top;
               bottom = line.advance.bottom;
             } else {
+              final double baseline = line.advance.top + line.fontBoundingBoxAscent;
               top = baseline - strutStyle.strutAscent;
               bottom = baseline + strutStyle.strutDescent;
             }

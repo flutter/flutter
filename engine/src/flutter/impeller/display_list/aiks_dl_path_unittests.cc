@@ -658,6 +658,10 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
 // the antialiasing. The amount of blurring should be the same for both
 // horizontal lines.
 TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is run with the antialias flag.
+  EnsureContextSupportsAntialiasLines();
+
   Scalar scale = 5.0;
   Scalar line_width = 10.f;
   auto callback = [&]() -> sk_sp<DisplayList> {
@@ -710,6 +714,10 @@ TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
 }
 
 TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is run with the antialias flag.
+  EnsureContextSupportsAntialiasLines();
+
   float scale = 5.0f;
   float line_width = 10.f;
   float rotation = 0.f;
@@ -773,6 +781,10 @@ TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
 }
 
 TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is run with the antialias flag.
+  EnsureContextSupportsAntialiasLines();
+
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
