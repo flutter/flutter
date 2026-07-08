@@ -91,8 +91,8 @@ class WindowingOwnerLinux extends WindowingOwner {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @protected
-  GtkWindowRegistrar get registrar => _registrar;
-  final GtkWindowRegistrar _registrar = GtkWindowRegistrar();
+  LinuxWindowRegistrar get registrar => _registrar;
+  final LinuxWindowRegistrar _registrar = LinuxWindowRegistrar();
 
   @internal
   @override
@@ -223,7 +223,7 @@ class WindowingOwnerLinux extends WindowingOwner {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-class GtkWindowRegistrar {
+class LinuxWindowRegistrar {
   final Map<int, _GtkWindow> _windows = <int, _GtkWindow>{};
   final Map<int, _FlView> _views = <int, _FlView>{};
 
