@@ -204,7 +204,7 @@ dependencies:
   web_socket_channel: 3.0.3
   webdriver: 3.1.0
   webkit_inspection_protocol: 1.2.1
-  webview_flutter: 4.14.0
+  webview_flutter: 4.14.1
   webview_flutter_android: 4.13.0
   webview_flutter_platform_interface: 2.15.1
   webview_flutter_wkwebview: 3.26.0
@@ -222,4 +222,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: pk9f1b
+# PUBSPEC CHECKSUM: esomih
