@@ -45,22 +45,24 @@ class MainActivity : FlutterActivity() {
                 JSONMessageCodec.INSTANCE
             )
 
+        val nativeSupportChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
+        nativeSupportChannel.setMethodCallHandler { call, result ->
+            if (call.method == "impeller_backend") {
+                result.success(impellerBackend)
+            } else {
+                result.notImplemented()
+            }
+        }
+
         flutterEngine
             .platformViewsController
             .registry
             .registerViewFactory(
                 "com.example.android_hardware_smoke_test/native_text_view",
-                NativeTextViewFactory()
-            )
-
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
-            .setMethodCallHandler { call, result ->
-                if (call.method == "impeller_backend") {
-                    result.success(impellerBackend)
-                } else {
-                    result.notImplemented()
+                NativeTextViewFactory {
+                    nativeSupportChannel.invokeMethod("onDraw", null)
                 }
-            }
+            )
 
         // Register the native_driver channel. This responds to AndroidNativeDriver's connection ping
         // and property checks, enabling the host-side runner to take compositor-level screenshots via ADB.
