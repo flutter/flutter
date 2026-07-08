@@ -933,18 +933,29 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
+///
+/// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
+/// different flavors can coexist on disk without overwriting each other.
+String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
       : targetPlatform.simpleName;
-  final subDirs = 'linux/$arch';
+  final String subDirs = (flavor != null && flavor.isNotEmpty)
+      ? globals.fs.path.join('linux', arch, flavor)
+      : globals.fs.path.join('linux', arch);
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Windows build output directory.
-String getWindowsBuildDirectory(TargetPlatform targetPlatform) {
+///
+/// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
+/// different flavors can coexist on disk without overwriting each other.
+String getWindowsBuildDirectory(TargetPlatform targetPlatform, [String? flavor]) {
   final String arch = targetPlatform.simpleName;
-  return globals.fs.path.join(getBuildDirectory(), 'windows', arch);
+  final String subDirs = (flavor != null && flavor.isNotEmpty)
+      ? globals.fs.path.join('windows', arch, flavor)
+      : globals.fs.path.join('windows', arch);
+  return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Fuchsia build output directory.

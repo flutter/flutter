@@ -141,7 +141,7 @@ void main() {
             return jsonEncode({'result': false});
           }
           dialogController.value = DialogWindowController(
-            preferredSize: const Size(200, 200),
+            size: const Size(200, 200),
             parent: controller,
             delegate: MyDialogWindowControllerDelegate(
               onDestroyed: () {
@@ -163,7 +163,7 @@ void main() {
     },
   );
   controller = RegularWindowController(
-    preferredSize: const Size(640, 480),
+    size: const Size(640, 480),
     title: 'Integration Test',
     delegate: RegularWindowControllerDelegate(),
   );

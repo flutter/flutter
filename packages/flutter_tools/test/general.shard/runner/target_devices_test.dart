@@ -677,6 +677,31 @@ target-device-5 (wireless) (mobile) • xxx • android • Android 10
             expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
           }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
 
+          testUsingContext('does not prompt if canPrompt is false', () async {
+            deviceManager.androidDiscoverer.deviceList = <Device>[
+              attachedAndroidDevice1,
+              attachedAndroidDevice2,
+            ];
+
+            final List<Device>? devices = await targetDevices.findAllTargetDevices(
+              canPrompt: false,
+            );
+
+            expect(
+              logger.statusText,
+              equals('''
+More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.
+
+target-device-1 (mobile) • xxx • android • Android 10
+target-device-2 (mobile) • xxx • android • Android 10
+'''),
+            );
+            expect(devices, isNull);
+            expect(deviceManager.androidDiscoverer.devicesCalled, 4);
+            expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
+            expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
+          }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
           testUsingContext('including only attached devices', () async {
             deviceManager.androidDiscoverer.deviceList = <Device>[
               attachedAndroidDevice1,
@@ -697,6 +722,27 @@ target-device-2 (mobile) • xxx • android • Android 10
 '''),
             );
             expect(devices, <Device>[attachedAndroidDevice1]);
+            expect(deviceManager.androidDiscoverer.devicesCalled, 2);
+            expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
+            expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
+          }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+          testUsingContext('can select the eleventh attached device', () async {
+            final attachedDevices = List<Device>.generate(
+              11,
+              (int index) =>
+                  FakeDevice(deviceId: 'id-${index + 1}', deviceName: 'target-device-${index + 1}'),
+            );
+            deviceManager.androidDiscoverer.deviceList = attachedDevices;
+            terminal.addInputLine('11');
+
+            final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+            expect(devices, <Device>[attachedDevices[10]]);
+            expect(logger.statusText, contains('[11]: target-device-11 (id-11)'));
+            expect(logger.statusText, contains('Please choose one (or "q" to quit): '));
+            expect(logger.statusText, isNot(contains('Please choose one (or "q" to quit): 11')));
+            expect(terminal.singleCharMode, isFalse);
             expect(deviceManager.androidDiscoverer.devicesCalled, 2);
             expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
             expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
@@ -3296,6 +3342,19 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   List<String>? _nextPrompt;
   late String _nextResult;
+  final List<String> _inputLines = <String>[];
+
+  void addInputLine(String line) {
+    _inputLines.add(line);
+  }
+
+  @override
+  Stream<String> get keystrokes => const Stream<String>.empty();
+
+  @override
+  Future<String> readLine() async {
+    return _inputLines.removeAt(0);
+  }
 
   @override
   Future<String> promptForCharInput(

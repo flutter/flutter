@@ -109,6 +109,21 @@ class GoldenPlaygroundTest
  protected:
   void SetWindowSize(ISize size);
 
+  // See |Playground::PlatformSupportsWideGamutTests|
+  [[nodiscard]] bool PlatformSupportsWideGamutTests() const;
+
+  // See |Playground::EnsureContextIsUnique|
+  // GoldenPlaygroundTest uses context replacement on the fly to support this.
+  void EnsureContextIsUnique() {}
+
+  // See |Playground::EnsureContextSupportsWideGamut|
+  // GoldenPlaygroundTest uses name matching to support this.
+  [[nodiscard]] bool EnsureContextSupportsWideGamut() { return true; }
+
+  // See |Playground::EnsureContextSupportsAntialiasLines|
+  // GoldenPlaygroundTest uses name matching to support this.
+  void EnsureContextSupportsAntialiasLines() {}
+
  private:
 #if FML_OS_MACOSX
   // This must be placed first so that the autorelease pool is not destroyed

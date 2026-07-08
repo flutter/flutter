@@ -3381,6 +3381,37 @@ void main() {
     });
 
     testWidgets(
+      'Group parentNode attaches the group to the given node instead of the enclosing scope.',
+      (WidgetTester tester) async {
+        final parentNode = FocusScopeNode(debugLabel: 'parent');
+        addTearDown(parentNode.dispose);
+        final childNode = FocusNode(debugLabel: 'child');
+        addTearDown(childNode.dispose);
+        final GlobalKey key = GlobalKey();
+
+        await tester.pumpWidget(
+          FocusScope.withExternalFocusNode(
+            focusScopeNode: parentNode,
+            child: FocusScope(
+              // Without parentNode, this group would attach under the enclosing
+              // FocusScope above. parentNode reparents it to the root scope.
+              child: FocusTraversalGroup(
+                parentNode: FocusManager.instance.rootScope,
+                child: Focus(focusNode: childNode, child: SizedBox(key: key)),
+              ),
+            ),
+          ),
+        );
+
+        // The group's node (the parent of childNode) is attached to the root
+        // scope, not to the enclosing parentNode.
+        final FocusNode groupNode = childNode.parent!;
+        expect(groupNode.parent, equals(FocusManager.instance.rootScope));
+        expect(parentNode.descendants, isNot(contains(childNode)));
+      },
+    );
+
+    testWidgets(
       "Descendants of FocusTraversalGroup aren't traversable if descendantsAreTraversable is false.",
       (WidgetTester tester) async {
         final node1 = FocusNode();
