@@ -58,7 +58,6 @@ abstract base class ConfigurationService extends ToolExtensionService {
 /// Extensions implement this class to define custom configuration options
 /// (e.g., enabling experimental features).
 abstract base class ConfigurationOption {
-  /// Create a new [ConfigurationOption].
   const ConfigurationOption();
 
   /// The name of the option.
@@ -100,7 +99,7 @@ final class OptionValidationResult {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'success': success,
-    if (failureReason != null) 'failureReason': failureReason,
+    if (failureReason case final failureReason?) 'failureReason': failureReason,
   };
 
   static List<OptionValidationResult> listFromJson(Object? rpcResult) => <OptionValidationResult>[
@@ -117,7 +116,6 @@ final class OptionValidationResult {
 /// Its [validate] method throws an [UnimplementedError] because validation
 /// must be delegated to the extension isolate via RPC.
 final class ExtensionConfigurationOption extends ConfigurationOption {
-  /// Create a new instance of [ExtensionConfigurationOption].
   ExtensionConfigurationOption({required this.description, required this.name});
 
   /// Parses an option from a JSON extension map representation.

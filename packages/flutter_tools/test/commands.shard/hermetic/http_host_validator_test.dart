@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/flutter_tools_core/diagnostics.dart' show ValidationType;
 import 'package:flutter_tools/src/http_host_validator.dart';
 
 import '../../src/common.dart';

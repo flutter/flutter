@@ -90,8 +90,8 @@ class Response extends Message {
   @override
   Map<String, Object?> toMap() => <String, Object?>{
     ...super.toMap(),
-    if (result != null) 'result': result,
-    if (error != null) 'error': error!.toMap(),
+    if (result case final result?) 'result': result,
+    if (error case final error?) 'error': error.toMap(),
   };
 }
 
@@ -115,7 +115,7 @@ class RpcError {
   Map<String, Object?> toMap() => <String, Object?>{
     'code': code,
     'message': message,
-    if (data != null) 'data': data,
+    if (data case final data?) 'data': data,
   };
 }
 

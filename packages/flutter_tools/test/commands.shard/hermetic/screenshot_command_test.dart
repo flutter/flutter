@@ -147,53 +147,45 @@ void main() {
       testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
     });
 
-    testUsingContext(
-      'should not throw for a single device',
-      () async {
-        final command = ScreenshotCommand(fs: MemoryFileSystem.test());
+    testUsingContext('should not throw for a single device', () async {
+      final command = ScreenshotCommand(fs: MemoryFileSystem.test());
 
-        final deviceUnsupportedForProject = _ScreenshotDevice(
-          id: '123',
-          name: 'Device 1',
-          isSupportedForProject: false,
-        );
+      final deviceUnsupportedForProject = _ScreenshotDevice(
+        id: '123',
+        name: 'Device 1',
+        isSupportedForProject: false,
+      );
 
-        testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
+      testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
 
-        await createTestCommandRunner(command).run(<String>['screenshot']);
-      },
-      overrides: <Type, Generator>{DeviceManager: () => testDeviceManager},
-    );
+      await createTestCommandRunner(command).run(<String>['screenshot']);
+    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
 
-    testUsingContext(
-      'should tool exit for multiple devices',
-      () async {
-        final command = ScreenshotCommand(fs: MemoryFileSystem.test());
+    testUsingContext('should tool exit for multiple devices', () async {
+      final command = ScreenshotCommand(fs: MemoryFileSystem.test());
 
-        final devicesUnsupportedForProject = <_ScreenshotDevice>[
-          _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
-          _ScreenshotDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
-        ];
+      final devicesUnsupportedForProject = <_ScreenshotDevice>[
+        _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
+        _ScreenshotDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
+      ];
 
-        testDeviceManager.devices = devicesUnsupportedForProject;
+      testDeviceManager.devices = devicesUnsupportedForProject;
 
-        await expectLater(
-          () => createTestCommandRunner(command).run(<String>['screenshot']),
-          throwsToolExit(message: 'Must have a connected device for screenshot type device'),
-        );
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['screenshot']),
+        throwsToolExit(message: 'Must have a connected device for screenshot type device'),
+      );
 
-        expect(
-          testLogger.statusText,
-          contains('''
+      expect(
+        testLogger.statusText,
+        contains('''
 More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.
 
 Device 1 (mobile) • 123 • android • 1.2.3
 Device 2 (mobile) • 456 • android • 1.2.3
 '''),
-        );
-      },
-      overrides: <Type, Generator>{DeviceManager: () => testDeviceManager},
-    );
+      );
+    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
   });
 }
 

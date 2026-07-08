@@ -21,6 +21,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../doctor_validator.dart';
+import '../flutter_tools_core/diagnostics.dart' show ValidationMessageType, ValidationType;
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/code_signing.dart';

@@ -4,6 +4,7 @@
 
 import '../base/platform.dart';
 import '../doctor_validator.dart';
+import '../flutter_tools_core/diagnostics.dart' show ValidationType;
 import 'chrome.dart';
 
 /// A validator for Chromium-based browsers.

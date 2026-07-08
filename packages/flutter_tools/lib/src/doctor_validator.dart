@@ -12,7 +12,6 @@ import 'base/terminal.dart';
 // to share them with tool extensions and avoid duplication.
 import 'flutter_tools_core/diagnostics.dart' show ValidationMessageType, ValidationType;
 import 'globals.dart' as globals;
-export 'flutter_tools_core/diagnostics.dart' show ValidationMessageType, ValidationType;
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);

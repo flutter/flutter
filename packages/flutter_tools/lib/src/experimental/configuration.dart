@@ -26,7 +26,6 @@ ExtensionConfigurationManager? get extensionConfigurationManager =>
 /// This manager interacts with active [ToolExtension]s to discover custom
 /// configuration options and validate their values over the extension protocol RPC.
 base class ExtensionConfigurationManager extends core.ConfigurationService {
-  /// Create a new instance of [ExtensionConfigurationManager].
   ExtensionConfigurationManager({
     required ToolExtensionManager extensionManager,
     required Logger logger,

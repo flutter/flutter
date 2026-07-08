@@ -20,7 +20,6 @@ import '../commands/build.dart';
 import '../convert.dart';
 import '../experimental/build_targets.dart';
 import '../experimental/configuration.dart';
-import '../experimental/extension_discovery.dart';
 import '../experimental/templates.dart';
 import '../flutter_tools_core/build.dart' as core_build;
 import '../flutter_tools_core/configuration.dart' as core;
@@ -347,7 +346,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // If the tool extension prototype is enabled and the command is 'create',
     // query the template manager to discover custom templates provided by
     // active tool extensions, and rebuild the parser to register them.
-    if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
+    if (globals.isToolExtensionPrototypeEnabled &&
         (commandName == 'create' || (commandName == 'help' && args.contains('create')))) {
       final ExtensionTemplateManager? templateManager = extensionTemplateManager;
       if (templateManager != null) {
@@ -359,7 +358,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // If the tool extension prototype is enabled and the command is 'build',
     // query the build target manager to discover custom build targets provided
     // by active tool extensions. Register them as CLI subcommands and rebuild the parser.
-    if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
+    if (globals.isToolExtensionPrototypeEnabled &&
         (commandName == 'build' || (commandName == 'help' && args.contains('build')))) {
       final ExtensionBuildTargetManager? buildTargetManager = extensionBuildTargetManager;
       if (buildTargetManager != null) {
@@ -375,7 +374,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // If the tool extension prototype is enabled and the command is 'config',
     // query the configuration manager to discover custom configuration options
     // provided by active tool extensions. Register them as flags on the config command.
-    if (globals.platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true' &&
+    if (globals.isToolExtensionPrototypeEnabled &&
         (commandName == 'config' || commandName == 'configure')) {
       final ExtensionConfigurationManager? configManager = extensionConfigurationManager;
       if (configManager != null) {

@@ -24,7 +24,6 @@ final class LinuxConfigurationService extends ConfigurationService {
 /// This option is exposed as a command-line flag (`--enable-custom-linux-feature`)
 /// when the tool extension prototype is enabled.
 final class LinuxCustomFeatureOption extends ConfigurationOption {
-  /// Create a new instance of [LinuxCustomFeatureOption].
   const LinuxCustomFeatureOption();
 
   @override

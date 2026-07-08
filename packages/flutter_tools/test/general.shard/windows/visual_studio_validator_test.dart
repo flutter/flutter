@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/flutter_tools_core/diagnostics.dart' show ValidationType;
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
 import 'package:test/fake.dart';

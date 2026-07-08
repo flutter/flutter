@@ -2962,13 +2962,15 @@ flutter:
     });
 
     testWithoutContext('parses custom platform plugins', () {
-      final yaml = loadYaml(r'''
+      final yaml =
+          loadYaml(r'''
 platforms:
   foo_platform:
     pluginClass: CustomPlugin
     fileName: custom_plugin.dart
     someCustomKey: customValue
-''') as YamlMap;
+''')
+              as YamlMap;
       final plugin = Plugin.fromYaml(
         'my_custom_plugin',
         '/path/to/plugin',

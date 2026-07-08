@@ -21,7 +21,6 @@ import '../extension_prototypes/linux_extension/extension.dart';
 /// query capabilities of extensions, filter extensions by supported services,
 /// and invoke RPC methods on multiple extensions.
 class ExtensionDiscoveryHelper {
-  /// Create a new instance of [ExtensionDiscoveryHelper].
   ExtensionDiscoveryHelper({
     required Logger logger,
     required Platform platform,

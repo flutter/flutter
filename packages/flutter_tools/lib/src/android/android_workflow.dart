@@ -17,6 +17,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
+import '../flutter_tools_core/diagnostics.dart' show ValidationType;
 import 'android_sdk.dart';
 import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';

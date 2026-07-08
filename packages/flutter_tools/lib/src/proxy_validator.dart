@@ -5,6 +5,7 @@
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'doctor_validator.dart';
+import 'flutter_tools_core/diagnostics.dart' show ValidationType;
 
 /// A validator that displays configured HTTP_PROXY environment variables.
 ///

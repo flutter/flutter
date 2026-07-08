@@ -8,6 +8,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../doctor_validator.dart';
+import '../flutter_tools_core/diagnostics.dart' show ValidationType;
 
 /// Flutter only supports development on Windows host machines version 10 and greater.
 const kUnsupportedVersions = <String>['6', '7', '8'];

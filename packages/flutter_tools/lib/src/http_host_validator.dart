@@ -9,6 +9,7 @@ import 'base/net.dart';
 import 'base/platform.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
+import 'flutter_tools_core/diagnostics.dart' show ValidationType;
 
 /// Common Flutter HTTP hosts.
 const kCloudHost = 'https://storage.googleapis.com/';

@@ -1192,28 +1192,31 @@ void createPluginSymlinks(
   }
   platformPlugins ??= <String, Object?>{};
 
-  if (localFeatureFlags.isWindowsEnabled && project.windows.existsSync()) {
-    _createPlatformPluginSymlinks(
-      project.windows.pluginSymlinkDirectory,
-      platformPlugins[project.windows.pluginConfigKey] as List<Object?>?,
-      force: force,
-    );
+  void createSymlinksFor(CmakeBasedProject cmakeProject, String platformKey) {
+    if (cmakeProject.existsSync()) {
+      _createPlatformPluginSymlinks(
+        cmakeProject.pluginSymlinkDirectory,
+        platformPlugins![platformKey] as List<Object?>?,
+        force: force,
+      );
+    }
   }
-  if (localFeatureFlags.isLinuxEnabled && project.linux.existsSync()) {
-    _createPlatformPluginSymlinks(
-      project.linux.pluginSymlinkDirectory,
-      platformPlugins[project.linux.pluginConfigKey] as List<Object?>?,
-      force: force,
-    );
+
+  if (localFeatureFlags.isWindowsEnabled) {
+    createSymlinksFor(project.windows, project.windows.pluginConfigKey);
   }
-  if (customCMakeProject != null && customPlatformKey != null) {
-    // If a custom CMake project and platform key are provided (e.g. by a tool extension),
-    // create symlinks for that custom platform's plugins.
-    _createPlatformPluginSymlinks(
-      customCMakeProject.pluginSymlinkDirectory,
-      platformPlugins[customPlatformKey] as List<Object?>?,
-      force: force,
-    );
+  if (localFeatureFlags.isLinuxEnabled) {
+    createSymlinksFor(project.linux, project.linux.pluginConfigKey);
+  }
+  if (customCMakeProject != null) {
+    final String? key =
+        customPlatformKey ??
+        (customCMakeProject is FlutterProjectPlatform
+            ? (customCMakeProject as FlutterProjectPlatform).pluginConfigKey
+            : null);
+    if (key != null) {
+      createSymlinksFor(customCMakeProject, key);
+    }
   }
 }
 

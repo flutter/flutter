@@ -680,5 +680,5 @@ class CustomPlatformPlugin extends PluginPlatform {
   final Map<String, Object?> configuration;
 
   @override
-  Map<String, dynamic> toMap() => configuration;
+  Map<String, Object?> toMap() => configuration;
 }

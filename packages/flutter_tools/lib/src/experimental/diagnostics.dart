@@ -105,7 +105,7 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
   Future<host_doctor.ValidationResult> validateImpl() async {
     if (!_discoveryHelper.isPrototypeEnabled) {
       return host_doctor.ValidationResult(
-        host_doctor.ValidationType.notAvailable,
+        core.ValidationType.notAvailable,
         const <host_doctor.ValidationMessage>[
           host_doctor.ValidationMessage('Tool extension prototype is not enabled.'),
         ],
@@ -127,15 +127,15 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
       core.ValidationMessage msg,
     ) {
       return switch (msg.type) {
-        host_doctor.ValidationMessageType.error => host_doctor.ValidationMessage.error(
+        core.ValidationMessageType.error => host_doctor.ValidationMessage.error(
           msg.message,
           piiStrippedMessage: msg.piiStrippedMessage,
         ),
-        host_doctor.ValidationMessageType.hint => host_doctor.ValidationMessage.hint(
+        core.ValidationMessageType.hint => host_doctor.ValidationMessage.hint(
           msg.message,
           piiStrippedMessage: msg.piiStrippedMessage,
         ),
-        host_doctor.ValidationMessageType.information => host_doctor.ValidationMessage(
+        core.ValidationMessageType.information => host_doctor.ValidationMessage(
           msg.message,
           contextUrl: msg.contextUrl,
           piiStrippedMessage: msg.piiStrippedMessage,
@@ -157,7 +157,7 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
   host_doctor.ValidationResult _mergeValidationResults(List<host_doctor.ValidationResult> results) {
     if (results.isEmpty) {
       return host_doctor.ValidationResult(
-        host_doctor.ValidationType.success,
+        core.ValidationType.success,
         const <host_doctor.ValidationMessage>[],
         statusInfo: 'no checks executed',
       );
@@ -165,7 +165,7 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
 
     final mergedMessages = <host_doctor.ValidationMessage>[];
     String? statusInfo;
-    final types = <host_doctor.ValidationType>{};
+    final types = <core.ValidationType>{};
 
     for (final result in results) {
       statusInfo ??= result.statusInfo;
@@ -174,24 +174,25 @@ class ExtensionDoctorValidator extends host_doctor.DoctorValidator {
     }
 
     if (types.length > 1) {
-      types.remove(host_doctor.ValidationType.notAvailable);
+      types.remove(core.ValidationType.notAvailable);
     }
 
-    final host_doctor.ValidationType mergedType = switch (types) {
-      _
-          when types.contains(host_doctor.ValidationType.partial) ||
-              (types.contains(host_doctor.ValidationType.crash) &&
-                  types.contains(host_doctor.ValidationType.success)) ||
-              (types.contains(host_doctor.ValidationType.missing) &&
-                  types.contains(host_doctor.ValidationType.success)) =>
-        host_doctor.ValidationType.partial,
-      _ when types.contains(host_doctor.ValidationType.crash) => host_doctor.ValidationType.crash,
-      _ when types.contains(host_doctor.ValidationType.missing) =>
-        host_doctor.ValidationType.missing,
-      _ when types.contains(host_doctor.ValidationType.success) =>
-        host_doctor.ValidationType.success,
-      _ => host_doctor.ValidationType.notAvailable,
-    };
+    final core.ValidationType mergedType;
+    if (types.contains(core.ValidationType.partial) ||
+        (types.contains(core.ValidationType.crash) &&
+            types.contains(core.ValidationType.success)) ||
+        (types.contains(core.ValidationType.missing) &&
+            types.contains(core.ValidationType.success))) {
+      mergedType = core.ValidationType.partial;
+    } else if (types.contains(core.ValidationType.crash)) {
+      mergedType = core.ValidationType.crash;
+    } else if (types.contains(core.ValidationType.missing)) {
+      mergedType = core.ValidationType.missing;
+    } else if (types.contains(core.ValidationType.success)) {
+      mergedType = core.ValidationType.success;
+    } else {
+      mergedType = core.ValidationType.notAvailable;
+    }
 
     return host_doctor.ValidationResult(mergedType, mergedMessages, statusInfo: statusInfo);
   }

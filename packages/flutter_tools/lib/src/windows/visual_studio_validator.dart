@@ -5,6 +5,7 @@
 import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor_validator.dart';
+import '../flutter_tools_core/diagnostics.dart' show ValidationType;
 import 'visual_studio.dart';
 
 VisualStudioValidator? get visualStudioValidator => context.get<VisualStudioValidator>();

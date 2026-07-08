@@ -6,6 +6,7 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../doctor_validator.dart';
+import '../flutter_tools_core/diagnostics.dart' show ValidationType;
 import '../ios/simulators.dart';
 import 'xcode.dart';
 

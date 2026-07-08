@@ -28,7 +28,6 @@ ExtensionTemplateManager? get extensionTemplateManager => context.get<ExtensionT
 /// project templates, resolve their directories on the host, and generate
 /// template parameters over the extension protocol RPC.
 base class ExtensionTemplateManager extends core.TemplateService {
-  /// Create a new instance of [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required ToolExtensionManager extensionManager,
     required FileSystem fileSystem,

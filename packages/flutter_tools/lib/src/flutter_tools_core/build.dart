@@ -49,13 +49,14 @@ abstract base class BuildService extends ToolExtensionService {
             'dependencies': target.dependencies,
             'inputs': target.inputs,
             'outputs': target.outputs,
-            if (target.cliSubcommand != null) 'cliSubcommand': target.cliSubcommand,
-            if (target.cliDescription != null) 'cliDescription': target.cliDescription,
-            if (target.targetPlatformDirectory != null)
-              'targetPlatformDirectory': target.targetPlatformDirectory,
-            if (target.targetDeviceDirectory != null)
-              'targetDeviceDirectory': target.targetDeviceDirectory,
-            if (target.pluginPlatformKey != null) 'pluginPlatformKey': target.pluginPlatformKey,
+            if (target.cliSubcommand case final cliSubcommand?) 'cliSubcommand': cliSubcommand,
+            if (target.cliDescription case final cliDescription?) 'cliDescription': cliDescription,
+            if (target.targetPlatformDirectory case final targetPlatformDirectory?)
+              'targetPlatformDirectory': targetPlatformDirectory,
+            if (target.targetDeviceDirectory case final targetDeviceDirectory?)
+              'targetDeviceDirectory': targetDeviceDirectory,
+            if (target.pluginPlatformKey case final pluginPlatformKey?)
+              'pluginPlatformKey': pluginPlatformKey,
           },
         )
         .toList();
@@ -344,7 +345,6 @@ class Depfile {
 
 /// A DTO representing the result of a compilation build operation over the tool extension RPC.
 class BuildResult {
-  /// Create a new instance of [BuildResult].
   BuildResult({required this.success, this.errorMessage, this.executablePath, this.stackTrace});
 
   /// Parses a [BuildResult] from a JSON map returned over the RPC.
@@ -372,8 +372,8 @@ class BuildResult {
   /// Convert to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     'success': success,
-    if (errorMessage != null) 'errorMessage': errorMessage,
-    if (executablePath != null) 'executablePath': executablePath,
-    if (stackTrace != null) 'stackTrace': stackTrace,
+    if (errorMessage case final errorMessage?) 'errorMessage': errorMessage,
+    if (executablePath case final executablePath?) 'executablePath': executablePath,
+    if (stackTrace case final stackTrace?) 'stackTrace': stackTrace,
   };
 }

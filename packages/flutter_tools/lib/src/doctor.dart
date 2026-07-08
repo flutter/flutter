@@ -26,8 +26,8 @@ import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
 import 'experimental/diagnostics.dart';
-import 'experimental/extension_discovery.dart';
 import 'features.dart';
+import 'flutter_tools_core/diagnostics.dart' show ValidationType;
 import 'generic_extension_protocol/manager.dart';
 import 'globals.dart' as globals;
 import 'http_host_validator.dart';
@@ -163,8 +163,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     // If the tool extension prototype is enabled, register the ExtensionDoctorValidator
     // to run diagnostics provided by registered tool extensions.
     final ToolExtensionManager? extensionManager = context.get<ToolExtensionManager>();
-    if (extensionManager != null &&
-        platform.environment[ExtensionDiscoveryHelper.envPrototypeFlag] == 'true') {
+    if (extensionManager != null && globals.isToolExtensionPrototypeEnabled) {
       _validators!.add(
         ExtensionDoctorValidator(extensionManager, logger: logger, platform: platform),
       );
@@ -550,7 +549,7 @@ class FlutterValidator extends DoctorValidator {
       final String flutterRoot = _flutterRoot();
       messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel, flutterRoot));
 
-      _validateRequiredBinaries(flutterRoot).forEach(messages.add);
+      messages.addAll(_validateRequiredBinaries(flutterRoot));
       messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
         messages.add(ValidationMessage(flutterGitUrl(gitUrl)));

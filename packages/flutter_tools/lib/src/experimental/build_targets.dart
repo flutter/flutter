@@ -28,7 +28,6 @@ ExtensionBuildTargetManager? get extensionBuildTargetManager =>
 /// build targets and delegate the compilation process to them over the
 /// extension protocol RPC.
 base class ExtensionBuildTargetManager extends core.BuildService {
-  /// Create a new instance of [ExtensionBuildTargetManager].
   ExtensionBuildTargetManager({
     required ToolExtensionManager extensionManager,
     required Logger logger,

@@ -66,14 +66,10 @@ void main() {
         platform = FakePlatform();
       });
 
-      testUsingContext(
-        'returns 0 when called',
-        () async {
-          final command = DevicesCommand();
-          await createTestCommandRunner(command).run(<String>['devices']);
-        },
-        overrides: <Type, Generator>{Cache: () => cache, Artifacts: () => Artifacts.test()},
-      );
+      testUsingContext('returns 0 when called', () async {
+        final command = DevicesCommand();
+        await createTestCommandRunner(command).run(<String>['devices']);
+      }, overrides: <Type, Generator>{Cache: () => cache, Artifacts: () => Artifacts.test()});
 
       testUsingContext(
         'no error when no connected devices',

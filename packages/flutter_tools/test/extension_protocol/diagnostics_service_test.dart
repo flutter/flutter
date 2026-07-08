@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart' as host_doctor;
 import 'package:flutter_tools/src/experimental/diagnostics.dart';
 import 'package:flutter_tools/src/extension_prototypes/linux_extension/diagnostics.dart';
+import 'package:flutter_tools/src/flutter_tools_core/diagnostics.dart' as core;
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:stream_channel/isolate_channel.dart';
@@ -163,13 +164,13 @@ void main() {
         final host_doctor.ValidationResult result = await validator.validate();
 
         // Merged validation result should be partial because one is success and one is missing
-        expect(result.type, host_doctor.ValidationType.partial);
+        expect(result.type, core.ValidationType.partial);
         expect(result.statusInfo, 'installed');
         expect(result.messages, hasLength(2));
         expect(result.messages[0].message, 'clang++ version: 1.0');
-        expect(result.messages[0].type, host_doctor.ValidationMessageType.information);
+        expect(result.messages[0].type, core.ValidationMessageType.information);
         expect(result.messages[1].message, 'cmake is missing');
-        expect(result.messages[1].type, host_doctor.ValidationMessageType.error);
+        expect(result.messages[1].type, core.ValidationMessageType.error);
 
         await manager.dispose();
         await testPeer.close();
@@ -223,7 +224,7 @@ void main() {
           <String, Object?>{'type': 'notAvailable', 'messages': <Map<String, Object?>>[]},
         ];
         final host_doctor.ValidationResult result1 = await validator.validate();
-        expect(result1.type, host_doctor.ValidationType.notAvailable);
+        expect(result1.type, core.ValidationType.notAvailable);
 
         // Case 2: success and crash (order 1)
         mockDiagnosticsResponse = <Map<String, Object?>>[
@@ -231,7 +232,7 @@ void main() {
           <String, Object?>{'type': 'crash', 'messages': <Map<String, Object?>>[]},
         ];
         final host_doctor.ValidationResult result2 = await validator.validate();
-        expect(result2.type, host_doctor.ValidationType.partial);
+        expect(result2.type, core.ValidationType.partial);
 
         // Case 3: crash and success (order 2)
         mockDiagnosticsResponse = <Map<String, Object?>>[
@@ -239,7 +240,7 @@ void main() {
           <String, Object?>{'type': 'success', 'messages': <Map<String, Object?>>[]},
         ];
         final host_doctor.ValidationResult result3 = await validator.validate();
-        expect(result3.type, host_doctor.ValidationType.partial);
+        expect(result3.type, core.ValidationType.partial);
 
         // Case 4: success and missing
         mockDiagnosticsResponse = <Map<String, Object?>>[
@@ -247,7 +248,7 @@ void main() {
           <String, Object?>{'type': 'missing', 'messages': <Map<String, Object?>>[]},
         ];
         final host_doctor.ValidationResult result4 = await validator.validate();
-        expect(result4.type, host_doctor.ValidationType.partial);
+        expect(result4.type, core.ValidationType.partial);
 
         await manager.dispose();
         await testPeer.close();

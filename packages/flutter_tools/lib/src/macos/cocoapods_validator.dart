@@ -4,6 +4,7 @@
 
 import '../base/user_messages.dart';
 import '../doctor_validator.dart';
+import '../flutter_tools_core/diagnostics.dart' show ValidationType;
 import 'cocoapods.dart';
 
 /// A validator that confirms cocoapods is in a valid state.

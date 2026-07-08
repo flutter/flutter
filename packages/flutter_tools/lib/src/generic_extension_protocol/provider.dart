@@ -110,7 +110,7 @@ class ToolExtensionProvider implements RpcRegistrar {
     for (final ToolExtensionService service in _services) {
       serviceNamespaces.add(service.namespace);
       final Map<String, Function> methods = await service.initialize();
-      methods.forEach((methodName, handler) {
+      for (final MapEntry(key: methodName, value: handler) in methods.entries) {
         final namespacedMethod = '${service.namespace}.$methodName';
         Object? callback(rpc.Parameters params) {
           if (handler is Object? Function(Map<String, Object?>)) {
@@ -129,11 +129,13 @@ class ToolExtensionProvider implements RpcRegistrar {
         }
 
         peer.registerMethod(namespacedMethod, callback);
-      });
+      }
     }
 
     // Register all cached methods.
-    _registeredMethods.forEach(peer.registerMethod);
+    for (final MapEntry(:key, :value) in _registeredMethods.entries) {
+      peer.registerMethod(key, value);
+    }
 
     // Register standard capabilities RPC.
     peer.registerMethod('extension.getCapabilities', () {
