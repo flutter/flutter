@@ -85,7 +85,7 @@ class MockPlatformHandler : public PlatformHandler {
               (override));
   MOCK_METHOD(void,
               SetPlainText,
-              (const std::string_view,
+              (std::string_view,
                std::unique_ptr<MethodResult<rapidjson::Document>>),
               (override));
   MOCK_METHOD(void,

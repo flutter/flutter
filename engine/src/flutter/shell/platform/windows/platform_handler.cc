@@ -341,7 +341,7 @@ void PlatformHandler::GetHasStrings(
 }
 
 void PlatformHandler::SetPlainText(
-    const std::string_view text,
+    std::string_view text,
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
