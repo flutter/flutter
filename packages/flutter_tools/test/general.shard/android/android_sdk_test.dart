@@ -617,6 +617,38 @@ void main() {
       expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
       expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
     });
+
+    testWithoutContext(
+      'ndk executables with config override fall back to SDK NDK $operatingSystem',
+      () {
+        final Platform platform = FakePlatform(operatingSystem: operatingSystem);
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, platform: platform);
+        final Directory brokenNdkDir = fileSystem.systemTempDirectory.createTempSync(
+          'flutter_mock_android_ndk.',
+        );
+        config.setValue('android-sdk', sdkDir.path);
+        config.setValue('android-ndk', brokenNdkDir.path);
+
+        final Directory binDir =
+            sdkDir
+                .childDirectory('ndk')
+                .childDirectory('24.0.8215888')
+                .childDirectory('toolchains')
+                .childDirectory('llvm')
+                .childDirectory('prebuilt')
+                .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+                .childDirectory('bin')
+              ..createSync(recursive: true);
+        final File clang = binDir.childFile('clang$extension')..createSync();
+        final File ar = binDir.childFile('llvm-ar$extension')..createSync();
+        final File ld = binDir.childFile('ld.lld$extension')..createSync();
+
+        final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+        expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
+        expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
+        expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
+      },
+    );
   }
 }
 
