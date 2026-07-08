@@ -4,8 +4,10 @@
 
 #include "flutter/lib/gpu/shader_library.h"
 
+#include <memory>
 #include <optional>
 #include <utility>
+#include <vector>
 
 #include "flutter/assets/asset_manager.h"
 #include "flutter/lib/gpu/shader.h"
@@ -18,6 +20,7 @@
 #include "impeller/renderer/shader_key.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 #include "lib/gpu/context.h"
+#include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
 namespace gpu {
@@ -176,6 +179,14 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
     const std::string& library_id) {
   ShaderLibrary::ShaderMap shader_map;
   if (payload == nullptr || !payload->GetMapping()) {
+    return shader_map;
+  }
+  // `ShaderBundleBufferHasIdentifier` reads the file identifier at a fixed
+  // offset, so a buffer too small to hold the root offset plus the identifier
+  // would be read out of bounds. A `fromBytes` caller can pass arbitrary bytes,
+  // so reject undersized buffers before sniffing the identifier.
+  if (payload->GetSize() <
+      sizeof(flatbuffers::uoffset_t) + flatbuffers::kFileIdentifierLength) {
     return shader_map;
   }
   if (!impeller::fb::shaderbundle::ShaderBundleBufferHasIdentifier(
@@ -443,6 +454,24 @@ ShaderLibrary::~ShaderLibrary() = default;
 /// Exports
 ///
 
+namespace {
+
+// Copies the bytes of a Dart `ByteData` into an owned mapping, so the shader
+// bundle data outlives the (temporarily acquired) Dart buffer. Returns null if
+// the handle is not typed data.
+std::shared_ptr<fml::Mapping> ShaderBundleMappingFromByteData(
+    Dart_Handle byte_data) {
+  tonic::DartByteData data(byte_data);
+  if (!data.data()) {
+    return nullptr;
+  }
+  const auto* bytes = static_cast<const uint8_t*>(data.data());
+  return std::make_shared<fml::DataMapping>(
+      std::vector<uint8_t>(bytes, bytes + data.length_in_bytes()));
+}
+
+}  // namespace
+
 Dart_Handle InternalFlutterGpu_ShaderLibrary_InitializeWithAsset(
     Dart_Handle wrapper,
     Dart_Handle asset_name) {
@@ -482,6 +511,55 @@ Dart_Handle InternalFlutterGpu_ShaderLibrary_ReinitializeWithAsset(
 
   std::string error = wrapper->ReloadFromAsset(
       impeller_context->GetBackendType(), tonic::StdStringFromDart(asset_name));
+  if (!error.empty()) {
+    return tonic::ToDart(error);
+  }
+  return Dart_Null();
+}
+
+Dart_Handle InternalFlutterGpu_ShaderLibrary_InitializeWithBytes(
+    Dart_Handle wrapper,
+    Dart_Handle byte_data) {
+  std::optional<std::string> out_error;
+  auto impeller_context = flutter::gpu::Context::GetDefaultContext(out_error);
+  if (out_error.has_value()) {
+    return tonic::ToDart(out_error.value());
+  }
+
+  std::shared_ptr<fml::Mapping> payload =
+      ShaderBundleMappingFromByteData(byte_data);
+  if (payload == nullptr) {
+    return tonic::ToDart("Shader bundle bytes must be a ByteData.");
+  }
+
+  auto res = flutter::gpu::ShaderLibrary::MakeFromFlatbuffer(
+      impeller_context->GetBackendType(), std::move(payload));
+  if (!res) {
+    return tonic::ToDart(
+        "Failed to parse the shader bundle bytes. The bytes must be a shader "
+        "bundle compiled by a compatible impellerc.");
+  }
+  res->AssociateWithDartWrapper(wrapper);
+  return Dart_Null();
+}
+
+Dart_Handle InternalFlutterGpu_ShaderLibrary_ReinitializeWithBytes(
+    flutter::gpu::ShaderLibrary* wrapper,
+    Dart_Handle byte_data) {
+  std::optional<std::string> out_error;
+  auto impeller_context = flutter::gpu::Context::GetDefaultContext(out_error);
+  if (out_error.has_value()) {
+    return tonic::ToDart(out_error.value());
+  }
+
+  std::shared_ptr<fml::Mapping> payload =
+      ShaderBundleMappingFromByteData(byte_data);
+  if (payload == nullptr) {
+    return tonic::ToDart("Shader bundle bytes must be a ByteData.");
+  }
+
+  std::string error = wrapper->ReloadFromFlatbuffer(
+      impeller_context->GetBackendType(), std::move(payload));
   if (!error.empty()) {
     return tonic::ToDart(error);
   }
