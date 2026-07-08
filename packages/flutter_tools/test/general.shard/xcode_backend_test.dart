@@ -1370,22 +1370,16 @@ void main() {
         expect(
           context.stderr,
           contains(
-            'error: Missing Flutter generated build settings. Please verify the '
-            'current build configuration contains '
+            'error: Missing Flutter build settings. Run "flutter build $platformName '
+            '--config-only" to regenerate the Flutter xcconfig files, and verify the '
+            'build configuration for the current scheme includes '
             '${platform == TargetPlatform.macos ? '#include "ephemeral/Flutter-Generated.xcconfig"' : '#include "Generated.xcconfig"'}.',
-          ),
-        );
-        expect(
-          context.stderr,
-          contains(
-            'Missing settings: FLUTTER_ROOT, FLUTTER_BUILD_DIR, '
-            'FLUTTER_BUILD_NAME, FLUTTER_BUILD_NUMBER.',
           ),
         );
       });
     }
 
-    test('build exits with error listing only the missing settings', () {
+    test('build exits with error when only some settings are missing', () {
       final context = TestContext(
         <String>['build', 'ios'],
         <String, String>{'FLUTTER_ROOT': '/path/to/flutter', 'FLUTTER_BUILD_DIR': 'build'},
@@ -1393,12 +1387,7 @@ void main() {
         fileSystem: fileSystem,
       );
       expect(() => context.run(), throwsException);
-      expect(
-        context.stderr,
-        contains(
-          'Missing settings: FLUTTER_BUILD_NAME, FLUTTER_BUILD_NUMBER.',
-        ),
-      );
+      expect(context.stderr, contains('error: Missing Flutter build settings.'));
     });
   });
 }

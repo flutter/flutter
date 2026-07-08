@@ -104,21 +104,19 @@ class Context {
   ];
 
   void validateGeneratedBuildSettings(TargetPlatform platform) {
-    final List<String> missingSettings = requiredGeneratedBuildSettings
-        .where((String setting) => environment[setting] == null)
-        .toList();
-    if (missingSettings.isEmpty) {
+    final bool hasMissingSettings = requiredGeneratedBuildSettings.any(
+      (String setting) => environment[setting] == null,
+    );
+    if (!hasMissingSettings) {
       return;
     }
     final includeDirective = platform == TargetPlatform.macos
         ? '#include "ephemeral/Flutter-Generated.xcconfig"'
         : '#include "Generated.xcconfig"';
     echoXcodeError(
-      'Missing Flutter generated build settings. Please verify the current build '
-      'configuration contains $includeDirective. '
-      'Missing settings: ${missingSettings.join(', ')}. '
-      'See https://docs.flutter.dev/deployment/flavors-ios#configure-xcode-schemes '
-      'for an example of correctly configured build configurations.',
+      'Missing Flutter build settings. Run "flutter build ${platform.name} --config-only" '
+      'to regenerate the Flutter xcconfig files, and verify the build configuration for '
+      'the current scheme includes $includeDirective.',
     );
     exitApp(-1);
   }
