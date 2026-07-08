@@ -1328,7 +1328,7 @@ class IOSDevice extends Device {
   bool get supportsScreenshot {
     if (isCoreDevice) {
       final Version? xcodeVersion = globals.xcode?.currentVersion;
-      if (xcodeVersion != null && xcodeVersion.major >= 26) {
+      if (xcodeVersion != null && xcodeVersion.major >= 27) {
         return _coreDeviceControl.isDevicectlInstalled;
       }
       // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
@@ -1342,7 +1342,7 @@ class IOSDevice extends Device {
   Future<void> takeScreenshot(File outputFile) async {
     if (isCoreDevice) {
       final Version? xcodeVersion = globals.xcode?.currentVersion;
-      if (xcodeVersion != null && xcodeVersion.major >= 26) {
+      if (xcodeVersion != null && xcodeVersion.major >= 27) {
         var success = false;
         try {
           success = await _coreDeviceControl.takeScreenshot(

@@ -623,7 +623,7 @@ void main() {
         },
       );
 
-      testUsingContext('supportsScreenshot is false on CoreDevice with Xcode < 26', () async {
+      testUsingContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -650,7 +650,7 @@ void main() {
       }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))});
 
       testUsingContext(
-        'supportsScreenshot is true on CoreDevice with Xcode 26+ and devicectl installed',
+        'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
         () async {
           device = IOSDevice(
             'device-123',
@@ -680,10 +680,10 @@ void main() {
           fakeCoreDeviceControl.isDevicectlInstalled = false;
           expect(device.supportsScreenshot, isFalse);
         },
-        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))},
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
       );
 
-      testUsingContext('takeScreenshot uses devicectl on CoreDevice with Xcode 26+', () async {
+      testUsingContext('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -711,7 +711,7 @@ void main() {
 
         fakeCoreDeviceControl.takeScreenshotSuccess = false;
         expect(() => device.takeScreenshot(outputFile), throwsToolExit());
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
 
       testUsingContext(
         'takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable',
@@ -749,11 +749,11 @@ void main() {
             ),
           );
         },
-        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))},
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
       );
 
       testUsingContext(
-        'takeScreenshot falls back to iMobileDevice on CoreDevice with Xcode < 26',
+        'takeScreenshot falls back to iMobileDevice on CoreDevice with Xcode < 27',
         () async {
           final testProcessManager = FakeProcessManager.empty();
           final File outputFile = fileSystem.file('screenshot.png');
@@ -802,7 +802,7 @@ void main() {
           await device.takeScreenshot(outputFile);
           expect(testProcessManager, hasNoRemainingExpectations);
         },
-        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(25, 0, 0))},
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))},
       );
     });
   });
