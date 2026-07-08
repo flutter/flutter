@@ -1816,6 +1816,99 @@ void main() {
     expect(pageTapCount, 1);
   });
 
+  testWidgets('Underlying route can scroll during the back swipe release animation', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/188840.
+    //
+    // When the user lifts their finger part way through an iOS back swipe, the
+    // route settles to rest over _kDroppedSwipePageAnimationDuration. During
+    // that animation the page below must remain interactive (e.g. a ListView
+    // must scroll), instead of being frozen for the whole animation, while the
+    // page transition keeps its (non-linear) curve stable.
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: ListView.builder(
+            controller: controller,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(height: 100, child: Text('Item $index'));
+            },
+          ),
+        ),
+      ),
+    );
+
+    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+
+    navigator.push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(child: Center(child: Text('Page 2')));
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Page 2'), findsOneWidget);
+    expect(controller.offset, 0.0);
+
+    // Sanity check: while the finger is down mid-swipe, the page below is not
+    // interactive (the scroll gesture on it is ignored).
+    final TestGesture swipe = await tester.startGesture(const Offset(5, 300));
+    await swipe.moveBy(const Offset(500, 0));
+    await tester.pump();
+    expect(navigator.userGestureInProgress, true);
+    expect(navigator.userGestureSettling, false);
+    final TestGesture blockedScroll = await tester.startGesture(const Offset(100, 300));
+    await blockedScroll.moveBy(const Offset(0, -200));
+    await tester.pump();
+    expect(controller.offset, 0.0, reason: 'The page below is frozen while the finger is down.');
+    await blockedScroll.up();
+
+    // Release the swipe. The route now settles to a full pop.
+    await swipe.up();
+    await tester.pump();
+
+    // userGestureInProgress stays true so CupertinoPageTransition keeps its
+    // curve stable, but the gesture is flagged as "settling" so the page below
+    // is unblocked immediately.
+    expect(navigator.userGestureInProgress, true);
+    expect(navigator.userGestureSettling, true);
+
+    // Sample the popping page's position, then let the settle run partway.
+    final double page2StartDx = tester.getTopLeft(find.text('Page 2')).dx;
+    await tester.pump(const Duration(milliseconds: 50));
+    final double page2MidDx = tester.getTopLeft(find.text('Page 2')).dx;
+    // Still settling (curve preserved: userGestureInProgress remains true).
+    expect(navigator.userGestureInProgress, true);
+    expect(navigator.userGestureSettling, true);
+    expect(page2MidDx, greaterThan(page2StartDx));
+
+    // While the second page is still animating away, scroll the ListView on the
+    // page below. It must respond immediately instead of staying frozen for the
+    // full settling animation.
+    final TestGesture scroll = await tester.startGesture(const Offset(100, 300));
+    await scroll.moveBy(const Offset(0, -150));
+    await scroll.moveBy(const Offset(0, -150));
+    await tester.pump();
+    expect(
+      controller.offset,
+      greaterThan(0.0),
+      reason: 'The page below must scroll during the back swipe release animation.',
+    );
+    await scroll.up();
+
+    await tester.pumpAndSettle();
+    // The pop completed and the gesture state is fully cleared.
+    expect(find.text('Page 2'), findsNothing);
+    expect(navigator.userGestureInProgress, false);
+    expect(navigator.userGestureSettling, false);
+  });
+
   testWidgets('showCupertinoModalPopup uses root navigator by default', (
     WidgetTester tester,
   ) async {

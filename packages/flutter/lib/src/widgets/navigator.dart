@@ -4137,6 +4137,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _rawNextPagelessRestorationScopeId.dispose();
     _serializableHistory.dispose();
     userGestureInProgressNotifier.dispose();
+    userGestureSettlingNotifier.dispose();
     ServicesBinding.instance.accessibilityFocus.removeListener(_recordLastFocus);
     _history.removeListener(_handleHistoryChanged);
     _history.dispose();
@@ -5857,6 +5858,29 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   /// Notifies its listeners if the value of [userGestureInProgress] changes.
   final ValueNotifier<bool> userGestureInProgressNotifier = ValueNotifier<bool>(false);
+
+  /// Whether an in-progress user gesture is settling: the finger has lifted but
+  /// the transition is still animating to rest.
+  ///
+  /// [userGestureInProgress] stays true throughout, so transitions keep their
+  /// curve across the settle. But routes below stop ignoring pointers, so the
+  /// page below becomes interactive as soon as the finger lifts instead of when
+  /// the settling animation ends.
+  ///
+  /// Managed by the framework's back-gesture controllers; not for application use.
+  ///
+  /// See also:
+  ///
+  ///  * [userGestureSettlingNotifier], which notifies its listeners when
+  ///    [userGestureSettling] changes.
+  ///  * <https://github.com/flutter/flutter/issues/188840>, the issue this resolves.
+  bool get userGestureSettling => userGestureSettlingNotifier.value;
+  set userGestureSettling(bool value) {
+    userGestureSettlingNotifier.value = value;
+  }
+
+  /// Notifies its listeners if the value of [userGestureSettling] changes.
+  final ValueNotifier<bool> userGestureSettlingNotifier = ValueNotifier<bool>(false);
 
   /// The navigator is being controlled by a user gesture.
   ///

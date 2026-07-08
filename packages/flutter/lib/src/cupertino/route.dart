@@ -897,11 +897,14 @@ class _CupertinoBackGestureController<T> {
     }
 
     if (controller.isAnimating) {
-      // Keep the userGestureInProgress in true state so we don't change the
-      // curve of the page transition mid-flight since CupertinoPageTransition
-      // depends on userGestureInProgress.
+      // Finger's up but the route is still settling: keep userGestureInProgress
+      // true to hold the transition curve, but flag it settling so routes below
+      // stop ignoring pointers now instead of when the animation ends.
+      // https://github.com/flutter/flutter/issues/188840
+      navigator.userGestureSettling = true;
       late AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
+        navigator.userGestureSettling = false;
         navigator.didStopUserGesture();
         controller.removeStatusListener(animationStatusCallback);
       };

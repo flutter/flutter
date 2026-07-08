@@ -1152,8 +1152,14 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   bool get _shouldIgnoreFocusRequest {
-    return widget.route.animation?.status == AnimationStatus.reverse ||
-        (widget.route.navigator?.userGestureInProgress ?? false);
+    final NavigatorState? navigator = widget.route.navigator;
+    // A gesture blocks input on routes below only while the finger is down.
+    // During the settle the finger is up but userGestureInProgress stays true
+    // (to hold the transition curve), so exclude the settling phase here.
+    // https://github.com/flutter/flutter/issues/188840
+    final bool blockedByUserGesture =
+        (navigator?.userGestureInProgress ?? false) && !(navigator?.userGestureSettling ?? false);
+    return widget.route.animation?.status == AnimationStatus.reverse || blockedByUserGesture;
   }
 
   bool get _shouldRequestFocus {
@@ -1208,14 +1214,13 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
-                              // This additional ListenableBuilder is include because if the
-                              // value of the userGestureInProgressNotifier changes, it's
-                              // only necessary to rebuild the IgnorePointer widget and set
-                              // the focus node's ability to focus.
+                              // Rebuilds just the IgnorePointer and focus ability when
+                              // userGestureInProgress or userGestureSettling changes.
                               ListenableBuilder(
-                                listenable:
-                                    widget.route.navigator?.userGestureInProgressNotifier ??
-                                    ValueNotifier<bool>(false),
+                                listenable: Listenable.merge(<Listenable?>[
+                                  widget.route.navigator?.userGestureInProgressNotifier,
+                                  widget.route.navigator?.userGestureSettlingNotifier,
+                                ]),
                                 builder: (BuildContext context, Widget? child) {
                                   final bool ignoreEvents = _shouldIgnoreFocusRequest;
                                   focusScopeNode.canRequestFocus = !ignoreEvents;
