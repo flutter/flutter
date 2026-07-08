@@ -20,12 +20,15 @@ jobs:
           persist-credentials: false
 
       - name: Configure git
+        run: |
+          gh auth setup-git
+          git config --global user.name "flutteractionsbot"
+          git config --global user.email "<flutter-actions-bot@google.com>"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          REF_NAME: ${{ github.ref_name }}
+
+      - name: Fetch upstream
         run: |
-          git config user.name "flutteractionsbot"
-          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream $REF_NAME
 
@@ -33,6 +36,9 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
           git checkout -b "$BRANCH_NAME" upstream/$REF_NAME
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
 
       - name: Generate and Capture Hash
         id: generate-hash
@@ -69,10 +75,8 @@ jobs:
 
       - name: Create PR if Changed
         if: steps.git-check.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          REF_NAME: ${{ github.ref_name }}
         run: |
+          gh auth setup-git
           git commit -m "Update engine.version to $ENGINE_HASH"
           git push origin "$BRANCH_NAME"
 
@@ -89,3 +93,6 @@ jobs:
           echo "Updated engine version from \`$OLD_HASH\` to \`$ENGINE_HASH\`." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}

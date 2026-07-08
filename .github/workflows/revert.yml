@@ -30,7 +30,7 @@ jobs:
           echo "Cancellation signal timeout reached. Forcing failure."
           exit 1
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
 
@@ -58,7 +58,7 @@ jobs:
 
           jq -r '.body // ""' pr_details.json > original_body.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
 
@@ -72,15 +72,22 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Prepare Git
+      - name: Configure git
+        run: |
+          gh auth setup-git
+          git config --global user.name "flutteractionsbot"
+          git config --global user.email "<flutter-actions-bot@google.com>"
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+
+      - name: Prepare working folder
         working-directory: ./flutter
         run: |
-          git config user.name "flutteractionsbot"
-          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream master
           git checkout -b "revert-$PR_NUMBER-$(date +%s)" upstream/master
         env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Revert Commit
@@ -92,7 +99,7 @@ jobs:
             exit 1
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           MERGE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
@@ -134,7 +141,7 @@ jobs:
           gh pr comment "$PR_NUMBER" -R flutter/flutter -b "Successfully created revert PR: $NEW_PR_URL"
           gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           INITIATOR: ${{ github.event.sender.login }}
           ORIGINAL_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

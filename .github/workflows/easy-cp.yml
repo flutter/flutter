@@ -31,7 +31,7 @@ jobs:
           gh pr edit ${{ github.event.pull_request.number }} --remove-label "cp: stable"
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "Only merged pull requests can be cherrypicked."
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
   remove_label_from_issues:
     name: remove_label_from_issues
@@ -45,7 +45,7 @@ jobs:
           gh issue edit $ISSUE_NUMBER -R flutter/flutter --remove-label "$LABEL_NAME"
           gh issue comment $ISSUE_NUMBER -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           LABEL_NAME: ${{ github.event.label.name }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
 
@@ -86,13 +86,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Configure Git
+        run: |
+          gh auth setup-git
+          git config --global user.name "flutteractionsbot"
+          git config --global user.email "<flutter-actions-bot@google.com>"
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+
       # use same name when checking out branch, since the marketplace action does a hard reset.
       - name: Attempt CP
         id: attempt-cp
         working-directory: ./flutter
         run: |
-          git config user.name "flutteractionsbot"
-          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream "$RELEASE_BRANCH"
           git fetch upstream master
@@ -102,6 +108,7 @@ jobs:
           CHANNEL: ${{ steps.get-channel.outputs.channel }}
           RELEASE_BRANCH: ${{ steps.get-branch.outputs.branch }}
           MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Create PR on CP success
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
@@ -115,7 +122,7 @@ jobs:
           CHANNEL: ${{ steps.get-channel.outputs.channel }}
           RELEASE_BRANCH: ${{ steps.get-branch.outputs.branch }}
           MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
 
       - name: Leave Comment on CP success
@@ -126,7 +133,7 @@ jobs:
           SUCCESS_MSG=" @$ACTOR please fill out the PR description above, afterwards the release team will review this request."
           gh pr comment "$NEW_PR_NUMBER" -R flutter/flutter -b "${SUCCESS_MSG}"
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ACTOR: ${{ github.actor }}
           PR_URL: ${{ steps.create-pr.outputs.pr_url }}
 
@@ -137,4 +144,4 @@ jobs:
           FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/blob/main/docs/releases/Flutter-Cherrypick-Process.md) for more info."
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
