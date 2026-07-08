@@ -470,10 +470,10 @@ packages:
     dependency: "direct main"
     description:
       name: googleapis_auth
-      sha256: "1417d8846663df5e7b77ca56591c5edd442c66ffc9c01ab036e138a21a148e86"
+      sha256: ea53b290aaf1fdff615c8d79091b02c9150ff81c48f7f3b7460598c444f3c50a
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.2"
+    version: "2.3.3"
   graphs:
     dependency: transitive
     description:
