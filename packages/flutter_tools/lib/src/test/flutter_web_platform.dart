@@ -715,7 +715,7 @@ window.\$dartLoader.loader.nextAttempt();
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
     await Future.wait<void>(<Future<dynamic>>[
-      if (_browserManager != null) _browserManager!.close(),
+      ?_browserManager?.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);
@@ -1020,8 +1020,7 @@ class BrowserManager {
       );
 
       _controllers.add(controller);
-      final RunnerSuite suite = await controller.suite;
-      return suite;
+      return await controller.suite;
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
       closeIframe();
@@ -1079,8 +1078,7 @@ class BrowserManager {
       }
       _pauseCompleter = null;
       _controllers.clear();
-      final Future<dynamic> closeFuture = _browser.close();
-      return closeFuture;
+      return _browser.close();
     });
   }
 }

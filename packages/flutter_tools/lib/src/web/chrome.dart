@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
@@ -258,6 +259,7 @@ class ChromiumLauncher {
       // GPU rendering with this flag.
       if (_isMacosArm && headless) '--use-angle=metal',
 
+      // TODO(kevmoo): Refactor Chrome argument construction to share code across spawning locations.
       if (headless) ...<String>[
         '--no-sandbox',
         '--headless',
@@ -317,14 +319,14 @@ class ChromiumLauncher {
     var retry = 0;
     while (true) {
       final Process process = await _processManager.start(args);
-      final logBuffer = <String>[];
+      final logBuffer = ListQueue<String>(200);
 
       void addLog(String type, String line) {
         _logger.printTrace('[CHROME]: $line');
         final logLine = '[$type]: $line';
         logBuffer.add(logLine);
         if (logBuffer.length > 200) {
-          logBuffer.removeAt(0);
+          logBuffer.removeFirst();
         }
       }
 
@@ -383,7 +385,7 @@ class ChromiumLauncher {
       }
 
       if (!hitGlibcBug && !shouldRetry) {
-        return _SpawnResult(process, logBuffer);
+        return _SpawnResult(process, logBuffer.toList());
       }
 
       retry += 1;
