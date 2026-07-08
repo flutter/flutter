@@ -287,6 +287,13 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
     }
 
     DisplayListBuilder builder;
+
+    // Most tests scale the builder with
+    // builder.Scale(GetContentScale().x, GetContentScale().y) in order to
+    // maintain the same visual size on different screens.
+    // These DrawLines tests explicitly doesn't invoke this scaling, because
+    // they are testing specific line widths relative to a device pixel size.
+
     builder.DrawPaint(
         DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
 
@@ -339,8 +346,8 @@ TEST_P(AiksTest, DrawLinesWithPath) {
     stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
     stroke_paint.setStrokeWidth(width);
     DlPathBuilder path_builder;
-    path_builder.MoveTo(DlPoint(p0.x, p0.y));
-    path_builder.LineTo(DlPoint(p1.x, p1.y));
+    path_builder.MoveTo(p0);
+    path_builder.LineTo(p1);
     builder.DrawPath(path_builder.TakePath(), stroke_paint);
   });
 }
@@ -351,7 +358,7 @@ TEST_P(AiksTest, DrawLinesWithDrawLine) {
     DlPaint stroke_paint = paint;
     stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
     stroke_paint.setStrokeWidth(width);
-    builder.DrawLine(DlPoint(p0.x, p0.y), DlPoint(p1.x, p1.y), stroke_paint);
+    builder.DrawLine(p0, p1, stroke_paint);
   });
 }
 
