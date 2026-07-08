@@ -265,13 +265,13 @@ public class PlayStoreDeferredComponentManagerTest {
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.deferredComponentInstallFailureCalled, 0);
 
-    // The native loader dlopen()s from the end of the array first, so the most trusted entry must
-    // come last. The OS-installed signed APK must therefore be ordered after the app-writable
-    // getFilesDir() .so, so it is attempted first.
+    // Search paths are ordered most-preferred first (the native loader tries them in order and
+    // stops at the first that loads). The OS-installed signed APK must be ordered before the
+    // app-writable getFilesDir() .so, so it is attempted first.
     assertEquals(jni.searchPaths.length, 3);
     assertEquals(jni.searchPaths[0], "libapp.so-123.part.so");
-    assertTrue(jni.searchPaths[1].endsWith(soTestPath));
-    assertTrue(jni.searchPaths[2].endsWith(apkTestPath + "!lib/armeabi-v7a/libapp.so-123.part.so"));
+    assertTrue(jni.searchPaths[1].endsWith(apkTestPath + "!lib/armeabi-v7a/libapp.so-123.part.so"));
+    assertTrue(jni.searchPaths[2].endsWith(soTestPath));
     assertEquals(jni.loadingUnitId, 123);
   }
 

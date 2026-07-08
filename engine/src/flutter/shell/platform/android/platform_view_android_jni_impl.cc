@@ -692,11 +692,19 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
 
   // Use dlopen here to directly check if handle is nullptr before creating a
   // NativeLibrary.
+  //
+  // Search paths are provided in descending priority order (see the contract on
+  // FlutterJNI.loadDartDeferredLibrary): try them from first to last and stop at
+  // the first one that loads. This matters for security as well as correctness --
+  // callers place the most trusted candidates (e.g. OS-installed signed APKs)
+  // ahead of less trusted fallbacks (e.g. loose .so files in app-writable
+  // storage), so the trusted candidate must win when more than one is loadable.
   void* handle = nullptr;
-  while (handle == nullptr && !search_paths.empty()) {
-    std::string path = search_paths.back();
+  for (const std::string& path : search_paths) {
     handle = ::dlopen(path.c_str(), RTLD_NOW);
-    search_paths.pop_back();
+    if (handle != nullptr) {
+      break;
+    }
   }
   if (handle == nullptr) {
     LoadLoadingUnitFailure(loading_unit_id,

@@ -459,26 +459,25 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
       }
     }
 
-    // The native side (LoadDartDeferredLibrary in platform_view_android_jni_impl.cc) dlopen()s
-    // these paths starting from the *end* of the array and stops at the first that loads, so
-    // entries added later have higher priority. Order them least-trusted-first so the most
-    // trusted candidate wins: OS-installed signed split APKs should take precedence over loose
-    // .so files sitting in the app-writable internal storage dir (getFilesDir()), which are only
-    // a fallback and could be tampered with if anything else writes into internal storage.
+    // These paths are handed to the native loader in descending priority order: it tries them
+    // first to last and stops at the first that loads (see FlutterJNI.loadDartDeferredLibrary).
+    // Ordering matters for security -- OS-installed signed APKs must be preferred over loose .so
+    // files in the app-writable internal storage dir (getFilesDir()), which are only a fallback
+    // and could be tampered with if anything else manages to write into internal storage.
     List<String> searchPaths = new ArrayList<>();
 
-    // Bare filename, tried last. On some devices the so file can be dlopen-ed with just the file
-    // name (resolved via the linker's own search path).
+    // Add the bare filename as the first search path. On some devices the so file can be
+    // dlopen-ed with just the file name (resolved via the linker's own trusted search path).
     searchPaths.add(aotSharedLibraryName);
 
-    // Loose .so files discovered in getFilesDir(). App-writable, so least trusted; only used as a
-    // fallback when no signed APK contains the library.
-    searchPaths.addAll(soPaths);
-
-    // Signed split APKs installed by the OS. Most trusted, so added last to be tried first.
+    // Signed split APKs installed by the OS. Preferred over anything in app-writable storage.
     for (String path : apkPaths) {
       searchPaths.add(path + "!lib/" + abi + "/" + aotSharedLibraryName);
     }
+
+    // Loose .so files discovered in getFilesDir(). App-writable, so least trusted: searched last
+    // and only used as a fallback when no signed APK contains the library.
+    searchPaths.addAll(soPaths);
 
     flutterJNI.loadDartDeferredLibrary(
         loadingUnitId, searchPaths.toArray(new String[searchPaths.size()]));
