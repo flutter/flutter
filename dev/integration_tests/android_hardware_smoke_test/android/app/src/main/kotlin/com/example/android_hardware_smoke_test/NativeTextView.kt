@@ -34,12 +34,7 @@ class NativeTextViewFactory(
         viewId: Int,
         args: Any?
     ): PlatformView {
-        val rawParams = args as? Map<*, *>
-        val creationParams =
-            rawParams?.entries?.associate { entry ->
-                val key = entry.key as? String ?: ""
-                key to entry.value
-            }
+        val creationParams = (args as? Map<*, *>)?.mapKeys { it.key as? String ?: "" }
         return NativeTextView(context, viewId, creationParams, onDrawCallback)
     }
 }
@@ -60,11 +55,14 @@ class NativeTextView(
             setTextColor(Color.BLACK)
         }
 
+    private val drawRunnable =
+        Runnable {
+            onDrawCallback()
+        }
+
     init {
         textView.onDrawn = {
-            textView.post {
-                onDrawCallback()
-            }
+            textView.post(drawRunnable)
             textView.onDrawn = null
         }
     }
@@ -73,5 +71,6 @@ class NativeTextView(
 
     override fun dispose() {
         textView.onDrawn = null
+        textView.removeCallbacks(drawRunnable)
     }
 }
