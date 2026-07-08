@@ -8,7 +8,6 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
@@ -155,8 +154,10 @@ class FlutterPlugin : Plugin<Project> {
 
         FlutterPluginUtils.getTargetPlatforms(project).forEach { targetArch ->
             val abiValue: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
-            val androidExtension: BaseExtension = FlutterPluginUtils.getLegacyAndroidExtension(project)
-            androidExtension.splits.abi.include(abiValue!!)
+            FlutterPluginUtils
+                .getAndroidExtension(project)
+                .splits.abi
+                .include(abiValue!!)
         }
 
         val flutterExecutableName = getExecutableNameForPlatform("flutter")
@@ -300,6 +301,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addTaskForKGPVersion(projectToAddTasksTo)
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
+            FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
         }
 
@@ -313,22 +315,28 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatformsList = targetPlatforms
         androidComponents.onVariants { variant ->
             val capitalizeVariantName = FlutterPluginUtils.capitalize(variant.name)
-            // Reference the Flutter compile task by name rather than by provider: this variant API
-            // callback runs before the legacy `applicationVariants` callback in addFlutterDeps that
-            // registers the task, so its provider does not exist yet here.
             val compileTaskName = flutterCompileTaskName(variant.name)
             val copyJniLibsTaskProvider: TaskProvider<CopyFlutterJniLibsTask> =
                 projectToAddTasksTo.tasks.register(
                     "copyJniLibs${FLUTTER_BUILD_PREFIX}$capitalizeVariantName",
                     CopyFlutterJniLibsTask::class.java
                 ) {
-                    dependsOn(compileTaskName)
-                    val compileTaskProvider = projectToAddTasksTo.tasks.named(compileTaskName, FlutterTask::class.java)
-                    val outputDirProvider =
-                        compileTaskProvider.flatMap { task ->
-                            projectToAddTasksTo.layout.dir(projectToAddTasksTo.provider { task.outputDirectory!! })
-                        }
-                    intermediateDir.set(outputDirProvider)
+                    // The Flutter compile task is registered later (in the legacy
+                    // `applicationVariants` callback in addFlutterDeps) and only for variants that
+                    // are actually built as a Flutter app. It is absent for e.g. an
+                    // `assembleAndroidTest` build, where `shouldConfigureFlutterTask` returns false.
+                    // Look it up tolerantly (findByName, not named) so this task degrades to a no-op
+                    // with empty output instead of failing to be created when there is no Flutter
+                    // build for the variant. See https://github.com/flutter/flutter/issues/188785.
+                    dependsOn(projectToAddTasksTo.tasks.matching { it.name == compileTaskName })
+                    intermediateDir.set(
+                        projectToAddTasksTo.layout.dir(
+                            projectToAddTasksTo.provider {
+                                val compileTask = projectToAddTasksTo.tasks.findByName(compileTaskName) as? FlutterTask
+                                compileTask?.outputDirectory
+                            }
+                        )
+                    )
                     this.targetPlatforms.set(targetPlatformsList)
                 }
             variant.sources.jniLibs?.addGeneratedSourceDirectory(

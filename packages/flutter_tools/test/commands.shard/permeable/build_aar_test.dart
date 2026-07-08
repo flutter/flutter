@@ -363,6 +363,30 @@ void main() {
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
+        final AndroidSdk androidSdk = globals.androidSdk!;
+        final List<String> installedNdkVersions =
+            androidSdk.directory
+                .childDirectory('ndk')
+                .listSync()
+                .whereType<Directory>()
+                .map((Directory dir) => dir.basename)
+                .where(
+                  (String version) => androidSdk.directory
+                      .childDirectory('ndk')
+                      .childDirectory(version)
+                      .childFile('source.properties')
+                      .existsSync(),
+                )
+                .toList()
+              ..sort();
+        final ndkProvisioningProperties = <String>[
+          '-Pflutter.androidSdkRoot=${androidSdk.directory.path}',
+          '-Pflutter.installedNdkVersions=${installedNdkVersions.join(',')}',
+          if (androidSdk.sdkManagerPath != null &&
+              androidSdk.cmdlineToolsAvailable &&
+              androidSdk.licensesAvailable)
+            '-Pflutter.sdkManagerPath=${androidSdk.sdkManagerPath!}',
+        ];
 
         processManager.addCommand(
           FakeCommand(
@@ -387,6 +411,7 @@ void main() {
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              ...ndkProvisioningProperties,
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               'assembleAarRelease',
             ],
