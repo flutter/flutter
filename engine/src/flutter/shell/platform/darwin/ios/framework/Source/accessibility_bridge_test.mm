@@ -712,9 +712,16 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
-  XCTAssertEqual([accessibility_notifications count], 1ul);
+  // With the iOS 18+ fix, route changes now post:
+  // 1. UIAccessibilityAnnouncementNotification with the route name (for VoiceOver to speak)
+  // 2. UIAccessibilityScreenChangedNotification with nil (to signal screen change; nil because
+  //    no element was previously focused)
+  XCTAssertEqual([accessibility_notifications count], 2ul);
   XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"node3");
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityAnnouncementNotification);
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 }
 
@@ -1278,9 +1285,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
-  XCTAssertEqual([accessibility_notifications count], 1ul);
+  XCTAssertEqual([accessibility_notifications count], 2ul);
   XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"node1");
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityAnnouncementNotification);
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 
   // Simulates the focusing on the node 0.
@@ -1309,14 +1319,14 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   new_root_node.childrenInHitTestOrder = {1};
   new_nodes[new_root_node.id] = new_root_node;
   bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/actions);
-  XCTAssertEqual([accessibility_notifications count], 3ul);
-  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], @"new_node2");
-  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
-                 UIAccessibilityScreenChangedNotification);
-  SemanticsObject* focusObject = accessibility_notifications[2][@"argument"];
-  XCTAssertEqual([focusObject uid], 0);
+  XCTAssertEqual([accessibility_notifications count], 4ul);
+  XCTAssertEqualObjects(accessibility_notifications[2][@"argument"], @"new_node2");
   XCTAssertEqual([accessibility_notifications[2][@"notification"] unsignedIntValue],
-                 UIAccessibilityLayoutChangedNotification);
+                 UIAccessibilityAnnouncementNotification);
+  SemanticsObject* focusObject = accessibility_notifications[3][@"argument"];
+  XCTAssertEqual([focusObject uid], 0);
+  XCTAssertEqual([accessibility_notifications[3][@"notification"] unsignedIntValue],
+                 UIAccessibilityScreenChangedNotification);
 }
 
 - (void)testAnnouncesRouteChangesWhenAddAdditionalRoute {
@@ -1373,9 +1383,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
-  XCTAssertEqual([accessibility_notifications count], 1ul);
+  XCTAssertEqual([accessibility_notifications count], 2ul);
   XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"node1");
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityAnnouncementNotification);
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 
   flutter::SemanticsNodeUpdates new_nodes;
@@ -1401,9 +1414,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   new_root_node.childrenInHitTestOrder = {1};
   new_nodes[new_root_node.id] = new_root_node;
   bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/actions);
-  XCTAssertEqual([accessibility_notifications count], 2ul);
-  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], @"new_node2");
-  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
+  XCTAssertEqual([accessibility_notifications count], 4ul);
+  XCTAssertEqualObjects(accessibility_notifications[2][@"argument"], @"new_node2");
+  XCTAssertEqual([accessibility_notifications[2][@"notification"] unsignedIntValue],
+                 UIAccessibilityAnnouncementNotification);
+  XCTAssertEqualObjects(accessibility_notifications[3][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[3][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 }
 
@@ -1469,9 +1485,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
-  XCTAssertEqual([accessibility_notifications count], 1ul);
+  XCTAssertEqual([accessibility_notifications count], 2ul);
   XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"node2");
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityAnnouncementNotification);
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 
   flutter::SemanticsNodeUpdates new_nodes;
@@ -1495,9 +1514,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   new_root_node.childrenInHitTestOrder = {1};
   new_nodes[new_root_node.id] = new_root_node;
   bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/actions);
-  XCTAssertEqual([accessibility_notifications count], 2ul);
-  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], @"new_node2");
-  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
+  XCTAssertEqual([accessibility_notifications count], 4ul);
+  XCTAssertEqualObjects(accessibility_notifications[2][@"argument"], @"new_node2");
+  XCTAssertEqual([accessibility_notifications[2][@"notification"] unsignedIntValue],
+                 UIAccessibilityAnnouncementNotification);
+  XCTAssertEqualObjects(accessibility_notifications[3][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[3][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 }
 
@@ -1663,12 +1685,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
-  // Notification should focus first focusable node, which is node1.
-  XCTAssertEqual([accessibility_notifications count], 1ul);
-  id focusObject = accessibility_notifications[0][@"argument"];
-  XCTAssertTrue([focusObject isKindOfClass:[NSString class]]);
-  XCTAssertEqualObjects(focusObject, @"node1");
+  // With the iOS 18+ fix, route changes now post announcement + screen changed.
+  XCTAssertEqual([accessibility_notifications count], 2ul);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"node1");
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityAnnouncementNotification);
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
 }
 

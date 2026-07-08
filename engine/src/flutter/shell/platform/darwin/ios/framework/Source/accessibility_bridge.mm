@@ -211,19 +211,26 @@ void AccessibilityBridge::UpdateSemantics(
 
     if (routeChanged) {
       NSString* routeName = [lastAdded routeName];
-      ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
-                                                   routeName);
-    }
+      SemanticsObject* next = FindNextFocusableIfNecessary();
 
-    if (layoutChanged) {
+      // iOS 18+ no longer announces strings passed to UIAccessibilityScreenChangedNotification
+      // (see https://developer.apple.com/documentation/uikit/uiaccessibility/notification/screenchanged?language=objc).
+      // Use UIAccessibilityAnnouncementNotification to announce the route name, then move focus
+      // to the first focusable element.
+      if (routeName != nil && [routeName length] > 0) {
+        ios_delegate_->PostAccessibilityNotification(UIAccessibilityAnnouncementNotification,
+                                                     routeName);
+      }
+      ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
+                                                   next ? next.nativeAccessibility : nil);
+    } else if (layoutChanged) {
       SemanticsObject* next = FindNextFocusableIfNecessary();
       SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
       // Only specify the focus item if the new focus is different, avoiding double focuses on the
-      // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a route
-      // change, we always refocus.
+      // same item. See: https://github.com/flutter/flutter/issues/104176.
       ios_delegate_->PostAccessibilityNotification(
           UIAccessibilityLayoutChangedNotification,
-          (routeChanged || next != lastFocused) ? next.nativeAccessibility : NULL);
+          (next != lastFocused) ? next.nativeAccessibility : NULL);
     } else if (scrollOccured) {
       // TODO(chunhtai): figure out what string to use for notification. At this
       // point, it is guarantee the previous focused object is still in the tree
