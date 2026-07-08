@@ -3646,6 +3646,101 @@ void main() {
     );
   });
 
+  testWidgets('TabBar accepts indicatorWeight: 0 when the indicator comes from TabBarThemeData', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/188837.
+    // A themed indicator supplies the decoration, so indicatorWeight: 0 must not
+    // trip the default-underline assertion.
+    const indicatorColor = Color(0xFF00FF00);
+    const Decoration indicator = BoxDecoration(color: indicatorColor);
+    const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+
+    Widget buildFrame({required bool secondary}) {
+      return boilerplate(
+        useMaterial3: false,
+        tabBarTheme: const TabBarThemeData(
+          indicator: indicator,
+          indicatorSize: TabBarIndicatorSize.tab,
+        ),
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: DefaultTabController(
+            length: tabs.length,
+            child: secondary
+                ? TabBar.secondary(indicatorWeight: 0.0, tabs: tabs)
+                : TabBar(indicatorWeight: 0.0, tabs: tabs),
+          ),
+        ),
+      );
+    }
+
+    // Primary TabBar: no assertion is thrown and the themed indicator is painted.
+    await tester.pumpWidget(buildFrame(secondary: false));
+    expect(tester.takeException(), isNull);
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    // 46 = _kTabHeight(46) with no weight added by the zero indicatorWeight.
+    expect(tabBarBox.size.height, 46.0);
+    expect(
+      tabBarBox,
+      paints..rect(rect: const Rect.fromLTRB(0.0, 0.0, 400.0, 46.0), color: indicatorColor),
+    );
+
+    // Secondary TabBar: also accepts a zero indicatorWeight with a themed indicator.
+    await tester.pumpWidget(buildFrame(secondary: true));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('TabBar accepts indicatorWeight: 0 when the indicator is provided on the widget', (
+    WidgetTester tester,
+  ) async {
+    const Decoration indicator = BoxDecoration(color: Color(0xFF00FF00));
+    const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+
+    await tester.pumpWidget(
+      boilerplate(
+        useMaterial3: false,
+        child: DefaultTabController(
+          length: tabs.length,
+          child: const TabBar(indicator: indicator, indicatorWeight: 0.0, tabs: tabs),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('TabBar asserts indicatorWeight: 0 with the default underline indicator', (
+    WidgetTester tester,
+  ) async {
+    // With no indicator on the widget or the theme, the TabBar falls back to the
+    // default underline indicator, which requires a positive indicatorWeight.
+    const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+
+    await tester.pumpWidget(
+      boilerplate(
+        useMaterial3: false,
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBar(indicatorWeight: 0.0, tabs: tabs),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isAssertionError);
+
+    await tester.pumpWidget(
+      boilerplate(
+        useMaterial3: false,
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBar.secondary(indicatorWeight: 0.0, tabs: tabs),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isAssertionError);
+  });
+
   testWidgets('TabBar with custom indicator - directional indicatorPadding (LTR)', (
     WidgetTester tester,
   ) async {
