@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io'; // flutter_ignore: dart_io_import
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
@@ -782,7 +781,6 @@ class BrowserManager {
     // Start this canceled because we don't want it to start ticking until we
     // get some response from the iframe.
     _timer = RestartableTimer(const Duration(seconds: 3), () {
-      _isDebugging = true;
       for (final RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
       }
@@ -795,9 +793,6 @@ class BrowserManager {
         return stream.map((Object? message) {
           if (!_closed) {
             _timer.reset();
-          }
-          if (_isDebugging) {
-            _isDebugging = false;
           }
           for (final RunnerSuiteController controller in _controllers) {
             controller.setDebugging(false);
@@ -830,9 +825,6 @@ class BrowserManager {
 
   /// Whether the channel to the browser has closed.
   var _closed = false;
-
-  /// Whether the browser has been marked as debugging due to timeout.
-  var _isDebugging = false;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
