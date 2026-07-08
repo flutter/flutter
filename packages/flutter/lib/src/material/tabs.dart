@@ -1038,8 +1038,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.tabAlignment,
     this.textScaler,
     this.indicatorAnimation,
-  }) : _isPrimary = true,
-       assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = true;
 
   /// Creates a Material Design secondary tab bar.
   ///
@@ -1094,8 +1093,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.tabAlignment,
     this.textScaler,
     this.indicatorAnimation,
-  }) : _isPrimary = false,
-       assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = false;
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -1592,6 +1590,12 @@ class _TabBarState extends State<TabBar> {
     if (tabBarTheme.indicator != null) {
       return tabBarTheme.indicator!;
     }
+    assert(
+      widget.indicatorWeight > 0.0,
+      'The indicatorWeight must be greater than 0 when the TabBar '
+      'draws its default underline indicator (i.e. when no indicator is '
+      'provided by the TabBar or the TabBarTheme).',
+    );
 
     Color color = widget.indicatorColor ?? tabBarTheme.indicatorColor ?? _defaults.indicatorColor!;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
