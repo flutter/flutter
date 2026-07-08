@@ -73,7 +73,7 @@ bool AccessibilityBridge::SetViewController(FlutterViewController* view_controll
   UIView* previous_view = viewIfLoaded();
   UIView* next_view = view_controller.viewIfLoaded;
   if (previous_view != next_view) {
-    previous_view.accessibilityElements = nil;
+    ClearAccessibilityElementsIfOwnedByBridge(previous_view);
   }
   view_controller_ = view_controller;
   ViewDidChange();
@@ -220,7 +220,7 @@ void AccessibilityBridge::UpdateSemantics(
     }
   } else {
     UIView* view = viewIfLoaded();
-    view.accessibilityElements = nil;
+    ClearAccessibilityElementsIfOwnedByBridge(view);
   }
 
   NSMutableArray<NSNumber*>* doomed_uids = [NSMutableArray arrayWithArray:objects_.allKeys];
@@ -402,14 +402,44 @@ fml::WeakPtr<AccessibilityBridge> AccessibilityBridge::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
+bool AccessibilityBridge::AccessibilityElementsBelongToBridge(NSArray* elements) const {
+  if (elements.count == 0) {
+    return false;
+  }
+  for (id element in elements) {
+    if (![element isKindOfClass:[SemanticsObjectContainer class]]) {
+      return false;
+    }
+    SemanticsObjectContainer* container = element;
+    SemanticsObject* semantics_object = container.semanticsObject;
+    if (!semantics_object || semantics_object.bridge.get() != this) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void AccessibilityBridge::ClearAccessibilityElementsIfOwnedByBridge(UIView* view) {
+  if (!view) {
+    return;
+  }
+  if (AccessibilityElementsBelongToBridge(view.accessibilityElements)) {
+    view.accessibilityElements = nil;
+  }
+}
+
 bool AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
   UIView* view = viewIfLoaded();
   if (!view) {
     return false;
   }
   SemanticsObject* root = objects_[@(kRootNodeId)];
-  view.accessibilityElements = root ? @[ [root accessibilityContainer] ?: [NSNull null] ] : nil;
-  return root != nil;
+  if (!root) {
+    ClearAccessibilityElementsIfOwnedByBridge(view);
+    return false;
+  }
+  view.accessibilityElements = @[ [root accessibilityContainer] ?: [NSNull null] ];
+  return true;
 }
 
 void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {
@@ -419,11 +449,11 @@ void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {
 }
 
 void AccessibilityBridge::clearState() {
+  UIView* view = viewIfLoaded();
+  ClearAccessibilityElementsIfOwnedByBridge(view);
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();
-  UIView* view = viewIfLoaded();
-  view.accessibilityElements = nil;
 }
 
 }  // namespace flutter

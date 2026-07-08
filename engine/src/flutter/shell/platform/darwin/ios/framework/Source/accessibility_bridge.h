@@ -91,6 +91,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void clearState();
 
  private:
+  bool AccessibilityElementsBelongToBridge(NSArray* elements) const;
+  void ClearAccessibilityElementsIfOwnedByBridge(UIView* view);
   bool UpdateAccessibilityElementsForCurrentView();
   void NotifySemanticsObjectsViewChanged();
   SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
