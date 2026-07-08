@@ -1,6 +1,9 @@
+@file:Suppress("PackageName")
+
 package com.example.android_hardware_smoke_test
 
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -42,12 +45,44 @@ class MainActivity : FlutterActivity() {
                 JSONMessageCodec.INSTANCE
             )
 
+        flutterEngine
+            .platformViewsController
+            .registry
+            .registerViewFactory(
+                "com.example.android_hardware_smoke_test/native_text_view",
+                NativeTextViewFactory()
+            )
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
             .setMethodCallHandler { call, result ->
                 if (call.method == "impeller_backend") {
                     result.success(impellerBackend)
                 } else {
                     result.notImplemented()
+                }
+            }
+
+        // Register the native_driver channel. This responds to AndroidNativeDriver's connection ping
+        // and property checks, enabling the host-side runner to take compositor-level screenshots via ADB.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "native_driver")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "sdk_version" -> {
+                        result.success(mapOf("version" to Build.VERSION.SDK_INT))
+                    }
+                    "is_emulator" -> {
+                        val isEmulator =
+                            Build.MODEL.contains("gphone") ||
+                                Build.MODEL.contains("Emulator") ||
+                                Build.MODEL.contains("Android SDK built for x86")
+                        result.success(mapOf("emulator" to isEmulator))
+                    }
+                    "ping" -> {
+                        result.success(null)
+                    }
+                    else -> {
+                        result.notImplemented()
+                    }
                 }
             }
     }
