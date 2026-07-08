@@ -38,6 +38,9 @@ static constexpr char kClipboardHasStringsFakeContentTypeMessage[] =
     "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/madeupcontenttype\"}";
 static constexpr char kClipboardSetDataMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\"}}";
+static constexpr char kClipboardSetDataNullTerminatorMessage[] =
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":"
+    "\"hello\\u0000world\"}}";
 static constexpr char kClipboardSetDataNullTextMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":null}}";
 static constexpr char kClipboardSetDataUnknownTypeMessage[] =
@@ -354,6 +357,33 @@ TEST_F(PlatformHandlerTest, ClipboardSetData) {
 
   std::string result =
       SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+
+  EXPECT_EQ(result, "[null]");
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/162226.
+TEST_F(PlatformHandlerTest, ClipboardSetDataReplacesNullTerminators) {
+  UseHeadlessEngine();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine(), []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), SetString)
+        .Times(1)
+        .WillOnce([](std::wstring string) {
+          EXPECT_EQ(string, L"hello\uFFFDworld");
+          return kErrorSuccess;
+        });
+
+    return clipboard;
+  });
+
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardSetDataNullTerminatorMessage);
 
   EXPECT_EQ(result, "[null]");
 }
