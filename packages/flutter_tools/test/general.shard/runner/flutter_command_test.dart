@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart' show OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -823,6 +824,77 @@ void main() {
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
       });
+    });
+
+    group('findAllTargetDevices canPrompt/machine mode interaction', () {
+      final device1 = FakeDevice('device1', 'device-1');
+      final device2 = FakeDevice('device2', 'device-2');
+      late FakeTerminal terminal;
+
+      setUp(() {
+        terminal = FakeTerminal();
+      });
+
+      testUsingContext('defaults to prompting when machine mode is false', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyFlutterCommand();
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+
+        // Should prompt the user and print prompt options (so status contains "Connected devices")
+        expect(testLogger.statusText, contains('Connected devices:'));
+        expect(devices, <Device>[device1]);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+      testUsingContext('defaults to not prompting when machine mode is true', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyMachineFlutterCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--machine']);
+
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+
+        // Should NOT prompt, should print specify device help, and return null
+        expect(
+          testLogger.statusText,
+          contains('More than one device connected; please specify a device'),
+        );
+        expect(devices, isNull);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+      testUsingContext('can override default canPrompt when machine mode is true', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyMachineFlutterCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--machine']);
+
+        // Explicitly set canPrompt to true, overriding outputMachineFormat default of false.
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: true);
+
+        // Should prompt the user even in machine mode.
+        expect(testLogger.statusText, contains('Connected devices:'));
+        expect(devices, <Device>[device1]);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+      testUsingContext('can override default canPrompt when machine mode is false', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyFlutterCommand();
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
+
+        // Should NOT prompt the user even if machine mode is false.
+        expect(
+          testLogger.statusText,
+          contains('More than one device connected; please specify a device'),
+        );
+        expect(devices, isNull);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
     });
 
     group('--dart-define-from-file', () {
@@ -1850,4 +1922,43 @@ class FakeFeatureFlags implements FeatureFlags {
 
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeTerminal extends Fake implements AnsiTerminal {
+  FakeTerminal({this.stdinHasTerminal = true, this.supportsColor = false});
+
+  @override
+  final bool stdinHasTerminal;
+
+  @override
+  final bool supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => supportsColor;
+
+  @override
+  bool usesTerminalUi = true;
+
+  @override
+  bool singleCharMode = false;
+
+  @override
+  Stream<String> get keystrokes => const Stream<String>.empty();
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    Logger? logger,
+    String? prompt,
+    int? defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) async {
+    return '1';
+  }
+}
+
+class DummyMachineFlutterCommand extends DummyFlutterCommand {
+  DummyMachineFlutterCommand() : super(name: 'dummy') {
+    addMachineOutputFlag(verboseHelp: false);
+  }
 }
