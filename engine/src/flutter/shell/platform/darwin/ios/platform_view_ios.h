@@ -141,9 +141,18 @@ class PlatformViewIOS final : public PlatformView {
   AccessibilityBridge* GetAccessibilityBridge() { return accessibility_bridge_.get(); }
 
  private:
+  // Result of synchronizing the accessibility bridge with the current owner view controller.
+  enum class AccessibilityBridgeUpdateResult {
+    kNoChange,
+    kBridgeCreated,
+    kBridgeRebound,
+    kBridgeReboundAndCachedSemanticsApplied,
+    kCachedSemanticsReapplied,
+  };
+
   void ApplyLocaleToOwnerController();
-  // Returns true when the bridge was created or rebound to a different owner controller.
-  bool UpdateAccessibilityBridgeViewController();
+  AccessibilityBridgeUpdateResult UpdateAccessibilityBridgeViewController();
+  AccessibilityBridgeUpdateResult UpdateAccessibilityBridgeForViewAttachment();
   void PostSemanticsUpdateNotification();
 
   /// Smart pointer for use with objective-c observers.

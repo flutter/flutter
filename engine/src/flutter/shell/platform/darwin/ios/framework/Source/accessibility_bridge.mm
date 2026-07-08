@@ -66,9 +66,10 @@ AccessibilityBridge::~AccessibilityBridge() {
   clearState();
 }
 
-bool AccessibilityBridge::SetViewController(FlutterViewController* view_controller) {
+AccessibilityBridge::ViewControllerUpdateResult AccessibilityBridge::SetViewController(
+    FlutterViewController* view_controller) {
   if (view_controller_ == view_controller) {
-    return false;
+    return ViewControllerUpdateResult::kUnchanged;
   }
   UIView* previous_view = viewIfLoaded();
   UIView* next_view = view_controller.viewIfLoaded;
@@ -76,11 +77,18 @@ bool AccessibilityBridge::SetViewController(FlutterViewController* view_controll
     ClearAccessibilityElementsIfOwnedByBridge(previous_view);
   }
   view_controller_ = view_controller;
-  ViewDidChange();
-  return true;
+  switch (ViewDidChange()) {
+    case ViewUpdateResult::kViewNotLoaded:
+      return ViewControllerUpdateResult::kReboundToViewNotLoaded;
+    case ViewUpdateResult::kNoSemantics:
+      return ViewControllerUpdateResult::kReboundWithoutSemantics;
+    case ViewUpdateResult::kUpdatedAccessibilityElements:
+      return ViewControllerUpdateResult::kReboundAndUpdatedAccessibilityElements;
+  }
+  FML_UNREACHABLE();
 }
 
-bool AccessibilityBridge::ViewDidChange() {
+AccessibilityBridge::ViewUpdateResult AccessibilityBridge::ViewDidChange() {
   NotifySemanticsObjectsViewChanged();
   return UpdateAccessibilityElementsForCurrentView();
 }
@@ -428,18 +436,19 @@ void AccessibilityBridge::ClearAccessibilityElementsIfOwnedByBridge(UIView* view
   }
 }
 
-bool AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
+AccessibilityBridge::ViewUpdateResult
+AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
   UIView* view = viewIfLoaded();
   if (!view) {
-    return false;
+    return ViewUpdateResult::kViewNotLoaded;
   }
   SemanticsObject* root = objects_[@(kRootNodeId)];
   if (!root) {
     ClearAccessibilityElementsIfOwnedByBridge(view);
-    return false;
+    return ViewUpdateResult::kNoSemantics;
   }
   view.accessibilityElements = @[ [root accessibilityContainer] ?: [NSNull null] ];
-  return true;
+  return ViewUpdateResult::kUpdatedAccessibilityElements;
 }
 
 void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {

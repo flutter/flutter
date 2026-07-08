@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
@@ -104,15 +105,17 @@ void PlatformViewIOS::attachView() {
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
-  bool accessibility_bridge_updated = UpdateAccessibilityBridgeViewController();
-  bool semantics_were_applied = false;
-  if (accessibility_bridge_ && accessibility_bridge_updated) {
-    semantics_were_applied = accessibility_bridge_->HasSemantics();
-  } else if (accessibility_bridge_) {
-    semantics_were_applied = accessibility_bridge_->ViewDidChange();
-  }
-  if (semantics_were_applied) {
-    PostSemanticsUpdateNotification();
+  AccessibilityBridgeUpdateResult accessibility_bridge_update =
+      UpdateAccessibilityBridgeForViewAttachment();
+  switch (accessibility_bridge_update) {
+    case AccessibilityBridgeUpdateResult::kBridgeReboundAndCachedSemanticsApplied:
+    case AccessibilityBridgeUpdateResult::kCachedSemanticsReapplied:
+      PostSemanticsUpdateNotification();
+      break;
+    case AccessibilityBridgeUpdateResult::kNoChange:
+    case AccessibilityBridgeUpdateResult::kBridgeCreated:
+    case AccessibilityBridgeUpdateResult::kBridgeRebound:
+      break;
   }
 }
 
@@ -259,21 +262,51 @@ void PlatformViewIOS::ApplyLocaleToOwnerController() {
   }
 }
 
-bool PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
+PlatformViewIOS::AccessibilityBridgeUpdateResult
+PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
   if (!semantics_tree_enabled_) {
-    return false;
+    return AccessibilityBridgeUpdateResult::kNoChange;
   }
   if (accessibility_bridge_) {
-    return accessibility_bridge_->SetViewController(owner_controller_);
+    switch (accessibility_bridge_->SetViewController(owner_controller_)) {
+      case AccessibilityBridge::ViewControllerUpdateResult::kUnchanged:
+        return AccessibilityBridgeUpdateResult::kNoChange;
+      case AccessibilityBridge::ViewControllerUpdateResult::kReboundToViewNotLoaded:
+      case AccessibilityBridge::ViewControllerUpdateResult::kReboundWithoutSemantics:
+        return AccessibilityBridgeUpdateResult::kBridgeRebound;
+      case AccessibilityBridge::ViewControllerUpdateResult::kReboundAndUpdatedAccessibilityElements:
+        return AccessibilityBridgeUpdateResult::kBridgeReboundAndCachedSemanticsApplied;
+    }
+    FML_UNREACHABLE();
   }
   if (owner_controller_) {
     FlutterPlatformViewsController* platform_views_controller =
         owner_controller_.platformViewsController ?: platform_views_controller_;
     accessibility_bridge_ =
         std::make_unique<AccessibilityBridge>(owner_controller_, this, platform_views_controller);
-    return true;
+    return AccessibilityBridgeUpdateResult::kBridgeCreated;
   }
-  return false;
+  return AccessibilityBridgeUpdateResult::kNoChange;
+}
+
+PlatformViewIOS::AccessibilityBridgeUpdateResult
+PlatformViewIOS::UpdateAccessibilityBridgeForViewAttachment() {
+  AccessibilityBridgeUpdateResult view_controller_update =
+      UpdateAccessibilityBridgeViewController();
+  if (view_controller_update != AccessibilityBridgeUpdateResult::kNoChange) {
+    return view_controller_update;
+  }
+  if (!accessibility_bridge_) {
+    return AccessibilityBridgeUpdateResult::kNoChange;
+  }
+  switch (accessibility_bridge_->ViewDidChange()) {
+    case AccessibilityBridge::ViewUpdateResult::kViewNotLoaded:
+    case AccessibilityBridge::ViewUpdateResult::kNoSemantics:
+      return AccessibilityBridgeUpdateResult::kNoChange;
+    case AccessibilityBridge::ViewUpdateResult::kUpdatedAccessibilityElements:
+      return AccessibilityBridgeUpdateResult::kCachedSemanticsReapplied;
+  }
+  FML_UNREACHABLE();
 }
 
 PlatformViewIOS::ScopedObserver::ScopedObserver() {}

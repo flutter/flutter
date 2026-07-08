@@ -220,20 +220,21 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   UpdateRootSemantics(bridge.get(), "loaded later");
 
   viewIfLoaded = mockFlutterView;
-  OCMExpect([mockFlutterView
-      setAccessibilityElements:[OCMArg checkWithBlock:^BOOL(NSArray* value) {
-        if ([value count] != 1) {
-          return NO;
-        }
-        if (![value[0] isKindOfClass:[SemanticsObjectContainer class]]) {
-          return NO;
-        }
-        SemanticsObjectContainer* container = value[0];
-        SemanticsObject* object = container.semanticsObject;
-        return object.uid == kRootNodeId && object.bridge.get() == bridge_ptr &&
-               object.node.label == "loaded later";
-      }]]);
-  XCTAssertTrue(bridge->ViewDidChange());
+  OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg checkWithBlock:^BOOL(NSArray* value) {
+                               if ([value count] != 1) {
+                                 return NO;
+                               }
+                               if (![value[0] isKindOfClass:[SemanticsObjectContainer class]]) {
+                                 return NO;
+                               }
+                               SemanticsObjectContainer* container = value[0];
+                               SemanticsObject* object = container.semanticsObject;
+                               return object.uid == kRootNodeId &&
+                                      object.bridge.get() == bridge_ptr &&
+                                      object.node.label == "loaded later";
+                             }]]);
+  XCTAssertEqual(bridge->ViewDidChange(),
+                 flutter::AccessibilityBridge::ViewUpdateResult::kUpdatedAccessibilityElements);
   OCMVerifyAll(mockFlutterView);
 
   [engine stopMocking];
@@ -351,7 +352,9 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
 
   XCTAssertNotNil(previous_view.accessibilityElements);
   XCTAssertNil(next_view.accessibilityElements);
-  XCTAssertTrue(bridge->SetViewController(next_view_controller));
+  XCTAssertEqual(bridge->SetViewController(next_view_controller),
+                 flutter::AccessibilityBridge::ViewControllerUpdateResult::
+                     kReboundAndUpdatedAccessibilityElements);
   XCTAssertNil(previous_view.accessibilityElements);
   XCTAssertNotNil(next_view.accessibilityElements);
 }
@@ -397,7 +400,9 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   XCTAssertNotNil(other_bridge_elements);
   previous_view.accessibilityElements = other_bridge_elements;
 
-  XCTAssertTrue(bridge->SetViewController(next_view_controller));
+  XCTAssertEqual(bridge->SetViewController(next_view_controller),
+                 flutter::AccessibilityBridge::ViewControllerUpdateResult::
+                     kReboundAndUpdatedAccessibilityElements);
   XCTAssertEqual(previous_view.accessibilityElements, other_bridge_elements);
 }
 
@@ -434,7 +439,9 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   NSArray* native_elements = @[ native_element ];
   previous_view.accessibilityElements = native_elements;
 
-  XCTAssertTrue(bridge->SetViewController(next_view_controller));
+  XCTAssertEqual(
+      bridge->SetViewController(next_view_controller),
+      flutter::AccessibilityBridge::ViewControllerUpdateResult::kReboundWithoutSemantics);
   XCTAssertEqual(previous_view.accessibilityElements, native_elements);
 }
 
