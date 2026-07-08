@@ -85,10 +85,16 @@ Before applying or re-applying the `autosubmit` label (`gh pr edit <number> --re
   2. Instruct the user to open the URL and click **Retry Build** on the LUCI page.
   3. If a check continues to fail after manual retries, inspect the failure logs (`gh pr view <number> --repo flutter/flutter` or `flutter-pr-checks-finder`) and summarize the failure for the user.
 
-## 5. Stale Branch Updates & Token Scope
+## 5. Stale Branch Updates, CICD Label & Token Scope
 
 * If a PR branch is out of date with `master` (including when the base commit is >7 days old):
   * Always update the branch using `gh pr update-branch <number> --repo flutter/flutter` before attempting to add `autosubmit`.
+* **Re-applying the `CICD` Label**:
+  * After updating a branch with `gh pr update-branch` (or when shepherding a PR that has not run CI), the `CICD` label is often stripped or required to start the CI checks on the updated commit.
+  * Always check if the `CICD` label is present after a branch update, and re-apply it if missing:
+    ```bash
+    gh pr edit <number> --repo flutter/flutter --add-label CICD
+    ```
 * **Stale Token Scope Error**: If updating fails due to workflow file permissions (`ERROR: ... lacks the "workflow" scope`), instruct the user to refresh their CLI scope:
   ```bash
   gh auth refresh -h github.com -s workflow
