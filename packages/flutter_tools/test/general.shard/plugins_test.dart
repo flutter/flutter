@@ -2020,6 +2020,32 @@ flutter:
         );
       });
 
+      testUsingContext(
+        'Plugin.fromYaml rejects a plugin class with code-injection characters',
+        () async {
+          // A (possibly transitive) dependency must not be able to smuggle
+          // arbitrary source into the generated GeneratedPluginRegistrant by
+          // declaring a pluginClass that is not a plain identifier.
+          const String maliciousYaml = '''
+platforms:
+  macos:
+    pluginClass: "SomePlugin(); evilInjectedCall(); if (false) { SomePlugin"
+''';
+          expect(
+            () => Plugin.fromYaml(
+              'evil_plugin',
+              '',
+              loadYaml(maliciousYaml) as YamlMap,
+              null,
+              const <String>[],
+              fileSystem: globals.fs,
+              isDevDependency: false,
+            ),
+            throwsToolExit(message: 'Invalid plugin specification evil_plugin'),
+          );
+        },
+      );
+
       testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(
           <String>['ios', 'android', 'linux'],

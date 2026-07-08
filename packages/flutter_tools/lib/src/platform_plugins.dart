@@ -23,6 +23,22 @@ const kFfiPlugin = 'ffiPlugin';
 // Constant for 'defaultPackage' key in plugin maps.
 const kDefaultPackage = 'default_package';
 
+// Matches a valid native plugin class or dot-separated package identifier.
+//
+// Plugin `class`/`package` values are interpolated verbatim into the generated
+// GeneratedPluginRegistrant source files (Java/Kotlin, Swift, Objective-C,
+// C++). Restricting them to identifier characters prevents a (possibly
+// transitive) dependency from injecting arbitrary native code into the
+// consuming app's build via its pubspec plugin declaration.
+final RegExp _pluginIdentifierPattern = RegExp(
+  r'^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*$',
+);
+
+// Returns false only when [value] is a String that is not a valid identifier.
+// Absent or non-String values are left to the existing schema type checks.
+bool _isValidPluginIdentifier(Object? value) =>
+    value is! String || _pluginIdentifierPattern.hasMatch(value);
+
 /// Constant for 'sharedDarwinSource' key in plugin maps.
 /// Can be set for iOS and macOS plugins.
 const kSharedDarwinSource = 'sharedDarwinSource';
@@ -131,10 +147,13 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   bool hasDart() => dartPluginClass != null;
 
   static bool validate(YamlMap yaml) {
-    return (yaml['package'] is String && yaml[kPluginClass] is String) ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+    return ((yaml['package'] is String && yaml[kPluginClass] is String) ||
+            yaml[kDartPluginClass] is String ||
+            yaml[kFfiPlugin] == true ||
+            yaml[kDefaultPackage] is String) &&
+        _isValidPluginIdentifier(yaml['package']) &&
+        _isValidPluginIdentifier(yaml[kPluginClass]) &&
+        _isValidPluginIdentifier(yaml[kDartPluginClass]);
   }
 
   static const kConfigKey = 'android';
@@ -288,11 +307,13 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   }
 
   static bool validate(YamlMap yaml) {
-    return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kSharedDarwinSource] == true ||
-        yaml[kDefaultPackage] is String;
+    return (yaml[kPluginClass] is String ||
+            yaml[kDartPluginClass] is String ||
+            yaml[kFfiPlugin] == true ||
+            yaml[kSharedDarwinSource] == true ||
+            yaml[kDefaultPackage] is String) &&
+        _isValidPluginIdentifier(yaml[kPluginClass]) &&
+        _isValidPluginIdentifier(yaml[kDartPluginClass]);
   }
 
   static const kConfigKey = 'ios';
@@ -381,11 +402,13 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   }
 
   static bool validate(YamlMap yaml) {
-    return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kSharedDarwinSource] == true ||
-        yaml[kDefaultPackage] is String;
+    return (yaml[kPluginClass] is String ||
+            yaml[kDartPluginClass] is String ||
+            yaml[kFfiPlugin] == true ||
+            yaml[kSharedDarwinSource] == true ||
+            yaml[kDefaultPackage] is String) &&
+        _isValidPluginIdentifier(yaml[kPluginClass]) &&
+        _isValidPluginIdentifier(yaml[kDartPluginClass]);
   }
 
   static const kConfigKey = 'macos';
@@ -488,10 +511,12 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
   }
 
   static bool validate(YamlMap yaml) {
-    return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+    return (yaml[kPluginClass] is String ||
+            yaml[kDartPluginClass] is String ||
+            yaml[kFfiPlugin] == true ||
+            yaml[kDefaultPackage] is String) &&
+        _isValidPluginIdentifier(yaml[kPluginClass]) &&
+        _isValidPluginIdentifier(yaml[kDartPluginClass]);
   }
 
   static const kConfigKey = 'windows';
@@ -575,10 +600,12 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   }
 
   static bool validate(YamlMap yaml) {
-    return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+    return (yaml[kPluginClass] is String ||
+            yaml[kDartPluginClass] is String ||
+            yaml[kFfiPlugin] == true ||
+            yaml[kDefaultPackage] is String) &&
+        _isValidPluginIdentifier(yaml[kPluginClass]) &&
+        _isValidPluginIdentifier(yaml[kDartPluginClass]);
   }
 
   static const kConfigKey = 'linux';
