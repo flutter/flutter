@@ -45,7 +45,6 @@ AccessibilityBridge::AccessibilityBridge(
     __weak FlutterPlatformViewsController* platform_views_controller,
     std::unique_ptr<IosDelegate> ios_delegate)
     : view_controller_(view_controller),
-      fallback_accessibility_container_view_([[UIView alloc] initWithFrame:CGRectZero]),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
       objects_([[NSMutableDictionary alloc] init]),

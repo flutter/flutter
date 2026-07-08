@@ -78,10 +78,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   UIView* viewIfLoaded() const override { return view_controller_.viewIfLoaded; }
 
-  UIView* accessibilityContainerView() const override {
-    UIView* view = viewIfLoaded();
-    return view ? view : fallback_accessibility_container_view_;
-  }
+  UIView* accessibilityContainerView() const override { return viewIfLoaded(); }
 
   bool isVoiceOverRunning() const override { return view_controller_.isVoiceOverRunning; }
 
@@ -107,7 +104,6 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                                         NSMutableArray<NSNumber*>* doomed_uids);
 
   __weak FlutterViewController* view_controller_;
-  UIView* fallback_accessibility_container_view_;
   PlatformViewIOS* platform_view_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
 
