@@ -1024,9 +1024,12 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
 
       try {
-        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['info'];
-        if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
-          return true;
+        final Object? decoded = json.decode(stringOutput);
+        if (decoded is Map<String, Object?>) {
+          final Object? decodeResult = decoded['info'];
+          if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
+            return true;
+          }
         }
         _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return false;

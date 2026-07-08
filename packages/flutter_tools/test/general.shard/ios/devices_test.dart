@@ -745,7 +745,7 @@ void main() {
             () => device.takeScreenshot(outputFile),
             throwsToolExit(
               message:
-                  'Failed to establish a connection to the device. Please make sure the device is unlocked and try again.',
+                  'Failed to establish a connection to the device. Please make sure the device is available and try again.',
             ),
           );
         },
@@ -766,7 +766,7 @@ void main() {
                 '--udid',
                 'device-123',
               ],
-              environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+              environment: const <String, String>{'DYLD_LIBRARY_PATH': ''},
             ),
           );
 
