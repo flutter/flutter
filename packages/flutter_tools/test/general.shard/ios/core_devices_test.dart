@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -1019,7 +1018,7 @@ void main() {
     });
   });
 
-  group('Xcode prior to Core Device Control/Xcode 15', () {
+  group('Xcode when devicectl is not installed', () {
     late BufferLogger logger;
     late FakeProcessManager fakeProcessManager;
     late Xcode xcode;
@@ -1028,14 +1027,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-        processManager: fakeProcessManager,
-        version: Version(14, 0, 0),
-      );
-      xcode = Xcode.test(
-        processManager: fakeProcessManager,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-      );
+      xcode = FakeXcodeNotInstalled();
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
         processManager: fakeProcessManager,
@@ -4457,4 +4449,9 @@ IOSDeviceSupport createDeviceSupport({
     cpuArchitectureString: cpuArchitectureString,
     deviceId: deviceId,
   );
+}
+
+class FakeXcodeNotInstalled extends Fake implements Xcode {
+  @override
+  bool get isDevicectlInstalled => false;
 }
