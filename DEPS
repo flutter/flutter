@@ -252,8 +252,35 @@ deps = {
   'engine/src/flutter/third_party/shaderc':
    Var('flutter_git') + '/third_party/shaderc' + '@' + '70b1130380fcbf1d1e9719ee78ba7202a5161424',
 
-  'engine/src/flutter/third_party/vulkan-deps':
-   Var('chromium_git') + '/vulkan-deps' + '@' + '0582f446e54aa4ea389c89cd027067ee0f5459aa',
+  'engine/src/flutter/third_party/vulkan-deps/glslang/src':
+   Var('flutter_git') + '/third_party/glslang' + '@' + 'fdbdca9263a4c09dbfb4a51c76e3e9d9f52bc504',
+
+  'engine/src/flutter/third_party/vulkan-deps/lunarg-vulkantools/src':
+   Var('chromium_git') + '/external/github.com/LunarG/VulkanTools' + '@' + 'be9744eb74f522c6829c5e8d842cc29dce8259bd',
+
+  'engine/src/flutter/third_party/vulkan-deps/spirv-cross/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/SPIRV-Cross' + '@' + 'b8fcf307f1f347089e3c46eb4451d27f32ebc8d3',
+
+  'engine/src/flutter/third_party/vulkan-deps/spirv-headers/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/SPIRV-Headers' + '@' + 'c63848ecf2200425511319fd8bf2c17b751e501e',
+
+  'engine/src/flutter/third_party/vulkan-deps/spirv-tools/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/SPIRV-Tools' + '@' + '58fe144fdc8847b303be51d4f8fcc9e7da17056e',
+
+  'engine/src/flutter/third_party/vulkan-deps/vulkan-headers/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/Vulkan-Headers' + '@' + '0307c70bfbf0646d56a604384b2a91525cefea15',
+
+  'engine/src/flutter/third_party/vulkan-deps/vulkan-loader/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/Vulkan-Loader' + '@' + 'ddaf5c7c2302b07ef2385727c9a54b073ebb563e',
+
+  'engine/src/flutter/third_party/vulkan-deps/vulkan-tools/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/Vulkan-Tools' + '@' + 'b7ae55b37cda76d16368c302f37cb0c7ea2f8409',
+
+  'engine/src/flutter/third_party/vulkan-deps/vulkan-utility-libraries/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/Vulkan-Utility-Libraries' + '@' + '8183a0b86632bf1107553eab1e69d7b85d455477',
+
+  'engine/src/flutter/third_party/vulkan-deps/vulkan-validation-layers/src':
+   Var('chromium_git') + '/external/github.com/KhronosGroup/Vulkan-ValidationLayers' + '@' + '9a47aeb53821f5fe54b715fa9fc9d74b66077c46',
 
   'engine/src/flutter/third_party/flatbuffers':
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '067bfdbde9b10c1beb5d6b02d67ae9db8b96f736',
@@ -836,10 +863,6 @@ deps = {
       'dep_type': 'cipd',
   }
 }
-
-recursedeps = [
-  'engine/src/flutter/third_party/vulkan-deps',
-]
 
 hooks = [
   {
