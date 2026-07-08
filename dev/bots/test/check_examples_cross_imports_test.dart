@@ -827,7 +827,9 @@ Directory getDirectoryForExamplesSlashApiLibrary(
     throw ArgumentError('Invalid library name: $libraryName', 'libraryName');
   }
 
-  return flutterRoot.childDirectory(libraryName);
+  final String fullPath = path.joinAll([flutterRoot.path, ...libraryName.split('/')]);
+
+  return flutterRoot.fileSystem.directory(fullPath);
 }
 
 /// Get the first known cross import for the given [libraryName].
