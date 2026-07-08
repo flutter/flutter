@@ -5,10 +5,25 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_IMPL_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_IMPL_H_
 
+#include <string>
+#include <vector>
+
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 namespace flutter {
+
+//------------------------------------------------------------------------------
+/// @brief      Returns a `dlopen` handle for the first path in `search_paths`
+///             that loads, or nullptr if none of them load.
+///
+///             Paths are tried in order, i.e. in descending priority: this
+///             matches the contract documented on
+///             `FlutterJNI.loadDartDeferredLibrary`, so callers list the most
+///             trusted candidate first. Exposed here so the ordering can be
+///             covered by unit tests.
+///
+void* FindFirstLoadableLibrary(const std::vector<std::string>& search_paths);
 
 //------------------------------------------------------------------------------
 /// @brief      Concrete implementation of `PlatformViewAndroidJNI` that is

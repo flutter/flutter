@@ -680,6 +680,22 @@ static void DeferredComponentInstallFailure(JNIEnv* env,
                          static_cast<bool>(jTransient));
 }
 
+void* FindFirstLoadableLibrary(const std::vector<std::string>& search_paths) {
+  // Search paths are provided in descending priority order (see the contract on
+  // FlutterJNI.loadDartDeferredLibrary): try them from first to last and stop at
+  // the first one that loads. This matters for security as well as correctness
+  // -- callers place the most trusted candidates (e.g. OS-installed signed APKs)
+  // ahead of less trusted fallbacks (e.g. loose .so files in app-writable
+  // storage), so the trusted candidate must win when more than one is loadable.
+  for (const std::string& path : search_paths) {
+    void* handle = ::dlopen(path.c_str(), RTLD_NOW);
+    if (handle != nullptr) {
+      return handle;
+    }
+  }
+  return nullptr;
+}
+
 static void LoadDartDeferredLibrary(JNIEnv* env,
                                     jobject obj,
                                     jlong shell_holder,
@@ -690,22 +706,9 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
   std::vector<std::string> search_paths =
       fml::jni::StringArrayToVector(env, jSearchPaths);
 
-  // Use dlopen here to directly check if handle is nullptr before creating a
-  // NativeLibrary.
-  //
-  // Search paths are provided in descending priority order (see the contract on
-  // FlutterJNI.loadDartDeferredLibrary): try them from first to last and stop at
-  // the first one that loads. This matters for security as well as correctness --
-  // callers place the most trusted candidates (e.g. OS-installed signed APKs)
-  // ahead of less trusted fallbacks (e.g. loose .so files in app-writable
-  // storage), so the trusted candidate must win when more than one is loadable.
-  void* handle = nullptr;
-  for (const std::string& path : search_paths) {
-    handle = ::dlopen(path.c_str(), RTLD_NOW);
-    if (handle != nullptr) {
-      break;
-    }
-  }
+  // Use dlopen here (via FindFirstLoadableLibrary) to directly check if handle
+  // is nullptr before creating a NativeLibrary.
+  void* handle = FindFirstLoadableLibrary(search_paths);
   if (handle == nullptr) {
     LoadLoadingUnitFailure(loading_unit_id,
                            "No lib .so found for provided search paths.", true);

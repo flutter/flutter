@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <dlfcn.h>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -171,6 +173,43 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        reinterpret_cast<jlong>(holder.get()), 1.0f, 100, 100, 0,
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, bounds, type, state,
                        0, 0, 0, 0, 0, 0, 0, 0);
+}
+
+TEST(FindFirstLoadableLibraryTest, ReturnsNullptrForEmptySearchPaths) {
+  EXPECT_EQ(FindFirstLoadableLibrary({}), nullptr);
+}
+
+TEST(FindFirstLoadableLibraryTest, ReturnsNullptrWhenNothingLoads) {
+  EXPECT_EQ(FindFirstLoadableLibrary(
+                {"/flutter/does/not/exist/a.so", "/flutter/nope/b.so"}),
+            nullptr);
+}
+
+TEST(FindFirstLoadableLibraryTest, PrefersEarlierLoadablePath) {
+  // Use two distinct system libraries as stand-ins for two loadable candidates.
+  // This keeps the test free of build-time .so fixtures while still exercising
+  // the real dlopen()-based ordering on the standard host test runners.
+#if defined(__APPLE__)
+  const char* lib_a = "/usr/lib/libSystem.B.dylib";
+  const char* lib_b = "/usr/lib/libz.dylib";
+#else
+  const char* lib_a = "libc.so.6";
+  const char* lib_b = "libm.so.6";
+#endif
+  void* handle_a = ::dlopen(lib_a, RTLD_NOW);
+  void* handle_b = ::dlopen(lib_b, RTLD_NOW);
+  if (handle_a == nullptr || handle_b == nullptr || handle_a == handle_b) {
+    GTEST_SKIP() << "Requires two distinct loadable system libraries.";
+  }
+
+  // When more than one path is loadable, the earliest one in the list wins.
+  EXPECT_EQ(FindFirstLoadableLibrary({lib_a, lib_b}), handle_a);
+  EXPECT_EQ(FindFirstLoadableLibrary({lib_b, lib_a}), handle_b);
+
+  // Unloadable paths are skipped until the first that loads.
+  EXPECT_EQ(
+      FindFirstLoadableLibrary({"/flutter/does/not/exist.so", lib_b, lib_a}),
+      handle_b);
 }
 
 }  // namespace testing
