@@ -291,8 +291,8 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
     // Most tests scale the builder with
     // builder.Scale(GetContentScale().x, GetContentScale().y) in order to
     // maintain the same visual size on different screens.
-    // These DrawLines tests explicitly doesn't invoke this scaling, because
-    // they are testing specific line widths relative to a device pixel size.
+    // These DrawLines tests explicitly don't invoke this scaling, because they
+    // are testing specific line widths relative to a device pixel size.
 
     builder.DrawPaint(
         DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
