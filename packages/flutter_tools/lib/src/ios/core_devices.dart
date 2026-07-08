@@ -995,6 +995,8 @@ class IOSCoreDeviceControl {
   }
 
   /// Captures a screenshot from the device and saves it to the destination.
+  ///
+  /// Returns true if successfully able to take screenshot.
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
