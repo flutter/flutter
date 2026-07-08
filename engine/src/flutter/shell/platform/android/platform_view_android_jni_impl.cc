@@ -698,12 +698,6 @@ void* FindFirstLoadableLibrary(
   return nullptr;
 }
 
-void* FindFirstLoadableLibrary(const std::vector<std::string>& search_paths) {
-  return FindFirstLoadableLibrary(search_paths, [](const std::string& path) {
-    return ::dlopen(path.c_str(), RTLD_NOW);
-  });
-}
-
 static void LoadDartDeferredLibrary(JNIEnv* env,
                                     jobject obj,
                                     jlong shell_holder,
@@ -716,7 +710,10 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
 
   // Use dlopen here (via FindFirstLoadableLibrary) to directly check if handle
   // is nullptr before creating a NativeLibrary.
-  void* handle = FindFirstLoadableLibrary(search_paths);
+  void* handle =
+      FindFirstLoadableLibrary(search_paths, [](const std::string& path) {
+        return ::dlopen(path.c_str(), RTLD_NOW);
+      });
   if (handle == nullptr) {
     LoadLoadingUnitFailure(loading_unit_id,
                            "No lib .so found for provided search paths.", true);

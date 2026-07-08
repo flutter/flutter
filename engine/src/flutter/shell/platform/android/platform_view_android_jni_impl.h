@@ -13,21 +13,15 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// @brief      Returns a `dlopen` handle for the first path in `search_paths`
-///             that loads, or nullptr if none of them load.
+/// @brief      Returns the first entry of `search_paths` that `open_library`
+///             loads (returns non-null for), or nullptr if none of them load.
 ///
 ///             Paths are tried in order, i.e. in descending priority: this
 ///             matches the contract documented on
 ///             `FlutterJNI.loadDartDeferredLibrary`, so callers list the most
-///             trusted candidate first.
-///
-void* FindFirstLoadableLibrary(const std::vector<std::string>& search_paths);
-
-//------------------------------------------------------------------------------
-/// @brief      Testable variant of `FindFirstLoadableLibrary` that takes the
-///             loader as a parameter. Returns the first non-null result of
-///             `open_library` over `search_paths` (tried in order), or nullptr.
-///             The one-argument overload supplies `dlopen` as the loader.
+///             trusted candidate first. The loader is a parameter (rather than
+///             calling `dlopen` directly) so the ordering can be covered by
+///             unit tests; production callers pass a `dlopen` wrapper.
 ///
 void* FindFirstLoadableLibrary(
     const std::vector<std::string>& search_paths,
