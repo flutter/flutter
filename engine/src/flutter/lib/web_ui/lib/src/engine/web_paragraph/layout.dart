@@ -236,7 +236,21 @@ class TextLayout {
 
     // Arrange line vertically, calculate metrics and bounds
     final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
-    final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
+    ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
+    if (hardLineBreak) {
+      // (This is how SkParagraph works and we need to keep it the same for compatibility)
+      assert(whitespaceRange.size > 0); // There is at least hard line break
+      if (contentRange.isEmpty && whitespaceRange.size == 1) {
+        // This is a special case when we have a last line after a hard line break and it has no text or whitespaces
+        // In this case we keep \n as a part of the text
+      } else {
+        // In this case we need to remove \n from whitespace range
+        whitespaceTextRange = ui.TextRange(
+          start: whitespaceTextRange.start,
+          end: whitespaceTextRange.end - 1,
+        );
+      }
+    }
     final allTextRange = ui.TextRange(start: contentTextRange.start, end: whitespaceTextRange.end);
     assert(contentTextRange.end == whitespaceTextRange.start);
 
@@ -426,6 +440,13 @@ class TextLayout {
       line.updateBoundingBox(block);
     }
 
+    if (line.visualBlocks.isEmpty) {
+      // This is a special case when we have a last line after a hard line break and it has no text or whitespaces
+      // This line didn't get any metrics from the blocks so we need to update it with the metrics from the last block of the previous line
+      // The previous block garanteed to have metrics because it could not be empty
+      line.updateBoundingBox(lines.last.visualBlocks.last);
+    }
+
     line.advance = ui.Rect.fromLTWH(
       0,
       top,
@@ -521,7 +542,7 @@ class TextLayout {
         );
       }
       // We take whitespaces in account
-      if (!line.allLineTextRange.overlapsWith(start, end)) {
+      if (!line.correctedAllLineTextRange.overlapsWith(start, end)) {
         continue;
       }
 
@@ -771,14 +792,19 @@ class TextLayout {
         assert(false);
       }
       // We found the line but not the block because the offset is to the right of all blocks in this line.
-      // We deal with it the same way as if we didn't find the line (taking the last block of the last line)
-      final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
-      return lastVisualBlockInLine.isLtr
-          ? ui.TextPosition(
-              offset: lastVisualBlockInLine.textRange.end,
-              affinity: ui.TextAffinity.upstream,
-            )
-          : ui.TextPosition(offset: lastVisualBlockInLine.textRange.start);
+      // We deal with it the same way as if we didn't find the line (taking the last block of the last line if it exists)
+      if (lines.last.visualBlocks.isEmpty) {
+        // This is a special case when the last line is empty (it has no visual blocks)
+        return ui.TextPosition(offset: line.textRange.end);
+      } else {
+        final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
+        return lastVisualBlockInLine.isLtr
+            ? ui.TextPosition(
+                offset: lastVisualBlockInLine.textRange.end,
+                affinity: ui.TextAffinity.upstream,
+              )
+            : ui.TextPosition(offset: lastVisualBlockInLine.textRange.start);
+      }
     }
 
     // This is the default result for any position outside of the paragraph width and height
@@ -845,8 +871,8 @@ class TextLayout {
 
   ui.TextRange getLineBoundary(int codepointPosition) {
     for (final TextLine line in lines) {
-      if (line.allLineTextRange.start <= codepointPosition &&
-          line.allLineTextRange.end > codepointPosition) {
+      if (codepointPosition >= line.correctedAllLineTextRange.start &&
+          codepointPosition < line.correctedAllLineTextRange.end) {
         return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
       }
     }
@@ -1314,6 +1340,12 @@ class TextLine {
   final ui.TextRange allLineTextRange;
   final bool hardLineBreak;
   final int lineNumber;
+
+  // Since SkParagraph treats differently text with hard line breaks we need to do the same
+  ui.TextRange get correctedAllLineTextRange => ui.TextRange(
+    start: allLineTextRange.start,
+    end: allLineTextRange.end + (hardLineBreak ? 1 : 0),
+  );
 
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;

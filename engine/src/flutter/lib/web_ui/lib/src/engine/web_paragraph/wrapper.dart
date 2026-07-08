@@ -139,14 +139,18 @@ class TextWrapper {
       }
     }
 
-    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
-    // This empty line gets in a way of detecting line visual runs (there isn't any)
     if (hardLineBreak) {
-      final emptyClusterRange = ClusterRange(
-        start: _layout.allClusters.length - 1,
-        end: _layout.allClusters.length - 1,
+      // Flutter wants to have another (empty) line if \n is the last codepoint in the text
+      // This empty line gets in a way of detecting line visual runs (there isn't any)
+      // SkParagraph copies the content of the last line to this empty line, so we need to do the same?
+      assert(_layout.lines.isNotEmpty);
+      final TextLine lastLine = _layout.lines.last;
+      line._top += _layout.addLine(
+        lastLine.textClusterRange,
+        lastLine.whitespacesClusterRange,
+        false,
+        line._top,
       );
-      line._top += _layout.addLine(emptyClusterRange, emptyClusterRange, false, line._top);
     }
 
     _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);

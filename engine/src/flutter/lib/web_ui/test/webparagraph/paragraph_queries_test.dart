@@ -125,42 +125,52 @@ Future<void> testMain() async {
 
   test('Paragraph getLineBoundary', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    /*
+    getLineBoundary: offset=18, metric.startIndex=17, metric.endIndex=18
+getLineBoundary: offset=17, metric.startIndex=17, metric.endIndex=18
+getLineBoundary: offset=16, metric.startIndex=15, metric.endIndex=16
+getLineBoundary: offset=15, metric.startIndex=15, metric.endIndex=16
+getLineBoundary: offset=14, metric.startIndex=13, metric.endIndex=14
+getLineBoundary: offset=13, metric.startIndex=13, metric.endIndex=14
+getLineBoundary: offset=12, metric.startIndex=0, metric.endIndex=12
+getLineBoundary: offset=11, metric.startIndex=0, metric.endIndex=12
+    */
 
     final builder = WebParagraphBuilder(paragraphStyle);
-    builder.addText('Line1\nLine2\nLine3');
+    builder.addText('Hello World!\n+\n \n\n');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
     expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: 0 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      const ui.TextRange(start: 0, end: 6),
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 18)),
+      const ui.TextRange(start: 17, end: 18),
     );
     expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: 6 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      const ui.TextRange(start: 6, end: 12),
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 17)),
+      const ui.TextRange(start: 17, end: 18),
     );
     expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: 12 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      const ui.TextRange(start: 12, end: 17),
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 16)),
+      const ui.TextRange(start: 15, end: 16),
     );
-
     expect(
-      paragraph.getLineBoundary(
-        const ui.TextPosition(offset: -1 /* affinity: ui.TextAffinity.downstream */),
-      ),
-      ui.TextRange.empty,
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 15)),
+      const ui.TextRange(start: 15, end: 16),
     );
-
     expect(
-      paragraph.getLineBoundary(
-        ui.TextPosition(offset: paragraph.text.length + 1, affinity: ui.TextAffinity.upstream),
-      ),
-      ui.TextRange.empty,
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 14)),
+      const ui.TextRange(start: 13, end: 14),
+    );
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 13)),
+      const ui.TextRange(start: 13, end: 14),
+    );
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 12)),
+      const ui.TextRange(start: 0, end: 12),
+    );
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 11)),
+      const ui.TextRange(start: 0, end: 12),
     );
   });
 

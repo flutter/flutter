@@ -1041,16 +1041,11 @@ class WebParagraph implements ui.Paragraph {
     }
 
     for (final TextLine line in _layout.lines) {
-      if (line.allLineTextRange.isBefore(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
-        continue;
+      if (codeUnitOffset >= line.correctedAllLineTextRange.start &&
+          codeUnitOffset < line.correctedAllLineTextRange.end) {
+        WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
+        return line.lineNumber;
       }
-      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        break;
-      }
-
-      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
-      return line.lineNumber;
     }
 
     assert(false, 'getLineNumberAt($codeUnitOffset): null (out of range, should not happen)');
