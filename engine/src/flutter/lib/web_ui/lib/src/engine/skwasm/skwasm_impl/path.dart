@@ -31,8 +31,10 @@ class SkwasmPath implements BackendPath {
   @override
   void dispose() {
     assert(!_isDisposed, 'SkwasmPath has already been disposed.');
-    pathDispose(handle);
-    _isDisposed = true;
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
   }
 
   @override
@@ -75,13 +77,18 @@ class SkwasmPathBuilder implements BackendPathBuilder {
   bool _isDisposed = false;
 
   @override
-  SkwasmPath build() => SkwasmPath.fromHandle(pathCopy(handle));
+  SkwasmPath build() {
+    assert(!_isDisposed, 'SkwasmPathBuilder has been disposed.');
+    return SkwasmPath.fromHandle(pathCopy(handle));
+  }
 
   @override
   void dispose() {
     assert(!_isDisposed, 'SkwasmPathBuilder has already been disposed.');
-    pathDispose(handle);
-    _isDisposed = true;
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
   }
 
   @override
