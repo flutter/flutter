@@ -28,6 +28,13 @@ analyzer:
       # Ignore protoc generated files
     - "dev/conductor/lib/proto/*"
     - "engine/**"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 formatter:
   page_width: 100

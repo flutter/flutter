@@ -82,7 +82,8 @@ ScopedObject<Context> PlaygroundTest::CreateContext() const {
       } user_data;
       user_data.resolver = CreateVKProcAddressResolver();
       settings.user_data = &user_data;
-      settings.enable_vulkan_validation = switches_.enable_vulkan_validation;
+      settings.enable_vulkan_validation =
+          GetSwitches().enable_vulkan_validation;
       settings.proc_address_callback = [](void* instance,         //
                                           const char* proc_name,  //
                                           void* user_data         //
