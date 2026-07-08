@@ -37,10 +37,14 @@ String get testSelector {
 
 /// Runs a specific web test
 Future<void> runWebTest(WebTest test) async {
+  print('DEBUG: runWebTest started');
   ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
   final completer = Completer<void>();
+  print('DEBUG: calling bootstrapEngine');
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
+  print('DEBUG: bootstrapEngine returned, waiting for runApp callback');
   await completer.future;
+  print('DEBUG: runApp callback received');
 
   goldenFileComparator = HttpProxyGoldenComparator(test.goldensUri);
 
@@ -57,21 +61,27 @@ Future<void> runWebTest(WebTest test) async {
 }
 
 void _internalBootstrapBrowserTest(EntryPoint Function() getMain) {
+  print('DEBUG: _internalBootstrapBrowserTest started');
   final StreamChannel<Object?> channel = _serializeSuite(getMain, hidePrints: false);
+  print('DEBUG: _serializeSuite returned');
   _postMessageChannel().pipe(channel);
+  print('DEBUG: _postMessageChannel piped');
 }
 
 StreamChannel<Object?> _serializeSuite(EntryPoint Function() getMain, {bool hidePrints = true}) =>
     RemoteListener.start(getMain, hidePrints: hidePrints);
 
 StreamChannel<Object?> _postMessageChannel() {
+  print('DEBUG: _postMessageChannel started');
   final controller = StreamChannelController<Object?>(sync: true);
   final channel = web.MessageChannel();
+  print('DEBUG: sending port message to parent');
   web.window.parent!.postMessage(
     'port'.toJS,
     web.window.location.origin,
     <JSObject>[channel.port2].toJS,
   );
+  print('DEBUG: port message sent');
 
   final JSFunction eventCallback = (web.Event event) {
     controller.local.sink.add(event.data.dartify());
