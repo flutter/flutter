@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -321,7 +322,10 @@ void main() {
       final Iterable<String> result = file
           .readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
-          .map((String line) => line.split('=')[1]);
+          .map((String line) {
+            final int index = line.indexOf('=');
+            return line.substring(index + 1);
+          });
       return result.isEmpty ? null : result.first;
     }
 
@@ -570,6 +574,117 @@ flutter:
         ),
       );
     });
+
+    testUsingAndroidContext('writes dart-defines to a dedicated file', () async {
+      const manifest = '''
+name: test
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync(manifest);
+
+      const buildInfo = BuildInfo(
+        BuildMode.release,
+        null,
+        dartDefines: <String>['foo=2', 'bar=2'],
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+
+      final List<String> gradleConfig = buildInfo.toGradleConfig();
+      final String filePath = gradleConfig.firstWhere((String arg) => arg.contains('dart-defines-file')).split('=').last;
+
+      final File dartDefinesFile = globals.fs.file(filePath);
+      expect(dartDefinesFile.existsSync(), isTrue);
+      expect(
+        dartDefinesFile.readAsStringSync(),
+        encodeDartDefines(<String>['foo=2', 'bar=2']),
+      );
+    });
+
+    testUsingAndroidContext('writes no file when dart-defines is empty', () async {
+      const manifest = '''
+name: test
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync(manifest);
+
+      const buildInfo = BuildInfo(
+        BuildMode.release,
+        null,
+        dartDefines: <String>[],
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+
+      final List<String> gradleConfig = buildInfo.toGradleConfig();
+      final String? filePath = gradleConfig.firstWhereOrNull((String arg) => arg.contains('dart-defines-file'))?.split('=').last;
+      expect(filePath, isNull);
+    });
+
+    // Regression test: on Windows, passing dart-defines via -P command-line
+    // args to Gradle can exceed the 8,191-character command-line limit.
+    // Dart-defines are now written to a dedicated file and the path is passed
+    // via -Pdart-defines-file instead.
+    testUsingAndroidContext(
+      'large dart-defines (>8191 chars) are written to a dedicated file, not command-line args',
+      () async {
+        const manifest = '''
+name: test
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+        final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
+        manifestFile.createSync(recursive: true);
+        manifestFile.writeAsStringSync(manifest);
+
+        // Generate dart defines that exceed the Windows command-line limit of
+        // 8,191 characters when encoded.
+        final largeDartDefines = <String>[
+          for (int i = 0; i < 200; i++) 'DEFINE_KEY_$i=${'x' * 40}',
+        ];
+
+        final buildInfo = BuildInfo(
+          BuildMode.release,
+          null,
+          dartDefines: largeDartDefines,
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        );
+
+        // Verify the encoded dart-defines exceed 8,191 characters.
+        final String encoded = encodeDartDefines(largeDartDefines);
+        expect(encoded.length, greaterThan(8191));
+
+        // Verify toGradleConfig() does NOT include -Pdart-defines-file.
+        final List<String> gradleConfig = buildInfo.toGradleConfig();
+        expect(
+          gradleConfig.where((String arg) => arg.startsWith('-Pdart-defines=')),
+          isEmpty,
+          reason: 'dart-defines should not be in Gradle command-line args',
+        );
+        final String? filePath = gradleConfig.firstWhereOrNull((String arg) => arg.contains('dart-defines-file'))?.split('=').last;
+        expect(filePath, isNotNull);
+        final File dartDefinesFile = globals.fs.file(filePath);
+        expect(dartDefinesFile.existsSync(), isTrue);
+        expect(dartDefinesFile.readAsStringSync(), encoded);
+        expect(dartDefinesFile.readAsStringSync().length, greaterThan(8191));
+      },
+    );
   });
 
   group('isAppUsingAndroidX', () {

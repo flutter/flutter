@@ -407,9 +407,35 @@ class BuildInfo {
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
+    // Dart-defines are written to a dedicated file rather than passed directly
+    // as a `-Pdart-defines` command-line argument. This avoids exceeding the
+    // command-line length limit on Windows (8,191 characters) when large
+    // `--dart-define-from-file` payloads are used.
+    String? dartDefinesFilePath;
+    if (dartDefines.isNotEmpty) {
+      final String encoded = encodeDartDefines(dartDefines);
+      // The path is keyed by build mode (and flavor, if any) so that concurrent
+      // builds of different configurations do not overwrite each other's file.
+      Directory dartDefinesDir = globals.fs
+          .directory(getAndroidBuildDirectory())
+          .childDirectory('app')
+          .childDirectory('intermediates')
+          .childDirectory('flutter')
+          .childDirectory(mode.cliName);
+      if (flavor != null) {
+        dartDefinesDir = dartDefinesDir.childDirectory(flavor!);
+      }
+      dartDefinesDir.createSync(recursive: true);
+      final File dartDefinesFile = dartDefinesDir.childFile('dart_defines.properties');
+      dartDefinesFile.writeAsStringSync(encoded);
+      // Gradle is invoked from the `android/` directory, so an absolute path is
+      // required for it to resolve the file regardless of its working directory.
+      dartDefinesFilePath = dartDefinesFile.absolute.path;
+    }
+
     // PACKAGE_CONFIG not currently supported.
     return <String>[
-      if (dartDefines.isNotEmpty) '-Pdart-defines=${encodeDartDefines(dartDefines)}',
+      if (dartDefinesFilePath != null) '-Pdart-defines-file=$dartDefinesFilePath',
       '-Pdart-obfuscation=$dartObfuscation',
       if (frontendServerStarterPath != null)
         '-Pfrontend-server-starter-path=$frontendServerStarterPath',

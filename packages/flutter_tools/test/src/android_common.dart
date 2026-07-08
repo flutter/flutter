@@ -69,6 +69,24 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
   }
 }
 
+/// Returns the `-Pdart-defines-file=...` Gradle argument that
+/// [BuildInfo.toGradleConfig] produces for the given [mode] and [flavor].
+///
+/// The path must match the one written by `toGradleConfig`, which is keyed by
+/// build mode (and flavor, if any) and passed to Gradle as an absolute path.
+String dartDefinesFileArg(BuildMode mode, {String? flavor}) {
+  file_system.Directory dir = globals.fs
+      .directory(getAndroidBuildDirectory())
+      .childDirectory('app')
+      .childDirectory('intermediates')
+      .childDirectory('flutter')
+      .childDirectory(mode.cliName);
+  if (flavor != null) {
+    dir = dir.childDirectory(flavor);
+  }
+  return '-Pdart-defines-file=${dir.childFile('dart_defines.properties').absolute.path}';
+}
+
 // The following test outline shares a lot of similarities with the one in
 // dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 // When making changes here, consider making the corresponding changes to that
