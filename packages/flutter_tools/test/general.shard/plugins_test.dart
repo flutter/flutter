@@ -2046,6 +2046,30 @@ platforms:
         },
       );
 
+      testUsingContext(
+        'Plugin.fromYaml rejects a web plugin whose pluginClass/fileName contain injection',
+        () async {
+          const String maliciousYaml = '''
+platforms:
+  web:
+    pluginClass: "P; void pwn() {} //"
+    fileName: some_file.dart
+''';
+          expect(
+            () => Plugin.fromYaml(
+              'evil_web_plugin',
+              '',
+              loadYaml(maliciousYaml) as YamlMap,
+              null,
+              const <String>[],
+              fileSystem: globals.fs,
+              isDevDependency: false,
+            ),
+            throwsToolExit(),
+          );
+        },
+      );
+
       testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(
           <String>['ios', 'android', 'linux'],

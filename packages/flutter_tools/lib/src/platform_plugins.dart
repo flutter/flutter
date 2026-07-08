@@ -39,6 +39,17 @@ final RegExp _pluginIdentifierPattern = RegExp(
 bool _isValidPluginIdentifier(Object? value) =>
     value is! String || _pluginIdentifierPattern.hasMatch(value);
 
+// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
+// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
+// `import` in the generated registrant, so they must not contain quotes,
+// semicolons, whitespace or parent-directory segments.
+final RegExp pluginDartFileNamePattern = RegExp(r'^[a-zA-Z0-9_][a-zA-Z0-9_./-]*\.dart$');
+
+// Returns false only when [value] is a String that is not a safe Dart file name.
+bool isValidPluginDartFileName(Object? value) =>
+    value is! String ||
+    (pluginDartFileNamePattern.hasMatch(value) && !value.contains('..'));
+
 /// Constant for 'sharedDarwinSource' key in plugin maps.
 /// Can be set for iOS and macOS plugins.
 const kSharedDarwinSource = 'sharedDarwinSource';
@@ -656,6 +667,12 @@ class WebPlugin extends PluginPlatform {
     }
     if (yaml['fileName'] is! String) {
       throwToolExit('The plugin `$name` is missing the required field `fileName` in pubspec.yaml');
+    }
+    if (!_isValidPluginIdentifier(yaml['pluginClass'])) {
+      throwToolExit('The plugin `$name` has an invalid `pluginClass` in its web plugin declaration.');
+    }
+    if (!isValidPluginDartFileName(yaml['fileName'])) {
+      throwToolExit('The plugin `$name` has an invalid `fileName` in its web plugin declaration.');
     }
     return WebPlugin(
       name: name,
