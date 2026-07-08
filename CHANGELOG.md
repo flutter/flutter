@@ -34,7 +34,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.44.6](https://github.com/flutter/flutter/releases/tag/3.44.6)
 - [flutter/187980](https://github.com/flutter/flutter/issues/187980) On Linux, building asset bundles with native assets enabled without a native app build directory crashes due to missing `CMakeCache.txt`.
-- [flutter/188805](https://github.com/flutter/flutter/issues/188805) Fixes a crash when running android instrumented tests.
+- [flutter/188805](https://github.com/flutter/flutter/issues/188805) Fixes a crash when running Android instrumented tests.
 
 ### [3.44.5](https://github.com/flutter/flutter/releases/tag/3.44.5)
 - [flutter/188718](https://github.com/flutter/flutter/issues/188718) When building Flutter Android apps and add-to-app modules using AGP < 9 with KGP, the tool incorrectly logs Built-in Kotlin migration warnings.
