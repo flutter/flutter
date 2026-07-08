@@ -303,6 +303,7 @@ class CustomDeviceAppSession {
         ],
         if (debuggingOptions.startPaused) 'start-paused=true',
         if (debuggingOptions.disableServiceAuthCodes) 'disable-service-auth-codes=true',
+        if (debuggingOptions.disableServiceOriginCheck) 'disable-service-origin-check=true',
         if (debuggingOptions.dartFlags.isNotEmpty) 'dart-flags=${debuggingOptions.dartFlags}',
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',
