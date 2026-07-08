@@ -295,10 +295,8 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: false',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.empty(),
-      FileSystem: () => _ThrowingResolveFileSystem(
-            fileSystem,
-            '${environment.outputDir.path}/mock_clang++',
-          ),
+      FileSystem: () =>
+          _ThrowingResolveFileSystem(fileSystem, '${environment.outputDir.path}/mock_clang++'),
     },
     () async {
       if (!const LocalPlatform().isLinux) {
@@ -326,10 +324,8 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: true',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.empty(),
-      FileSystem: () => _ThrowingResolveFileSystem(
-            fileSystem,
-            '${environment.outputDir.path}/mock_clang++',
-          ),
+      FileSystem: () =>
+          _ThrowingResolveFileSystem(fileSystem, '${environment.outputDir.path}/mock_clang++'),
     },
     () async {
       if (!const LocalPlatform().isLinux) {
