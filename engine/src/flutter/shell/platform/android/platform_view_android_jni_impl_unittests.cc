@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <dlfcn.h>
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -20,6 +18,7 @@ namespace flutter {
 namespace testing {
 
 using ::testing::_;
+using ::testing::ElementsAre;
 using ::testing::Return;
 using ::testing::ReturnArg;
 
@@ -175,41 +174,37 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        0, 0, 0, 0, 0, 0, 0, 0);
 }
 
-TEST(FindFirstLoadableLibraryTest, ReturnsNullptrForEmptySearchPaths) {
-  EXPECT_EQ(FindFirstLoadableLibrary({}), nullptr);
+// The load order is exercised with an injected loader rather than real dlopen():
+// the property under test is purely the ordering (first-to-last, stop at the
+// first that loads), and a fake loader makes that deterministic and free of any
+// platform- or system-library-specific behavior. Whether a given path format is
+// actually loadable is covered end-to-end by the deferred_components_test.
+TEST(FindFirstLoadableLibraryTest, TriesInOrderAndStopsAtFirstSuccess) {
+  std::vector<std::string> attempted;
+  void* const kHandle = reinterpret_cast<void*>(0x1234);
+  auto opener = [&](const std::string& path) -> void* {
+    attempted.push_back(path);
+    return path == "b" ? kHandle : nullptr;
+  };
+  EXPECT_EQ(FindFirstLoadableLibrary({"a", "b", "c"}, opener), kHandle);
+  // "c" is never attempted because "b" already loaded.
+  EXPECT_THAT(attempted, ElementsAre("a", "b"));
 }
 
-TEST(FindFirstLoadableLibraryTest, ReturnsNullptrWhenNothingLoads) {
+TEST(FindFirstLoadableLibraryTest, TriesAllAndReturnsNullWhenNoneLoad) {
+  std::vector<std::string> attempted;
+  auto opener = [&](const std::string& path) -> void* {
+    attempted.push_back(path);
+    return nullptr;
+  };
+  EXPECT_EQ(FindFirstLoadableLibrary({"a", "b"}, opener), nullptr);
+  EXPECT_THAT(attempted, ElementsAre("a", "b"));
+}
+
+TEST(FindFirstLoadableLibraryTest, EmptyReturnsNull) {
   EXPECT_EQ(FindFirstLoadableLibrary(
-                {"/flutter/does/not/exist/a.so", "/flutter/nope/b.so"}),
+                {}, [](const std::string&) -> void* { return nullptr; }),
             nullptr);
-}
-
-TEST(FindFirstLoadableLibraryTest, PrefersEarlierLoadablePath) {
-  // Use two distinct system libraries as stand-ins for two loadable candidates.
-  // This keeps the test free of build-time .so fixtures while still exercising
-  // the real dlopen()-based ordering on the standard host test runners.
-#if defined(__APPLE__)
-  const char* lib_a = "/usr/lib/libSystem.B.dylib";
-  const char* lib_b = "/usr/lib/libz.dylib";
-#else
-  const char* lib_a = "libc.so.6";
-  const char* lib_b = "libm.so.6";
-#endif
-  void* handle_a = ::dlopen(lib_a, RTLD_NOW);
-  void* handle_b = ::dlopen(lib_b, RTLD_NOW);
-  if (handle_a == nullptr || handle_b == nullptr || handle_a == handle_b) {
-    GTEST_SKIP() << "Requires two distinct loadable system libraries.";
-  }
-
-  // When more than one path is loadable, the earliest one in the list wins.
-  EXPECT_EQ(FindFirstLoadableLibrary({lib_a, lib_b}), handle_a);
-  EXPECT_EQ(FindFirstLoadableLibrary({lib_b, lib_a}), handle_b);
-
-  // Unloadable paths are skipped until the first that loads.
-  EXPECT_EQ(
-      FindFirstLoadableLibrary({"/flutter/does/not/exist.so", lib_b, lib_a}),
-      handle_b);
 }
 
 }  // namespace testing
