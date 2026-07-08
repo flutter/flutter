@@ -21,7 +21,9 @@ UberSDFParameters UberSDFParameters::MakeRect(
                 {.width = stroke->width, .join = Join::kBevel}))
           : stroke;
 
-  return UberSDFParameters{.type = Type::kRect,
+  return UberSDFParameters{.shape_type = ShapeType::kRect,
+                           .filter_type = FilterType::kAntialiasing,
+                           .filter_scale = kAntialiasPixels,
                            .color = color,
                            .center = rect.GetCenter(),
                            .size = size,
@@ -38,7 +40,9 @@ UberSDFParameters UberSDFParameters::MakeCircle(
   // share bounds calculations without having to test for circle vs rect.
   Point size = Point(radius, radius);
 
-  return UberSDFParameters{.type = Type::kCircle,
+  return UberSDFParameters{.shape_type = ShapeType::kCircle,
+                           .filter_type = FilterType::kAntialiasing,
+                           .filter_scale = kAntialiasPixels,
                            .color = color,
                            .center = center,
                            .size = size,
@@ -50,11 +54,29 @@ UberSDFParameters UberSDFParameters::MakeOval(
     const Rect& bounds,
     std::optional<StrokeParameters> stroke) {
   Point size = Point(bounds.GetSize() * 0.5f);
-  return UberSDFParameters{.type = Type::kOval,
+  return UberSDFParameters{.shape_type = ShapeType::kOval,
+                           .filter_type = FilterType::kAntialiasing,
+                           .filter_scale = kAntialiasPixels,
                            .color = color,
                            .center = bounds.GetCenter(),
                            .size = size,
                            .stroke = stroke};
+}
+
+UberSDFParameters UberSDFParameters::MakeOvalShadow(Color color,
+                                                    const Rect& bounds,
+                                                    bool is_device_space,
+                                                    Scalar shadow_radius) {
+  Point size = Point(bounds.GetSize() * 0.5f);
+  return UberSDFParameters{.shape_type = ShapeType::kOval,
+                           //  .filter_type = FilterType::kSDFGradient,
+                           .filter_type = is_device_space
+                                              ? FilterType::kDeviceSpaceShadow
+                                              : FilterType::kLocalSpaceShadow,
+                           .filter_scale = shadow_radius,
+                           .color = color,
+                           .center = bounds.GetCenter(),
+                           .size = size};
 }
 
 UberSDFParameters UberSDFParameters::MakeRoundedRect(
@@ -64,7 +86,9 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
     std::optional<StrokeParameters> stroke) {
   Point size = Point(rect.GetSize() * 0.5f);
   return UberSDFParameters{
-      .type = Type::kRoundedRect,
+      .shape_type = ShapeType::kRoundedRect,
+      .filter_type = FilterType::kAntialiasing,
+      .filter_scale = kAntialiasPixels,
       .color = color,
       .center = rect.GetCenter(),
       .size = size,
@@ -87,7 +111,9 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
   Point size = Point(bounds.GetSize() * 0.5f);
 
   return UberSDFParameters{
-      .type = Type::kRoundedSuperellipseSymmetric,
+      .shape_type = ShapeType::kRoundedSuperellipseSymmetric,
+      .filter_type = FilterType::kAntialiasing,
+      .filter_scale = kAntialiasPixels,
       .color = color,
       .center = center,
       .size = size,

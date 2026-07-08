@@ -281,7 +281,18 @@ class Canvas {
   /// Returns true if the paint is compatible with SDF rendering.
   ///
   /// Visible for testing.
-  static bool IsCompatibleWithSDFRendering(const Paint& paint);
+  static bool IsCompatibleWithSDFAntialiasRendering(const Paint& paint);
+
+  /// Returns true if the paint is compatible with using the UberSDF shader
+  /// for a shadow operation.
+  ///
+  /// Visible for testing.
+  static bool IsCompatibleWithSDFShadowRendering(const Paint& paint);
+
+  /// Returns true if the blend mode is compatible with SDF rendering.
+  ///
+  /// Visible for testing.
+  static bool IsCompatibleWithSDFRendering(BlendMode blend_mode);
 
  private:
   class BlurShape {
@@ -289,7 +300,8 @@ class Canvas {
     virtual ~BlurShape() = default;
     virtual Rect GetBounds() const = 0;
     virtual std::shared_ptr<SolidBlurContents> BuildBlurContent(
-        Sigma sigma) = 0;
+        const Matrix& matrix,
+        const Paint::MaskBlurDescriptor& blur) = 0;
     virtual const Geometry& BuildDrawGeometry() = 0;
   };
   class RRectBlurShape;
@@ -398,6 +410,20 @@ class Canvas {
   /// Returns the radius common to both width and height of all corners,
   /// or -1 if the radii are not uniform.
   static Scalar GetCommonRRectLikeRadius(const RoundingRadii& radii);
+
+  /// Returns the local radius of a shadow for the specified matrix and sigma.
+  /// Note that this is the distance applied both inside and outside the
+  /// outline of the shape over which the shadow will progress from
+  /// maximum umbra/opacity to transparency.
+  static Scalar GetShadowLocalRadius(const Matrix& matrix,
+                                     const Paint::MaskBlurDescriptor& mask);
+
+  /// Returns the device radius of a shadow for the specified matrix and sigma.
+  /// Note that this is the distance applied both inside and outside the
+  /// outline of the shape over which the shadow will progress from
+  /// maximum umbra/opacity to transparency.
+  static Scalar GetShadowDeviceRadius(const Matrix& matrix,
+                                      const Paint::MaskBlurDescriptor& mask);
 
   bool AttemptDrawBlurredPathSource(const PathSource& source,
                                     const Paint& paint);

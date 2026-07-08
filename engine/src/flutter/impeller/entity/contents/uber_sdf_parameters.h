@@ -24,12 +24,19 @@ struct UberSDFParameters {
   static constexpr Scalar kAntialiasPixels = 1.0f;
 
   /// The type of primitive shape.
-  enum class Type {
+  enum class ShapeType {
     kCircle,
     kRect,
     kOval,
     kRoundedRect,
     kRoundedSuperellipseSymmetric,
+  };
+
+  enum class FilterType {
+    kAntialiasing,
+    kDeviceSpaceShadow,
+    kLocalSpaceShadow,
+    kSDFGradient,
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -48,6 +55,12 @@ struct UberSDFParameters {
                                     const Rect& bounds,
                                     std::optional<StrokeParameters> stroke);
 
+  /// Creates UberSDFParameters for an Oval shadow.
+  static UberSDFParameters MakeOvalShadow(Color color,
+                                          const Rect& bounds,
+                                          bool is_device_space,
+                                          Scalar shadow_radius);
+
   /// Creates UberSDFParameters for a rounded rectangle.
   static UberSDFParameters MakeRoundedRect(
       Color color,
@@ -63,7 +76,20 @@ struct UberSDFParameters {
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
-  Type type;
+  ShapeType shape_type;
+
+  /// The manner in which the edge is filtered.
+  FilterType filter_type;
+
+  /// The scale of the filtered edge.
+  ///
+  /// The symmetric local space distance (measured both inside and outside
+  /// the shape) over which to apply a Gaussian Cumulative Distribution curve
+  /// if this is a shadow operation. The total distance from maximum shadow
+  /// opacity to transparency is twice this distance.
+  ///
+  /// Note: This value overrides the use of aa_pixels.
+  Scalar filter_scale = 0.0f;
 
   /// The color used for filling or stroking the shape.
   Color color;

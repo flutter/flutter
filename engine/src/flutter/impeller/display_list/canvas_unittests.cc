@@ -538,9 +538,13 @@ TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
       }
     }
 
+    EXPECT_EQ(blend_mode_is_compatible,
+              Canvas::IsCompatibleWithSDFRendering(blend_mode))
+        << "Failure for BlendMode: " << BlendModeToString(blend_mode);
+
     Paint paint = {.blend_mode = blend_mode};
     EXPECT_EQ(blend_mode_is_compatible,
-              Canvas::IsCompatibleWithSDFRendering(paint))
+              Canvas::IsCompatibleWithSDFAntialiasRendering(paint))
         << "Failure for BlendMode: " << BlendModeToString(blend_mode);
   }
 }
@@ -548,12 +552,23 @@ TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
 TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
   Paint paint;
   paint.anti_alias = false;
-  EXPECT_FALSE(Canvas::IsCompatibleWithSDFRendering(paint));
+  EXPECT_FALSE(Canvas::IsCompatibleWithSDFAntialiasRendering(paint));
 }
 
 TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
   Paint paint;
-  EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
+  EXPECT_TRUE(Canvas::IsCompatibleWithSDFAntialiasRendering(paint));
+}
+
+TEST(CanvasTest, NonMaskFilteredPaintIncompatibleWithSDFShadowRendering) {
+  Paint paint;
+  EXPECT_FALSE(Canvas::IsCompatibleWithSDFShadowRendering(paint));
+}
+
+TEST(CanvasTest, MaskFilteredPaintCompatibleWithSDFShadowRendering) {
+  Paint paint;
+  paint.mask_blur_descriptor = {{}};
+  EXPECT_TRUE(Canvas::IsCompatibleWithSDFShadowRendering(paint));
 }
 
 }  // namespace testing

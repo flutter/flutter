@@ -5,6 +5,7 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
+#include <impeller/gaussian.glsl>
 #include <impeller/types.glsl>
 
 #include "sdf_functions.glsl"
@@ -14,11 +15,12 @@ uniform FragInfo {
   vec4 color;
   vec2 center;
   vec2 size;
+  float shape_type;
+  float filter_type;
+  float filter_scale;
   float stroke_width;
   float stroke_join;
-  float aa_pixels;
   float stroked;
-  float type;
   vec2 superellipse_degree;
   vec2 superellipse_semi_axis;
   vec2 angle_span;
@@ -142,13 +144,13 @@ float pixelSize(float sdf) {
 
 vec2 filledSDF(vec2 p) {
   float sdf;
-  if (frag_info.type < 0.5) {  // Circle
+  if (frag_info.shape_type < 0.5) {  // Circle
     sdf = distanceFromCircle(p, frag_info.size.x);
-  } else if (frag_info.type < 1.5) {  // Rect
+  } else if (frag_info.shape_type < 1.5) {  // Rect
     sdf = distanceFromRect(p, frag_info.size);
-  } else if (frag_info.type < 2.5) {  // Oval
+  } else if (frag_info.shape_type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
-  } else if (frag_info.type < 3.5) {  // Rounded Rect
+  } else if (frag_info.shape_type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {  // Symmetric Rounded Superellipse
     sdf = distanceFromRoundedSuperellipse(
@@ -167,8 +169,10 @@ vec2 strokedSDF(vec2 p) {
 
   float half_stroke = max(frag_info.stroke_width, base_pixel_size) * 0.5;
 
-  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
-
+  // Some cases need special handling because their stroked SDFs have a
+  // different shape from their base SDFs.
+  if (frag_info.shape_type >= 0.5 && frag_info.shape_type < 1.5) {  // Rect
+    // Rect has slightly different outer shape depending on the join type
     if (frag_info.stroke_join < 0.5) {  // Miter
       float outer = distanceFromRect(p, frag_info.size + half_stroke);
       float inner = base_sdf + half_stroke;
@@ -186,15 +190,89 @@ vec2 strokedSDF(vec2 p) {
   return SDFStroke(base_sdf, base_pixel_size, frag_info.stroke_width);
 }
 
+float getAlpha(vec2 sdf_and_pixel_size) {
+  highp float sdf = sdf_and_pixel_size.x;
+  highp float pixel_size = sdf_and_pixel_size.y;
+
+  if (frag_info.filter_type < 0.5) {
+    // Antialiasing case. The filter_scale is the size of the AA pixel blends
+    // at the edge of the shape and the SDFAlpha function uses a smoothstep
+    // function to filter the coverage across those blended pixels.
+    return SDFAlpha(sdf, pixel_size, frag_info.filter_scale);
+  }
+
+  // Else we are processing a shadow.
+  // Shadows. Fade from alpha 1 to 0 across the edge of the SDF at a distance
+  // of -shadow_radius on the inside of the shape where the shadow is most
+  // opaque (maximum umbra) to a distance of +shadow_radius on the outside
+  // of the shape where the shadow fades to transparent.
+  //
+  // The total distance over which the shadow fades from maximum umbra to
+  // transparency is (shadow_radius * 2.0)
+  //
+  // The scale changes +/-shadow_radius to +/-0.5, we then invert that scaled
+  // number (we want higher values on the inside) and offset by 0.5 to get
+  // a gaussian coefficient from 1 (inside/umbra) to 0 (outside/transparent).
+  if (frag_info.filter_type > 10.0) {
+    float shadow_scale;
+    if (frag_info.filter_type < 1.5) {
+      // Device scale shadow.
+      shadow_scale = 0.5 / (frag_info.filter_scale * pixel_size);
+    } else {
+      // Local space shadow.
+      shadow_scale = 0.5 / frag_info.filter_scale;
+    }
+    float gaussian_t = clamp(0.5 - sdf * shadow_scale, 0.0, 1.0);
+    return IPHalfFractionToFastGaussianCDF(gaussian_t);
+  }
+  highp float shadow_size;
+  if (frag_info.filter_type < 1.5) {
+    // Device scale shadow.
+    shadow_size = frag_info.filter_scale * pixel_size;
+  } else {
+    // Local space shadow.
+    shadow_size = frag_info.filter_scale;
+  }
+  float gaussian_t = 1.0 - smoothstep(-shadow_size, shadow_size, sdf);
+  return gaussian_t;
+}
+
+#undef SDF_VISUALIZATION
+
+#ifdef SDF_VISUALIZATION
+vec4 SampleSDFVisualization(vec2 sdf_and_pixel_size) {
+  float d = sdf_and_pixel_size.x;
+  float px = sdf_and_pixel_size.y;
+
+  // The following constants are tuned for a coordinate system where 1.0
+  // represents 100 pixels.
+  float d_norm = d / 100.0;
+  float px_norm = px / 100.0;
+
+  vec3 col = (d > 0.0) ? vec3(0.9, 0.6, 0.3) : vec3(0.65, 0.85, 1.0);
+  col *= 1.0 - exp2(-12.0 * abs(d_norm));
+  col *= 0.8 + 0.2 * cos(120.0 * d_norm);
+  col =
+      mix(col, vec3(1.0), smoothstep(1.5 * px_norm, 0.0, abs(d_norm) - 0.002));
+
+  return vec4(col, 1.0);
+}
+#endif  // SDF_VISUALIZATION
+
 void main() {
   vec2 p = v_position - frag_info.center;
 
   vec2 sdf_and_pixel_size =
       (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
-  float sdf = sdf_and_pixel_size.x;
-  float pixel_size = sdf_and_pixel_size.y;
 
-  float alpha = SDFAlpha(sdf, pixel_size, frag_info.aa_pixels);
+#ifdef SDF_VISUALIZATION
+  if (frag_info.filter_type > 2.5) {
+    frag_color = SampleSDFVisualization(sdf_and_pixel_size);
+    return;
+  }
+#endif  // SDF_VISUALIZATION
+
+  float alpha = getAlpha(sdf_and_pixel_size);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
