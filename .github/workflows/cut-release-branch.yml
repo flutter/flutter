@@ -12,6 +12,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   check-membership:
     runs-on: ubuntu-latest
@@ -20,9 +23,6 @@ jobs:
     steps:
       - name: Check if user is in the required team
         id: check
-        env:
-          GH_TOKEN: ${{ secrets.FLUTTER_READ_ORG }}
-          ACTOR: ${{ github.actor }}
         run: |
           # Use the GitHub CLI to check team membership
           # Returns 204 if member, 404 if not
@@ -32,6 +32,9 @@ jobs:
             echo "::error::User $ACTOR is not a member of flutter-release-eng."
             exit 1
           fi
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTER_READ_ORG }}
+          ACTOR: ${{ github.actor }}
 
   create-release-branch:
     needs: check-membership
@@ -50,10 +53,19 @@ jobs:
           fi
 
       - name: Checkout target commit
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ inputs.commit_hash }}
           token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          persist-credentials: false
+
+      - name: Configure Git
+        run: |
+          gh auth setup-git
+          git config --global user.name "flutteractionsbot"
+          git config --global user.email "<flutter-actions-bot@google.com>"
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Set Environment Variables
         env:
@@ -67,11 +79,8 @@ jobs:
             echo "Error: Branch $BRANCH_NAME already exists on remote."
             exit 1
           fi
-
-      - name: Configure Git
-        run: |
-          git config user.name "flutteractionsbot"
-          git config user.email "<flutter-actions-bot@google.com>"
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Create Branch and Version File
         run: |
@@ -92,3 +101,5 @@ jobs:
           echo "## Release Branch \`$BRANCH_NAME\` Cut Successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **View Branch** https://github.com/$GITHUB_REPOSITORY/tree/$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}

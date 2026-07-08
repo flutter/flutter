@@ -14,8 +14,9 @@ import 'package:flutter/widgets.dart';
 ///
 /// This widget does not provide a concrete implementation of text selection handles
 /// out of the box, and instead uses [testTextSelectionHandleControls] as a default.
-/// A more robust implementation of text selection handles can be provided by
-/// setting [selectionControls].
+/// Selection handles are not shown by default unless [showSelectionHandles] is set
+/// to true. A more robust implementation of text selection handles can be provided
+/// by setting [selectionControls].
 ///
 /// This input field manages its own internal [TextEditingController]
 /// and [FocusNode] unless provided one. This field also provides defaults
@@ -39,7 +40,7 @@ class TestTextField extends StatefulWidget {
     this.style,
     this.controller,
     this.onSubmitted,
-    this.selectAllOnFocus,
+    this.showSelectionHandles = false,
   });
 
   final Iterable<String>? autofillHints;
@@ -57,6 +58,7 @@ class TestTextField extends StatefulWidget {
   final TextStyle? style;
   final TextEditingController? controller;
   final ValueChanged<String>? onSubmitted;
+  final bool showSelectionHandles;
 
   /// Controls whether all text is selected when the field receives focus.
   ///
@@ -129,7 +131,7 @@ class _TestTextFieldState extends State<TestTextField>
           showCursor: widget.showCursor,
           style: widget.style ?? const TextStyle(), // required by editable text.
           controller: _effectiveController, // required by editable text.
-          selectAllOnFocus: widget.selectAllOnFocus,
+          showSelectionHandles: widget.showSelectionHandles,
         ),
       ),
     );
