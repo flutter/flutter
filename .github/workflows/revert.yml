@@ -20,71 +20,49 @@ jobs:
         run: |
           gh pr comment "$PR_NUMBER" -R flutter/flutter -b "Only merged pull requests can be reverted."
           gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
-          exit 0
+
+          # Cancel the workflow and poll the API with a 5-minute safety timeout to prevent infinite runner hanging
+          gh run cancel ${{ github.run_id }} || true
+          for i in {1..60}; do
+            echo "Waiting for cancellation signal... [$i/60]"
+            sleep 5
+          done
+          echo "Cancellation signal timeout reached. Forcing failure."
+          exit 1
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
 
-      - name: Verify Reason for Revert
-        if: github.event.pull_request.merged == true
-        id: verify-reason
+      - name: Verify Reason and Fetch PR Details
         run: |
-          # Write sanitized output to a temporary file
-          gh pr view "$PR_NUMBER" -R "$REPO" --json comments \
-            --jq '.comments[] | .body | select(startswith("Reason for revert:")) | sub("^Reason for revert:\\s*"; "")' | head -n 1 > reason.txt
+          # Fetch body, comments, and reviews in a single consolidated API call
+          gh pr view "$PR_NUMBER" -R "$REPO" --json body,comments,reviews > pr_details.json
+
+          # Parse the revert reason case-insensitively and robustly, while allowing the latest "revert" reason to win.
+          jq -r '.comments // [] | .[] | .body | select(test("^reason for revert:"; "i")) | sub("^reason for revert:\\s*"; ""; "i")' pr_details.json | tail -n 1 > reason.txt
 
           if [ ! -s reason.txt ]; then
             gh pr comment "$PR_NUMBER" -R flutter/flutter -b "A reason for requesting a revert of $REPO/$PR_NUMBER could not be found or the reason was not properly formatted. Begin a comment with **'Reason for revert:'** to tell the bot why this issue is being reverted."
             gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
-            echo "found=false" >> "$GITHUB_OUTPUT"
             exit 1
-          else
-            echo "found=true" >> "$GITHUB_OUTPUT"
           fi
+
+          # Extract reviewer and original body with null safety to avoid subsequent API requests
+          REVIEWER=$(jq -r '[.reviews // [] | .[] | select(.state == "APPROVED")] | .[0].author.login' pr_details.json)
+          if [ -z "$REVIEWER" ] || [ "$REVIEWER" = "null" ]; then
+            echo "None" > reviewer.txt
+          else
+            echo "@$REVIEWER" > reviewer.txt
+          fi
+
+          jq -r '.body // ""' pr_details.json > original_body.txt
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-
-      - name: Export Reason to Env
-        if: steps.verify-reason.outputs.found == 'true'
-        # Reason: reason.txt is verified to be a single sanitized line output from jq.
-        run: echo "REASON=$(cat reason.txt)" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
-
-      - name: Get PR Details
-        if: steps.verify-reason.outputs.found == 'true'
-        run: |
-          gh api repos/"$REPO"/pulls/"$PR_NUMBER"/reviews \
-            --jq '[.[] | select(.state == "APPROVED")] | .[0].user.login' > reviewer.txt
-
-          gh pr view "$PR_NUMBER" -R "$REPO" --json body --jq '.body' > original_pr_body.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-
-      - name: Export MERGE_COMMIT Details to Env
-        if: steps.verify-reason.outputs.found == 'true'
-        # Reason: Trusted, single-word GitHub system fields (usernames and commit SHAs).
-        run: echo "MERGE_COMMIT=$MERGE_COMMIT" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
-        env:
-          MERGE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
-
-      - name: Export ORIGINAL_AUTHOR Details to Env
-        if: steps.verify-reason.outputs.found == 'true'
-        # Reason: Trusted, single-word GitHub system fields (usernames and commit SHAs).
-        run: echo "ORIGINAL_AUTHOR=$ORIGINAL_AUTHOR" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
-        env:
-          ORIGINAL_AUTHOR: ${{ github.event.pull_request.user.login }}
-
-      - name: Export REVIEWER Details to Env
-        if: steps.verify-reason.outputs.found == 'true'
-        # Reason: Trusted, single-word GitHub system fields (usernames and commit SHAs).
-        run: echo "REVIEWER=$(cat reviewer.txt)" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
 
       - name: Checkout Fork
-        if: steps.verify-reason.outputs.found == 'true'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           repository: flutteractionsbot/flutter
@@ -95,7 +73,6 @@ jobs:
           persist-credentials: false
 
       - name: Prepare Git
-        if: steps.verify-reason.outputs.found == 'true'
         working-directory: ./flutter
         run: |
           git config user.name "flutteractionsbot"
@@ -106,34 +83,27 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
-      - name: Export Branch Name to Env
-        if: steps.verify-reason.outputs.found == 'true'
-        working-directory: ./flutter
-        # Reason: BRANCH_NAME is dynamically constructed from local git state.
-        run: echo "BRANCH_NAME=$(git branch --show-current)" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
-
       - name: Revert Commit
-        if: steps.verify-reason.outputs.found == 'true'
-        id: revert-commit
         working-directory: ./flutter
         run: |
-          if git revert "$MERGE_COMMIT" --no-edit; then
-            echo "success=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "success=false" >> "$GITHUB_OUTPUT"
+          if ! git revert "$MERGE_COMMIT" --no-edit; then
             gh pr comment "$PR_NUMBER" -R flutter/flutter -b "Failed to revert commit $MERGE_COMMIT cleanly. Please resolve conflicts manually."
             gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
             exit 1
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          MERGE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
 
       - name: Push and Create PR
-        if: steps.revert-commit.outputs.success == 'true'
         working-directory: ./flutter
         run: |
+          BRANCH_NAME=$(git branch --show-current)
+          REVIEWER_NAME=$(cat ../reviewer.txt)
+          REVIEW_LINE="Reviewed By: $REVIEWER_NAME"
+
           git push origin "$BRANCH_NAME"
 
           PR_LINK="https://github.com/flutter/flutter/pull/$PR_NUMBER"
@@ -143,19 +113,19 @@ jobs:
             echo ""
             echo "Initiated by: @$INITIATOR"
             echo ""
-            echo "Reason for reverting: $REASON"
+            echo "Reason for reverting: $(cat ../reason.txt)"
             echo ""
             echo "Original PR Author: @$ORIGINAL_AUTHOR"
             echo ""
-            echo "Reviewed By: @$REVIEWER"
+            echo "$REVIEW_LINE"
             echo ""
             echo "The original PR description is provided below:"
             echo ""
-            cat ../original_pr_body.txt
+            cat ../original_body.txt
           } > ../pr_body.txt
 
           NEW_PR_URL=$(gh pr create \
-            --title "Revert \"${PR_TITLE}\"" \
+            --title "Revert: $PR_TITLE" \
             --body-file ../pr_body.txt \
             --repo flutter/flutter \
             --base master \
@@ -165,7 +135,8 @@ jobs:
           gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
           INITIATOR: ${{ github.event.sender.login }}
+          ORIGINAL_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
           REPO: ${{ github.repository }}

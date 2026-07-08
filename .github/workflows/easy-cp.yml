@@ -58,14 +58,22 @@ jobs:
       (github.event.pull_request.merged == true)
     steps:
       - name: Get Release Channel
-        # Safe because LABEL_NAME is a PR label name that can only be added by authorized repository contributors, and is parsed/trimmed.
-        run: echo "CHANNEL=$(echo $LABEL_NAME | cut -d ':' -f 2 | xargs)" >> $GITHUB_ENV # zizmor: ignore[github-env]
+        id: get-channel
         env:
           LABEL_NAME: ${{ github.event.label.name }}
+        run: echo "channel=$(echo $LABEL_NAME | cut -d ':' -f 2 | xargs)" >> "$GITHUB_OUTPUT"
 
-      - name: Export Release Candidate Branch to Env
-        # Reason: RELEASE_BRANCH is retrieved from a trusted file within the repository.
-        run: echo "RELEASE_BRANCH=$(curl https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version | tr -d '\n')" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
+      - name: Export Release Candidate Branch
+        id: get-branch
+        env:
+          CHANNEL: ${{ steps.get-channel.outputs.channel }}
+        run: |
+          branch=$(curl -f -s "https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version" | tr -d '\n')
+          if [ -z "$branch" ]; then
+            echo "Error: Failed to fetch release candidate branch for channel $CHANNEL" >&2
+            exit 1
+          fi
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
       - name: Checkout Flutter Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -77,8 +85,6 @@ jobs:
           # Checkout all history commits on master branch, so that the cp commit is a known object
           fetch-depth: 0
           persist-credentials: false
-        env:
-          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
 
       # use same name when checking out branch, since the marketplace action does a hard reset.
       - name: Attempt CP
@@ -92,6 +98,10 @@ jobs:
           git fetch upstream master
           git checkout -b "cp-${CHANNEL}-${MERGE_COMMIT_SHA}" --track "upstream/$RELEASE_BRANCH"
           git cherry-pick "$MERGE_COMMIT_SHA"
+        env:
+          CHANNEL: ${{ steps.get-channel.outputs.channel }}
+          RELEASE_BRANCH: ${{ steps.get-branch.outputs.branch }}
+          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
 
       - name: Create PR on CP success
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
@@ -99,12 +109,11 @@ jobs:
         id: create-pr
         run: |
           git push origin "cp-${CHANNEL}-${MERGE_COMMIT_SHA}"
-          {
-            echo 'PR_URL<<EOF'
-            gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ".github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md" --base "${RELEASE_BRANCH}" --label "cp: review" --repo flutter/flutter --head "flutteractionsbot:cp-${CHANNEL}-${MERGE_COMMIT_SHA}"
-            echo EOF
-          } >> "$GITHUB_ENV"
+          pr_url=$(gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ".github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md" --base "${RELEASE_BRANCH}" --label "cp: review" --repo flutter/flutter --head "flutteractionsbot:cp-${CHANNEL}-${MERGE_COMMIT_SHA}")
+          echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
         env:
+          CHANNEL: ${{ steps.get-channel.outputs.channel }}
+          RELEASE_BRANCH: ${{ steps.get-branch.outputs.branch }}
           MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -112,13 +121,14 @@ jobs:
       - name: Leave Comment on CP success
         if: ${{ steps.create-pr.conclusion == 'success' }}
         run: |
-          echo $PR_URL
+          echo "$PR_URL"
           NEW_PR_NUMBER="${PR_URL##*/}"
           SUCCESS_MSG=" @$ACTOR please fill out the PR description above, afterwards the release team will review this request."
-          gh pr comment $NEW_PR_NUMBER -R flutter/flutter -b "${SUCCESS_MSG}"
+          gh pr comment "$NEW_PR_NUMBER" -R flutter/flutter -b "${SUCCESS_MSG}"
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ACTOR: ${{ github.actor }}
+          PR_URL: ${{ steps.create-pr.outputs.pr_url }}
 
       - name: Leave Comment on CP failure
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
