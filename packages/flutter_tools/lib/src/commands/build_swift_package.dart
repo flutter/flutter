@@ -185,7 +185,12 @@ class BuildSwiftPackage extends BuildSubCommand {
     await super.validateCommand();
     _validateTargetPlatform();
     _validateFeatureFlags();
-    _validateXcodeVersion();
+    if (_xcode == null || !_xcode.isInstalled) {
+      throwToolExit(
+        'Flutter requires Xcode when using Swift Package Manager. Please ensure '
+        'Xcode is installed.',
+      );
+    }
   }
 
   /// Validates the Flutter project supports the [_targetPlatform].
@@ -219,19 +224,6 @@ class BuildSwiftPackage extends BuildSubCommand {
         'Swift Package Manager is disabled. Ensure it is enabled in your global config ("flutter '
         'config --enable-swift-package-manager") and is not disabled in your Flutter '
         "project's pubspec.yaml.",
-      );
-    }
-  }
-
-  /// Validates the Xcode version is equal to or greater than 15.
-  ///
-  /// Throws a [ToolExit] if the Xcoder version is less than 15.
-  void _validateXcodeVersion() {
-    final Version? xcodeVersion = _xcode?.currentVersion;
-    if (xcodeVersion == null || xcodeVersion.major < 15) {
-      throwToolExit(
-        'Flutter requires Xcode 15 or greater when using Swift Package Manager. Please ensure '
-        'Xcode is installed and meets the version requirements.',
       );
     }
   }
