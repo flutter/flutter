@@ -10,51 +10,36 @@
 
 namespace impeller {
 
-EntityPlayground::EntityPlayground()
-    : typographer_context_(TypographerContextSkia::Make()) {}
+EntityPlayground::EntityPlayground() = default;
 
 EntityPlayground::~EntityPlayground() = default;
 
-void EntityPlayground::SetTypographerContext(
-    std::shared_ptr<TypographerContext> typographer_context) {
-  typographer_context_ = std::move(typographer_context);
-}
-
-std::shared_ptr<TypographerContext> EntityPlayground::GetTypographerContext()
-    const {
-  return typographer_context_;
-}
-
-std::shared_ptr<ContentContext> EntityPlayground::GetContentContext() const {
-  return std::make_shared<ContentContext>(GetContext(), typographer_context_);
-}
-
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
-  if (!switches_.enable_playground) {
+  if (!IsPlaygroundEnabled()) {
     return true;
   }
 
-  auto content_context = GetContentContext();
-  if (!content_context->IsValid()) {
+  ContentContext& content_context = GetContentContext();
+  if (!content_context.IsValid()) {
     return false;
   }
   SinglePassCallback callback = [&](RenderPass& pass) -> bool {
-    content_context->GetRenderTargetCache()->Start();
-    bool result = entity.Render(*content_context, pass);
-    content_context->GetRenderTargetCache()->End();
-    content_context->GetTransientsDataBuffer().Reset();
-    content_context->GetTransientsIndexesBuffer().Reset();
+    content_context.GetRenderTargetCache()->Start();
+    bool result = entity.Render(content_context, pass);
+    content_context.GetRenderTargetCache()->End();
+    content_context.GetTransientsDataBuffer().Reset();
+    content_context.GetTransientsIndexesBuffer().Reset();
     return result;
   };
   return Playground::OpenPlaygroundHere(callback);
 }
 
 bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
-  if (!switches_.enable_playground) {
+  if (!IsPlaygroundEnabled()) {
     return true;
   }
 
-  ContentContext content_context(GetContext(), typographer_context_);
+  ContentContext& content_context = GetContentContext();
   if (!content_context.IsValid()) {
     return false;
   }

@@ -2303,8 +2303,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // currently allowed to mutate, and a boolean indicating whether this
   // RenderObject is allowed to mutate.
   //
-  // This method must only be called during layout as mutations are always allowed
-  // before layout.
+  // This method must only be called during layout, as mutations are always
+  // allowed before layout. A null return value indicates another render subtree
+  // is actively performing layout and, in the process, illegally mutating this
+  // RenderObject's subtree.
   (RenderObject, bool)? get _debugClosestMutationRoot {
     return switch (this) {
       // This subtree is being mutated in a layout callback.
@@ -2571,6 +2573,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   bool? _isRelayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
+  ///
+  /// Layout callbacks are a special part of this render object's layout phase:
+  /// they are allowed to mutate child lists and dirty render subtrees while the
+  /// callback is executing. This flag lets debug-only assertions distinguish
+  /// that special callback phase from the regular [performLayout] body.
+  ///
+  /// This does not imply that a widget rebuild is currently in progress. A
+  /// layout callback can trigger rebuild work by mutating the render or element
+  /// tree, but this flag only describes the synchronous callback passed to
+  /// [invokeLayoutCallback].
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
   bool _doingThisLayoutWithCallback = false;
 
