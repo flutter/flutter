@@ -187,9 +187,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   UIView* view = bridge ? bridge->viewIfLoaded() : nil;
   if (_scrollView.superview != view) {
     [_scrollView removeFromSuperview];
-    if (view) {
-      [view addSubview:_scrollView];
-    }
+    [view addSubview:_scrollView];
   }
   return view;
 }
