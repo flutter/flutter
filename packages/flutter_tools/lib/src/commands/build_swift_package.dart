@@ -185,7 +185,8 @@ class BuildSwiftPackage extends BuildSubCommand {
     await super.validateCommand();
     _validateTargetPlatform();
     _validateFeatureFlags();
-    if (_xcode == null || !_xcode.isInstalled) {
+    final Xcode? xcode = _xcode;
+    if (xcode == null || !xcode.isInstalled) {
       throwToolExit(
         'Flutter requires Xcode when using Swift Package Manager. Please ensure '
         'Xcode is installed.',
