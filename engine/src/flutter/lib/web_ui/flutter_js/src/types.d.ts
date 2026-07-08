@@ -73,6 +73,13 @@ export interface FlutterConfiguration {
    *  isolation (e.g. in a browser extension or embedded environment). */
   suppressMultithreadingWarning?: boolean;
   wasmAllowList?: WasmAllowList;
+  /** When true, the Flutter Web loader prints a separate `console.warn`
+   *  line for every candidate build it skipped — including cases where a
+   *  compatible build was eventually found. Useful when debugging why
+   *  the loader keeps falling back to a different build than expected.
+   *  When false (default), per-build skip details are not printed; the
+   *  fatal "no compatible build found" warning is always printed. */
+  verboseBuildSelection?: boolean;
 }
 
 /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
