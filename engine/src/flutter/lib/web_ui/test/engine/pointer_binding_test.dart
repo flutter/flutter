@@ -2237,6 +2237,47 @@ void testMain() {
     packets.clear();
   });
 
+  test('handles stylus eraser touches as inverted stylus', () {
+    final context = _PointerEventContext();
+
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    rootElement.dispatchEvent(
+      context.stylusTouchDown(pointerId: 100, buttons: 0x32, clientX: 5.0, clientY: 100.0),
+    );
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(2));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+    expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.invertedStylus));
+    expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+    expect(packets[0].data[1].kind, equals(ui.PointerDeviceKind.invertedStylus));
+    expect(packets[0].data[1].buttons, equals(0x6));
+    packets.clear();
+
+    rootElement.dispatchEvent(
+      context.stylusTouchMove(pointerId: 100, buttons: 0x32, clientX: 10.0, clientY: 105.0),
+    );
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+    expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.invertedStylus));
+    expect(packets[0].data[0].buttons, equals(0x6));
+    packets.clear();
+
+    rootElement.dispatchEvent(
+      context.stylusTouchUp(pointerId: 100, buttons: 0, clientX: 10.0, clientY: 105.0),
+    );
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+    expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.invertedStylus));
+    expect(packets[0].data[0].buttons, equals(0));
+    packets.clear();
+  });
+
   // MULTIPOINTER ADAPTERS
 
   test('treats each pointer separately', () {
@@ -3631,6 +3672,22 @@ class _PointerEventContext extends _BasicEventContext
       pointer: pointerId,
       buttons: buttons,
       button: 0,
+      clientX: clientX,
+      clientY: clientY,
+      pointerType: 'pen',
+    );
+  }
+
+  DomEvent stylusTouchMove({
+    double? clientX,
+    double? clientY,
+    int? buttons,
+    int? pointerId = 1000,
+  }) {
+    return _moveWithFullDetails(
+      pointer: pointerId,
+      buttons: buttons,
+      button: _kNoButtonChange,
       clientX: clientX,
       clientY: clientY,
       pointerType: 'pen',
