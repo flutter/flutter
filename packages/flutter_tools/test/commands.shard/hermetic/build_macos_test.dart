@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart' show Version;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -68,6 +69,22 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
+  }
+}
+
+class FakeXcodeProjectInterpreterWithVersion extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithVersion({required this.version});
+
+  @override
+  final Version version;
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+    XcodeBasedProject xcodeProject, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
   }
 }
 
@@ -1431,7 +1448,8 @@ STDERR STUFF
       await expectLater(
         createTestCommandRunner(command).run(<String>['build', 'macos', '--release', '--no-pub']),
         throwsToolExit(
-          message: 'No Valid Target Arch: '
+          message:
+              'No Valid Target Arch: '
               'You have enabled the macOSArm64Only feature flag but '
               "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
               'Consider removing arm64 from EXCLUDED_ARCHS.',
@@ -1508,13 +1526,15 @@ STDERR STUFF
   );
 
   testUsingContext(
-    'macOS deployment target too low shows guided message',
+    'Prints warning when building a release app for macOS that contains an x86_64 slice and Xcode version is 27 or greater',
     () async {
+      createMinimalMockProjectFiles();
+
       final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
-        logger: logger,
+        logger: testLogger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: FakePlatform(),
@@ -1522,156 +1542,37 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
-        processManager: fakeProcessManager,
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
       );
-      createMinimalMockProjectFiles();
 
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        fileSystem.currentDirectory,
-      );
-      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            '/usr/bin/env',
-            'xcrun',
-            'xcodebuild',
-            '-workspace',
-            flutterProject.macos.xcodeWorkspace!.path,
-            '-configuration',
-            'Debug',
-            '-scheme',
-            'Runner',
-            '-derivedDataPath',
-            flutterBuildDir.absolute.path,
-            '-destination',
-            'platform=macOS,arch=x86_64',
-            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-            '-quiet',
-            'COMPILER_INDEX_STORE_ENABLE=NO',
-          ],
-          exitCode: 1,
-          stdout:
-              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is 12.0 to 27.0.x. (in target 'Runner' from project 'Runner')",
-        ),
-      );
-
-      await expectLater(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
-        throwsToolExit(),
-      );
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(
-        testLogger.errorText,
-        contains('The macOS deployment target is too low. Xcode requires at least 12.0.'),
-      );
-      expect(
-        testLogger.errorText,
-        contains('Select the "Runner" TARGET, and in the "General" tab:'),
-      );
-      expect(testLogger.errorText, contains('Update "Minimum Deployments" to at least 12.0.'));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => fakeProcessManager,
-      Platform: () => macosPlatform,
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
-    },
-  );
-
-  testUsingContext(
-    'macOS deployment target too low shows fallback message if version cannot be parsed',
-    () async {
-      final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: fakeProcessManager,
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
-      createMinimalMockProjectFiles();
-
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        fileSystem.currentDirectory,
-      );
-      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            '/usr/bin/env',
-            'xcrun',
-            'xcodebuild',
-            '-workspace',
-            flutterProject.macos.xcodeWorkspace!.path,
-            '-configuration',
-            'Debug',
-            '-scheme',
-            'Runner',
-            '-derivedDataPath',
-            flutterBuildDir.absolute.path,
-            '-destination',
-            'platform=macOS,arch=x86_64',
-            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-            '-quiet',
-            'COMPILER_INDEX_STORE_ENABLE=NO',
-          ],
-          exitCode: 1,
-          stdout:
-              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x. (in target 'Runner' from project 'Runner')",
-        ),
-      );
-
-      await expectLater(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
-        throwsToolExit(),
-      );
-
-      expect(
-        testLogger.errorText,
+        testLogger.warningText,
         contains(
-          'The macOS deployment target is too low. Xcode requires at least the minimum supported version.',
+          'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+          'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+          'This will become the default behavior in a future Flutter release.',
         ),
       );
-      expect(
-        testLogger.errorText,
-        contains('Select the "Runner" TARGET, and in the "General" tab:'),
-      );
-      expect(
-        testLogger.errorText,
-        contains('Update "Minimum Deployments" to at least the minimum supported version.'),
-      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => fakeProcessManager,
       Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithVersion(version: Version(27, 0, 0)),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

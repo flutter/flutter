@@ -242,7 +242,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
-  bool get outputMachineFormat => boolArg('machine');
+  bool get outputMachineFormat =>
+      argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
+      boolArg(FlutterGlobalOptions.kMachineFlag);
 
   bool get shouldUpdateCache => true;
 
@@ -1934,6 +1936,15 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
 
+    if (globals.os.hostPlatform == .darwin_x64 &&
+        globals.persistentToolState!.shouldShowIntelMacWarning) {
+      globals.logger.printWarning(
+        'Flutter is deprecating support for Intel-based Macs. '
+        'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+      );
+      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+    }
+
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.
       _targetDevices.startExtendedWirelessDeviceDiscovery(
@@ -2043,10 +2054,17 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
+  ///
+  /// If [canPrompt] is true, the tool will interactively prompt the user to
+  /// select a device when multiple devices are found and a terminal is
+  /// attached. If [canPrompt] is false, the interactive prompt is bypassed.
+  /// If not specified, [canPrompt] defaults to `!outputMachineFormat`.
   Future<List<Device>?> findAllTargetDevices({
+    bool? canPrompt,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     return _targetDevices.findAllTargetDevices(
+      canPrompt: canPrompt ?? !outputMachineFormat,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
