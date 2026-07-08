@@ -44,8 +44,9 @@ void ClipPathLayer::PushClipToEmbeddedNativeViewMutatorStack(
     DlRoundRect rrect;
     if (clip_shape().IsRoundRect(&rrect)) {
       view_embedder->PushClipRRectToVisitedPlatformViews(rrect);
+    } else {
+      view_embedder->PushClipPathToVisitedPlatformViews(clip_shape());
     }
-    view_embedder->PushClipPathToVisitedPlatformViews(clip_shape());
   }
 }
 
