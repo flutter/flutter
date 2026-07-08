@@ -202,7 +202,7 @@ class _WindowCreatorCard extends StatelessWidget {
                               onDestroyed: () => windowRegistry.unregister(entry),
                             ),
                             title: 'Regular',
-                            preferredSize: windowSettings.regularSize,
+                            size: windowSettings.regularSize,
                           );
                         }
 
@@ -236,7 +236,7 @@ class _WindowCreatorCard extends StatelessWidget {
                               onDestroyed: () => windowRegistry.unregister(entry),
                             ),
                             title: 'Modeless Dialog',
-                            preferredSize: windowSettings.dialogSize,
+                            size: windowSettings.dialogSize,
                           );
                         }
 
@@ -269,7 +269,7 @@ class _WindowCreatorCard extends StatelessWidget {
                               onDestroyed: () => windowRegistry.unregister(entry),
                             ),
                             title: 'Modal Dialog',
-                            preferredSize: windowSettings.dialogSize,
+                            size: windowSettings.dialogSize,
                             parent: windowController,
                           );
                         }
