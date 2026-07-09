@@ -45,6 +45,14 @@ class BackgroundCommandPoolVK final {
     // once for the original BackgroundCommandPoolVK() and once for the moved
     // BackgroundCommandPoolVK().
     if (!recycler) {
+      // The context is gone, and the device may already be destroyed. Release
+      // the handles without making Vulkan API calls: letting the RAII wrappers
+      // call vkFreeCommandBuffers / vkDestroyCommandPool on a destroyed device
+      // crashes inside the ICD.
+      for (auto& buffer : buffers_) {
+        buffer.release();
+      }
+      pool_.release();
       return;
     }
     // If there are many unused command buffers, release some of them and
@@ -156,6 +164,29 @@ void CommandPoolVK::Destroy() {
 
   // When the command pool is destroyed, all of its command buffers are freed.
   // Handles allocated from that pool are now invalid and must be discarded.
+  for (auto& buffer : collected_buffers_) {
+    buffer.release();
+  }
+  for (auto& buffer : unused_command_buffers_) {
+    buffer.release();
+  }
+  unused_command_buffers_.clear();
+  collected_buffers_.clear();
+}
+
+void CommandPoolVK::AbandonForDriverCrash() {
+  Lock lock(pool_mutex_);
+  if (!pool_) {
+    return;
+  }
+  // Some drivers non-conformantly invalidate the VkCommandPool and its child
+  // VkCommandBuffer handles internally when vkQueueSubmit returns
+  // VK_ERROR_OUT_OF_HOST_MEMORY (observed on AMD). Calling
+  // vkDestroyCommandPool or vkFreeCommandBuffers on these already-invalid
+  // handles causes validation errors and an access violation inside the
+  // driver. Release the C++ ownership handles without invoking any Vulkan
+  // destroy/free calls.
+  pool_.release();
   for (auto& buffer : collected_buffers_) {
     buffer.release();
   }
@@ -296,8 +327,16 @@ void CommandPoolRecyclerVK::Reclaim(
     VALIDATION_LOG << "Could not reset command pool: " << vk::to_string(result);
   }
 
-  // Move the pool to the recycled list.
+  // Move the pool to the recycled list, capping the list size to prevent
+  // unbounded host memory growth. Without a cap, heavy workloads (e.g. text
+  // rendering stress) can accumulate dozens of recycled pools, each holding
+  // significant driver-internal memory. Evict oldest first; the device is
+  // alive here, so normal RAII destruction of the evicted pool is safe.
   Lock recycled_lock(recycled_mutex_);
+  static constexpr size_t kMaxRecycledCommandPools = 8;
+  while (recycled_.size() >= kMaxRecycledCommandPools) {
+    recycled_.erase(recycled_.begin());
+  }
   recycled_.push_back(
       RecycledData{.pool = std::move(pool), .buffers = std::move(buffers)});
 }

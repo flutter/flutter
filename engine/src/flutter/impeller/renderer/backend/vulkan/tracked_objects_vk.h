@@ -27,6 +27,14 @@ class TrackedObjectsVK {
 
   bool IsValid() const;
 
+  /// @brief      Discard the command buffer handle without returning it to
+  ///             the pool, and abandon the pool itself.
+  ///
+  /// Call this after a failed vkQueueSubmit where the driver has already freed
+  /// the underlying Vulkan objects (e.g. AMD non-conformant OOM behaviour).
+  /// Prevents vkFreeCommandBuffers being called on an already-invalid handle.
+  void AbandonForDriverCrash();
+
   void Track(const std::shared_ptr<SharedObjectVK>& object);
 
   void Track(const std::shared_ptr<const DeviceBuffer>& buffer);
