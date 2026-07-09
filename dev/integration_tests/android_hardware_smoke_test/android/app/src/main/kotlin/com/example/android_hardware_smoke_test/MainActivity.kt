@@ -20,6 +20,9 @@ class MainActivity : FlutterActivity() {
         const val CHANNEL_NAME = "com.example.android_hardware_smoke_test/test_channel"
         private const val METHOD_CHANNEL_NAME = "com.example.android_hardware_smoke_test/native_support"
         private var lastConfiguredEngine: WeakReference<FlutterEngine>? = null
+
+        // Tracks the active activity to prevent transition race conditions on the cached engine.
+        private var activeActivity: WeakReference<MainActivity>? = null
     }
 
     var messageChannel: BasicMessageChannel<Any>? = null
@@ -60,6 +63,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        activeActivity = WeakReference(this)
 
         try {
             val appInfo =
@@ -129,9 +133,13 @@ class MainActivity : FlutterActivity() {
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         super.cleanUpFlutterEngine(flutterEngine)
-        methodChannel?.setMethodCallHandler(null)
+        // Only clear handlers if this activity is still active (prevents transition races).
+        if (activeActivity?.get() == this) {
+            methodChannel?.setMethodCallHandler(null)
+            nativeDriverChannel?.setMethodCallHandler(null)
+            activeActivity = null
+        }
         methodChannel = null
-        nativeDriverChannel?.setMethodCallHandler(null)
         nativeDriverChannel = null
     }
 }
