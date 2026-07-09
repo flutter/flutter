@@ -142,21 +142,13 @@ void DescriptorPoolRecyclerVK::Reclaim(
     return;
   }
 
-  // Reset all underlying VkDescriptorPool handles via vkResetDescriptorPool.
-  // This frees ALL descriptor sets allocated from each pool, returning them
-  // to the unallocated state. Without this, pools become permanently exhausted
-  // and cache misses (different pipeline keys on reuse) would trigger
-  // VK_ERROR_OUT_OF_POOL_MEMORY, causing new raw pool creation every time.
-  auto device = strong_context->GetDevice();
-  for (auto& pool : pools) {
-    auto reset_result = device.resetDescriptorPool(pool.get());
-    if (reset_result != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Could not reset descriptor pool: "
-                     << vk::to_string(reset_result);
-    }
+  // Return the used descriptor sets to the unused cache so they are reused
+  // by future frames instead of being reallocated.
+  for (auto& [_, cache] : descriptor_sets) {
+    cache.unused.insert(cache.unused.end(), cache.used.begin(),
+                        cache.used.end());
+    cache.used.clear();
   }
-  // The descriptor set handles in the cache are now invalid after pool reset.
-  descriptor_sets.clear();
 
   // Move the pool to the recycled list. If more than 32 pools are
   // cached then delete the newest entry (back of the deque).
@@ -171,20 +163,6 @@ void DescriptorPoolRecyclerVK::Reclaim(
 }
 
 vk::UniqueDescriptorPool DescriptorPoolRecyclerVK::Get() {
-  // Try to extract a reset raw pool from the recycled wrappers first.
-  {
-    Lock recycled_lock(recycled_mutex_);
-    for (auto it = recycled_.begin(); it != recycled_.end(); ++it) {
-      if (!(*it)->pools_.empty()) {
-        auto pool = std::move((*it)->pools_.back());
-        (*it)->pools_.pop_back();
-        if ((*it)->pools_.empty()) {
-          recycled_.erase(it);
-        }
-        return pool;
-      }
-    }
-  }
   return Create();
 }
 

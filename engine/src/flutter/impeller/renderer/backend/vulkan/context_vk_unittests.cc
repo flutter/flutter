@@ -408,5 +408,19 @@ TEST(ContextVKTest, HashIsUniqueAcrossThreads) {
   EXPECT_NE(hash1, hash2);
 }
 
+TEST(ContextVKTest, CreateCommandBufferShortCircuitsAfterDeviceLost) {
+  const std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+
+  EXPECT_FALSE(context->IsDeviceLost());
+  EXPECT_NE(context->CreateCommandBuffer(), nullptr);
+
+  context->MarkDeviceLost();
+
+  EXPECT_TRUE(context->IsDeviceLost());
+  // No command buffer may be created once the device is lost; allocation
+  // calls on a driver in a corrupted state can crash inside the ICD.
+  EXPECT_EQ(context->CreateCommandBuffer(), nullptr);
+}
+
 }  // namespace testing
 }  // namespace impeller
