@@ -24,6 +24,8 @@ class MainActivity : FlutterActivity() {
 
     var messageChannel: BasicMessageChannel<Any>? = null
     private var impellerBackend = "vulkan"
+    private var methodChannel: MethodChannel? = null
+    private var nativeDriverChannel: MethodChannel? = null
 
     override fun provideFlutterEngine(context: Context): FlutterEngine {
         var backend = "vulkan"
@@ -91,45 +93,45 @@ class MainActivity : FlutterActivity() {
             lastConfiguredEngine = WeakReference(flutterEngine)
         }
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
-            .setMethodCallHandler { call, result ->
-                if (call.method == "impeller_backend") {
-                    result.success(impellerBackend)
-                } else {
-                    result.notImplemented()
-                }
+        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
+        methodChannel?.setMethodCallHandler { call, result ->
+            if (call.method == "impeller_backend") {
+                result.success(impellerBackend)
+            } else {
+                result.notImplemented()
             }
+        }
 
         // Register the native_driver channel. This responds to AndroidNativeDriver's connection ping
         // and property checks, enabling the host-side runner to take compositor-level screenshots via ADB.
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "native_driver")
-            .setMethodCallHandler { call, result ->
-                when (call.method) {
-                    "sdk_version" -> {
-                        result.success(mapOf("version" to Build.VERSION.SDK_INT))
-                    }
-                    "is_emulator" -> {
-                        val isEmulator =
-                            Build.MODEL.contains("gphone") ||
-                                Build.MODEL.contains("Emulator") ||
-                                Build.MODEL.contains("Android SDK built for x86")
-                        result.success(mapOf("emulator" to isEmulator))
-                    }
-                    "ping" -> {
-                        result.success(null)
-                    }
-                    else -> {
-                        result.notImplemented()
-                    }
+        nativeDriverChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "native_driver")
+        nativeDriverChannel?.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "sdk_version" -> {
+                    result.success(mapOf("version" to Build.VERSION.SDK_INT))
+                }
+                "is_emulator" -> {
+                    val isEmulator =
+                        Build.MODEL.contains("gphone") ||
+                            Build.MODEL.contains("Emulator") ||
+                            Build.MODEL.contains("Android SDK built for x86")
+                    result.success(mapOf("emulator" to isEmulator))
+                }
+                "ping" -> {
+                    result.success(null)
+                }
+                else -> {
+                    result.notImplemented()
                 }
             }
+        }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         super.cleanUpFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
-            .setMethodCallHandler(null)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "native_driver")
-            .setMethodCallHandler(null)
+        methodChannel?.setMethodCallHandler(null)
+        methodChannel = null
+        nativeDriverChannel?.setMethodCallHandler(null)
+        nativeDriverChannel = null
     }
 }
