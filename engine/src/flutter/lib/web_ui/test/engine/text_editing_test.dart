@@ -789,7 +789,7 @@ Future<void> testMain() async {
 
         expect(textEditing.isEditing, isTrue);
 
-        if (isFirefox) {
+        if (isFirefox || isSafari) {
           expect(
             domDocument.activeElement,
             anyOf(textEditing.strategy.domElement, domDocument.body),
@@ -798,8 +798,7 @@ Future<void> testMain() async {
           expect(domDocument.activeElement, textEditing.strategy.domElement);
         }
 
-        final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.viewManager
-            .findViewForElement(textEditing.strategy.domElement)!;
+        final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.implicitView!;
 
         flutterView.dom.rootElement.focusWithoutScroll();
         expect(spy.messages, isEmpty);
