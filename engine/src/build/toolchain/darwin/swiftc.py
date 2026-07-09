@@ -404,9 +404,9 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map, t
       ensure_directory(os.path.join(build_cache_dir, 'PrecompiledHeaders')),
   ]
 
-  # Handle optional -bridge-header flag.
-  if args.bridge_header:
-    swiftc_args.extend(('-import-objc-header', args.bridge_header))
+  # Handle optional -import-objc-header flag.
+  if args.import_objc_header:
+    swiftc_args.extend(('-import-objc-header', args.import_objc_header))
 
   # Handle swift const values extraction.
   swiftc_args.extend(['-emit-const-values'])
@@ -552,7 +552,7 @@ def main(args):
   parser = argparse.ArgumentParser(allow_abbrev=False, add_help=False)
 
   # Required arguments.
-  parser.add_argument('--module-name',
+  parser.add_argument('-module-name',
                       required=True,
                       help='name of the Swift module')
 
@@ -572,7 +572,7 @@ def main(args):
                       required=True,
                       help='path to the generated header file')
 
-  parser.add_argument('--bridge-header',
+  parser.add_argument('-import-objc-header',
                       required=True,
                       help='path to the Objective-C bridge header file')
 
@@ -606,23 +606,9 @@ def main(args):
                       action='store_true',
                       help='enable whole module optimisation')
 
-  parser.add_argument('--target-cpu',
+  parser.add_argument('-target',
                       required=True,
-                      choices=['x64', 'arm64'],
-                      help='target CPU architecture (e.g. "arm64", "x64")')
-
-  parser.add_argument('--target-os',
-                      required=True,
-                      help='target OS name (e.g. "apple-ios", "apple-macos")')
-
-  parser.add_argument('--deployment-target',
-                      required=True,
-                      help='target deployment version (e.g. "13.0", "15.6")')
-
-  parser.add_argument('--use-simulator',
-                      default=False,
-                      action='store_true',
-                      help='targeting the simulator')
+                      help='target triple (e.g. "arm64-apple-ios14.0")')
 
   parser.add_argument('-sdk',
                       required=True,
@@ -670,11 +656,7 @@ def main(args):
 
   parsed, extras = parser.parse_known_args(args)
 
-  cpu = 'x86_64' if parsed.target_cpu == 'x64' else parsed.target_cpu
-  simulator = '-simulator' if parsed.use_simulator else ''
-  target_triple = f'{cpu}-{parsed.target_os}{parsed.deployment_target}{simulator}'
-
-  compile_module(parsed, extras, build_signature(os.environ, args), target_triple)
+  compile_module(parsed, extras, build_signature(os.environ, args), parsed.target)
 
 
 if __name__ == '__main__':
