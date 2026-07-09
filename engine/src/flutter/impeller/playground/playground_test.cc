@@ -4,7 +4,9 @@
 
 #include "impeller/playground/playground_test.h"
 
+#ifndef FML_OS_WIN
 #include <wordexp.h>
+#endif
 
 #include "flutter/fml/file.h"
 #include "flutter/fml/time/time_point.h"
@@ -62,6 +64,9 @@ class PlaygroundTestEnvironment : public ::testing::Environment {
  public:
   static std::optional<std::string> ValidateGoldenDirectory(
       const std::string& dir) {
+#ifdef FML_OS_WIN
+    return dir;
+#else   // FML_OS_WIN
     wordexp_t wordexp_result;
     int code = wordexp(dir.c_str(), &wordexp_result, 0);
     FML_CHECK(code == 0) << "Could not parse golden output directory: " << dir;
@@ -78,6 +83,7 @@ class PlaygroundTestEnvironment : public ::testing::Environment {
         << "Golden output directory must be a directory with read/write"
         << " permissions: " << dir;
     return working_dir;
+#endif  // FML_OS_WIN
   }
 
   void SetUp() override {
