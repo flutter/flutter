@@ -2179,9 +2179,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return _isFullscreenValue(controller);
   }
 
-  // Computes the value of the [_WindowControllerAspect.title] aspect for the
-  // given [controller]. Controllers that do not support titles report an empty
-  // string.
+  /// Computes the value of the [_WindowControllerAspect.title] aspect for the
+  /// given [controller]. Controllers that do not support titles report an empty
+  /// string.
   static String _titleValue(BaseWindowController controller) => switch (controller) {
     RegularWindowController() => controller.title,
     DialogWindowController() => controller.title,
@@ -2200,9 +2200,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     SatelliteWindowController() => controller.isActivated,
   };
 
-  // Computes the value of the [_WindowControllerAspect.maximized] aspect for the
-  // given [controller]. Controllers that do not support maximization report
-  // false.
+  /// Computes the value of the [_WindowControllerAspect.maximized] aspect for the
+  /// given [controller]. Controllers that do not support maximization report
+  /// false.
   static bool _isMaximizedValue(BaseWindowController controller) => switch (controller) {
     RegularWindowController() => controller.isMaximized,
     DialogWindowController() => false,
@@ -2211,9 +2211,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     SatelliteWindowController() => false,
   };
 
-  // Computes the value of the [_WindowControllerAspect.minimized] aspect for the
-  // given [controller]. Controllers that do not support minimization report
-  // false.
+  /// Computes the value of the [_WindowControllerAspect.minimized] aspect for the
+  /// given [controller]. Controllers that do not support minimization report
+  /// false.
   static bool _isMinimizedValue(BaseWindowController controller) => switch (controller) {
     RegularWindowController() => controller.isMinimized,
     DialogWindowController() => controller.isMinimized,
@@ -2222,9 +2222,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     SatelliteWindowController() => false,
   };
 
-  // Computes the value of the [_WindowControllerAspect.fullscreen] aspect for
-  // the given [controller]. Controllers that do not support fullscreen report
-  // false.
+  /// Computes the value of the [_WindowControllerAspect.fullscreen] aspect for
+  /// the given [controller]. Controllers that do not support fullscreen report
+  /// false.
   static bool _isFullscreenValue(BaseWindowController controller) => switch (controller) {
     RegularWindowController() => controller.isFullscreen,
     DialogWindowController() => false,
