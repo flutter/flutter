@@ -5,15 +5,51 @@
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../globals.dart' as globals;
+
+/// Whether to ignore [Isolate.packageConfigSync] and force the fallback
+/// path in [currentPackageConfig].
+@visibleForTesting
+bool debugIgnorePackageConfigSync = false;
+
+const String _fileScheme = 'file';
 
 /// Loads the package configuration of the current isolate.
 Future<PackageConfig> currentPackageConfig() async {
-  return loadPackageConfigUri(Isolate.packageConfigSync!);
+  final Uri? packageConfigUri = debugIgnorePackageConfigSync ? null : Isolate.packageConfigSync;
+  if (packageConfigUri != null) {
+    return loadPackageConfigUri(packageConfigUri);
+  }
+
+  final FileSystem fileSystem = globals.fs;
+  final Directory cwd = fileSystem.currentDirectory;
+  File? packageConfigFile = findPackageConfigFile(cwd);
+
+  if (packageConfigFile == null) {
+    final Uri scriptUri = globals.platform.script;
+    if (scriptUri.scheme == _fileScheme) {
+      final File scriptFile = fileSystem.file(scriptUri);
+      packageConfigFile = findPackageConfigFile(scriptFile.parent);
+    }
+  }
+
+  if (packageConfigFile == null) {
+    throwToolExit(
+      'Failed to resolve package configuration.\n'
+      'Isolate.packageConfigSync was null, and no .dart_tool/package_config.json '
+      'could be found in the current working directory (${cwd.path}) or '
+      'relative to the script (${globals.platform.script}).\n'
+      'Did you run "flutter pub get"?',
+    );
+  }
+
+  return loadPackageConfigWithLogging(packageConfigFile, logger: globals.logger);
 }
 
 /// Locates the `.dart_tool/package_config.json` relevant to [dir].

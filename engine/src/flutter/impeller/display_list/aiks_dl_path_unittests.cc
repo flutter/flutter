@@ -261,88 +261,118 @@ TEST_P(AiksTest, CanRenderStrokedConicPaths) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, HairlinePath) {
+namespace {
+using DrawLinesCallback = std::function<void(DisplayListBuilder& builder,
+                                             const DlPaint& paint,
+                                             const Point& p0,
+                                             const Point& p1,
+                                             Scalar width)>;
+
+static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
   Scalar scale = 1.f;
   Scalar rotation = 0.f;
   Scalar offset = 0.f;
-  Scalar width = 0.f;
-  auto callback = [&]() -> sk_sp<DisplayList> {
-    if (IsPlaygroundEnabled()) {
+  Scalar width_adjustment = 0.f;
+  bool invert_colors = false;
+
+  auto callback = [=]() mutable -> sk_sp<DisplayList> {
+    if (test->IsPlaygroundEnabled()) {
       ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Scale", &scale, 0, 6);
       ImGui::SliderFloat("Rotate", &rotation, 0, 90);
       ImGui::SliderFloat("Offset", &offset, 0, 2);
-      ImGui::SliderFloat("Width", &width, 0, 2);
+      ImGui::SliderFloat("Width Adjustment", &width_adjustment, -1, 2);
+      ImGui::Checkbox("Invert colors", &invert_colors);
       ImGui::End();
     }
 
     DisplayListBuilder builder;
-    builder.Scale(GetContentScale().x, GetContentScale().y);
-    builder.DrawPaint(DlPaint(DlColor(0xff111111)));
+
+    // Most tests scale the builder with
+    // builder.Scale(GetContentScale().x, GetContentScale().y) in order to
+    // maintain the same visual size on different screens.
+    // These DrawLines tests explicitly don't invoke this scaling, because they
+    // are testing specific line widths relative to a device pixel size.
+
+    builder.DrawPaint(
+        DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
 
     DlPaint paint;
-    paint.setStrokeWidth(width);
-    paint.setColor(DlColor::kWhite());
-    paint.setStrokeCap(DlStrokeCap::kRound);
-    paint.setStrokeJoin(DlStrokeJoin::kRound);
-    paint.setDrawStyle(DlDrawStyle::kStroke);
+    paint.setColor(invert_colors ? DlColor::kBlack() : DlColor::kWhite());
 
-    builder.Translate(512, 384);
-    builder.Scale(scale, scale);
-    builder.Rotate(rotation);
-    builder.Translate(-512, -384 + offset);
+    std::vector<Scalar> widths = {0.0f, 0.3f, 1.0f};
+    std::vector<Scalar> angles = {0.0f, 3.0f, 45.0f, 87.0f, 90.0f};
 
-    for (int i = 0; i < 5; ++i) {
-      Scalar yoffset = i * 25.25f + 300.f;
-      DlPathBuilder path_builder;
+    const Scalar column_spacing = 1024.0f / widths.size();
+    const Scalar row_spacing = 768.0f / angles.size();
 
-      path_builder.MoveTo(DlPoint(100, yoffset));
-      path_builder.LineTo(DlPoint(924, yoffset));
-      builder.DrawPath(path_builder.TakePath(), paint);
+    for (size_t col = 0; col < widths.size(); ++col) {
+      Scalar col_x = (col + 0.5f) * column_spacing;
+      Scalar width = std::max(0.0f, widths[col] + width_adjustment);
+      for (size_t row = 0; row < angles.size(); ++row) {
+        Scalar row_y = (row + 0.5f) * row_spacing;
+        builder.Save();
+        builder.Translate(col_x, row_y);
+        builder.Scale(scale, scale);
+        builder.Rotate(angles[row] + rotation);
+
+        // Draw 4 parallel lines centered around y = 0. Each line is spaced 8px
+        // apart (-12, -4, +4, +12), plus a 0.25px increment per line to test
+        // fractional subpixel alignment (0.0, 0.25, 0.5, 0.75).
+        for (int i = 0; i < 4; ++i) {
+          Scalar base_y = i * 8.0f - 12.0f;
+          Scalar subpixel_y = i * 0.25f;
+          Scalar line_y = base_y + subpixel_y + offset;
+          Point p0 = Point(-60.0f, line_y);
+          Point p1 = Point(60.0f, line_y);
+          draw_fn(builder, paint, p0, p1, width);
+        }
+
+        builder.Restore();
+      }
     }
 
     return builder.Build();
   };
 
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
+  ASSERT_TRUE(test->OpenPlaygroundHere(callback));
+}
+}  // namespace
+
+TEST_P(AiksTest, DrawLinesWithPath) {
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint stroke_paint = paint;
+    stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+    stroke_paint.setStrokeWidth(width);
+    DlPathBuilder path_builder;
+    path_builder.MoveTo(p0);
+    path_builder.LineTo(p1);
+    builder.DrawPath(path_builder.TakePath(), stroke_paint);
+  });
 }
 
-TEST_P(AiksTest, HairlineDrawLine) {
-  Scalar scale = 1.f;
-  Scalar rotation = 0.f;
-  Scalar offset = 0.f;
-  auto callback = [&]() -> sk_sp<DisplayList> {
-    if (IsPlaygroundEnabled()) {
-      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-      ImGui::SliderFloat("Scale", &scale, 0, 6);
-      ImGui::SliderFloat("Rotate", &rotation, 0, 90);
-      ImGui::SliderFloat("Offset", &offset, 0, 2);
-      ImGui::End();
-    }
+TEST_P(AiksTest, DrawLinesWithDrawLine) {
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint stroke_paint = paint;
+    stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+    stroke_paint.setStrokeWidth(width);
+    builder.DrawLine(p0, p1, stroke_paint);
+  });
+}
 
-    DisplayListBuilder builder;
-    builder.Scale(GetContentScale().x, GetContentScale().y);
-    builder.DrawPaint(DlPaint(DlColor(0xff111111)));
-
-    DlPaint paint;
-    paint.setStrokeWidth(0.f);
-    paint.setColor(DlColor::kWhite());
-
-    builder.Translate(512, 384);
-    builder.Scale(scale, scale);
-    builder.Rotate(rotation);
-    builder.Translate(-512, -384 + offset);
-
-    for (int i = 0; i < 5; ++i) {
-      Scalar yoffset = i * 25.25f + 300.f;
-
-      builder.DrawLine(DlPoint(100, yoffset), DlPoint(924, yoffset), paint);
-    }
-
-    return builder.Build();
-  };
-
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
+TEST_P(AiksTest, DrawLinesWithFilledRects) {
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint fill_paint = paint;
+    fill_paint.setDrawStyle(DlDrawStyle::kFill);
+    Scalar length = p0.GetDistance(p1);
+    Point center = {(p0.x + p1.x) * 0.5f, (p0.y + p1.y) * 0.5f};
+    builder.DrawRect(
+        DlRect::MakeEllipseBounds(center, Size(length, width) * 0.5f),
+        fill_paint);
+  });
 }
 
 TEST_P(AiksTest, CanRenderTightConicPath) {
