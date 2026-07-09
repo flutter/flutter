@@ -98,6 +98,9 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
 - (BOOL)accessibilityScrollToVisible;
 - (BOOL)accessibilityScrollToVisibleWithChild:(id)child;
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event;
+- (CGRect)globalRect;
+- (bool)containsPoint:(CGPoint)point;
+- (bool)isFocusable;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_SEMANTICSOBJECTTESTMOCKS_H_

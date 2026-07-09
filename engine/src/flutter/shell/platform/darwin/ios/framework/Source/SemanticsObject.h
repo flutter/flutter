@@ -42,6 +42,12 @@ constexpr float kScrollExtentMaxForInf = 1000;
 @property(nonatomic, weak, readonly) SemanticsObject* parent;
 
 /**
+ * The parent of this node in the hit-test tree. Will be nil for the root node,
+ * during transient state changes, and for nodes that have no hit-test parent.
+ */
+@property(nonatomic, weak, readonly) SemanticsObject* hitTestParent;
+
+/**
  * The accessibility bridge that this semantics object is attached to. This
  * object may use the bridge to access contextual application information. A weak
  * pointer is used because the platform view owns the accessibility bridge.
@@ -68,8 +74,8 @@ constexpr float kScrollExtentMaxForInf = 1000;
 @property(nonatomic, copy) NSArray<SemanticsObject*>* children;
 
 /**
- * Direct children of this semantics object in hit test order. Each child's `parent` property
- * must be equal to this object.
+ * Direct children of this semantics object in hit test order. Each child's
+ * `hitTestParent` property must be equal to this object.
  */
 @property(nonatomic, copy) NSArray<SemanticsObject*>* childrenInHitTestOrder;
 
