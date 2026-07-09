@@ -526,7 +526,7 @@ class Text extends StatelessWidget {
     this.semanticsIdentifier,
     this.textWidthBasis,
     this.textHeightBehavior,
-    this.hyphens = ui.Hyphens.manual,
+    this.hyphens,
     this.selectionColor,
   }) : textSpan = null,
        assert(
@@ -564,7 +564,7 @@ class Text extends StatelessWidget {
     this.semanticsIdentifier,
     this.textWidthBasis,
     this.textHeightBehavior,
-    this.hyphens = ui.Hyphens.manual,
+    this.hyphens,
     this.selectionColor,
   }) : data = null,
        assert(
@@ -705,7 +705,11 @@ class Text extends StatelessWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// {@macro flutter.painting.textPainter.hyphens}
-  final ui.Hyphens hyphens;
+  ///
+  /// If null, resolves to [Hyphens.manual] (via [DefaultTextStyle] once that
+  /// gains a `hyphens` field), matching the other paragraph-level properties
+  /// on this widget.
+  final ui.Hyphens? hyphens;
 
   /// The color to use when painting the selection.
   ///
@@ -774,7 +778,7 @@ class Text extends StatelessWidget {
               textHeightBehavior ??
               defaultTextStyle.textHeightBehavior ??
               DefaultTextHeightBehavior.maybeOf(context),
-          hyphens: hyphens,
+          hyphens: hyphens ?? ui.Hyphens.manual,
           selectionColor:
               selectionColor ??
               DefaultSelectionStyle.of(context).selectionColor ??
@@ -798,7 +802,7 @@ class Text extends StatelessWidget {
             textHeightBehavior ??
             defaultTextStyle.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
-        hyphens: hyphens,
+        hyphens: hyphens ?? ui.Hyphens.manual,
         selectionColor:
             selectionColor ??
             DefaultSelectionStyle.of(context).selectionColor ??
@@ -852,7 +856,7 @@ class Text extends StatelessWidget {
         defaultValue: null,
       ),
     );
-    properties.add(EnumProperty<ui.Hyphens>('hyphens', hyphens, defaultValue: ui.Hyphens.manual));
+    properties.add(EnumProperty<ui.Hyphens>('hyphens', hyphens, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }

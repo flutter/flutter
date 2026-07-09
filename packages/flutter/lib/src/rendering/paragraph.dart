@@ -772,6 +772,9 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.hyphens = value;
     _overflowShader = null;
+    // Although Hyphens is described as a rendering choice, rendering the hyphen
+    // glyph makes the line wider and can change where the paragraph wraps, so it
+    // affects layout — hence markNeedsLayout rather than markNeedsPaint.
     markNeedsLayout();
   }
 
