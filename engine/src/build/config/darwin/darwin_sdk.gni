@@ -67,9 +67,8 @@ declare_args() {
   ios_swift_lib_paths = []
 
   # Version of iOS that we're targeting for tests.
-  # iOS 15.0 is the earliest version that allows swift testing tests to be loaded
-  # from dylibs without crashing.
-  ios_testing_deployment_target = "15.0"
+  # iOS 16.0 is the earliest version that supports TimeLimitTrait in swift testing.
+  ios_testing_deployment_target = "16.0"
 }
 
 if (target_os == "ios" || target_os == "macos") {
