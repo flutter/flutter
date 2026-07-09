@@ -226,9 +226,7 @@ static void DrawCompressedTextureGolden(RendererGoldenTest& test,
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  desc->SetSampleCount(SampleCount::kCount1);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
+  ASSERT_TRUE(test.InitializePipelineDescriptorForRendering(*desc));
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_TRUE(pipeline);
 
