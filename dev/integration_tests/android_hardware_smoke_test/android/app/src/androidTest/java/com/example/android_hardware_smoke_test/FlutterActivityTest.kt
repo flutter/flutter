@@ -37,9 +37,9 @@ class FlutterActivityTest {
         @AfterClass
         fun tearDownClass() {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                val engine = FlutterEngineCache.getInstance().get("smoke_test_engine")
+                val engine = FlutterEngineCache.getInstance().get(MainActivity.CACHED_ENGINE_KEY)
                 engine?.destroy()
-                FlutterEngineCache.getInstance().remove("smoke_test_engine")
+                FlutterEngineCache.getInstance().remove(MainActivity.CACHED_ENGINE_KEY)
             }
         }
     }

@@ -19,7 +19,7 @@ class MainActivity : FlutterActivity() {
         private const val TAG = "MainActivity"
         const val CHANNEL_NAME = "com.example.android_hardware_smoke_test/test_channel"
         private const val METHOD_CHANNEL_NAME = "com.example.android_hardware_smoke_test/native_support"
-        private const val CACHED_ENGINE_KEY = "smoke_test_engine"
+        internal const val CACHED_ENGINE_KEY = "smoke_test_engine"
 
         // Stored as WeakReferences to avoid static leaks; both are only read/written on the UI/Main Thread.
         private var lastConfiguredEngine: WeakReference<FlutterEngine>? = null
