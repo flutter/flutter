@@ -87,16 +87,6 @@ class PlaygroundTestEnvironment : public ::testing::Environment {
   }
 
   void SetUp() override {
-    // Make sure environment is set up for VK swiftshader
-    // std::filesystem::path testing_assets_path =
-    //     flutter::testing::GetTestingAssetsPath();
-    // std::filesystem::path target_path = testing_assets_path.parent_path()
-    //                                         .parent_path()
-    //                                         .parent_path()
-    //                                         .parent_path();
-    // std::filesystem::path icd_path = target_path / "vk_swiftshader_icd.json";
-    // setenv("VK_ICD_FILENAMES", icd_path.c_str(), 1);
-
     const fml::CommandLine& args = ::flutter::testing::GetArgsForProcess();
     std::string golden_output_dir;
     if (args.GetOptionValue("golden_output_dir", &golden_output_dir)) {
@@ -140,7 +130,24 @@ std::optional<testing::GoldenDigestManager>
 
 }  // namespace
 
+// Change these declarations to #defines to enable swiftshader or metal
+// validation.
+#undef APPLY_METAL_VALIDATION
+#undef ENABLE_VK_SWIFTSHADER
+
 void PlaygroundTest::SetupTestEnvironment() {
+#ifdef ENABLE_VK_SWIFTSHADER
+  // Make sure environment is set up for VK swiftshader
+  std::filesystem::path testing_assets_path =
+      flutter::testing::GetTestingAssetsPath();
+  std::filesystem::path target_path = testing_assets_path.parent_path()
+                                          .parent_path()
+                                          .parent_path()
+                                          .parent_path();
+  std::filesystem::path icd_path = target_path / "vk_swiftshader_icd.json";
+  setenv("VK_ICD_FILENAMES", icd_path.c_str(), 1);
+#endif
+
 #ifdef APPLY_METAL_VALIDATION
   // https://developer.apple.com/documentation/metal/diagnosing_metal_programming_issues_early?language=objc
   // Enables all shader validation tests.
