@@ -556,46 +556,44 @@ void main() {
     ),
   );
 
-  testWidgets(
-    'does not crash when long press is cancelled after unmounting',
-    (WidgetTester tester) async {
-      // Regression test for b/425840577.
-      final scrollController = ScrollController();
-      addTearDown(scrollController.dispose);
+  testWidgets('does not crash when long press is cancelled after unmounting', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for b/425840577.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: CustomScrollView(
-            controller: scrollController,
-            slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (_, int index) => index == 0 ? const TestTextField() : const SizedBox(height: 50),
-                  childCount: 200,
-                  addAutomaticKeepAlives: false,
-                ),
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: CustomScrollView(
+          controller: scrollController,
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (_, int index) => index == 0 ? const TestTextField() : const SizedBox(height: 50),
+                childCount: 200,
+                addAutomaticKeepAlives: false,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
-      // gesture is not accepted and is cancelled when the recognizer is disposed.
-      await tester.startGesture(tester.getCenter(find.byType(TestTextField)));
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pumpAndSettle();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
+    // gesture is not accepted and is cancelled when the recognizer is disposed.
+    await tester.startGesture(tester.getCenter(find.byType(TestTextField)));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
 
-      // While attempting to long press, scroll the TextField out of view
-      // to dispose of it and its gesture recognizers.
-      scrollController.jumpTo(8000.0);
-      await tester.pump();
-      expect(state.mounted, isFalse);
-      // Should reach the end of the test without any failures.
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    // While attempting to long press, scroll the TextField out of view
+    // to dispose of it and its gesture recognizers.
+    scrollController.jumpTo(8000.0);
+    await tester.pump();
+    expect(state.mounted, isFalse);
+    // Should reach the end of the test without any failures.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets(
     'TextSelectionGestureDetectorBuilder right click Apple platforms',
@@ -1246,35 +1244,208 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/37032.
+  testWidgets("selection handle's GestureDetector should not cover the entire screen", (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'a');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(home: TestTextField(autofocus: true, controller: controller)),
+    );
+
+    await tester.pumpAndSettle();
+
+    final Finder gestureDetector = find.descendant(
+      of: find.byType(CompositedTransformFollower),
+      matching: find.descendant(
+        of: find.byType(FadeTransition),
+        matching: find.byType(RawGestureDetector),
+      ),
+    );
+
+    expect(gestureDetector, findsOneWidget);
+    // The GestureDetector's size should not exceed that of the TextField.
+    final Rect hitRect = tester.getRect(gestureDetector);
+    final Rect textFieldRect = tester.getRect(find.byType(TestTextField));
+
+    expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
+    expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
+
+  testWidgets('dragging selection handle does not crash when RenderObject is degenerate', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/187644
+    final controller = TextEditingController(text: 'The quick fox jumps over the fence.');
+    final focusNode = FocusNode();
+    final selectionControls = _MockTextSelectionHandleControls();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+
+    var scaleY = 1.0;
+    late StateSetter setState;
+
+    // Build the widget tree with a Transform that scales only the height (Y-axis).
+    // Collapsing only the height axis to a subnormal value (like 1e-310) mirrors
+    // a horizontal fold and causes the inverse Y coordinate to overflow to Infinity.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return Transform(
+                transform: Matrix4.diagonal3Values(1.0, scaleY, 1.0),
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: 300,
+                  height: 200,
+                  child: TestTextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    maxLines: null,
+                    selectionControls: selectionControls,
+                    showSelectionHandles: true,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Focus and select text programatically.
+    focusNode.requestFocus();
+    await tester.pump();
+    controller.selection = const TextSelection(baseOffset: 14, extentOffset: 19);
+    await tester.pumpAndSettle();
+
+    final RenderEditable renderEditable = tester.allRenderObjects.whereType<RenderEditable>().first;
+
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+      controller.selection,
+    );
+    final Offset handleGlobalPos = renderEditable.localToGlobal(endpoints[1].point);
+
+    // Start a drag gesture.
+    final TestGesture gesture = await tester.startGesture(handleGlobalPos);
+    await tester.pump();
+
+    // Move the gesture slightly to exceed the touch slop and accept the gesture.
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await tester.pump();
+
+    // Trigger a degenerate transform mid-drag.
+    // Set the height scale (Y-axis) to a subnormal value (1e-310) to trigger
+    // coordinate inversion overflow.
+    setState(() {
+      scaleY = 1e-310;
+    });
+    await tester.pump();
+
+    final Offset newGlobalPos = handleGlobalPos + const Offset(50.0, 0.0);
+
+    // Move the drag handle, this should not crash.
+    await gesture.moveTo(newGlobalPos);
+    await gesture.moveTo(newGlobalPos + const Offset(10.0, 0.0));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets(
-    "selection handle's GestureDetector should not cover the entire screen",
+    'dragging selection handle does not crash when layout is degenerate (preferredLineHeight == 0)',
     (WidgetTester tester) async {
-      final controller = TextEditingController(text: 'a');
+      // Regression test for https://github.com/flutter/flutter/issues/187644
+      final controller = TextEditingController(text: 'The quick fox jumps over the fence.');
+      final focusNode = FocusNode();
+      final selectionControls = _MockTextSelectionHandleControls();
       addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+
+      var scaleFactor = 1.0;
+      late StateSetter setState;
 
       await tester.pumpWidget(
-        TestWidgetsApp(home: TestTextField(autofocus: true, controller: controller)),
-      );
-
-      await tester.pumpAndSettle();
-
-      final Finder gestureDetector = find.descendant(
-        of: find.byType(CompositedTransformFollower),
-        matching: find.descendant(
-          of: find.byType(FadeTransition),
-          matching: find.byType(RawGestureDetector),
+        TestWidgetsApp(
+          home: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter localSetState) {
+                setState = localSetState;
+                return SizedBox(
+                  width: 300,
+                  height: 200,
+                  child: MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: TextScaler.linear(scaleFactor)),
+                    child: TestTextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      maxLines: null,
+                      style: const TextStyle(fontSize: 14.0, height: 1.0),
+                      showSelectionHandles: true,
+                      selectionControls: selectionControls,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       );
 
-      expect(gestureDetector, findsOneWidget);
-      // The GestureDetector's size should not exceed that of the TextField.
-      final Rect hitRect = tester.getRect(gestureDetector);
-      final Rect textFieldRect = tester.getRect(find.byType(TestTextField));
+      // Focus the text field to allow selection.
+      focusNode.requestFocus();
+      await tester.pump();
 
-      expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
-      expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
+      // Programmatically select a range of text to show the selection handles.
+      controller.selection = const TextSelection(baseOffset: 14, extentOffset: 19);
+      await tester.pumpAndSettle();
+
+      // Find the RenderEditable to get the handle coordinates.
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+      expect(endpoints.length, 2);
+
+      // Calculate the global coordinate of the end handle.
+      final Offset handleLocalPos = endpoints[1].point;
+      final Offset handleGlobalPos = renderEditable.localToGlobal(handleLocalPos);
+
+      // Start the drag gesture on the end handle.
+      final TestGesture gesture = await tester.startGesture(handleGlobalPos);
+      await tester.pump();
+
+      // Simulate a transient degenerate layout state mid-drag.
+      // By setting scaleFactor to 0.0, the RenderEditable's preferredLineHeight
+      // will become 0.0 on the next layout pass.
+      setState(() {
+        scaleFactor = 0.0;
+      });
+      await tester.pump();
+
+      // Move the drag handle. This triggers the drag update callback which
+      // should not crash.
+      final Offset newGlobalPos = handleGlobalPos + const Offset(50.0, 0.0);
+
+      // We expect this to not throw.
+      await gesture.moveTo(newGlobalPos);
+      await gesture.moveTo(newGlobalPos + const Offset(20.0, 0.0));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      // Clean up the gesture.
+      await gesture.up();
+      await tester.pumpAndSettle();
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
   group('SelectionOverlay', () {
@@ -2164,6 +2335,38 @@ class _TapCallbackWidget extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onPointerUp: onTap != null ? (_) => onTap!() : null,
       child: child,
+    );
+  }
+}
+
+class _MockTextSelectionHandleControls extends TextSelectionControls
+    with TextSelectionHandleControls {
+  @override
+  Size getHandleSize(double textLineHeight) => const Size(30.0, 30.0);
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    // Anchor the handle at the top-center (x: 15, y: 0) of the 30x30 box.
+    return const Offset(15.0, 0.0);
+  }
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return GestureDetector(
+      onTap: onTap,
+      // A plain colored container that is large enough to target and drag easily in tests.
+      child: const SizedBox(
+        width: 30.0,
+        height: 30.0,
+        child: ColoredBox(
+          color: Color(0xFF0000FF), // Pure Blue
+        ),
+      ),
     );
   }
 }
