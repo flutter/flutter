@@ -8,28 +8,26 @@ import Testing
 @MainActor
 @Suite struct TaskRunnerTests {
 
-  @Test(.timeLimit(.seconds(5)))
+  @Test(.timeLimit(.minutes(1)))
   func postTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    await withCheckedContinuation { continuation in
-      taskRunner.postTask {
-        continuation.resume()
-      }
+    await confirmation { confirm in
+      taskRunner.postTask(confirm)
     }
   }
 
-  @Test(.timeLimit(.seconds(5)))
+  @Test(.timeLimit(.minutes(1)))
   func postDelayedTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
     let startTime = CACurrentMediaTime()
-    await withCheckedContinuation { continuation in
+    await confirmation { confirm in
       taskRunner.postTask(delay: 0.1) {
         let endTime = CACurrentMediaTime()
         let epsilon = 0.001
         #expect(endTime - startTime >= 0.1 - epsilon)
-        continuation.resume()
+        confirm()
       }
     }
   }

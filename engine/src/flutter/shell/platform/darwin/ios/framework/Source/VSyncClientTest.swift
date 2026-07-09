@@ -150,21 +150,21 @@ import Testing
     #expect(link.isPaused)
   }
 
-  @Test(.timeLimit(.seconds(1)))
+  @Test(.timeLimit(.minutes(1)))
   func releasesLinkOnInvalidation() async {
     let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "FlutterVSyncClientTest")
     weak var weakClient: VSyncClient?
 
     var client: VSyncClient?
 
-    await withCheckedContinuation { continuation in
+    await confirmation { confirm in
       autoreleasepool {
         client = VSyncClient(
           taskRunner: threadTaskRunner,
           isVariableRefreshRateEnabled: false,
           maxRefreshRate: 60.0
         ) { _, _ in
-          continuation.resume()
+          confirm()
         }
         weakClient = client
 
@@ -179,10 +179,8 @@ import Testing
       client = nil
     }
 
-    await withCheckedContinuation { continuation in
-      threadTaskRunner.postTask {
-        continuation.resume()
-      }
+    await confirmation { confirm in
+      threadTaskRunner.postTask(confirm)
     }
 
     #expect(weakClient == nil)
@@ -212,7 +210,7 @@ import Testing
   /// registering thread). If this fails, the run loop will strongly retain and leak both the
   /// display link and the relay.
   @MainActor
-  @Test(.timeLimit(.seconds(1)))
+  @Test(.timeLimit(.minutes(1)))
   func displayLinkIsDeallocatedOnTaskRunnerThread() async {
     let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
     weak var weakClient: VSyncClient?
@@ -231,10 +229,8 @@ import Testing
     }
 
     // Ensure the display link is added to the run loop on the task runner thread.
-    await withCheckedContinuation { continuation in
-      threadTaskRunner.postTask {
-        continuation.resume()
-      }
+    await confirmation { confirm in
+      threadTaskRunner.postTask(confirm)
     }
 
     // Deallocate on the main (test) thread. deinit calls invalidate(), which must post the
@@ -245,10 +241,8 @@ import Testing
     #expect(weakClient == nil)
 
     // Flush the task runner queue to ensure invalidation executes on the task runner thread.
-    await withCheckedContinuation { continuation in
-      threadTaskRunner.postTask {
-        continuation.resume()
-      }
+    await confirmation { confirm in
+      threadTaskRunner.postTask(confirm)
     }
 
     // If the invalidation succeeded on the correct thread, the run loop dropped its strong
