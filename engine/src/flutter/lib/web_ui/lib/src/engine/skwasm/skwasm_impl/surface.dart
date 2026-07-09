@@ -21,7 +21,6 @@ extension type RasterResult._(JSObject _) implements JSObject {
   external JSArray<JSAny> get imageBitmaps;
 }
 
-@pragma('wasm:export')
 WasmVoid callbackHandler(WasmI32 callbackId, WasmI32 context, WasmExternRef? jsContext) {
   // Actually hide this call behind whether skwasm is enabled. Otherwise, the SkwasmCallbackHandler
   // won't actually be tree-shaken, and we end up with skwasm imports in non-skwasm builds.
