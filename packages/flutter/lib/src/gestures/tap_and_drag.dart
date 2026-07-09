@@ -582,7 +582,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     }
 
     final Offset difference = secondTapOffset - _lastTapOffset!;
-    return difference.distanceSquared <= kDoubleTapSlop * kDoubleTapSlop;
+    return difference.distanceIsWithin(kDoubleTapSlop);
   }
 
   bool _representsSameSeries(PointerDownEvent event) {

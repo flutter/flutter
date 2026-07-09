@@ -826,8 +826,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     switch (_gestureType) {
       case _GestureType.pan:
-        if (details.velocity.pixelsPerSecond.distanceSquared <
-            kMinFlingVelocity * kMinFlingVelocity) {
+        if (details.velocity.pixelsPerSecond.distanceIsWithin(kMinFlingVelocity)) {
           _currentAxis = null;
           return;
         }

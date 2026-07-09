@@ -341,9 +341,7 @@ class _ImmediatePointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    final double hitSlop = computeHitSlop(kind, gestureSettings);
-    assert(hitSlop >= 0.0);
-    if (pendingDelta!.distanceSquared > hitSlop * hitSlop) {
+    if (pendingDelta!.distanceExceeds(computeHitSlop(kind, gestureSettings))) {
       resolve(GestureDisposition.accepted);
     }
   }
@@ -504,11 +502,7 @@ class _DelayedPointerState extends MultiDragPointerState {
   void _delayPassed() {
     assert(_timer != null);
     assert(pendingDelta != null);
-    assert(() {
-      final double hitSlop = computeHitSlop(kind, gestureSettings);
-      assert(hitSlop >= 0.0);
-      return pendingDelta!.distanceSquared <= hitSlop * hitSlop;
-    }());
+    assert(pendingDelta!.distanceIsWithin(computeHitSlop(kind, gestureSettings)));
     _timer = null;
     if (_starter != null) {
       _starter!(initialPosition);
@@ -546,9 +540,7 @@ class _DelayedPointerState extends MultiDragPointerState {
       return;
     }
     assert(pendingDelta != null);
-    final double hitSlop = computeHitSlop(kind, gestureSettings);
-    assert(hitSlop >= 0.0);
-    if (pendingDelta!.distanceSquared > hitSlop * hitSlop) {
+    if (pendingDelta!.distanceExceeds(computeHitSlop(kind, gestureSettings))) {
       resolve(GestureDisposition.rejected);
       _ensureTimerStopped();
     }
