@@ -440,11 +440,17 @@ class TextLayout {
       line.updateBoundingBox(block);
     }
 
-    if (line.visualBlocks.isEmpty) {
+    if (line.visualBlocks.isEmpty && lines.isNotEmpty) {
       // This is a special case when we have a last line after a hard line break and it has no text or whitespaces
       // This line didn't get any metrics from the blocks so we need to update it with the metrics from the last block of the previous line
       // The previous block garanteed to have metrics because it could not be empty
-      line.updateBoundingBox(lines.last.visualBlocks.last);
+      final TextLine previousLineWithBlocks = lines.reversed.firstWhere(
+        (l) => l.visualBlocks.isNotEmpty,
+        orElse: () => lines.last,
+      );
+      if (previousLineWithBlocks.visualBlocks.isNotEmpty) {
+        line.updateBoundingBox(previousLineWithBlocks.visualBlocks.last);
+      }
     }
 
     line.advance = ui.Rect.fromLTWH(
