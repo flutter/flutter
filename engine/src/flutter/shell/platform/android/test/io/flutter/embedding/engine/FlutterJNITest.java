@@ -368,18 +368,23 @@ public class FlutterJNITest {
     // TODO(gmackall): Update when robolectric supports testing on API 37.
     // Robolectric 4.16 has no shadow for API 37 yet, so override SDK_INT directly rather than
     // relying on @Config(sdk = API_LEVELS.API_37).
-    ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+    int originalSdkInt = Build.VERSION.SDK_INT;
+    try {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
 
-    FlutterJNI flutterJNI = spy(new FlutterJNI());
-    Context context = mock(Context.class);
-    // Avoid actually loading the native library during the test.
-    doNothing().when(flutterJNI).loadFlutterLibraryWithReLinker(any());
-    doNothing().when(flutterJNI).loadFlutterLibraryWithSystemLinker();
+      FlutterJNI flutterJNI = spy(new FlutterJNI());
+      Context context = mock(Context.class);
+      // Avoid actually loading the native library during the test.
+      doNothing().when(flutterJNI).loadFlutterLibraryWithReLinker(any());
+      doNothing().when(flutterJNI).loadFlutterLibraryWithSystemLinker();
 
-    flutterJNI.loadLibrary(context);
+      flutterJNI.loadLibrary(context);
 
-    verify(flutterJNI, times(1)).loadFlutterLibraryWithSystemLinker();
-    verify(flutterJNI, never()).loadFlutterLibraryWithReLinker(any());
+      verify(flutterJNI, times(1)).loadFlutterLibraryWithSystemLinker();
+      verify(flutterJNI, never()).loadFlutterLibraryWithReLinker(any());
+    } finally {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
+    }
   }
 
   static class FlutterJNITester extends FlutterJNI {
