@@ -9,6 +9,8 @@
 #include <mutex>
 #include <vector>
 
+#include "impeller/base/thread_safety.h"
+
 namespace impeller {
 
 /// @brief Tracks GPU completion of submitted command buffers as a monotonic
@@ -38,11 +40,11 @@ class GpuSubmissionTracker {
 
  private:
   mutable std::mutex mutex_;
-  uint64_t last_id_ = 0;
+  uint64_t last_id_ IPLR_GUARDED_BY(mutex_) = 0;
   // Sorted, since ids are recorded in increasing order. The pending count
   // tracks GPU queue depth and stays small, so erasure is cheap and steady
   // state performs no heap allocation.
-  std::vector<uint64_t> pending_;
+  std::vector<uint64_t> pending_ IPLR_GUARDED_BY(mutex_);
 };
 
 }  // namespace impeller
