@@ -37,10 +37,7 @@ class SkwasmPath implements BackendPath {
     }
   }
 
-  @override
   bool contains(ui.Offset point) => pathContains(handle, point.dx, point.dy);
-
-  @override
   ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
 
   @override

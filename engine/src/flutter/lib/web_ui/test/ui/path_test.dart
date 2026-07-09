@@ -347,7 +347,7 @@ Future<void> testMain() async {
       p.moveTo(10, 0);
       // Small clockwise quarter-circle from (10,0) to (0,10) with radius 10.
       // Center at the origin; the arc spans the first quadrant.
-      p.arcToPoint(const Offset(0, 10), radius: const Radius.circular(10), clockwise: true);
+      p.arcToPoint(const Offset(0, 10), radius: const Radius.circular(10));
       expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
     });
 
@@ -355,11 +355,7 @@ Future<void> testMain() async {
       final p = Path();
       p.moveTo(10, 0);
       // Relative (-10, 10) from (10, 0) = absolute endpoint (0, 10): same arc as arcToPoint.
-      p.relativeArcToPoint(
-        const Offset(-10, 10),
-        radius: const Radius.circular(10),
-        clockwise: true,
-      );
+      p.relativeArcToPoint(const Offset(-10, 10), radius: const Radius.circular(10));
       expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
     });
 
@@ -432,7 +428,7 @@ Future<void> testMain() async {
       p.lineTo(10.0, 10.0);
       expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)));
       p.reset();
-      expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)));
+      expect(p.getBounds(), equals(Rect.zero));
     });
 
     test('contains', () {
