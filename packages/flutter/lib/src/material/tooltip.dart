@@ -554,6 +554,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         ignorePointer: widget.ignorePointer ?? widget.message != null,
         child: effectiveChild,
       );
+    } else {
+      // A TooltipVisibility ancestor has disabled the tooltip overlay and its
+      // triggers, but the message should still be reported to assistive
+      // technology, matching what RawTooltip does when the tooltip is enabled.
+      effectiveChild = Semantics(
+        tooltip: excludeFromSemantics ? null : _tooltipMessage,
+        child: effectiveChild,
+      );
     }
 
     return effectiveChild;

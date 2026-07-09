@@ -189,6 +189,56 @@ void main() {
     await tester.pump();
     expect(find.text(tooltipText), findsOneWidget);
   });
+
+  testWidgets('Tooltip contributes semantics when in TooltipVisibility with visible = false', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/189062.
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const childKey = Key('child');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: TooltipVisibility(
+          visible: false,
+          child: Tooltip(
+            message: tooltipText,
+            child: SizedBox(key: childKey, width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(childKey)), containsSemantics(tooltip: tooltipText));
+    handle.dispose();
+  });
+
+  testWidgets(
+    'Tooltip in TooltipVisibility with visible = false contributes no semantics when excluded',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const childKey = Key('child');
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: TooltipVisibility(
+            visible: false,
+            child: Tooltip(
+              message: tooltipText,
+              excludeFromSemantics: true,
+              child: SizedBox(key: childKey, width: 100.0, height: 100.0),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSemantics(find.byKey(childKey)),
+        isNot(containsSemantics(tooltip: tooltipText)),
+      );
+      handle.dispose();
+    },
+  );
 }
 
 Future<void> setWidgetForTooltipMode(
