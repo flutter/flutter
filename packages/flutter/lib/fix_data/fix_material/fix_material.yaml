@@ -26,6 +26,13 @@
 #     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
+  - title: 'migrate from flutter/material.dart to material_ui/material_ui.dart.'
+    date: 2026-05-08
+    library: 'package:flutter/material.dart'
+    changes:
+      - kind: 'replacedBy'
+        newLibrary: 'package:material_ui/material_ui.dart'
+
   # Changes made in https://github.com/flutter/flutter/pull/179776
   - title: 'Replaced by cupertino CupertinoPageTransitionsBuilder'
     date: 2026-01-15
