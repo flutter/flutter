@@ -18,12 +18,14 @@ class MainApp extends StatelessWidget {
 {{/withEmptyMain}}
 {{^withEmptyMain}}
 {{#withPlatformChannelPluginHook}}
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPlatformChannelPluginHook}}
 {{#withFfi}}
+
 import 'dart:async';
 
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart' as {{pluginProjectName}};
