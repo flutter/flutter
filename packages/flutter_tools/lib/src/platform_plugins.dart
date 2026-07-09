@@ -23,29 +23,29 @@ const kFfiPlugin = 'ffiPlugin';
 // Constant for 'defaultPackage' key in plugin maps.
 const kDefaultPackage = 'default_package';
 
-// Matches a valid native plugin class or dot-separated package identifier.
-//
-// Plugin `class`/`package` values are interpolated verbatim into the generated
-// GeneratedPluginRegistrant source files (Java/Kotlin, Swift, Objective-C,
-// C++). Restricting them to identifier characters prevents a (possibly
-// transitive) dependency from injecting arbitrary native code into the
-// consuming app's build via its pubspec plugin declaration.
+/// Matches a valid native plugin class or dot-separated package identifier.
+///
+/// Plugin `class`/`package` values are interpolated verbatim into the generated
+/// GeneratedPluginRegistrant source files (Java/Kotlin, Swift, Objective-C,
+/// C++). Restricting them to identifier characters prevents a (possibly
+/// transitive) dependency from injecting arbitrary native code into the
+/// consuming app's build via its pubspec plugin declaration.
 final RegExp _pluginIdentifierPattern = RegExp(
   r'^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*$',
 );
 
-// Returns false only when [value] is a String that is not a valid identifier.
-// Absent or non-String values are left to the existing schema type checks.
+/// Returns false only when [value] is a String that is not a valid identifier.
+/// Absent or non-String values are left to the existing schema type checks.
 bool _isValidPluginIdentifier(Object? value) =>
     value is! String || _pluginIdentifierPattern.hasMatch(value);
 
-// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
-// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
-// `import` in the generated registrant, so they must not contain quotes,
-// semicolons, whitespace or parent-directory segments.
+/// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
+/// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
+/// `import` in the generated registrant, so they must not contain quotes,
+/// semicolons, whitespace or parent-directory segments.
 final RegExp pluginDartFileNamePattern = RegExp(r'^[a-zA-Z0-9_][a-zA-Z0-9_./-]*\.dart$');
 
-// Returns false only when [value] is a String that is not a safe Dart file name.
+/// Returns false only when [value] is a String that is not a safe Dart file name.
 bool isValidPluginDartFileName(Object? value) =>
     value is! String ||
     (pluginDartFileNamePattern.hasMatch(value) && !value.contains('..'));
