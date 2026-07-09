@@ -906,6 +906,22 @@ void main() {
 
       painter.dispose();
     });
+
+    test('getFullHeightForCaret handles degenerate layout without crashing', () {
+      // Regression test for https://github.com/flutter/flutter/issues/187644
+      final painter = TextPainter(
+        textDirection: .ltr,
+        text: const TextSpan(text: '', style: TextStyle(height: 1.0, fontSize: 0.0)),
+      );
+      painter.layout();
+
+      expect(
+        painter.getFullHeightForCaret(const TextPosition(offset: 0), Rect.zero),
+        painter.preferredLineHeight,
+      );
+
+      painter.dispose();
+    });
   });
 
   test('TextPainter error test', () {
