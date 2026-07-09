@@ -161,6 +161,15 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
           ASSERT_EQ(7.0, node->transform.pers0);
           ASSERT_EQ(8.0, node->transform.pers1);
           ASSERT_EQ(9.0, node->transform.pers2);
+          ASSERT_EQ(1.0, node->hit_test_transform.scaleX);
+          ASSERT_EQ(2.0, node->hit_test_transform.skewX);
+          ASSERT_EQ(3.0, node->hit_test_transform.transX);
+          ASSERT_EQ(4.0, node->hit_test_transform.skewY);
+          ASSERT_EQ(5.0, node->hit_test_transform.scaleY);
+          ASSERT_EQ(6.0, node->hit_test_transform.transY);
+          ASSERT_EQ(7.0, node->hit_test_transform.pers0);
+          ASSERT_EQ(8.0, node->hit_test_transform.pers1);
+          ASSERT_EQ(9.0, node->hit_test_transform.pers2);
           ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1),
                     0);
           ASSERT_EQ(node->heading_level, 0);
@@ -837,6 +846,15 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
           ASSERT_EQ(7.0, node->transform.pers0);
           ASSERT_EQ(8.0, node->transform.pers1);
           ASSERT_EQ(9.0, node->transform.pers2);
+          ASSERT_EQ(1.0, node->hit_test_transform.scaleX);
+          ASSERT_EQ(2.0, node->hit_test_transform.skewX);
+          ASSERT_EQ(3.0, node->hit_test_transform.transX);
+          ASSERT_EQ(4.0, node->hit_test_transform.skewY);
+          ASSERT_EQ(5.0, node->hit_test_transform.scaleY);
+          ASSERT_EQ(6.0, node->hit_test_transform.transY);
+          ASSERT_EQ(7.0, node->hit_test_transform.pers0);
+          ASSERT_EQ(8.0, node->hit_test_transform.pers1);
+          ASSERT_EQ(9.0, node->hit_test_transform.pers2);
           ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1),
                     0);
         }

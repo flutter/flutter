@@ -98,7 +98,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
@@ -159,7 +159,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
 
-  FlutterSemanticsNode2 node1;
+  FlutterSemanticsNode2 node1{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   std::vector<int32_t> node1_children{2};
   node1.id = 1;
@@ -180,7 +180,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   node1.custom_accessibility_actions_count = 0;
   node1.identifier = "";
 
-  FlutterSemanticsNode2 node2;
+  FlutterSemanticsNode2 node2{};
   node2.id = 2;
   node2.flags2 = &flags;
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
@@ -227,7 +227,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
@@ -276,7 +276,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
