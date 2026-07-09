@@ -36,7 +36,7 @@ namespace impeller {
 class PipelineCompileQueueGLES : public PipelineCompileQueue {
  public:
   static std::shared_ptr<PipelineCompileQueueGLES> Create(
-      fml::RefPtr<fml::TaskRunner> worker_task_runner);
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
   ~PipelineCompileQueueGLES() override;
 
@@ -50,10 +50,10 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
 
  private:
   explicit PipelineCompileQueueGLES(
-      fml::RefPtr<fml::TaskRunner> worker_task_runner);
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
   void DrainPendingJobs();
 
-  fml::RefPtr<fml::TaskRunner> worker_task_runner_;
+  std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
   Mutex processing_mutex_;
   bool is_processing_ IPLR_GUARDED_BY(processing_mutex_) = false;
 };

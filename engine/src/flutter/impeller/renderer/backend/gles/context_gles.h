@@ -29,7 +29,7 @@ class ContextGLES final : public Context,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
       bool enable_gpu_tracing,
-      fml::RefPtr<fml::TaskRunner> io_task_runner = nullptr);
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner = nullptr);
 
   // |Context|
   ~ContextGLES() override;
@@ -72,7 +72,7 @@ class ContextGLES final : public Context,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
       bool enable_gpu_tracing,
-      fml::RefPtr<fml::TaskRunner> io_task_runner = nullptr);
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner = nullptr);
 
   // |Context|
   std::string DescribeGpuModel() const override;

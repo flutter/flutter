@@ -18,7 +18,7 @@ namespace impeller {
 
 PipelineLibraryGLES::PipelineLibraryGLES(
     std::shared_ptr<ReactorGLES> reactor,
-    fml::RefPtr<fml::TaskRunner> io_task_runner)
+    std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
     : reactor_(std::move(reactor)),
       compile_queue_(
           PipelineCompileQueueGLES::Create(std::move(io_task_runner))) {}

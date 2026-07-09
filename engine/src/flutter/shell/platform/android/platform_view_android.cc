@@ -107,7 +107,7 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     AndroidRenderingAPI android_rendering_api,
     bool enable_opengl_gpu_tracing,
     const AndroidContext::ContextSettings& settings,
-    const fml::RefPtr<fml::TaskRunner>& io_task_runner) {
+    const std::shared_ptr<fml::BasicTaskRunner>& io_task_runner) {
   switch (android_rendering_api) {
 #if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:
@@ -146,7 +146,7 @@ PlatformViewAndroid::PlatformViewAndroid(
               rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
               CreateContextSettings(delegate.OnPlatformViewGetSettings()),
-              task_runners.GetIOTaskRunner())) {}
+              delegate.OnPlatformViewGetShutdownSafeIOTaskRunner())) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,

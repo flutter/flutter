@@ -14,9 +14,10 @@ namespace flutter {
 
 class AndroidContextGLImpeller : public AndroidContext {
  public:
-  AndroidContextGLImpeller(std::unique_ptr<impeller::egl::Display> display,
-                           bool enable_gpu_tracing,
-                           fml::RefPtr<fml::TaskRunner> io_task_runner);
+  AndroidContextGLImpeller(
+      std::unique_ptr<impeller::egl::Display> display,
+      bool enable_gpu_tracing,
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner);
 
   ~AndroidContextGLImpeller();
 
@@ -44,7 +45,7 @@ class AndroidContextGLImpeller : public AndroidContext {
   std::unique_ptr<impeller::egl::Context> onscreen_context_;
   std::unique_ptr<impeller::egl::Context> offscreen_context_;
   bool is_valid_ = false;
-  fml::RefPtr<fml::TaskRunner> io_task_runner_;
+  std::shared_ptr<fml::BasicTaskRunner> io_task_runner_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextGLImpeller);
 };
