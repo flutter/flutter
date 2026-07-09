@@ -53,6 +53,10 @@ enum TextHeightBehavior {
   kDisableAll = 0x1 | 0x2,
 };
 
+// ParagraphStyle is instantiated rarely (roughly once per paragraph) and is not
+// performance-sensitive, so its fields are ordered for readability rather than
+// for minimal struct padding.
+// NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
 class ParagraphStyle {
  public:
   // Default TextStyle. Used in GetTextStyle() to obtain the base TextStyle to
