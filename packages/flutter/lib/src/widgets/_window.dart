@@ -1904,12 +1904,17 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   WindowScope({super.key, required this.controller, required super.child})
-    : _contentSize = controller.contentSize,
-      _title = _titleValue(controller),
-      _isActivated = _isActivatedValue(controller),
-      _isMaximized = _isMaximizedValue(controller),
-      _isMinimized = _isMinimizedValue(controller),
-      _isFullscreen = _isFullscreenValue(controller) {
+    : _isDestroyed = controller.isDestroyed,
+      // A destroyed controller throws from its other getters (e.g.
+      // [BaseWindowController.contentSize]), so only the destroyed flag is read
+      // once the window is gone. The remaining aspects are moot at that point
+      // and fall back to defaults.
+      _contentSize = controller.isDestroyed ? Size.zero : controller.contentSize,
+      _title = controller.isDestroyed ? '' : _titleValue(controller),
+      _isActivated = !controller.isDestroyed && _isActivatedValue(controller),
+      _isMaximized = !controller.isDestroyed && _isMaximizedValue(controller),
+      _isMinimized = !controller.isDestroyed && _isMinimizedValue(controller),
+      _isFullscreen = !controller.isDestroyed && _isFullscreenValue(controller) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -1931,6 +1936,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   final bool _isMaximized;
   final bool _isMinimized;
   final bool _isFullscreen;
+  final bool _isDestroyed;
 
   /// The controller associated with this window.
   ///
@@ -2206,8 +2212,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isDestroyedOf(BuildContext context) {
-    final BaseWindowController controller = _of(context, _WindowControllerAspect.destroyed);
-    return controller.isDestroyed;
+    return _of(context, _WindowControllerAspect.destroyed).isDestroyed;
   }
 
   /// Returns whether the nearest [WindowScope]'s window is destroyed,
@@ -2222,8 +2227,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsDestroyedOf(BuildContext context) {
-    final BaseWindowController? controller = _maybeOf(context, _WindowControllerAspect.destroyed);
-    return controller?.isDestroyed;
+    return _maybeOf(context, _WindowControllerAspect.destroyed)?.isDestroyed;
   }
 
   /// Computes the value of the [_WindowControllerAspect.title] aspect for the
@@ -2330,7 +2334,8 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
         _isActivated != oldWidget._isActivated ||
         _isMaximized != oldWidget._isMaximized ||
         _isMinimized != oldWidget._isMinimized ||
-        _isFullscreen != oldWidget._isFullscreen;
+        _isFullscreen != oldWidget._isFullscreen ||
+        _isDestroyed != oldWidget._isDestroyed;
   }
 
   /// {@macro flutter.widgets.windowing.experimental}
@@ -2347,8 +2352,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
             _WindowControllerAspect.maximized => _isMaximized != oldWidget._isMaximized,
             _WindowControllerAspect.minimized => _isMinimized != oldWidget._isMinimized,
             _WindowControllerAspect.fullscreen => _isFullscreen != oldWidget._isFullscreen,
-            _WindowControllerAspect.destroyed =>
-              controller.isDestroyed != oldWidget.controller.isDestroyed,
+            _WindowControllerAspect.destroyed => _isDestroyed != oldWidget._isDestroyed,
           },
     );
   }

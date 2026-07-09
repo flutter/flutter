@@ -509,7 +509,10 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
       return;
     }
     _Win32PlatformInterface.destroyWindow(windowHandle);
-    _destroyed = true;
+    if (!_destroyed) {
+      _destroyed = true;
+      notifyListeners();
+    }
   }
 
   int? _handleWindowsMessage(
@@ -528,7 +531,11 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
       _delegate.onWindowCloseRequested(this);
       return 0;
     } else if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _owner._removeMessageHandler(_handler);
       _delegate.onWindowDestroyed();
       return 0;
@@ -750,7 +757,11 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
       _delegate.onWindowCloseRequested(this);
       return 0;
     } else if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _owner._removeMessageHandler(_handler);
       _delegate.onWindowDestroyed();
       return 0;
@@ -898,7 +909,10 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       return;
     }
     _Win32PlatformInterface.destroyWindow(windowHandle);
-    _destroyed = true;
+    if (!_destroyed) {
+      _destroyed = true;
+      notifyListeners();
+    }
   }
 
   @override
@@ -944,7 +958,11 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     if (message == _WM_SIZE || message == _WM_ACTIVATE) {
       notifyListeners();
     } else if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _onGetWindowPosition.close();
       _owner._removeMessageHandler(this);
       _delegate.onWindowDestroyed();
@@ -1088,7 +1106,10 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       return;
     }
     _Win32PlatformInterface.destroyWindow(getWindowHandle());
-    _destroyed = true;
+    if (!_destroyed) {
+      _destroyed = true;
+      notifyListeners();
+    }
   }
 
   @override
@@ -1139,7 +1160,11 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     // WM_DESTROY is dispatched by the engine after destroyWindow is called.
     // It must be handled even after _destroyed is set by destroy().
     if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _onGetWindowPosition.close();
       _owner._removeMessageHandler(this);
       _delegate.onWindowDestroyed();
