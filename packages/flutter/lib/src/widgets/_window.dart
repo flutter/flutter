@@ -1889,11 +1889,34 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  WindowScope({super.key, required this.controller, required super.child}) {
+  WindowScope({super.key, required this.controller, required super.child})
+    : _contentSize = controller.contentSize,
+      _title = _titleValue(controller),
+      _isActivated = _isActivatedValue(controller),
+      _isMaximized = _isMaximizedValue(controller),
+      _isMinimized = _isMinimizedValue(controller),
+      _isFullscreen = _isFullscreenValue(controller) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
   }
+
+  // A snapshot of the aspect values captured from [controller] at construction
+  // time.
+  //
+  // The window widgets rebuild this [WindowScope] with the same [controller]
+  // instance whenever the controller notifies its listeners. Because the
+  // controller is the same object across rebuilds, comparing the live
+  // controller against itself in [updateShouldNotify] and
+  // [updateShouldNotifyDependent] would never detect a change. Capturing the
+  // values here means the old and new widgets hold independent snapshots that
+  // can be compared to detect which aspects changed.
+  final Size _contentSize;
+  final String _title;
+  final bool _isActivated;
+  final bool _isMaximized;
+  final bool _isMinimized;
+  final bool _isFullscreen;
 
   /// The controller associated with this window.
   ///
@@ -1987,14 +2010,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static String titleOf(BuildContext context) {
-    final BaseWindowController controller = _of(context, _WindowControllerAspect.title);
-    return switch (controller) {
-      RegularWindowController() => controller.title,
-      DialogWindowController() => controller.title,
-      TooltipWindowController() => '',
-      PopupWindowController() => '',
-      SatelliteWindowController() => controller.title,
-    };
+    return _titleValue(_of(context, _WindowControllerAspect.title));
   }
 
   /// Returns title of the nearest [WindowScope], or null if not found.
@@ -2012,13 +2028,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       return null;
     }
 
-    return switch (controller) {
-      RegularWindowController() => controller.title,
-      DialogWindowController() => controller.title,
-      TooltipWindowController() => '',
-      PopupWindowController() => '',
-      SatelliteWindowController() => controller.title,
-    };
+    return _titleValue(controller);
   }
 
   /// Returns the activation status of the nearest [WindowScope].
@@ -2036,14 +2046,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isActivatedOf(BuildContext context) {
-    final BaseWindowController controller = _of(context, _WindowControllerAspect.activated);
-    return switch (controller) {
-      RegularWindowController() => controller.isActivated,
-      DialogWindowController() => controller.isActivated,
-      TooltipWindowController() => false,
-      PopupWindowController() => controller.isActivated,
-      SatelliteWindowController() => controller.isActivated,
-    };
+    return _isActivatedValue(_of(context, _WindowControllerAspect.activated));
   }
 
   /// Returns the activation status of the nearest [WindowScope],
@@ -2062,13 +2065,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       return null;
     }
 
-    return switch (controller) {
-      RegularWindowController() => controller.isActivated,
-      DialogWindowController() => controller.isActivated,
-      TooltipWindowController() => false,
-      PopupWindowController() => controller.isActivated,
-      SatelliteWindowController() => controller.isActivated,
-    };
+    return _isActivatedValue(controller);
   }
 
   /// Returns the minimization status of the nearest [WindowScope].
@@ -2086,14 +2083,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMinimizedOf(BuildContext context) {
-    final BaseWindowController controller = _of(context, _WindowControllerAspect.minimized);
-    return switch (controller) {
-      RegularWindowController() => controller.isMinimized,
-      DialogWindowController() => controller.isMinimized,
-      TooltipWindowController() => false,
-      PopupWindowController() => false,
-      SatelliteWindowController() => false,
-    };
+    return _isMinimizedValue(_of(context, _WindowControllerAspect.minimized));
   }
 
   /// Returns the minimization status of the nearest [WindowScope],
@@ -2112,13 +2102,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       return null;
     }
 
-    return switch (controller) {
-      RegularWindowController() => controller.isMinimized,
-      DialogWindowController() => controller.isMinimized,
-      TooltipWindowController() => false,
-      PopupWindowController() => false,
-      SatelliteWindowController() => false,
-    };
+    return _isMinimizedValue(controller);
   }
 
   /// Returns the maximization status of the nearest [WindowScope].
@@ -2136,14 +2120,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMaximizedOf(BuildContext context) {
-    final BaseWindowController controller = _of(context, _WindowControllerAspect.maximized);
-    return switch (controller) {
-      RegularWindowController() => controller.isMaximized,
-      DialogWindowController() => false,
-      TooltipWindowController() => false,
-      PopupWindowController() => false,
-      SatelliteWindowController() => false,
-    };
+    return _isMaximizedValue(_of(context, _WindowControllerAspect.maximized));
   }
 
   /// Returns the maximization status of the nearest [WindowScope],
@@ -2162,13 +2139,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       return null;
     }
 
-    return switch (controller) {
-      RegularWindowController() => controller.isMaximized,
-      DialogWindowController() => false,
-      TooltipWindowController() => false,
-      PopupWindowController() => false,
-      SatelliteWindowController() => false,
-    };
+    return _isMaximizedValue(controller);
   }
 
   /// Returns the fullscreen status of the nearest [WindowScope].
@@ -2186,15 +2157,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isFullscreenOf(BuildContext context) {
-    final BaseWindowController controller = _of(context, _WindowControllerAspect.fullscreen);
-
-    return switch (controller) {
-      RegularWindowController() => controller.isFullscreen,
-      DialogWindowController() => false,
-      TooltipWindowController() => false,
-      PopupWindowController() => false,
-      SatelliteWindowController() => false,
-    };
+    return _isFullscreenValue(_of(context, _WindowControllerAspect.fullscreen));
   }
 
   /// Returns the fullscreen status of the nearest [WindowScope],
@@ -2213,14 +2176,62 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       return null;
     }
 
-    return switch (controller) {
-      RegularWindowController() => controller.isFullscreen,
-      DialogWindowController() => false,
-      TooltipWindowController() => false,
-      PopupWindowController() => false,
-      SatelliteWindowController() => false,
-    };
+    return _isFullscreenValue(controller);
   }
+
+  // Computes the value of the [_WindowControllerAspect.title] aspect for the
+  // given [controller]. Controllers that do not support titles report an empty
+  // string.
+  static String _titleValue(BaseWindowController controller) => switch (controller) {
+    RegularWindowController() => controller.title,
+    DialogWindowController() => controller.title,
+    TooltipWindowController() => '',
+    PopupWindowController() => '',
+    SatelliteWindowController() => controller.title,
+  };
+
+  // Computes the value of the [_WindowControllerAspect.activated] aspect for the
+  // given [controller]. Controllers that do not support activation report false.
+  static bool _isActivatedValue(BaseWindowController controller) => switch (controller) {
+    RegularWindowController() => controller.isActivated,
+    DialogWindowController() => controller.isActivated,
+    TooltipWindowController() => false,
+    PopupWindowController() => controller.isActivated,
+    SatelliteWindowController() => controller.isActivated,
+  };
+
+  // Computes the value of the [_WindowControllerAspect.maximized] aspect for the
+  // given [controller]. Controllers that do not support maximization report
+  // false.
+  static bool _isMaximizedValue(BaseWindowController controller) => switch (controller) {
+    RegularWindowController() => controller.isMaximized,
+    DialogWindowController() => false,
+    TooltipWindowController() => false,
+    PopupWindowController() => false,
+    SatelliteWindowController() => false,
+  };
+
+  // Computes the value of the [_WindowControllerAspect.minimized] aspect for the
+  // given [controller]. Controllers that do not support minimization report
+  // false.
+  static bool _isMinimizedValue(BaseWindowController controller) => switch (controller) {
+    RegularWindowController() => controller.isMinimized,
+    DialogWindowController() => controller.isMinimized,
+    TooltipWindowController() => false,
+    PopupWindowController() => false,
+    SatelliteWindowController() => false,
+  };
+
+  // Computes the value of the [_WindowControllerAspect.fullscreen] aspect for
+  // the given [controller]. Controllers that do not support fullscreen report
+  // false.
+  static bool _isFullscreenValue(BaseWindowController controller) => switch (controller) {
+    RegularWindowController() => controller.isFullscreen,
+    DialogWindowController() => false,
+    TooltipWindowController() => false,
+    PopupWindowController() => false,
+    SatelliteWindowController() => false,
+  };
 
   static BaseWindowController _of(BuildContext context, [_WindowControllerAspect? aspect]) {
     if (!isWindowingEnabled) {
@@ -2265,7 +2276,15 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
-  bool updateShouldNotify(WindowScope oldWidget) => controller != oldWidget.controller;
+  bool updateShouldNotify(WindowScope oldWidget) {
+    return controller != oldWidget.controller ||
+        _contentSize != oldWidget._contentSize ||
+        _title != oldWidget._title ||
+        _isActivated != oldWidget._isActivated ||
+        _isMaximized != oldWidget._isMaximized ||
+        _isMinimized != oldWidget._isMinimized ||
+        _isFullscreen != oldWidget._isFullscreen;
+  }
 
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -2275,59 +2294,12 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       (Object dependency) =>
           dependency is _WindowControllerAspect &&
           switch (dependency) {
-            _WindowControllerAspect.contentSize =>
-              controller.contentSize != oldWidget.controller.contentSize,
-            _WindowControllerAspect.title => switch (controller) {
-              final RegularWindowController regular =>
-                regular.title != (oldWidget.controller as RegularWindowController).title,
-              final DialogWindowController dialog =>
-                dialog.title != (oldWidget.controller as DialogWindowController).title,
-              TooltipWindowController() => false,
-              PopupWindowController() => false,
-              final SatelliteWindowController satellite =>
-                satellite.title != (oldWidget.controller as SatelliteWindowController).title,
-            },
-            _WindowControllerAspect.activated => switch (controller) {
-              final RegularWindowController regular =>
-                regular.isActivated !=
-                    (oldWidget.controller as RegularWindowController).isActivated,
-              final DialogWindowController dialog =>
-                dialog.isActivated != (oldWidget.controller as DialogWindowController).isActivated,
-              TooltipWindowController() => false,
-              final PopupWindowController popup =>
-                popup.isActivated != (oldWidget.controller as PopupWindowController).isActivated,
-              final SatelliteWindowController satellite =>
-                satellite.isActivated !=
-                    (oldWidget.controller as SatelliteWindowController).isActivated,
-            },
-            _WindowControllerAspect.maximized => switch (controller) {
-              final RegularWindowController regular =>
-                regular.isMaximized !=
-                    (oldWidget.controller as RegularWindowController).isMaximized,
-              DialogWindowController() => false,
-              TooltipWindowController() => false,
-              PopupWindowController() => false,
-              SatelliteWindowController() => false,
-            },
-            _WindowControllerAspect.minimized => switch (controller) {
-              final RegularWindowController regular =>
-                regular.isMinimized !=
-                    (oldWidget.controller as RegularWindowController).isMinimized,
-              final DialogWindowController dialog =>
-                dialog.isMinimized != (oldWidget.controller as DialogWindowController).isMinimized,
-              TooltipWindowController() => false,
-              PopupWindowController() => false,
-              SatelliteWindowController() => false,
-            },
-            _WindowControllerAspect.fullscreen => switch (controller) {
-              final RegularWindowController regular =>
-                regular.isFullscreen !=
-                    (oldWidget.controller as RegularWindowController).isFullscreen,
-              DialogWindowController() => false,
-              TooltipWindowController() => false,
-              PopupWindowController() => false,
-              SatelliteWindowController() => false,
-            },
+            _WindowControllerAspect.contentSize => _contentSize != oldWidget._contentSize,
+            _WindowControllerAspect.title => _title != oldWidget._title,
+            _WindowControllerAspect.activated => _isActivated != oldWidget._isActivated,
+            _WindowControllerAspect.maximized => _isMaximized != oldWidget._isMaximized,
+            _WindowControllerAspect.minimized => _isMinimized != oldWidget._isMinimized,
+            _WindowControllerAspect.fullscreen => _isFullscreen != oldWidget._isFullscreen,
           },
     );
   }
