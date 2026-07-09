@@ -6,10 +6,9 @@
 #define FLUTTER_IMPELLER_CORE_GPU_SUBMISSION_TRACKER_H_
 
 #include <cstdint>
-#include <mutex>
 #include <vector>
 
-#include "impeller/base/thread_safety.h"
+#include "impeller/base/thread.h"
 
 namespace impeller {
 
@@ -39,7 +38,7 @@ class GpuSubmissionTracker {
   uint64_t LatestSubmission() const;
 
  private:
-  mutable std::mutex mutex_;
+  mutable Mutex mutex_;
   uint64_t last_id_ IPLR_GUARDED_BY(mutex_) = 0;
   // Sorted, since ids are recorded in increasing order. The pending count
   // tracks GPU queue depth and stays small, so erasure is cheap and steady

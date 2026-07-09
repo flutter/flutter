@@ -9,14 +9,14 @@
 namespace impeller {
 
 uint64_t GpuSubmissionTracker::RecordSubmission() {
-  std::lock_guard<std::mutex> lock(mutex_);
+  Lock lock(mutex_);
   uint64_t id = ++last_id_;
   pending_.push_back(id);
   return id;
 }
 
 void GpuSubmissionTracker::RecordCompletion(uint64_t id) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  Lock lock(mutex_);
   auto it = std::lower_bound(pending_.begin(), pending_.end(), id);
   if (it != pending_.end() && *it == id) {
     pending_.erase(it);
@@ -24,7 +24,7 @@ void GpuSubmissionTracker::RecordCompletion(uint64_t id) {
 }
 
 uint64_t GpuSubmissionTracker::CompletedThrough() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  Lock lock(mutex_);
   if (pending_.empty()) {
     return last_id_;
   }
@@ -32,7 +32,7 @@ uint64_t GpuSubmissionTracker::CompletedThrough() const {
 }
 
 uint64_t GpuSubmissionTracker::LatestSubmission() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  Lock lock(mutex_);
   return last_id_;
 }
 
