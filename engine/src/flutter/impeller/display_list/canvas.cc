@@ -833,47 +833,25 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint)) {
-    Vector2 transform_scaling = GetCurrentTransform().GetBasisScaleXY();
-    if (transform_scaling.x <= 0.0f || transform_scaling.y <= 0.0f) {
-      // Rectangle is scaled to 0 and doesn't need to be drawn.
-      return;
-    }
-
     Rect effective_rect = rect;
     Color effective_color = paint.color;
 
-    // Expand very small/thin rectangles to have a minimum 1 pixel width/height.
-    // Rectangles that are scaled up to meet this minimum get their alpha scaled
-    // down by the same ratio to maintain visual consistency.
-    //
-    // This only applies to filled rectangles with no perspective transform.
-    if (paint.style == Paint::Style::kFill &&
-        !GetCurrentTransform().HasPerspective2D()) {
-      // Convert local rectangle size to device pixel size.
-      Vector2 rect_pixel_size = Vector2(rect.GetSize()) * transform_scaling;
+    if (paint.style == Paint::Style::kFill) {
+      effective_rect = UpscaledRect(rect);
 
-      // Expand rect pixel size dimensions to a 1.0 minimum.
-      Vector2 expanded_rect_pixel_size =
-          rect_pixel_size.Max(Vector2(1.0f, 1.0f));
-
-      // Calculate the alpha scaling as the ratio of the original rectangle to
-      // the expanded rectangle.
-      Scalar alpha_scaling = (rect_pixel_size.x / expanded_rect_pixel_size.x) *
-                             (rect_pixel_size.y / expanded_rect_pixel_size.y);
-
-      if (alpha_scaling <= kEhCloseEnough) {
-        // Rect is effectively invisible and doesn't need to be drawn.
+      if (effective_rect.IsEmpty()) {
+        // Rect is effectively invisible. Don't need to draw anything.
         return;
       }
-
-      // Convert expanded rectangle from pixel size back to local size.
-      Vector2 expanded_rect_local_size =
-          Vector2(expanded_rect_pixel_size / transform_scaling);
-
-      effective_rect = Rect::MakeEllipseBounds(rect.GetCenter(),
-                                               expanded_rect_local_size * 0.5f);
-      effective_color =
-          effective_color.WithAlpha(effective_color.alpha * alpha_scaling);
+      if (effective_rect != rect) {
+        Scalar alpha_scaling = rect.Area() / effective_rect.Area();
+        if (alpha_scaling < kEhCloseEnough) {
+          // Rect is effectively invisible. Don't need to draw anything.
+          return;
+        }
+        effective_color =
+            paint.color.WithAlpha(paint.color.alpha * alpha_scaling);
+      }
     }
 
     auto params = UberSDFParameters::MakeRect(
@@ -1015,6 +993,36 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+    if (paint.style == Paint::Style::kFill) {
+      Rect rrect_bounds = round_rect.GetBounds();
+      Rect upscaled_bounds = UpscaledRect(rrect_bounds);
+
+      if (upscaled_bounds.IsEmpty()) {
+        // Rect is effectively invisible. Don't need to draw anything.
+        return;
+      }
+
+      if (upscaled_bounds != rrect_bounds) {
+        // The rrect is upscaled to 1 pixel minimum dimensions.
+        Scalar alpha_scaling = rrect_bounds.Area() / upscaled_bounds.Area();
+        if (alpha_scaling < kEhCloseEnough) {
+          // Rect is effectively invisible. Don't need to draw anything.
+          return;
+        }
+        Color effective_color =
+            paint.color.WithAlpha(paint.color.alpha * alpha_scaling);
+
+        // At a 1-pixel size, the rounded corners can be ignored. Draw a regular
+        // rect matching the upscaled bounds.
+        auto params = UberSDFParameters::MakeRect(
+            /*color=*/effective_color,
+            /*rect=*/upscaled_bounds,
+            /*stroke=*/std::nullopt);
+        AddRenderSDFEntityToCurrentPass(paint, params);
+        return;
+      }
+    }
+
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -2551,6 +2559,39 @@ bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
     case BlendMode::kLuminosity:
       return true;
   }
+}
+
+Rect Canvas::UpscaledRect(const Rect& rect) const {
+  if (rect.IsEmpty() || GetCurrentTransform().HasPerspective2D()) {
+    // Minimum rect scaling not applicable for empty rects or when using a
+    // perspective transform. Return the unmodified input rect.
+    return rect;
+  }
+
+  Vector2 transform_scaling = GetCurrentTransform().GetBasisScaleXY();
+  if (transform_scaling.x <= 0.0f || transform_scaling.y <= 0.0f) {
+    // Rectangle is scaled to 0. Return an empty rectangle.
+    return Rect();
+  }
+
+  // Convert local rectangle size to device size (pixels).
+  Vector2 rect_device_size = Vector2(rect.GetSize()) * transform_scaling;
+
+  // Expand rect pixel size dimensions to a 1.0 minimum.
+  Vector2 expanded_rect_device_size = rect_device_size.Max(Vector2(1.0f, 1.0f));
+
+  if (expanded_rect_device_size == rect_device_size) {
+    // Minimum rect scaling not applicable - rectangle is already large enough.
+    // Return the unmodified rectangle.
+    return rect;
+  }
+
+  // Convert expanded rectangle from pixel size back to local size.
+  Vector2 expanded_rect_local_size =
+      Vector2(expanded_rect_device_size / transform_scaling);
+
+  return Rect::MakeEllipseBounds(rect.GetCenter(),
+                                 expanded_rect_local_size * 0.5f);
 }
 
 LazyRenderingConfig::LazyRenderingConfig(
