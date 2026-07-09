@@ -363,7 +363,7 @@ void testMain() {
 
       mockHttpFetchResponseFactory = (String url) async {
         requestedUrls.add(url);
-        if (url.contains('notosanskr') && !url.contains('.')) {
+        if (url.contains('notosanskr') && !RegExp(r'\.\d+\.woff2$').hasMatch(url)) {
           await completer.future;
         }
         return MockHttpFetchResponse(
@@ -428,6 +428,41 @@ void testMain() {
         // 0x1100 is combining Jamo (triggers monolithic Noto Sans KR)
         // 0x4E00 is standard CJK (triggers Noto Sans KR split slice, e.g., Noto Sans KR 0)
         FallbackFontService.instance.addMissingCodePoints(<int>[0x1100, 0x4E00]);
+        await FallbackFontService.instance.waitForIdle();
+
+        // Only the monolithic font should have been requested. No split slices should be requested.
+        expect(requestedUrls, hasLength(1));
+        expect(
+          requestedUrls.where((String url) => RegExp(r'\.\d+\.woff2$').hasMatch(url)),
+          isEmpty,
+        );
+
+        final List<String> loadedFamilies = mockRegistry.loadedFonts.keys.toList();
+        expect(loadedFamilies, contains('Noto Sans KR'));
+        expect(
+          loadedFamilies.where((String f) => RegExp(r'Noto Sans KR \d+').hasMatch(f)),
+          isEmpty,
+        );
+      },
+    );
+
+    test(
+      'monolithic font and split slice requested in the same batch in reverse order only download monolithic font',
+      () async {
+        fontFallbackManager.debugUserPreferredLanguage = 'ko';
+        final requestedUrls = <String>[];
+        mockHttpFetchResponseFactory = (String url) async {
+          requestedUrls.add(url);
+          return MockHttpFetchResponse(
+            url: url,
+            status: 200,
+            payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+          );
+        };
+
+        // 0x4E00 is standard CJK (triggers Noto Sans KR split slice, e.g., Noto Sans KR 0)
+        // 0x1100 is combining Jamo (triggers monolithic Noto Sans KR)
+        FallbackFontService.instance.addMissingCodePoints(<int>[0x4E00, 0x1100]);
         await FallbackFontService.instance.waitForIdle();
 
         // Only the monolithic font should have been requested. No split slices should be requested.
