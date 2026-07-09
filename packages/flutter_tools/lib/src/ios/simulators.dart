@@ -12,6 +12,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -63,16 +64,21 @@ class IOSSimulatorUtils {
     required Xcode xcode,
     required Logger logger,
     required ProcessManager processManager,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
-       _xcode = xcode;
+       _xcode = xcode,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final SimControl _simControl;
   final Xcode _xcode;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
+
+    final CpuArch cpuArch = _operatingSystemUtils.hostPlatform == .darwin_arm64 ? CpuArch.arm64 : CpuArch.x86_64;
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -93,6 +99,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            cpuArch: cpuArch,
           );
         })
         .whereType<IOSSimulator>()
@@ -358,8 +365,10 @@ class IOSSimulator extends Device {
     required this.name,
     required this.simulatorCategory,
     required SimControl simControl,
+    required CpuArch cpuArch,
     required super.logger,
   }) : _simControl = simControl,
+       _cpuArch = cpuArch,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
@@ -368,6 +377,8 @@ class IOSSimulator extends Device {
   final String simulatorCategory;
 
   final SimControl _simControl;
+
+  final CpuArch _cpuArch;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -394,6 +405,9 @@ class IOSSimulator extends Device {
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
 
   final _logReaders = <IOSApp?, DeviceLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;

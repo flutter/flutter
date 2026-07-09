@@ -506,6 +506,45 @@ void main() {
     });
   });
 
+  group('Device default cpuArch', () {
+    testWithoutContext('resolves from TargetPlatform', () async {
+      final device = FakeDevice('test', 'test');
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
+      expect(await device.cpuArch, CpuArch.armv7);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm64);
+      expect(await device.cpuArch, CpuArch.arm64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_x64);
+      expect(await device.cpuArch, CpuArch.x86_64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android);
+      expect(await device.cpuArch, CpuArch.x86);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios);
+      expect(await device.cpuArch, CpuArch.arm64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.darwin);
+      expect(await device.cpuArch, CpuArch.arm64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.linux_x64);
+      expect(await device.cpuArch, CpuArch.x86_64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.linux_arm64);
+      expect(await device.cpuArch, CpuArch.arm64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.windows_x64);
+      expect(await device.cpuArch, CpuArch.x86_64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_arm64);
+      expect(await device.cpuArch, CpuArch.arm64);
+
+      device.targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
+      expect(await device.cpuArch, CpuArch.unknown);
+    });
+  });
+
   group('Simultaneous device discovery', () {
     testWithoutContext(
       'Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing last',

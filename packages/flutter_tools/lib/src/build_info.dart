@@ -620,6 +620,38 @@ bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug;
 }
 
+/// Platform-agnostic CPU architecture type.
+enum CpuArch {
+  /// Unknown architecture. Used when the architecture is not relevant.
+  unknown,
+  armv7,
+  arm64,
+  x86,
+  x86_64,
+  riscv64;
+
+  factory CpuArch.fromName(String name) {
+    return switch (name) {
+      'unknown' => CpuArch.unknown,
+      'armv7' => CpuArch.armv7,
+      'arm64' => CpuArch.arm64,
+      'x86' => CpuArch.x86,
+      'x86_64' => CpuArch.x86_64,
+      'riscv64' => CpuArch.riscv64,
+      _ => throw Exception('Unsupported CPU arch name "$name"'),
+    };
+  }
+
+  String get name => switch (this) {
+    CpuArch.unknown => 'unknown',
+    CpuArch.armv7 => 'armv7',
+    CpuArch.arm64 => 'arm64',
+    CpuArch.x86 => 'x86',
+    CpuArch.x86_64 => 'x86_64',
+    CpuArch.riscv64 => 'riscv64',
+  };
+}
+
 enum TargetPlatform {
   android('android'),
   ios('ios'),

@@ -22,6 +22,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       'id': 'ephemeral',
       'isSupported': true,
       'targetPlatform': 'android-arm',
+      'cpuArch': 'armv7',
       'emulator': true,
       'sdk': 'Test SDK (1.2.3)',
       'capabilities': <String, Object>{
@@ -43,6 +44,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       'id': 'webby',
       'isSupported': true,
       'targetPlatform': 'web-javascript',
+      'cpuArch': 'unknown',
       'emulator': true,
       'sdk': 'Web SDK (1.2.4)',
       'capabilities': <String, Object>{
@@ -67,6 +69,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       'id': 'wireless-android',
       'isSupported': true,
       'targetPlatform': 'android-arm',
+      'cpuArch': 'armv7',
       'emulator': true,
       'sdk': 'Test SDK (1.2.3)',
       'capabilities': <String, Object>{
@@ -93,6 +96,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       'id': 'wireless-ios',
       'isSupported': true,
       'targetPlatform': 'ios',
+      'cpuArch': 'arm64',
       'emulator': true,
       'sdk': 'iOS 16',
       'capabilities': <String, Object>{
@@ -162,6 +166,31 @@ class FakeDevice extends Device {
 
   @override
   Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
+
+  @override
+  Future<CpuArch> get cpuArch async {
+    final TargetPlatform platform = await targetPlatform;
+    switch (platform) {
+      case TargetPlatform.ios:
+      case TargetPlatform.darwin:
+        return CpuArch.arm64;
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_riscv64:
+      case TargetPlatform.tester:
+      case TargetPlatform.unsupported:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_arm64:
+      case TargetPlatform.windows_x64:
+        return super.cpuArch;
+    }
+  }
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
