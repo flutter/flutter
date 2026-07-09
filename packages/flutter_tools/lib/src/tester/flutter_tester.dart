@@ -184,14 +184,14 @@ class FlutterTesterDevice extends Device {
         return LaunchResult.succeeded();
       }
 
+      _logReader.listenToProcessOutput(_process!);
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(),
+        SingleLaunchLogReader(_logReader.logLines, _process!.exitCode),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: debuggingOptions.ipv6,
         logger: _logger,
       );
-      _logReader.initializeProcess(_process!);
 
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {

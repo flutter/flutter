@@ -135,12 +135,12 @@ abstract class DesktopDevice extends Device {
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
-    _deviceLogReader.initializeProcess(process);
+    _deviceLogReader.listenToProcessOutput(process);
     if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
     final vmServiceDiscovery = ProtocolDiscovery.vmService(
-      _deviceLogReader,
+      SingleLaunchLogReader(_deviceLogReader.logLines, process.exitCode),
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: debuggingOptions.ipv6,
@@ -342,26 +342,29 @@ abstract class DesktopDevice extends Device {
 
 /// A log reader for desktop applications that delegates to a [Process] stdout
 /// and stderr streams.
+///
+/// A single instance of this reader is kept for the lifetime of a
+/// [DesktopDevice], returned by [DesktopDevice.getLogReader], so that
+/// external callers (e.g. `flutter drive`, `flutter logs`) can subscribe to
+/// [logLines] once and keep receiving output across multiple `startApp`
+/// launches on the same device. Because of that, [logLines] is never closed
+/// when a given `process` exits: `Device.dispose()` (and therefore
+/// [dispose]) is called far more often than "the device is really done" —
+/// e.g. once per test file for desktop integration tests — so this reader
+/// deliberately has nothing for [dispose] to do, exactly like the upstream
+/// implementation this is based on. (Mirrors
+/// `CustomDeviceLogReader.listenToProcessOutput`, though that reader's
+/// [dispose] closes it — its callers dispose it at true end-of-life only.)
+///
+/// This reader is intentionally *not* used for a single launch's VM Service
+/// discovery — see [SingleLaunchLogReader] for that.
 class DesktopLogReader extends DeviceLogReader {
   final _inputController = StreamController<List<int>>.broadcast();
 
-  /// Begin listening to the stdout and stderr streams of the provided [process].
-  void initializeProcess(Process process) {
-    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(_inputController.add);
-    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(_inputController.add);
-    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
-      stdoutSub.asFuture<void>(),
-      stderrSub.asFuture<void>(),
-    ]);
-    process.exitCode.whenComplete(() async {
-      // Wait for output to be fully processed.
-      await stdioFuture;
-      // The streams have already completed, so waiting for the stream
-      // cancellation to complete is not needed.
-      unawaited(stdoutSub.cancel());
-      unawaited(stderrSub.cancel());
-      await _inputController.close();
-    });
+  /// Adds the stdout and stderr streams of the provided [process] to [logLines].
+  void listenToProcessOutput(Process process) {
+    process.stdout.listen(_inputController.add);
+    process.stderr.listen(_inputController.add);
   }
 
   @override
@@ -375,6 +378,47 @@ class DesktopLogReader extends DeviceLogReader {
   @override
   void dispose() {
     // Nothing to dispose.
+  }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
+}
+
+/// A [DeviceLogReader] that mirrors `source` but closes [logLines] as soon
+/// as `scope` completes.
+///
+/// [ProtocolDiscovery] relies on [logLines] reaching "done" to detect that a
+/// launched process exited without ever exposing a VM Service, so it can
+/// give up instead of waiting forever. The device-scoped [DesktopLogReader]
+/// returned by `getLogReader()` can't provide that signal — it must survive
+/// across relaunches — so a fresh, throwaway [SingleLaunchLogReader] is
+/// created for each [DesktopDevice.startApp] call instead, scoped to that
+/// single process via `scope` (typically `process.exitCode`). This mirrors
+/// how `AndroidDevice.startApp` avoids reusing its cached `getLogReader()`
+/// singleton for the same reason, constructing a fresh `AdbLogReader` for VM
+/// Service discovery on each launch.
+class SingleLaunchLogReader extends DeviceLogReader {
+  SingleLaunchLogReader(Stream<String> source, Future<void> scope) {
+    _subscription = source.listen(_controller.add);
+    scope.whenComplete(() {
+      unawaited(_subscription.cancel());
+      unawaited(_controller.close());
+    });
+  }
+
+  final _controller = StreamController<String>.broadcast();
+  late final StreamSubscription<String> _subscription;
+
+  @override
+  Stream<String> get logLines => _controller.stream;
+
+  @override
+  String get name => 'desktop (single launch)';
+
+  @override
+  void dispose() {
+    unawaited(_subscription.cancel());
+    unawaited(_controller.close());
   }
 
   @override
