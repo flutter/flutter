@@ -1384,8 +1384,6 @@ std::shared_ptr<Pipeline<PipelineDescriptor>> CreateDefaultPipeline(
   if (!test->InitializePipelineDescriptorForRendering(*pipeline_desc)) {
     return nullptr;
   }
-  pipeline_desc->SetSampleCount(SampleCount::kCount4);
-  pipeline_desc->SetStencilAttachmentDescriptors(std::nullopt);
   auto pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   if (!pipeline || !pipeline->IsValid()) {
