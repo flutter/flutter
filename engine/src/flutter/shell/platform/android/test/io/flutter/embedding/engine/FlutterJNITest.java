@@ -365,6 +365,7 @@ public class FlutterJNITest {
 
   @Test
   public void loadLibrary_usesSystemLinkerOnApi37AndAbove() {
+    // TODO(gmackall): Update when robolectric supports testing on API 37.
     // Robolectric 4.16 has no shadow for API 37 yet, so override SDK_INT directly rather than
     // relying on @Config(sdk = API_LEVELS.API_37).
     ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
