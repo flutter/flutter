@@ -144,6 +144,13 @@ bool Playground::PlatformSupportsWideGamutTests() const {
 }
 
 bool Playground::RenderingSupportsMSAA() const {
+  // We could call GetContext(), but we don't want to cause it to be
+  // created just yet. So, we make some assumptions here. If they are
+  // insufficient then we should beef them up rather than just calling
+  // GetContext() if we can.
+  // Also, technically, we should check if it supports OffscreenMSAA
+  // which might be a subset of supporting MSAA on screen, but for now
+  // they seem to be closely related.
   switch (backend_) {
     case PlaygroundBackend::kMetal:
     case PlaygroundBackend::kMetalSDF:

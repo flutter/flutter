@@ -135,6 +135,22 @@ std::optional<testing::GoldenDigestManager>
 }  // namespace
 
 void PlaygroundTest::SetupTestEnvironment() {
+#ifdef APPLY_METAL_VALIDATION
+  // https://developer.apple.com/documentation/metal/diagnosing_metal_programming_issues_early?language=objc
+  // Enables all shader validation tests.
+  setenv("MTL_SHADER_VALIDATION", "1", true);
+  // Validates accesses to device and constant memory.
+  setenv("MTL_SHADER_VALIDATION_GLOBAL_MEMORY", "1", true);
+  // Validates accesses to threadgroup memory.
+  setenv("MTL_SHADER_VALIDATION_THREADGROUP_MEMORY", "1", true);
+  // Validates that texture references are not nil.
+  setenv("MTL_SHADER_VALIDATION_TEXTURE_USAGE", "1", true);
+  // Enables metal validation.
+  setenv("METAL_DEBUG_ERROR_MODE", "0", true);
+  // Enables metal validation.
+  setenv("METAL_DEVICE_WRAPPER_TYPE", "1", true);
+#endif
+
   ::testing::AddGlobalTestEnvironment(new PlaygroundTestEnvironment());
 }
 
