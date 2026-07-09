@@ -5,10 +5,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const kRed = Color(0xFFFF0000);
+
   group('Horizontal', () {
     testWidgets('gets local coordinates', (WidgetTester tester) async {
       var dragCancelCount = 0;
@@ -36,7 +38,7 @@ void main() {
             onHorizontalDragUpdate: (DragUpdateDetails details) {
               updateDetails.add(details);
             },
-            child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+            child: Container(key: redContainer, width: 100, height: 150, color: kRed),
           ),
         ),
       );
@@ -99,7 +101,7 @@ void main() {
               onTap: () {
                 // Competing gesture detector.
               },
-              child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+              child: Container(key: redContainer, width: 100, height: 150, color: kRed),
             ),
           ),
         ),
@@ -205,7 +207,7 @@ void main() {
               onTap: () {
                 // Competing gesture detector.
               },
-              child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+              child: Container(key: redContainer, width: 100, height: 150, color: kRed),
             ),
           ),
         ),
@@ -311,7 +313,7 @@ void main() {
               onTap: () {
                 // Competing gesture detector.
               },
-              child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+              child: Container(key: redContainer, width: 100, height: 150, color: kRed),
             ),
           ),
         ),
@@ -401,7 +403,7 @@ void main() {
             onVerticalDragUpdate: (DragUpdateDetails details) {
               updateDetails.add(details);
             },
-            child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+            child: Container(key: redContainer, width: 100, height: 150, color: kRed),
           ),
         ),
       );
@@ -464,7 +466,7 @@ void main() {
               onTap: () {
                 // Competing gesture detector.
               },
-              child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+              child: Container(key: redContainer, width: 100, height: 150, color: kRed),
             ),
           ),
         ),
@@ -570,7 +572,7 @@ void main() {
               onTap: () {
                 // Competing gesture detector.
               },
-              child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+              child: Container(key: redContainer, width: 100, height: 150, color: kRed),
             ),
           ),
         ),
@@ -676,7 +678,7 @@ void main() {
               onTap: () {
                 // Competing gesture detector.
               },
-              child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+              child: Container(key: redContainer, width: 100, height: 150, color: kRed),
             ),
           ),
         ),

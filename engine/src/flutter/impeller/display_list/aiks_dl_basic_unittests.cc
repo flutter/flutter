@@ -1909,6 +1909,12 @@ TEST_P(AiksTest,
 
 // This makes sure the WideGamut named tests use 10-bit wide gamut pixel format.
 TEST_P(AiksTest, FormatWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
 }
@@ -2499,6 +2505,59 @@ TEST_P(AiksTest, CanRenderFilledRoundSuperellipses) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderAsymmetricRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(60.0f, 240.0f),
+              .top_right = Size(200.0f, 40.0f),
+              .bottom_left = Size(180.0f, 20.0f),
+              .bottom_right = Size(40.0f, 200.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(240.0f, 40.0f),
+              .top_right = Size(40.0f, 240.0f),
+              .bottom_left = Size(40.0f, 240.0f),
+              .bottom_right = Size(240.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(40.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(240.0f, 240.0f),
+          }),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderStrokedRoundSuperellipses) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
@@ -2626,6 +2685,82 @@ TEST_P(AiksTest, CanRenderTransformedRoundSuperellipse) {
           /*rect=*/DlRect::MakeXYWH(-70, -30, 140, 60), /*radius=*/20),
       paint);
   builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CompareAntiAliasAndNonAntiAlias) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+
+  DlRect bounds = DlRect::MakeXYWH(75, 75, 50, 50);
+
+  // --- Left Half: Zoom-in on the top-left corner WITH anti-aliasing (SDF) ---
+  DlPaint layer_paint_left;
+  layer_paint_left.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({200, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_left);
+
+  paint.setAntiAlias(true);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  // --- Right Half: Zoom-in on the top-left corner WITHOUT anti-aliasing ---
+  DlPaint layer_paint_right;
+  layer_paint_right.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({600, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_right);
+
+  paint.setAntiAlias(false);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CompareDiffRoundRectAndRoundRect) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  DlRect outer_rect = DlRect::MakeXYWH(0, 0, 100, 100);
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset = 5.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  builder.Translate(50, 50);
+
+  // Draw DiffRoundRect.
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect,
+                            DlPaint().setColor(DlColor::kSkyBlue()));
+
+  // Draw simalated DiffRoundRect by drawing the outer RoundRect and clearing
+  // the inner RoundRect.
+  builder.Translate(200, 0);
+  builder.DrawRoundRect(outer_rrect, DlPaint().setColor(DlColor::kSkyBlue()));
+  builder.DrawRoundRect(inner_rrect,
+                        DlPaint().setBlendMode(DlBlendMode::kClear));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

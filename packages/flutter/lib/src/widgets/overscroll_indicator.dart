@@ -649,7 +649,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 /// Created by [MaterialScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication when
 /// [ThemeData.useMaterial3] is true. Otherwise, when [ThemeData.useMaterial3]
-/// is false, a [GlowingOverscrollIndicator] is used instead.=
+/// is false, a [GlowingOverscrollIndicator] is used instead.
 ///
 /// See also:
 ///
@@ -724,7 +724,10 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       // from a different axis bubbles up, do nothing.
       return false;
     }
-    if (notification is OverscrollNotification) {
+    if (notification is ScrollStartNotification) {
+      _accepted = true;
+      _totalOverscroll = 0.0;
+    } else if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
       if (_lastNotification.runtimeType is! OverscrollNotification) {
         final confirmationNotification = OverscrollIndicatorNotification(
@@ -770,7 +773,9 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
       // Since the overscrolling ended, we reset the total overscroll amount.
       _totalOverscroll = 0.0;
-      _stretchController.scrollEnd(velocity);
+      if (_accepted) {
+        _stretchController.scrollEnd(velocity);
+      }
     } else if (notification is ScrollUpdateNotification) {
       _totalOverscroll = 0.0;
       _stretchController.scrollEnd(0.0);

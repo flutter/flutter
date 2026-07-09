@@ -59,6 +59,7 @@ export interface FlutterConfiguration {
   canvasKitBaseUrl?: string;
   canvasKitVariant?: CanvasKitVariant;
   renderer?: WebRenderer;
+  preferWebParagraph?: boolean;
   enableWimp?: boolean;
   hostElement?: HTMLElement;
   fontFallbackBaseUrl?: string;
@@ -66,7 +67,19 @@ export interface FlutterConfiguration {
   entryPointBaseUrl?: string;
   entrypointBaseUrl?: string;
   forceSingleThreadedSkwasm?: boolean;
+  /** When true, silences the console warning emitted by skwasm when the
+   *  hosting page is not cross-origin isolated. Use this if you are aware
+   *  of the multi-threading constraints and cannot enable cross-origin
+   *  isolation (e.g. in a browser extension or embedded environment). */
+  suppressMultithreadingWarning?: boolean;
   wasmAllowList?: WasmAllowList;
+  /** When true, the Flutter Web loader prints a separate `console.warn`
+   *  line for every candidate build it skipped — including cases where a
+   *  compatible build was eventually found. Useful when debugging why
+   *  the loader keeps falling back to a different build than expected.
+   *  When false (default), per-build skip details are not printed; the
+   *  fatal "no compatible build found" warning is always printed. */
+  verboseBuildSelection?: boolean;
 }
 
 /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
