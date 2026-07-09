@@ -11,7 +11,7 @@
 namespace impeller {
 
 std::shared_ptr<PipelineCompileQueueGLES> PipelineCompileQueueGLES::Create(
-    fml::RefPtr<fml::TaskRunner> worker_task_runner) {
+    std::shared_ptr<fml::BasicTaskRunner> worker_task_runner) {
   if (!worker_task_runner) {
     return nullptr;
   }
@@ -20,7 +20,7 @@ std::shared_ptr<PipelineCompileQueueGLES> PipelineCompileQueueGLES::Create(
 }
 
 PipelineCompileQueueGLES::PipelineCompileQueueGLES(
-    fml::RefPtr<fml::TaskRunner> worker_task_runner)
+    std::shared_ptr<fml::BasicTaskRunner> worker_task_runner)
     : worker_task_runner_(std::move(worker_task_runner)) {}
 
 PipelineCompileQueueGLES::~PipelineCompileQueueGLES() = default;

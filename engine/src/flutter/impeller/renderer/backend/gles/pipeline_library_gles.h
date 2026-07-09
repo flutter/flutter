@@ -95,8 +95,9 @@ class PipelineLibraryGLES final
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
   std::shared_ptr<PipelineCompileQueueGLES> compile_queue_;
 
-  explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor,
-                               fml::RefPtr<fml::TaskRunner> io_task_runner);
+  explicit PipelineLibraryGLES(
+      std::shared_ptr<ReactorGLES> reactor,
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner);
 
   // |PipelineLibrary|
   bool IsValid() const override;

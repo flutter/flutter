@@ -280,6 +280,19 @@ class Shell final : public PlatformView::Delegate,
   ///
   fml::WeakPtr<ShellIOManager> GetIOManager();
 
+  //----------------------------------------------------------------------------
+  /// @brief      The IO thread can be used for background tasks, including
+  ///             tasks that perform graphics operations using the resource
+  ///             context. But the IO thread will lose the resource context
+  ///             during shutdown of the Shell. Tasks that require the IO
+  ///             manager or the resource context must not run after that
+  ///             phase of shutdown.
+  ///
+  /// @return     A BasicTaskRunner that posts tasks to the IO thread but stops
+  ///             running tasks after the Shell shuts down the IO manager.
+  ///
+  std::shared_ptr<fml::BasicTaskRunner> GetShutdownSafeIOTaskRunner();
+
   // Embedders should call this under low memory conditions to free up
   // internal caches used.
   //
@@ -480,6 +493,9 @@ class Shell final : public PlatformView::Delegate,
   fml::WeakPtr<PlatformView>
       weak_platform_view_;  // to be shared across threads
 
+  std::promise<fml::WeakPtr<ShellIOManager>> weak_io_manager_promise_;
+  std::shared_ptr<fml::BasicTaskRunner> shutdown_safe_io_task_runner_;
+
   std::unordered_map<std::string_view,  // method
                      std::pair<fml::RefPtr<fml::TaskRunner>,
                                ServiceProtocolHandler>  // task-runner/function
@@ -639,6 +655,10 @@ class Shell final : public PlatformView::Delegate,
 
   // |PlatformView::Delegate|
   const Settings& OnPlatformViewGetSettings() const override;
+
+  // |PlatformView::Delegate|
+  std::shared_ptr<fml::BasicTaskRunner>
+  OnPlatformViewGetShutdownSafeIOTaskRunner() const override;
 
   // |PlatformView::Delegate|
   void LoadDartDeferredLibrary(

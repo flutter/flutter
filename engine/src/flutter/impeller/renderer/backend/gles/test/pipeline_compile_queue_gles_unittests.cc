@@ -10,12 +10,22 @@
 
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/thread.h"
 #include "flutter/testing/testing.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
 namespace testing {
+
+namespace {
+
+std::shared_ptr<fml::BasicTaskRunner> CreateBasicTaskRunner(
+    const fml::Thread& thread) {
+  return std::make_shared<fml::WrapperBasicTaskRunner>(thread.GetTaskRunner());
+}
+
+}  // namespace
 
 TEST(PipelineCompileQueueGLESTest, CreateReturnsNullWithNullTaskRunner) {
   auto queue = PipelineCompileQueueGLES::Create(nullptr);
@@ -24,14 +34,14 @@ TEST(PipelineCompileQueueGLESTest, CreateReturnsNullWithNullTaskRunner) {
 
 TEST(PipelineCompileQueueGLESTest, CreateSucceedsWithValidTaskRunner) {
   fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
+  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   EXPECT_NE(queue, nullptr);
   thread.Join();
 }
 
 TEST(PipelineCompileQueueGLESTest, PostJobDoesNothingWithNullClosure) {
   fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
+  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);
   queue->PostJob(nullptr);
   thread.Join();
@@ -39,7 +49,7 @@ TEST(PipelineCompileQueueGLESTest, PostJobDoesNothingWithNullClosure) {
 
 TEST(PipelineCompileQueueGLESTest, OnJobAddedProcessesJobsSequentially) {
   fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
+  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);
 
   std::atomic<int> completed_jobs{0};
@@ -85,7 +95,7 @@ TEST(PipelineCompileQueueGLESTest, OnJobAddedProcessesJobsSequentially) {
 TEST(PipelineCompileQueueGLESTest,
      PostJobForDescriptorWithDuplicateRunsEagerly) {
   fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
+  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);
 
   std::atomic<int> first_job_count{0};
@@ -113,7 +123,7 @@ TEST(PipelineCompileQueueGLESTest,
 
 TEST(PipelineCompileQueueGLESTest, IsProcessingResetsAfterAllJobsComplete) {
   fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
+  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);
 
   fml::CountDownLatch latch(1);
@@ -139,7 +149,8 @@ TEST(PipelineCompileQueueGLESTest, DestroyQueueWithPendingTasks) {
   fml::CountDownLatch latch(3);
 
   {
-    auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
+    auto queue =
+        PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
     ASSERT_NE(queue, nullptr);
 
     PipelineDescriptor desc1;

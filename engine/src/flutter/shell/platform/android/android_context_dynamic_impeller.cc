@@ -146,7 +146,7 @@ GetActualRenderingAPIForImpeller(
 
 AndroidContextDynamicImpeller::AndroidContextDynamicImpeller(
     const AndroidContext::ContextSettings& settings,
-    fml::RefPtr<fml::TaskRunner> io_task_runner)
+    std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
       settings_(settings),
       io_task_runner_(std::move(io_task_runner)) {}

@@ -24,7 +24,7 @@ class AndroidContextDynamicImpeller : public AndroidContext {
  public:
   explicit AndroidContextDynamicImpeller(
       const AndroidContext::ContextSettings& settings,
-      fml::RefPtr<fml::TaskRunner> io_task_runner);
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner);
 
   ~AndroidContextDynamicImpeller();
 
@@ -52,7 +52,7 @@ class AndroidContextDynamicImpeller : public AndroidContext {
   const AndroidContext::ContextSettings settings_;
   std::shared_ptr<AndroidContextGLImpeller> gl_context_;
   std::shared_ptr<AndroidContextVKImpeller> vk_context_;
-  fml::RefPtr<fml::TaskRunner> io_task_runner_;
+  std::shared_ptr<fml::BasicTaskRunner> io_task_runner_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextDynamicImpeller);
 };
