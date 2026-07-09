@@ -19,12 +19,16 @@ class MainActivity : FlutterActivity() {
         private const val TAG = "MainActivity"
         const val CHANNEL_NAME = "com.example.android_hardware_smoke_test/test_channel"
         private const val METHOD_CHANNEL_NAME = "com.example.android_hardware_smoke_test/native_support"
+        private const val CACHED_ENGINE_KEY = "smoke_test_engine"
+
+        // Stored as WeakReferences to avoid static leaks; both are only read/written on the UI/Main Thread.
         private var lastConfiguredEngine: WeakReference<FlutterEngine>? = null
 
         // Tracks the active activity to prevent transition race conditions on the cached engine.
         private var activeActivity: WeakReference<MainActivity>? = null
     }
 
+    // Accessed by FlutterActivityTest to send orchestration messages.
     var messageChannel: BasicMessageChannel<Any>? = null
     private var impellerBackend = "vulkan"
     private var methodChannel: MethodChannel? = null
@@ -54,8 +58,8 @@ class MainActivity : FlutterActivity() {
         // creating a surface/window with a cached engine.
         if (backend == "vulkan") {
             val cache = FlutterEngineCache.getInstance()
-            return cache.get("smoke_test_engine") ?: FlutterEngine(context.applicationContext).also {
-                cache.put("smoke_test_engine", it)
+            return cache.get(CACHED_ENGINE_KEY) ?: FlutterEngine(context.applicationContext).also {
+                cache.put(CACHED_ENGINE_KEY, it)
             }
         }
         return FlutterEngine(context)
@@ -141,5 +145,6 @@ class MainActivity : FlutterActivity() {
         }
         methodChannel = null
         nativeDriverChannel = null
+        messageChannel = null
     }
 }
