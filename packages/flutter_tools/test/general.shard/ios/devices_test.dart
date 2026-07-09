@@ -33,7 +33,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_process_manager.dart';
 
 void main() {
   final macPlatform = FakePlatform(operatingSystem: 'macos');
@@ -594,35 +593,6 @@ void main() {
         outputFile = fileSystem.file('screenshot.png');
       });
 
-      testUsingContext(
-        'supportsScreenshot and takeScreenshot on non-CoreDevice with iMobileDevice',
-        () async {
-          device = IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            analytics: FakeAnalytics(),
-            iMobileDevice: iMobileDevice,
-            coreDeviceControl: fakeCoreDeviceControl,
-            coreDeviceLauncher: coreDeviceLauncher,
-            xcodeDebug: xcodeDebug,
-            name: 'iPhone 1',
-            sdkVersion: '13.3',
-            cpuArchitecture: DarwinArch.arm64,
-            connectionInterface: DeviceConnectionInterface.attached,
-            isConnected: true,
-            isPaired: true,
-            devModeEnabled: true,
-            isCoreDevice: false,
-          );
-
-          expect(device.supportsScreenshot, isTrue);
-        },
-      );
-
       testUsingContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
@@ -752,58 +722,34 @@ void main() {
         overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
       );
 
-      testUsingContext(
-        'takeScreenshot falls back to iMobileDevice on CoreDevice with Xcode < 27',
-        () async {
-          final testProcessManager = FakeProcessManager.empty();
-          final File outputFile = fileSystem.file('screenshot.png');
+      testUsingContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArchitecture: DarwinArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+        );
 
-          testProcessManager.addCommand(
-            FakeCommand(
-              command: <String>[
-                'HostArtifact.idevicescreenshot',
-                outputFile.path,
-                '--udid',
-                'device-123',
-              ],
-              environment: const <String, String>{'DYLD_LIBRARY_PATH': ''},
-            ),
-          );
-
-          final testIMobileDevice = IMobileDevice(
-            artifacts: Artifacts.test(),
-            cache: cache,
-            logger: logger,
-            processManager: testProcessManager,
-          );
-
-          device = IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            analytics: FakeAnalytics(),
-            iMobileDevice: testIMobileDevice,
-            coreDeviceControl: fakeCoreDeviceControl,
-            coreDeviceLauncher: coreDeviceLauncher,
-            xcodeDebug: xcodeDebug,
-            name: 'iPhone 1',
-            sdkVersion: '17.0',
-            cpuArchitecture: DarwinArch.arm64,
-            connectionInterface: DeviceConnectionInterface.attached,
-            isConnected: true,
-            isPaired: true,
-            devModeEnabled: true,
-            isCoreDevice: true,
-          );
-
-          await device.takeScreenshot(outputFile);
-          expect(testProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))},
-      );
+        expect(
+          () => device.takeScreenshot(outputFile),
+          throwsToolExit(message: 'flutter screenshot requires Xcode 27 or higher.'),
+        );
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
     });
   });
 

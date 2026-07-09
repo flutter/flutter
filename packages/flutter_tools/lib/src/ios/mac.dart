@@ -79,10 +79,8 @@ class IMobileDevice {
     required ProcessManager processManager,
     required Logger logger,
   }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
-       _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
        _dyLdLibEntry = cache.dyLdLibEntry,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   /// Create an [IMobileDevice] for testing.
   factory IMobileDevice.test({required ProcessManager processManager}) {
@@ -96,12 +94,8 @@ class IMobileDevice {
   }
 
   final String _idevicesyslogPath;
-  final String _idevicescreenshotPath;
   final MapEntry<String, String> _dyLdLibEntry;
-  final ProcessManager _processManager;
   final ProcessUtils _processUtils;
-
-  late final bool isInstalled = _processManager.canRun(_idevicescreenshotPath);
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID, bool isWirelesslyConnected) {
@@ -111,25 +105,6 @@ class IMobileDevice {
       deviceID,
       if (isWirelesslyConnected) '--network',
     ], environment: Map<String, String>.fromEntries(<MapEntry<String, String>>[_dyLdLibEntry]));
-  }
-
-  /// Captures a screenshot to the specified outputFile.
-  Future<void> takeScreenshot(
-    File outputFile,
-    String deviceID,
-    DeviceConnectionInterface interfaceType,
-  ) {
-    return _processUtils.run(
-      <String>[
-        _idevicescreenshotPath,
-        outputFile.path,
-        '--udid',
-        deviceID,
-        if (interfaceType == DeviceConnectionInterface.wireless) '--network',
-      ],
-      throwOnError: true,
-      environment: Map<String, String>.fromEntries(<MapEntry<String, String>>[_dyLdLibEntry]),
-    );
   }
 }
 

@@ -993,13 +993,12 @@ void main() {
         platform: FakePlatform(operatingSystem: 'macos'),
       );
       iosUsbArtifacts.location.createSync();
-      final File ideviceScreenshotFile = iosUsbArtifacts.location.childFile('idevicescreenshot')
+      final File ideviceSyslogFile = iosUsbArtifacts.location.childFile('idevicesyslog')
         ..createSync();
-      iosUsbArtifacts.location.childFile('idevicesyslog').createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
 
-      ideviceScreenshotFile.deleteSync();
+      ideviceSyslogFile.deleteSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(fileSystem), false);
     },
