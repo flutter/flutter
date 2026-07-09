@@ -363,8 +363,8 @@ class DesktopLogReader extends DeviceLogReader {
 
   /// Adds the stdout and stderr streams of the provided [process] to [logLines].
   void listenToProcessOutput(Process process) {
-    process.stdout.listen(_inputController.add);
-    process.stderr.listen(_inputController.add);
+    process.stdout.listen(_inputController.add, onError: _inputController.addError);
+    process.stderr.listen(_inputController.add, onError: _inputController.addError);
   }
 
   @override
@@ -399,8 +399,11 @@ class DesktopLogReader extends DeviceLogReader {
 /// Service discovery on each launch.
 class SingleLaunchLogReader extends DeviceLogReader {
   SingleLaunchLogReader(Stream<String> source, Future<void> scope) {
-    _subscription = source.listen(_controller.add);
-    scope.whenComplete(() {
+    _subscription = source.listen(_controller.add, onError: _controller.addError);
+    // Ignore how `scope` completed — only that it did — so an error from it
+    // (e.g. an unexpected failure reading `process.exitCode`) can't escape
+    // as an unhandled Future error.
+    scope.catchError((Object _, StackTrace _) {}).whenComplete(() {
       unawaited(_subscription.cancel());
       unawaited(_controller.close());
     });
