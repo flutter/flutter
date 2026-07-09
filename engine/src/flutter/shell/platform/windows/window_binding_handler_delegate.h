@@ -162,6 +162,15 @@ class WindowBindingHandlerDelegate {
   // children and parents, so a method such as this is required.
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() = 0;
 
+  // Returns the cursor that the Flutter framework has requested for the
+  // window's client area.
+  //
+  // Called by |FlutterWindow| when handling WM_SETCURSOR to restore the
+  // framework's cursor when the mouse re-enters the client area, as the
+  // cursor may have been changed while over the non-client area (e.g. a
+  // resize arrow over the window border).
+  virtual HCURSOR GetFlutterCursor() = 0;
+
   // Called when a window receives an event that may alter application lifecycle
   // state.
   virtual void OnWindowStateEvent(HWND hwnd, WindowStateEvent event) = 0;

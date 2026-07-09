@@ -978,6 +978,40 @@ TEST_F(FlutterWindowTest, OnThemeChange) {
   win32window.InjectWindowMessage(WM_THEMECHANGED, 0, 0);
 }
 
+// WM_SETCURSOR over the client area should restore the cursor requested by
+// the Flutter framework, as the cursor may have been changed while the mouse
+// was over the non-client area (e.g. a resize arrow over the window border).
+// Regression test for stale cursors when re-entering the client area.
+TEST_F(FlutterWindowTest, OnSetCursorRestoresFlutterCursor) {
+  MockFlutterWindow win32window;
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  HCURSOR hand_cursor = ::LoadCursor(nullptr, IDC_HAND);
+  EXPECT_CALL(delegate, GetFlutterCursor).WillOnce(Return(hand_cursor));
+
+  LRESULT result = win32window.InjectWindowMessage(
+      WM_SETCURSOR, 0, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
+
+  EXPECT_EQ(result, TRUE);
+  EXPECT_EQ(::GetCursor(), hand_cursor);
+}
+
+// WM_SETCURSOR over the non-client area should not touch the cursor;
+// DefWindowProc handles it (e.g. resize arrows over the window border).
+TEST_F(FlutterWindowTest, OnSetCursorNonClientAreaLeavesCursorAlone) {
+  MockFlutterWindow win32window;
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  EXPECT_CALL(delegate, GetFlutterCursor).Times(0);
+
+  win32window.InjectWindowMessage(WM_SETCURSOR, 0,
+                                  MAKELPARAM(HTBOTTOMRIGHT, WM_MOUSEMOVE));
+}
+
 // The window should return no root accessibility node if
 // it isn't attached to a view.
 // Regression test for https://github.com/flutter/flutter/issues/129791

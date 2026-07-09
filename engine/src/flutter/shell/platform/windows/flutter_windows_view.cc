@@ -865,6 +865,10 @@ void FlutterWindowsView::OnHighContrastChanged() {
   engine_->UpdateHighContrastMode();
 }
 
+HCURSOR FlutterWindowsView::GetFlutterCursor() {
+  return engine_->GetFlutterCursor();
+}
+
 HWND FlutterWindowsView::GetWindowHandle() const {
   return binding_handler_->GetWindowHandle();
 }

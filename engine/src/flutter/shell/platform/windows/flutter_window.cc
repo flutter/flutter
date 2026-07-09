@@ -712,6 +712,13 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_SETCURSOR: {
       UINT hit_test_result = LOWORD(lparam);
       if (hit_test_result == HTCLIENT) {
+        // Restore the cursor requested by the Flutter framework. The cursor
+        // may have been changed while the mouse was over the non-client area
+        // (e.g. a resize arrow over the window border), and since processing
+        // is halted below, DefWindowProc never resets it.
+        if (binding_handler_delegate_ != nullptr) {
+          ::SetCursor(binding_handler_delegate_->GetFlutterCursor());
+        }
         // Halt further processing to prevent DefWindowProc from setting the
         // cursor back to the registered class cursor.
         return TRUE;
