@@ -107,8 +107,23 @@ class GoldenPlaygroundTest
 
   bool IsPlaygroundEnabled() const { return false; }
 
+  /// @brief Initializes the provided |PipelineDescriptor| with appropriate
+  ///        default values to match the conditions under which a pipeline
+  ///        will be rendered.
+  bool InitializePipelineDescriptorForRendering(PipelineDescriptor& desc) const;
+
  protected:
   void SetWindowSize(ISize size);
+
+  /// @brief Returns true if the rendering path supports MSAA rendering.
+  ///
+  /// In the case of goldens, all tests are rendered to a non-MSAA backend.
+  bool RenderingSupportsMSAA() const { return false; }
+
+  /// @brief Returns the default sample count of the rendering path.
+  ///
+  /// In the case of goldens, all tests are rendered to a non-MSAA backend.
+  SampleCount GetDefaultSampleCount() const { return SampleCount::kCount1; }
 
   // See |Playground::EnsureContextIsUnique|
   // GoldenPlaygroundTest uses context replacement on the fly to support this.

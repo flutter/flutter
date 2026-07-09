@@ -464,6 +464,7 @@ TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
   TextureDescriptor desc;
   desc.size = {100, 100};
   desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  desc.usage = TextureUsage::kRenderTarget;
   auto texture =
       context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
 

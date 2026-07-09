@@ -4,6 +4,9 @@
 
 #include "impeller/playground/playground_test.h"
 
+#include <wordexp.h>
+
+#include "flutter/fml/file.h"
 #include "flutter/fml/time/time_point.h"
 #include "impeller/base/timing.h"
 #include "impeller/base/validation.h"
@@ -57,11 +60,49 @@ namespace {
 
 class PlaygroundTestEnvironment : public ::testing::Environment {
  public:
+  static std::optional<std::string> ValidateGoldenDirectory(
+      const std::string& dir) {
+    wordexp_t wordexp_result;
+    int code = wordexp(dir.c_str(), &wordexp_result, 0);
+    FML_CHECK(code == 0) << "Could not parse golden output directory: " << dir;
+    FML_CHECK(wordexp_result.we_wordc == 1u)
+        << "Exactly one directory must be specified for Golden image output: "
+        << dir;
+    std::optional<std::string> working_dir = wordexp_result.we_wordv[0];
+    wordfree(&wordexp_result);
+
+    FML_CHECK(working_dir) << "Unrecognized golden output directory: " << dir;
+    fml::UniqueFD directory = fml::OpenDirectory(
+        working_dir->c_str(), false, fml::FilePermission::kReadWrite);
+    FML_CHECK(fml::IsDirectory(directory))
+        << "Golden output directory must be a directory with read/write"
+        << " permissions: " << dir;
+    return working_dir;
+  }
+
   void SetUp() override {
+    // Make sure environment is set up for VK swiftshader
+    // std::filesystem::path testing_assets_path =
+    //     flutter::testing::GetTestingAssetsPath();
+    // std::filesystem::path target_path = testing_assets_path.parent_path()
+    //                                         .parent_path()
+    //                                         .parent_path()
+    //                                         .parent_path();
+    // std::filesystem::path icd_path = target_path / "vk_swiftshader_icd.json";
+    // setenv("VK_ICD_FILENAMES", icd_path.c_str(), 1);
+
     const fml::CommandLine& args = ::flutter::testing::GetArgsForProcess();
     std::string golden_output_dir;
     if (args.GetOptionValue("golden_output_dir", &golden_output_dir)) {
-      golden_manager_.emplace(golden_output_dir);
+      const std::optional<std::string> validated_dir =
+          ValidateGoldenDirectory(golden_output_dir);
+      if (validated_dir) {
+        golden_manager_.emplace(*validated_dir);
+      } else {
+        FML_CHECK(validated_dir)
+            << "Did not recognize golden output directory: "
+            << golden_output_dir;
+      }
     }
   }
 
@@ -72,7 +113,7 @@ class PlaygroundTestEnvironment : public ::testing::Environment {
       } else {
         FML_LOG(ERROR)
             << ::testing::UnitTest::GetInstance()->failed_test_count()
-            << " tests failed, not writing golden digest";
+            << " tests failed, golden digest will not be written";
         golden_manager_->ClearDigestData();
       }
       golden_manager_.reset();

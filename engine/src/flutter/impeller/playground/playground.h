@@ -127,6 +127,11 @@ class Playground {
 
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
+  /// @brief Initializes the provided |PipelineDescriptor| with appropriate
+  ///        default values to match the conditions under which a pipeline
+  ///        will be rendered.
+  bool InitializePipelineDescriptorForRendering(PipelineDescriptor& desc) const;
+
  protected:
   // This method could override testing::Test::TearDown() directly, but
   // since we don't inherit from that Test class the override would not
@@ -146,6 +151,12 @@ class Playground {
 
   /// @brief Returns true if the platform can support wide gamuts.
   bool PlatformSupportsWideGamutTests() const;
+
+  /// @brief Returns true if the rendering path supports MSAA rendering.
+  bool RenderingSupportsMSAA() const;
+
+  /// @brief Returns the default sample count of the rendering path.
+  SampleCount GetDefaultSampleCount() const;
 
   /// @brief Make sure that when the context is later created that it
   ///        will support wide gamuts if the platform supports it.

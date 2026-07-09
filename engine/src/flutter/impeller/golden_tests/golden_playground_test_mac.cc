@@ -454,4 +454,17 @@ void GoldenPlaygroundTest::SetEnableWriteGolden(bool write_golden) {
   }
 }
 
+bool GoldenPlaygroundTest::InitializePipelineDescriptorForRendering(
+    PipelineDescriptor& desc) const {
+  // Match the golden harness render target: single-sampled, no depth/stencil.
+  // `ClearStencilAttachments` also resets the stencil pixel format on the
+  // pipeline, which Metal validation requires to match the target's lack of a
+  // stencil texture; `SetStencilAttachmentDescriptors(nullopt)` alone leaves
+  // the format set and trips that validation.
+  desc.SetSampleCount(SampleCount::kCount1);
+  desc.ClearStencilAttachments();
+  desc.ClearDepthAttachment();
+  return true;
+}
+
 }  // namespace impeller

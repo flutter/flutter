@@ -62,14 +62,7 @@ TEST_P(RendererGoldenTest, BabysFirstTriangle) {
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  // Match the golden harness render target: single-sampled, no depth/stencil.
-  // `ClearStencilAttachments` also resets the stencil pixel format on the
-  // pipeline, which Metal validation requires to match the target's lack of a
-  // stencil texture; `SetStencilAttachmentDescriptors(nullopt)` alone leaves
-  // the format set and trips that validation.
-  desc->SetSampleCount(SampleCount::kCount1);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_TRUE(pipeline);
 
@@ -115,10 +108,7 @@ TEST_P(RendererGoldenTest, CanRenderInstancedWithVertexAttributes) {
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  // Match the golden harness render target: single-sampled, no depth/stencil.
-  desc->SetSampleCount(SampleCount::kCount1);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
 
   // Per-instance data is laid out contiguously, one record per instance.
   struct InstanceData {
@@ -462,9 +452,7 @@ static void DrawManuallyMippedTextureGolden(RendererGoldenTest& test,
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  desc->SetSampleCount(SampleCount::kCount1);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
+  ASSERT_TRUE(test.InitializePipelineDescriptorForRendering(*desc));
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_TRUE(pipeline);
 

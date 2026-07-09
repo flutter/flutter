@@ -129,11 +129,46 @@ void Playground::EnsureContextIsUnique() {
 
 bool Playground::PlatformSupportsWideGamutTests() const {
 #if __arm64__ && FML_OS_MACOSX
-  return backend_ == PlaygroundBackend::kMetal ||
-         backend_ == PlaygroundBackend::kMetalSDF;
+  switch (backend_) {
+    case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
+      return true;
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
+    case PlaygroundBackend::kVulkan:
+      return false;
+  }
 #else
   return false;
 #endif
+}
+
+bool Playground::RenderingSupportsMSAA() const {
+  switch (backend_) {
+    case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
+      return true;
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
+      return false;
+    case PlaygroundBackend::kVulkan:
+      return true;
+  }
+}
+
+SampleCount Playground::GetDefaultSampleCount() const {
+  return RenderingSupportsMSAA() ? SampleCount::kCount4 : SampleCount::kCount1;
+}
+
+bool Playground::InitializePipelineDescriptorForRendering(
+    PipelineDescriptor& desc) const {
+  // Match the golden/verirication harness render target:
+  // - msaa or single samples depending on the Context
+  // - no depth or stencil
+  desc.SetSampleCount(GetDefaultSampleCount());
+  desc.ClearStencilAttachments();
+  desc.ClearDepthAttachment();
+  return true;
 }
 
 bool Playground::EnsureContextSupportsWideGamut() {
@@ -337,14 +372,22 @@ bool Playground::RenderImage(const RenderCallback& callback,
   ISize size(std::round(GetWindowSize().width * content_scale.x),
              std::round(GetWindowSize().height * content_scale.y));
 
-  RenderTargetAllocator render_target_allocator(
-      context->GetResourceAllocator());
   std::string label =
       write_result ? "Golden Render Pass" : "Playground Verification Pass";
-  RenderTarget render_target = render_target_allocator.CreateOffscreen(
-      *context, size, /*mip_count=*/1, label,
-      RenderTarget::kDefaultColorAttachmentConfig,
-      /*stencil_attachment_config=*/std::nullopt);
+  RenderTargetAllocator render_target_allocator(
+      context->GetResourceAllocator());
+  RenderTarget render_target;
+  if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
+    render_target = render_target_allocator.CreateOffscreenMSAA(
+        *context, size, /*mip_count=*/1, label + " (MSAA)",
+        RenderTarget::kDefaultColorAttachmentConfigMSAA,
+        /*stencil_attachment_config=*/std::nullopt);
+  } else {
+    render_target = render_target_allocator.CreateOffscreen(
+        *context, size, /*mip_count=*/1, label,
+        RenderTarget::kDefaultColorAttachmentConfig,
+        /*stencil_attachment_config=*/std::nullopt);
+  }
   if (!render_target.IsValid()) {
     return false;
   }

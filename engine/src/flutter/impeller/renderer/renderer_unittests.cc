@@ -74,8 +74,10 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   using BoxPipelineBuilder = PipelineBuilder<VS, FS>;
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
+  desc->ClearStencilAttachments();
+  desc->ClearDepthAttachment();
 
   // Vertex buffer.
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
@@ -143,10 +145,9 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   ASSERT_TRUE(context);
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   desc->SetCullMode(CullMode::kBackFace);
   desc->SetWindingOrder(WindingOrder::kCounterClockwise);
-  desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
 
   // Setup the vertex layout to take two bindings. The first for positions and
   // the second for colors.
@@ -257,8 +258,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
   using BoxPipelineBuilder = PipelineBuilder<VS, FS>;
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   auto box_pipeline =
       context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
   ASSERT_TRUE(box_pipeline);
@@ -448,16 +448,12 @@ TEST_P(RendererTest, CanRenderInstanced) {
       VS::PerVertexData{Point{110, 110}},
   });
 
-  ASSERT_NE(GetContext(), nullptr);
-  auto pipeline =
-      GetContext()
-          ->GetPipelineLibrary()
-          ->GetPipeline(PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(
-                            *GetContext())
-                            ->SetSampleCount(SampleCount::kCount4)
-                            .SetStencilAttachmentDescriptors(std::nullopt))
-
-          .Get();
+  std::shared_ptr<Context> context = GetContext();
+  ASSERT_TRUE(context);
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
+  auto pipeline = GetContext()->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
   static constexpr size_t kInstancesCount = 5u;
@@ -504,8 +500,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
   using FS = MipmapsFragmentShader;
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   auto mipmaps_pipeline =
       context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
   ASSERT_TRUE(mipmaps_pipeline);
@@ -621,8 +616,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
   using FS = MipmapsFragmentShader;
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   auto mipmaps_pipeline =
       context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
   ASSERT_TRUE(mipmaps_pipeline);
@@ -751,8 +745,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
   using FS = MipmapsFragmentShader;
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  desc->SetSampleCount(SampleCount::kCount4);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   auto mipmaps_pipeline =
       context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
   ASSERT_TRUE(mipmaps_pipeline);
@@ -872,8 +865,7 @@ TEST_P(RendererTest, TheImpeller) {
   auto pipeline_descriptor =
       PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_descriptor.has_value());
-  pipeline_descriptor->SetSampleCount(SampleCount::kCount4);
-  pipeline_descriptor->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*pipeline_descriptor));
   auto pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
@@ -935,8 +927,7 @@ TEST_P(RendererTest, Planet) {
   auto pipeline_descriptor =
       PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_descriptor.has_value());
-  pipeline_descriptor->SetSampleCount(SampleCount::kCount4);
-  pipeline_descriptor->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*pipeline_descriptor));
   auto pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
@@ -1003,8 +994,7 @@ TEST_P(RendererTest, ArrayUniforms) {
   auto pipeline_descriptor =
       PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_descriptor.has_value());
-  pipeline_descriptor->SetSampleCount(SampleCount::kCount4);
-  pipeline_descriptor->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*pipeline_descriptor));
   auto pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
@@ -1061,8 +1051,7 @@ TEST_P(RendererTest, InactiveUniforms) {
   auto pipeline_descriptor =
       PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_descriptor.has_value());
-  pipeline_descriptor->SetSampleCount(SampleCount::kCount4);
-  pipeline_descriptor->SetStencilAttachmentDescriptors(std::nullopt);
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*pipeline_descriptor));
   auto pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
@@ -1384,11 +1373,15 @@ TEST_P(RendererTest,
 
 template <class VertexShader, class FragmentShader>
 std::shared_ptr<Pipeline<PipelineDescriptor>> CreateDefaultPipeline(
+    RendererTest* test,
     const std::shared_ptr<Context>& context) {
   using TexturePipelineBuilder = PipelineBuilder<VertexShader, FragmentShader>;
   auto pipeline_desc =
       TexturePipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   if (!pipeline_desc.has_value()) {
+    return nullptr;
+  }
+  if (!test->InitializePipelineDescriptorForRendering(*pipeline_desc)) {
     return nullptr;
   }
   pipeline_desc->SetSampleCount(SampleCount::kCount4);
@@ -1419,8 +1412,9 @@ TEST_P(RendererTest, CanSepiaToneWithSubpasses) {
   }
 
   // Create pipelines.
-  auto texture_pipeline = CreateDefaultPipeline<TextureVS, TextureFS>(context);
-  auto sepia_pipeline = CreateDefaultPipeline<SepiaVS, SepiaFS>(context);
+  auto texture_pipeline =
+      CreateDefaultPipeline<TextureVS, TextureFS>(this, context);
+  auto sepia_pipeline = CreateDefaultPipeline<SepiaVS, SepiaFS>(this, context);
 
   ASSERT_TRUE(texture_pipeline);
   ASSERT_TRUE(sepia_pipeline);
@@ -1511,9 +1505,11 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
   }
 
   // Create pipelines.
-  auto texture_pipeline = CreateDefaultPipeline<TextureVS, TextureFS>(context);
-  auto swizzle_pipeline = CreateDefaultPipeline<SwizzleVS, SwizzleFS>(context);
-  auto sepia_pipeline = CreateDefaultPipeline<SepiaVS, SepiaFS>(context);
+  auto texture_pipeline =
+      CreateDefaultPipeline<TextureVS, TextureFS>(this, context);
+  auto swizzle_pipeline =
+      CreateDefaultPipeline<SwizzleVS, SwizzleFS>(this, context);
+  auto sepia_pipeline = CreateDefaultPipeline<SepiaVS, SepiaFS>(this, context);
 
   ASSERT_TRUE(texture_pipeline);
   ASSERT_TRUE(swizzle_pipeline);
