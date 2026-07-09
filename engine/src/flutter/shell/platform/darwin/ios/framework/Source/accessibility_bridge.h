@@ -122,6 +122,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   __weak FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
+  // The loaded UIView this bridge last populated through accessibilityElements.
+  __weak UIView* current_view_with_accessibility_elements_;
 
   // If the this id is kSemanticObjectIdInvalid, it means either nothing has
   // been focused or the focus is currently outside of the flutter application

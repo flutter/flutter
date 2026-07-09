@@ -320,6 +320,41 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   OCMVerifyAll(mockFlutterView);
 }
 
+- (void)testClearStateClearsTrackedAccessibilityElementsWhenGetterDoesNotReflectSetter {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
+
+  auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil);
+
+  OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNotNil]]);
+  UpdateRootSemantics(bridge.get(), "tracked");
+  OCMVerifyAll(mockFlutterView);
+
+  OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
+  bridge->clearState();
+  OCMVerifyAll(mockFlutterView);
+}
+
 - (void)testSetViewControllerClearsPreviousViewAccessibilityElementsOwnedByBridge {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
@@ -443,6 +478,47 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       bridge->SetViewController(next_view_controller),
       flutter::AccessibilityBridge::ViewControllerUpdateResult::kReboundWithoutSemantics);
   XCTAssertEqual(previous_view.accessibilityElements, native_elements);
+}
+
+- (void)testSetViewControllerDoesNotClearTrackedPreviousViewAccessibilityElementsOwnedByUIKit {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  UIView* previous_view = [[UIView alloc] init];
+  UIView* next_view = [[UIView alloc] init];
+  id previous_view_controller = OCMClassMock([FlutterViewController class]);
+  id next_view_controller = OCMClassMock([FlutterViewController class]);
+  StubLoadedView(previous_view_controller, previous_view);
+  StubLoadedView(next_view_controller, next_view);
+
+  auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previous_view_controller,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil);
+  UpdateRootSemantics(bridge.get(), "owned");
+  UIAccessibilityElement* native_element =
+      [[UIAccessibilityElement alloc] initWithAccessibilityContainer:previous_view];
+  NSArray* native_elements = @[ native_element ];
+  previous_view.accessibilityElements = native_elements;
+
+  XCTAssertEqual(bridge->SetViewController(next_view_controller),
+                 flutter::AccessibilityBridge::ViewControllerUpdateResult::
+                     kReboundAndUpdatedAccessibilityElements);
+  XCTAssertEqual(previous_view.accessibilityElements, native_elements);
+  XCTAssertNotNil(next_view.accessibilityElements);
 }
 
 - (void)testIsVoiceOverRunning {

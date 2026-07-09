@@ -47,6 +47,7 @@ AccessibilityBridge::AccessibilityBridge(
     : view_controller_(view_controller),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
+      current_view_with_accessibility_elements_(nil),
       objects_([[NSMutableDictionary alloc] init]),
       previous_routes_({}),
       ios_delegate_(ios_delegate ? std::move(ios_delegate)
@@ -72,8 +73,12 @@ AccessibilityBridge::ViewControllerUpdateResult AccessibilityBridge::SetViewCont
     return ViewControllerUpdateResult::kUnchanged;
   }
   UIView* previous_view = viewIfLoaded();
+  UIView* tracked_view = current_view_with_accessibility_elements_;
   UIView* next_view = view_controller.viewIfLoaded;
-  if (previous_view != next_view) {
+  if (tracked_view != next_view) {
+    ClearAccessibilityElementsIfOwnedByBridge(tracked_view);
+  }
+  if (previous_view != tracked_view && previous_view != next_view) {
     ClearAccessibilityElementsIfOwnedByBridge(previous_view);
   }
   view_controller_ = view_controller;
@@ -431,8 +436,14 @@ void AccessibilityBridge::ClearAccessibilityElementsIfOwnedByBridge(UIView* view
   if (!view) {
     return;
   }
-  if (AccessibilityElementsBelongToBridge(view.accessibilityElements)) {
+  NSArray* elements = view.accessibilityElements;
+  bool view_was_last_populated_by_bridge = view == current_view_with_accessibility_elements_;
+  if (AccessibilityElementsBelongToBridge(elements) ||
+      (!elements && view_was_last_populated_by_bridge)) {
     view.accessibilityElements = nil;
+  }
+  if (view_was_last_populated_by_bridge) {
+    current_view_with_accessibility_elements_ = nil;
   }
 }
 
@@ -442,12 +453,17 @@ AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
   if (!view) {
     return ViewUpdateResult::kViewNotLoaded;
   }
+  UIView* tracked_view = current_view_with_accessibility_elements_;
+  if (tracked_view != view) {
+    ClearAccessibilityElementsIfOwnedByBridge(tracked_view);
+  }
   SemanticsObject* root = objects_[@(kRootNodeId)];
   if (!root) {
     ClearAccessibilityElementsIfOwnedByBridge(view);
     return ViewUpdateResult::kNoSemantics;
   }
   view.accessibilityElements = @[ [root accessibilityContainer] ?: [NSNull null] ];
+  current_view_with_accessibility_elements_ = view;
   return ViewUpdateResult::kUpdatedAccessibilityElements;
 }
 
@@ -458,8 +474,12 @@ void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {
 }
 
 void AccessibilityBridge::clearState() {
+  UIView* tracked_view = current_view_with_accessibility_elements_;
+  ClearAccessibilityElementsIfOwnedByBridge(tracked_view);
   UIView* view = viewIfLoaded();
-  ClearAccessibilityElementsIfOwnedByBridge(view);
+  if (view != tracked_view) {
+    ClearAccessibilityElementsIfOwnedByBridge(view);
+  }
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();

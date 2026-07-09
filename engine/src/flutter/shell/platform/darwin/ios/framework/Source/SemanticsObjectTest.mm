@@ -762,7 +762,7 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue(CGRectEqualToRect(container.accessibilityFrame, UIScreen.mainScreen.bounds));
 }
 
-- (void)testRootSemanticsObjectContainerAccessibilityContainerIsNil {
+- (void)testRootSemanticsObjectContainerAccessibilityContainerIsBridgeView {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
@@ -778,7 +778,7 @@ const float kFloatCompareEpsilon = 0.001;
   SemanticsObjectContainer* container =
       static_cast<SemanticsObjectContainer*>(rootObject.accessibilityContainer);
 
-  XCTAssertNil(container.accessibilityContainer);
+  XCTAssertEqual(container.accessibilityContainer, mock->view());
 }
 
 - (void)testChildSemanticsObjectContainerAccessibilityContainerIsParentContainer {
