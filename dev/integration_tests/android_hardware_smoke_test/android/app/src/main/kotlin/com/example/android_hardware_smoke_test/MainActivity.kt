@@ -35,7 +35,6 @@ class MainActivity : FlutterActivity() {
     private var nativeDriverChannel: MethodChannel? = null
 
     override fun provideFlutterEngine(context: Context): FlutterEngine {
-        var backend = "vulkan"
         try {
             val appInfo =
                 context.packageManager.getApplicationInfo(
@@ -44,7 +43,7 @@ class MainActivity : FlutterActivity() {
                 )
             val manifestBackend = appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
             if (!manifestBackend.isNullOrEmpty()) {
-                backend = manifestBackend
+                impellerBackend = manifestBackend
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
@@ -56,7 +55,7 @@ class MainActivity : FlutterActivity() {
         // We only want to do this for Vulkan backend because those teardown
         // crashes are specific to Vulkan, and OpenGLES can crash when
         // creating a surface/window with a cached engine.
-        if (backend == "vulkan") {
+        if (impellerBackend == "vulkan") {
             val cache = FlutterEngineCache.getInstance()
             return cache.get(CACHED_ENGINE_KEY) ?: FlutterEngine(context.applicationContext).also {
                 cache.put(CACHED_ENGINE_KEY, it)
@@ -68,20 +67,6 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         activeActivity = WeakReference(this)
-
-        try {
-            val appInfo =
-                packageManager.getApplicationInfo(
-                    packageName,
-                    PackageManager.GET_META_DATA
-                )
-            val manifestBackend = appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
-            if (!manifestBackend.isNullOrEmpty()) {
-                impellerBackend = manifestBackend
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
-        }
 
         messageChannel =
             BasicMessageChannel(
@@ -136,7 +121,6 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
-        super.cleanUpFlutterEngine(flutterEngine)
         // Only clear handlers if this activity is still active (prevents transition races).
         if (activeActivity?.get() == this) {
             methodChannel?.setMethodCallHandler(null)
@@ -146,5 +130,6 @@ class MainActivity : FlutterActivity() {
         methodChannel = null
         nativeDriverChannel = null
         messageChannel = null
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 }
