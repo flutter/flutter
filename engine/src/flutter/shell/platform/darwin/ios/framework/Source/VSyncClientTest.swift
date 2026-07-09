@@ -157,14 +157,14 @@ import Testing
 
     var client: VSyncClient?
 
-    await confirmation { confirm in
+    await withCheckedContinuation { continuation in
       autoreleasepool {
         client = VSyncClient(
           taskRunner: threadTaskRunner,
           isVariableRefreshRateEnabled: false,
           maxRefreshRate: 60.0
         ) { _, _ in
-          confirm()
+          continuation.resume()
         }
         weakClient = client
 
@@ -179,8 +179,10 @@ import Testing
       client = nil
     }
 
-    await confirmation { confirm in
-      threadTaskRunner.postTask(confirm)
+    await withCheckedContinuation { continuation in
+      threadTaskRunner.postTask {
+        continuation.resume()
+      }
     }
 
     #expect(weakClient == nil)
@@ -229,8 +231,10 @@ import Testing
     }
 
     // Ensure the display link is added to the run loop on the task runner thread.
-    await confirmation { confirm in
-      threadTaskRunner.postTask(confirm)
+    await withCheckedContinuation { continuation in
+      threadTaskRunner.postTask {
+        continuation.resume()
+      }
     }
 
     // Deallocate on the main (test) thread. deinit calls invalidate(), which must post the
@@ -241,8 +245,10 @@ import Testing
     #expect(weakClient == nil)
 
     // Flush the task runner queue to ensure invalidation executes on the task runner thread.
-    await confirmation { confirm in
-      threadTaskRunner.postTask(confirm)
+    await withCheckedContinuation { continuation in
+      threadTaskRunner.postTask {
+        continuation.resume()
+      }
     }
 
     // If the invalidation succeeded on the correct thread, the run loop dropped its strong

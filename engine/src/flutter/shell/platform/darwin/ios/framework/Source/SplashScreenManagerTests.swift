@@ -81,8 +81,10 @@ struct SplashScreenManagerTests {
     let view = UIView()
     manager.splashScreenView = view
 
-    await confirmation { confirm in
-      manager.removeSplashScreen(completion: confirm)
+    await withCheckedContinuation { continuation in
+      manager.removeSplashScreen {
+        continuation.resume()
+      }
     }
     #expect(manager.splashScreenView == nil)
   }

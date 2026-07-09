@@ -12,8 +12,10 @@ import Testing
   func postTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    await confirmation { confirm in
-      taskRunner.postTask(confirm)
+    await withCheckedContinuation { continuation in
+      taskRunner.postTask {
+        continuation.resume()
+      }
     }
   }
 
@@ -22,12 +24,12 @@ import Testing
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
     let startTime = CACurrentMediaTime()
-    await confirmation { confirm in
+    await withCheckedContinuation { continuation in
       taskRunner.postTask(delay: 0.1) {
         let endTime = CACurrentMediaTime()
         let epsilon = 0.001
         #expect(endTime - startTime >= 0.1 - epsilon)
-        confirm()
+        continuation.resume()
       }
     }
   }
