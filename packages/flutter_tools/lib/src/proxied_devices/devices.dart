@@ -112,6 +112,9 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     final DeviceConnectionInterface? connectionInterface = connectionInterfaceName != null
         ? getDeviceConnectionInterfaceForName(connectionInterfaceName)
         : null;
+    // Casting to `String?` to be backward compatible with old daemon version
+    // which is not sending the cpuArch. It can be changed to `String` when we
+    // no longer need the backward compatibility.
     final String? cpuArch = _cast<String?>(device['cpuArch']);
     return ProxiedDevice(
       connection,
