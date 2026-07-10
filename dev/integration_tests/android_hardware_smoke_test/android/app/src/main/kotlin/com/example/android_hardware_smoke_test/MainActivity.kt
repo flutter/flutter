@@ -74,14 +74,15 @@ class MainActivity : FlutterActivity() {
                 CHANNEL_NAME,
                 JSONMessageCodec.INSTANCE
             )
-
         if (flutterEngine != lastConfiguredEngine?.get()) {
             flutterEngine
                 .platformViewsController
                 .registry
                 .registerViewFactory(
                     "com.example.android_hardware_smoke_test/native_text_view",
-                    NativeTextViewFactory()
+                    NativeTextViewFactory {
+                        activeActivity?.get()?.methodChannel?.invokeMethod("onDraw", null)
+                    }
                 )
             lastConfiguredEngine = WeakReference(flutterEngine)
         }
