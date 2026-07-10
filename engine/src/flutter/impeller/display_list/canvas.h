@@ -283,6 +283,15 @@ class Canvas {
   /// Visible for testing.
   static bool IsCompatibleWithSDFRendering(const Paint& paint);
 
+  /// Returns the input rectangle upscaled to have a minimum 1 pixel width and
+  /// height when rendered with the canvas' current transform.
+  ///
+  /// If the rectangle is effectively invisible, the returned rectangle will be
+  /// empty.
+  ///
+  /// Visible for testing.
+  Rect UpscaledRect(const Rect& rect) const;
+
  private:
   class BlurShape {
    public:
