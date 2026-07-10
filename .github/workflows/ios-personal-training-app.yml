@@ -1,0 +1,52 @@
+name: iOS Personal Training App Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_env:
+        description: Build environment passed as APP_ENV
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: examples/personal_training_app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Build iOS IPA for App Store
+        run: |
+          flutter build ipa \
+            --release \
+            --dart-define=APP_ENV=${{ inputs.app_env }} \
+            --export-options-plist=ios/ExportOptions-AppStore.plist
+
+      - name: Upload iOS IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app-ipa-${{ inputs.app_env }}
+          path: examples/personal_training_app/build/ios/ipa/*.ipa
+          if-no-files-found: error
