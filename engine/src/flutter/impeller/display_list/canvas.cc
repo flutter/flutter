@@ -2577,7 +2577,7 @@ Rect Canvas::UpscaledRect(const Rect& rect) const {
   // Convert local rectangle size to device size (pixels).
   Vector2 rect_device_size = Vector2(rect.GetSize()) * transform_scaling;
 
-  // Expand rect pixel size dimensions to a 1.0 minimum.
+  // Expand rect device size dimensions to a 1.0 minimum.
   Vector2 expanded_rect_device_size = rect_device_size.Max(Vector2(1.0f, 1.0f));
 
   if (expanded_rect_device_size == rect_device_size) {
@@ -2586,7 +2586,7 @@ Rect Canvas::UpscaledRect(const Rect& rect) const {
     return rect;
   }
 
-  // Convert expanded rectangle from pixel size back to local size.
+  // Convert expanded rectangle from device size back to local size.
   Vector2 expanded_rect_local_size =
       Vector2(expanded_rect_device_size / transform_scaling);
 
