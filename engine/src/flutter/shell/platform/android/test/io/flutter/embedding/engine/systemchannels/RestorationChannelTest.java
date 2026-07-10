@@ -6,6 +6,7 @@ package io.flutter.embedding.engine.systemchannels;
 
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -86,7 +87,7 @@ public class RestorationChannelTest {
     verify(result).success(expected);
 
     restorationChannel.setRestorationData(data);
-    assertEquals(null, restorationChannel.getRestorationData());
+    assertNull(restorationChannel.getRestorationData());
 
     ArgumentCaptor<MethodChannel.Result> resultCapture =
         ArgumentCaptor.forClass(MethodChannel.Result.class);
