@@ -214,23 +214,14 @@ class VSyncClientTest: XCTestCase {
     XCTAssertNil(weakClient)
   }
 
-  /// Verifies that when `VSyncClient` is deallocated, and its display link is successfully
-  /// invalidated and deallocated on the thread where it was created.
-  ///
-  /// Since `deinit` can run on an arbitrary thread, calling `CADisplayLink.invalidate()` directly
-  /// from `deinit` violates Apple's thread-affinity contract (invalidation must happen on the
-  /// registering thread). If this fails, the run loop will strongly retain and leak both the
-  /// display link and the relay.
-  func testDisplayLinkIsDeallocatedOnTaskRunnerThread() {
+  /// Verifies there is no retain cycle through the display-link → relay → client chain after
+  /// the display server has taken ownership of the link. On iOS 27+, QuartzCore holds a
+  /// `_CADisplayLinkAssertion` on registered links; a never-unpaused link may therefore
+  /// outlive `VSyncClient` itself, which is expected.
+  func testDeallocatesAfterRegistrationCompletes() {
     let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
     weak var weakClient: VSyncClient?
-    weak var weakDisplayLink: CADisplayLink?
 
-    // Scope the lifetime of VSyncClient using an autorelease pool.
-    //
-    // When this block exits, the client will be released on the main (test) thread. Since deinit
-    // runs on the main thread but the display link was registered on the task runner's thread, the
-    // client must post the invalidation task to the task runner to execute it safely.
     autoreleasepool {
       let client = VSyncClient(
         taskRunner: threadTaskRunner,
@@ -239,29 +230,14 @@ class VSyncClientTest: XCTestCase {
       ) { _, _ in }
 
       weakClient = client
-      weakDisplayLink = client.displayLink
 
-      // Ensure the display link is added to the run loop on the task runner thread.
+      // Registration is dispatched to the task runner in init. Post a barrier task after it
+      // so we know registration has completed before deinit fires.
       let registerExpectation = expectation(description: "Wait for display link registration")
-      threadTaskRunner.postTask {
-        registerExpectation.fulfill()
-      }
+      threadTaskRunner.postTask { registerExpectation.fulfill() }
       waitForExpectations(timeout: 1.0, handler: nil)
     }
 
-    // Deallocate on the main (test) thread. deinit calls invalidate(), which must post the
-    // invalidation task to the task runner.
     XCTAssertNil(weakClient)
-
-    // Flush the task runner queue to ensure invalidation executes on the task runner thread.
-    let flushExpectation = expectation(description: "Flush invalidation task")
-    threadTaskRunner.postTask {
-      flushExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 1.0, handler: nil)
-
-    // If the invalidation succeeded on the correct thread, the run loop dropped its strong
-    // reference, and the display link must have been deallocated.
-    XCTAssertNil(weakDisplayLink)
   }
 }
