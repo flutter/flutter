@@ -54,7 +54,7 @@ void main() {
     TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
-      final String arch = getAndroidArchForName(targetPlatform.getName()).archName;
+      final String arch = getCpuArchForName(targetPlatform.getName()).androidArchName;
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',

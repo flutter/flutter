@@ -1465,7 +1465,7 @@ IOSDevice setUpIOSDevice({
   IOSCoreDeviceControl? coreDeviceControl,
   IOSCoreDeviceLauncher? coreDeviceLauncher,
   FakeXcodeDebug? xcodeDebug,
-  DarwinArch cpuArchitecture = DarwinArch.arm64,
+  CpuArch cpuArchitecture = CpuArch.arm64,
   FakeExactAnalytics? analytics,
 }) {
   artifacts ??= Artifacts.test();

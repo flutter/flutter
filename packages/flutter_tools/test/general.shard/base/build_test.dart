@@ -70,7 +70,7 @@ void main() {
 
       final int result = await genSnapshot.run(
         snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -130,7 +130,7 @@ void main() {
       expect(
         await snapshotter.build(
           platform: TargetPlatform.ios,
-          darwinArch: DarwinArch.arm64,
+          cpuArch: CpuArch.arm64,
           sdkRoot: 'path/to/sdk',
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
@@ -224,7 +224,7 @@ void main() {
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         splitDebugInfo: 'foo',
         dartObfuscation: false,
@@ -284,7 +284,7 @@ void main() {
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: true,
       );
@@ -342,7 +342,7 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: false,
       );

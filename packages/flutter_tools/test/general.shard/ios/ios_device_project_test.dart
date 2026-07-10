@@ -116,7 +116,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     platform: platform,
     name: 'iPhone 1',
     sdkVersion: '13.3',
-    cpuArchitecture: DarwinArch.arm64,
+    cpuArchitecture: CpuArch.arm64,
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,

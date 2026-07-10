@@ -366,7 +366,7 @@ IOSDevice setUpIOSDevice({
     logger: logger,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     sdkVersion: '13.3',
-    cpuArchitecture: DarwinArch.arm64,
+    cpuArchitecture: CpuArch.arm64,
     platform: platform,
     iMobileDevice: IMobileDevice(
       logger: logger,

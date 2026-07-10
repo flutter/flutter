@@ -1157,14 +1157,14 @@ void main() {
             expect(devices[0].id, '00008027-00192736010F802E');
             expect(devices[0].name, 'An iPhone (Space Gray)');
             expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
-            expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[0].cpuArchitecture, CpuArch.arm64);
             expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
             expect(devices[0].isConnected, true);
 
             expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
             expect(devices[1].name, 'iPad 1');
             expect(await devices[1].sdkNameAndVersion, 'iOS 10.1 14C54');
-            expect(devices[1].cpuArchitecture, DarwinArch.armv7);
+            expect(devices[1].cpuArchitecture, CpuArch.armv7);
             expect(devices[1].connectionInterface, DeviceConnectionInterface.attached);
             expect(devices[1].isConnected, true);
 
@@ -1173,7 +1173,7 @@ void main() {
             expect(await devices[2].sdkNameAndVersion, 'iOS 10.1 14C54');
             expect(
               devices[2].cpuArchitecture,
-              DarwinArch.arm64,
+              CpuArch.arm64,
             ); // Defaults to arm64 for unknown architecture.
             expect(devices[2].connectionInterface, DeviceConnectionInterface.wireless);
             expect(devices[2].isConnected, true);
@@ -1183,7 +1183,7 @@ void main() {
             expect(await devices[3].sdkNameAndVersion, 'iOS 10.1 14C54');
             expect(
               devices[3].cpuArchitecture,
-              DarwinArch.arm64,
+              CpuArch.arm64,
             ); // Defaults to arm64 for unknown architecture.
             expect(devices[3].connectionInterface, DeviceConnectionInterface.attached);
             expect(devices[3].isConnected, true);
@@ -1191,7 +1191,7 @@ void main() {
             expect(devices[4].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
             expect(devices[4].name, 'iPhone');
             expect(await devices[4].sdkNameAndVersion, 'iOS 13.3 17C54');
-            expect(devices[4].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[4].cpuArchitecture, CpuArch.arm64);
             expect(devices[4].connectionInterface, DeviceConnectionInterface.attached);
             expect(devices[4].isConnected, false);
 
@@ -1308,8 +1308,8 @@ void main() {
               ),
             );
             final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
-            expect(devices[0].cpuArchitecture, DarwinArch.armv7);
-            expect(devices[1].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[0].cpuArchitecture, CpuArch.armv7);
+            expect(devices[1].cpuArchitecture, CpuArch.arm64);
             expect(fakeProcessManager, hasNoRemainingExpectations);
           },
           overrides: <Type, Generator>{
@@ -1422,7 +1422,7 @@ void main() {
             expect(devices[0].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
             expect(devices[0].name, 'iPhone');
             expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
-            expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[0].cpuArchitecture, CpuArch.arm64);
             expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
             expect(devices[0].isConnected, true);
 
@@ -1491,7 +1491,7 @@ void main() {
             expect(devices[0].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
             expect(devices[0].name, 'iPhone_2');
             expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
-            expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[0].cpuArchitecture, CpuArch.arm64);
             expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
             expect(devices[0].isConnected, false);
 
@@ -1561,7 +1561,7 @@ void main() {
             expect(devices[0].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
             expect(devices[0].name, 'iPhone_1');
             expect(await devices[0].sdkNameAndVersion, 'iOS 14.3 17C54');
-            expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[0].cpuArchitecture, CpuArch.arm64);
             expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
             expect(devices[0].isConnected, false);
 
@@ -1778,7 +1778,7 @@ void main() {
               expect(devices[0].id, '00008027-00192736010F802E');
               expect(devices[0].name, 'An iPhone (Space Gray)');
               expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
-              expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+              expect(devices[0].cpuArchitecture, CpuArch.arm64);
               expect(devices[0].connectionInterface, DeviceConnectionInterface.wireless);
               expect(devices[0].isConnected, true);
               expect(devices[0].devModeEnabled, true);
@@ -1786,7 +1786,7 @@ void main() {
               expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
               expect(devices[1].name, 'iPad 1');
               expect(await devices[1].sdkNameAndVersion, 'iOS 10.1 14C54');
-              expect(devices[1].cpuArchitecture, DarwinArch.armv7);
+              expect(devices[1].cpuArchitecture, CpuArch.armv7);
               expect(devices[1].connectionInterface, DeviceConnectionInterface.attached);
               expect(devices[1].isConnected, true);
               expect(devices[1].devModeEnabled, true);
@@ -1796,7 +1796,7 @@ void main() {
               expect(await devices[2].sdkNameAndVersion, 'iOS 10.1 14C54');
               expect(
                 devices[2].cpuArchitecture,
-                DarwinArch.arm64,
+                CpuArch.arm64,
               ); // Defaults to arm64 for unknown architecture.
               expect(devices[2].connectionInterface, DeviceConnectionInterface.attached);
               expect(devices[2].isConnected, true);
@@ -1807,7 +1807,7 @@ void main() {
               expect(await devices[3].sdkNameAndVersion, 'iOS 10.1 14C54');
               expect(
                 devices[3].cpuArchitecture,
-                DarwinArch.arm64,
+                CpuArch.arm64,
               ); // Defaults to arm64 for unknown architecture.
               expect(devices[3].connectionInterface, DeviceConnectionInterface.attached);
               expect(devices[3].isConnected, true);
@@ -1816,7 +1816,7 @@ void main() {
               expect(devices[4].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
               expect(devices[4].name, 'iPhone');
               expect(await devices[4].sdkNameAndVersion, 'iOS 13.3 17C54');
-              expect(devices[4].cpuArchitecture, DarwinArch.arm64);
+              expect(devices[4].cpuArchitecture, CpuArch.arm64);
               expect(devices[4].connectionInterface, DeviceConnectionInterface.attached);
               expect(devices[4].isConnected, false);
               expect(devices[4].devModeEnabled, true);

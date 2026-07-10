@@ -724,21 +724,21 @@ class XCDevice {
     return null;
   }
 
-  DarwinArch _cpuArchitecture(Map<String, Object?> deviceProperties) {
-    DarwinArch? cpuArchitecture;
+  CpuArch _cpuArchitecture(Map<String, Object?> deviceProperties) {
+    CpuArch? cpuArchitecture;
     final Object? architecture = deviceProperties['architecture'];
     if (architecture is String) {
       try {
-        cpuArchitecture = getIOSArchForName(architecture);
+        cpuArchitecture = getCpuArchForName(architecture);
       } on Exception {
         // Fallback to default iOS architecture. Future-proof against a
         // theoretical version of Xcode that changes this string to something
         // slightly different like "ARM64", or armv7 variations like
         // armv7s and armv7f.
         if (architecture.startsWith('armv7')) {
-          cpuArchitecture = DarwinArch.armv7;
+          cpuArchitecture = CpuArch.armv7;
         } else {
-          cpuArchitecture = DarwinArch.arm64;
+          cpuArchitecture = CpuArch.arm64;
         }
         _logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
@@ -746,7 +746,7 @@ class XCDevice {
         );
       }
     }
-    return cpuArchitecture ?? DarwinArch.arm64;
+    return cpuArchitecture ?? CpuArch.arm64;
   }
 
   /// Error message parsed from xcdevice. null if no error.

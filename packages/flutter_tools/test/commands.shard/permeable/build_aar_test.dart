@@ -224,10 +224,10 @@ void main() {
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
-        expect(androidBuildInfo.targetArchs, <AndroidArch>[
-          AndroidArch.armeabi_v7a,
-          AndroidArch.arm64_v8a,
-          AndroidArch.x86_64,
+        expect(androidBuildInfo.targetArchs, <CpuArch>[
+          CpuArch.armv7,
+          CpuArch.arm64,
+          CpuArch.x64,
         ]);
       }
       expect(buildModes, hasLength(3));
@@ -272,7 +272,7 @@ void main() {
 
       final AndroidBuildInfo androidBuildInfo =
           (buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>).single;
-      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86_64]);
+      expect(androidBuildInfo.targetArchs, <CpuArch>[CpuArch.x64]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
       expect(buildInfo.mode, BuildMode.release);

@@ -148,8 +148,8 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
   final flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
-    return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
-      final String abi = arch.archName;
+    return androidBuildInfo.targetArchs.map<String>((CpuArch arch) {
+      final String abi = arch.androidArchName;
       return 'app$flavorString-$abi-$buildType.apk';
     });
   }
@@ -525,7 +525,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map((AndroidArch e) => e.platformName)
+          .map((CpuArch e) => e.androidPlatformName)
           .join(',');
       options.add('-Ptarget-platform=$targetPlatforms');
     }
@@ -677,7 +677,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   Future<bool> _isAabStrippedOfDebugSymbols(
     FlutterProject project,
     String aabPath,
-    Iterable<AndroidArch> targetArchs,
+    Iterable<CpuArch> targetArchs,
   ) async {
     if (_androidSdk == null) {
       _logger.printTrace(
@@ -744,7 +744,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       logger: _logger,
       analytics: _analytics,
     );
-    final String archName = androidBuildInfo.targetArchs.single.archName;
+    final String archName = androidBuildInfo.targetArchs.single.androidArchName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final File aotSnapshot = _fileSystem
         .directory(buildInfo.codeSizeDirectory)
@@ -865,7 +865,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map((AndroidArch e) => e.platformName)
+          .map((CpuArch e) => e.androidPlatformName)
           .join(',');
       command.add('-Ptarget-platform=$targetPlatforms');
     }
@@ -1187,8 +1187,8 @@ Iterable<String> listApkPaths(AndroidBuildInfo androidBuildInfo) {
   ];
   if (androidBuildInfo.splitPerAbi) {
     return <String>[
-      for (final AndroidArch androidArch in androidBuildInfo.targetArchs)
-        <String>['app', androidArch.archName, ...apkPartialName].join('-'),
+      for (final CpuArch cpuArch in androidBuildInfo.targetArchs)
+        <String>['app', cpuArch.androidArchName, ...apkPartialName].join('-'),
     ];
   }
   return <String>[

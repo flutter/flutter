@@ -120,7 +120,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
-      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      targetArchs: stringsArg('target-platform').map<CpuArch>(getCpuArchForName),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.

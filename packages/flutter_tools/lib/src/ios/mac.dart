@@ -138,7 +138,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   required BuildInfo buildInfo,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
-  DarwinArch? activeArch,
+  CpuArch? activeArch,
   bool codesign = true,
   String? deviceID,
   bool configOnly = false,
@@ -462,10 +462,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == getCurrentDarwinArch();
+      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
-      buildCommands.add('ARCHS=${activeArch.name}');
+      buildCommands.add('ARCHS=${activeArch.darwinArchName}');
     }
   }
 

@@ -370,14 +370,10 @@ class IOSDevice extends Device {
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
-  final DarwinArch cpuArchitecture;
+  final CpuArch cpuArchitecture;
 
   @override
-  Future<CpuArch> get cpuArch async => switch (cpuArchitecture) {
-    .armv7 => CpuArch.armv7,
-    .arm64 => CpuArch.arm64,
-    .x86_64 => CpuArch.x64,
-  };
+  Future<CpuArch> get cpuArch async => cpuArchitecture;
 
   @override
   /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
@@ -502,7 +498,7 @@ class IOSDevice extends Device {
 
   @override
   // 32-bit devices are not supported.
-  Future<bool> isSupported() async => cpuArchitecture == DarwinArch.arm64;
+  Future<bool> isSupported() async => cpuArchitecture == CpuArch.arm64;
 
   @override
   Future<LaunchResult> startApp(
