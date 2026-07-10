@@ -38,6 +38,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
     FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript)
+      ..cpuArch = Future<CpuArch>.value(CpuArch.unknown)
       ..sdkNameAndVersion = Future<String>.value('Web SDK (1.2.4)'),
     <String, Object>{
       'name': 'webby',
@@ -90,6 +91,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         connectionInterface: DeviceConnectionInterface.wireless,
       )
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
+      ..cpuArch = Future<CpuArch>.value(CpuArch.arm64)
       ..sdkNameAndVersion = Future<String>.value('iOS 16'),
     <String, Object>{
       'name': 'wireless ios',
@@ -168,29 +170,7 @@ class FakeDevice extends Device {
   Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
 
   @override
-  Future<CpuArch> get cpuArch async {
-    final TargetPlatform platform = await targetPlatform;
-    switch (platform) {
-      case TargetPlatform.ios:
-      case TargetPlatform.darwin:
-        return CpuArch.arm64;
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.tester:
-      case TargetPlatform.unsupported:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.windows_x64:
-        return super.cpuArch;
-    }
-  }
+  Future<CpuArch> cpuArch = Future<CpuArch>.value(CpuArch.armv7);
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

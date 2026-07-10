@@ -642,14 +642,16 @@ enum CpuArch {
     };
   }
 
-  String get name => switch (this) {
-    CpuArch.unknown => 'unknown',
-    CpuArch.armv7 => 'armv7',
-    CpuArch.arm64 => 'arm64',
-    CpuArch.x86 => 'x86',
-    CpuArch.x86_64 => 'x86_64',
-    CpuArch.riscv64 => 'riscv64',
-  };
+  /// The [CpuArch] of the given [hostPlatform].
+  factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
+    return switch (hostPlatform) {
+      HostPlatform.darwin_x64 || HostPlatform.linux_x64 || HostPlatform.windows_x64 =>
+        CpuArch.x86_64,
+      HostPlatform.darwin_arm64 || HostPlatform.linux_arm64 || HostPlatform.windows_arm64 =>
+        CpuArch.arm64,
+      HostPlatform.linux_riscv64 => CpuArch.riscv64,
+    };
+  }
 }
 
 enum TargetPlatform {

@@ -78,7 +78,7 @@ class IOSSimulatorUtils {
       return <IOSSimulator>[];
     }
 
-    final CpuArch cpuArch = _operatingSystemUtils.hostPlatform == .darwin_arm64 ? CpuArch.arm64 : CpuArch.x86_64;
+    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected

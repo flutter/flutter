@@ -607,16 +607,6 @@ String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionI
   };
 }
 
-CpuArch _cpuArchForTargetPlatform(TargetPlatform targetPlatform) => switch (targetPlatform) {
-  .linux_x64 || .windows_x64 || .android_x64 || .fuchsia_x64 => CpuArch.x86_64,
-  .linux_arm64 || .windows_arm64 || .android_arm64 || .fuchsia_arm64 => CpuArch.arm64,
-  .android_arm => CpuArch.armv7,
-  .android => CpuArch.x86,
-  .linux_riscv64 => CpuArch.riscv64,
-  .web_javascript || .tester || .unsupported => CpuArch.unknown,
-  .darwin || .ios => throw StateError('Unable to determine CPU architecture for $targetPlatform'),
-};
-
 /// A device is a physical hardware that can run a Flutter application.
 ///
 /// This may correspond to a connected iOS or Android device, or represent
@@ -718,7 +708,7 @@ abstract class Device {
   Future<TargetPlatform> get targetPlatform;
 
   /// The CPU architecture of the device.
-  Future<CpuArch> get cpuArch async => _cpuArchForTargetPlatform(await targetPlatform);
+  Future<CpuArch> get cpuArch;
 
   /// Platform name for display only.
   Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
