@@ -1329,8 +1329,8 @@ enum TextAlign {
 
 /// The behavior of soft hyphens (U+00AD) at a line break.
 ///
-/// This affects rendering only; it does not change where lines break, since
-/// Flutter always treats U+00AD as a line-break opportunity.
+/// This does not change where lines break, since Flutter always treats U+00AD
+/// as a line-break opportunity.
 enum Hyphens {
   /// A hyphen glyph is rendered at the end of a line that breaks on a soft
   /// hyphen (U+00AD). Soft hyphens elsewhere remain invisible.
@@ -1951,6 +1951,8 @@ class TextStyle {
 //
 //  - Element 6: The encoded value of |textHeightBehavior|, except its leading
 //    distribution.
+//
+//  - Element 7: The enum index of the |hyphens|.
 Int32List _encodeParagraphStyle(
   TextAlign? textAlign,
   TextDirection? textDirection,
