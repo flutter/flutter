@@ -116,14 +116,28 @@ tasks.register("embedTestResultImages") {
                     for (test in discoveredTests) {
                         val testName = test.testName
                         val fileName = test.fileName
-                        val targetCell = "<td>$testName</td>"
+                        val baseName = fileName.substringBefore(".")
+                        val hasVariant = fileName.count { it == '.' } > 1
+                        val targetCell = "<td>$baseName</td>"
+
                         if (htmlContent.contains(targetCell)) {
                             htmlContent =
                                 htmlContent.replace(
                                     targetCell,
-                                    "<td>$testName<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
+                                    "<td>$baseName<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
                                 )
                             modified = true
+                        } else if (hasVariant) {
+                            val variant = fileName.substringAfter(".").substringBefore(".")
+                            val parameterizedCell = "<td>$baseName[$variant]</td>"
+                            if (htmlContent.contains(parameterizedCell)) {
+                                htmlContent =
+                                    htmlContent.replace(
+                                        parameterizedCell,
+                                        "<td>$baseName[$variant]<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
+                                    )
+                                modified = true
+                            }
                         }
                     }
 

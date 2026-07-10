@@ -83,6 +83,17 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
     --no-dds
   ```
 
+* **Command to run using a locally compiled engine**:
+  If you have modified the engine codebase locally, specify your target engine and host configs:
+  ```sh
+  flutter drive -v \
+    --local-engine=android_debug_unopt_arm64 \
+    --local-engine-host=host_debug_unopt_arm64 \
+    --driver=test_driver/driver_test.dart \
+    --target=integration_test/integration_test_wrapper.dart \
+    --no-dds
+  ```
+
 * **Command to capture/update reference golden baselines**:
   Running with `UPDATE_GOLDENS=true` writes or overwrites the local PNG baselines under `test_driver/goldens/` on the host.
 
@@ -101,7 +112,7 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 
 > [!IMPORTANT]
 > **Asset Bundling Precondition**:
-> Because instrumented tests run completely standalone on the device, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** first generate the local baselines under `test_driver/goldens/` using the **Host-Driven Driver Mode (with `UPDATE_GOLDENS=true`)** before compiling and building the instrumented APK.
+> Because the instrumented tests will run both backends sequentially in a single execution, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** generate local baselines under `test_driver/goldens/` for **both** backend variants (Vulkan and OpenGL ES) using the **Host-Driven Driver Mode (with `UPDATE_GOLDENS=true`)** before compiling and building the instrumented APK.
 
 * **Command to compile and run the native JUnit suite**:
   ```sh
@@ -112,14 +123,44 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
     -s
   ```
 
+* **Command to compile and run using a locally compiled engine**:
+  When testing changes made to the Flutter Engine codebase, you must compile your engine changes first (see [Debugging the engine](file:///Users/awolff/Projects/andywolff/flutter/docs/engine/Debugging-the-engine.md#running-a-flutter-app-with-a-local-engine)).
+  
+  Since running Gradle directly bypasses the `flutter` CLI tool, you must manually populate a Maven-layout directory with your local engine's `.jar` and `.pom` artifacts so that Gradle can resolve them:
+  
+  1. Assemble a local Maven directory structure and copy the artifacts (replace `<COMMIT_HASH>` with your engine repo's current commit). (Optional) Add `/local_maven_repo/` to your local `android/.gitignore` file to prevent tracking it:
+     ```sh
+     VERSION="1.0.0-<COMMIT_HASH>"
+     REPO="dev/integration_tests/android_hardware_smoke_test/android/local_maven_repo"
+     OUT_DIR="engine/src/out/android_debug_unopt_arm64"
+     
+     mkdir -p "$REPO/io/flutter/flutter_embedding_debug/$VERSION"
+     mkdir -p "$REPO/io/flutter/arm64_v8a_debug/$VERSION"
+     
+     cp "$OUT_DIR/flutter_embedding_debug.jar" "$REPO/io/flutter/flutter_embedding_debug/$VERSION/flutter_embedding_debug-$VERSION.jar"
+     cp "$OUT_DIR/flutter_embedding_debug.pom" "$REPO/io/flutter/flutter_embedding_debug/$VERSION/flutter_embedding_debug-$VERSION.pom"
+     cp "$OUT_DIR/arm64_v8a_debug.jar" "$REPO/io/flutter/arm64_v8a_debug/$VERSION/arm64_v8a_debug-$VERSION.jar"
+     cp "$OUT_DIR/arm64_v8a_debug.pom" "$REPO/io/flutter/arm64_v8a_debug/$VERSION/arm64_v8a_debug-$VERSION.pom"
+     ```
+  
+  2. Execute the Gradle connected test command, passing the local repository and engine paths:
+     ```sh
+     cd android
+     ./gradlew :app:connectedDebugAndroidTest \
+       -Pandroid.testInstrumentationRunnerArguments.class=com.example.android_hardware_smoke_test.FlutterActivityTest \
+       -Plocal-engine-repo=local_maven_repo \
+       -Plocal-engine-out=../../../../engine/src/out/android_debug_unopt_arm64 \
+       -Plocal-engine-host-out=../../../../engine/src/out/host_debug_unopt_arm64 \
+       -s
+     ```
+
 > [!NOTE]
-> **Statically Compiled Single Source of Truth**:
-> The app's compiled `AndroidManifest.xml` `<meta-data>` tag is the single source of truth for the graphics backend configuration under **both** Instrumented On-Device Mode (OEM) and Host-Driven Driver Mode (CI).
+> **Dynamic Backend Override**:
+> Under **Instrumented On-Device Mode (OEM)**, the native JUnit runner (`FlutterActivityTest.kt`) automatically executes both the Vulkan and OpenGL ES variants of each test method in a single run. It does this by launching the Activity programmatically with an intent extra designating the target backend, which dynamically overrides the statically compiled `AndroidManifest.xml` backend metadata tag.
 >
-> * **Instrumented On-Device Mode (OEM)**: The native Java JUnit harness (`FlutterActivityTest.java`) reads this value dynamically using the `PackageManager` API and routes it to Dart.
-> * **Host-Driven Driver Mode (CI / Host)**: The Dart app queries the native Android embedder via a custom `MethodChannel` to self-discover its compiled backend and self-reports it to the host test script inside its JSON reply payload, completely eliminating the need for environment variables on the host PC.
+> * **Host-Driven Driver Mode (CI / Host)**: The compiled `AndroidManifest.xml` backend configuration remains the single source of truth and is automatically queried via a custom `MethodChannel` to self-discover its compiled backend.
 >
-> To switch the active graphics backend manually for local runs, open `android/app/src/main/AndroidManifest.xml` and update the `io.flutter.embedding.android.ImpellerBackend` value:
+> To switch the active graphics backend manually for host-driven driver runs, open `android/app/src/main/AndroidManifest.xml` and update the `io.flutter.embedding.android.ImpellerBackend` value:
 >
 > ```xml
 > <!-- Enable Vulkan: -->
