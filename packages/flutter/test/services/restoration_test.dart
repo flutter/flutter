@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -351,6 +352,35 @@ void main() {
       isTrue,
     );
   });
+
+  testWidgets('handles decoding errors gracefully', (WidgetTester tester) async {
+    final result = Completer<Map<dynamic, dynamic>>();
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.restoration,
+      (MethodCall call) => result.future,
+    );
+
+    final manager = RestorationManager();
+    addTearDown(manager.dispose);
+
+    FlutterErrorDetails? reportedError;
+    final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) => reportedError = details;
+    addTearDown(() => FlutterError.onError = originalOnError);
+
+    RestorationBucket? rootBucket;
+    manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
+    result.complete(_createCorruptedRestorationData());
+    await tester.pump();
+
+    expect(reportedError, isNotNull);
+    expect(reportedError!.exception, isNotNull);
+    expect(reportedError!.library, 'services library');
+    expect(reportedError!.context.toString(), contains('restoration data decoding'));
+    expect(rootBucket, isNotNull);
+    expect(rootBucket!.contains('value1'), isFalse);
+    expect(rootBucket!.read<int>('value1'), isNull);
+  });
 }
 
 Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
@@ -359,6 +389,15 @@ Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
     const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
     (_) {},
   );
+}
+
+Map<dynamic, dynamic> _createCorruptedRestorationData({int truncateBy = 1}) {
+  final Map<dynamic, dynamic> valid = _createEncodedRestorationData1();
+  final validBytes = valid['data'] as Uint8List;
+
+  final corrupted = Uint8List.fromList(validBytes.sublist(0, validBytes.length - truncateBy));
+
+  return <dynamic, dynamic>{'enabled': true, 'data': corrupted};
 }
 
 Map<dynamic, dynamic> _createEncodedRestorationData1() {
