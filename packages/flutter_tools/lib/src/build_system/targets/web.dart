@@ -416,24 +416,37 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @override
   Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
       ? const <File>[]
-      : environment.buildDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where(
-              (File file) => switch (file.basename) {
-                'main.dart.wasm' || 'main.dart.mjs' => true,
-                'main.dart.wasm.map' => compilerConfig.sourceMaps,
-                _ => false,
-              },
-            );
+      : environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
+          if (file.basename == 'main.dart.wasm' || file.basename == 'main.dart.mjs') {
+            return true;
+          }
+          if (compilerConfig.sourceMaps && file.basename == 'main.dart.wasm.map') {
+            return true;
+          }
+          final partWasmRegex = RegExp(r'main\.dart_module[0-9].*\.wasm');
+          if (partWasmRegex.hasMatch(file.basename)) {
+            return true;
+          }
+          if (compilerConfig.sourceMaps) {
+            final partWasmMapRegex = RegExp(r'main\.dart_module[0-9].*\.wasm\.map');
+            if (partWasmMapRegex.hasMatch(file.basename)) {
+              return true;
+            }
+          }
+          return false;
+        });
 
   @override
   Iterable<String> get buildPatternStems => compilerConfig.dryRun
       ? const <String>[]
       : <String>[
           'main.dart.wasm',
+          'main.dart_module*.wasm',
           'main.dart.mjs',
-          if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+          if (compilerConfig.sourceMaps) ...<String>[
+            'main.dart.wasm.map',
+            'main.dart_module*.wasm.map',
+          ],
           if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
         ];
 
