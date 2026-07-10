@@ -6640,7 +6640,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "1_15"
+      subshard: "1_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6665,7 +6665,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "2_15"
+      subshard: "2_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6690,7 +6690,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "3_15"
+      subshard: "3_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6715,7 +6715,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "4_15"
+      subshard: "4_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6740,7 +6740,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "5_15"
+      subshard: "5_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6765,7 +6765,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "6_15"
+      subshard: "6_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6790,7 +6790,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "7_15"
+      subshard: "7_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6815,7 +6815,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "8_15"
+      subshard: "8_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6840,7 +6840,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "9_15"
+      subshard: "9_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6865,7 +6865,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "10_15"
+      subshard: "10_18"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
