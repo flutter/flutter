@@ -4732,7 +4732,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_1_10
+  - name: Mac tool_integration_tests_1
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4759,7 +4759,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_2_10
+  - name: Mac tool_integration_tests_2
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4786,7 +4786,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_3_10
+  - name: Mac tool_integration_tests_3
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4813,7 +4813,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_4_10
+  - name: Mac tool_integration_tests_4
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4840,7 +4840,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_5_10
+  - name: Mac tool_integration_tests_5
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4867,7 +4867,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_6_10
+  - name: Mac tool_integration_tests_6
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4894,7 +4894,7 @@ targets:
       - engine/**
       - DEPS
 
- - name: Mac tool_integration_tests_7_10
+  - name: Mac tool_integration_tests_7
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4921,7 +4921,7 @@ targets:
       - engine/**
       - DEPS
 
-- name: Mac tool_integration_tests_8_10
+  - name: Mac tool_integration_tests_8
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4948,7 +4948,7 @@ targets:
       - engine/**
       - DEPS
 
-- name: Mac tool_integration_tests_9_10
+  - name: Mac tool_integration_tests_9
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -4975,7 +4975,7 @@ targets:
       - engine/**
       - DEPS
 
-- name: Mac tool_integration_tests_10_10
+  - name: Mac tool_integration_tests_10
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
