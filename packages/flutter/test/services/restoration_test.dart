@@ -355,7 +355,7 @@ void main() {
 
   testWidgets('handles decoding errors gracefully', (WidgetTester tester) async {
     final result = Completer<Map<dynamic, dynamic>>();
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.restoration,
       (MethodCall call) => result.future,
     );
@@ -395,7 +395,7 @@ Map<dynamic, dynamic> _createCorruptedRestorationData({int truncateBy = 1}) {
   final Map<dynamic, dynamic> valid = _createEncodedRestorationData1();
   final validBytes = valid['data'] as Uint8List;
 
-  final corrupted = Uint8List.fromList(validBytes.sublist(0, validBytes.length - truncateBy));
+  final Uint8List corrupted = validBytes.sublist(0, validBytes.length - truncateBy);
 
   return <dynamic, dynamic>{'enabled': true, 'data': corrupted};
 }
