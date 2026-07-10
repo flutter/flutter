@@ -396,8 +396,8 @@ class RegularWindowControllerLinux extends RegularWindowController
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    notifyListeners();
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override
@@ -615,8 +615,8 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    notifyListeners();
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override
@@ -792,8 +792,8 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    notifyListeners();
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override
@@ -989,8 +989,8 @@ class PopupWindowControllerLinux extends PopupWindowController {
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    notifyListeners();
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override

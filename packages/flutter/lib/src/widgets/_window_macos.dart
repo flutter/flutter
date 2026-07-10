@@ -352,11 +352,8 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
 
   @override
   void _handleOnWillClose() {
-    final bool wasAlreadyDestroyed = _destroyed;
     super._handleOnWillClose();
-    if (!wasAlreadyDestroyed) {
-      notifyListeners();
-    }
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 
@@ -458,11 +455,8 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
 
   @override
   void _handleOnWillClose() {
-    final bool wasAlreadyDestroyed = _destroyed;
     super._handleOnWillClose();
-    if (!wasAlreadyDestroyed) {
-      notifyListeners();
-    }
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 
@@ -550,11 +544,8 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
 
   @override
   void _handleOnWillClose() {
-    final bool wasAlreadyDestroyed = _destroyed;
     super._handleOnWillClose();
-    if (!wasAlreadyDestroyed) {
-      notifyListeners();
-    }
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 
@@ -690,11 +681,8 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
 
   @override
   void _handleOnWillClose() {
-    final bool wasAlreadyDestroyed = _destroyed;
     super._handleOnWillClose();
-    if (!wasAlreadyDestroyed) {
-      notifyListeners();
-    }
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 
