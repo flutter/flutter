@@ -58,7 +58,7 @@ public class MouseCursorPluginTest {
                 methodResult);
             verify(testView, times(1)).getSystemPointerIcon(PointerIcon.TYPE_TEXT);
             verify(testView, times(1)).setPointerIcon(any(PointerIcon.class));
-            assertEquals(methodResult.result, Boolean.TRUE);
+            assertEquals(Boolean.TRUE, methodResult.result);
           });
     }
   }

@@ -53,6 +53,6 @@ public class KeyChannelResponderTest {
         (canHandleEvent) -> {
           completionCallbackInvocationCounter[0]++;
         });
-    assertEquals(completionCallbackInvocationCounter[0], 1);
+    assertEquals(1, completionCallbackInvocationCounter[0]);
   }
 }

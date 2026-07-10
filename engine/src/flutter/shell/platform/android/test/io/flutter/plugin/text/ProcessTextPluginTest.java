@@ -139,7 +139,7 @@ public class ProcessTextPluginTest {
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
     verify(mockActivity, times(1)).startActivityForResult(intentCaptor.capture(), anyInt());
     Intent intent = intentCaptor.getValue();
-    assertEquals(intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT), textToBeProcessed);
+    assertEquals(textToBeProcessed, intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT));
 
     // Simulate an Android activity answer which does not return a value.
     Intent resultIntent = new Intent();
@@ -188,7 +188,7 @@ public class ProcessTextPluginTest {
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
     verify(mockActivity, times(1)).startActivityForResult(intentCaptor.capture(), anyInt());
     Intent intent = intentCaptor.getValue();
-    assertEquals(intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT), textToBeProcessed);
+    assertEquals(textToBeProcessed, intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT));
 
     // Simulate an Android activity answer which returns a transformed text.
     String processedText = "Flutter!!!";
@@ -239,7 +239,7 @@ public class ProcessTextPluginTest {
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
     verify(mockActivity, times(1)).startActivityForResult(intentCaptor.capture(), anyInt());
     Intent intent = intentCaptor.getValue();
-    assertEquals(intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT), textToBeProcessed);
+    assertEquals(textToBeProcessed, intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT));
 
     // Result to a request not sent by this plugin should be ignored.
     final int externalRequestCode = 42;

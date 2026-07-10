@@ -86,7 +86,7 @@ public class RestorationChannelTest {
     verify(result).success(expected);
 
     restorationChannel.setRestorationData(data);
-    assertEquals(restorationChannel.getRestorationData(), null);
+    assertEquals(null, restorationChannel.getRestorationData());
 
     ArgumentCaptor<MethodChannel.Result> resultCapture =
         ArgumentCaptor.forClass(MethodChannel.Result.class);

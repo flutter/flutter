@@ -110,18 +110,18 @@ public class PlayStoreDeferredComponentManagerTest {
     TestPlayStoreDeferredComponentManager playStoreManager =
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(123, "TestModuleName");
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(1, jni.updateAssetManagerCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
-    assertEquals(jni.searchPaths[0], soTestFilename);
+    assertEquals(soTestFilename, jni.searchPaths[0]);
     assertTrue(jni.searchPaths[1].endsWith(soTestPath));
-    assertEquals(jni.searchPaths.length, 2);
-    assertEquals(jni.loadingUnitId, 123);
-    assertEquals(jni.assetBundlePath, "flutter_assets");
+    assertEquals(2, jni.searchPaths.length);
+    assertEquals(123, jni.loadingUnitId);
+    assertEquals("flutter_assets", jni.assetBundlePath);
   }
 
   @Test
@@ -141,18 +141,18 @@ public class PlayStoreDeferredComponentManagerTest {
     TestPlayStoreDeferredComponentManager playStoreManager =
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(123, "TestModuleName");
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(1, jni.updateAssetManagerCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
-    assertEquals(jni.searchPaths[0], soTestFilename);
+    assertEquals(soTestFilename, jni.searchPaths[0]);
     assertTrue(jni.searchPaths[1].endsWith(soTestPath));
-    assertEquals(jni.searchPaths.length, 2);
-    assertEquals(jni.loadingUnitId, 123);
-    assertEquals(jni.assetBundlePath, "custom_assets");
+    assertEquals(2, jni.searchPaths.length);
+    assertEquals(123, jni.loadingUnitId);
+    assertEquals("custom_assets", jni.assetBundlePath);
   }
 
   @Test
@@ -173,18 +173,18 @@ public class PlayStoreDeferredComponentManagerTest {
     TestPlayStoreDeferredComponentManager playStoreManager =
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(123, "TestModuleName");
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(1, jni.updateAssetManagerCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
-    assertEquals(jni.searchPaths[0], soTestFilename);
+    assertEquals(soTestFilename, jni.searchPaths[0]);
     assertTrue(jni.searchPaths[1].endsWith(soTestPath));
-    assertEquals(jni.searchPaths.length, 2);
-    assertEquals(jni.loadingUnitId, 123);
-    assertEquals(jni.assetBundlePath, "custom_assets");
+    assertEquals(2, jni.searchPaths.length);
+    assertEquals(123, jni.loadingUnitId);
+    assertEquals("custom_assets", jni.assetBundlePath);
   }
 
   @Test
@@ -205,17 +205,17 @@ public class PlayStoreDeferredComponentManagerTest {
     PlayStoreDeferredComponentManager playStoreManager =
         new PlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(3, null);
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 0); // no assets to load for base
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(0, jni.updateAssetManagerCalled); // no assets to load for base
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
-    assertEquals(jni.searchPaths[0], soTestFilename);
+    assertEquals(soTestFilename, jni.searchPaths[0]);
     assertTrue(jni.searchPaths[1].endsWith(soTestPath));
-    assertEquals(jni.searchPaths.length, 2);
-    assertEquals(jni.loadingUnitId, 3);
+    assertEquals(2, jni.searchPaths.length);
+    assertEquals(3, jni.loadingUnitId);
   }
 
   @Test
@@ -229,17 +229,17 @@ public class PlayStoreDeferredComponentManagerTest {
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
 
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(123, "TestModuleName");
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(1, jni.updateAssetManagerCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
-    assertEquals(jni.searchPaths[0], "libapp.so-123.part.so");
+    assertEquals("libapp.so-123.part.so", jni.searchPaths[0]);
     assertTrue(jni.searchPaths[1].endsWith(apkTestPath + "!lib/armeabi-v7a/libapp.so-123.part.so"));
-    assertEquals(jni.searchPaths.length, 2);
-    assertEquals(jni.loadingUnitId, 123);
+    assertEquals(2, jni.searchPaths.length);
+    assertEquals(123, jni.loadingUnitId);
   }
 
   @Test
@@ -253,17 +253,17 @@ public class PlayStoreDeferredComponentManagerTest {
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
 
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(123, "TestModuleName");
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(1, jni.updateAssetManagerCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
-    assertEquals(jni.searchPaths[0], "libapp.so-123.part.so");
+    assertEquals("libapp.so-123.part.so", jni.searchPaths[0]);
     assertTrue(jni.searchPaths[1].endsWith(apkTestPath + "!lib/armeabi-v7a/libapp.so-123.part.so"));
-    assertEquals(jni.searchPaths.length, 2);
-    assertEquals(jni.loadingUnitId, 123);
+    assertEquals(2, jni.searchPaths.length);
+    assertEquals(123, jni.loadingUnitId);
   }
 
   @Test
@@ -277,16 +277,16 @@ public class PlayStoreDeferredComponentManagerTest {
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
 
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(123, "TestModuleName");
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(1, jni.updateAssetManagerCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
-    assertEquals(jni.searchPaths[0], "libapp.so-123.part.so");
-    assertEquals(jni.searchPaths.length, 1);
-    assertEquals(jni.loadingUnitId, 123);
+    assertEquals("libapp.so-123.part.so", jni.searchPaths[0]);
+    assertEquals(1, jni.searchPaths.length);
+    assertEquals(123, jni.loadingUnitId);
   }
 
   @Test
@@ -301,12 +301,12 @@ public class PlayStoreDeferredComponentManagerTest {
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     jni.setDeferredComponentManager(playStoreManager);
 
-    assertEquals(jni.loadingUnitId, 0);
+    assertEquals(0, jni.loadingUnitId);
 
     playStoreManager.installDeferredComponent(123, "TestModuleName");
-    assertEquals(jni.loadDartDeferredLibraryCalled, 1);
-    assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(1, jni.updateAssetManagerCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
 
     assertEquals(jni.assetManager, assetManager);
   }
@@ -318,7 +318,7 @@ public class PlayStoreDeferredComponentManagerTest {
     doReturn(null).when(spyContext).getAssets();
     TestPlayStoreDeferredComponentManager playStoreManager =
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
-    assertEquals(playStoreManager.getDeferredComponentInstallState(-1, "invalidName"), "unknown");
+    assertEquals("unknown", playStoreManager.getDeferredComponentInstallState(-1, "invalidName"));
   }
 
   @Test
