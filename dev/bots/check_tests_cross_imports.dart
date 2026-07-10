@@ -187,7 +187,6 @@ class TestsCrossImportChecker {
     'packages/flutter_test/lib/src/widget_tester.dart',
     'packages/flutter_test/lib/src/finders.dart',
     'packages/flutter_test/lib/src/matchers.dart',
-    'packages/flutter_test/test/navigator_test.dart',
     'packages/flutter_test/test/mock_canvas_test.dart',
     'packages/flutter_test/test/semantics_finder_test.dart',
     'packages/flutter_test/test/accessibility_window_test.dart',
