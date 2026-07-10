@@ -6640,10 +6640,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "1_10"
+      subshard: "1_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6666,10 +6665,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "2_10"
+      subshard: "2_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "3600"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6692,10 +6690,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "3_10"
+      subshard: "3_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6718,10 +6715,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "4_10"
+      subshard: "4_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6744,10 +6740,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "5_10"
+      subshard: "5_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6770,10 +6765,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "6_10"
+      subshard: "6_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6796,10 +6790,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "7_10"
+      subshard: "7_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6822,10 +6815,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "8_10"
+      subshard: "8_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6848,10 +6840,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "9_10"
+      subshard: "9_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6874,10 +6865,9 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "10_10"
+      subshard: "10_15"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
