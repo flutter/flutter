@@ -1,0 +1,107 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Flutter Web Dev Server",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"chrome"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Flutter Web Dev Server",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"chrome"
+			],
+			"isBackground": true
+		},
+		{
+			"label": "Flutter Run on Device",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Flutter Build APK",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"apk"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Flutter Build Web",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"web"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Flutter Build APK",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"apk"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Flutter Build APK",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"apk"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Flutter Build APK",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"apk",
+				"--release"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Flutter Build AAB",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"appbundle",
+				"--release"
+			],
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}
