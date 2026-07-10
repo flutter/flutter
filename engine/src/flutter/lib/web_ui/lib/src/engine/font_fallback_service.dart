@@ -413,7 +413,7 @@ class FallbackFontService {
 
     // 1. Language-Specific Preference
     final List<String> preferredPrefixes = _getPrefixesForLanguage(language);
-    for (final String prefix in preferredPrefixes) {
+    for (final prefix in preferredPrefixes) {
       final List<NotoFont> matches = fonts
           .where((NotoFont f) => f.name.startsWith(prefix) && coverCounts[f]! > 0)
           .toList();
