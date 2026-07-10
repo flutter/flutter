@@ -2328,9 +2328,17 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
 // exceed the max texture size. See
 // https://github.com/flutter/flutter/issues/128912
 TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP() << "Swiftshader is running out of memory on this example.";
+  switch (GetBackend()) {
+    case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
+      break;
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
+    case PlaygroundBackend::kVulkan:
+      GTEST_SKIP() << "Platform is running out of memory on this example "
+                   << "(see https://github.com/flutter/flutter/issues/189286).";
   }
+
   DisplayListBuilder builder(DlRect::MakeSize(DlSize(1000, 1000)));
 
   auto filter = DlImageFilter::MakeMatrix(
