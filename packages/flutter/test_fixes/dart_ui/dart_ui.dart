@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/animation.dart';
+import 'dart:ui';
 
 void main() {
   Color color = Color.from(alpha: 1, red: 0, green: 1, blue: 0);
