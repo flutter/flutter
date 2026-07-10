@@ -1,4 +1,4 @@
-name: iOS Build
+name: iOS Build for App Store
 
 on:
   workflow_dispatch:
@@ -34,17 +34,16 @@ jobs:
           cd ios
           pod install --repo-update
 
-      - name: Build iOS (release, no code signing)
-        run: flutter build ios --release --no-codesign --dart-define=APP_ENV=${{ inputs.app_env }}
-
-      - name: Package Runner.app artifact
+      - name: Build iOS IPA for App Store
         run: |
-          mkdir -p build/ios_artifacts
-          ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app build/ios_artifacts/Runner.app.zip
+          flutter build ipa \
+            --release \
+            --dart-define=APP_ENV=${{ inputs.app_env }} \
+            --export-options-plist=ios/ExportOptions-AppStore.plist
 
-      - name: Upload iOS build artifact
+      - name: Upload iOS IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ios-runner-app-${{ inputs.app_env }}
-          path: build/ios_artifacts/Runner.app.zip
+          name: ios-app-ipa-${{ inputs.app_env }}
+          path: build/ios/ipa/*.ipa
           if-no-files-found: error
