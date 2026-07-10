@@ -696,6 +696,31 @@ struct TRect {
     return Expand(amount.width, amount.height);
   }
 
+  /// @brief  Returns a rectangle with edges expanded to satisfy a minimum size
+  ///         in a 2D-transformed coordinate space. This function is not valid
+  ///         for a matrix with perspective elements.
+  ///
+  ///         If the transform has a scaling factor of zero in either dimension,
+  ///         it cannot be expanded to the minimum size. This returns nullopt.
+  [[nodiscard]] constexpr std::optional<TRect<T>> ExpandToMinSize(
+      TSize<T> min_transformed_size,
+      const Matrix& transform) const {
+    FML_DCHECK(!transform.HasPerspective2D());
+
+    Vector2 transform_scaling = transform.GetBasisScaleXY();
+    if (transform_scaling.x == 0.0f || transform_scaling.y == 0.0f) {
+      return std::nullopt;
+    }
+
+    Size min_local_size =
+        Size(min_transformed_size.width / transform_scaling.x,
+             min_transformed_size.height / transform_scaling.y);
+    Size current_size = GetSize();
+    Size expanded_size = current_size.Max(min_local_size);
+    return MakeEllipseBounds(GetCenter(), Point(expanded_size.width * 0.5f,
+                                                expanded_size.height * 0.5f));
+  }
+
   /// @brief  Returns a new rectangle that represents the projection of the
   ///         source rectangle onto this rectangle. In other words, the source
   ///         rectangle is redefined in terms of the coordinate space of this

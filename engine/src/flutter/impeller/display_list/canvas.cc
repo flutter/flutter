@@ -193,6 +193,37 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   );
 }
 
+/// @brief  Expands the rectangle to satisfy a 1-device-pixel minimum size using
+///         the given transform and scales alpha based on the ratio of local
+///         areas when `scale_alpha` is true.
+///
+///         If the shape is scaled to zero under the transform or if its alpha
+///         scales close to zero, an empty `Rect` is returned to indicate that
+///         the shape is effectively invisible.
+static std::pair<Rect, Color> ExpandRectToPixelMinimum(const Rect& rect,
+                                                       const Color& color,
+                                                       const Matrix& transform,
+                                                       bool scale_alpha) {
+  std::optional<Rect> expanded = rect.ExpandToMinSize({1.0f, 1.0f}, transform);
+  if (!expanded) {
+    // Rect is scaled to 0.
+    return {Rect(), color};
+  }
+
+  // No alpha scaling needed.
+  if (!scale_alpha) {
+    return {expanded.value(), color};
+  }
+
+  // Scale alpha based on expanded ratio.
+  Scalar alpha_scaling = rect.Area() / expanded->Area();
+  if (alpha_scaling < kEhCloseEnough) {
+    // Rect is effectively invisible.
+    return {Rect(), color};
+  }
+  return {expanded.value(), color.WithAlpha(color.alpha * alpha_scaling)};
+}
+
 }  // namespace
 
 class Canvas::RRectBlurShape : public BlurShape {
@@ -781,21 +812,78 @@ void Canvas::DrawLine(const Point& p0,
   if ((renderer_.GetContext()->GetFlags().use_sdfs ||
        renderer_.GetContext()->GetFlags().antialiased_lines) &&
       IsCompatibleWithSDFRendering(paint)) {
-    // UberSDF line geometry is a horizontal line centered at the origin.
-    // Draw the line from p0 to p1 by applying a translation and rotation
-    // to the UberSDF line.
+    // Draw the line as a filled rectangle with width=line_length and
+    // height=stroke_width.
+
+    Paint rect_paint = paint;
+    rect_paint.style = Paint::Style::kFill;
+
+    Scalar line_length = p0.GetDistance(p1);
+    Scalar half_stroke_width = paint.stroke.width * 0.5f;
+    Scalar half_length = line_length * 0.5f;
+
+    // For Butt stroke caps, the rect width is line_length. For Square and Round
+    // stroke caps, the rect extends past the line's endpoints by
+    // half_stroke_width at each end.
+    if (paint.stroke.cap != Cap::kButt) {
+      half_length += half_stroke_width;
+    }
+
+    // The axis-aligned origin-centered rect which the line will be drawn as.
+    Rect rect = Rect::MakeEllipseBounds(Point(0.0f, 0.0f),
+                                        Point(half_length, half_stroke_width));
+
+    // A transform matrix is used to rotate and translate the rect to match the
+    // position of the input line.
+
+    // Unit vector along the line. Fallback to (1, 0) if length is 0.
+    Point u = p1 != p0 ? ((p1 - p0) / line_length) : Point(1.0f, 0.0f);
+    // Unit vector perpendicular to the line.
+    Point perp = Point(-u.y, u.x);
     Point center = (p0 + p1) * 0.5f;
-    Matrix translation = Matrix::MakeTranslation(center);
+    Matrix rect_to_line_transform = Matrix::MakeColumn(
+        // X basis: unit vector along the line
+        u.x, u.y, 0.0f, 0.0f,
+        // Y basis: unit vector perpendicular to the line
+        perp.x, perp.y, 0.0f, 0.0f,
+        // Z basis: unchanged
+        0.0f, 0.0f, 1.0f, 0.0f,
+        // Translation: to line center
+        center.x, center.y, 0.0f, 1.0f);
 
-    Point vector = p1 - p0;
-    Scalar length = vector.GetLength();
-    Radians angle = Radians(std::atan2(vector.y, vector.x));
-    Matrix rotation = Matrix::MakeRotationZ(angle);
+    // Expand rect to 1 pixel minimum dimensions if applicable.
+    if (!GetCurrentTransform().HasPerspective()) {
+      auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
+          rect, paint.color, GetCurrentTransform() * rect_to_line_transform,
+          // Don't scale alpha stroke width is 0. This draws a hairline that is
+          // always 1 pixel regardless of the transform.
+          /*scale_alpha=*/paint.stroke.width != 0.0f);
 
-    auto params =
-        UberSDFParameters::MakeLine(paint.color, length, paint.stroke);
+      if (expanded.IsEmpty()) {
+        // Line is invisible due to transform scaling or alpha scaling.
+        return;
+      }
+
+      rect_paint.color = alpha_scaled_color;
+      rect = expanded;
+    }
+
+    UberSDFParameters params;
+    if (paint.stroke.cap == Cap::kRound) {
+      params = UberSDFParameters::MakeRoundedRect(
+          /*color=*/rect_paint.color,
+          /*rect=*/rect,
+          /*radii=*/
+          RoundingRadii::MakeRadius(rect.GetHeight() * 0.5f),
+          /*stroke=*/std::nullopt);
+    } else {
+      params = UberSDFParameters::MakeRect(
+          /*color=*/rect_paint.color,
+          /*rect=*/rect,
+          /*stroke=*/std::nullopt);
+    }
     AddRenderSDFEntityToCurrentPass(paint, params, reuse_depth,
-                                    /*shape_transform=*/translation * rotation);
+                                    /*shape_transform=*/rect_to_line_transform);
     return;
   }
 
@@ -804,6 +892,7 @@ void Canvas::DrawLine(const Point& p0,
   entity.SetBlendMode(paint.blend_mode);
 
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
+
   AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
                                           /*reuse_depth=*/reuse_depth);
 }
@@ -835,6 +924,10 @@ void Canvas::DrawDashedLine(const Point& p0,
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
+  if (paint.style == Paint::Style::kFill && rect.IsEmpty()) {
+    return;
+  }
+
   if (IsShadowBlurDrawOperation(paint)) {
     RRectBlurShape shape(rect, 0.0f);
     if (AttemptDrawBlur(shape, paint)) {
@@ -847,22 +940,19 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
     Rect effective_rect = rect;
     Color effective_color = paint.color;
 
-    if (paint.style == Paint::Style::kFill) {
-      effective_rect = UpscaledRect(rect);
+    // Expand rect to 1 pixel minimum dimensions if applicable.
+    if (paint.style == Paint::Style::kFill &&
+        !GetCurrentTransform().HasPerspective()) {
+      auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
+          rect, paint.color, GetCurrentTransform(), /*scale_alpha=*/true);
 
-      if (effective_rect.IsEmpty()) {
-        // Rect is effectively invisible. Don't need to draw anything.
+      if (expanded.IsEmpty()) {
+        // Rect is invisible due to transform scaling or alpha scaling.
         return;
       }
-      if (effective_rect != rect) {
-        Scalar alpha_scaling = rect.Area() / effective_rect.Area();
-        if (alpha_scaling < kEhCloseEnough) {
-          // Rect is effectively invisible. Don't need to draw anything.
-          return;
-        }
-        effective_color =
-            paint.color.WithAlpha(paint.color.alpha * alpha_scaling);
-      }
+
+      effective_rect = expanded;
+      effective_color = alpha_scaled_color;
     }
 
     auto params = UberSDFParameters::MakeRect(
@@ -994,6 +1084,10 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
 }
 
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
+  if (paint.style == Paint::Style::kFill && round_rect.IsEmpty()) {
+    return;
+  }
+
   if (IsShadowBlurDrawOperation(paint)) {
     if (AttemptDrawBlurredRRect(round_rect, paint)) {
       return;
@@ -1004,30 +1098,27 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
-    if (paint.style == Paint::Style::kFill) {
+    // Expand rrect bounds to 1 pixel minimum dimensions if applicable.
+    if (paint.style == Paint::Style::kFill &&
+        !GetCurrentTransform().HasPerspective()) {
       Rect rrect_bounds = round_rect.GetBounds();
-      Rect upscaled_bounds = UpscaledRect(rrect_bounds);
+      auto [expanded, alpha_scaled_color] =
+          ExpandRectToPixelMinimum(rrect_bounds, paint.color,
+                                   GetCurrentTransform(), /*scale_alpha=*/true);
 
-      if (upscaled_bounds.IsEmpty()) {
-        // Rect is effectively invisible. Don't need to draw anything.
+      if (expanded.IsEmpty()) {
+        // RRect is invisible due to transform scaling or alpha scaling.
         return;
       }
 
-      if (upscaled_bounds != rrect_bounds) {
-        // The rrect is upscaled to 1 pixel minimum dimensions.
-        Scalar alpha_scaling = rrect_bounds.Area() / upscaled_bounds.Area();
-        if (alpha_scaling < kEhCloseEnough) {
-          // Rect is effectively invisible. Don't need to draw anything.
-          return;
-        }
-        Color effective_color =
-            paint.color.WithAlpha(paint.color.alpha * alpha_scaling);
-
+      // Pixel-minimum expansion is applicable if the expanded bounds is
+      // different from the original bounds.
+      if (expanded != rrect_bounds) {
         // At a 1-pixel size, the rounded corners can be ignored. Draw a regular
-        // rect matching the upscaled bounds.
+        // rect matching the expanded bounds.
         auto params = UberSDFParameters::MakeRect(
-            /*color=*/effective_color,
-            /*rect=*/upscaled_bounds,
+            /*color=*/alpha_scaled_color,
+            /*rect=*/expanded,
             /*stroke=*/std::nullopt);
         AddRenderSDFEntityToCurrentPass(paint, params);
         return;
@@ -2592,39 +2683,6 @@ bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
     case BlendMode::kLuminosity:
       return true;
   }
-}
-
-Rect Canvas::UpscaledRect(const Rect& rect) const {
-  if (rect.IsEmpty() || GetCurrentTransform().HasPerspective2D()) {
-    // Minimum rect scaling not applicable for empty rects or when using a
-    // perspective transform. Return the unmodified input rect.
-    return rect;
-  }
-
-  Vector2 transform_scaling = GetCurrentTransform().GetBasisScaleXY();
-  if (transform_scaling.x <= 0.0f || transform_scaling.y <= 0.0f) {
-    // Rectangle is scaled to 0. Return an empty rectangle.
-    return Rect();
-  }
-
-  // Convert local rectangle size to device size (pixels).
-  Vector2 rect_device_size = Vector2(rect.GetSize()) * transform_scaling;
-
-  // Expand rect device size dimensions to a 1.0 minimum.
-  Vector2 expanded_rect_device_size = rect_device_size.Max(Vector2(1.0f, 1.0f));
-
-  if (expanded_rect_device_size == rect_device_size) {
-    // Minimum rect scaling not applicable - rectangle is already large enough.
-    // Return the unmodified rectangle.
-    return rect;
-  }
-
-  // Convert expanded rectangle from device size back to local size.
-  Vector2 expanded_rect_local_size =
-      Vector2(expanded_rect_device_size / transform_scaling);
-
-  return Rect::MakeEllipseBounds(rect.GetCenter(),
-                                 expanded_rect_local_size * 0.5f);
 }
 
 LazyRenderingConfig::LazyRenderingConfig(

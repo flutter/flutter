@@ -104,23 +104,4 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
                        top_right.right.circle_radius, 0.0f, 0.0f)};
 }
 
-UberSDFParameters UberSDFParameters::MakeLine(Color color,
-                                              Scalar length,
-                                              const StrokeParameters& stroke) {
-  Scalar half_width = stroke.width * 0.5f;
-  // For Square and Round stroke caps, the line bounds extend past the line's
-  // endpoints by half_width on each side.
-  Scalar half_length =
-      length * 0.5f + (stroke.cap == Cap::kButt ? 0.0f : half_width);
-  Rect rect = Rect::MakeEllipseBounds(Point(0.0f, 0.0f),
-                                      Point(half_length, half_width));
-
-  if (stroke.cap == Cap::kRound) {
-    return MakeRoundedRect(color, rect, RoundingRadii::MakeRadius(half_width),
-                           /*stroke=*/std::nullopt);
-  }
-
-  return MakeRect(color, rect, /*stroke=*/std::nullopt);
-}
-
 }  // namespace impeller

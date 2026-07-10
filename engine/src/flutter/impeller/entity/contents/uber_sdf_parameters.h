@@ -62,11 +62,6 @@ struct UberSDFParameters {
       const RoundSuperellipseParam& round_superellipse_params,
       std::optional<StrokeParameters> stroke);
 
-  /// Creates UberSDFParameters for a horizontal line centered at the origin.
-  static UberSDFParameters MakeLine(Color color,
-                                    Scalar length,
-                                    const StrokeParameters& stroke);
-
   /// The type of shape to render.
   Type type;
 
