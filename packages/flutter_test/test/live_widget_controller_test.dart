@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This test is very fragile and bypasses some zone-related checks.
@@ -47,9 +47,9 @@ class _CountButtonState extends State<CountButton> {
   int counter = 0;
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return GestureDetector(
       child: Text('Counter $counter'),
-      onPressed: () {
+      onTap: () {
         setState(() {
           counter += 1;
         });
@@ -93,7 +93,7 @@ void main() {
   TestBinding.ensureInitialized();
 
   test('Test pump on LiveWidgetController', () async {
-    runApp(const MaterialApp(home: Center(child: CountButton())));
+    runApp(buildTestApp(child: const CountButton()));
 
     await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
@@ -106,7 +106,7 @@ void main() {
   });
 
   test('Test pumpAndSettle on LiveWidgetController', () async {
-    runApp(const MaterialApp(home: Center(child: AnimateSample())));
+    runApp(buildTestApp(child: const AnimateSample()));
     await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
     expect(find.text('Value: 1.0'), findsNothing);
@@ -117,8 +117,8 @@ void main() {
   test('Input event array on LiveWidgetController', () async {
     final logs = <String>[];
     runApp(
-      MaterialApp(
-        home: Listener(
+      buildTestApp(
+        child: Listener(
           onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
           onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
           onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
@@ -182,4 +182,28 @@ void main() {
     }
     expect(logs.last, 'up $b');
   });
+}
+
+PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
+  return PageRouteBuilder<T>(
+    settings: settings,
+    pageBuilder:
+        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+            builder(context),
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) => child,
+  );
+}
+
+Widget buildTestApp({required Widget child}) {
+  return WidgetsApp(
+    color: const Color(0xFFFFFFFF),
+    pageRouteBuilder: defaultPageRouteBuilder,
+    home: SizedBox.expand(child: Center(child: child)),
+  );
 }
