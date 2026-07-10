@@ -231,7 +231,7 @@ ContentContext& Playground::GetContentContext() const {
   return *content_context_;
 }
 
-std::shared_ptr<TypographerContext>& Playground::GetTypographerContext() const {
+std::shared_ptr<TypographerContext> Playground::GetTypographerContext() const {
   if (!typographer_context_) {
     typographer_context_ = TypographerContextSkia::Make();
   }
@@ -374,6 +374,10 @@ void Playground::SetEnableWriteGolden(bool write_golden) {
 bool Playground::RenderImage(const RenderCallback& callback,
                              bool write_result) {
   std::shared_ptr<Context> context = GetContext();
+  if (!context) {
+    return false;
+  }
+
   AiksContext renderer(context, typographer_context_);
   Point content_scale = GetContentScale();
   ISize size(std::round(GetWindowSize().width * content_scale.x),
@@ -416,6 +420,10 @@ bool Playground::WriteGoldenImage(const RenderTarget& render_target,
   }
 
   std::shared_ptr<Context> context = GetContext();
+  if (!context) {
+    return false;
+  }
+
   digest->AddDimension("gpu_string", context->DescribeGpuModel());
 
   std::string test_name = GetTestName();

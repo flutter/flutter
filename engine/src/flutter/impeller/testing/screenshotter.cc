@@ -33,6 +33,9 @@ std::unique_ptr<Screenshot> Screenshotter::MakeVulkanScreenshot(
 std::unique_ptr<Screenshot> Screenshotter::MakeScreenshot(
     std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture) {
+  if (!context || !texture) {
+    return nullptr;
+  }
   switch (context->GetBackendType()) {
     case Context::BackendType::kMetal:
       return MakeMetalScreenshot(context, texture);

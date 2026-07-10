@@ -4,6 +4,8 @@
 
 #include "impeller/display_list/dl_golden_unittests.h"
 
+#include <utility>
+
 #include "display_list/dl_color.h"
 #include "display_list/dl_paint.h"
 #include "display_list/geometry/dl_geometry_types.h"
@@ -394,6 +396,9 @@ int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
 std::optional<int32_t> CalculateSpaceBetweenUI(
     const impeller::testing::Screenshot* img,
     int32_t y) {
+  if (y < 0 || std::cmp_greater_equal(y, img->GetHeight())) {
+    return {};
+  }
   const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
   ptr += img->GetWidth() * y;
   std::vector<size_t> boundaries;

@@ -69,7 +69,7 @@ class Playground {
 
   ContentContext& GetContentContext() const;
 
-  std::shared_ptr<TypographerContext>& GetTypographerContext() const;
+  std::shared_ptr<TypographerContext> GetTypographerContext() const;
 
   using RenderCallback = std::function<bool(RenderTarget& render_target)>;
 
