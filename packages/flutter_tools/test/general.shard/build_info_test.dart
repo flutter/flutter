@@ -392,8 +392,11 @@ void main() {
     'Linux GTK4 builds use a separate output directory',
     () {
       expect(getLinuxBuildDirectory(TargetPlatform.linux_x64), 'build/linux/x64');
-      expect(getLinuxBuildDirectory(TargetPlatform.linux_x64, 'gtk3'), 'build/linux/x64');
-      expect(getLinuxBuildDirectory(TargetPlatform.linux_x64, 'gtk4'), 'build/linux-gtk4/x64');
+      expect(getLinuxBuildDirectory(TargetPlatform.linux_x64, null, 'gtk3'), 'build/linux/x64');
+      expect(
+        getLinuxBuildDirectory(TargetPlatform.linux_x64, null, 'gtk4'),
+        'build/linux-gtk4/x64',
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),

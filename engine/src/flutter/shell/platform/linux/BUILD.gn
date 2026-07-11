@@ -126,7 +126,6 @@ source_set("flutter_linux_sources_gtk3") {
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
     "fl_binary_messenger.cc",
-    "fl_compositor.cc",
     "fl_compositor_opengl.cc",
     "fl_compositor_opengl_shader.cc",
     "fl_compositor_software.cc",
@@ -186,6 +185,8 @@ source_set("flutter_linux_sources_gtk3") {
     "fl_view_gtk3.cc",
     "fl_view_monitor.cc",
     "fl_view_renderer.cc",
+    "fl_view_renderer_opengl.cc",
+    "fl_view_renderer_software.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
   ]

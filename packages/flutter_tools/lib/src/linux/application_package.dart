@@ -27,7 +27,7 @@ abstract class LinuxApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildInfo buildInfo);
+  String executable(BuildMode buildMode, [String? flavor, String? linuxGtkVersion]);
 }
 
 class PrebuiltLinuxApp extends LinuxApp {
@@ -38,7 +38,7 @@ class PrebuiltLinuxApp extends LinuxApp {
   final String _executable;
 
   @override
-  String executable(BuildInfo buildInfo) => _executable;
+  String executable(BuildMode buildMode, [String? flavor, String? linuxGtkVersion]) => _executable;
 
   @override
   String get name => _executable;
@@ -51,12 +51,11 @@ class BuildableLinuxApp extends LinuxApp {
   final LinuxProject project;
 
   @override
-  String executable(BuildInfo buildInfo) {
+  String executable(BuildMode buildMode, [String? flavor, String? linuxGtkVersion]) {
     final String? binaryName = getCmakeExecutableName(project);
-    final String linuxGtkVersion = buildInfo.linuxGtkVersion ?? 'gtk3';
     return globals.fs.path.join(
-      getLinuxBuildDirectory(null, linuxGtkVersion),
-      buildInfo.mode.cliName,
+      getLinuxBuildDirectory(null, flavor, linuxGtkVersion),
+      buildMode.cliName,
       'bundle',
       binaryName,
     );

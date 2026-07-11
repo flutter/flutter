@@ -242,7 +242,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
-  bool get outputMachineFormat => boolArg('machine');
+  bool get outputMachineFormat =>
+      argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
+      boolArg(FlutterGlobalOptions.kMachineFlag);
 
   bool get shouldUpdateCache => true;
 
@@ -1375,6 +1377,10 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('build-number')
         : null;
 
+    final String? buildName = argParser.options.containsKey('build-name')
+        ? stringArg('build-name')
+        : null;
+
     final File packageConfigFile = globals.fs.file(packageConfigPath());
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -1494,17 +1500,18 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
-    if (globals.platform.environment[kAppFlavor] != null) {
-      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
-    }
-    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
-      throwToolExit(
-        '$kAppFlavor is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-      );
-    }
+    _ensureReservedDartDefineIsUnset(kAppFlavor, dartDefines);
     if (flavor != null) {
       dartDefines.add('$kAppFlavor=$flavor');
+    }
+    for (final (String define, String? value) in <(String, String?)>[
+      (kAppBuildName, buildName ?? project.manifest.buildName),
+      (kAppBuildNumber, buildNumber ?? project.manifest.buildNumber),
+    ]) {
+      _ensureReservedDartDefineIsUnset(define, dartDefines);
+      if (value != null) {
+        dartDefines.add('$define=$value');
+      }
     }
     _addLinuxGtkToDartDefines(linuxGtkVersion, dartDefines);
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
@@ -1523,7 +1530,7 @@ abstract class FlutterCommand extends Command<void> {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
-      buildName: argParser.options.containsKey('build-name') ? stringArg('build-name') : null,
+      buildName: buildName,
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
@@ -1596,6 +1603,21 @@ abstract class FlutterCommand extends Command<void> {
         '$kLinuxGtkDartDefine=$explicitLinuxGtkDefine conflicts with '
         '--linux-gtk=$linuxGtkVersion. Remove the --${FlutterOptions.kDartDefinesOption} '
         'override or make it match --linux-gtk.',
+      );
+    }
+  }
+
+  /// Throws a [ToolExit] if [define], a dart-define key reserved by the
+  /// framework, has been set either in the environment or through
+  /// `--${FlutterOptions.kDartDefinesOption}` / `--${FlutterOptions.kDartDefineFromFileOption}`.
+  void _ensureReservedDartDefineIsUnset(String define, List<String> dartDefines) {
+    if (globals.platform.environment[define] != null) {
+      throwToolExit('$define is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
+      throwToolExit(
+        '$define is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
       );
     }
   }
@@ -2135,10 +2157,17 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
+  ///
+  /// If [canPrompt] is true, the tool will interactively prompt the user to
+  /// select a device when multiple devices are found and a terminal is
+  /// attached. If [canPrompt] is false, the interactive prompt is bypassed.
+  /// If not specified, [canPrompt] defaults to `!outputMachineFormat`.
   Future<List<Device>?> findAllTargetDevices({
+    bool? canPrompt,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     return _targetDevices.findAllTargetDevices(
+      canPrompt: canPrompt ?? !outputMachineFormat,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
