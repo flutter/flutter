@@ -413,6 +413,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'jsSupportRuntimePath': 'main.dart.mjs',
         };
 
+  static final RegExp _partWasmRegex = RegExp(r'main\.dart_module[0-9].*\.wasm');
+  static final RegExp _partWasmMapRegex = RegExp(r'main\.dart_module[0-9].*\.wasm\.map');
+
   @override
   Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
       ? const <File>[]
@@ -423,15 +426,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
           if (compilerConfig.sourceMaps && file.basename == 'main.dart.wasm.map') {
             return true;
           }
-          final partWasmRegex = RegExp(r'main\.dart_module[0-9].*\.wasm');
-          if (partWasmRegex.hasMatch(file.basename)) {
+          if (_partWasmRegex.hasMatch(file.basename)) {
             return true;
           }
-          if (compilerConfig.sourceMaps) {
-            final partWasmMapRegex = RegExp(r'main\.dart_module[0-9].*\.wasm\.map');
-            if (partWasmMapRegex.hasMatch(file.basename)) {
-              return true;
-            }
+          if (compilerConfig.sourceMaps && _partWasmMapRegex.hasMatch(file.basename)) {
+            return true;
           }
           return false;
         });

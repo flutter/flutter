@@ -204,6 +204,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
       'minify': minify,
       'dryRun': dryRun,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
+      'enableWasmDeferredLoading': enableWasmDeferredLoading,
     };
     return jsonEncode(settings);
   }

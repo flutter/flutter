@@ -182,12 +182,12 @@ export class FlutterEntrypointLoader {
         importsPromise = Promise.resolve({});
       }
       const compiledDartApp = await compiledDartAppPromise;
-      const defaultLoadDeferredModules = async (moduleNames, handleModule) =>
+      const defaultLoadDeferredModules = (moduleNames, handleModule) =>
         Promise.all(
-          moduleNames.map(async (moduleName) =>
+          moduleNames.map((moduleName) =>
             handleModule(
               moduleName,
-              await fetch(resolveUrlWithSegments(entrypointBaseUrl, moduleName))
+              fetch(resolveUrlWithSegments(entrypointBaseUrl, moduleName))
             )
           )
         );
