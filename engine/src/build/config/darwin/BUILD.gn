@@ -22,17 +22,6 @@ config("compiler") {
     assert(false, "unsupported platform")
   }
 
-  # swiftc -target flag (target triplet).
-  # CPU architecture.
-  if (current_cpu == "x64") {
-    _triplet_cpu = "x86_64"
-  } else if (current_cpu == "arm64") {
-    _triplet_cpu = "arm64"
-  } else {
-    # x86, arm, armv7, etc.
-    assert(false, "unsupported cpu: $current_cpu")
-  }
-
   # OS and deployment target.
   if (is_ios) {
     _triplet_os = "apple-ios"
@@ -41,15 +30,6 @@ config("compiler") {
     _triplet_os = "apple-macos"
     _deployment_target = mac_deployment_target
   }
-
-  # Environment.
-  if (use_ios_simulator) {
-    _triplet_environment = "-simulator"
-  } else {
-    _triplet_environment = ""
-  }
-  _target_triplet =
-      "$_triplet_cpu-$_triplet_os$_deployment_target$_triplet_environment"
 
   # swiftc -swift-version flag.
   #
@@ -68,11 +48,14 @@ config("compiler") {
   # when their commandline changes). Nothing should ever read this define.
   #defines = [ "CR_XCODE_VERSION=$xcode_version" ]
 
+  _target_triple =
+      "$darwin_target_arch-$_triplet_os$_deployment_target$darwin_target_sim"
+
   swiftflags = [
     "-sdk",
     _sdk_root,
     "-target",
-    _target_triplet,
+    _target_triple,
     "-swift-version",
     _swift_version,
   ]

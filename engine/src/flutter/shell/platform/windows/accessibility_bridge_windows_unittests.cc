@@ -115,6 +115,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   properties.assets_path = L"C:\\foo\\flutter_assets";
   properties.icu_data_path = L"C:\\foo\\icudtl.dat";
   properties.aot_library_path = L"C:\\foo\\aot.so";
+  properties.impeller_switch = DefaultImpeller;
   FlutterProjectBundle project(properties);
   auto engine = std::make_unique<FlutterWindowsEngine>(project);
 
@@ -400,36 +401,6 @@ TEST(AccessibilityBridgeWindows, OnDocumentSelectionChanged) {
   ExpectWinEventFromAXEventOnFocusNode(
       1, ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED,
       ax::mojom::Event::kDocumentSelectionChanged, 2);
-}
-
-TEST(AccessibilityBridgeWindows, OnAccessibilityEnabledChanged) {
-  auto engine = GetTestEngine();
-  FlutterWindowsViewSpy view{
-      engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
-  EngineModifier modifier{engine.get()};
-  modifier.SetImplicitView(&view);
-  view.OnUpdateSemanticsEnabled(true);
-
-  auto bridge = GetAccessibilityBridgeSpy(view);
-  PopulateAXTree(bridge);
-
-  bridge->ResetRecords();
-  bridge->OnAccessibilityEvent({AXNodeFromID(bridge, 1),
-                                {ui::AXEventGenerator::Event::ENABLED_CHANGED,
-                                 ax::mojom::EventFrom::kNone,
-                                 {}}});
-
-  // Should dispatch an MSAA state change event. The UIA property change for
-  // UIA_IsEnabledPropertyId is now raised internally by AXPlatformNodeWin
-  // when it processes the kStateChanged event.
-  ASSERT_EQ(bridge->dispatched_events().size(), 1u);
-  EXPECT_EQ(bridge->dispatched_events()[0].event_type,
-            ax::mojom::Event::kStateChanged);
-}
-
-TEST(AccessibilityBridgeWindows, OnAccessibilityReadOnlyChanged) {
-  ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::READONLY_CHANGED,
-                            ax::mojom::Event::kStateChanged);
 }
 
 }  // namespace testing

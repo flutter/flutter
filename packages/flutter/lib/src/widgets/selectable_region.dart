@@ -54,12 +54,14 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. Wrapping a widget subtree
-/// with a [SelectableRegion] widget enables selection within that subtree (for
-/// example, [Text] widgets automatically look for selectable regions to enable
-/// selection). The wrapped subtree can be selected by users using mouse or
-/// touch gestures, e.g. users can select widgets by holding the mouse
-/// left-click and dragging across widgets, or they can use long press gestures
-/// to select words on touch devices.
+/// with a [SelectableRegion] widget enables selection for widgets in the
+/// subtree that participate in selection. For example, [Text] widgets
+/// automatically look for selectable regions to enable selection, while widgets
+/// such as [RichText] must be configured with a [SelectionRegistrar] and
+/// [RichText.selectionColor]. The wrapped subtree can be selected by users
+/// using mouse or touch gestures, e.g. users can select widgets by holding the
+/// mouse left-click and dragging across widgets, or they can use long press
+/// gestures to select words on touch devices.
 ///
 /// A [SelectableRegion] widget requires configuration; in particular specific
 /// [selectionControls] must be provided.
@@ -94,8 +96,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 ///
 /// Both [SelectionContainer]s and the leaf [Selectable]s need to register
 /// themselves to the [SelectionRegistrar] from the
-/// [SelectionContainer.maybeOf] if they want to participate in the
-/// selection.
+/// [SelectionContainer.maybeOf] if they want to participate in the selection.
+/// The [BuildContext] used with [SelectionContainer.maybeOf] must be below the
+/// [SelectionContainer], [SelectableRegion], or [SelectionArea] that provides
+/// the registrar in the widget tree.
 ///
 /// An example selection tree will look like:
 ///
@@ -1999,8 +2003,8 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    if (callingAction != null) {
-      return callingAction!.invoke(intent);
+    if (callingAction case final callingAction?) {
+      return callingAction.invoke(intent);
     }
     return invokeAction(intent, context);
   }

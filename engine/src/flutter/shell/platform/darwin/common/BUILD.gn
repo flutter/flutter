@@ -29,16 +29,24 @@ config("test_config") {
   # Add platform frameworks directory to search path for test frameworks.
   # Add platform lib to search path for test libraries/Swift modules.
   cflags = [ "-fvisibility=default" ]
+  ldflags = []
+  swiftflags = []
 
   if (is_ios) {
     _platform_path = ios_platform_path
+    swiftflags += [
+      "-target",
+      "$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim",
+    ]
+    cflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
+    ldflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
   } else if (is_mac) {
     _platform_path = mac_platform_path
     cflags += [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
-    ldflags = [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
+    ldflags += [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
   }
   cflags += [ "-F$_platform_path/Developer/Library/Frameworks" ]
-  swiftflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
+  swiftflags += [ "-F$_platform_path/Developer/Library/Frameworks" ]
   include_dirs = [ "$_platform_path/Developer/usr/lib" ]
   framework_dirs = [ "$_platform_path/Developer/Library/Frameworks" ]
   lib_dirs = [ "$_platform_path/Developer/usr/lib" ]

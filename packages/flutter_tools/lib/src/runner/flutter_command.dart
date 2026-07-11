@@ -26,7 +26,6 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
 import 'flutter_command_runner.dart';
@@ -243,7 +242,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
-  bool get outputMachineFormat => boolArg('machine');
+  bool get outputMachineFormat =>
+      argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
+      boolArg(FlutterGlobalOptions.kMachineFlag);
 
   bool get shouldUpdateCache => true;
 
@@ -1365,12 +1366,19 @@ abstract class FlutterCommand extends Command<void> {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    // TODO(nshahan): Delete when fully migrated to new module system,
+    // https://github.com/flutter/flutter/issues/142060.
+    bool? forcedWebEnableHotReload,
   }) async {
     final bool trackWidgetCreation =
         argParser.options.containsKey('track-widget-creation') && boolArg('track-widget-creation');
 
     final String? buildNumber = argParser.options.containsKey('build-number')
         ? stringArg('build-number')
+        : null;
+
+    final String? buildName = argParser.options.containsKey('build-name')
+        ? stringArg('build-name')
         : null;
 
     final File packageConfigFile = globals.fs.file(packageConfigPath());
@@ -1403,8 +1411,9 @@ abstract class FlutterCommand extends Command<void> {
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
     final bool webEnableHotReload =
-        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload);
+        forcedWebEnableHotReload ??
+        (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+            boolArg(FlutterOptions.kWebExperimentalHotReload));
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -1490,17 +1499,18 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
-    if (globals.platform.environment[kAppFlavor] != null) {
-      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
-    }
-    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
-      throwToolExit(
-        '$kAppFlavor is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-      );
-    }
+    _ensureReservedDartDefineIsUnset(kAppFlavor, dartDefines);
     if (flavor != null) {
       dartDefines.add('$kAppFlavor=$flavor');
+    }
+    for (final (String define, String? value) in <(String, String?)>[
+      (kAppBuildName, buildName ?? project.manifest.buildName),
+      (kAppBuildNumber, buildNumber ?? project.manifest.buildNumber),
+    ]) {
+      _ensureReservedDartDefineIsUnset(define, dartDefines);
+      if (value != null) {
+        dartDefines.add('$define=$value');
+      }
     }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
     _addFeatureFlagsToDartDefines(dartDefines);
@@ -1518,7 +1528,7 @@ abstract class FlutterCommand extends Command<void> {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
-      buildName: argParser.options.containsKey('build-name') ? stringArg('build-name') : null,
+      buildName: buildName,
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
@@ -1541,6 +1551,21 @@ abstract class FlutterCommand extends Command<void> {
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: webEnableHotReload,
     );
+  }
+
+  /// Throws a [ToolExit] if [define], a dart-define key reserved by the
+  /// framework, has been set either in the environment or through
+  /// `--${FlutterOptions.kDartDefinesOption}` / `--${FlutterOptions.kDartDefineFromFileOption}`.
+  void _ensureReservedDartDefineIsUnset(String define, List<String> dartDefines) {
+    if (globals.platform.environment[define] != null) {
+      throwToolExit('$define is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
+      throwToolExit(
+        '$define is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
   }
 
   // This adds the Dart defines used to access various Flutter version information at runtime.
@@ -1884,7 +1909,6 @@ abstract class FlutterCommand extends Command<void> {
   ) {
     // Send command result.
     final int? maxRss = getMaxRss(processInfo);
-    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
     analytics.send(
       Event.flutterCommandResult(
         commandPath: commandPath,
@@ -1931,6 +1955,15 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
+
+    if (globals.os.hostPlatform == .darwin_x64 &&
+        globals.persistentToolState!.shouldShowIntelMacWarning) {
+      globals.logger.printWarning(
+        'Flutter is deprecating support for Intel-based Macs. '
+        'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+      );
+      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+    }
 
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.
@@ -2041,10 +2074,17 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
+  ///
+  /// If [canPrompt] is true, the tool will interactively prompt the user to
+  /// select a device when multiple devices are found and a terminal is
+  /// attached. If [canPrompt] is false, the interactive prompt is bypassed.
+  /// If not specified, [canPrompt] defaults to `!outputMachineFormat`.
   Future<List<Device>?> findAllTargetDevices({
+    bool? canPrompt,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     return _targetDevices.findAllTargetDevices(
+      canPrompt: canPrompt ?? !outputMachineFormat,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );

@@ -2069,6 +2069,11 @@ class EditableText extends StatefulWidget {
   /// Specifies the [SpellCheckService] used to spell check text input and the
   /// [TextStyle] used to style text with misspelled words.
   ///
+  /// Spell check is disabled for password input, including when [obscureText]
+  /// is true, [keyboardType] is [TextInputType.visiblePassword], or
+  /// [autofillHints] contains [AutofillHints.password] or
+  /// [AutofillHints.newPassword].
+  ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
   /// it is used. It is currently supported only on Android and iOS.
@@ -3079,18 +3084,27 @@ class EditableTextState extends State<EditableText>
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(
-    SpellCheckConfiguration? configuration,
-  ) {
+    SpellCheckConfiguration? configuration, {
+    required bool obscureText,
+    required TextInputType keyboardType,
+    required Iterable<String>? autofillHints,
+  }) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
     final bool spellCheckAutomaticallyDisabled =
-        configuration == null || configuration == const SpellCheckConfiguration.disabled();
+        _isPasswordInput(
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          autofillHints: autofillHints,
+        ) ||
+        configuration == null ||
+        configuration == const SpellCheckConfiguration.disabled();
     final bool spellCheckServiceIsConfigured =
         spellCheckService != null ||
         WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
-      // and if that configuration does not specify a spell check service,
-      // a native spell checker must be supported.
+      // for non-password input and, if that configuration does not specify a
+      // spell check service, a native spell checker must be supported.
       assert(() {
         if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
           FlutterError.reportError(
@@ -3115,6 +3129,19 @@ class EditableTextState extends State<EditableText>
     return configuration.copyWith(
       spellCheckService: spellCheckService ?? DefaultSpellCheckService(),
     );
+  }
+
+  static bool _isPasswordInput({
+    required bool obscureText,
+    required TextInputType keyboardType,
+    required Iterable<String>? autofillHints,
+  }) {
+    return obscureText ||
+        keyboardType == TextInputType.visiblePassword ||
+        (autofillHints?.any(
+              (String hint) => hint == AutofillHints.password || hint == AutofillHints.newPassword,
+            ) ??
+            false);
   }
 
   /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
@@ -3313,7 +3340,12 @@ class EditableTextState extends State<EditableText>
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
-    _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _spellCheckConfiguration = _inferSpellCheckConfiguration(
+      widget.spellCheckConfiguration,
+      obscureText: widget.obscureText,
+      keyboardType: widget.keyboardType,
+      autofillHints: widget.autofillHints,
+    );
     _appLifecycleListener = AppLifecycleListener(onResume: _onResume);
     _initProcessTextActions();
   }
@@ -3530,6 +3562,28 @@ class EditableTextState extends State<EditableText>
           _obscureLatestCharIndex = null;
         }
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+      }
+    }
+
+    if (oldWidget.spellCheckConfiguration != widget.spellCheckConfiguration ||
+        oldWidget.obscureText != widget.obscureText ||
+        oldWidget.keyboardType != widget.keyboardType ||
+        !listEquals<String>(
+          oldWidget.autofillHints?.toList(growable: false),
+          widget.autofillHints?.toList(growable: false),
+        )) {
+      _spellCheckConfiguration = _inferSpellCheckConfiguration(
+        widget.spellCheckConfiguration,
+        obscureText: widget.obscureText,
+        keyboardType: widget.keyboardType,
+        autofillHints: widget.autofillHints,
+      );
+      if (spellCheckEnabled) {
+        if (textEditingValue.text.isNotEmpty) {
+          _performSpellCheck(textEditingValue.text);
+        }
+      } else {
+        spellCheckResults = null;
       }
     }
 
@@ -4672,9 +4726,10 @@ class EditableTextState extends State<EditableText>
       final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
           .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (suggestions == null || !mounted) {
+      if (suggestions == null || !mounted || !spellCheckEnabled) {
         // The request to fetch spell check suggestions was canceled due to ongoing request,
-        // or the widget was unmounted.
+        // the widget was unmounted, or spell check was disabled before the
+        // request completed.
         return;
       }
 
