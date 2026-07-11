@@ -2,21 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'keyboard_inserted_content.dart';
+/// @docImport 'message_codecs.dart';
+library;
+
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
-
-import 'message_codecs.dart';
+import 'message_codec.dart';
 import 'platform_channel.dart';
 
 /// A binary [MethodChannel] for handling content insertion from IMEs.
 ///
-/// This channel uses [StandardMethodCodec] for efficient binary data transfer,
-/// avoiding the performance overhead of JSON serialization for large files.
+/// [MethodChannel] uses [StandardMethodCodec] by default, which encodes byte
+/// arrays ([Uint8List]) as length-prefixed blobs. This avoids the per-byte JSON
+/// serialization overhead of the `flutter/textinput` channel, which uses
+/// [JSONMethodCodec] and serializes large content (such as images) element by
+/// element.
 ///
 /// See also:
 ///
 ///  * [KeyboardInsertedContent], which represents the data received on this channel.
+///  * <https://github.com/flutter/flutter/issues/188977>, the performance issue
+///    that motivated this channel.
 class ContentInsertionChannel {
   /// Creates a [ContentInsertionChannel].
   ///
@@ -26,47 +33,34 @@ class ContentInsertionChannel {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  static const MethodChannel _channel = MethodChannel(
-    'flutter/contentinsertion',
-    StandardMethodCodec(),
-  );
+  static const MethodChannel _channel = MethodChannel('flutter/contentinsertion');
 
-  /// Callback type for content insertion events.
+  /// Called when content is inserted on the binary content insertion channel.
   ///
   /// The callback receives a map containing:
-  /// - 'mimeType': String - the MIME type of the inserted content
-  /// - 'uri': String - the URI of the content (if available)
-  /// - 'data': Uint8List - the raw bytes of the content (if available)
-  late void Function(Map<String, dynamic>)? _onContentInserted;
-
-  /// Sets the callback to be invoked when content is inserted.
-  ///
-  /// The callback receives a map with the content details.
-  void setContentInsertionCallback(
-    void Function(Map<String, dynamic>)? callback,
-  ) {
+  ///  * `mimeType`: `String` — the MIME type of the inserted content.
+  ///  * `uri`: `String` — the URI of the content.
+  ///  * `data`: `Uint8List?` — the raw bytes of the content, if available.
+  set onContentInserted(void Function(Map<String, dynamic> metadata)? callback) {
     _onContentInserted = callback;
   }
+
+  void Function(Map<String, dynamic> metadata)? _onContentInserted;
 
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'commitContent':
-        final Map<dynamic, dynamic> arguments = call.arguments as Map<dynamic, dynamic>;
-        final Map<String, dynamic> contentMap = <String, dynamic>{
+        final arguments = (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>();
+        _onContentInserted?.call(<String, dynamic>{
           'mimeType': arguments['mimeType'] as String,
           'uri': arguments['uri'] as String,
-          if (arguments.containsKey('data'))
-            'data': arguments['data'] as Uint8List?,
-        };
-        _onContentInserted?.call(contentMap);
+          if (arguments.containsKey('data')) 'data': arguments['data'] as Uint8List?,
+        });
       default:
         throw MissingPluginException();
     }
   }
 }
 
-/// Singleton instance of [ContentInsertionChannel].
-final ContentInsertionChannel _contentInsertionChannel = ContentInsertionChannel();
-
-/// Gets the singleton [ContentInsertionChannel] instance.
-ContentInsertionChannel get contentInsertionChannel => _contentInsertionChannel;
+/// The singleton [ContentInsertionChannel] instance.
+final ContentInsertionChannel contentInsertionChannel = ContentInsertionChannel();
