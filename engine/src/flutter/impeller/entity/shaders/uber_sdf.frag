@@ -156,6 +156,36 @@ float rectPixelSize(vec2 p) {
   return (distance.x < distance.y) ? device_pixel_size.x : device_pixel_size.y;
 }
 
+// Special case pixel size calculation for rounded rectangles, similar to
+// `rectPixelSize` for regular rectangles.
+float roundRectPixelSize(vec2 p) {
+  // The change in local coordinates per horizontal device pixel (device_dx)
+  // and vertical device pixel (device_dy).
+  vec2 device_dx = dFdx(v_position);
+  vec2 device_dy = dFdy(v_position);
+  // The size of a device pixel in terms of local coordinates.
+  vec2 device_pixel_size = vec2(length(vec2(device_dx.x, device_dy.x)),
+                                length(vec2(device_dx.y, device_dy.y)));
+
+  // Select the corner radius for the quadrant of p.
+  vec4 r = frag_info.radii;
+  r.xy = (p.x > 0.0) ? r.xy : r.zw;
+  float radius = (p.y > 0.0) ? r.x : r.y;
+
+  // Vector from corner circle center to abs(p).
+  vec2 corner_center = frag_info.size - radius;
+  vec2 q = abs(p) - corner_center;
+
+  // If in the rounded corner arc, blend X and Y pixel sizes along the normal.
+  if (q.x > 0.0 && q.y > 0.0) {
+    return length(normalize(q) * device_pixel_size);
+  }
+
+  // Otherwise, we are closer to a straight edge. Get pixel size in the
+  // direction perpendicular to the closer edge.
+  return (q.x > q.y) ? device_pixel_size.x : device_pixel_size.y;
+}
+
 float pixelSize(float sdf) {
   vec2 gradient = vec2(dFdx(sdf), dFdy(sdf));
   return length(gradient);
@@ -174,7 +204,9 @@ vec2 filledSDF(vec2 p) {
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
+    // RoundRect has its own separate logic for calculating pixel size.
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
+    return vec2(sdf, roundRectPixelSize(p));
   } else {  // Symmetric Rounded Superellipse
     sdf = distanceFromRoundedSuperellipse(
         p, frag_info.superellipse_degree, frag_info.superellipse_semi_axis,
