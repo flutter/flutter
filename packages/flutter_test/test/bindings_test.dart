@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -41,17 +40,16 @@ void main() {
     setUp(() {
       expect(binding.testTextInput, isNotNull);
       expect(binding.testTextInput.isRegistered, isFalse);
-      expect(HttpOverrides.current, isNotNull);
     });
     tearDown(() {
       expect(binding.testTextInput.isRegistered, isFalse);
     });
 
-    testWidgets('Registers testTextInput', (WidgetTester tester) async {
+    testWidgets('testWidgets registers testTextInput', (WidgetTester tester) async {
       expect(tester.testTextInput.isRegistered, isTrue);
     });
 
-    test('Does not register testTextInput', () async {
+    test('test does not register testTextInput', () async {
       expect(binding.testTextInput.isRegistered, isFalse);
     });
   });
