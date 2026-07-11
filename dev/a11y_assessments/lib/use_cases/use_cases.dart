@@ -32,6 +32,7 @@ import 'popup_menu_button.dart';
 import 'radio.dart';
 import 'radio_list_tile.dart';
 import 'range_slider.dart';
+import 'search_bar.dart';
 import 'segmented_button.dart';
 import 'slider.dart';
 import 'snack_bar.dart';
@@ -41,6 +42,7 @@ import 'tab_bar_view.dart';
 import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';
+import 'text_form_field.dart';
 import 'toggle_buttons.dart';
 
 /// Tags for accessibility assessment use cases.
@@ -110,4 +112,6 @@ final List<UseCase> useCases = <UseCase>[
   ToggleButtonsUseCase(),
   BackButtonUseCase(),
   CloseButtonUseCase(),
+  TextFormFieldUseCase(),
+  SearchBarUseCase(),
 ];
