@@ -261,7 +261,12 @@ TEST(ContextVKTest, HasDefaultColorFormat) {
   ASSERT_NE(capabilites_vk->GetDefaultColorFormat(), PixelFormat::kUnknown);
 }
 
-TEST(ContextVKTest, EmbedderOverridesUsesInstanceExtensions) {
+TEST(ContextVKTest, EmbedderWithoutSurfaceExtensionsIsSurfaceless) {
+  // An embedder that presents rendered images itself (for example through a
+  // platform compositor such as DirectComposition on Windows) supplies a
+  // Vulkan device without the surface, WSI, or swapchain extensions. Context
+  // creation must succeed in that configuration; presentation is then the
+  // embedder's responsibility rather than Impeller's.
   ContextVK::EmbedderData data;
   auto other_context = MockVulkanContextBuilder().Build();
 
@@ -270,14 +275,36 @@ TEST(ContextVKTest, EmbedderOverridesUsesInstanceExtensions) {
   data.physical_device = other_context->GetPhysicalDevice();
   data.queue = VkQueue{};
   data.queue_family_index = 0;
-  // Missing surface extension.
+  // No surface (instance) or swapchain (device) extensions.
   data.instance_extensions = {};
+  data.device_extensions = {};
+
+  ScopedValidationDisable scoped;
+  auto context = MockVulkanContextBuilder().SetEmbedderData(data).Build();
+
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->IsValid());
+}
+
+TEST(ContextVKTest, EmbedderWithSurfaceExtensionsStillEnablesThem) {
+  // When the embedder does provide the surface extension, it is honored and
+  // added to the enabled instance extensions as before.
+  ContextVK::EmbedderData data;
+  auto other_context = MockVulkanContextBuilder().Build();
+
+  data.instance = other_context->GetInstance();
+  data.device = other_context->GetDevice();
+  data.physical_device = other_context->GetPhysicalDevice();
+  data.queue = VkQueue{};
+  data.queue_family_index = 0;
+  data.instance_extensions = {"VK_KHR_surface", "VK_KHR_win32_surface"};
   data.device_extensions = {"VK_KHR_swapchain"};
 
   ScopedValidationDisable scoped;
   auto context = MockVulkanContextBuilder().SetEmbedderData(data).Build();
 
-  EXPECT_EQ(context, nullptr);
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->IsValid());
 }
 
 TEST(ContextVKTest, EmbedderOverrides) {
