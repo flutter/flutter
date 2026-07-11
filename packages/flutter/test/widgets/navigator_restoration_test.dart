@@ -1210,7 +1210,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
         return TestRoute<int>(
           maintainState: true,
           settings: settings,
-          builder: (BuildContext context) {
+          pageBuilder: (_, _, _) {
             return RouteWidget(name: settings.name!, arguments: settings.arguments);
           },
         );
