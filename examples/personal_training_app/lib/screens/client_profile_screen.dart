@@ -89,7 +89,9 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF111827).withOpacity(0.06),
+                              color: const Color(
+                                0xFF111827,
+                              ).withValues(alpha: 0.06),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -173,7 +175,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.03),
+          color: Colors.black.withValues(alpha: 0.03),
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),
@@ -510,7 +512,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                     color: const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF2563EB).withOpacity(0.15),
+                      color: const Color(0xFF2563EB).withValues(alpha: 0.15),
                     ),
                   ),
                   child: Column(
@@ -549,7 +551,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                                 border: Border.all(
                                   color: const Color(
                                     0xFF2563EB,
-                                  ).withOpacity(0.08),
+                                  ).withValues(alpha: 0.08),
                                 ),
                               ),
                               child: Column(
@@ -609,7 +611,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                     color: const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF059669).withOpacity(0.15),
+                      color: const Color(0xFF059669).withValues(alpha: 0.15),
                     ),
                   ),
                   child: Column(
@@ -652,7 +654,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                                 ),
                                 backgroundColor: const Color(
                                   0xFF059669,
-                                ).withOpacity(0.08),
+                                ).withValues(alpha: 0.08),
                               ),
                             )
                             .toList(),
@@ -705,7 +707,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   color: const Color(0xFFF3F4F6),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFF2563EB).withOpacity(0.15),
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.15),
                   ),
                 ),
                 child: Column(
@@ -774,7 +776,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            backgroundColor: color.withOpacity(0.08),
+                            backgroundColor: color.withValues(alpha: 0.08),
                           );
                         }).toList(),
                       ),
@@ -796,7 +798,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF1D4ED8).withOpacity(0.2),
+                    color: const Color(0xFF1D4ED8).withValues(alpha: 0.2),
                     blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
@@ -816,7 +818,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   Text(
                     'Update your personal information and training details',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withOpacity(0.92),
+                      color: Colors.white.withValues(alpha: 0.92),
                     ),
                   ),
                 ],
@@ -840,7 +842,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.1),
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),

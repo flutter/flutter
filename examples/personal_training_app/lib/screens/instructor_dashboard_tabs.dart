@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import '../utils/firebase_service.dart';
 import '../models/client_profile.dart';
-
 
 class NotificationTab extends StatefulWidget {
   final List<ClientProfile> clients;
@@ -32,14 +30,21 @@ class _NotificationTabState extends State<NotificationTab> {
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: 'Select Client',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
                 initialValue: _selectedClient,
                 items: widget.clients.map((client) {
                   return DropdownMenuItem<String>(
                     value: client.username,
-                    child: Text(client.name.isNotEmpty ? client.name : client.username),
+                    child: Text(
+                      client.name.isNotEmpty ? client.name : client.username,
+                    ),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -61,7 +66,7 @@ class _NotificationTabState extends State<NotificationTab> {
                     border: Border.all(color: Colors.grey.shade300, width: 1.5),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
+                        color: Colors.grey.withValues(alpha: 0.08),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -73,7 +78,10 @@ class _NotificationTabState extends State<NotificationTab> {
                     children: [
                       const Text(
                         'Send Notification to Client:',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       TextField(
@@ -96,9 +104,15 @@ class _NotificationTabState extends State<NotificationTab> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0FDF4),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF10B981), width: 1.2),
+                    border: Border.all(
+                      color: const Color(0xFF10B981),
+                      width: 1.2,
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   child: Row(
                     children: [
                       Checkbox(
@@ -107,7 +121,10 @@ class _NotificationTabState extends State<NotificationTab> {
                           setState(() => celebration = val ?? false);
                         },
                       ),
-                      const Text('Show confetti (celebration)', style: TextStyle(fontSize: 15)),
+                      const Text(
+                        'Show confetti (celebration)',
+                        style: TextStyle(fontSize: 15),
+                      ),
                     ],
                   ),
                 ),
@@ -118,8 +135,13 @@ class _NotificationTabState extends State<NotificationTab> {
                 label: const Text('Send Notification'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(180, 48),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: () async {
                   final msg = notificationController.text.trim();
@@ -136,14 +158,29 @@ class _NotificationTabState extends State<NotificationTab> {
                         context: context,
                         barrierDismissible: true,
                         builder: (context) => AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 32,
+                            horizontal: 24,
+                          ),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.check_circle, color: Colors.green, size: 56),
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                                size: 56,
+                              ),
                               const SizedBox(height: 18),
-                              const Text('Notification sent!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Notification sent!',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),

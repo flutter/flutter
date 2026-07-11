@@ -554,7 +554,9 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
       final workoutListStr =
           await StorageHelper.getString(workoutListKey) ?? '';
       workoutIds.addAll(workoutListStr.split(',').where((id) => id.isNotEmpty));
-      _debugLog('🔍 DEBUG: Loading workouts for $username - Key: $workoutListKey');
+      _debugLog(
+        '🔍 DEBUG: Loading workouts for $username - Key: $workoutListKey',
+      );
     }
     _debugLog('🔍 DEBUG: Workout IDs found: ${workoutIds.toList()}');
 
@@ -576,7 +578,9 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
             final workout = _workoutFromFirebaseMap(workoutId, firebaseWorkout);
             await _saveWorkoutToStorage(workout, syncFirebase: false);
             userWorkouts.add(workout);
-            _debugLog('✅ DEBUG: Loaded fallback Firebase workout: ${workout.name}');
+            _debugLog(
+              '✅ DEBUG: Loaded fallback Firebase workout: ${workout.name}',
+            );
           }
         }
       } else {
@@ -661,7 +665,9 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
     }
 
     if (workoutIds.isEmpty) {
-      _debugLog('⚠️ DEBUG: No workout IDs found for $username after all fallbacks');
+      _debugLog(
+        '⚠️ DEBUG: No workout IDs found for $username after all fallbacks',
+      );
       return;
     }
 
@@ -687,7 +693,9 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
         final workout = _workoutFromFirebaseMap(workoutId, firebaseWorkout);
         await _saveWorkoutToStorage(workout, syncFirebase: false);
       } catch (e) {
-        _debugLog('❌ DEBUG: Error mapping workout $workoutId from Firebase: $e');
+        _debugLog(
+          '❌ DEBUG: Error mapping workout $workoutId from Firebase: $e',
+        );
       }
     }
 
@@ -720,11 +728,15 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
             final workout = _workoutFromFirebaseMap(workoutId, firebaseWorkout);
             await _saveWorkoutToStorage(workout, syncFirebase: false);
             userWorkouts.add(workout);
-            _debugLog('✅ DEBUG: Reload fallback from Firebase: ${workout.name}');
+            _debugLog(
+              '✅ DEBUG: Reload fallback from Firebase: ${workout.name}',
+            );
           }
         }
       } else {
-        _debugLog('❌ DEBUG: No data found for workout $workoutId during reload');
+        _debugLog(
+          '❌ DEBUG: No data found for workout $workoutId during reload',
+        );
         final firebaseWorkout = await FirebaseService.getWorkout(workoutId);
         if (firebaseWorkout != null) {
           final workout = _workoutFromFirebaseMap(workoutId, firebaseWorkout);
@@ -784,7 +796,9 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
   }
 
   Map<String, dynamic> _workoutToFirebaseMap(Workout workout) {
-    final clientUid = _userRole == 'client' ? FirebaseService.currentUid ?? '' : '';
+    final clientUid = _userRole == 'client'
+        ? FirebaseService.currentUid ?? ''
+        : '';
     return {
       'name': workout.name,
       'date': workout.date.toIso8601String(),
@@ -1103,7 +1117,9 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
           .split(',')
           .where((id) => id.isNotEmpty)
           .toList();
-        _debugLog('🔍 DEBUG: Client $username has \\${workoutIds.length} workouts');
+      _debugLog(
+        '🔍 DEBUG: Client $username has \\${workoutIds.length} workouts',
+      );
 
       for (final workoutId in workoutIds) {
         final firebaseWorkout = await FirebaseService.getWorkout(workoutId);
@@ -1291,7 +1307,7 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
         if (_isLoadingUser)
           Positioned.fill(
             child: Container(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               child: const Center(child: CircularProgressIndicator()),
             ),
           ),

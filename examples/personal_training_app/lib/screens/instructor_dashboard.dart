@@ -669,7 +669,7 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
                   AddWorkoutScreen(
                     onWorkoutAdded: (workout) async {
                       final workoutMap = _workoutToFirebaseMap(workout);
-                      
+
                       // Look up and add clientUid
                       final client = _clients.firstWhere(
                         (c) =>
@@ -682,15 +682,14 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
                           notifications: [],
                         ),
                       );
-                      final clientUid = await FirebaseService.getUidForUsername(client.username);
+                      final clientUid = await FirebaseService.getUidForUsername(
+                        client.username,
+                      );
                       if (clientUid != null && clientUid.isNotEmpty) {
                         workoutMap['clientUid'] = clientUid;
                       }
-                      
-                      await FirebaseService.saveWorkout(
-                        workout.id,
-                        workoutMap,
-                      );
+
+                      await FirebaseService.saveWorkout(workout.id, workoutMap);
                       final usernameKey = client.username;
                       final workoutListKey = 'workouts_$usernameKey';
                       String? workoutList = await FirebaseService.getString(
@@ -1141,7 +1140,7 @@ class _StepActivityTabState extends State<_StepActivityTab> {
                       child: Text(
                         '/ ${_formatSteps(goal)}',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),

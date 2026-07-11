@@ -44,9 +44,16 @@ class _ExerciseLibraryScreenState extends State<ExerciseLibraryScreen> {
           } else {
             exercises = exerciseLibrary;
           }
-            final filteredExercises = exercises
-              .where((e) => (selectedCategory == 'All' || e.category == selectedCategory) &&
-                (_searchQuery.isEmpty || e.name.toLowerCase().contains(_searchQuery.toLowerCase())))
+          final filteredExercises = exercises
+              .where(
+                (e) =>
+                    (selectedCategory == 'All' ||
+                        e.category == selectedCategory) &&
+                    (_searchQuery.isEmpty ||
+                        e.name.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        )),
+              )
               .toList();
           return Column(
             children: [
@@ -56,7 +63,9 @@ class _ExerciseLibraryScreenState extends State<ExerciseLibraryScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search exercises...',
                     prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -182,7 +191,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                             label: Text(muscle),
                             backgroundColor: const Color(
                               0xFF16A34A,
-                            ).withOpacity(0.1),
+                            ).withValues(alpha: 0.1),
                             labelStyle: const TextStyle(
                               color: Color(0xFF16A34A),
                               fontWeight: FontWeight.w500,
@@ -251,7 +260,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: color, width: 1),
             ),

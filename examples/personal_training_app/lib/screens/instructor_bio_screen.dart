@@ -44,31 +44,28 @@ class _InstructorBioScreenState extends State<InstructorBioScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : (_bio == null || (_bio!['name'] as String? ?? '').isEmpty)
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.person_outline,
-                          size: 80,
-                          color: Color(0xFFD1D5DB),
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'Trainer profile coming soon!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Color(0xFF6B7280),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.person_outline,
+                      size: 80,
+                      color: Color(0xFFD1D5DB),
                     ),
-                  ),
-                )
-              : _buildProfile(),
+                    SizedBox(height: 16),
+                    Text(
+                      'Trainer profile coming soon!',
+                      style: TextStyle(fontSize: 18, color: Color(0xFF6B7280)),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _buildProfile(),
     );
   }
 
@@ -113,10 +110,7 @@ class _InstructorBioScreenState extends State<InstructorBioScreen> {
                   const SizedBox(height: 6),
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -198,7 +192,7 @@ class _InstructorBioScreenState extends State<InstructorBioScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

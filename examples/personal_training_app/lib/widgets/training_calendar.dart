@@ -181,10 +181,10 @@ class _TrainingCalendarState extends State<TrainingCalendar> {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withOpacity(0.08),
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: const Color(0xFFF59E0B).withOpacity(0.28),
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.28),
               ),
             ),
             child: Column(
@@ -432,10 +432,10 @@ class _TrainingCalendarState extends State<TrainingCalendar> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Color(0xFF7C3AED).withOpacity(0.05),
+                        color: Color(0xFF7C3AED).withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Color(0xFF7C3AED).withOpacity(0.3),
+                          color: Color(0xFF7C3AED).withValues(alpha: 0.3),
                         ),
                       ),
                       child: Text(
@@ -801,14 +801,14 @@ class _TrainingCalendarState extends State<TrainingCalendar> {
                                           decoration: BoxDecoration(
                                             color: Color(
                                               0xFF7C3AED,
-                                            ).withOpacity(0.05),
+                                            ).withValues(alpha: 0.05),
                                             borderRadius: BorderRadius.circular(
                                               6,
                                             ),
                                             border: Border.all(
                                               color: Color(
                                                 0xFF7C3AED,
-                                              ).withOpacity(0.3),
+                                              ).withValues(alpha: 0.3),
                                             ),
                                           ),
                                           child: Text(
@@ -849,14 +849,14 @@ class _TrainingCalendarState extends State<TrainingCalendar> {
                                           decoration: BoxDecoration(
                                             color: Color(
                                               0xFF2563EB,
-                                            ).withOpacity(0.05),
+                                            ).withValues(alpha: 0.05),
                                             borderRadius: BorderRadius.circular(
                                               6,
                                             ),
                                             border: Border.all(
                                               color: Color(
                                                 0xFF2563EB,
-                                              ).withOpacity(0.3),
+                                              ).withValues(alpha: 0.3),
                                             ),
                                           ),
                                           child: Text(
@@ -951,7 +951,7 @@ class _TrainingCalendarState extends State<TrainingCalendar> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),

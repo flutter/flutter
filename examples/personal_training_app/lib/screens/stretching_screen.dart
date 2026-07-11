@@ -37,9 +37,16 @@ class _StretchingScreenState extends State<StretchingScreen> {
           } else {
             stretches = stretchingLibrary;
           }
-            final filteredStretches = stretches
-              .where((s) => (selectedCategory == 'All' || s.category == selectedCategory) &&
-                (_searchQuery.isEmpty || s.name.toLowerCase().contains(_searchQuery.toLowerCase())))
+          final filteredStretches = stretches
+              .where(
+                (s) =>
+                    (selectedCategory == 'All' ||
+                        s.category == selectedCategory) &&
+                    (_searchQuery.isEmpty ||
+                        s.name.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        )),
+              )
               .toList();
           return Column(
             children: [
@@ -49,7 +56,7 @@ class _StretchingScreenState extends State<StretchingScreen> {
                   gradient: LinearGradient(
                     colors: [
                       const Color(0xFF059669),
-                      const Color(0xFF059669).withOpacity(0.8),
+                      const Color(0xFF059669).withValues(alpha: 0.8),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -80,7 +87,9 @@ class _StretchingScreenState extends State<StretchingScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search stretches...',
                     prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -156,13 +165,14 @@ class _StretchCardState extends State<StretchCard> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 18,
+              horizontal: 24,
+            ),
             onTap: () {
               setState(() {
                 isExpanded = !isExpanded;
@@ -172,7 +182,7 @@ class _StretchCardState extends State<StretchCard> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: const Color(0xFF059669).withOpacity(0.13),
+                color: const Color(0xFF059669).withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -222,7 +232,7 @@ class _StretchCardState extends State<StretchCard> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF059669).withOpacity(0.1),
+                          color: const Color(0xFF059669).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: const Color(0xFF059669),

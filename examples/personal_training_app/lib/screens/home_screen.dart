@@ -139,8 +139,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? 'Steps synced: ${_formatSteps(steps)} steps today'
                   : 'Could not read steps from watch. Make sure your watch is connected.',
             ),
-            backgroundColor:
-                steps != null ? const Color(0xFF059669) : Colors.orange,
+            backgroundColor: steps != null
+                ? const Color(0xFF059669)
+                : Colors.orange,
           ),
         );
       }
@@ -211,8 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 7-day average
     int weekAvg = 0;
     if (_weekSteps.isNotEmpty) {
-      weekAvg = (_weekSteps.values.fold(0, (a, b) => a + b) /
-              _weekSteps.length)
+      weekAvg = (_weekSteps.values.fold(0, (a, b) => a + b) / _weekSteps.length)
           .round();
     }
 
@@ -230,10 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: (isGoalMet
-                    ? const Color(0xFF059669)
-                    : const Color(0xFF2563EB))
-                .withOpacity(0.3),
+            color:
+                (isGoalMet ? const Color(0xFF059669) : const Color(0xFF2563EB))
+                    .withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -277,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   '/ ${_formatSteps(goal)} goal',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.75),
+                    color: Colors.white.withValues(alpha: 0.75),
                     fontSize: 14,
                   ),
                 ),
@@ -289,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.white.withOpacity(0.25),
+              backgroundColor: Colors.white.withValues(alpha: 0.25),
               color: Colors.white,
               minHeight: 6,
             ),
@@ -300,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 '${(progress * 100).toStringAsFixed(0)}% of daily goal',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 12,
                 ),
               ),
@@ -309,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   '7-day avg: ${_formatSteps(weekAvg)}',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 12,
                   ),
                 ),
@@ -331,17 +330,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Icon(
-                            Icons.sync,
-                            size: 16,
-                            color: Colors.white,
-                          ),
+                        : const Icon(Icons.sync, size: 16, color: Colors.white),
                     label: Text(
                       _stepSyncing ? 'Syncing...' : 'Sync from Watch',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                     ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.white54),
@@ -353,11 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _enterStepsManually,
-                  icon: const Icon(
-                    Icons.edit,
-                    size: 16,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.edit, size: 16, color: Colors.white),
                   label: const Text(
                     'Enter Manually',
                     style: TextStyle(color: Colors.white, fontSize: 13),
@@ -701,8 +689,8 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFFFFD700).withOpacity(0.2),
-                const Color(0xFF7C3AED).withOpacity(0.1),
+                const Color(0xFFFFD700).withValues(alpha: 0.2),
+                const Color(0xFF7C3AED).withValues(alpha: 0.1),
               ],
             ),
             borderRadius: BorderRadius.circular(12),
@@ -846,8 +834,8 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              const Color(0xFF7C3AED).withOpacity(0.1),
-              const Color(0xFF2563EB).withOpacity(0.1),
+              const Color(0xFF7C3AED).withValues(alpha: 0.1),
+              const Color(0xFF2563EB).withValues(alpha: 0.1),
             ],
           ),
           borderRadius: BorderRadius.circular(12),
@@ -905,7 +893,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: const Color(0xFF7C3AED).withOpacity(0.3),
+                        color: const Color(0xFF7C3AED).withValues(alpha: 0.3),
                       ),
                     ),
                     child: Column(
@@ -935,7 +923,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7C3AED).withOpacity(0.05),
+                            color: const Color(
+                              0xFF7C3AED,
+                            ).withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -1032,8 +1022,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               // Step count card
-              if (widget.clientProfile != null)
-                _buildStepCountCard(context),
+              if (widget.clientProfile != null) _buildStepCountCard(context),
 
               // Workouts completed summary
               Text(

@@ -146,10 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? 'Invalid username or password.'
                 : 'Unable to start secure session: $authError');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
       return;
     }
@@ -189,7 +186,11 @@ class _LoginScreenState extends State<LoginScreen> {
         await FirebaseService.saveUserToken(username, token);
         final dbRef = FirebaseDatabase.instance.ref();
         try {
-          await dbRef.child('users').child(username).child('fcmToken').set(token);
+          await dbRef
+              .child('users')
+              .child(username)
+              .child('fcmToken')
+              .set(token);
         } catch (e) {
           debugPrint('Error saving FCM token: $e');
         }
@@ -365,10 +366,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? 'Unable to start secure session. Try again.'
                   : 'Unable to start secure session: $authError');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
         return;
       }
@@ -425,7 +423,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB).withOpacity(0.1),
+                      color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -454,20 +452,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              const Color(0xFF2563EB).withOpacity(0.13),
-                              const Color(0xFF7C3AED).withOpacity(0.13),
+                              const Color(0xFF2563EB).withValues(alpha: 0.13),
+                              const Color(0xFF7C3AED).withValues(alpha: 0.13),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: const Color(0xFF2563EB).withOpacity(0.25),
+                            color: const Color(
+                              0xFF2563EB,
+                            ).withValues(alpha: 0.25),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF2563EB).withOpacity(0.18),
+                              color: const Color(
+                                0xFF2563EB,
+                              ).withValues(alpha: 0.18),
                               blurRadius: 16,
                               offset: const Offset(0, 6),
                             ),
@@ -483,7 +485,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 letterSpacing: 0.5,
                                 shadows: [
                                   Shadow(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                     blurRadius: 8,
                                     offset: Offset(0, 2),
                                   ),

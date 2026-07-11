@@ -133,10 +133,10 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withOpacity(0.08),
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: const Color(0xFFF59E0B).withOpacity(0.28),
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.28),
               ),
             ),
             child: Column(
@@ -259,7 +259,8 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Rep Range',
                   hintText: 'e.g., 8-12',
-                  helperText: 'Guide: Strength 3-6, Hypertrophy 8-12, Endurance 12-20',
+                  helperText:
+                      'Guide: Strength 3-6, Hypertrophy 8-12, Endurance 12-20',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -315,7 +316,9 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
 
                 if (repRange == null || reps == null) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    const SnackBar(content: Text('Rep range must look like 8-12')),
+                    const SnackBar(
+                      content: Text('Rep range must look like 8-12'),
+                    ),
                   );
                   return;
                 }
@@ -407,7 +410,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.primaryContainer.withOpacity(0.35),
+                        ).colorScheme.primaryContainer.withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Theme.of(context).colorScheme.outlineVariant,
@@ -437,9 +440,8 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.secondaryContainer.withOpacity(0.35),
+                        color: Theme.of(context).colorScheme.secondaryContainer
+                            .withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Theme.of(context).colorScheme.outlineVariant,
@@ -586,7 +588,9 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
               color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.35),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.35),
               ),
             ),
             child: Column(

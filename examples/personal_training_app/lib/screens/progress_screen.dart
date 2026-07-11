@@ -216,7 +216,7 @@ class _ProgressScreenView extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF1D4ED8).withOpacity(0.2),
+                  color: const Color(0xFF1D4ED8).withValues(alpha: 0.2),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -236,7 +236,7 @@ class _ProgressScreenView extends StatelessWidget {
                 Text(
                   'Track training consistency, PRs, cardio, and bodyweight trends.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],

@@ -67,11 +67,7 @@ class IllustratedAvatar extends StatelessWidget {
   final String token;
   final double size;
 
-  const IllustratedAvatar({
-    super.key,
-    required this.token,
-    this.size = 96,
-  });
+  const IllustratedAvatar({super.key, required this.token, this.size = 96});
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +300,8 @@ class _IllustratedAvatarPainter extends CustomPainter {
     final height = size.height;
     final center = Offset(width / 2, height / 2);
     final radius = math.min(width, height) / 2;
-    final clipPath = Path()..addOval(Rect.fromCircle(center: center, radius: radius));
+    final clipPath = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: radius));
 
     canvas.save();
     canvas.clipPath(clipPath);
@@ -395,31 +392,70 @@ class _IllustratedAvatarPainter extends CustomPainter {
       case _HairShape.swoop:
         final path = Path()
           ..moveTo(size.width * 0.33, size.height * 0.29)
-          ..quadraticBezierTo(size.width * 0.43, size.height * 0.16, size.width * 0.63, size.height * 0.22)
-          ..quadraticBezierTo(size.width * 0.70, size.height * 0.28, size.width * 0.65, size.height * 0.38)
+          ..quadraticBezierTo(
+            size.width * 0.43,
+            size.height * 0.16,
+            size.width * 0.63,
+            size.height * 0.22,
+          )
+          ..quadraticBezierTo(
+            size.width * 0.70,
+            size.height * 0.28,
+            size.width * 0.65,
+            size.height * 0.38,
+          )
           ..lineTo(size.width * 0.58, size.height * 0.31)
-          ..quadraticBezierTo(size.width * 0.48, size.height * 0.26, size.width * 0.39, size.height * 0.33)
+          ..quadraticBezierTo(
+            size.width * 0.48,
+            size.height * 0.26,
+            size.width * 0.39,
+            size.height * 0.33,
+          )
           ..close();
         canvas.drawPath(path, hairPaint);
         break;
       case _HairShape.bun:
         canvas.drawOval(
-          Rect.fromLTWH(size.width * 0.31, size.height * 0.22, size.width * 0.38, size.height * 0.20),
+          Rect.fromLTWH(
+            size.width * 0.31,
+            size.height * 0.22,
+            size.width * 0.38,
+            size.height * 0.20,
+          ),
           hairPaint,
         );
-        canvas.drawCircle(Offset(size.width * 0.34, size.height * 0.27), size.width * 0.07, hairPaint);
+        canvas.drawCircle(
+          Offset(size.width * 0.34, size.height * 0.27),
+          size.width * 0.07,
+          hairPaint,
+        );
         final backPath = Path()
           ..moveTo(size.width * 0.30, size.height * 0.32)
-          ..quadraticBezierTo(size.width * 0.20, size.height * 0.45, size.width * 0.28, size.height * 0.62)
+          ..quadraticBezierTo(
+            size.width * 0.20,
+            size.height * 0.45,
+            size.width * 0.28,
+            size.height * 0.62,
+          )
           ..lineTo(size.width * 0.38, size.height * 0.56)
-          ..quadraticBezierTo(size.width * 0.33, size.height * 0.44, size.width * 0.39, size.height * 0.34)
+          ..quadraticBezierTo(
+            size.width * 0.33,
+            size.height * 0.44,
+            size.width * 0.39,
+            size.height * 0.34,
+          )
           ..close();
         canvas.drawPath(backPath, hairPaint);
         break;
       case _HairShape.fade:
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(size.width * 0.36, size.height * 0.22, size.width * 0.28, size.height * 0.16),
+            Rect.fromLTWH(
+              size.width * 0.36,
+              size.height * 0.22,
+              size.width * 0.28,
+              size.height * 0.16,
+            ),
             const Radius.circular(20),
           ),
           hairPaint,
@@ -428,15 +464,45 @@ class _IllustratedAvatarPainter extends CustomPainter {
       case _HairShape.waves:
         final wavesPath = Path()
           ..moveTo(size.width * 0.28, size.height * 0.24)
-          ..quadraticBezierTo(size.width * 0.18, size.height * 0.40, size.width * 0.30, size.height * 0.62)
-          ..quadraticBezierTo(size.width * 0.42, size.height * 0.70, size.width * 0.44, size.height * 0.50)
-          ..quadraticBezierTo(size.width * 0.36, size.height * 0.42, size.width * 0.42, size.height * 0.28)
+          ..quadraticBezierTo(
+            size.width * 0.18,
+            size.height * 0.40,
+            size.width * 0.30,
+            size.height * 0.62,
+          )
+          ..quadraticBezierTo(
+            size.width * 0.42,
+            size.height * 0.70,
+            size.width * 0.44,
+            size.height * 0.50,
+          )
+          ..quadraticBezierTo(
+            size.width * 0.36,
+            size.height * 0.42,
+            size.width * 0.42,
+            size.height * 0.28,
+          )
           ..close();
         final wavesPath2 = Path()
           ..moveTo(size.width * 0.52, size.height * 0.22)
-          ..quadraticBezierTo(size.width * 0.76, size.height * 0.24, size.width * 0.67, size.height * 0.55)
-          ..quadraticBezierTo(size.width * 0.58, size.height * 0.72, size.width * 0.48, size.height * 0.54)
-          ..quadraticBezierTo(size.width * 0.60, size.height * 0.40, size.width * 0.52, size.height * 0.22)
+          ..quadraticBezierTo(
+            size.width * 0.76,
+            size.height * 0.24,
+            size.width * 0.67,
+            size.height * 0.55,
+          )
+          ..quadraticBezierTo(
+            size.width * 0.58,
+            size.height * 0.72,
+            size.width * 0.48,
+            size.height * 0.54,
+          )
+          ..quadraticBezierTo(
+            size.width * 0.60,
+            size.height * 0.40,
+            size.width * 0.52,
+            size.height * 0.22,
+          )
           ..close();
         canvas.drawPath(wavesPath, hairPaint);
         canvas.drawPath(wavesPath2, hairPaint);
@@ -444,27 +510,52 @@ class _IllustratedAvatarPainter extends CustomPainter {
       case _HairShape.quiff:
         final path = Path()
           ..moveTo(size.width * 0.31, size.height * 0.28)
-          ..quadraticBezierTo(size.width * 0.48, size.height * 0.12, size.width * 0.67, size.height * 0.23)
+          ..quadraticBezierTo(
+            size.width * 0.48,
+            size.height * 0.12,
+            size.width * 0.67,
+            size.height * 0.23,
+          )
           ..lineTo(size.width * 0.60, size.height * 0.41)
-          ..quadraticBezierTo(size.width * 0.49, size.height * 0.30, size.width * 0.39, size.height * 0.36)
+          ..quadraticBezierTo(
+            size.width * 0.49,
+            size.height * 0.30,
+            size.width * 0.39,
+            size.height * 0.36,
+          )
           ..close();
         canvas.drawPath(path, hairPaint);
         break;
       case _HairShape.longStraight:
         final sideHair = Path()
           ..moveTo(size.width * 0.28, size.height * 0.22)
-          ..quadraticBezierTo(size.width * 0.20, size.height * 0.44, size.width * 0.28, size.height * 0.78)
+          ..quadraticBezierTo(
+            size.width * 0.20,
+            size.height * 0.44,
+            size.width * 0.28,
+            size.height * 0.78,
+          )
           ..lineTo(size.width * 0.40, size.height * 0.78)
           ..lineTo(size.width * 0.38, size.height * 0.26)
           ..close();
         final sideHair2 = Path()
           ..moveTo(size.width * 0.72, size.height * 0.22)
-          ..quadraticBezierTo(size.width * 0.80, size.height * 0.44, size.width * 0.72, size.height * 0.78)
+          ..quadraticBezierTo(
+            size.width * 0.80,
+            size.height * 0.44,
+            size.width * 0.72,
+            size.height * 0.78,
+          )
           ..lineTo(size.width * 0.60, size.height * 0.78)
           ..lineTo(size.width * 0.62, size.height * 0.26)
           ..close();
         canvas.drawOval(
-          Rect.fromLTWH(size.width * 0.30, size.height * 0.20, size.width * 0.40, size.height * 0.18),
+          Rect.fromLTWH(
+            size.width * 0.30,
+            size.height * 0.20,
+            size.width * 0.40,
+            size.height * 0.18,
+          ),
           hairPaint,
         );
         canvas.drawPath(sideHair, hairPaint);
@@ -472,25 +563,54 @@ class _IllustratedAvatarPainter extends CustomPainter {
         break;
       case _HairShape.topKnot:
         canvas.drawOval(
-          Rect.fromLTWH(size.width * 0.30, size.height * 0.22, size.width * 0.40, size.height * 0.16),
+          Rect.fromLTWH(
+            size.width * 0.30,
+            size.height * 0.22,
+            size.width * 0.40,
+            size.height * 0.16,
+          ),
           hairPaint,
         );
-        canvas.drawCircle(Offset(size.width * 0.53, size.height * 0.17), size.width * 0.07, hairPaint);
+        canvas.drawCircle(
+          Offset(size.width * 0.53, size.height * 0.17),
+          size.width * 0.07,
+          hairPaint,
+        );
         canvas.drawRect(
-          Rect.fromLTWH(size.width * 0.49, size.height * 0.20, size.width * 0.04, size.height * 0.08),
+          Rect.fromLTWH(
+            size.width * 0.49,
+            size.height * 0.20,
+            size.width * 0.04,
+            size.height * 0.08,
+          ),
           hairPaint,
         );
         break;
       case _HairShape.ponytail:
         canvas.drawOval(
-          Rect.fromLTWH(size.width * 0.30, size.height * 0.21, size.width * 0.40, size.height * 0.17),
+          Rect.fromLTWH(
+            size.width * 0.30,
+            size.height * 0.21,
+            size.width * 0.40,
+            size.height * 0.17,
+          ),
           hairPaint,
         );
         final tail = Path()
           ..moveTo(size.width * 0.60, size.height * 0.30)
-          ..quadraticBezierTo(size.width * 0.72, size.height * 0.42, size.width * 0.58, size.height * 0.68)
+          ..quadraticBezierTo(
+            size.width * 0.72,
+            size.height * 0.42,
+            size.width * 0.58,
+            size.height * 0.68,
+          )
           ..lineTo(size.width * 0.50, size.height * 0.64)
-          ..quadraticBezierTo(size.width * 0.60, size.height * 0.46, size.width * 0.53, size.height * 0.32)
+          ..quadraticBezierTo(
+            size.width * 0.60,
+            size.height * 0.46,
+            size.width * 0.53,
+            size.height * 0.32,
+          )
           ..close();
         canvas.drawPath(tail, hairPaint);
         break;
@@ -503,7 +623,12 @@ class _IllustratedAvatarPainter extends CustomPainter {
           );
         }
         canvas.drawOval(
-          Rect.fromLTWH(size.width * 0.30, size.height * 0.25, size.width * 0.40, size.height * 0.16),
+          Rect.fromLTWH(
+            size.width * 0.30,
+            size.height * 0.25,
+            size.width * 0.40,
+            size.height * 0.16,
+          ),
           hairPaint,
         );
         break;
@@ -525,19 +650,34 @@ class _IllustratedAvatarPainter extends CustomPainter {
         break;
       case _HairShape.bob:
         canvas.drawOval(
-          Rect.fromLTWH(size.width * 0.29, size.height * 0.21, size.width * 0.42, size.height * 0.18),
+          Rect.fromLTWH(
+            size.width * 0.29,
+            size.height * 0.21,
+            size.width * 0.42,
+            size.height * 0.18,
+          ),
           hairPaint,
         );
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(size.width * 0.26, size.height * 0.29, size.width * 0.12, size.height * 0.34),
+            Rect.fromLTWH(
+              size.width * 0.26,
+              size.height * 0.29,
+              size.width * 0.12,
+              size.height * 0.34,
+            ),
             const Radius.circular(20),
           ),
           hairPaint,
         );
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(size.width * 0.62, size.height * 0.29, size.width * 0.12, size.height * 0.34),
+            Rect.fromLTWH(
+              size.width * 0.62,
+              size.height * 0.29,
+              size.width * 0.12,
+              size.height * 0.34,
+            ),
             const Radius.circular(20),
           ),
           hairPaint,
@@ -546,17 +686,37 @@ class _IllustratedAvatarPainter extends CustomPainter {
       case _HairShape.sidePart:
         final partPath = Path()
           ..moveTo(size.width * 0.30, size.height * 0.30)
-          ..quadraticBezierTo(size.width * 0.38, size.height * 0.18, size.width * 0.58, size.height * 0.23)
-          ..quadraticBezierTo(size.width * 0.68, size.height * 0.26, size.width * 0.70, size.height * 0.38)
+          ..quadraticBezierTo(
+            size.width * 0.38,
+            size.height * 0.18,
+            size.width * 0.58,
+            size.height * 0.23,
+          )
+          ..quadraticBezierTo(
+            size.width * 0.68,
+            size.height * 0.26,
+            size.width * 0.70,
+            size.height * 0.38,
+          )
           ..lineTo(size.width * 0.60, size.height * 0.37)
-          ..quadraticBezierTo(size.width * 0.50, size.height * 0.29, size.width * 0.39, size.height * 0.35)
+          ..quadraticBezierTo(
+            size.width * 0.50,
+            size.height * 0.29,
+            size.width * 0.39,
+            size.height * 0.35,
+          )
           ..close();
         canvas.drawPath(partPath, hairPaint);
         break;
       case _HairShape.buzz:
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(size.width * 0.35, size.height * 0.24, size.width * 0.30, size.height * 0.12),
+            Rect.fromLTWH(
+              size.width * 0.35,
+              size.height * 0.24,
+              size.width * 0.30,
+              size.height * 0.12,
+            ),
             const Radius.circular(18),
           ),
           hairPaint,
@@ -568,18 +728,34 @@ class _IllustratedAvatarPainter extends CustomPainter {
   void _drawFace(Canvas canvas, Size size) {
     final whitePaint = Paint()..color = Colors.white;
     final eyeColor = Paint()..color = const Color(0xFF55351F);
-    final blushPaint = Paint()..color = preset.lips.withOpacity(0.18);
+    final blushPaint = Paint()..color = preset.lips.withValues(alpha: 0.18);
 
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(size.width * 0.43, size.height * 0.44), width: size.width * 0.06, height: size.height * 0.03),
+      Rect.fromCenter(
+        center: Offset(size.width * 0.43, size.height * 0.44),
+        width: size.width * 0.06,
+        height: size.height * 0.03,
+      ),
       whitePaint,
     );
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(size.width * 0.57, size.height * 0.44), width: size.width * 0.06, height: size.height * 0.03),
+      Rect.fromCenter(
+        center: Offset(size.width * 0.57, size.height * 0.44),
+        width: size.width * 0.06,
+        height: size.height * 0.03,
+      ),
       whitePaint,
     );
-    canvas.drawCircle(Offset(size.width * 0.44, size.height * 0.445), size.width * 0.010, eyeColor);
-    canvas.drawCircle(Offset(size.width * 0.56, size.height * 0.445), size.width * 0.010, eyeColor);
+    canvas.drawCircle(
+      Offset(size.width * 0.44, size.height * 0.445),
+      size.width * 0.010,
+      eyeColor,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.56, size.height * 0.445),
+      size.width * 0.010,
+      eyeColor,
+    );
 
     final browPaint = Paint()
       ..color = _shade(preset.hair, -0.1)
@@ -597,11 +773,19 @@ class _IllustratedAvatarPainter extends CustomPainter {
     );
 
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(size.width * 0.37, size.height * 0.51), width: size.width * 0.06, height: size.height * 0.03),
+      Rect.fromCenter(
+        center: Offset(size.width * 0.37, size.height * 0.51),
+        width: size.width * 0.06,
+        height: size.height * 0.03,
+      ),
       blushPaint,
     );
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(size.width * 0.63, size.height * 0.51), width: size.width * 0.06, height: size.height * 0.03),
+      Rect.fromCenter(
+        center: Offset(size.width * 0.63, size.height * 0.51),
+        width: size.width * 0.06,
+        height: size.height * 0.03,
+      ),
       blushPaint,
     );
 
@@ -612,7 +796,12 @@ class _IllustratedAvatarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     final nosePath = Path()
       ..moveTo(size.width * 0.50, size.height * 0.45)
-      ..quadraticBezierTo(size.width * 0.49, size.height * 0.51, size.width * 0.52, size.height * 0.54);
+      ..quadraticBezierTo(
+        size.width * 0.49,
+        size.height * 0.51,
+        size.width * 0.52,
+        size.height * 0.54,
+      );
     canvas.drawPath(nosePath, nosePaint);
 
     final mouthPaint = Paint()
@@ -622,13 +811,23 @@ class _IllustratedAvatarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     final mouthPath = Path()
       ..moveTo(size.width * 0.42, size.height * 0.58)
-      ..quadraticBezierTo(size.width * 0.50, size.height * 0.64, size.width * 0.60, size.height * 0.56);
+      ..quadraticBezierTo(
+        size.width * 0.50,
+        size.height * 0.64,
+        size.width * 0.60,
+        size.height * 0.56,
+      );
     canvas.drawPath(mouthPath, mouthPaint);
 
-    final teethPaint = Paint()..color = Colors.white.withOpacity(0.9);
+    final teethPaint = Paint()..color = Colors.white.withValues(alpha: 0.9);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(size.width * 0.45, size.height * 0.57, size.width * 0.10, size.height * 0.030),
+        Rect.fromLTWH(
+          size.width * 0.45,
+          size.height * 0.57,
+          size.width * 0.10,
+          size.height * 0.030,
+        ),
         const Radius.circular(4),
       ),
       teethPaint,
@@ -640,11 +839,19 @@ class _IllustratedAvatarPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = size.width * 0.012;
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(size.width * 0.43, size.height * 0.445), width: size.width * 0.10, height: size.height * 0.07),
+        Rect.fromCenter(
+          center: Offset(size.width * 0.43, size.height * 0.445),
+          width: size.width * 0.10,
+          height: size.height * 0.07,
+        ),
         glassesPaint,
       );
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(size.width * 0.57, size.height * 0.445), width: size.width * 0.10, height: size.height * 0.07),
+        Rect.fromCenter(
+          center: Offset(size.width * 0.57, size.height * 0.445),
+          width: size.width * 0.10,
+          height: size.height * 0.07,
+        ),
         glassesPaint,
       );
       canvas.drawLine(
@@ -658,8 +865,18 @@ class _IllustratedAvatarPainter extends CustomPainter {
       final beardPaint = Paint()..color = _shade(preset.hair, -0.02);
       final beardPath = Path()
         ..moveTo(size.width * 0.36, size.height * 0.55)
-        ..quadraticBezierTo(size.width * 0.50, size.height * 0.72, size.width * 0.64, size.height * 0.55)
-        ..quadraticBezierTo(size.width * 0.50, size.height * 0.68, size.width * 0.36, size.height * 0.55)
+        ..quadraticBezierTo(
+          size.width * 0.50,
+          size.height * 0.72,
+          size.width * 0.64,
+          size.height * 0.55,
+        )
+        ..quadraticBezierTo(
+          size.width * 0.50,
+          size.height * 0.68,
+          size.width * 0.36,
+          size.height * 0.55,
+        )
         ..close();
       canvas.drawPath(beardPath, beardPaint);
     }

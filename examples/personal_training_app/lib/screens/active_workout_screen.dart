@@ -136,7 +136,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                 color: const Color(0xFF111827),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -237,10 +237,14 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B).withOpacity(0.18),
+                              color: const Color(
+                                0xFFF59E0B,
+                              ).withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: const Color(0xFFF59E0B).withOpacity(0.5),
+                                color: const Color(
+                                  0xFFF59E0B,
+                                ).withValues(alpha: 0.5),
                                 width: 1,
                               ),
                             ),
@@ -285,10 +289,14 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withOpacity(0.18),
+                              color: const Color(
+                                0xFF10B981,
+                              ).withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: const Color(0xFF10B981).withOpacity(0.5),
+                                color: const Color(
+                                  0xFF10B981,
+                                ).withValues(alpha: 0.5),
                                 width: 1,
                               ),
                             ),
@@ -428,7 +436,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: _completedSets[globalSetIndex]
-                                      ? const Color(0xFF10B981).withOpacity(0.2)
+                                      ? const Color(
+                                          0xFF10B981,
+                                        ).withValues(alpha: 0.2)
                                       : const Color(0xFF1F2937),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
@@ -583,7 +593,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: _completedSets[setStartIndex]
-                                  ? const Color(0xFF10B981).withOpacity(0.2)
+                                  ? const Color(
+                                      0xFF10B981,
+                                    ).withValues(alpha: 0.2)
                                   : const Color(0xFF1F2937),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
@@ -658,7 +670,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                 color: const Color(0xFF111827),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
@@ -745,9 +757,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -777,7 +789,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF3B82F6).withOpacity(0.2),
+          color: const Color(0xFF3B82F6).withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: const Color(0xFF3B82F6), width: 1),
         ),
@@ -816,7 +828,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF8B5CF6).withOpacity(0.2),
+        color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFF8B5CF6), width: 1),
       ),
@@ -951,9 +963,11 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF3B82F6).withOpacity(0.1),
+          color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3)),
+          border: Border.all(
+            color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+          ),
         ),
         child: Text(
           label,
@@ -1074,7 +1088,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFFD700).withOpacity(0.3),
+                          color: const Color(0xFFFFD700).withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -1126,7 +1140,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                                       Text(
                                         '${previousPR.toStringAsFixed(1)} → ',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.7),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
                                           fontSize: 13,
                                           decoration:
                                               TextDecoration.lineThrough,
@@ -1283,9 +1299,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                         prescribedSets:
                             exercise.prescribedSets ?? exercise.sets,
                         prescribedReps:
-                          exercise.prescribedReps ??
-                          exercise.reps ??
-                          Exercise.repsFromRange(exercise.repRange),
+                            exercise.prescribedReps ??
+                            exercise.reps ??
+                            Exercise.repsFromRange(exercise.repRange),
                         prescribedWeight:
                             exercise.prescribedWeight ?? exercise.weight,
                       ),
@@ -1297,7 +1313,8 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                   final avgReps = setReps != null && setReps.isNotEmpty
                       ? (setReps.reduce((a, b) => a + b) / setReps.length)
                             .round()
-                      : exercise.reps ?? Exercise.repsFromRange(exercise.repRange);
+                      : exercise.reps ??
+                            Exercise.repsFromRange(exercise.repRange);
 
                   final updatedSets =
                       setWeights != null && setWeights.isNotEmpty
@@ -1315,7 +1332,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
                       reps: avgReps,
                       sets: updatedSets,
                       prescribedSets: exercise.prescribedSets ?? exercise.sets,
-                        prescribedReps:
+                      prescribedReps:
                           exercise.prescribedReps ??
                           exercise.reps ??
                           Exercise.repsFromRange(exercise.repRange),
