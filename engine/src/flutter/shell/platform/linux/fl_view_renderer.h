@@ -1,10 +1,11 @@
-#if FLUTTER_LINUX_GTK4
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
+
+#if FLUTTER_LINUX_GTK4
 
 #include <gtk/gtk.h>
 
@@ -73,14 +74,10 @@ void fl_view_renderer_present_layers(FlViewRenderer* renderer,
 
 G_END_DECLS
 
-#endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
 #else
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-#ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
-#define FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
 
 #include <gtk/gtk.h>
 
@@ -162,5 +159,6 @@ void fl_view_renderer_notify_frame(FlViewRenderer* renderer);
 
 G_END_DECLS
 
-#endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
 #endif
+
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_H_
