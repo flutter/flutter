@@ -16,7 +16,9 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -1360,6 +1362,38 @@ flutter:
       await flutterDevice.exitApps();
 
       expect(device.appStopped, true);
+    }),
+  );
+
+  testUsingContext(
+    'FlutterDevice echoes stderr from a desktop device as error output',
+    () => testbed.run(() async {
+      final stdoutController = StreamController<List<int>>();
+      final stderrController = StreamController<List<int>>();
+      final exitCompleter = Completer<int>();
+      final process = FakeProcess(
+        exitCode: exitCompleter.future,
+        stdout: stdoutController.stream,
+        stderr: stderrController.stream,
+      );
+      final logReader = DesktopLogReader();
+      logReader.initializeProcess(process);
+      device.logReader = logReader;
+      final flutterDevice = TestFlutterDevice(device);
+
+      await flutterDevice.startEchoingDeviceLog(DebuggingOptions.enabled(BuildInfo.debug));
+      stdoutController.add(utf8.encode('stdout line\n'));
+      stderrController.add(utf8.encode('stderr line\n'));
+      await stdoutController.close();
+      await stderrController.close();
+      exitCompleter.complete(0);
+      await pumpEventQueue();
+      await flutterDevice.stopEchoingDeviceLog();
+
+      expect(testLogger.statusText, contains('stdout line'));
+      expect(testLogger.statusText, isNot(contains('stderr line')));
+      expect(testLogger.errorText, contains('stderr line'));
+      expect(testLogger.errorText, isNot(contains('stdout line')));
     }),
   );
 

@@ -451,9 +451,11 @@ class FakeDevice extends Fake implements Device {
     outputFile.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
   }
 
+  DeviceLogReader? logReader;
+
   @override
   FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      NoOpDeviceLogReader(name);
+      logReader ?? NoOpDeviceLogReader(name);
 
   @override
   DevicePortForwarder portForwarder = const NoOpDevicePortForwarder();

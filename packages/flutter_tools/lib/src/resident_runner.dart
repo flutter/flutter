@@ -29,6 +29,7 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
+import 'desktop_device.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -107,6 +108,7 @@ class FlutterDevice {
   DevFS? devFS;
   ApplicationPackage? package;
   StreamSubscription<String>? _loggingSubscription;
+  StreamSubscription<String>? _errorLoggingSubscription;
   bool? _isListeningForVmServiceUri;
 
   /// Whether the stream [vmServiceUris] is still open.
@@ -349,27 +351,46 @@ class FlutterDevice {
     if (_loggingSubscription != null) {
       return;
     }
-    final Stream<String> logStream;
+    final DeviceLogReader logReader;
     if (device is IOSDevice) {
-      logStream = (device! as IOSDevice)
-          .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
-          .logLines;
+      logReader = (device! as IOSDevice).getLogReader(
+        app: package as IOSApp?,
+        usingCISystem: debuggingOptions.usingCISystem,
+      );
     } else {
-      logStream = (await device!.getLogReader(app: package)).logLines;
+      logReader = await device!.getLogReader(app: package);
     }
-    _loggingSubscription = logStream.listen((String line) {
-      if (!line.contains(globals.kVMServiceMessageRegExp)) {
-        globals.printStatus(line, wrap: false);
-      }
-    });
+    if (logReader is DesktopLogReader) {
+      // Desktop apps run as local child processes, so the log reader can tell
+      // stdout from stderr. Echo stderr as error output so terminals and IDEs
+      // can present it accordingly.
+      _loggingSubscription = logReader.outputLines.listen((String line) {
+        if (!line.contains(globals.kVMServiceMessageRegExp)) {
+          globals.printStatus(line, wrap: false);
+        }
+      });
+      _errorLoggingSubscription = logReader.errorLines.listen((String line) {
+        if (!line.contains(globals.kVMServiceMessageRegExp)) {
+          globals.printError(line, wrap: false);
+        }
+      });
+    } else {
+      _loggingSubscription = logReader.logLines.listen((String line) {
+        if (!line.contains(globals.kVMServiceMessageRegExp)) {
+          globals.printStatus(line, wrap: false);
+        }
+      });
+    }
   }
 
   Future<void> stopEchoingDeviceLog() async {
-    if (_loggingSubscription == null) {
+    if (_loggingSubscription == null && _errorLoggingSubscription == null) {
       return;
     }
-    await _loggingSubscription!.cancel();
+    await _loggingSubscription?.cancel();
     _loggingSubscription = null;
+    await _errorLoggingSubscription?.cancel();
+    _errorLoggingSubscription = null;
   }
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
