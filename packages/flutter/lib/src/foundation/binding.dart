@@ -20,6 +20,7 @@ import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWind
 
 // Before adding any more dart:ui imports, please read the README.
 
+import 'package:listen/listen.dart';
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -295,6 +296,40 @@ abstract class BindingBase {
       _debugBindingZone = Zone.current;
       return true;
     }());
+    _setupListenableHooks();
+  }
+
+  void _setupListenableHooks() {
+    Listenable.onError = (Object error, StackTrace? stackTrace, {ErrorContext? context}) {
+      switch (context) {
+        case ErrorContext.assertion:
+          if (error is FlutterError) {
+            throw error;
+          }
+          final String message = switch (error) {
+            StateError(message: final String msg) => msg,
+            AssertionError(message: final Object? msg) => msg?.toString() ?? error.toString(),
+            _ => error.toString(),
+          };
+          throw FlutterError(message);
+        case ErrorContext.listener:
+        case null:
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stackTrace,
+              library: 'foundation library',
+              context: ErrorDescription('while dispatching notifications for $Listenable'),
+            ),
+          );
+      }
+    };
+    Listenable.debugMaybeDispatchCreated = (String className, Object object) {
+      debugMaybeDispatchCreated('foundation', className, object);
+    };
+    Listenable.debugMaybeDispatchDisposed = (Object object) {
+      debugMaybeDispatchDisposed(object);
+    };
   }
 
   /// A method that shows a useful error message if the given binding

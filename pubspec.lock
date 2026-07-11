@@ -634,6 +634,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+  listen:
+    dependency: transitive
+    description:
+      name: listen
+      sha256: "40cfdfa71dc52a29c22873fc62458b9139cd36f65f96ffcfae2c21607bcc1dd6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0-beta.3"
   logging:
     dependency: "direct main"
     description:

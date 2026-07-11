@@ -9,6 +9,8 @@
 /// framework.
 library foundation;
 
+export 'dart:ui' show VoidCallback;
+export 'package:listen/listen.dart' show ChangeNotifier, Listenable, ValueListenable, ValueNotifier;
 export 'package:meta/meta.dart'
     show
         awaitNotRequired,
@@ -31,7 +33,6 @@ export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
 export 'src/foundation/bitfield.dart';
 export 'src/foundation/capabilities.dart';
-export 'src/foundation/change_notifier.dart';
 export 'src/foundation/collections.dart';
 export 'src/foundation/consolidate_response.dart';
 export 'src/foundation/constants.dart';
