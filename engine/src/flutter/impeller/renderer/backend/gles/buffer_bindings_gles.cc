@@ -504,14 +504,8 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     //--------------------------------------------------------------------------
     /// Set the active texture unit.
     ///
-    /// Texture units are a combined resource shared by all shader stages;
-    /// glActiveTexture and sampler uniform values are valid up to the combined
-    /// unit limit. The per-stage limits only cap how many samplers a single
-    /// stage's shader may reference, not which unit indices those samplers
-    /// may be assigned to. Since fragment stage units are allocated after the
-    /// vertex stage's, the running unit index must be validated against the
-    /// combined limit, and only the per-stage texture count against the
-    /// per-stage limit.
+    /// Units are a combined resource; the per-stage limits cap only how many
+    /// samplers one stage references, not the unit indices they bind to.
     ///
     stage_texture_count++;
     if (stage_texture_count > gl.GetCapabilities()->GetMaxTextureUnits(stage)) {

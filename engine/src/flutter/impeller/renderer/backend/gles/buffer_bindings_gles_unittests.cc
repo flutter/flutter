@@ -280,9 +280,7 @@ class BindTexturesTestWorker : public ReactorGLES::Worker {
   }
 };
 
-// State shared by the textures handed to BindUniformData: the reactor the
-// textures were created against, the sampler library the shared sampler came
-// from, and the metadata each texture binding points back into.
+// Owns the reactor, sampler, and metadata behind a set of texture bindings.
 struct BoundTexturesFixture {
   std::shared_ptr<ReactorGLES> reactor;
   std::shared_ptr<BindTexturesTestWorker> worker;
@@ -326,8 +324,7 @@ struct BoundTexturesFixture {
   }
 };
 
-// A mock impl whose capabilities report the GLES minimums a 16-unit driver
-// advertises: 16 fragment samplers, 16 vertex samplers, 32 combined units.
+// Capabilities of a minimum-spec ES3 driver (16 per stage, 32 combined).
 std::unique_ptr<NiceMock<MockGLESImpl>> MakeSixteenUnitMockImpl() {
   auto impl = std::make_unique<NiceMock<MockGLESImpl>>();
   EXPECT_CALL(*impl, GetIntegerv(_, _))
@@ -349,11 +346,8 @@ std::unique_ptr<NiceMock<MockGLESImpl>> MakeSixteenUnitMockImpl() {
 
 }  // namespace
 
-// Fragment stage texture units are allocated after the vertex stage's, so a
-// draw whose vertex stage samples a texture pushes the last of 16 fragment
-// samplers onto unit index 16. Units are a combined resource in GL, so this
-// must bind successfully on a driver reporting the per-stage minimum of 16;
-// only the per-stage sampler count is bounded per stage.
+// One vertex texture pushes the last of 16 fragment samplers onto unit 16,
+// which must bind on a 16-per-stage driver since units are combined in GL.
 TEST(BufferBindingsGLESTest, BindsTexturesAcrossThePerStageUnitBoundary) {
   std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(MakeSixteenUnitMockImpl());
   BoundTexturesFixture fixture(
@@ -370,8 +364,7 @@ TEST(BufferBindingsGLESTest, BindsTexturesAcrossThePerStageUnitBoundary) {
       Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
-// A single stage referencing more samplers than its per-stage limit is still
-// rejected.
+// More samplers in one stage than its limit is still rejected.
 TEST(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit) {
   std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(MakeSixteenUnitMockImpl());
   BoundTexturesFixture fixture(
@@ -387,8 +380,8 @@ TEST(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit) {
       Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
-// Unit indices past the combined limit are rejected even when each stage is
-// within its own per-stage limit. The mock's combined limit defaults to 8.
+// Units past the combined limit (the mock default, 8) are rejected even when
+// each stage is within its per-stage limit.
 TEST(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit) {
   auto impl = std::make_unique<NiceMock<MockGLESImpl>>();
   EXPECT_CALL(*impl, GetIntegerv(_, _))

@@ -98,7 +98,7 @@ void mockGetIntegerv(GLenum name, int* value) {
       *value = g_extensions.size();
     } break;
     case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
-      // Default to the minimum; a registered mock may overwrite the value.
+      // Minimum default; a registered mock may overwrite it.
       *value = 8;
       CallMockMethod(&IMockGLESImpl::GetIntegerv, name, value);
       break;
