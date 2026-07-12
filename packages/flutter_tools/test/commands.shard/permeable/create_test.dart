@@ -3682,11 +3682,10 @@ void main() {
       expect(pubspecContent, contains('macos:'));
       expect(pubspecContent, contains('pluginClass: DarwinPlugin'));
       expect(pubspecContent, contains('sharedDarwinSource: true'));
-
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
       final String podspecContent = await podspec.readAsString();
       expect(podspecContent, contains("s.ios.deployment_target = '15.0'"));
-      expect(podspecContent, contains("s.osx.deployment_target = '10.15'"));
+      expect(podspecContent, contains("s.osx.deployment_target = '12.0'"));
 
       final File swiftFile = projectDir
           .childDirectory('darwin')
@@ -3776,7 +3775,7 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
       expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)
@@ -3816,7 +3815,7 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
       expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)

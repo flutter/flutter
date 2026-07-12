@@ -33,6 +33,23 @@ static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   return kFlutterPointerDeviceKindMouse;
 }
 
+static void get_pointer_device_state(GdkEvent* event,
+                                     gdouble* rotation,
+                                     gdouble* pressure) {
+  *rotation = 0.0;
+  *pressure = 0.0;
+  if (event == nullptr) {
+    return;
+  }
+
+  gdouble pressure_value = 0.0;
+  gdouble rotation_value = 0.0;
+  gdk_event_get_axis(event, GDK_AXIS_PRESSURE, &pressure_value);
+  gdk_event_get_axis(event, GDK_AXIS_ROTATION, &rotation_value);
+  *pressure = pressure_value;
+  *rotation = rotation_value;
+}
+
 static void gesture_rotation_begin_cb(FlView* view) {
   fl_scrolling_manager_handle_rotation_begin(view->scrolling_manager);
 }
@@ -86,7 +103,7 @@ static gboolean get_event_position(FlView* view,
     return FALSE;
   }
 
-  GtkWidget* render_area = GTK_WIDGET(view->render_area);
+  GtkWidget* render_area = GTK_WIDGET(view->renderer);
   GtkNative* native = gtk_widget_get_native(render_area);
   if (native == nullptr) {
     *x = event_x;
@@ -134,15 +151,21 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
           gdk_event_get_modifier_state(event), gdk_event_get_time(event));
 
       if (event_type == GDK_BUTTON_PRESS) {
+        gdouble rotation = 0.0;
+        gdouble pressure = 0.0;
+        get_pointer_device_state(event, &rotation, &pressure);
         return fl_pointer_manager_handle_button_press(
             view->pointer_manager, gdk_event_get_time(event),
             get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-            button);
+            button, rotation, pressure);
       }
+      gdouble rotation = 0.0;
+      gdouble pressure = 0.0;
+      get_pointer_device_state(event, &rotation, &pressure);
       return fl_pointer_manager_handle_button_release(
           view->pointer_manager, gdk_event_get_time(event),
           get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-          button);
+          button, rotation, pressure);
     }
     case GDK_SCROLL:
       fl_scrolling_manager_handle_scroll_event(view->scrolling_manager, event,
@@ -156,9 +179,13 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
       if (!get_event_position(view, event, &x, &y)) {
         return FALSE;
       }
+      gdouble rotation = 0.0;
+      gdouble pressure = 0.0;
+      get_pointer_device_state(event, &rotation, &pressure);
       return fl_pointer_manager_handle_motion(
           view->pointer_manager, gdk_event_get_time(event),
-          get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+          get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+          rotation, pressure);
     }
     case GDK_ENTER_NOTIFY:
     case GDK_LEAVE_NOTIFY: {
@@ -172,13 +199,21 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
         return FALSE;
       }
       if (event_type == GDK_ENTER_NOTIFY) {
+        gdouble rotation = 0.0;
+        gdouble pressure = 0.0;
+        get_pointer_device_state(event, &rotation, &pressure);
         return fl_pointer_manager_handle_enter(
             view->pointer_manager, gdk_event_get_time(event),
-            get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+            get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+            rotation, pressure);
       }
+      gdouble rotation = 0.0;
+      gdouble pressure = 0.0;
+      get_pointer_device_state(event, &rotation, &pressure);
       return fl_pointer_manager_handle_leave(
           view->pointer_manager, gdk_event_get_time(event),
-          get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+          get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+          rotation, pressure);
     }
     case GDK_TOUCH_BEGIN:
     case GDK_TOUCH_UPDATE:
@@ -193,12 +228,12 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
 }
 
 void fl_view_gtk4_setup(FlView* view) {
-  gtk_box_append(GTK_BOX(view), GTK_WIDGET(view->render_area));
+  gtk_box_append(GTK_BOX(view), GTK_WIDGET(view->renderer));
 
   GtkEventController* legacy = gtk_event_controller_legacy_new();
   g_signal_connect_swapped(legacy, "event",
                            G_CALLBACK(fl_view_gtk4_legacy_event_cb), view);
-  gtk_widget_add_controller(GTK_WIDGET(view->render_area), legacy);
+  gtk_widget_add_controller(GTK_WIDGET(view->renderer), legacy);
 
   view->zoom_gesture = gtk_gesture_zoom_new();
   g_signal_connect_swapped(view->zoom_gesture, "begin",
@@ -207,7 +242,7 @@ void fl_view_gtk4_setup(FlView* view) {
                            G_CALLBACK(gesture_zoom_update_cb), view);
   g_signal_connect_swapped(view->zoom_gesture, "end",
                            G_CALLBACK(gesture_zoom_end_cb), view);
-  gtk_widget_add_controller(GTK_WIDGET(view->render_area),
+  gtk_widget_add_controller(GTK_WIDGET(view->renderer),
                             GTK_EVENT_CONTROLLER(view->zoom_gesture));
 
   view->rotate_gesture = gtk_gesture_rotate_new();
@@ -217,6 +252,6 @@ void fl_view_gtk4_setup(FlView* view) {
                            G_CALLBACK(gesture_rotation_update_cb), view);
   g_signal_connect_swapped(view->rotate_gesture, "end",
                            G_CALLBACK(gesture_rotation_end_cb), view);
-  gtk_widget_add_controller(GTK_WIDGET(view->render_area),
+  gtk_widget_add_controller(GTK_WIDGET(view->renderer),
                             GTK_EVENT_CONTROLLER(view->rotate_gesture));
 }

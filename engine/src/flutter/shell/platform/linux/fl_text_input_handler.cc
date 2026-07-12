@@ -428,8 +428,9 @@ void fl_text_input_handler_set_widget(FlTextInputHandler* self,
   fl_text_input_handler_gtk4_set_widget(self, widget);
 #else
   self->widget = widget;
-  gtk_im_context_set_client_window(self->im_context,
-                                   gtk_widget_get_window(self->widget));
+  gtk_im_context_set_client_window(
+      self->im_context,
+      widget != nullptr ? gtk_widget_get_window(widget) : nullptr);
 #endif
 }
 

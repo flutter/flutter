@@ -614,7 +614,6 @@ void main() {
 
   group('matchesSemanticsData', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
       const key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
@@ -713,8 +712,6 @@ void main() {
           ),
         ),
       );
-
-      handle.dispose();
     });
 
     testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
@@ -831,7 +828,6 @@ void main() {
     });
 
     testWidgets('Can match child semantics', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
       const key = Key('a');
       await tester.pumpWidget(
         Semantics(
@@ -853,12 +849,91 @@ void main() {
           children: <Matcher>[matchesSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
         ),
       );
-      handle.dispose();
+    });
+
+    testWidgets('expects children but missed one child', (WidgetTester tester) async {
+      const key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          container: true,
+          explicitChildNodes: true,
+          textDirection: TextDirection.ltr,
+          child: Semantics(label: 'Bar', textDirection: TextDirection.ltr),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        () => expect(
+          node,
+          matchesSemantics(
+            label: 'Foo',
+            textDirection: TextDirection.ltr,
+            children: <Matcher>[
+              matchesSemantics(label: 'Bar', textDirection: TextDirection.ltr),
+              matchesSemantics(label: 'Baz', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains('expected 2 children, found 1'),
+          ),
+        ),
+      );
+    });
+
+    testWidgets('has more children than expected', (WidgetTester tester) async {
+      const key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          container: true,
+          explicitChildNodes: true,
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                label: 'Bar',
+                textDirection: TextDirection.ltr,
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                label: 'Baz',
+                textDirection: TextDirection.ltr,
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        () => expect(
+          node,
+          matchesSemantics(
+            label: 'Foo',
+            textDirection: TextDirection.ltr,
+            children: <Matcher>[matchesSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
+          ),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains('expected 1 child, found 2'),
+          ),
+        ),
+      );
     });
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-
       const key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
@@ -913,7 +988,6 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
-      handle.dispose();
     });
 
     testWidgets('matchesSemantics captures NBSP in failure descriptions', (
@@ -1281,8 +1355,6 @@ void main() {
 
   group('isSemantics', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-
       const key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
@@ -1381,7 +1453,6 @@ void main() {
         ),
         reason: 'onTapHint "scans" should not have matched "scan".',
       );
-      handle.dispose();
     });
 
     testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
@@ -1710,7 +1781,6 @@ void main() {
     });
 
     testWidgets('can match child semantics', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
       const key = Key('a');
       await tester.pumpWidget(
         Semantics(
@@ -1732,11 +1802,91 @@ void main() {
           children: <Matcher>[isSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
         ),
       );
-
-      handle.dispose();
     });
+
+    testWidgets('expects children but missed one child', (WidgetTester tester) async {
+      const key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          container: true,
+          explicitChildNodes: true,
+          textDirection: TextDirection.ltr,
+          child: Semantics(label: 'Bar', textDirection: TextDirection.ltr),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        () => expect(
+          node,
+          isSemantics(
+            label: 'Foo',
+            textDirection: TextDirection.ltr,
+            children: <Matcher>[
+              isSemantics(label: 'Bar', textDirection: TextDirection.ltr),
+              isSemantics(label: 'Baz', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains('expected 2 children, found 1'),
+          ),
+        ),
+      );
+    });
+
+    testWidgets('has more children than expected', (WidgetTester tester) async {
+      const key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          container: true,
+          explicitChildNodes: true,
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                label: 'Bar',
+                textDirection: TextDirection.ltr,
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                label: 'Baz',
+                textDirection: TextDirection.ltr,
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        () => expect(
+          node,
+          isSemantics(
+            label: 'Foo',
+            textDirection: TextDirection.ltr,
+            children: <Matcher>[isSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
+          ),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains('expected 1 child, found 2'),
+          ),
+        ),
+      );
+    });
+
     testWidgets('can match validation result', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
       const key = Key('a');
       await tester.pumpWidget(
         Semantics(
@@ -1756,12 +1906,9 @@ void main() {
           textDirection: TextDirection.ltr,
         ),
       );
-
-      handle.dispose();
     });
 
     testWidgets('can ignore validation result', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
       const key = Key('a');
       await tester.pumpWidget(
         Semantics(
@@ -1775,8 +1922,60 @@ void main() {
       // It is important that validationResult is passed as null to isSemantics,
       // because this is testing that null means "ignore the validation result value".
       expect(node, isSemantics(label: 'Foo', textDirection: TextDirection.ltr));
+    });
 
-      handle.dispose();
+    testWidgets('can match role', (WidgetTester tester) async {
+      const key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          role: ui.SemanticsRole.dialog,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        node,
+        isSemantics(label: 'Foo', role: ui.SemanticsRole.dialog, textDirection: TextDirection.ltr),
+      );
+    });
+
+    testWidgets('can ignore role', (WidgetTester tester) async {
+      const key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          role: ui.SemanticsRole.dialog,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      expect(node, isSemantics(label: 'Foo', textDirection: TextDirection.ltr));
+    });
+
+    testWidgets('can match role with matchesSemantics', (WidgetTester tester) async {
+      const key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          role: ui.SemanticsRole.dialog,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        node,
+        matchesSemantics(
+          label: 'Foo',
+          role: ui.SemanticsRole.dialog,
+          textDirection: TextDirection.ltr,
+        ),
+      );
     });
 
     testWidgets('can match only custom actions', (WidgetTester tester) async {
@@ -1822,8 +2021,6 @@ void main() {
     });
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-
       const key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
@@ -1875,7 +2072,6 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
-      handle.dispose();
     });
   });
 

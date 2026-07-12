@@ -3,13 +3,18 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
+
+#include <memory>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 // FIXME(robert-ancell): Disabled, see below.
@@ -19,9 +24,9 @@ static void first_frame_cb(FlView* view, gboolean* first_frame_emitted) {
 }
 #endif
 
-TEST(FlViewTest, GetEngine) {
-  flutter::testing::fl_ensure_gtk_init();
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+class FlViewTest : public flutter::testing::LinuxTest {};
+
+TEST_F(FlViewTest, GetEngine) {
   FlView* view = fl_view_new(project);
 
   // Check the engine is immediately available (i.e. before the widget is
@@ -30,9 +35,7 @@ TEST(FlViewTest, GetEngine) {
   EXPECT_NE(engine, nullptr);
 }
 
-TEST(FlViewTest, StateUpdateDoesNotHappenInInit) {
-  flutter::testing::fl_ensure_gtk_init();
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {
   FlView* view = fl_view_new(project);
   // Check that creating a view doesn't try to query the window state in
   // initialization, causing a critical log to be issued.
@@ -43,15 +46,33 @@ TEST(FlViewTest, StateUpdateDoesNotHappenInInit) {
   (void)view;
 }
 
+// Disposing a view that holds the text input focus clears the handler's
+// widget pointer so it does not dangle.
+// https://github.com/flutter/flutter/issues/188657
+TEST_F(FlViewTest, DisposeClearsTextInputWidget) {
+  FlView* view = fl_view_new(project);
+  g_object_ref_sink(view);
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_ref(fl_view_get_engine(view)));
+  StartEngine(engine);
+  FlTextInputHandler* handler = fl_engine_get_text_input_handler(engine);
+
+  // Give the view text input focus.
+  fl_text_input_handler_set_widget(handler, GTK_WIDGET(view));
+  EXPECT_EQ(fl_text_input_handler_get_widget(handler), GTK_WIDGET(view));
+
+  // Destroy the view while the engine and handler persist.
+  g_object_unref(view);
+
+  EXPECT_EQ(fl_text_input_handler_get_widget(handler), nullptr);
+}
+
 // FIXME(robert-ancell): Disabling this test as it requires the FlView
 // to be realized to work after some refactoring. This is proving to be
 // very difficult to mock. Following PRs will change this code so enable the
 // test again after that.
 #if 0
-TEST(FlViewTest, FirstFrameSignal) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, FirstFrameSignal) {
   FlView* view = fl_view_new(project);
   gboolean first_frame_emitted = FALSE;
   g_signal_connect(view, "first-frame", G_CALLBACK(first_frame_cb),
@@ -72,15 +93,11 @@ TEST(FlViewTest, FirstFrameSignal) {
 #endif
 
 // Check semantics update applied
-TEST(FlViewTest, SemanticsUpdate) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SemanticsUpdate) {
   FlView* view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(view);
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlutterSemanticsFlags flags = {};
   FlutterSemanticsNode2 root_node = {
@@ -98,15 +115,11 @@ TEST(FlViewTest, SemanticsUpdate) {
 }
 
 // Check semantics update ignored for other view
-TEST(FlViewTest, SemanticsUpdateOtherView) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SemanticsUpdateOtherView) {
   FlView* view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(view);
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlutterSemanticsFlags flags = {};
   FlutterSemanticsNode2 root_node = {
@@ -121,18 +134,15 @@ TEST(FlViewTest, SemanticsUpdateOtherView) {
 }
 
 // Check secondary view is registered with engine.
-TEST(FlViewTest, SecondaryView) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SecondaryView) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
 
-  FlutterViewId view_id = -1;
+  auto view_id = std::make_shared<FlutterViewId>(-1);
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
-      AddView, ([&view_id](auto engine, const FlutterAddViewInfo* info) {
-        view_id = info->view_id;
+      AddView, ([view_id](auto engine, const FlutterAddViewInfo* info) {
+        *view_id = info->view_id;
         FlutterAddViewResult result = {
             .struct_size = sizeof(FlutterAddViewResult),
             .added = true,
@@ -141,41 +151,33 @@ TEST(FlViewTest, SecondaryView) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
-  EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
+  EXPECT_EQ(*view_id, fl_view_get_id(secondary_view));
 }
 
 // Check secondary view that fails registration.
-TEST(FlViewTest, SecondaryViewError) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SecondaryViewError) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
 
-  FlutterViewId view_id = -1;
+  auto view_id = std::make_shared<FlutterViewId>(-1);
   fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
-      AddView, ([&view_id](auto engine, const FlutterAddViewInfo* info) {
-        view_id = info->view_id;
+      AddView, ([view_id](auto engine, const FlutterAddViewInfo* info) {
+        *view_id = info->view_id;
         return kInvalidArguments;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
-  EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
+  EXPECT_EQ(*view_id, fl_view_get_id(secondary_view));
 }
 
 // Check views are deregistered on destruction.
-TEST(FlViewTest, ViewDestroy) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, ViewDestroy) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -188,8 +190,7 @@ TEST(FlViewTest, ViewDestroy) {
         return kSuccess;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
 
@@ -204,10 +205,7 @@ TEST(FlViewTest, ViewDestroy) {
 }
 
 // Check views deregistered with errors works.
-TEST(FlViewTest, ViewDestroyError) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, ViewDestroyError) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -217,8 +215,7 @@ TEST(FlViewTest, ViewDestroyError) {
         return kInvalidArguments;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
 
@@ -227,10 +224,7 @@ TEST(FlViewTest, ViewDestroyError) {
 }
 
 // Check can create a view that is sized to the content.
-TEST(FlViewTest, SizedToContent) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+TEST_F(FlViewTest, SizedToContent) {
   FlView* implicit_view = fl_view_new(project);
 
   FlEngine* engine = fl_view_get_engine(implicit_view);
@@ -240,8 +234,7 @@ TEST(FlViewTest, SizedToContent) {
         return kInvalidArguments;
       }));
 
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
+  StartEngine(engine);
 
   FlView* secondary_view = fl_view_new_sized_to_content(engine);
 

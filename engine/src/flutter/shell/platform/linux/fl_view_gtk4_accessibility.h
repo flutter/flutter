@@ -26,10 +26,9 @@ void fl_view_gtk4_accessibility_update_accessible_name(
     FlViewGtk4Accessibility* self);
 void fl_view_gtk4_accessibility_update_accessible_tree(
     FlViewGtk4Accessibility* self);
-void fl_view_gtk4_accessibility_send_announcement(
-    FlViewGtk4Accessibility* self,
-    const char* message,
-    gboolean assertive);
+void fl_view_gtk4_accessibility_send_announcement(FlViewGtk4Accessibility* self,
+                                                  const char* message,
+                                                  gboolean assertive);
 
 G_END_DECLS
 

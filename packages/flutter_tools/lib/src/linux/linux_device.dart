@@ -35,6 +35,9 @@ class LinuxDevice extends DesktopDevice {
   Future<bool> isSupported() async => true;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   String get name => 'Linux';
 
   @override
@@ -69,7 +72,7 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
-    return package.executable(buildInfo);
+    return package.executable(buildInfo.mode, buildInfo.flavor, buildInfo.linuxGtkVersion);
   }
 }
 

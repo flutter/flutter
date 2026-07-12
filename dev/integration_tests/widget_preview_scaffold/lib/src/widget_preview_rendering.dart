@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -595,17 +594,7 @@ class WidgetPreviewTheming extends StatelessWidget {
     if (themeData == null) {
       return child;
     }
-    final (materialTheme, cupertinoTheme) = themeData.themeForBrightness(
-      MediaQuery.platformBrightnessOf(context),
-    );
-    Widget result = child;
-    if (materialTheme != null) {
-      result = Theme(data: materialTheme, child: result);
-    }
-    if (cupertinoTheme != null) {
-      result = CupertinoTheme(data: cupertinoTheme, child: result);
-    }
-    return result;
+    return themeData.apply(context, child);
   }
 }
 

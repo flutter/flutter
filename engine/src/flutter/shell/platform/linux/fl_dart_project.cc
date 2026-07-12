@@ -61,7 +61,7 @@ G_MODULE_EXPORT FlDartProject* fl_dart_project_new() {
       g_build_filename(executable_dir, "data", "flutter_assets", nullptr);
   self->icu_data_path =
       g_build_filename(executable_dir, "data", "icudtl.dat", nullptr);
-  self->enable_impeller = FALSE;
+  self->enable_impeller = TRUE;
 
   return self;
 }
