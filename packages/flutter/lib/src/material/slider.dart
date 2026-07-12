@@ -619,14 +619,13 @@ class Slider extends StatefulWidget {
   /// The calculator receives a [SliderScrollIncrementDetails] object containing:
   /// - [SliderScrollIncrementDetails.type]: Whether this is a line or page scroll
   /// - [SliderScrollIncrementDetails.semanticActionUnit]: The base increment unit
-  /// Calculates the increment amount for scroll inputs.
   ///
   /// This calculator determines how much the slider value changes when a
   /// [ScrollIntent] is received.
   ///
   /// This property triggers exclusively when the widget intercepts a [ScrollIntent]
-  /// (such as from mouse wheel scrolls or gamepad axis movements). It does not 
-  /// apply to traditional directional navigation, regular touch drags, or direct 
+  /// (such as from mouse wheel scrolls or gamepad axis movements). It does not
+  /// apply to traditional directional navigation, regular touch drags, or direct
   /// track clicks.
   ///
   /// The function receives a [SliderScrollIncrementDetails] object. The
@@ -635,13 +634,17 @@ class Slider extends StatefulWidget {
   ///
   /// If this property is null, a default calculator is used. The default
   /// behavior returns `semanticActionUnit` for line scrolls and
-  /// `semanticActionUnit * 5` for page scrolls.
-  /// For example, to use 5x the increment for page scrolls:
+  /// `semanticActionUnit * 5` for page scrolls. The 5x multiplier is a
+  /// heuristic to make page jumps significantly larger than line scrolls
+  /// on the slider track, analogous to how [Scrollable] uses 80% of the
+  /// viewport for page scrolls versus a fixed 50px for line scrolls.
+  ///
+  /// For example, to use 10x the increment for page scrolls:
   /// ```dart
   /// Slider(
   ///   scrollIncrementCalculator: (details) {
   ///     if (details.type == SliderScrollIncrementType.page) {
-  ///       return details.semanticActionUnit * 5;
+  ///       return details.semanticActionUnit * 10;
   ///     }
   ///     return details.semanticActionUnit;
   ///   },
@@ -866,6 +869,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     );
   }
 
+  // The default page multiplier of 5 is a heuristic: page scrolls should be
+  // noticeably larger than line scrolls on the slider track, similar to how
+  // Scrollable defaults to 80% viewport for page vs 50px for line.
   static double _defaultScrollIncrementCalculator(SliderScrollIncrementDetails details) {
     return switch (details.type) {
       SliderScrollIncrementType.line => details.semanticActionUnit,
