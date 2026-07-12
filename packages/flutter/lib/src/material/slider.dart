@@ -870,8 +870,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   // The default page multiplier of 5 is a heuristic: page scrolls should be
-  // noticeably larger than line scrolls on the slider track, similar to how
-  // Scrollable defaults to 80% viewport for page vs 50px for line.
+  // noticeably larger than line scrolls on the slider track.
   static double _defaultScrollIncrementCalculator(SliderScrollIncrementDetails details) {
     return switch (details.type) {
       SliderScrollIncrementType.line => details.semanticActionUnit,
