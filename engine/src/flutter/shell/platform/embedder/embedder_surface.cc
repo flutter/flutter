@@ -19,4 +19,8 @@ sk_sp<GrDirectContext> EmbedderSurface::CreateResourceContext() const {
   return nullptr;
 }
 
+void EmbedderSurface::UpdateSurfaceSize(int64_t width, int64_t height) {
+  // No-op by default. Overridden in EmbedderSurfaceVulkanImpeller.
+}
+
 }  // namespace flutter

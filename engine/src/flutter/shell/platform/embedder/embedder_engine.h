@@ -90,6 +90,16 @@ class EmbedderEngine {
 
   Shell& GetShell();
 
+  /// Sets a callback to resize the rendering surface when viewport metrics
+  /// change. Used for Vulkan KHR swapchain mode where the swapchain must
+  /// be resized when the window size changes. The callback is invoked on
+  /// the raster thread.
+  ///
+  /// Must be called before `FlutterEngineRunInitialized`. After that point,
+  /// the updater is read without locking on the platform thread.
+  void SetSurfaceSizeUpdater(
+      std::function<void(int64_t width, int64_t height)> updater);
+
  private:
   std::unique_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
@@ -97,6 +107,7 @@ class EmbedderEngine {
   std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;
+  std::function<void(int64_t width, int64_t height)> surface_size_updater_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };

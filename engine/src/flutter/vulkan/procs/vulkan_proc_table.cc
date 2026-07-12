@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 
 #define ACQUIRE_PROC(name, context)                 \
@@ -21,7 +22,26 @@
 
 namespace vulkan {
 
-VulkanProcTable::VulkanProcTable() : VulkanProcTable("libvulkan.so") {};
+VulkanProcTable::VulkanProcTable()
+    : handle_(nullptr), acquired_mandatory_proc_addresses_(false) {
+  // Try multiple library paths for better compatibility.
+#if FML_OS_WIN
+  // On Windows, the Vulkan loader is vulkan-1.dll.
+  const char* paths[] = {"vulkan-1.dll"};
+#else
+  // libvulkan.so.1 is the actual versioned soname on most Linux systems.
+  const char* paths[] = {"libvulkan.so.1", "libvulkan.so"};
+#endif
+  for (const char* path : paths) {
+    if (OpenLibraryHandle(path)) {
+      acquired_mandatory_proc_addresses_ =
+          SetupGetInstanceProcAddress() && SetupLoaderProcAddresses();
+      if (acquired_mandatory_proc_addresses_) {
+        return;
+      }
+    }
+  }
+}
 
 VulkanProcTable::VulkanProcTable(const char* so_path)
     : handle_(nullptr), acquired_mandatory_proc_addresses_(false) {
@@ -88,6 +108,13 @@ bool VulkanProcTable::SetupLoaderProcAddresses() {
   ACQUIRE_PROC(EnumerateInstanceExtensionProperties, null_instance);
   ACQUIRE_PROC(EnumerateInstanceLayerProperties, null_instance);
 
+  // EnumerateInstanceVersion was added in Vulkan 1.1, may not be available
+  [this, &null_instance]() -> bool {
+    EnumerateInstanceVersion =
+        AcquireProc("vkEnumerateInstanceVersion", null_instance);
+    return true;
+  }();
+
   return true;
 }
 
@@ -97,6 +124,7 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
   ACQUIRE_PROC(DestroyDevice, handle);
   ACQUIRE_PROC(DestroyInstance, handle);
   ACQUIRE_PROC(EnumerateDeviceLayerProperties, handle);
+  ACQUIRE_PROC(EnumerateDeviceExtensionProperties, handle);
   ACQUIRE_PROC(EnumeratePhysicalDevices, handle);
   ACQUIRE_PROC(GetDeviceProcAddr, handle);
   ACQUIRE_PROC(GetPhysicalDeviceFeatures, handle);
@@ -106,14 +134,31 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
   ACQUIRE_PROC_EITHER(GetPhysicalDeviceMemoryProperties2,
                       GetPhysicalDeviceMemoryProperties2KHR, handle);
 
-#if FML_OS_ANDROID
+#if FML_OS_ANDROID || FML_OS_LINUX || FML_OS_WIN
   ACQUIRE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR, handle);
   ACQUIRE_PROC(GetPhysicalDeviceSurfaceFormatsKHR, handle);
   ACQUIRE_PROC(GetPhysicalDeviceSurfacePresentModesKHR, handle);
   ACQUIRE_PROC(GetPhysicalDeviceSurfaceSupportKHR, handle);
   ACQUIRE_PROC(DestroySurfaceKHR, handle);
+#endif  // FML_OS_ANDROID || FML_OS_LINUX || FML_OS_WIN
+#if FML_OS_ANDROID
   ACQUIRE_PROC(CreateAndroidSurfaceKHR, handle);
 #endif  // FML_OS_ANDROID
+#if FML_OS_LINUX
+  // X11 and Wayland surface creation - these are optional based on windowing
+  // system
+  [this, &handle]() -> bool {
+    CreateXlibSurfaceKHR = AcquireProc("vkCreateXlibSurfaceKHR", handle);
+    CreateWaylandSurfaceKHR = AcquireProc("vkCreateWaylandSurfaceKHR", handle);
+    return true;
+  }();
+#endif  // FML_OS_LINUX
+#if FML_OS_WIN
+  [this, &handle]() -> bool {
+    CreateWin32SurfaceKHR = AcquireProc("vkCreateWin32SurfaceKHR", handle);
+    return true;
+  }();
+#endif  // FML_OS_WIN
 
   // The debug report functions are optional. We don't want proc acquisition to
   // fail here because the optional methods were not present (since ACQUIRE_PROC
@@ -165,6 +210,10 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
   ACQUIRE_PROC(CreateBuffer, handle);
   ACQUIRE_PROC(DestroyBuffer, handle);
   ACQUIRE_PROC(CmdCopyBuffer, handle);
+  ACQUIRE_PROC(CmdBlitImage, handle);
+  ACQUIRE_PROC(CmdCopyImage, handle);
+  ACQUIRE_PROC(CmdCopyImageToBuffer, handle);
+  ACQUIRE_PROC(CmdClearColorImage, handle);
 
   ACQUIRE_PROC_EITHER(GetBufferMemoryRequirements2,
                       GetBufferMemoryRequirements2KHR, handle);
@@ -174,13 +223,17 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
   ACQUIRE_PROC_EITHER(BindImageMemory2, BindImageMemory2KHR, handle);
 
 #ifndef TEST_VULKAN_PROCS
-#if FML_OS_ANDROID
+#if FML_OS_ANDROID || FML_OS_LINUX || FML_OS_WIN
   ACQUIRE_PROC(AcquireNextImageKHR, handle);
   ACQUIRE_PROC(CreateSwapchainKHR, handle);
   ACQUIRE_PROC(DestroySwapchainKHR, handle);
   ACQUIRE_PROC(GetSwapchainImagesKHR, handle);
   ACQUIRE_PROC(QueuePresentKHR, handle);
-#endif  // FML_OS_ANDROID
+#endif  // FML_OS_ANDROID || FML_OS_LINUX || FML_OS_WIN
+#if FML_OS_LINUX
+  ACQUIRE_PROC(CreateImageView, handle);
+  ACQUIRE_PROC(DestroyImageView, handle);
+#endif  // FML_OS_LINUX
 #if OS_FUCHSIA
   ACQUIRE_PROC(ImportSemaphoreZirconHandleFUCHSIA, handle);
   ACQUIRE_PROC(GetSemaphoreZirconHandleFUCHSIA, handle);

@@ -25,6 +25,7 @@
 #include "flutter/shell/platform/linux/fl_view_renderer.h"
 #include "flutter/shell/platform/linux/fl_view_renderer_opengl.h"
 #include "flutter/shell/platform/linux/fl_view_renderer_software.h"
+#include "flutter/shell/platform/linux/fl_view_renderer_vulkan.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -650,6 +651,10 @@ static void setup_engine(FlView* self) {
     case kSoftware:
       self->renderer = FL_VIEW_RENDERER(
           fl_view_renderer_software_new(self->engine, self->sized_to_content));
+      break;
+    case kVulkan:
+      self->renderer = FL_VIEW_RENDERER(
+          fl_view_renderer_vulkan_new(self->engine, self->sized_to_content));
       break;
     case kOpenGL:
     default:

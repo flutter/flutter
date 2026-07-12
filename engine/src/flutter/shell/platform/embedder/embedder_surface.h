@@ -26,6 +26,13 @@ class EmbedderSurface {
 
   virtual sk_sp<GrDirectContext> CreateResourceContext() const;
 
+  /// Called when the surface size changes (e.g. on window resize).
+  /// Subclasses that manage their own swapchain (such as Vulkan KHR mode)
+  /// should override this to update the swapchain dimensions.
+  /// Only overridden by EmbedderSurfaceVulkanImpeller (KHR swapchain
+  /// mode).
+  virtual void UpdateSurfaceSize(int64_t width, int64_t height);
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurface);
 };
