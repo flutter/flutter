@@ -380,8 +380,8 @@ TEST(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit) {
       Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
-// Units past the combined limit (the mock default, 8) are rejected even when
-// each stage is within its per-stage limit.
+// Units past the combined limit are rejected even when each stage is within
+// its per-stage limit.
 TEST(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit) {
   auto impl = std::make_unique<NiceMock<MockGLESImpl>>();
   EXPECT_CALL(*impl, GetIntegerv(_, _))
@@ -389,6 +389,7 @@ TEST(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit) {
         switch (name) {
           case GL_MAX_TEXTURE_IMAGE_UNITS:
           case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS:
+          case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
             *value = 8;
             break;
           default:
