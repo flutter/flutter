@@ -120,10 +120,10 @@ static void fl_gtk4_accessible_node_set_string_property(
 
   GtkAccessibleProperty properties[] = {property};
   GValue property_value = G_VALUE_INIT;
-  fl_gtk_runtime_accessible_property_init_value(property, &property_value);
+  gtk_accessible_property_init_value(property, &property_value);
   g_value_set_string(&property_value, value);
-  fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self), 1,
-                                                  properties, &property_value);
+  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
+                                       &property_value);
   g_value_unset(&property_value);
 }
 
@@ -133,10 +133,10 @@ static void fl_gtk4_accessible_node_set_bool_property(
     gboolean value) {
   GtkAccessibleProperty properties[] = {property};
   GValue property_value = G_VALUE_INIT;
-  fl_gtk_runtime_accessible_property_init_value(property, &property_value);
+  gtk_accessible_property_init_value(property, &property_value);
   g_value_set_boolean(&property_value, value);
-  fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self), 1,
-                                                  properties, &property_value);
+  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
+                                       &property_value);
   g_value_unset(&property_value);
 }
 
@@ -146,10 +146,10 @@ static void fl_gtk4_accessible_node_set_int_property(
     gint value) {
   GtkAccessibleProperty properties[] = {property};
   GValue property_value = G_VALUE_INIT;
-  fl_gtk_runtime_accessible_property_init_value(property, &property_value);
+  gtk_accessible_property_init_value(property, &property_value);
   g_value_set_int(&property_value, value);
-  fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self), 1,
-                                                  properties, &property_value);
+  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
+                                       &property_value);
   g_value_unset(&property_value);
 }
 
@@ -158,10 +158,10 @@ static void fl_gtk4_accessible_node_set_state_bool(FlGtk4AccessibleNode* self,
                                                    gboolean value) {
   GtkAccessibleState states[] = {state};
   GValue state_value = G_VALUE_INIT;
-  fl_gtk_runtime_accessible_state_init_value(state, &state_value);
+  gtk_accessible_state_init_value(state, &state_value);
   g_value_set_boolean(&state_value, value);
-  fl_gtk_runtime_accessible_update_state_value(GTK_ACCESSIBLE(self), 1, states,
-                                               &state_value);
+  gtk_accessible_update_state_value(GTK_ACCESSIBLE(self), 1, states,
+                                    &state_value);
   g_value_unset(&state_value);
 }
 
@@ -171,10 +171,10 @@ static void fl_gtk4_accessible_node_set_state_tristate(
     GtkAccessibleTristate value) {
   GtkAccessibleState states[] = {state};
   GValue state_value = G_VALUE_INIT;
-  fl_gtk_runtime_accessible_state_init_value(state, &state_value);
+  gtk_accessible_state_init_value(state, &state_value);
   g_value_set_enum(&state_value, value);
-  fl_gtk_runtime_accessible_update_state_value(GTK_ACCESSIBLE(self), 1, states,
-                                               &state_value);
+  gtk_accessible_update_state_value(GTK_ACCESSIBLE(self), 1, states,
+                                    &state_value);
   g_value_unset(&state_value);
 }
 
@@ -593,10 +593,10 @@ void fl_view_gtk4_accessibility_update_accessible_name(
   GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
   GtkAccessibleProperty properties[] = {property};
   GValue value = G_VALUE_INIT;
-  fl_gtk_runtime_accessible_property_init_value(property, &value);
+  gtk_accessible_property_init_value(property, &value);
   g_value_set_string(&value, label);
-  fl_gtk_runtime_accessible_update_property_value(GTK_ACCESSIBLE(self->view), 1,
-                                                  properties, &value);
+  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self->view), 1,
+                                       properties, &value);
   g_value_unset(&value);
 }
 

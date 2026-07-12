@@ -9,6 +9,8 @@
 #include <dlfcn.h>
 #include <mutex>
 
+#include "flutter/shell/platform/linux/fl_linux_debug.h"
+
 static gboolean gtk_runtime_at_least(int major, int minor, int micro) {
   return gtk_check_version(major, minor, micro) == nullptr;
 }
@@ -30,61 +32,23 @@ static void log_fallback_once(const char* symbol, const char* fallback) {
     return;
   }
   g_hash_table_add(warned_symbols, const_cast<char*>(symbol));
-  g_warning("GTK4 runtime compat fallback: %s unavailable, using %s", symbol,
-            fallback);
+  flutter_linux_dbg("gtk4_runtime_api", "%s unavailable, using %s", symbol,
+                    fallback);
 }
 
 const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
-  static FlGtkRuntimeApi api = {};
-  if (api.checked) {
-    return &api;
-  }
-
-  api.checked = TRUE;
-  api.gtk_at_least_4_10 = gtk_runtime_at_least(4, 10, 0);
-  api.gtk_at_least_4_14 = gtk_runtime_at_least(4, 14, 0);
-  api.gtk_at_least_4_18 = gtk_runtime_at_least(4, 18, 0);
-
-  api.gtk_accessible_get_platform_state =
-      lookup_symbol<decltype(api.gtk_accessible_get_platform_state)>(
-          "gtk_accessible_get_platform_state");
-  api.gtk_accessible_get_accessible_parent =
-      lookup_symbol<decltype(api.gtk_accessible_get_accessible_parent)>(
-          "gtk_accessible_get_accessible_parent");
-  api.gtk_accessible_set_accessible_parent =
-      lookup_symbol<decltype(api.gtk_accessible_set_accessible_parent)>(
-          "gtk_accessible_set_accessible_parent");
-  api.gtk_accessible_get_first_accessible_child =
-      lookup_symbol<decltype(api.gtk_accessible_get_first_accessible_child)>(
-          "gtk_accessible_get_first_accessible_child");
-  api.gtk_accessible_get_next_accessible_sibling =
-      lookup_symbol<decltype(api.gtk_accessible_get_next_accessible_sibling)>(
-          "gtk_accessible_get_next_accessible_sibling");
-  api.gtk_accessible_update_next_accessible_sibling = lookup_symbol<
-      decltype(api.gtk_accessible_update_next_accessible_sibling)>(
-      "gtk_accessible_update_next_accessible_sibling");
-  api.gtk_accessible_update_state_value =
-      lookup_symbol<decltype(api.gtk_accessible_update_state_value)>(
-          "gtk_accessible_update_state_value");
-  api.gtk_accessible_update_property_value =
-      lookup_symbol<decltype(api.gtk_accessible_update_property_value)>(
-          "gtk_accessible_update_property_value");
-  api.gtk_accessible_update_relation_value =
-      lookup_symbol<decltype(api.gtk_accessible_update_relation_value)>(
-          "gtk_accessible_update_relation_value");
-  api.gtk_accessible_state_init_value =
-      lookup_symbol<decltype(api.gtk_accessible_state_init_value)>(
-          "gtk_accessible_state_init_value");
-  api.gtk_accessible_property_init_value =
-      lookup_symbol<decltype(api.gtk_accessible_property_init_value)>(
-          "gtk_accessible_property_init_value");
-  api.gtk_accessible_relation_init_value =
-      lookup_symbol<decltype(api.gtk_accessible_relation_init_value)>(
-          "gtk_accessible_relation_init_value");
-  api.gtk_accessible_announce =
-      lookup_symbol<decltype(api.gtk_accessible_announce)>(
-          "gtk_accessible_announce");
-
+  static const FlGtkRuntimeApi api = [] {
+    FlGtkRuntimeApi result = {};
+    result.gtk_at_least_4_10 = gtk_runtime_at_least(4, 10, 0);
+    result.gtk_at_least_4_14 = gtk_runtime_at_least(4, 14, 0);
+    result.gtk_accessible_set_accessible_parent =
+        lookup_symbol<decltype(result.gtk_accessible_set_accessible_parent)>(
+            "gtk_accessible_set_accessible_parent");
+    result.gtk_accessible_announce =
+        lookup_symbol<decltype(result.gtk_accessible_announce)>(
+            "gtk_accessible_announce");
+    return result;
+  }();
   return &api;
 }
 
@@ -112,102 +76,6 @@ void fl_gtk_runtime_accessible_set_accessible_parent(
 #endif
 }
 
-void fl_gtk_runtime_accessible_update_state_value(GtkAccessible* self,
-                                                  int n_states,
-                                                  GtkAccessibleState states[],
-                                                  const GValue values[]) {
-#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
-  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
-  if (api->gtk_accessible_update_state_value != nullptr) {
-    api->gtk_accessible_update_state_value(self, n_states, states, values);
-    return;
-  }
-  log_fallback_once("gtk_accessible_update_state_value",
-                    "gtk_accessible_update_state_value");
-#endif
-  gtk_accessible_update_state_value(self, n_states, states, values);
-}
-
-void fl_gtk_runtime_accessible_update_property_value(
-    GtkAccessible* self,
-    int n_properties,
-    GtkAccessibleProperty properties[],
-    const GValue values[]) {
-#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
-  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
-  if (api->gtk_accessible_update_property_value != nullptr) {
-    api->gtk_accessible_update_property_value(self, n_properties, properties,
-                                              values);
-    return;
-  }
-  log_fallback_once("gtk_accessible_update_property_value",
-                    "gtk_accessible_update_property_value");
-#endif
-  gtk_accessible_update_property_value(self, n_properties, properties, values);
-}
-
-void fl_gtk_runtime_accessible_update_relation_value(
-    GtkAccessible* self,
-    int n_relations,
-    GtkAccessibleRelation relations[],
-    const GValue values[]) {
-#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
-  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
-  if (api->gtk_accessible_update_relation_value != nullptr) {
-    api->gtk_accessible_update_relation_value(self, n_relations, relations,
-                                              values);
-    return;
-  }
-  log_fallback_once("gtk_accessible_update_relation_value",
-                    "gtk_accessible_update_relation_value");
-#endif
-  gtk_accessible_update_relation_value(self, n_relations, relations, values);
-}
-
-void fl_gtk_runtime_accessible_state_init_value(GtkAccessibleState state,
-                                                GValue* value) {
-#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
-  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
-  if (api->gtk_accessible_state_init_value != nullptr) {
-    api->gtk_accessible_state_init_value(state, value);
-    return;
-  }
-  log_fallback_once("gtk_accessible_state_init_value",
-                    "gtk_accessible_state_init_value");
-#endif
-  gtk_accessible_state_init_value(state, value);
-}
-
-void fl_gtk_runtime_accessible_property_init_value(
-    GtkAccessibleProperty property,
-    GValue* value) {
-#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
-  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
-  if (api->gtk_accessible_property_init_value != nullptr) {
-    api->gtk_accessible_property_init_value(property, value);
-    return;
-  }
-  log_fallback_once("gtk_accessible_property_init_value",
-                    "gtk_accessible_property_init_value");
-#endif
-  gtk_accessible_property_init_value(property, value);
-}
-
-void fl_gtk_runtime_accessible_relation_init_value(
-    GtkAccessibleRelation relation,
-    GValue* value) {
-#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
-  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
-  if (api->gtk_accessible_relation_init_value != nullptr) {
-    api->gtk_accessible_relation_init_value(relation, value);
-    return;
-  }
-  log_fallback_once("gtk_accessible_relation_init_value",
-                    "gtk_accessible_relation_init_value");
-#endif
-  gtk_accessible_relation_init_value(relation, value);
-}
-
 void fl_gtk_runtime_accessible_announce(GtkAccessible* self,
                                         const char* message,
                                         gint priority) {
@@ -218,6 +86,11 @@ void fl_gtk_runtime_accessible_announce(GtkAccessible* self,
     return;
   }
   log_fallback_once("gtk_accessible_announce", "no-op compatible path");
+#else
+#if GTK_CHECK_VERSION(4, 14, 0)
+  gtk_accessible_announce(self, message, priority);
+  return;
+#endif
 #endif
   (void)self;
   (void)message;

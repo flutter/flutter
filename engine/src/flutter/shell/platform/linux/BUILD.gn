@@ -10,6 +10,7 @@ import("//flutter/shell/platform/linux/config.gni")
 import("//flutter/testing/testing.gni")
 
 declare_args() {
+  gtk4_runtime_api_compat = true
   gtk4_native_accessibility_tree = false
 }
 
@@ -330,8 +331,11 @@ source_set("flutter_linux_sources_gtk4") {
     "FLUTTER_LINUX_COMPILATION",
     "FLUTTER_ENGINE_NO_PROTOTYPES",
     "FLUTTER_LINUX_GTK4",
-    "FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT",
   ]
+
+  if (gtk4_runtime_api_compat) {
+    defines += [ "FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT" ]
+  }
 
   if (gtk4_native_accessibility_tree) {
     defines += [ "FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE" ]

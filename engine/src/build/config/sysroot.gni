@@ -31,6 +31,7 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
       assert(linux_x64_sysroot_variant == "bullseye" ||
                  linux_x64_sysroot_variant == "trixie",
              "linux_x64_sysroot_variant must be bullseye or trixie")
+
       if (linux_x64_sysroot_variant == "bullseye") {
         sysroot =
             rebase_path("//build/linux/debian_bullseye_amd64-sysroot", root_build_dir)
