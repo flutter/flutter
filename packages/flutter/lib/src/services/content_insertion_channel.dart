@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'keyboard_inserted_content.dart';
 /// @docImport 'message_codecs.dart';
 library;
 
 import 'dart:typed_data';
 
+import 'keyboard_inserted_content.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 
@@ -29,33 +29,27 @@ class ContentInsertionChannel {
   ///
   /// This channel is used internally by Flutter to handle content insertion
   /// from input method editors (IMEs) to text input fields.
-  ContentInsertionChannel() {
+  ContentInsertionChannel._() {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
   static const MethodChannel _channel = MethodChannel('flutter/contentinsertion');
 
   /// Called when content is inserted on the binary content insertion channel.
-  ///
-  /// The callback receives a map containing:
-  ///  * `mimeType`: `String` — the MIME type of the inserted content.
-  ///  * `uri`: `String` — the URI of the content.
-  ///  * `data`: `Uint8List?` — the raw bytes of the content, if available.
-  set onContentInserted(void Function(Map<String, dynamic> metadata)? callback) {
+  set onContentInserted(void Function(KeyboardInsertedContent content)? callback) {
     _onContentInserted = callback;
   }
 
-  void Function(Map<String, dynamic> metadata)? _onContentInserted;
+  void Function(KeyboardInsertedContent content)? _onContentInserted;
 
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'commitContent':
-        final arguments = (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>();
-        _onContentInserted?.call(<String, dynamic>{
-          'mimeType': arguments['mimeType'] as String,
-          'uri': arguments['uri'] as String,
-          if (arguments.containsKey('data')) 'data': arguments['data'] as Uint8List?,
-        });
+        final Map<String, dynamic> arguments = (call.arguments as Map<dynamic, dynamic>)
+            .cast<String, dynamic>();
+        if (_onContentInserted != null) {
+          _onContentInserted!(KeyboardInsertedContent.fromBinary(arguments));
+        }
       default:
         throw MissingPluginException();
     }
@@ -63,4 +57,4 @@ class ContentInsertionChannel {
 }
 
 /// The singleton [ContentInsertionChannel] instance.
-final ContentInsertionChannel contentInsertionChannel = ContentInsertionChannel();
+final ContentInsertionChannel contentInsertionChannel = ContentInsertionChannel._();

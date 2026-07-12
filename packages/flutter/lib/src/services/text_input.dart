@@ -1975,8 +1975,8 @@ class TextInput {
     contentInsertionChannel.onContentInserted = _handleContentInserted;
   }
 
-  void _handleContentInserted(Map<String, dynamic> metadata) {
-    _currentConnection?._client.insertContent(KeyboardInsertedContent.fromBinary(metadata));
+  void _handleContentInserted(KeyboardInsertedContent content) {
+    _currentConnection?._client.insertContent(content);
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
