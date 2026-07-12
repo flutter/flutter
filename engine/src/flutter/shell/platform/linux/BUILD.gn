@@ -529,8 +529,6 @@ executable("flutter_linux_gtk4_unittests") {
     # fl_touch_manager_test.cc is GTK3-only (uses GdkEventTouch, gdkwayland)
     "fl_value_test.cc",
 
-    # fl_view_test.cc is GTK3-only (includes testing/mock_gtk.h)
-
     # fl_window_state_monitor_test.cc is GTK3-only (uses mock_gtk.h)
     "testing/fl_mock_binary_messenger.cc",
     "testing/fl_test.cc",

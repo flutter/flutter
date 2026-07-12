@@ -270,10 +270,11 @@ def main() -> int:
 
     verify_sysroot_symbols(repo, sysroot, version)
 
+    build_environment = os.environ.copy()
+    build_environment[
+        "VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
+
     if not args.skip_build:
-        environment = os.environ.copy()
-        environment[
-            "VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
         gn_args = (
             f'angle_use_wayland=false linux_x64_sysroot_variant="{args.sysroot}" '
             "gtk4_runtime_api_compat=true gtk4_native_accessibility_tree=false"
@@ -288,7 +289,7 @@ def main() -> int:
                 f"--gn-args={gn_args}",
             ],
             cwd=repo,
-            env=environment,
+            env=build_environment,
         )
         run(
             [
@@ -299,6 +300,7 @@ def main() -> int:
                 "flutter_linux_gtk4_unittests",
             ],
             cwd=repo,
+            env=build_environment,
         )
 
     library = output_dir / "libflutter_linux_gtk4.so"
