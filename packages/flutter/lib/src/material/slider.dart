@@ -636,8 +636,7 @@ class Slider extends StatefulWidget {
   /// behavior returns `semanticActionUnit` for line scrolls and
   /// `semanticActionUnit * 5` for page scrolls. The 5x multiplier is a
   /// heuristic to make page jumps significantly larger than line scrolls
-  /// on the slider track, analogous to how [Scrollable] uses 80% of the
-  /// viewport for page scrolls versus a fixed 50px for line scrolls.
+  /// on the slider track.
   ///
   /// For example, to use 10x the increment for page scrolls:
   /// ```dart
