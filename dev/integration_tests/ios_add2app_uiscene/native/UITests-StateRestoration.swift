@@ -26,7 +26,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     app.terminate()
 
     app.launch()
-    let nextPageTitle = app.otherElements["Flutter Demo Second Page"].firstMatch
+    let nextPageTitle = app.staticTexts["Flutter Demo Second Page"].firstMatch
     XCTAssertTrue(nextPageTitle.waitForExistence(timeout: 5))
   }
 }
