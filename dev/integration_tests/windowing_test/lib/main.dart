@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
-late final RegularWindowController controller;
+late final WindowController controller;
 final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(null);
 
 void main() {
@@ -162,13 +162,13 @@ void main() {
       }
     },
   );
-  controller = RegularWindowController(
+  controller = WindowController(
     size: const Size(640, 480),
     title: 'Integration Test',
-    delegate: RegularWindowControllerDelegate(),
+    delegate: WindowControllerDelegate(),
   );
 
-  runWidget(RegularWindow(controller: controller, child: const MyApp()));
+  runWidget(Window(controller: controller, child: const MyApp()));
   windowCreated.complete();
 }
 

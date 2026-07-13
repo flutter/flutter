@@ -12,13 +12,13 @@ import 'package:flutter/src/widgets/_window.dart'
         DialogWindowControllerDelegate,
         PopupWindow,
         PopupWindowController,
-        RegularWindow,
-        RegularWindowController,
-        RegularWindowControllerDelegate,
         SatelliteWindow,
         SatelliteWindowController,
         TooltipWindow,
         TooltipWindowController,
+        Window,
+        WindowController,
+        WindowControllerDelegate,
         WindowScope,
         WindowingOwner,
         createDefaultWindowingOwner;
@@ -28,8 +28,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'multi_view_testing.dart';
 
-class _StubRegularWindowController extends RegularWindowController {
-  _StubRegularWindowController(WidgetTester tester) : super.empty() {
+class _StubWindowController extends WindowController {
+  _StubWindowController(WidgetTester tester) : super.empty() {
     rootView = FakeView(tester.view);
   }
 
@@ -123,7 +123,7 @@ class _StubTooltipWindowController extends TooltipWindowController {
   final WidgetTester tester;
 
   @override
-  BaseWindowController get parent => _StubRegularWindowController(tester);
+  BaseWindowController get parent => _StubWindowController(tester);
 
   @override
   Size get contentSize => Size.zero;
@@ -146,7 +146,7 @@ class _StubPopupWindowController extends PopupWindowController {
   final WidgetTester tester;
 
   @override
-  BaseWindowController get parent => _StubRegularWindowController(tester);
+  BaseWindowController get parent => _StubWindowController(tester);
 
   @override
   Size get contentSize => Size.zero;
@@ -172,7 +172,7 @@ class _StubSatelliteWindowController extends SatelliteWindowController {
   final WidgetTester tester;
 
   @override
-  BaseWindowController get parent => _StubRegularWindowController(tester);
+  BaseWindowController get parent => _StubWindowController(tester);
 
   @override
   Size get contentSize => Size.zero;
@@ -205,8 +205,8 @@ class _StubSatelliteWindowController extends SatelliteWindowController {
 // A controller that mutates its aspect values and notifies listeners, used to
 // verify that dependents rebuild when the controller notifies even though the
 // same controller instance is reused across rebuilds.
-class _MutableRegularWindowController extends RegularWindowController {
-  _MutableRegularWindowController(WidgetTester tester) : super.empty() {
+class _MutableWindowController extends WindowController {
+  _MutableWindowController(WidgetTester tester) : super.empty() {
     rootView = FakeView(tester.view);
   }
 
@@ -278,11 +278,11 @@ void main() {
         expect(owner, isA<WindowingOwner>());
       });
 
-      test('default WindowingOwner throws when accessing createRegularWindowController', () {
+      test('default WindowingOwner throws when accessing createWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createRegularWindowController(
-            delegate: RegularWindowControllerDelegate(),
+          () => owner.createWindowController(
+            delegate: WindowControllerDelegate(),
             resizable: true,
           ),
           throwsUnsupportedError,
@@ -353,12 +353,12 @@ void main() {
         isWindowingEnabled = true;
       });
 
-      testWidgets('RegularWindow does not throw', (WidgetTester tester) async {
-        final controller = _StubRegularWindowController(tester);
+      testWidgets('Window does not throw', (WidgetTester tester) async {
+        final controller = _StubWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(controller: controller, child: Container()),
+          Window(controller: controller, child: Container()),
         );
       });
 
@@ -372,12 +372,12 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.of for regular windows', (WidgetTester tester) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         BaseWindowController? scope;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -388,7 +388,7 @@ void main() {
           ),
         );
 
-        expect(scope, isA<RegularWindowController>());
+        expect(scope, isA<WindowController>());
       });
 
       testWidgets('Can access WindowScope.of for dialog windows', (WidgetTester tester) async {
@@ -474,12 +474,12 @@ void main() {
       testWidgets('Can access WindowScope.maybeOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         BaseWindowController? scope;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -490,7 +490,7 @@ void main() {
           ),
         );
 
-        expect(scope, isA<RegularWindowController>());
+        expect(scope, isA<WindowController>());
       });
 
       testWidgets('Can access WindowScope.maybeOf for dialog windows', (WidgetTester tester) async {
@@ -580,12 +580,12 @@ void main() {
       testWidgets('Can access WindowScope.contentSizeOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         Size? size;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -690,12 +690,12 @@ void main() {
       testWidgets('Can access WindowScope.maybeContentSizeOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         Size? size;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -800,12 +800,12 @@ void main() {
       testWidgets('Can access WindowScope.titleOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         String? title;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -906,12 +906,12 @@ void main() {
       testWidgets('Can access WindowScope.maybeTitleOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         String? title;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1016,12 +1016,12 @@ void main() {
       testWidgets('Can access WindowScope.isActivatedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isActivated;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1126,12 +1126,12 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsActivatedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isActivated;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1236,12 +1236,12 @@ void main() {
       testWidgets('Can access WindowScope.isMinimizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isMinimized;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1324,12 +1324,12 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMinimizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isMinimized;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1412,12 +1412,12 @@ void main() {
       testWidgets('Can access WindowScope.isMaximizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isMaximized;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1522,12 +1522,12 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMaximizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isMaximized;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1632,12 +1632,12 @@ void main() {
       testWidgets('Can access WindowScope.isFullscreenOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isFullscreen;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1742,12 +1742,12 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsFullscreenOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubRegularWindowController(tester);
+        final controller = _StubWindowController(tester);
         bool? isFullscreen;
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1852,12 +1852,12 @@ void main() {
       testWidgets('Dependent rebuilds when an aspect changes and the controller notifies', (
         WidgetTester tester,
       ) async {
-        final controller = _MutableRegularWindowController(tester);
+        final controller = _MutableWindowController(tester);
         addTearDown(controller.dispose);
         final observed = <bool>[];
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {

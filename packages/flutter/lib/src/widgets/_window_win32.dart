@@ -139,14 +139,14 @@ class WindowingOwnerWin32 extends WindowingOwner {
 
   @internal
   @override
-  RegularWindowController createRegularWindowController({
+  WindowController createWindowController({
     Size? size,
     BoxConstraints? constraints,
     required bool resizable,
     String? title,
-    required RegularWindowControllerDelegate delegate,
+    required WindowControllerDelegate delegate,
   }) {
-    return RegularWindowControllerWin32(
+    return WindowControllerWin32(
       owner: this,
       delegate: delegate,
       size: size,
@@ -283,10 +283,10 @@ class WindowingOwnerWin32 extends WindowingOwner {
   }
 }
 
-class _RegularWindowMesageHandler implements _WindowsMessageHandler {
-  _RegularWindowMesageHandler({required this.controller});
+class _WindowMessageHandler implements _WindowsMessageHandler {
+  _WindowMessageHandler({required this.controller});
 
-  final RegularWindowControllerWin32 controller;
+  final WindowControllerWin32 controller;
 
   @override
   int? handleWindowsMessage(
@@ -304,7 +304,7 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract mixin class WindowControllerWin32 {
+abstract mixin class BaseWindowControllerWin32 {
   /// Returns the underlying HWND for this window.
   ///
   /// Using this handle implies the user is aware of any side effects changes may have to Flutter behavior.
@@ -317,14 +317,14 @@ abstract mixin class WindowControllerWin32 {
   HWND get windowHandle;
 }
 
-/// Implementation of [RegularWindowController] for the Windows platform.
+/// Implementation of [WindowController] for the Windows platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
 /// See also:
 ///
-///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerWin32 extends RegularWindowController with WindowControllerWin32 {
+///  * [WindowController], the base class for regular windows.
+class WindowControllerWin32 extends WindowController with BaseWindowControllerWin32 {
   /// Creates a new regular window controller for Win32.
   ///
   /// When this constructor completes the native window has been created and
@@ -334,11 +334,11 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
   ///
   /// See also:
   ///
-  ///  * [RegularWindowController], the base class for regular windows.
+  ///  * [WindowController], the base class for regular windows.
   @internal
-  RegularWindowControllerWin32({
+  WindowControllerWin32({
     required WindowingOwnerWin32 owner,
-    required RegularWindowControllerDelegate delegate,
+    required WindowControllerDelegate delegate,
     Size? size,
     BoxConstraints? constraints,
     String? title,
@@ -349,10 +349,10 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
-    _handler = _RegularWindowMesageHandler(controller: this);
+    _handler = _WindowMessageHandler(controller: this);
     owner._addMessageHandler(_handler);
     final sizedToContent = size == null;
-    final int viewId = _Win32PlatformInterface.createRegularWindow(
+    final int viewId = _Win32PlatformInterface.createWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
       size,
@@ -372,8 +372,8 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
   }
 
   final WindowingOwnerWin32 _owner;
-  final RegularWindowControllerDelegate _delegate;
-  late final _RegularWindowMesageHandler _handler;
+  final WindowControllerDelegate _delegate;
+  late final _WindowMessageHandler _handler;
   bool _destroyed = false;
 
   @override
@@ -559,7 +559,7 @@ class _DialogWindowMesageHandler implements _WindowsMessageHandler {
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerWin32 extends DialogWindowController with WindowControllerWin32 {
+class DialogWindowControllerWin32 extends DialogWindowController with BaseWindowControllerWin32 {
   /// Creates a new dialog window controller for Win32.
   ///
   /// When this constructor completes the native window has been created and
@@ -768,7 +768,7 @@ typedef _GetWindowPositionNative =
 ///
 ///  * [TooltipWindowController], the base class for tooltip windows.
 class TooltipWindowControllerWin32 extends TooltipWindowController
-    with WindowControllerWin32
+    with BaseWindowControllerWin32
     implements _WindowsMessageHandler {
   /// Creates a new tooltip window controller for Win32.
   ///
@@ -1281,7 +1281,7 @@ class _Win32PlatformInterface {
     ffi.Pointer<_WindowingInitRequest> request,
   );
 
-  static int createRegularWindow(
+  static int createWindow(
     ffi.Allocator allocator,
     int engineId,
     Size? size,
@@ -1290,26 +1290,26 @@ class _Win32PlatformInterface {
     bool sizedToContent,
     bool resizable,
   ) {
-    final ffi.Pointer<_RegularWindowCreationRequest> request =
-        allocator<_RegularWindowCreationRequest>();
+    final ffi.Pointer<_WindowCreationRequest> request =
+        allocator<_WindowCreationRequest>();
     try {
       request.ref.size.from(size);
       request.ref.constraints.from(constraints);
       request.ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
       request.ref.sizedToContent = sizedToContent;
       request.ref.resizable = resizable;
-      return _createRegularWindow(engineId, request);
+      return _createWindow(engineId, request);
     } finally {
       allocator.free(request);
     }
   }
 
-  @ffi.Native<ffi.Int64 Function(ffi.Int64, ffi.Pointer<_RegularWindowCreationRequest>)>(
+  @ffi.Native<ffi.Int64 Function(ffi.Int64, ffi.Pointer<_WindowCreationRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_CreateRegularWindow',
   )
-  external static int _createRegularWindow(
+  external static int _createWindow(
     int engineId,
-    ffi.Pointer<_RegularWindowCreationRequest> request,
+    ffi.Pointer<_WindowCreationRequest> request,
   );
 
   static int createDialogWindow(
@@ -1596,8 +1596,8 @@ class _Win32PlatformInterface {
   }
 }
 
-/// Payload for the creation method used by [_Win32PlatformInterface.createRegularWindow].
-final class _RegularWindowCreationRequest extends ffi.Struct {
+/// Payload for the creation method used by [_Win32PlatformInterface.createWindow].
+final class _WindowCreationRequest extends ffi.Struct {
   external _WindowSizeRequest size;
   external _WindowConstraintsRequest constraints;
   external ffi.Pointer<_Utf16> title;
@@ -1660,7 +1660,7 @@ final class _WindowingInitRequest extends ffi.Struct {
   onMessage;
 }
 
-/// Payload for the size of a window used by [_RegularWindowCreationRequest] and
+/// Payload for the size of a window used by [_WindowCreationRequest] and
 /// [_Win32PlatformInterface.setWindowContentSize].
 final class _WindowSizeRequest extends ffi.Struct {
   @ffi.Bool()
@@ -1679,7 +1679,7 @@ final class _WindowSizeRequest extends ffi.Struct {
   }
 }
 
-/// Payload for the constraints of a window used by [_RegularWindowCreationRequest] and
+/// Payload for the constraints of a window used by [_WindowCreationRequest] and
 /// [_Win32PlatformInterface.setWindowConstraints].
 final class _WindowConstraintsRequest extends ffi.Struct {
   @ffi.Bool()

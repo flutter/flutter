@@ -75,14 +75,14 @@ class WindowingOwnerMacOS extends WindowingOwner {
   }
 
   @override
-  RegularWindowController createRegularWindowController({
-    required RegularWindowControllerDelegate delegate,
+  WindowController createWindowController({
+    required WindowControllerDelegate delegate,
     Size? size,
     BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
-    final controller = RegularWindowControllerMacOS(
+    final controller = WindowControllerMacOS(
       owner: this,
       delegate: delegate,
       size: size,
@@ -187,7 +187,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract interface class WindowControllerMacOS {
+abstract interface class BaseWindowControllerMacOS {
   /// Returns pointer to the underlying NSWindow.
   ///
   /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
@@ -200,7 +200,7 @@ abstract interface class WindowControllerMacOS {
   Pointer<Void> get windowHandle;
 }
 
-mixin _WindowControllerMixin implements WindowControllerMacOS {
+mixin _WindowControllerMixin implements BaseWindowControllerMacOS {
   void _initController(WindowingOwnerMacOS owner) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -491,19 +491,19 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   Rect _anchorRect;
 }
 
-/// Implementation of [RegularWindowController] for the macOS platform.
+/// Implementation of [WindowController] for the macOS platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
 /// See also:
 ///
-///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerMacOS extends RegularWindowController with _WindowControllerMixin {
+///  * [WindowController], the base class for regular windows.
+class WindowControllerMacOS extends WindowController with _WindowControllerMixin {
   /// Creates a new regular window controller for macOS. When this constructor
   /// completes the FlutterView is created and framework is aware of it.
-  RegularWindowControllerMacOS({
+  WindowControllerMacOS({
     required WindowingOwnerMacOS owner,
-    required RegularWindowControllerDelegate delegate,
+    required WindowControllerDelegate delegate,
     required Size? size,
     BoxConstraints? constraints,
     String? title,
@@ -511,7 +511,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
        super.empty() {
     _initController(owner);
 
-    final int viewId = _MacOSPlatformInterface.createRegularWindow(
+    final int viewId = _MacOSPlatformInterface.createWindow(
       size: size,
       constraints: constraints,
       onShouldClose: _onShouldClose.nativeFunction,
@@ -616,7 +616,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
     return _MacOSPlatformInterface.isFullscreen(windowHandle);
   }
 
-  final RegularWindowControllerDelegate _delegate;
+  final WindowControllerDelegate _delegate;
 
   @override
   bool get isActivated => _MacOSPlatformInterface.isActivated(windowHandle);
@@ -871,10 +871,10 @@ class _MacOSPlatformInterface {
   @Native<Int64 Function(Int64, Pointer<_WindowCreationRequest>)>(
     symbol: 'InternalFlutter_WindowController_CreateRegularWindow',
   )
-  external static int _createRegularWindow(int engineId, Pointer<_WindowCreationRequest> request);
+  external static int _createWindow(int engineId, Pointer<_WindowCreationRequest> request);
 
   /// Creates a new window and returns the viewId of the created FlutterView.
-  static int createRegularWindow({
+  static int createWindow({
     required Size? size,
     BoxConstraints? constraints,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
@@ -901,7 +901,7 @@ class _MacOSPlatformInterface {
         ..constraints.maxWidth = constraints.maxWidth
         ..constraints.maxHeight = constraints.maxHeight;
     }
-    final int viewId = _createRegularWindow(
+    final int viewId = _createWindow(
       WidgetsBinding.instance.platformDispatcher.engineId!,
       request,
     );
