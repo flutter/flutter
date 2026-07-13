@@ -381,10 +381,9 @@ static Rect ComputeGlyphSize(const SkFont& font,
   }
   font.getBounds({&glyph.glyph.index, 1}, {&scaled_bounds, 1}, &glyph_paint);
 
-  // BUGFIX: We MUST calculate the absolute integer floor and ceil of the
-  // coordinates first. Then we add 1 pixel of padding to accommodate CoreText
-  // subpixel bleeding. Without floor/ceil, the bounds remain fractional, which
-  // clips the text when blitted to the integer-aligned texture atlas.
+  // Rather than computing the bounds at the requested point size and
+  // scaling up the bounds, we scale up the font size and request the
+  // bounds. This seems to give more accurate bounds information.
   return Rect::MakeLTRB(std::floor(scaled_bounds.fLeft) - 1.0f,
                         std::floor(scaled_bounds.fTop) - 1.0f,
                         std::ceil(scaled_bounds.fRight) + 1.0f,
@@ -426,7 +425,6 @@ TypographerContextSkia::CollectNewGlyphs(
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
                                      frame.properties);
 
-        // ATLAS CACHE FIX: Check if the glyph already exists in the atlas
         if (font_glyph_atlas->FindGlyphBounds(subpixel_glyph).has_value()) {
           continue;
         }
