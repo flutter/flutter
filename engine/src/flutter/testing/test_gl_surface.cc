@@ -24,27 +24,6 @@
 
 namespace flutter::testing {
 
-namespace {
-
-// Ensure that any thread that used an EGL context releases its EGL state when
-// the thread terminates.
-//
-// Tests often run with ANGLE, which may not clean up EGL state during thread
-// shutdown.
-struct EglReleaser {
-  ~EglReleaser() { eglReleaseThread(); }
-};
-
-EGLBoolean DoEglMakeCurrent(EGLDisplay display,
-                            EGLSurface draw,
-                            EGLSurface read,
-                            EGLContext context) {
-  static thread_local EglReleaser tls_egl_releaser;
-  return ::eglMakeCurrent(display, draw, read, context);
-}
-
-}  // namespace
-
 TestGLOnscreenOnlySurface::TestGLOnscreenOnlySurface(
     std::shared_ptr<TestEGLContext> context,
     DlISize size)
@@ -76,7 +55,7 @@ const DlISize& TestGLOnscreenOnlySurface::GetSurfaceSize() const {
 
 bool TestGLOnscreenOnlySurface::MakeCurrent() {
   auto result =
-      DoEglMakeCurrent(egl_context_->display, onscreen_surface_,
+      ::eglMakeCurrent(egl_context_->display, onscreen_surface_,
                        onscreen_surface_, egl_context_->onscreen_context);
 
   if (result == EGL_FALSE) {
@@ -87,7 +66,7 @@ bool TestGLOnscreenOnlySurface::MakeCurrent() {
 }
 
 bool TestGLOnscreenOnlySurface::ClearCurrent() {
-  auto result = DoEglMakeCurrent(egl_context_->display, EGL_NO_SURFACE,
+  auto result = ::eglMakeCurrent(egl_context_->display, EGL_NO_SURFACE,
                                  EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
   if (result == EGL_FALSE) {
@@ -271,7 +250,7 @@ TestGLSurface::~TestGLSurface() {
 
 bool TestGLSurface::MakeResourceCurrent() {
   auto result =
-      DoEglMakeCurrent(egl_context_->display, offscreen_surface_,
+      ::eglMakeCurrent(egl_context_->display, offscreen_surface_,
                        offscreen_surface_, egl_context_->offscreen_context);
 
   if (result == EGL_FALSE) {
