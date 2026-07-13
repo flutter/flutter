@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -644,10 +645,11 @@ void main() {
             isCoreDevice: true,
           );
 
-          fakeCoreDeviceControl.isDevicectlInstalled = true;
+          final fakeXcode = globals.xcode! as FakeXcode;
+          fakeXcode.isDevicectlInstalled = true;
           expect(device.supportsScreenshot, isTrue);
 
-          fakeCoreDeviceControl.isDevicectlInstalled = false;
+          fakeXcode.isDevicectlInstalled = false;
           expect(device.supportsScreenshot, isFalse);
         },
         overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
@@ -1335,9 +1337,6 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   Exception? takeScreenshotException;
 
   @override
-  bool isDevicectlInstalled = true;
-
-  @override
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
     if (takeScreenshotException != null) {
       throw takeScreenshotException!;
@@ -1351,8 +1350,11 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
 class FakeAnalytics extends Fake implements Analytics {}
 
 class FakeXcode extends Fake implements Xcode {
-  FakeXcode({this.currentVersion});
+  FakeXcode({this.currentVersion, this.isDevicectlInstalled = true});
 
   @override
   final Version? currentVersion;
+
+  @override
+  bool isDevicectlInstalled;
 }
