@@ -249,12 +249,9 @@ class Factory<T> {
   /// Creates a new object of type T.
   final ValueGetter<T> constructor;
 
-  /// The type of the objects created by this factory.
-  Type get type => T;
-
   @override
   String toString() {
-    return 'Factory(type: $type)';
+    return 'Factory(type: $T)';
   }
 }
 

@@ -46,7 +46,7 @@ bool _factoryTypesSetEquals<T>(Set<Factory<T>>? a, Set<Factory<T>>? b) {
 }
 
 Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
-  return factories.map<Type>((Factory<T> factory) => factory.type).toSet();
+  return factories.map<Type>((Factory<T> factory) => T).toSet();
 }
 
 /// A render object for an Android view.
