@@ -837,7 +837,8 @@ void Canvas::DrawLine(const Point& p0,
     // position of the input line.
 
     // Unit vector along the line. Fallback to (1, 0) if length is 0.
-    Point u = p1 != p0 ? ((p1 - p0) / line_length) : Point(1.0f, 0.0f);
+    Point u =
+        line_length > 0.0f ? ((p1 - p0) / line_length) : Point(1.0f, 0.0f);
     // Unit vector perpendicular to the line.
     Point perp = Point(-u.y, u.x);
     Point center = (p0 + p1) * 0.5f;
@@ -852,7 +853,7 @@ void Canvas::DrawLine(const Point& p0,
         center.x, center.y, 0.0f, 1.0f);
 
     // Expand rect to 1 pixel minimum dimensions if applicable.
-    if (!GetCurrentTransform().HasPerspective()) {
+    if (!GetCurrentTransform().HasPerspective2D()) {
       auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
           rect, paint.color, GetCurrentTransform() * rect_to_line_transform,
           // Don't scale alpha stroke width is 0. This draws a hairline that is
@@ -942,7 +943,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
     // Expand rect to 1 pixel minimum dimensions if applicable.
     if (paint.style == Paint::Style::kFill &&
-        !GetCurrentTransform().HasPerspective()) {
+        !GetCurrentTransform().HasPerspective2D()) {
       auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
           rect, paint.color, GetCurrentTransform(), /*scale_alpha=*/true);
 
@@ -1100,7 +1101,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
       IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
     // Expand rrect bounds to 1 pixel minimum dimensions if applicable.
     if (paint.style == Paint::Style::kFill &&
-        !GetCurrentTransform().HasPerspective()) {
+        !GetCurrentTransform().HasPerspective2D()) {
       Rect rrect_bounds = round_rect.GetBounds();
       auto [expanded, alpha_scaled_color] =
           ExpandRectToPixelMinimum(rrect_bounds, paint.color,
