@@ -250,6 +250,7 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @Override
   protected void onDraw(Canvas canvas) {
+    io.flutter.Log.i("FlutterImageView", "onDraw called, bitmapNeedsUpdate=" + bitmapNeedsUpdate);
     try (io.flutter.util.TraceSection e =
         io.flutter.util.TraceSection.scoped("FlutterImageView.onDraw")) {
       super.onDraw(canvas);
@@ -274,7 +275,9 @@ public class FlutterImageView extends View implements RenderSurface {
   }
 
   private void updateCurrentBitmap() {
-    try (io.flutter.util.TraceSection e = io.flutter.util.TraceSection.scoped("FlutterImageView.updateCurrentBitmap")) {
+    try (io.flutter.util.TraceSection e =
+        io.flutter.util.TraceSection.scoped("FlutterImageView.updateCurrentBitmap")) {
+      io.flutter.Log.i("FlutterImageView", "updateCurrentBitmap called");
       if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
         final HardwareBuffer buffer = currentImage.getHardwareBuffer();
         currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
