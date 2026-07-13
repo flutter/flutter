@@ -252,6 +252,15 @@ deps = {
   'engine/src/flutter/third_party/shaderc':
    Var('flutter_git') + '/third_party/shaderc' + '@' + '70b1130380fcbf1d1e9719ee78ba7202a5161424',
 
+  # Flutter checks out the Chromium vulkan-deps parent package to get licenses
+  # and other metadata.
+  # But Flutter does not include vulkan-deps in the recursedeps list because it
+  # now imports each of the vulkan-deps subpackages separately.  This makes it
+  # possible to individually update the version of each subpackage and fetch
+  # subpackages from Flutter mirrors that can include custom patches.
+  'engine/src/flutter/third_party/vulkan-deps':
+   Var('chromium_git') + '/vulkan-deps' + '@' + '0582f446e54aa4ea389c89cd027067ee0f5459aa',
+
   'engine/src/flutter/third_party/vulkan-deps/glslang/src':
    Var('flutter_git') + '/third_party/glslang' + '@' + 'fdbdca9263a4c09dbfb4a51c76e3e9d9f52bc504',
 
