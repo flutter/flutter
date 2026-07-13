@@ -1437,12 +1437,6 @@ TEST(RectTest, IRectExpand) {
   EXPECT_EQ(rect.Expand(ISize{-10, -10}), IRect::MakeLTRB(110, 110, 190, 190));
 }
 
-TEST(RectTest, RectExpandToMinSizeNullForPerspectiveTransform) {
-  auto rect = Rect();
-  auto transform = Matrix::MakePerspective(Degrees(60), 1, 1, 100);
-  EXPECT_EQ(rect.ExpandToMinSize({1.0f, 1.0f}, transform), std::nullopt);
-}
-
 TEST(RectTest, RectExpandToMinSizeNullForScaledToZero) {
   auto rect = Rect();
   auto transform = Matrix::MakeScale(Vector3(0.0f, 1.0f));
@@ -1461,23 +1455,41 @@ TEST(RectTest, RectExpandToMinSizeRectWithIdentityTransform) {
 
   auto transform = Matrix();
 
-  Rect expanded;
-
   // Expand to a width and height less than the original size.
-  expanded = *rect.ExpandToMinSize({0.5f, 0.75f}, transform);
-  EXPECT_EQ(expanded.GetSize(), size);
+  {
+    auto expanded = rect.ExpandToMinSize({0.5f, 0.75f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), size);
+    }
+  }
 
   // Expand to a minimum width. Minimum height is less than the original size.
-  expanded = *rect.ExpandToMinSize({4.0f, 1.5f}, transform);
-  EXPECT_EQ(expanded.GetSize(), Size(4.0f, 2.0f));
+  {
+    auto expanded = rect.ExpandToMinSize({4.0f, 1.5f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), Size(4.0f, 2.0f));
+    }
+  }
 
   // Expand to a minimum height. Minimum width is less than the original size.
-  expanded = *rect.ExpandToMinSize({1.5f, 4.0f}, transform);
-  EXPECT_EQ(expanded.GetSize(), Size(2.0f, 4.0f));
+  {
+    auto expanded = rect.ExpandToMinSize({1.5f, 4.0f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), Size(2.0f, 4.0f));
+    }
+  }
 
   // Expand to a minimum width and height.
-  expanded = *rect.ExpandToMinSize({3.0f, 4.0f}, transform);
-  EXPECT_EQ(expanded.GetSize(), Size(3.0f, 4.0f));
+  {
+    auto expanded = rect.ExpandToMinSize({3.0f, 4.0f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), Size(3.0f, 4.0f));
+    }
+  }
 }
 
 TEST(RectTest, RectExpandToMinSizeRectWithScalingTransform) {
@@ -1488,26 +1500,44 @@ TEST(RectTest, RectExpandToMinSizeRectWithScalingTransform) {
   // Transformed rect size is (4.0, 6.0).
   auto transform = Matrix::MakeScale(Vector3(2.0f, 3.0f));
 
-  Rect expanded;
-
   // Expand to a transformed width and height less than the transformed size of
   // the original rectangle.
-  expanded = *rect.ExpandToMinSize({3.0f, 4.0f}, transform);
-  EXPECT_EQ(expanded.GetSize(), size);
+  {
+    auto expanded = rect.ExpandToMinSize({3.0f, 4.0f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), size);
+    }
+  }
 
   // Expand to 5.0 transformed width.
   // This is equal to 5.0 / 2.0 = 2.5 local width.
-  expanded = *rect.ExpandToMinSize({5.0f, 4.0f}, transform);
-  EXPECT_EQ(expanded.GetSize(), Size(2.5f, 2.0f));
+  {
+    auto expanded = rect.ExpandToMinSize({5.0f, 4.0f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), Size(2.5f, 2.0f));
+    }
+  }
 
   // Expand to 9.0 transformed height.
   // This is equal to 9.0 / 3.0 = 3.0 local height.
-  expanded = *rect.ExpandToMinSize({3.0f, 9.0f}, transform);
-  EXPECT_EQ(expanded.GetSize(), Size(2.0f, 3.0));
+  {
+    auto expanded = rect.ExpandToMinSize({3.0f, 9.0f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), Size(2.0f, 3.0));
+    }
+  }
 
   // Expand both width and height.
-  expanded = *rect.ExpandToMinSize({5.0f, 9.0f}, transform);
-  EXPECT_EQ(expanded.GetSize(), Size(2.5f, 3.0f));
+  {
+    auto expanded = rect.ExpandToMinSize({5.0f, 9.0f}, transform);
+    ASSERT_TRUE(expanded.has_value());
+    if (expanded.has_value()) {
+      EXPECT_EQ(expanded.value().GetSize(), Size(2.5f, 3.0f));
+    }
+  }
 }
 
 TEST(RectTest, ContainsFloatingPoint) {

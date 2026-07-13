@@ -2766,7 +2766,7 @@ TEST_P(AiksTest, CompareDiffRoundRectAndRoundRect) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, CanRenderLines) {
+TEST_P(AiksTest, CanRenderLinesWithCapsAnglesAndAlphas) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
