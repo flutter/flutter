@@ -67,7 +67,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _dialogHeightController.addListener(_updateDialogSize);
     _dialogWidthController.text = widget.settings.dialogSize.width.toString();
     _dialogHeightController.text = widget.settings.dialogSize.height.toString();
-    _regularShrinkWrap = widget.settings.regularShrinkWrap;
+    _regularShrinkWrap = widget.settings.shrinkWrap;
     _regularResizable = widget.settings.regularResizable;
     _dialogShrinkWrap = widget.settings.dialogShrinkWrap;
     _dialogResizable = widget.settings.dialogResizable;
@@ -383,7 +383,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 double.tryParse(_regularHeightController.text) ??
                     widget.settings.regularSize.height,
               );
-              widget.settings.regularShrinkWrap = _regularShrinkWrap;
+              widget.settings.shrinkWrap = _regularShrinkWrap;
               widget.settings.regularResizable = _regularResizable;
               widget.settings.dialogSize = Size(
                 double.tryParse(_dialogWidthController.text) ?? widget.settings.dialogSize.width,

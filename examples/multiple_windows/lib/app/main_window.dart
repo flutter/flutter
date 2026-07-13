@@ -188,7 +188,7 @@ class _WindowCreatorCard extends StatelessWidget {
                       onPressed: () {
                         late final WindowEntry entry;
                         final WindowController controller;
-                        if (windowSettings.regularShrinkWrap) {
+                        if (windowSettings.shrinkWrap) {
                           controller = WindowController.shrinkWrap(
                             resizable: windowSettings.regularResizable,
                             delegate: CallbackWindowControllerDelegate(
