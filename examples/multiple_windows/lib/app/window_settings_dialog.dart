@@ -40,9 +40,9 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   final TextEditingController _offsetDxController = TextEditingController();
   final TextEditingController _offsetDyController = TextEditingController();
 
-  late bool _regularSizedToContent;
+  late bool _regularShrinkWrap;
   late bool _regularResizable;
-  late bool _dialogSizedToContent;
+  late bool _dialogShrinkWrap;
   late bool _dialogResizable;
 
   late bool _flipX;
@@ -67,9 +67,9 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _dialogHeightController.addListener(_updateDialogSize);
     _dialogWidthController.text = widget.settings.dialogSize.width.toString();
     _dialogHeightController.text = widget.settings.dialogSize.height.toString();
-    _regularSizedToContent = widget.settings.regularSizedToContent;
+    _regularShrinkWrap = widget.settings.regularShrinkWrap;
     _regularResizable = widget.settings.regularResizable;
-    _dialogSizedToContent = widget.settings.dialogSizedToContent;
+    _dialogShrinkWrap = widget.settings.dialogShrinkWrap;
     _dialogResizable = widget.settings.dialogResizable;
     _offsetDxController.text = widget.settings.positioner.offset.dx.toString();
     _offsetDyController.text = widget.settings.positioner.offset.dy.toString();
@@ -127,7 +127,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 child: TextFormField(
                   controller: _regularWidthController,
                   decoration: const InputDecoration(labelText: 'Initial width'),
-                  enabled: !_regularSizedToContent,
+                  enabled: !_regularShrinkWrap,
                 ),
               ),
               const SizedBox(width: 20),
@@ -135,7 +135,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 child: TextFormField(
                   controller: _regularHeightController,
                   decoration: const InputDecoration(labelText: 'Initial height'),
-                  enabled: !_regularSizedToContent,
+                  enabled: !_regularShrinkWrap,
                 ),
               ),
             ],
@@ -145,8 +145,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             children: [
               const SizedBox(width: 100, child: Text('Sized to content')),
               Switch(
-                value: _regularSizedToContent,
-                onChanged: (bool value) => setState(() => _regularSizedToContent = value),
+                value: _regularShrinkWrap,
+                onChanged: (bool value) => setState(() => _regularShrinkWrap = value),
               ),
               const SizedBox(width: 24),
               const SizedBox(width: 70, child: Text('Resizable')),
@@ -173,7 +173,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 child: TextFormField(
                   controller: _dialogWidthController,
                   decoration: const InputDecoration(labelText: 'Initial width'),
-                  enabled: !_dialogSizedToContent,
+                  enabled: !_dialogShrinkWrap,
                 ),
               ),
               const SizedBox(width: 20),
@@ -181,7 +181,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 child: TextFormField(
                   controller: _dialogHeightController,
                   decoration: const InputDecoration(labelText: 'Initial height'),
-                  enabled: !_dialogSizedToContent,
+                  enabled: !_dialogShrinkWrap,
                 ),
               ),
             ],
@@ -191,8 +191,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             children: [
               const SizedBox(width: 100, child: Text('Sized to content')),
               Switch(
-                value: _dialogSizedToContent,
-                onChanged: (bool value) => setState(() => _dialogSizedToContent = value),
+                value: _dialogShrinkWrap,
+                onChanged: (bool value) => setState(() => _dialogShrinkWrap = value),
               ),
               const SizedBox(width: 24),
               const SizedBox(width: 70, child: Text('Resizable')),
@@ -383,13 +383,13 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 double.tryParse(_regularHeightController.text) ??
                     widget.settings.regularSize.height,
               );
-              widget.settings.regularSizedToContent = _regularSizedToContent;
+              widget.settings.regularShrinkWrap = _regularShrinkWrap;
               widget.settings.regularResizable = _regularResizable;
               widget.settings.dialogSize = Size(
                 double.tryParse(_dialogWidthController.text) ?? widget.settings.dialogSize.width,
                 double.tryParse(_dialogHeightController.text) ?? widget.settings.dialogSize.height,
               );
-              widget.settings.dialogSizedToContent = _dialogSizedToContent;
+              widget.settings.dialogShrinkWrap = _dialogShrinkWrap;
               widget.settings.dialogResizable = _dialogResizable;
 
               widget.settings.positioner = widget.settings.positioner.copyWith(

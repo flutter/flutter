@@ -351,14 +351,14 @@ class WindowControllerWin32 extends WindowController with BaseWindowControllerWi
     }
     _handler = _WindowMessageHandler(controller: this);
     owner._addMessageHandler(_handler);
-    final sizedToContent = size == null;
+    final shrinkWrap = size == null;
     final int viewId = _Win32PlatformInterface.createWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
       size,
       constraints,
       title,
-      sizedToContent,
+      shrinkWrap,
       resizable,
     );
     if (viewId < 0) {
@@ -588,7 +588,7 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
     }
     _handler = _DialogWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
-    final sizedToContent = size == null;
+    final shrinkWrap = size == null;
     final int viewId = _Win32PlatformInterface.createDialogWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -601,7 +601,7 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
               parent.rootView.viewId,
             )
           : null,
-      sizedToContent,
+      shrinkWrap,
       resizable,
     );
     if (viewId < 0) {
@@ -1287,7 +1287,7 @@ class _Win32PlatformInterface {
     Size? size,
     BoxConstraints? constraints,
     String? title,
-    bool sizedToContent,
+    bool shrinkWrap,
     bool resizable,
   ) {
     final ffi.Pointer<_WindowCreationRequest> request =
@@ -1296,7 +1296,7 @@ class _Win32PlatformInterface {
       request.ref.size.from(size);
       request.ref.constraints.from(constraints);
       request.ref.title = (title ?? 'Window').toNativeUtf16(allocator: allocator);
-      request.ref.sizedToContent = sizedToContent;
+      request.ref.shrinkWrap = shrinkWrap;
       request.ref.resizable = resizable;
       return _createWindow(engineId, request);
     } finally {
@@ -1319,7 +1319,7 @@ class _Win32PlatformInterface {
     BoxConstraints? constraints,
     String? title,
     HWND? parent,
-    bool sizedToContent,
+    bool shrinkWrap,
     bool resizable,
   ) {
     final ffi.Pointer<_DialogWindowCreationRequest> request =
@@ -1329,7 +1329,7 @@ class _Win32PlatformInterface {
       request.ref.constraints.from(constraints);
       request.ref.title = (title ?? 'Dialog window').toNativeUtf16(allocator: allocator);
       request.ref.parentOrNull = parent ?? ffi.Pointer<ffi.Void>.fromAddress(0);
-      request.ref.sizedToContent = sizedToContent;
+      request.ref.shrinkWrap = shrinkWrap;
       request.ref.resizable = resizable;
       return _createDialogWindow(engineId, request);
     } finally {
@@ -1603,7 +1603,7 @@ final class _WindowCreationRequest extends ffi.Struct {
   external ffi.Pointer<_Utf16> title;
 
   @ffi.Bool()
-  external bool sizedToContent;
+  external bool shrinkWrap;
 
   @ffi.Bool()
   external bool resizable;
@@ -1617,7 +1617,7 @@ final class _DialogWindowCreationRequest extends ffi.Struct {
   external HWND parentOrNull;
 
   @ffi.Bool()
-  external bool sizedToContent;
+  external bool shrinkWrap;
 
   @ffi.Bool()
   external bool resizable;

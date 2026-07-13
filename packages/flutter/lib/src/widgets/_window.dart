@@ -211,7 +211,7 @@ abstract class WindowController extends BaseWindowController {
   /// {@endtemplate}
   ///
   /// To create a window that is sized to its content instead, use
-  /// [WindowController.sizedToContent].
+  /// [WindowController.shrinkWrap].
   ///
   /// {@template flutter.widgets.windowing.shared}
   /// The [title] argument configures the window's title.
@@ -250,7 +250,7 @@ abstract class WindowController extends BaseWindowController {
 
   /// Creates a [WindowController] that sizes the window to its content.
   ///
-  /// {@template flutter.widgets.windowing.sizedToContentConstructor}
+  /// {@template flutter.widgets.windowing.shrinkWrapConstructor}
   /// The window is created by the platform and initially
   /// sized to fit its content.
   ///
@@ -279,7 +279,7 @@ abstract class WindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  factory WindowController.sizedToContent({
+  factory WindowController.shrinkWrap({
     bool resizable = false,
     BoxConstraints? constraints,
     String? title,
@@ -549,7 +549,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.sizedConstructor}
   ///
   /// To create a dialog that is sized to its content instead, use
-  /// [DialogWindowController.sizedToContent].
+  /// [DialogWindowController.shrinkWrap].
   ///
   /// {@template flutter.widgets.windowing.dialogParent}
   /// The [parent] argument specifies the parent window of this dialog.
@@ -595,7 +595,7 @@ abstract class DialogWindowController extends BaseWindowController {
 
   /// Creates a [DialogWindowController] that sizes the window to its content.
   ///
-  /// {@macro flutter.widgets.windowing.sizedToContentConstructor}
+  /// {@macro flutter.widgets.windowing.shrinkWrapConstructor}
   ///
   /// To create a dialog with a specific size instead, use the default
   /// [DialogWindowController] constructor.
@@ -605,7 +605,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.shared}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
-  factory DialogWindowController.sizedToContent({
+  factory DialogWindowController.shrinkWrap({
     bool resizable = false,
     BoxConstraints? constraints,
     BaseWindowController? parent,
@@ -1211,15 +1211,15 @@ abstract class SatelliteWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.satelliteConstructorCommon}
   ///
-  /// {@macro flutter.widgets.windowing.sizedToContentConstructor}
+  /// {@macro flutter.widgets.windowing.shrinkWrapConstructor}
   ///
-  /// To create a dialog with a specific size instead, use the default
+  /// To create a satellite window with a specific size instead, use the default
   /// [SatelliteWindowController] constructor.
   ///
   /// {@macro flutter.widgets.windowing.shared}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
-  factory SatelliteWindowController.sizedToContent({
+  factory SatelliteWindowController.shrinkWrap({
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,

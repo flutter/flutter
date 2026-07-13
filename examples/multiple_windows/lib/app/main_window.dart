@@ -188,8 +188,8 @@ class _WindowCreatorCard extends StatelessWidget {
                       onPressed: () {
                         late final WindowEntry entry;
                         final WindowController controller;
-                        if (windowSettings.regularSizedToContent) {
-                          controller = WindowController.sizedToContent(
+                        if (windowSettings.regularShrinkWrap) {
+                          controller = WindowController.shrinkWrap(
                             resizable: windowSettings.regularResizable,
                             delegate: CallbackWindowControllerDelegate(
                               onDestroyed: () => windowRegistry.unregister(entry),
@@ -222,8 +222,8 @@ class _WindowCreatorCard extends StatelessWidget {
                       onPressed: () {
                         late final WindowEntry entry;
                         final DialogWindowController controller;
-                        if (windowSettings.dialogSizedToContent) {
-                          controller = DialogWindowController.sizedToContent(
+                        if (windowSettings.dialogShrinkWrap) {
+                          controller = DialogWindowController.shrinkWrap(
                             resizable: windowSettings.dialogResizable,
                             delegate: CallbackDialogWindowControllerDelegate(
                               onDestroyed: () => windowRegistry.unregister(entry),
@@ -254,8 +254,8 @@ class _WindowCreatorCard extends StatelessWidget {
                       onPressed: () {
                         late final WindowEntry entry;
                         final DialogWindowController controller;
-                        if (windowSettings.dialogSizedToContent) {
-                          controller = DialogWindowController.sizedToContent(
+                        if (windowSettings.dialogShrinkWrap) {
+                          controller = DialogWindowController.shrinkWrap(
                             resizable: windowSettings.dialogResizable,
                             delegate: CallbackDialogWindowControllerDelegate(
                               onDestroyed: () => windowRegistry.unregister(entry),
