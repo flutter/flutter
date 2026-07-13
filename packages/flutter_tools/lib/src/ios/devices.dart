@@ -1076,8 +1076,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
@@ -1328,7 +1327,7 @@ class IOSDevice extends Device {
   bool get supportsScreenshot {
     final Version? xcodeVersion = globals.xcode?.currentVersion;
     if (xcodeVersion != null && xcodeVersion.major >= 27) {
-      return _coreDeviceControl.isDevicectlInstalled;
+      return globals.xcode!.isDevicectlInstalled;
     }
     return false;
   }

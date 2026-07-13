@@ -351,8 +351,6 @@ class IOSCoreDeviceControl {
   final Xcode _xcode;
   final FileSystem _fileSystem;
 
-  bool get isDevicectlInstalled => _xcode.isDevicectlInstalled;
-
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
   /// run the command.
