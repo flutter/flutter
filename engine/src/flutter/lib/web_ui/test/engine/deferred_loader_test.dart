@@ -33,20 +33,19 @@ Future<JSObject> createEntrypointLoader() async {
 }
 
 String createFakeRuntimeModuleCode() {
-  final lines = <String>[
-    'export function compileStreaming(promise) {',
-    '  return Promise.resolve({',
-    '    instantiate: async (imports, options) => {',
-    '      globalThis._capturedDeferredModulesLoader =',
-    '          options.loadDeferredModules;',
-    '      return {',
-    '        invokeMain: async () => {}',
-    '      };',
-    '    }',
-    '  });',
-    '}',
-  ];
-  return lines.join('\n');
+  return '''
+export function compileStreaming(promise) {
+  return Promise.resolve({
+    instantiate: async (imports, options) => {
+      globalThis._capturedDeferredModulesLoader =
+          options.loadDeferredModules;
+      return {
+        invokeMain: async () => {}
+      };
+    }
+  });
+}
+''';
 }
 
 JSString createFakeRuntimeUrl() {
@@ -59,11 +58,11 @@ JSString createFakeRuntimeUrl() {
 }
 
 JSObject createDummyWasmBuild() {
-  final dummyBuild = JSObject();
-  dummyBuild.setProperty('compileTarget'.toJS, 'dart2wasm'.toJS);
-  dummyBuild.setProperty('mainWasmPath'.toJS, 'data:application/wasm,'.toJS);
-  dummyBuild.setProperty('jsSupportRuntimePath'.toJS, createFakeRuntimeUrl());
-  return dummyBuild;
+  return <String, Object>{
+    'compileTarget': 'dart2wasm',
+    'mainWasmPath': 'data:application/wasm,',
+    'jsSupportRuntimePath': createFakeRuntimeUrl().toDart,
+  }.jsify()! as JSObject;
 }
 
 void testMain() {
