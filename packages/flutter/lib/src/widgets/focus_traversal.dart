@@ -1123,6 +1123,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     TraversalDirection direction,
     FocusScopeNode nearestScope,
     FocusNode focusedChild,
+    _FocusTraversalGroupNode? groupNode,
   ) {
     final _DirectionalPolicyData? policyData = _policyData[nearestScope];
     if (policyData != null &&
@@ -1154,7 +1155,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           case TraversalDirection.down:
             alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
         }
-        requestFocusCallback(lastNode, alignmentPolicy: alignmentPolicy);
+        _requestFocus(lastNode, alignmentPolicy: alignmentPolicy, groupNode);
         return true;
       }
 
@@ -1213,24 +1214,34 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     FocusNode currentNode,
     FocusNode node,
     FocusScopeNode nearestScope,
-    TraversalDirection direction,
+    TraversalDirection direction, 
+    _FocusTraversalGroupNode? groupNode,
+    
   ) {
     if (node is FocusScopeNode) {
       if (node.focusedChild != null) {
-        return _requestTraversalFocusInDirection(currentNode, node.focusedChild!, node, direction);
+        return _requestTraversalFocusInDirection(
+          currentNode,
+          node.focusedChild!,
+          node,
+          direction,
+          groupNode,
+        );
       }
       final FocusNode firstNode = findFirstFocusInDirection(node, direction) ?? currentNode;
       switch (direction) {
         case TraversalDirection.up:
         case TraversalDirection.left:
-          requestFocusCallback(
+          _requestFocus(
             firstNode,
+            groupNode,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           );
         case TraversalDirection.right:
         case TraversalDirection.down:
-          requestFocusCallback(
+          _requestFocus(
             firstNode,
+            groupNode,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           );
       }
@@ -1240,20 +1251,44 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     switch (direction) {
       case TraversalDirection.up:
       case TraversalDirection.left:
-        requestFocusCallback(
+        _requestFocus(
           node,
+          groupNode,
           alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
         );
       case TraversalDirection.right:
       case TraversalDirection.down:
-        requestFocusCallback(node, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+        _requestFocus(
+          node,
+          groupNode,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        );
     }
     return !nodeHadPrimaryFocus;
+  }
+
+  void _requestFocus(
+    FocusNode node,
+    _FocusTraversalGroupNode? groupNode, {
+    ScrollPositionAlignmentPolicy? alignmentPolicy,
+    double? alignment,
+    Duration? duration,
+    Curve? curve,
+  }) {
+    groupNode?.lastRequestedFocus = node;
+    requestFocusCallback(
+      node,
+      alignmentPolicy: alignmentPolicy,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+    );
   }
 
   bool _onEdgeForDirection(
     FocusNode currentNode,
     FocusNode focusedChild,
+    _FocusTraversalGroupNode? groupNode,
     TraversalDirection direction, {
     FocusScopeNode? scope,
   }) {
@@ -1275,7 +1310,13 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             direction,
           );
           if (found == null) {
-            return _onEdgeForDirection(currentNode, focusedChild, direction, scope: nearestScope);
+            return _onEdgeForDirection(
+              currentNode,
+              focusedChild,
+              groupNode,
+              direction,
+              scope: nearestScope,
+            );
           }
         } else {
           found = _findNextFocusInDirection(
@@ -1296,7 +1337,13 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         return false;
     }
     if (found != null) {
-      return _requestTraversalFocusInDirection(currentNode, found, nearestScope, direction);
+      return _requestTraversalFocusInDirection(
+        currentNode,
+        found,
+        nearestScope,
+        direction,
+        groupNode,
+      );
     }
     return false;
   }
@@ -1332,20 +1379,22 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         switch (direction) {
           case TraversalDirection.up:
           case TraversalDirection.left:
-            requestFocusCallback(
+            _requestFocus(
               firstFocus,
               alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+              groupNode,
             );
           case TraversalDirection.right:
           case TraversalDirection.down:
-            requestFocusCallback(
+            _requestFocus(
               firstFocus,
               alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+              groupNode,
             );
         }
         return true;
       }
-      if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild)) {
+      if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild, groupNode)) {
         return true;
       }
       final FocusNode? found = _findNextFocusInDirection(
@@ -1355,9 +1404,15 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       );
       if (found != null) {
         _pushPolicyData(direction, nearestScope, focusedChild);
-        return _requestTraversalFocusInDirection(currentNode, found, nearestScope, direction);
+        return _requestTraversalFocusInDirection(
+          currentNode,
+          found,
+          nearestScope,
+          direction,
+          groupNode,
+        );
       }
-      return _onEdgeForDirection(currentNode, focusedChild, direction);
+      return _onEdgeForDirection(currentNode, focusedChild, groupNode, direction);
     } finally {
       groupNode?.isTraversing = false;
     }
@@ -2213,8 +2268,11 @@ class FocusTraversalGroup extends StatefulWidget {
 }
 
 // A special focus node subclass that only FocusTraversalGroup uses so that it
-// can be used to cache the policy in the focus tree, and so that the traversal
-// code can find groups in the focus tree.
+// can be used to cache the following in the focus tree:
+//  - the focus traversal policy - this allows traversal code to find groups in
+//    the focus tree.
+//  - the last focused node - this allows the policy to be invalidated when a
+//    focus change was not triggered via a traversal request.
 class _FocusTraversalGroupNode extends FocusNode {
   _FocusTraversalGroupNode({super.debugLabel, required this.policy}) {
     if (kFlutterMemoryAllocationsEnabled) {
@@ -2224,22 +2282,12 @@ class _FocusTraversalGroupNode extends FocusNode {
 
   FocusTraversalPolicy policy;
 
+  FocusNode? lastRequestedFocus;
+
   /// Whether the group is actively evaluating a focus traversal decision.
   ///
   /// It is set to true during [FocusTraversalPolicy.inDirection].
   bool isTraversing = false;
-
-  @override
-  void propagateFocusRequest(FocusNode descendant) {
-    if (!isTraversing) {
-      FocusScopeNode? scope = descendant.nearestScope;
-      while (scope != null) {
-        policy.invalidateScopeData(scope);
-        scope = scope.enclosingScope;
-      }
-    }
-    super.propagateFocusRequest(descendant);
-  }
 }
 
 class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
@@ -2256,11 +2304,13 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
   @override
   void initState() {
     super.initState();
+    FocusManager.instance.addListener(_handleFocusChanged);
     widget.onFocusNodeCreated?.call(focusNode);
   }
 
   @override
   void dispose() {
+    FocusManager.instance.removeListener(_handleFocusChanged);
     focusNode.dispose();
     super.dispose();
   }
@@ -2285,6 +2335,24 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
       descendantsAreTraversable: widget.descendantsAreTraversable,
       child: widget.child,
     );
+  }
+
+  void _handleFocusChanged() {
+    final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+    final FocusNode? lastRequestedFocus = focusNode.lastRequestedFocus;
+
+    if (primaryFocus == null || lastRequestedFocus == null) {
+      return;
+    }
+
+    if (primaryFocus != lastRequestedFocus) {
+      FocusScopeNode? scope = primaryFocus.nearestScope;
+      while (scope != null) {
+        widget.policy.invalidateScopeData(scope);
+        scope = scope.enclosingScope;
+      }
+      focusNode.lastRequestedFocus = null;
+    }
   }
 }
 
