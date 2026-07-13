@@ -125,7 +125,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   //    like "product:mokey model:mokey device:mokey transport_id:1" or "usb:123").
   static final _kDeviceRegex = RegExp(
     r'^(.*?)(?:\s{2,}|\t+)'
-    r'(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|connecting|authorizing|host|unknown)'
+    r'(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|rescue|connecting|authorizing|host|unknown)'
     r'(?:\s+(.*)|$)',
   );
 
