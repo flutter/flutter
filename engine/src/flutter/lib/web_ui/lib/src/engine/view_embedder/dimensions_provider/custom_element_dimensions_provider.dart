@@ -26,9 +26,6 @@ import 'dimensions_provider.dart';
 /// DomResizeObserverEntry. Further changes in the engine are required for this
 /// to be effective.
 class CustomElementDimensionsProvider extends DimensionsProvider {
-  /// Limit size of canvas to render into. Anything larger than 16384 breaks rendering
-  static final double _maxElementSize = 16384.0;
-
   /// Creates a [CustomElementDimensionsProvider] from a [_hostElement].
   CustomElementDimensionsProvider(this._hostElement, {Stream<double>? onDprChange}) {
     // Send a resize event when the page DPR changes.
@@ -59,6 +56,9 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
     _hostElementResizeObserver?.observe(_hostElement);
   }
 
+  /// Limit size of canvas to render into. Anything larger than 16384 breaks rendering
+  static const double _maxElementSize = 16384.0;
+
   // The host element that will be used to retrieve (and observe) app size measurements.
   final DomElement _hostElement;
 
@@ -87,8 +87,11 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
   @override
   ui.Size computePhysicalSize() {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
-    double width = (_hostElement.clientWidth * devicePixelRatio).clamp(0.0, _maxElementSize);
-    double height = (_hostElement.clientHeight * devicePixelRatio).clamp(0.0, _maxElementSize);
+    final double width = (_hostElement.clientWidth * devicePixelRatio).clamp(0.0, _maxElementSize);
+    final double height = (_hostElement.clientHeight * devicePixelRatio).clamp(
+      0.0,
+      _maxElementSize,
+    );
     return ui.Size(width, height);
   }
 
