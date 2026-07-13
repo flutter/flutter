@@ -3,10 +3,17 @@
 // found in the LICENSE file.
 
 /// Prototype Linux platform extension package for Flutter tools extensibility.
-///
-/// This package encapsulates all Linux-specific device detection, doctor check
-/// diagnostics, build handlers, and project templates for the custom Linux
-/// extension prototype.
 library flutter_tools_extension_linux_prototype;
 
-// TODO(bkonyi): implement prototype Linux extension entrypoint and services.
+import 'dart:isolate';
+
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+
+/// Isolate entrypoint for the prototype Linux Flutter Tool Extension.
+void linuxExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[],
+    supportedPlatforms: const <String>['linux'],
+  );
+}
