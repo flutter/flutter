@@ -354,6 +354,8 @@ void PlatformHandler::SetPlainText(
     return;
   }
   std::wstring clipboard_text = fml::Utf8ToWideString(text);
+  // Windows clipboard strings are null-terminated, so an embedded null
+  // character causes other applications to paste only the text before it.
   std::replace(clipboard_text.begin(), clipboard_text.end(), L'\0', L'\uFFFD');
   int set_result = clipboard->SetString(clipboard_text);
   if (set_result != kErrorSuccess) {
