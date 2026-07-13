@@ -2009,16 +2009,7 @@ class CarouselController extends ScrollController {
   double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
     if (!hasFlexWeights) {
       final double targetInFirstCycle = index * _carouselState!._itemExtent!;
-      if (!_carouselState!.widget.infinite) {
-        if (!position.hasContentDimensions) {
-          return targetInFirstCycle;
-        }
-        return math.min(
-          math.max(targetInFirstCycle, position.minScrollExtent),
-          position.maxScrollExtent,
-        );
-      }
-      return _adjustForInfiniteCycle(position, targetInFirstCycle);
+      return _resolveTargetOffset(position, targetInFirstCycle);
     }
 
     final _CarouselViewState carouselState = _carouselState!;
@@ -2037,7 +2028,11 @@ class CarouselController extends ScrollController {
     }
 
     final double targetInFirstCycle = dimension * (weights.first / totalWeight) * leadingIndex;
-    if (!carouselState.widget.infinite) {
+    return _resolveTargetOffset(position, targetInFirstCycle);
+  }
+
+  double _resolveTargetOffset(_CarouselPosition position, double targetInFirstCycle) {
+    if (!_carouselState!.widget.infinite) {
       if (!position.hasContentDimensions) {
         return targetInFirstCycle;
       }
