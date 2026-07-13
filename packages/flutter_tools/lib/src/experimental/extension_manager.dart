@@ -4,10 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../features.dart';
+import 'diagnostics.dart';
 import 'extension_discovery.dart';
 
 /// Manages active tool extension isolate connections and exposes capability proxies.
@@ -16,9 +19,11 @@ class ExtensionManager {
   ExtensionManager({
     required this.hostPlatform,
     required Logger logger,
+    List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[],
     ExtensionDiscovery? discovery,
     FeatureFlags? featureFlags,
   }) : _logger = logger,
+       _entryPoints = entryPoints,
        _discovery = discovery ?? ExtensionDiscovery(logger: logger),
        _featureFlags = featureFlags ?? context.get<FeatureFlags>()!;
 
@@ -26,7 +31,23 @@ class ExtensionManager {
   final HostPlatform hostPlatform;
   final Logger _logger;
   final ExtensionDiscovery _discovery;
+  final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
+  Future<void>? _initFuture;
+
+  /// Ensures entrypoints are initialized; idempotent.
+  Future<void> ensureInitialized() {
+    return _initFuture ??= _doInitialize();
+  }
+
+  Future<void> _doInitialize() async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return;
+    }
+    if (_entryPoints.isNotEmpty) {
+      await initialize(entryPoints: _entryPoints);
+    }
+  }
 
   /// Active extension connections compatible with [hostPlatform].
   List<ExtensionConnection> get connections => _discovery.connections;
@@ -43,9 +64,6 @@ class ExtensionManager {
   Future<void> initialize({
     List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[],
   }) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
-      return;
-    }
     _logger.printTrace(
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
@@ -68,6 +86,20 @@ class ExtensionManager {
         await connection.dispose();
       }
     }
+  }
+
+  /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.
+  List<DiagnosticsExtension> get diagnosticsExtensions {
+    _logger.printTrace('ExtensionManager querying active diagnosticsExtensions.');
+    return _discovery.connections
+        .where(
+          (ExtensionConnection c) =>
+              c.capabilities.services.contains(DiagnosticsExtension.serviceNamespace),
+        )
+        .map<DiagnosticsExtension>(
+          (ExtensionConnection c) => DiagnosticsExtensionClient(c, logger: _logger),
+        )
+        .toList();
   }
 
   /// Disposes all active extension isolate connections.
