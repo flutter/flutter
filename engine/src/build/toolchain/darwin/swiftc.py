@@ -345,7 +345,7 @@ def fix_generated_header(header_path, output_path, src_dir, gen_dir):
       header_file.write(line)
 
 
-def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map, target_triple):
+def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map):
   """Invokes Swift compiler to compile module according to `args`.
 
   The `build_cache_dir` and `output_file_map` should be path to existing
@@ -378,7 +378,7 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map, t
       '-sdk',
       args.sdk_path,
       '-target',
-      target_triple,
+      args.target_triple,
       '-swift-version',
       args.swift_version,
       '-c',
@@ -419,7 +419,7 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map, t
 
   # Handle -I, -F, -isystem, -Fsystem and -D arguments.
   for (attr_name, forwarder) in ARGUMENT_FORWARDER_FOR_ATTR:
-    forwarder.forward(swiftc_args, getattr(args, attr_name), target_triple)
+    forwarder.forward(swiftc_args, getattr(args, attr_name), args.target_triple)
 
   # Handle -whole-module-optimization flag.
   num_threads = max(1, multiprocessing.cpu_count() // 2)
@@ -523,7 +523,7 @@ def generate_depfile(args, output_file_map):
       stream.write(f'{output}: {" ".join(sorted(inputs))}\n')
 
 
-def compile_module(args, extras_args, build_signature, target_triple):
+def compile_module(args, extras_args, build_signature):
   """Compiles Swift module according to `args`."""
   for path in (args.target_out_dir, os.path.dirname(args.header_path)):
     ensure_directory(path)
@@ -541,8 +541,7 @@ def compile_module(args, extras_args, build_signature, target_triple):
     invoke_swift_compiler(args,
                           extras_args,
                           build_cache_dir=build_cache_dir,
-                          output_file_map=output_file_map_path,
-                          target_triple=target_triple)
+                          output_file_map=output_file_map_path)
 
   # Generate the depfile.
   generate_depfile(args, output_file_map)
@@ -608,6 +607,7 @@ def main(args):
 
   parser.add_argument('-target',
                       required=True,
+                      dest='target_triple',
                       help='target triple (e.g. "arm64-apple-ios14.0")')
 
   parser.add_argument('-sdk',
@@ -656,7 +656,7 @@ def main(args):
 
   parsed, extras = parser.parse_known_args(args)
 
-  compile_module(parsed, extras, build_signature(os.environ, args), parsed.target)
+  compile_module(parsed, extras, build_signature(os.environ, args))
 
 
 if __name__ == '__main__':
