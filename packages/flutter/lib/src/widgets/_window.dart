@@ -1213,7 +1213,7 @@ abstract class SatelliteWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.shrinkWrapConstructor}
   ///
-  /// To create a dialog with a specific size instead, use the default
+  /// To create a satellite window with a specific size instead, use the default
   /// [SatelliteWindowController] constructor.
   ///
   /// {@macro flutter.widgets.windowing.shared}

@@ -188,7 +188,7 @@ class _WindowCreatorCard extends StatelessWidget {
                       onPressed: () {
                         late final WindowEntry entry;
                         final RegularWindowController controller;
-                        if (windowSettings.regularSizedToContent) {
+                        if (windowSettings.regularShrinkWrap) {
                           controller = RegularWindowController.shrinkWrap(
                             resizable: windowSettings.regularResizable,
                             delegate: CallbackRegularWindowControllerDelegate(
@@ -222,7 +222,7 @@ class _WindowCreatorCard extends StatelessWidget {
                       onPressed: () {
                         late final WindowEntry entry;
                         final DialogWindowController controller;
-                        if (windowSettings.dialogSizedToContent) {
+                        if (windowSettings.dialogShrinkWrap) {
                           controller = DialogWindowController.shrinkWrap(
                             resizable: windowSettings.dialogResizable,
                             delegate: CallbackDialogWindowControllerDelegate(
@@ -254,7 +254,7 @@ class _WindowCreatorCard extends StatelessWidget {
                       onPressed: () {
                         late final WindowEntry entry;
                         final DialogWindowController controller;
-                        if (windowSettings.dialogSizedToContent) {
+                        if (windowSettings.dialogShrinkWrap) {
                           controller = DialogWindowController.shrinkWrap(
                             resizable: windowSettings.dialogResizable,
                             delegate: CallbackDialogWindowControllerDelegate(
