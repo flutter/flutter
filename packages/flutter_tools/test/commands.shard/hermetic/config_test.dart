@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -13,9 +14,12 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -116,17 +120,13 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
-    testUsingContext(
-      'throws error on absolute path to build-dir',
-      () async {
-        final configCommand = ConfigCommand();
-        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+    testUsingContext('throws error on absolute path to build-dir', () async {
+      final configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-        expect(() => commandRunner.run(<String>['config', '--build-dir=/foo']), throwsToolExit());
-        expect(fakeAnalytics.sentEvents, isEmpty);
-      },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-    );
+      expect(() => commandRunner.run(<String>['config', '--build-dir=/foo']), throwsToolExit());
+      expect(fakeAnalytics.sentEvents, isEmpty);
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext(
       'allows setting and removing feature flags',
@@ -228,22 +228,18 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'analytics flag enables/disables analytics',
-      () async {
-        final configCommand = ConfigCommand();
-        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+    testUsingContext('analytics flag enables/disables analytics', () async {
+      final configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-        expect(fakeAnalytics.telemetryEnabled, true);
+      expect(fakeAnalytics.telemetryEnabled, true);
 
-        await commandRunner.run(<String>['config', '--no-analytics']);
-        expect(fakeAnalytics.telemetryEnabled, false);
+      await commandRunner.run(<String>['config', '--no-analytics']);
+      expect(fakeAnalytics.telemetryEnabled, false);
 
-        await commandRunner.run(<String>['config', '--analytics']);
-        expect(fakeAnalytics.telemetryEnabled, true);
-      },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-    );
+      await commandRunner.run(<String>['config', '--analytics']);
+      expect(fakeAnalytics.telemetryEnabled, true);
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext('analytics reported with help usages', () async {
       final configCommand = ConfigCommand();
@@ -261,6 +257,93 @@ void main() {
         containsIgnoringWhitespace('Analytics reporting is currently enabled'),
       );
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+
+    testUsingContext(
+      'custom configuration options and feature flags are registered in parser',
+      () async {
+        final mockExtension = FakeConfigurationExtension(
+          title: 'My Extension',
+          featureFlags: <FeatureFlag>[
+            const FeatureFlag(
+              name: 'my-ext-feature',
+              help: 'My extension feature help',
+              enabledByDefault: true,
+            ),
+          ],
+          configOptions: <ConfigOption>[
+            const ConfigOption(
+              name: 'my-ext-option',
+              help: 'My extension option help',
+              value: 'default-value',
+            ),
+          ],
+        );
+        final fakeExtensionManager = FakeExtensionManager(
+          extensions: <ConfigurationExtension>[mockExtension],
+        );
+
+        final configCommand = ConfigCommand(extensionManager: fakeExtensionManager);
+        createTestCommandRunner(configCommand);
+
+        await configCommand.initializeDynamicOptions();
+        final ArgParser parser = configCommand.argParser;
+
+        expect(parser.options, contains('my-ext-feature'));
+        expect(parser.options, contains('my-ext-option'));
+
+        expect(parser.options['my-ext-feature']!.isFlag, true);
+        expect(parser.options['my-ext-feature']!.help, 'My extension feature help');
+        expect(parser.options['my-ext-feature']!.defaultsTo, true);
+
+        expect(parser.options['my-ext-option']!.isFlag, false);
+        expect(parser.options['my-ext-option']!.help, 'My extension option help');
+        expect(parser.options['my-ext-option']!.defaultsTo, 'default-value');
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+      },
+    );
+
+    testUsingContext(
+      'custom configuration options and feature flags can be set/cleared via runCommand',
+      () async {
+        final mockExtension = FakeConfigurationExtension(
+          title: 'My Extension',
+          featureFlags: <FeatureFlag>[
+            const FeatureFlag(name: 'my-ext-feature', help: 'My extension feature help'),
+          ],
+          configOptions: <ConfigOption>[
+            const ConfigOption(name: 'my-ext-option', help: 'My extension option help'),
+          ],
+        );
+        final fakeExtensionManager = FakeExtensionManager(
+          extensions: <ConfigurationExtension>[mockExtension],
+        );
+
+        final configCommand = ConfigCommand(extensionManager: fakeExtensionManager);
+        await configCommand.initializeDynamicOptions();
+        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+        await commandRunner.run(<String>['config', '--my-ext-feature', '--my-ext-option=my-value']);
+
+        expect(globals.config.getValue('my-ext-feature'), true);
+        expect(globals.config.getValue('my-ext-option'), 'my-value');
+
+        // Test disabling flag
+        await commandRunner.run(<String>['config', '--no-my-ext-feature']);
+        expect(globals.config.getValue('my-ext-feature'), false);
+
+        await commandRunner.run(<String>['config', '--clear-features']);
+        expect(globals.config.getValue('my-ext-feature'), null);
+
+        await commandRunner.run(<String>['config', '--my-ext-option=']);
+        expect(globals.config.getValue('my-ext-option'), null);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+        Analytics: () => fakeAnalytics,
+      },
+    );
   });
 }
 
@@ -286,4 +369,35 @@ class FakeFlutterVersion extends Fake implements FlutterVersion {
 
   @override
   Future<void> checkFlutterVersionFreshness() async {}
+}
+
+class FakeExtensionManager extends Fake implements ExtensionManager {
+  FakeExtensionManager({this.extensions = const <ConfigurationExtension>[]});
+
+  final List<ConfigurationExtension> extensions;
+
+  @override
+  List<ConfigurationExtension> get configurationExtensions => extensions;
+
+  @override
+  Future<void> ensureInitialized() async {}
+}
+
+class FakeConfigurationExtension extends Fake implements ConfigurationExtension {
+  FakeConfigurationExtension({
+    required this.title,
+    required this.featureFlags,
+    required this.configOptions,
+  });
+
+  @override
+  final String title;
+  final List<FeatureFlag> featureFlags;
+  final List<ConfigOption> configOptions;
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async => featureFlags;
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async => configOptions;
 }

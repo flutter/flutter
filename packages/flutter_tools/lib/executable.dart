@@ -254,7 +254,7 @@ List<FlutterCommand> generateCommands({
   ),
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
-  ConfigCommand(verboseHelp: verboseHelp),
+  ConfigCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
   CustomDevicesCommand(
     customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
     operatingSystemUtils: toolDependencies.toolContext.os,

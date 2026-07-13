@@ -10,6 +10,7 @@ import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../features.dart';
+import 'config.dart';
 import 'diagnostics.dart';
 import 'extension_discovery.dart';
 
@@ -110,6 +111,20 @@ class ExtensionManager {
       'ExtensionManager.ensureInitialized() must be called before accessing diagnosticsExtensions.',
     );
     return List<DiagnosticsExtension>.unmodifiable(_diagnosticsExtensions);
+  }
+
+  /// Active [ConfigurationExtension] proxies for extensions supporting `'config'`.
+  List<ConfigurationExtension> get configurationExtensions {
+    _logger.printTrace('ExtensionManager querying active configurationExtensions.');
+    return _discovery.connections
+        .where(
+          (ExtensionConnection c) =>
+              c.capabilities.services.contains(ConfigurationExtension.serviceNamespace),
+        )
+        .map<ConfigurationExtension>(
+          (ExtensionConnection c) => ConfigurationExtensionClient(c, logger: _logger),
+        )
+        .toList();
   }
 
   /// Disposes all active extension isolate connections.
