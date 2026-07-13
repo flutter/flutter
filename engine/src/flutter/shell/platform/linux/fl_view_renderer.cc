@@ -16,6 +16,7 @@
 #include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 
 struct _FlViewRenderer {
@@ -55,6 +56,9 @@ struct _FlViewRenderer {
 
   // Source ID for retrying texture acquisition when the surface is not ready.
   guint native_texture_retry_source_id;
+
+  // Root of the native Flutter semantics tree exposed to GTK 4.10+.
+  GtkAccessible* accessible_child;
 #endif
 };
 
@@ -63,12 +67,39 @@ enum { SIGNAL_FIRST_FRAME, SIGNAL_RESIZE, LAST_SIGNAL };
 static guint fl_view_renderer_signals[LAST_SIGNAL];
 
 #if FLUTTER_LINUX_GTK4
-G_DEFINE_TYPE(FlViewRenderer, fl_view_renderer, GTK_TYPE_WIDGET)
+static void fl_view_renderer_accessible_iface_init(
+    GtkAccessibleInterface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(
+    FlViewRenderer,
+    fl_view_renderer,
+    GTK_TYPE_WIDGET,
+    G_IMPLEMENT_INTERFACE(GTK_TYPE_ACCESSIBLE,
+                          fl_view_renderer_accessible_iface_init))
 #else
 G_DEFINE_TYPE(FlViewRenderer, fl_view_renderer, GTK_TYPE_DRAWING_AREA)
 #endif
 
 #if FLUTTER_LINUX_GTK4
+static GtkAccessible* fl_view_renderer_get_first_accessible_child(
+    GtkAccessible* accessible) {
+  FlViewRenderer* self = FL_VIEW_RENDERER(accessible);
+  return self->accessible_child == nullptr
+             ? nullptr
+             : GTK_ACCESSIBLE(g_object_ref(self->accessible_child));
+}
+
+static void fl_view_renderer_accessible_iface_init(
+    GtkAccessibleInterface* iface) {
+  if (!fl_gtk_runtime_supports_native_accessibility_tree()) {
+    return;
+  }
+
+  auto* iface_4_10 = reinterpret_cast<FlGtkAccessibleInterface4_10*>(iface);
+  iface_4_10->get_first_accessible_child =
+      fl_view_renderer_get_first_accessible_child;
+}
+
 static gboolean retry_native_texture_cb(gpointer user_data);
 
 static void set_texture(FlViewRenderer* self, GdkTexture* texture) {
@@ -374,6 +405,7 @@ static void fl_view_renderer_dispose(GObject* object) {
     self->native_texture_retry_source_id = 0;
   }
   g_clear_object(&self->texture);
+  g_clear_object(&self->accessible_child);
 #endif
   g_clear_object(&self->render_context);
   g_clear_object(&self->engine);
@@ -438,6 +470,17 @@ FlViewRenderer* fl_view_renderer_new(FlEngine* engine,
 
   return self;
 }
+
+#if FLUTTER_LINUX_GTK4
+void fl_view_renderer_set_accessible_child(FlViewRenderer* renderer,
+                                           GtkAccessible* accessible_child) {
+  g_return_if_fail(FL_IS_VIEW_RENDERER(renderer));
+  g_return_if_fail(accessible_child == nullptr ||
+                   GTK_IS_ACCESSIBLE(accessible_child));
+
+  g_set_object(&renderer->accessible_child, accessible_child);
+}
+#endif
 
 void fl_view_renderer_set_background_color(FlViewRenderer* self,
                                            const GdkRGBA* color) {

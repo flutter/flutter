@@ -6,6 +6,8 @@
 
 #if FLUTTER_LINUX_GTK4
 
+#include <cstddef>
+
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
@@ -20,12 +22,13 @@ struct _FlViewGtk4Accessibility {
   FlGtk4AccessibleNode* root_node;
 };
 
-#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE) && \
-    GTK_CHECK_VERSION(4, 10, 0)
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
 #define FL_TYPE_GTK4_ACCESSIBLE_NODE (fl_gtk4_accessible_node_get_type())
 #define FL_GTK4_ACCESSIBLE_NODE(obj)                               \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), FL_TYPE_GTK4_ACCESSIBLE_NODE, \
                               FlGtk4AccessibleNode))
+#define FL_IS_GTK4_ACCESSIBLE_NODE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj), FL_TYPE_GTK4_ACCESSIBLE_NODE))
 
 struct _FlGtk4AccessibleNode {
   GObject parent_instance;
@@ -52,6 +55,35 @@ struct _FlGtk4AccessibleNode {
 struct _FlGtk4AccessibleNodeClass {
   GObjectClass parent_class;
 };
+
+#if GTK_CHECK_VERSION(4, 10, 0)
+constexpr GtkAccessibleRole kFlGtkAccessibleRoleToggleButton =
+    GTK_ACCESSIBLE_ROLE_TOGGLE_BUTTON;
+#else
+constexpr GtkAccessibleRole kFlGtkAccessibleRoleToggleButton =
+    static_cast<GtkAccessibleRole>(GTK_ACCESSIBLE_ROLE_WINDOW + 1);
+#endif
+
+#if GTK_CHECK_VERSION(4, 10, 0)
+static_assert(sizeof(FlGtkAccessibleInterface4_10) ==
+              sizeof(GtkAccessibleInterface));
+static_assert(kFlGtkAccessibleRoleToggleButton ==
+              GTK_ACCESSIBLE_ROLE_TOGGLE_BUTTON);
+static_assert(offsetof(FlGtkAccessibleInterface4_10, get_at_context) ==
+              offsetof(GtkAccessibleInterface, get_at_context));
+static_assert(offsetof(FlGtkAccessibleInterface4_10, get_platform_state) ==
+              offsetof(GtkAccessibleInterface, get_platform_state));
+static_assert(offsetof(FlGtkAccessibleInterface4_10, get_accessible_parent) ==
+              offsetof(GtkAccessibleInterface, get_accessible_parent));
+static_assert(offsetof(FlGtkAccessibleInterface4_10,
+                       get_first_accessible_child) ==
+              offsetof(GtkAccessibleInterface, get_first_accessible_child));
+static_assert(offsetof(FlGtkAccessibleInterface4_10,
+                       get_next_accessible_sibling) ==
+              offsetof(GtkAccessibleInterface, get_next_accessible_sibling));
+static_assert(offsetof(FlGtkAccessibleInterface4_10, get_bounds) ==
+              offsetof(GtkAccessibleInterface, get_bounds));
+#endif
 
 enum {
   PROP_GTK4_ACCESSIBLE_NODE_0,
@@ -93,7 +125,7 @@ static GtkAccessibleRole fl_view_gtk4_accessibility_get_role(
     return GTK_ACCESSIBLE_ROLE_CHECKBOX;
   }
   if (flags->is_toggled != kFlutterTristateNone) {
-    return GTK_ACCESSIBLE_ROLE_TOGGLE_BUTTON;
+    return kFlGtkAccessibleRoleToggleButton;
   }
   if (flags->is_slider) {
     return GTK_ACCESSIBLE_ROLE_SLIDER;
@@ -169,25 +201,31 @@ static void fl_gtk4_accessible_node_set_state_tristate(
     FlGtk4AccessibleNode* self,
     GtkAccessibleState state,
     GtkAccessibleTristate value) {
-  GtkAccessibleState states[] = {state};
-  GValue state_value = G_VALUE_INIT;
-  gtk_accessible_state_init_value(state, &state_value);
-  g_value_set_enum(&state_value, value);
-  gtk_accessible_update_state_value(GTK_ACCESSIBLE(self), 1, states,
-                                    &state_value);
-  g_value_unset(&state_value);
+  gtk_accessible_update_state(GTK_ACCESSIBLE(self), state, value, -1);
 }
 
 static gboolean fl_gtk4_accessible_node_get_platform_state(
     GtkAccessible* accessible,
-    GtkAccessiblePlatformState state) {
+    FlGtkAccessiblePlatformState state) {
   FlGtk4AccessibleNode* self = FL_GTK4_ACCESSIBLE_NODE(accessible);
   switch (state) {
+#if GTK_CHECK_VERSION(4, 10, 0)
     case GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE:
+#else
+    case FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE:
+#endif
       return self->focusable;
+#if GTK_CHECK_VERSION(4, 10, 0)
     case GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED:
+#else
+    case FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED:
+#endif
       return self->focused;
+#if GTK_CHECK_VERSION(4, 10, 0)
     case GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE:
+#else
+    case FL_GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE:
+#endif
       return self->active;
   }
   return FALSE;
@@ -208,7 +246,9 @@ static GtkATContext* fl_gtk4_accessible_node_get_at_context(
 
   self->at_context =
       gtk_at_context_create(self->role, GTK_ACCESSIBLE(self), display);
-  return GTK_AT_CONTEXT(g_object_ref(self->at_context));
+  return self->at_context == nullptr
+             ? nullptr
+             : GTK_AT_CONTEXT(g_object_ref(self->at_context));
 }
 
 static GtkAccessible* fl_gtk4_accessible_node_get_accessible_parent(
@@ -288,18 +328,32 @@ static void fl_gtk4_accessible_node_get_property(GObject* object,
   }
 }
 
+static void fl_gtk4_accessible_node_set_property(GObject* object,
+                                                 guint property_id,
+                                                 const GValue* value,
+                                                 GParamSpec* pspec) {
+  FlGtk4AccessibleNode* self = FL_GTK4_ACCESSIBLE_NODE(object);
+
+  switch (property_id) {
+    case PROP_GTK4_ACCESSIBLE_NODE_ACCESSIBLE_ROLE:
+      self->role = static_cast<GtkAccessibleRole>(g_value_get_enum(value));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
+      break;
+  }
+}
+
 static void fl_gtk4_accessible_node_class_init(
     FlGtk4AccessibleNodeClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   object_class->get_property = fl_gtk4_accessible_node_get_property;
+  object_class->set_property = fl_gtk4_accessible_node_set_property;
   object_class->dispose = fl_gtk4_accessible_node_dispose;
 
-  g_object_class_install_property(
-      object_class, PROP_GTK4_ACCESSIBLE_NODE_ACCESSIBLE_ROLE,
-      g_param_spec_enum(
-          "accessible-role", nullptr, nullptr, GTK_TYPE_ACCESSIBLE_ROLE,
-          GTK_ACCESSIBLE_ROLE_GENERIC,
-          static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
+  g_object_class_override_property(object_class,
+                                   PROP_GTK4_ACCESSIBLE_NODE_ACCESSIBLE_ROLE,
+                                   "accessible-role");
 }
 
 static void fl_gtk4_accessible_node_init(FlGtk4AccessibleNode* self) {
@@ -308,25 +362,31 @@ static void fl_gtk4_accessible_node_init(FlGtk4AccessibleNode* self) {
 
 static void fl_gtk4_accessible_node_accessible_iface_init(
     GtkAccessibleInterface* iface) {
-  iface->get_at_context = fl_gtk4_accessible_node_get_at_context;
-  iface->get_platform_state = fl_gtk4_accessible_node_get_platform_state;
-  iface->get_accessible_parent = fl_gtk4_accessible_node_get_accessible_parent;
-  iface->get_first_accessible_child =
+  if (!fl_gtk_runtime_supports_native_accessibility_tree()) {
+    return;
+  }
+
+  auto* iface_4_10 = reinterpret_cast<FlGtkAccessibleInterface4_10*>(iface);
+  iface_4_10->get_at_context = fl_gtk4_accessible_node_get_at_context;
+  iface_4_10->get_platform_state = fl_gtk4_accessible_node_get_platform_state;
+  iface_4_10->get_accessible_parent =
+      fl_gtk4_accessible_node_get_accessible_parent;
+  iface_4_10->get_first_accessible_child =
       fl_gtk4_accessible_node_get_first_accessible_child;
-  iface->get_next_accessible_sibling =
+  iface_4_10->get_next_accessible_sibling =
       fl_gtk4_accessible_node_get_next_accessible_sibling;
-  iface->get_bounds = fl_gtk4_accessible_node_get_bounds;
+  iface_4_10->get_bounds = fl_gtk4_accessible_node_get_bounds;
 }
 
 static FlGtk4AccessibleNode* fl_gtk4_accessible_node_new(
     FlView* view,
     FlutterViewId view_id,
     const FlAccessibilitySemanticsNode* semantics) {
-  FlGtk4AccessibleNode* self = FL_GTK4_ACCESSIBLE_NODE(
-      g_object_new(FL_TYPE_GTK4_ACCESSIBLE_NODE, nullptr));
+  const GtkAccessibleRole role = fl_view_gtk4_accessibility_get_role(semantics);
+  FlGtk4AccessibleNode* self = FL_GTK4_ACCESSIBLE_NODE(g_object_new(
+      FL_TYPE_GTK4_ACCESSIBLE_NODE, "accessible-role", role, nullptr));
   self->view = view;
   self->view_id = view_id;
-  self->role = fl_view_gtk4_accessibility_get_role(semantics);
 
   const FlutterSemanticsFlags* flags = &semantics->flags;
   const gboolean is_enabled = flags->is_enabled != kFlutterTristateFalse;
@@ -424,11 +484,12 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_new(
     fl_gtk4_accessible_node_set_state_tristate(
         self, GTK_ACCESSIBLE_STATE_CHECKED, checked_value);
   }
-  if (flags->is_toggled != kFlutterTristateNone &&
-      self->role == GTK_ACCESSIBLE_ROLE_TOGGLE_BUTTON) {
-    fl_gtk4_accessible_node_set_state_bool(
+  if (flags->is_toggled != kFlutterTristateNone) {
+    fl_gtk4_accessible_node_set_state_tristate(
         self, GTK_ACCESSIBLE_STATE_PRESSED,
-        flags->is_toggled == kFlutterTristateTrue);
+        flags->is_toggled == kFlutterTristateTrue
+            ? GTK_ACCESSIBLE_TRISTATE_TRUE
+            : GTK_ACCESSIBLE_TRISTATE_FALSE);
   }
 
   return self;
@@ -447,9 +508,9 @@ static void fl_gtk4_accessible_node_attach_children(
     child->parent = parent;
     child->next_sibling = next_sibling;
     g_ptr_array_add(parent->children, child);
-    gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(child),
-                                         GTK_ACCESSIBLE(parent),
-                                         GTK_ACCESSIBLE(next_sibling));
+    fl_gtk_runtime_accessible_set_accessible_parent(
+        GTK_ACCESSIBLE(child), GTK_ACCESSIBLE(parent),
+        GTK_ACCESSIBLE(next_sibling));
   }
 }
 
@@ -492,8 +553,7 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
   fl_gtk4_accessible_node_attach_children(node, children);
   return node;
 }
-#endif  // defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE) &&
-        // GTK_CHECK_VERSION(4, 10, 0)
+#endif  // defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
 
 static const gchar* fl_view_gtk4_accessibility_get_root_label(
     FlViewGtk4Accessibility* self) {
@@ -509,11 +569,15 @@ static const gchar* fl_view_gtk4_accessibility_get_root_label(
   return root->label;
 }
 
-#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE) && \
-    GTK_CHECK_VERSION(4, 10, 0)
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
 static void fl_view_gtk4_accessibility_rebuild_native_tree(
     FlViewGtk4Accessibility* self) {
+  fl_view_renderer_set_accessible_child(self->view->renderer, nullptr);
   g_clear_object(&self->root_node);
+
+  if (!fl_gtk_runtime_supports_native_accessibility_tree()) {
+    return;
+  }
 
   if (self->semantics_store == nullptr ||
       !fl_accessibility_semantics_store_has_root(self->semantics_store)) {
@@ -531,13 +595,14 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
   self->root_node =
       fl_view_gtk4_accessibility_build_native_node(self, root, visited);
   if (self->root_node != nullptr) {
-    gtk_accessible_set_accessible_parent(GTK_ACCESSIBLE(self->root_node),
-                                         GTK_ACCESSIBLE(self->view->renderer),
-                                         nullptr);
+    fl_gtk_runtime_accessible_set_accessible_parent(
+        GTK_ACCESSIBLE(self->root_node), GTK_ACCESSIBLE(self->view->renderer),
+        nullptr);
+    fl_view_renderer_set_accessible_child(self->view->renderer,
+                                          GTK_ACCESSIBLE(self->root_node));
   }
 }
-#endif  // defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE) &&
-        // GTK_CHECK_VERSION(4, 10, 0)
+#endif  // defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
 
 FlViewGtk4Accessibility* fl_view_gtk4_accessibility_new(FlView* view,
                                                         FlutterViewId view_id) {
@@ -553,6 +618,7 @@ void fl_view_gtk4_accessibility_dispose(FlViewGtk4Accessibility* self) {
     return;
   }
 
+  fl_view_renderer_set_accessible_child(self->view->renderer, nullptr);
   g_clear_object(&self->root_node);
   g_clear_object(&self->semantics_store);
   g_free(self);
@@ -569,10 +635,14 @@ void fl_view_gtk4_accessibility_handle_update(
   }
 
   fl_accessibility_semantics_store_handle_update(self->semantics_store, update);
-#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE) && \
-    GTK_CHECK_VERSION(4, 10, 0)
-  fl_view_gtk4_accessibility_rebuild_native_tree(self);
-  fl_view_gtk4_accessibility_update_accessible_name(self);
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+  if (fl_gtk_runtime_supports_native_accessibility_tree()) {
+    fl_view_gtk4_accessibility_rebuild_native_tree(self);
+    fl_view_gtk4_accessibility_update_accessible_name(self);
+  } else {
+    fl_view_gtk4_accessibility_update_accessible_name(self);
+    fl_view_gtk4_accessibility_update_accessible_tree(self);
+  }
 #else
   fl_view_gtk4_accessibility_update_accessible_name(self);
   fl_view_gtk4_accessibility_update_accessible_tree(self);
@@ -604,9 +674,14 @@ void fl_view_gtk4_accessibility_update_accessible_tree(
     FlViewGtk4Accessibility* self) {
   g_return_if_fail(self != nullptr);
 
-#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE) && \
-    GTK_CHECK_VERSION(4, 10, 0)
-  fl_view_gtk4_accessibility_rebuild_native_tree(self);
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+  if (fl_gtk_runtime_supports_native_accessibility_tree()) {
+    fl_view_gtk4_accessibility_rebuild_native_tree(self);
+  } else {
+    fl_gtk_runtime_accessible_set_accessible_parent(
+        GTK_ACCESSIBLE(self->view->renderer), GTK_ACCESSIBLE(self->view),
+        nullptr);
+  }
 #else
   // The current GTK4 accessibility backend stays widget-backed, but this
   // helper is the seam for a future native GtkAccessible tree implementation.
@@ -623,6 +698,60 @@ void fl_view_gtk4_accessibility_send_announcement(FlViewGtk4Accessibility* self,
 
   fl_gtk_runtime_accessible_announce(GTK_ACCESSIBLE(self->view), message,
                                      assertive ? 1 : 0);
+}
+
+gboolean fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing() {
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+  return fl_gtk_runtime_supports_native_accessibility_tree();
+#else
+  return FALSE;
+#endif
+}
+
+GtkAccessible* fl_view_gtk4_accessibility_ref_native_root_for_testing(
+    FlViewGtk4Accessibility* self) {
+  g_return_val_if_fail(self != nullptr, nullptr);
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+  return self->root_node == nullptr
+             ? nullptr
+             : GTK_ACCESSIBLE(g_object_ref(self->root_node));
+#else
+  return nullptr;
+#endif
+}
+
+GtkAccessible* fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+    GtkAccessible* accessible) {
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+  g_return_val_if_fail(FL_IS_GTK4_ACCESSIBLE_NODE(accessible), nullptr);
+  return fl_gtk4_accessible_node_get_first_accessible_child(accessible);
+#else
+  return nullptr;
+#endif
+}
+
+GtkAccessible* fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
+    GtkAccessible* accessible) {
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+  g_return_val_if_fail(FL_IS_GTK4_ACCESSIBLE_NODE(accessible), nullptr);
+  return fl_gtk4_accessible_node_get_next_accessible_sibling(accessible);
+#else
+  return nullptr;
+#endif
+}
+
+gboolean fl_view_gtk4_accessibility_get_native_bounds_for_testing(
+    GtkAccessible* accessible,
+    int* x,
+    int* y,
+    int* width,
+    int* height) {
+#if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+  g_return_val_if_fail(FL_IS_GTK4_ACCESSIBLE_NODE(accessible), FALSE);
+  return fl_gtk4_accessible_node_get_bounds(accessible, x, y, width, height);
+#else
+  return FALSE;
+#endif
 }
 
 #endif  // FLUTTER_LINUX_GTK4

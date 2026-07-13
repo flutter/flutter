@@ -13,6 +13,7 @@ import sys
 import tempfile
 
 OPTIONAL_SYMBOLS = (
+    "gtk_accessible_get_first_accessible_child",
     "gtk_accessible_set_accessible_parent",
     "gtk_accessible_announce",
 )
@@ -96,6 +97,7 @@ def verify_sysroot_symbols(repo: Path, sysroot: Path,
                            version: tuple[int, int, int]) -> None:
     symbols = dynamic_symbols(repo, find_gtk_library(sysroot))
     expected = {
+        "gtk_accessible_get_first_accessible_child": version >= (4, 10, 0),
         "gtk_accessible_set_accessible_parent": version >= (4, 10, 0),
         "gtk_accessible_announce": version >= (4, 14, 0),
     }
@@ -177,17 +179,33 @@ def run_container_test(
     output_dir: Path,
     image: str,
     runtime: str,
+    validate_native_tree: bool,
 ) -> None:
     if shutil.which(runtime) is None:
         raise RuntimeError(f"Container runtime not found: {runtime}")
-    install_packages = " ".join(("libgtk-4-1", "libgtk-3-0", "libepoxy0"))
+    install_packages = " ".join(
+        (
+            "libgtk-4-1",
+            "libegl1",
+            "libegl-mesa0",
+            "libepoxy0",
+            "libgl1-mesa-dri",
+            "dbus-x11",
+            "xvfb",
+        ))
+    test_filter = "FlGtk4RuntimeApiTest.*"
+    if validate_native_tree:
+        test_filter += ":FlViewGtk4AccessibilityTest.*"
     container_script = (
         "set -eu; "
         "apt-get update -qq; "
         f"DEBIAN_FRONTEND=noninteractive apt-get install -y -qq {install_packages} >/dev/null; "
         "cp /opt/flutter/flutter_linux_gtk4_unittests /tmp/flutter_linux_gtk4_unittests; "
         "chmod +x /tmp/flutter_linux_gtk4_unittests; "
-        "/tmp/flutter_linux_gtk4_unittests --gtest_filter=FlGtk4RuntimeApiTest.*"
+        "G_DEBUG=fatal-criticals GDK_DISABLE=gl,vulkan GSK_RENDERER=cairo "
+        "GTK_A11Y=none "
+        "xvfb-run -a /tmp/flutter_linux_gtk4_unittests "
+        f"--gtest_filter='{test_filter}'"
     )
     run(
         [
@@ -242,6 +260,15 @@ def main() -> int:
                         default="bullseye")
     parser.add_argument("--skip-build", action="store_true")
     parser.add_argument(
+        "--native-tree-compat",
+        action="store_true",
+        help=(
+            "Compile the experimental native accessibility tree against the "
+            "selected baseline headers. The tree activates only on GTK 4.10+ "
+            "runtimes."
+        ),
+    )
+    parser.add_argument(
         "--runtime-loader",
         choices=("container", "host", "sysroot"),
         default="container",
@@ -261,7 +288,8 @@ def main() -> int:
     repo = Path(__file__).resolve().parents[2]
     engine_src = repo / "engine/src"
     sysroot = engine_src / f"build/linux/debian_{args.sysroot}_amd64-sysroot"
-    output_name = f"host_debug_unopt_{args.sysroot}_gtk4_compat"
+    output_suffix = "_native_tree" if args.native_tree_compat else ""
+    output_name = f"host_debug_unopt_{args.sysroot}_gtk4_compat{output_suffix}"
     output_dir = engine_src / "out" / output_name
     version = gtk_version(sysroot)
     print(
@@ -277,7 +305,9 @@ def main() -> int:
     if not args.skip_build:
         gn_args = (
             f'angle_use_wayland=false linux_x64_sysroot_variant="{args.sysroot}" '
-            "gtk4_runtime_api_compat=true gtk4_native_accessibility_tree=false"
+            "gtk4_runtime_api_compat=true gtk4_native_accessibility_tree=false "
+            "gtk4_native_accessibility_tree_compat="
+            f"{'true' if args.native_tree_compat else 'false'}"
         )
         run(
             [
@@ -319,6 +349,7 @@ def main() -> int:
     environment.pop("LD_LIBRARY_PATH", None)
     environment.pop("LD_PRELOAD", None)
     environment["FLUTTER_LINUX_GTK_DEBUG"] = "1"
+    environment["G_DEBUG"] = "fatal-criticals"
     if args.runtime_loader == "container":
         image = args.container_image
         if image is None:
@@ -328,6 +359,7 @@ def main() -> int:
             output_dir,
             image,
             args.container_runtime,
+            args.native_tree_compat,
         )
     elif args.runtime_loader == "host":
         with stage_host_runtime_libraries(sysroot) as staging:

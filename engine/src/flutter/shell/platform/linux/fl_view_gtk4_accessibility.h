@@ -30,6 +30,21 @@ void fl_view_gtk4_accessibility_send_announcement(FlViewGtk4Accessibility* self,
                                                   const char* message,
                                                   gboolean assertive);
 
+// Internal accessors used to validate the native tree with GTK 4.8 headers.
+gboolean fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing();
+GtkAccessible* fl_view_gtk4_accessibility_ref_native_root_for_testing(
+    FlViewGtk4Accessibility* self);
+GtkAccessible* fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+    GtkAccessible* accessible);
+GtkAccessible* fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
+    GtkAccessible* accessible);
+gboolean fl_view_gtk4_accessibility_get_native_bounds_for_testing(
+    GtkAccessible* accessible,
+    int* x,
+    int* y,
+    int* width,
+    int* height);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_GTK4_ACCESSIBILITY_H_

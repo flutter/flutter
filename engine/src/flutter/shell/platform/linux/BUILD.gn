@@ -12,7 +12,12 @@ import("//flutter/testing/testing.gni")
 declare_args() {
   gtk4_runtime_api_compat = true
   gtk4_native_accessibility_tree = false
+  gtk4_native_accessibility_tree_compat = true
 }
+
+assert(
+    !gtk4_native_accessibility_tree_compat || gtk4_runtime_api_compat,
+    "The GTK4 native accessibility compatibility tree requires runtime API compatibility")
 
 group("linux") {
   deps = [
@@ -341,6 +346,10 @@ source_set("flutter_linux_sources_gtk4") {
     defines += [ "FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE" ]
   }
 
+  if (gtk4_native_accessibility_tree_compat) {
+    defines += [ "FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE" ]
+  }
+
   deps = [
     "$dart_src/runtime:dart_api",
     "//flutter/fml",
@@ -478,6 +487,7 @@ executable("flutter_linux_gtk4_unittests") {
   testonly = true
 
   sources = [
+    "//flutter/testing/run_all_unittests.cc",
     "fl_accessibility_semantics_store_test.cc",
     "fl_application_test.cc",
     "fl_basic_message_channel_test.cc",
@@ -528,6 +538,7 @@ executable("flutter_linux_gtk4_unittests") {
 
     # fl_touch_manager_test.cc is GTK3-only (uses GdkEventTouch, gdkwayland)
     "fl_value_test.cc",
+    "fl_view_gtk4_accessibility_test.cc",
 
     # fl_window_state_monitor_test.cc is GTK3-only (uses mock_gtk.h)
     "testing/fl_mock_binary_messenger.cc",
@@ -552,6 +563,7 @@ executable("flutter_linux_gtk4_unittests") {
   configs += [
     "//flutter/shell/platform/linux/config:epoxy",
     "//flutter/shell/platform/linux/config:gtk4",
+    "//flutter/testing:dynamic_symbols",
   ]
 
   defines = [
@@ -559,6 +571,10 @@ executable("flutter_linux_gtk4_unittests") {
     "FLUTTER_LINUX_COMPILATION",
     "FLUTTER_LINUX_GTK4",
   ]
+
+  if (gtk4_native_accessibility_tree || gtk4_native_accessibility_tree_compat) {
+    defines += [ "FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE" ]
+  }
 
   deps = [
     ":flutter_linux_fixtures",
@@ -568,7 +584,7 @@ executable("flutter_linux_gtk4_unittests") {
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/shell/platform/embedder:embedder_test_utils",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
   ]
 }
 

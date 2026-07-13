@@ -72,6 +72,10 @@ void fl_view_renderer_present_layers(FlViewRenderer* renderer,
                                      const FlutterLayer** layers,
                                      size_t layers_count);
 
+// Sets the root of the native GTK accessibility tree exposed by this renderer.
+void fl_view_renderer_set_accessible_child(FlViewRenderer* renderer,
+                                           GtkAccessible* accessible_child);
+
 G_END_DECLS
 
 #else

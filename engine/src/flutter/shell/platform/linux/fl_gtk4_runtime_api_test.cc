@@ -19,8 +19,12 @@ TEST(FlGtk4RuntimeApiTest, CapabilitiesMatchLoadedGtk) {
   EXPECT_EQ(api->gtk_at_least_4_14, GtkRuntimeAtLeast(4, 14, 0));
   EXPECT_EQ(api->gtk_accessible_set_accessible_parent != nullptr,
             GtkRuntimeAtLeast(4, 10, 0));
+  EXPECT_EQ(api->gtk_accessible_get_first_accessible_child != nullptr,
+            GtkRuntimeAtLeast(4, 10, 0));
   EXPECT_EQ(api->gtk_accessible_announce != nullptr,
             GtkRuntimeAtLeast(4, 14, 0));
+  EXPECT_EQ(fl_gtk_runtime_supports_native_accessibility_tree(),
+            GtkRuntimeAtLeast(4, 10, 0));
 }
 
 TEST(FlGtk4RuntimeApiTest, MissingOptionalFunctionsUseNoOpFallback) {
@@ -28,6 +32,10 @@ TEST(FlGtk4RuntimeApiTest, MissingOptionalFunctionsUseNoOpFallback) {
 
   if (api->gtk_accessible_set_accessible_parent == nullptr) {
     fl_gtk_runtime_accessible_set_accessible_parent(nullptr, nullptr, nullptr);
+  }
+  if (api->gtk_accessible_get_first_accessible_child == nullptr) {
+    EXPECT_EQ(fl_gtk_runtime_accessible_get_first_accessible_child(nullptr),
+              nullptr);
   }
   if (api->gtk_accessible_announce == nullptr) {
     fl_gtk_runtime_accessible_announce(nullptr, "test announcement", 0);
