@@ -246,12 +246,14 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @Override
   protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-    if (currentImage != null) {
-      updateCurrentBitmap();
-    }
-    if (currentBitmap != null) {
-      canvas.drawBitmap(currentBitmap, 0, 0, null);
+    try (io.flutter.util.TraceSection e = io.flutter.util.TraceSection.scoped("FlutterImageView.onDraw")) {
+      super.onDraw(canvas);
+      if (currentImage != null) {
+        updateCurrentBitmap();
+      }
+      if (currentBitmap != null) {
+        canvas.drawBitmap(currentBitmap, 0, 0, null);
+      }
     }
   }
 
@@ -264,30 +266,32 @@ public class FlutterImageView extends View implements RenderSurface {
   }
 
   private void updateCurrentBitmap() {
-    if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      final HardwareBuffer buffer = currentImage.getHardwareBuffer();
-      currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
-      buffer.close();
-    } else {
-      final Image.Plane[] imagePlanes = currentImage.getPlanes();
-      if (imagePlanes.length != 1) {
-        return;
-      }
+    try (io.flutter.util.TraceSection e = io.flutter.util.TraceSection.scoped("FlutterImageView.updateCurrentBitmap")) {
+      if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+        final HardwareBuffer buffer = currentImage.getHardwareBuffer();
+        currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
+        buffer.close();
+      } else {
+        final Image.Plane[] imagePlanes = currentImage.getPlanes();
+        if (imagePlanes.length != 1) {
+          return;
+        }
 
-      final Image.Plane imagePlane = imagePlanes[0];
-      final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
-      final int desiredHeight = currentImage.getHeight();
+        final Image.Plane imagePlane = imagePlanes[0];
+        final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
+        final int desiredHeight = currentImage.getHeight();
 
-      if (currentBitmap == null
-          || currentBitmap.getWidth() != desiredWidth
-          || currentBitmap.getHeight() != desiredHeight) {
-        currentBitmap =
-            Bitmap.createBitmap(
-                desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
+        if (currentBitmap == null
+            || currentBitmap.getWidth() != desiredWidth
+            || currentBitmap.getHeight() != desiredHeight) {
+          currentBitmap =
+              Bitmap.createBitmap(
+                  desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
+        }
+        ByteBuffer buffer = imagePlane.getBuffer();
+        buffer.rewind();
+        currentBitmap.copyPixelsFromBuffer(buffer);
       }
-      ByteBuffer buffer = imagePlane.getBuffer();
-      buffer.rewind();
-      currentBitmap.copyPixelsFromBuffer(buffer);
     }
   }
 
