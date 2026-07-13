@@ -171,46 +171,49 @@ void main() {
     },
   );
 
-  test('Eager winner should be cleared when the eager winner rejects while arena is still open', () {
-    final GestureArenaManager arena = GestureArenaManager();
-    final TestGestureArenaMember memberA = TestGestureArenaMember();
-    final TestGestureArenaMember memberB = TestGestureArenaMember();
-    final TestGestureArenaMember memberC = TestGestureArenaMember();
+  test(
+    'Eager winner should be cleared when the eager winner rejects while arena is still open',
+    () {
+      final arena = GestureArenaManager();
+      final memberA = TestGestureArenaMember();
+      final memberB = TestGestureArenaMember();
+      final memberC = TestGestureArenaMember();
 
-    final GestureArenaEntry entryA = arena.add(primaryKey, memberA);
-    final GestureArenaEntry entryB = arena.add(primaryKey, memberB);
-    final GestureArenaEntry entryC = arena.add(primaryKey, memberC);
+      final GestureArenaEntry entryA = arena.add(primaryKey, memberA);
+      arena.add(primaryKey, memberB);
+      arena.add(primaryKey, memberC);
 
-    // A accepts while arena is open, becoming the eager winner.
-    entryA.resolve(GestureDisposition.accepted);
-    expect(memberA.acceptRan, isFalse); // Not yet resolved, arena still open.
-    expect(memberA.rejectRan, isFalse);
+      // A accepts while arena is open, becoming the eager winner.
+      entryA.resolve(GestureDisposition.accepted);
+      expect(memberA.acceptRan, isFalse); // Not yet resolved, arena still open.
+      expect(memberA.rejectRan, isFalse);
 
-    // A then gets rejected while arena is still open.
-    // Without the fix: eagerWinner still points to A (stale reference).
-    // With the fix: eagerWinner is cleared.
-    entryA.resolve(GestureDisposition.rejected);
-    expect(memberA.rejectRan, isTrue);
-    expect(memberA.acceptRan, isFalse);
+      // A then gets rejected while arena is still open.
+      // Without the fix: eagerWinner still points to A (stale reference).
+      // With the fix: eagerWinner is cleared.
+      entryA.resolve(GestureDisposition.rejected);
+      expect(memberA.rejectRan, isTrue);
+      expect(memberA.acceptRan, isFalse);
 
-    // Close the arena. _tryToResolveArena sees members = [B, C].
-    // Without the fix: eagerWinner (A) is non-null → _resolveInFavorOf(A)
-    //   → A.acceptGesture() called again on an already-rejected member,
-    //   → B and C incorrectly rejected. Assert fires in debug mode.
-    // With the fix: eagerWinner is null, arena stays unresolved.
-    arena.close(primaryKey);
+      // Close the arena. _tryToResolveArena sees members = [B, C].
+      // Without the fix: eagerWinner (A) is non-null → _resolveInFavorOf(A)
+      //   → A.acceptGesture() called again on an already-rejected member,
+      //   → B and C incorrectly rejected. Assert fires in debug mode.
+      // With the fix: eagerWinner is null, arena stays unresolved.
+      arena.close(primaryKey);
 
-    // Verify A was NOT incorrectly accepted again by a stale eager winner.
-    expect(memberA.acceptRan, isFalse);
-    // B and C should NOT have been prematurely rejected by stale eager winner.
-    expect(memberB.rejectRan, isFalse);
-    expect(memberC.rejectRan, isFalse);
+      // Verify A was NOT incorrectly accepted again by a stale eager winner.
+      expect(memberA.acceptRan, isFalse);
+      // B and C should NOT have been prematurely rejected by stale eager winner.
+      expect(memberB.rejectRan, isFalse);
+      expect(memberC.rejectRan, isFalse);
 
-    // Force resolution via sweep. B should win as the first remaining member.
-    arena.sweep(primaryKey);
-    expect(memberB.acceptRan, isTrue);
-    expect(memberB.rejectRan, isFalse);
-    expect(memberC.rejectRan, isTrue);
-    expect(memberC.acceptRan, isFalse);
-  });
+      // Force resolution via sweep. B should win as the first remaining member.
+      arena.sweep(primaryKey);
+      expect(memberB.acceptRan, isTrue);
+      expect(memberB.rejectRan, isFalse);
+      expect(memberC.rejectRan, isTrue);
+      expect(memberC.acceptRan, isFalse);
+    },
+  );
 }
