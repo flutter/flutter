@@ -4734,7 +4734,6 @@ targets:
 
   - name: Mac tool_integration_tests_1
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4761,7 +4760,6 @@ targets:
 
   - name: Mac tool_integration_tests_2
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4788,7 +4786,6 @@ targets:
 
   - name: Mac tool_integration_tests_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4815,7 +4812,6 @@ targets:
 
   - name: Mac tool_integration_tests_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4842,7 +4838,6 @@ targets:
 
   - name: Mac tool_integration_tests_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4869,7 +4864,6 @@ targets:
 
   - name: Mac tool_integration_tests_6
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4896,7 +4890,6 @@ targets:
 
   - name: Mac tool_integration_tests_7
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4923,7 +4916,6 @@ targets:
 
   - name: Mac tool_integration_tests_8
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4950,7 +4942,6 @@ targets:
 
   - name: Mac tool_integration_tests_9
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4977,7 +4968,6 @@ targets:
 
   - name: Mac tool_integration_tests_10
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
