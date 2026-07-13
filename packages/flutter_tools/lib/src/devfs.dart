@@ -741,7 +741,11 @@ class DevFS {
         return;
       }
 
-      final bool isEntryModified = entry.content.isModified;
+      final isShader = entry.kind == AssetKind.shader;
+      final bool isEntryModified =
+          entry.content.isModified ||
+          (isShader && shaderCompiler.areDependenciesModified(entry.content));
+
       final Set<Uri>? deps = assetTransformer.dependencies[archivePath];
       final bool hasInvalidatedDependencies = deps != null && deps.any(invalidatedSet.contains);
 
