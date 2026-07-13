@@ -13,10 +13,10 @@ import 'dialog_window_edit_dialog.dart';
 import 'models.dart';
 import 'popup_button.dart';
 import 'popup_window_edit_dialog.dart';
-import 'regular_window_content.dart';
-import 'regular_window_edit_dialog.dart';
 import 'tooltip_button.dart';
 import 'tooltip_window_edit_dialog.dart';
+import 'window_content.dart';
+import 'window_edit_dialog.dart';
 import 'window_settings_dialog.dart';
 
 class MainWindow extends StatelessWidget {

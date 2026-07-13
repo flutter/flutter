@@ -1295,7 +1295,7 @@ class _Win32PlatformInterface {
     try {
       request.ref.size.from(size);
       request.ref.constraints.from(constraints);
-      request.ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
+      request.ref.title = (title ?? 'Window').toNativeUtf16(allocator: allocator);
       request.ref.sizedToContent = sizedToContent;
       request.ref.resizable = resizable;
       return _createWindow(engineId, request);
