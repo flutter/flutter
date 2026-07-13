@@ -5172,6 +5172,9 @@ targets:
   - name: Mac_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       tags: >
@@ -5202,6 +5205,9 @@ targets:
   - name: Mac_mokey integration_test_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       tags: >
@@ -5252,6 +5258,9 @@ targets:
   - name: Mac_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     runIf:
       - .ci.yaml
       - dev/**
@@ -5282,6 +5291,9 @@ targets:
   - name: Mac_mokey run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     runIf:
       - .ci.yaml
       - engine/**
