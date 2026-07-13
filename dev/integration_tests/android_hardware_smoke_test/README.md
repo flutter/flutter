@@ -286,4 +286,3 @@ While beneficial for network isolation, it was **not desirable** for several rea
 3. **Redundant Safety**: Because the online compilation phase (`assembleDebugAndroidTest`) already queries remote Maven repositories for project dependencies, running the test execution online does not introduce any new network vectors that could flake. Gradle's internal dependency caching guarantees subsequent execution remains extremely fast.
 
 By executing `connectedDebugAndroidTest` online directly in a single step, the test suite executes exactly once, remains low maintenance across AGP upgrades, and cleanly bubbles up any legitimate compiler or runner errors without silent try-catch blocks.
-

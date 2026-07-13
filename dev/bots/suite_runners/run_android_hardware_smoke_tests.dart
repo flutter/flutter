@@ -21,7 +21,7 @@ void _copyDirectory(Directory source, Directory destination) {
     if (entity is File) {
       final String relativePath = path.relative(entity.path, from: source.path);
       final String destPath = path.join(destination.path, relativePath);
-      const LocalFileSystem().file(destPath).createSync(recursive: true);
+      entity.fileSystem.file(destPath).parent.createSync(recursive: true);
       entity.copySync(destPath);
     }
   }
@@ -101,8 +101,7 @@ Future<void> runAndroidHardwareSmokeTests({
       }
 
       final String gradle = path.absolute(
-        androidDir,
-        Platform.isWindows ? 'gradlew.bat' : 'gradlew',
+        path.join(androidDir, Platform.isWindows ? 'gradlew.bat' : 'gradlew'),
       );
 
       // 3. Build and run the instrumented tests.
