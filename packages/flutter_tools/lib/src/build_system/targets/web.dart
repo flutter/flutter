@@ -413,8 +413,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'jsSupportRuntimePath': 'main.dart.mjs',
         };
 
-  static final RegExp _partWasmRegex = RegExp(r'main\.dart_module[0-9].*\.wasm');
-  static final RegExp _partWasmMapRegex = RegExp(r'main\.dart_module[0-9].*\.wasm\.map');
+  static final RegExp _partWasmRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm$');
+  static final RegExp _partWasmMapRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm\.map$');
 
   @override
   Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun

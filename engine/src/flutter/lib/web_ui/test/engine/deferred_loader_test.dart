@@ -59,10 +59,11 @@ JSString createFakeRuntimeUrl() {
 
 JSObject createDummyWasmBuild() {
   return <String, Object>{
-    'compileTarget': 'dart2wasm',
-    'mainWasmPath': 'data:application/wasm,',
-    'jsSupportRuntimePath': createFakeRuntimeUrl().toDart,
-  }.jsify()! as JSObject;
+        'compileTarget': 'dart2wasm',
+        'mainWasmPath': 'data:application/wasm,',
+        'jsSupportRuntimePath': createFakeRuntimeUrl().toDart,
+      }.jsify()!
+      as JSObject;
 }
 
 void testMain() {
