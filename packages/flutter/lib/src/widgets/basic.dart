@@ -1934,10 +1934,15 @@ class Transform extends SingleChildRenderObjectWidget {
 /// The [CompositedTransformTarget] must come earlier in the paint order than
 /// any linked [CompositedTransformFollower]s.
 ///
+/// {@macro flutter.widgets.CompositedTransformFollower.overlayPortal}
+///
 /// See also:
 ///
 ///  * [CompositedTransformFollower], the widget that can target this one.
 ///  * [LeaderLayer], the layer that implements this widget's logic.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformTarget extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///
@@ -1985,11 +1990,21 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// this widget is usually used as the root of an [OverlayEntry] in an app-wide
 /// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
 ///
+/// {@template flutter.widgets.CompositedTransformFollower.overlayPortal}
+/// [CompositedTransformFollower] and [CompositedTransformTarget] are
+/// incompatible with [OverlayPortal.overlayChildLayoutBuilder] and thus
+/// must not be used together. Consider using
+/// [OverlayPortal.overlayChildLayoutBuilder] instead
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [CompositedTransformTarget], the widget that this widget can target.
 ///  * [FollowerLayer], the layer that implements this widget's logic.
 ///  * [Transform], which applies an arbitrary transform to a child.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///

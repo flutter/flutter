@@ -566,7 +566,8 @@ ContentContext::ContentContext(
       data_host_buffer_(HostBuffer::Create(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
-          context_->GetCapabilities()->GetMinimumUniformAlignment())),
+          context_->GetCapabilities()->GetMinimumUniformAlignment(),
+          context_->GetSubmissionTracker())),
       text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -580,7 +581,8 @@ ContentContext::ContentContext(
       context_->GetCapabilities()->NeedsPartitionedHostBuffer()
           ? HostBuffer::Create(
                 context_->GetResourceAllocator(), context_->GetIdleWaiter(),
-                context_->GetCapabilities()->GetMinimumUniformAlignment())
+                context_->GetCapabilities()->GetMinimumUniformAlignment(),
+                context_->GetSubmissionTracker())
           : data_host_buffer_;
   {
     TextureDescriptor desc;

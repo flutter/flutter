@@ -933,11 +933,16 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
+///
+/// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
+/// different flavors can coexist on disk without overwriting each other.
+String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
       : targetPlatform.simpleName;
-  final subDirs = 'linux/$arch';
+  final String subDirs = (flavor != null && flavor.isNotEmpty)
+      ? globals.fs.path.join('linux', arch, flavor)
+      : globals.fs.path.join('linux', arch);
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
@@ -1069,6 +1074,14 @@ const kFlavor = 'Flavor';
 /// Environment variable of the flavor to be set in dartDefines to be accessed
 /// by the `appFlavor` service.
 const kAppFlavor = 'FLUTTER_APP_FLAVOR';
+
+/// Environment variable of the build name to be set in dartDefines to be
+/// accessed by the `appBuildName` service.
+const kAppBuildName = 'FLUTTER_BUILD_NAME';
+
+/// Environment variable of the build number to be set in dartDefines to be
+/// accessed by the `appBuildNumber` service.
+const kAppBuildNumber = 'FLUTTER_BUILD_NUMBER';
 
 /// Environment variable of the enabled feature flags to be set in the
 /// dartDefines.
