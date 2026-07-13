@@ -46,6 +46,7 @@ public class FlutterImageView extends View implements RenderSurface {
   @Nullable private Image currentImage;
   @Nullable private Bitmap currentBitmap;
   @Nullable private FlutterRenderer flutterRenderer;
+  private boolean bitmapNeedsUpdate = false;
 
   private boolean isContentSizingEnabled = false;
 
@@ -178,6 +179,7 @@ public class FlutterImageView extends View implements RenderSurface {
     acquireLatestImage();
     // Clear drawings.
     currentBitmap = null;
+    bitmapNeedsUpdate = false;
 
     // Close and clear the current image if any.
     closeCurrentImage();
@@ -212,6 +214,7 @@ public class FlutterImageView extends View implements RenderSurface {
       // Only close current image after acquiring valid new image
       closeCurrentImage();
       currentImage = newImage;
+      bitmapNeedsUpdate = true;
       invalidate();
     }
     return newImage != null;
@@ -228,6 +231,7 @@ public class FlutterImageView extends View implements RenderSurface {
 
     // Close resources.
     closeCurrentImage();
+    currentBitmap = null;
     // Close the current image reader, then create a new one with the new size.
     // Image readers cannot be resized once created.
     closeImageReader();
@@ -246,12 +250,18 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @Override
   protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-    if (currentImage != null) {
-      updateCurrentBitmap();
-    }
-    if (currentBitmap != null) {
-      canvas.drawBitmap(currentBitmap, 0, 0, null);
+    try (io.flutter.util.TraceSection e =
+        io.flutter.util.TraceSection.scoped("FlutterImageView.onDraw")) {
+      super.onDraw(canvas);
+      if (currentImage != null) {
+        if (bitmapNeedsUpdate) {
+          updateCurrentBitmap();
+          bitmapNeedsUpdate = false;
+        }
+      }
+      if (currentBitmap != null) {
+        canvas.drawBitmap(currentBitmap, 0, 0, null);
+      }
     }
   }
 
