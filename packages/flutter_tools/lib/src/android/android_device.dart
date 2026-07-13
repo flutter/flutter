@@ -498,6 +498,7 @@ class AndroidDevice extends Device {
           app.id,
         ]),
         throwOnError: true,
+        timeout: const Duration(seconds: 30),
       );
       uninstallOut = uninstallResult.stdout;
     } on Exception catch (error) {
@@ -577,12 +578,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -687,6 +686,11 @@ class AndroidDevice extends Device {
           'disable-service-auth-codes',
           'true',
         ],
+        if (debuggingOptions.disableServiceOriginCheck) ...<String>[
+          '--ez',
+          'disable-service-origin-check',
+          'true',
+        ],
         if (debuggingOptions.dartFlags.isNotEmpty) ...<String>[
           '--es',
           'dart-flags',
@@ -701,7 +705,9 @@ class AndroidDevice extends Device {
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
-    if (result.contains('Error: ')) {
+    if (result.contains(
+      RegExp(r'(Error:|Error type|Security\s?exception)', caseSensitive: false),
+    )) {
       _logger.printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
@@ -753,11 +759,17 @@ class AndroidDevice extends Device {
       if (userIdentifier != null) ...<String>['--user', userIdentifier],
       app.id,
     ]);
-    return _processUtils
-        .stream(command)
-        .then<bool>(
-          (int exitCode) => exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform),
-        );
+    try {
+      final RunResult result = await _processUtils.run(
+        command,
+        timeout: const Duration(seconds: 30),
+      );
+      final int exitCode = result.exitCode;
+      return exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform);
+    } on Exception catch (error) {
+      _logger.printError('adb shell am force-stop failed: $error');
+      return false;
+    }
   }
 
   @override
@@ -1167,6 +1179,9 @@ class AdbLogReader extends DeviceLogReader {
     // It is not an actual error and causes no problems for the application.
     // See https://github.com/flutter/flutter/issues/104268
     RegExp(r'^E/FrameEvents\(\s*\d+\): updateAcquireFence: Did not find frame\.$'),
+    // This warning is spammy on some devices and does not affect functionality.
+    // See https://github.com/flutter/flutter/issues/174783
+    RegExp(r'^W/MotionEvent-JNI\(\s*\d+\): android_view_MotionEvent_nativeGetPointerCount: -1$'),
     // See https://github.com/flutter/flutter/issues/160598
     RegExp(r'ViewPostIme pointer'),
     RegExp(r'mali.instrumentation.graph.work'),

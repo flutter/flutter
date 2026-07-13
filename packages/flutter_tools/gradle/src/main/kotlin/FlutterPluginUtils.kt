@@ -4,23 +4,28 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.api.BaseVariantOutput
-import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.PrintTask
+import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import java.io.File
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 
@@ -39,6 +44,19 @@ object FlutterPluginUtils {
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
+    internal const val PROP_SDK_MANAGER_PATH = "flutter.sdkManagerPath"
+    internal const val PROP_ANDROID_SDK_ROOT = "flutter.androidSdkRoot"
+    internal const val PROP_INSTALLED_NDK_VERSIONS = "flutter.installedNdkVersions"
+    internal const val TASK_PRINT_NDK_VERSION = "printNdkVersion"
+    internal const val NDK_VERSION_OUTPUT_PREFIX = "NdkVersion: "
+
+    private data class ToolNdkProvisioningProperties(
+        val androidSdkRoot: String,
+        val installedNdkVersions: Set<String>,
+        val sdkManagerPath: String?
+    )
+
+    internal const val PROP_FORCE_VERSION_CODE_IGNORING_ABI = "force-version-code-ignoring-abi"
 
     /**
      * The URL for documentation for general information on migration to built-in Kotlin.
@@ -294,6 +312,16 @@ object FlutterPluginUtils {
         project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
 
     /**
+     *  Developers can set this value by passing `-P force-version-code-ignoring-abi=true`
+     *  to flutter build. Where "force-version-code-ignoring-abi" comes from
+     *  PROP_FORCE_VERSION_CODE_IGNORING_ABI.
+     */
+    @JvmStatic
+    @JvmName("shouldForceVersionCodeIgnoringAbi")
+    internal fun shouldForceVersionCodeIgnoringAbi(project: Project): Boolean =
+        project.findProperty(PROP_FORCE_VERSION_CODE_IGNORING_ABI)?.toString()?.toBoolean() ?: false
+
+    /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
      *
      * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
@@ -500,6 +528,10 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
+    internal fun getConfiguredNdkVersion(project: Project): String? =
+        project.extensions.findByType(ApplicationExtension::class.java)?.ndkVersion
+            ?: getLegacyAndroidExtension(project).ndkVersion
+
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
      * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
@@ -530,107 +562,20 @@ object FlutterPluginUtils {
         }
     }
 
-    private fun logPluginCompileSdkWarnings(
-        maxPluginCompileSdkVersion: Int,
-        projectCompileSdkVersion: Int,
-        logger: Logger,
-        pluginsWithHigherSdkVersion: List<PluginVersionPair>,
-        projectDirectory: File
-    ) {
-        logger.error(
-            "Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:"
-        )
-        for (pluginToCompileSdkVersion in pluginsWithHigherSdkVersion) {
-            logger.error(
-                "- ${pluginToCompileSdkVersion.name} compiles against Android SDK ${pluginToCompileSdkVersion.version}"
-            )
-        }
-        val buildGradleFile =
-            getBuildGradleFileFromProjectDir(
-                projectDirectory,
-                logger
-            )
-        logger.error(
-            """
-            Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-            Add the following to ${buildGradleFile.path}:
-
-                android {
-                    compileSdk = $maxPluginCompileSdkVersion
-                    ...
-                }
-            """.trimIndent()
-        )
-    }
-
-    private fun logPluginNdkWarnings(
-        maxPluginNdkVersion: String,
-        projectNdkVersion: String,
-        logger: Logger,
-        pluginsWithDifferentNdkVersion: List<PluginVersionPair>,
-        projectDirectory: File
-    ) {
-        logger.error(
-            "Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:"
-        )
-        for (pluginToNdkVersion in pluginsWithDifferentNdkVersion) {
-            logger.error("- ${pluginToNdkVersion.name} requires Android NDK ${pluginToNdkVersion.version}")
-        }
-        val buildGradleFile =
-            getBuildGradleFileFromProjectDir(
-                projectDirectory,
-                logger
-            )
-        logger.error(
-            """
-            Fix this issue by using the highest Android NDK version (they are backward compatible).
-            Add the following to ${buildGradleFile.path}:
-
-                android {
-                    ndkVersion = "$maxPluginNdkVersion"
-                    ...
-                }
-            """.trimIndent()
-        )
-    }
-
     /** Prints error message for usage of KGP. */
     @JvmStatic
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
-
+        val agpVersion = VersionFetcher.getAGPVersion(project)
         var shouldLogForApp = false
         project.rootProject.subprojects {
-            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
-            if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
-
-            val scriptText: String =
-                if (buildFile.absolutePath.contains("app/build.gradle")) {
-                    getBuildGradleFileFromProjectDir(this.projectDir, this.logger).readText()
-                } else {
-                    buildFile.readText()
-                }
-
-            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
-                if (buildFile.extension == "kts") {
-                    Triple(
-                        kgpRegexKotlin.containsMatchIn(scriptText),
-                        appPluginRegexKotlin.containsMatchIn(scriptText),
-                        libPluginRegexKotlin.containsMatchIn(scriptText)
-                    )
-                } else {
-                    Triple(
-                        kgpRegexGroovy.containsMatchIn(scriptText),
-                        appPluginRegexGroovy.containsMatchIn(scriptText),
-                        libPluginRegexGroovy.containsMatchIn(scriptText)
-                    )
-                }
+            val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
             // Ensures applying AGP exists in the build file configuration.
-            if (!hasAppPlugin && !hasLibPlugin) return@subprojects
+            if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
-            if (!hasKgpPlugin) {
+            if (!isBuiltInKotlinEnabled(project, agpVersion) && !pluginState.hasKgpPlugin) {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
@@ -642,27 +587,34 @@ object FlutterPluginUtils {
                         """.trimIndent()
                     )
                 }
-                return@subprojects
             }
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
-            if (hasAppPlugin) {
+            if (pluginState.hasAppPlugin && pluginState.hasKgpPlugin) {
                 shouldLogForApp = true
             }
 
-            if (hasLibPlugin) {
+            if (pluginState.hasLibPlugin && pluginState.hasKgpPlugin) {
                 pluginsWithKGPAppliedList.add(name)
             }
         }
 
+        // If no imperative apply KGP declarations were found, there is nothing to log.
+        if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
+            return
+        }
+
         project.gradle.projectsEvaluated {
+            if (agpVersion == null || agpVersion.major < 9) {
+                return@projectsEvaluated
+            }
             if (shouldLogForApp) {
                 project.logger.error(
                     """
                     WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
-                    applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
+                    applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                     Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
-                    
+
                     """.trimIndent()
                 )
             }
@@ -671,15 +623,108 @@ object FlutterPluginUtils {
                 """
                 WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): ${pluginsWithKGPAppliedList.joinToString()}
                 Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
-                
+
                 Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
-                If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+                If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
                 an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
-                
+
                 If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
                 """.trimIndent()
             )
         }
+    }
+
+    /**
+     * Represents whether Kotlin Gradle Plugin, Android Gradle Plugin (for applications), and the
+     * Android Gradle Plugin (for libraries) are declared in a subproject's build script.
+     *
+     * @property hasKgpPlugin `true` if the Kotlin Gradle Plugin (KGP) is declared in the subproject's build script.
+     * @property hasAppPlugin `true` if the Android Gradle Plugin (AGP) for applications is declared in the subproject's build script.
+     * @property hasLibPlugin `true` if the Android Gradle Plugin (AGP) for libraries is declared in the subproject's build script.
+     */
+    internal data class SubprojectPluginState(
+        val hasKgpPlugin: Boolean,
+        val hasAppPlugin: Boolean,
+        val hasLibPlugin: Boolean
+    )
+
+    /**
+     * Scans the build script (`build.gradle` or `build.gradle.kts`) of Flutter Android app modules and Flutter plugin
+     * modules to detect declarations of Kotlin Gradle Plugin, Android Gradle Plugin (for applications),
+     * and Android Gradle Plugin (for libraries).
+     *
+     * This inspects build script files directly via regex rather than querying Gradle plugin
+     * state at runtime. Evaluating Kotlin Gradle Plugin dynamically at runtime to conditionally apply Kotlin Gradle Plugin
+     * during configuration leads to lifecycle and ordering issues (see https://github.com/gradle/gradle/issues/36953).
+     *
+     * Returns null if the build script does not exist, is inside an ephemeral `.android/` directory,
+     * or fails to read due to an [IOException].
+     */
+    internal fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
+        val buildFile = subproject.buildFile
+
+        // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory
+        // should not be adjusted and by default does not apply KGP
+        if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) {
+            return null
+        }
+
+        val scriptText: String =
+            try {
+                if (buildFile.absolutePath.contains("app/build.gradle")) {
+                    getBuildGradleFileFromProjectDir(
+                        subproject.projectDir,
+                        subproject.logger
+                    ).readText()
+                } else {
+                    buildFile.readText()
+                }
+            } catch (e: IOException) {
+                subproject.logger.error("Failed to read build file: ${buildFile.absolutePath}", e)
+                return null
+            }
+
+        val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+            if (buildFile.extension == "kts") {
+                Triple(
+                    kgpRegexKotlin.containsMatchIn(scriptText),
+                    appPluginRegexKotlin.containsMatchIn(scriptText),
+                    libPluginRegexKotlin.containsMatchIn(scriptText)
+                )
+            } else {
+                Triple(
+                    kgpRegexGroovy.containsMatchIn(scriptText),
+                    appPluginRegexGroovy.containsMatchIn(scriptText),
+                    libPluginRegexGroovy.containsMatchIn(scriptText)
+                )
+            }
+
+        return SubprojectPluginState(hasKgpPlugin, hasAppPlugin, hasLibPlugin)
+    }
+
+    /**
+     * Determines if the Gradle property `android.builtInKotlin` is enabled globally across the multi-project Gradle build.
+     *
+     * Evaluates the `android.builtInKotlin` Gradle property, supporting any [standard Gradle
+     * configuration source](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties) (such as the root project's `gradle.properties` file or command-line `-P` flags).
+     *
+     * Defaults to `true` for AGP 9.0+ unless `android.builtInKotlin` is explicitly configured
+     * to `false`. Always returns `false` if the AGP version is below `9.0.0` (or null).
+     * See [Android Migration Guide](https://developer.android.com/build/migrate-to-built-in-kotlin).
+     */
+    @JvmStatic
+    @JvmName("isBuiltInKotlinEnabled")
+    internal fun isBuiltInKotlinEnabled(
+        project: Project,
+        agpVersion: AndroidPluginVersion?
+    ): Boolean {
+        if (agpVersion == null || agpVersion.major < 9) {
+            return false
+        }
+        return project.providers
+            .gradleProperty("android.builtInKotlin")
+            .orNull
+            ?.toBoolean() ?: true
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
@@ -689,91 +734,48 @@ object FlutterPluginUtils {
         project: Project,
         pluginList: List<Map<String?, Any?>>
     ) {
-        project.afterEvaluate {
-            // getCompileSdkFromProject returns a string if the project uses a preview compileSdkVersion
-            // so default to Int.MAX_VALUE in that case.
-            val projectCompileSdkVersion: Int =
-                getCompileSdkFromProject(project).toIntOrNull() ?: Int.MAX_VALUE
+        val validateTask =
+            project.tasks.register("validateCompileSdkVersion", ValidateCompileSdkVersionTask::class.java) {
+                this.projectDir.set(project.layout.projectDirectory)
+            }
 
-            var maxPluginCompileSdkVersion = projectCompileSdkVersion
-            // TODO(gmackall): This should be updated to reflect newer templates.
-            // The default for AGP 4.1.0 used in old templates.
-            val ndkVersionIfUnspecified = "21.1.6352462"
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.finalizeDsl { _ ->
+            val projectAndroidExtension = getAndroidExtension(project)
+            validateTask.configure {
+                projectCompileSdk.set(projectAndroidExtension.compileSdk ?: Int.MAX_VALUE)
+                projectNdkVersion.set(projectAndroidExtension.ndkVersion)
 
-            // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
-            //  This value (ndkVersion) is nullable on AGP versions below that.
-            //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
-            @Suppress("USELESS_ELVIS")
-            val projectNdkVersion: String =
-                getLegacyAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
-            var maxPluginNdkVersion = projectNdkVersion
-            var numProcessedPlugins = pluginList.size
-            val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
-            val pluginsWithDifferentNdkVersion = mutableListOf<PluginVersionPair>()
-            pluginList.forEach { pluginObject ->
-                val pluginName: String =
-                    requireNotNull(
-                        pluginObject["name"] as? String
-                    ) { "Missing valid \"name\" property for plugin object: $pluginObject" }
-                val pluginProject: Project =
-                    project.rootProject.findProject(":$pluginName") ?: return@forEach
-                pluginProject.afterEvaluate {
-                    val pluginCompileSdkVersion: Int =
-                        getCompileSdkFromProject(pluginProject).toIntOrNull() ?: Int.MAX_VALUE
-                    maxPluginCompileSdkVersion =
-                        maxOf(maxPluginCompileSdkVersion, pluginCompileSdkVersion)
-                    if (pluginCompileSdkVersion > projectCompileSdkVersion) {
-                        pluginsWithHigherSdkVersion.add(
-                            PluginVersionPair(
-                                pluginName,
-                                pluginCompileSdkVersion.toString()
-                            )
-                        )
-                    }
+                val pluginSdksMap = mutableMapOf<String, Int>()
+                val pluginNdksMap = mutableMapOf<String, String>()
 
-                    // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
-                    //  This value (ndkVersion) is nullable on AGP versions below that.
-                    //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
-                    @Suppress("USELESS_ELVIS")
-                    val pluginNdkVersion: String =
-                        getLegacyAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
-                    maxPluginNdkVersion =
-                        VersionUtils.mostRecentSemanticVersion(
-                            pluginNdkVersion,
-                            maxPluginNdkVersion
-                        )
-                    if (pluginNdkVersion != projectNdkVersion) {
-                        pluginsWithDifferentNdkVersion.add(
-                            PluginVersionPair(
-                                pluginName,
-                                pluginNdkVersion
-                            )
-                        )
-                    }
+                pluginList.forEach { plugin ->
+                    val name = requireNotNull(plugin["name"] as? String) { "Missing valid \"name\" property for plugin object: $plugin" }
+                    val pluginProject = project.rootProject.findProject(":$name")
+                    if (pluginProject != null) {
+                        val pluginAndroidExtension =
+                            try {
+                                getAndroidExtension(pluginProject)
+                            } catch (e: IllegalStateException) {
+                                null
+                            }
 
-                    numProcessedPlugins--
-                    if (numProcessedPlugins == 0) {
-                        if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            logPluginCompileSdkWarnings(
-                                maxPluginCompileSdkVersion = maxPluginCompileSdkVersion,
-                                projectCompileSdkVersion = projectCompileSdkVersion,
-                                logger = project.logger,
-                                pluginsWithHigherSdkVersion = pluginsWithHigherSdkVersion,
-                                projectDirectory = project.projectDir
-                            )
-                        }
-                        if (maxPluginNdkVersion != projectNdkVersion) {
-                            logPluginNdkWarnings(
-                                maxPluginNdkVersion = maxPluginNdkVersion,
-                                projectNdkVersion = projectNdkVersion,
-                                logger = project.logger,
-                                pluginsWithDifferentNdkVersion = pluginsWithDifferentNdkVersion,
-                                projectDirectory = project.projectDir
-                            )
+                        pluginSdksMap[name] = pluginAndroidExtension?.compileSdk ?: Int.MAX_VALUE
+
+                        val ndkVersion = pluginAndroidExtension?.ndkVersion ?: projectAndroidExtension.ndkVersion
+                        if (ndkVersion != null) {
+                            pluginNdksMap[name] = ndkVersion
                         }
                     }
                 }
+                pluginCompileSdks.set(pluginSdksMap)
+                pluginNdkVersions.set(pluginNdksMap)
             }
+        }
+
+        // Wire the task to run before compilation.
+        project.tasks.named("preBuild").configure {
+            dependsOn(validateTask)
         }
     }
 
@@ -787,6 +789,10 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
+        if (isFlutterAppProject(gradleProject) && isInvokingMetadataNdkVersionTask(gradleProject)) {
+            return
+        }
+
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
@@ -795,7 +801,126 @@ object FlutterPluginUtils {
             return
         }
 
-        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
+        val toolNdkProvisioningProperties = getToolNdkProvisioningProperties(gradleProject)
+        if (toolNdkProvisioningProperties != null) {
+            val androidComponents =
+                gradleProject.extensions.findByType(AndroidComponentsExtension::class.java)
+            if (androidComponents == null) {
+                configureSyntheticExternalNativeBuildFallback(
+                    gradleProject = gradleProject,
+                    flutterSdkRootPath = flutterSdkRootPath
+                )
+                return
+            }
+
+            androidComponents.finalizeDsl { _ ->
+                if (gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null) {
+                    return@finalizeDsl
+                }
+
+                val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+                if (
+                    !configuredNdkVersion.isNullOrBlank() &&
+                    toolNdkProvisioningProperties.installedNdkVersions.contains(
+                        configuredNdkVersion
+                    )
+                ) {
+                    return@finalizeDsl
+                }
+                if (
+                    toolNdkProvisioningProperties.sdkManagerPath == null ||
+                    gradleProject.gradle.startParameter.isOffline
+                ) {
+                    configureSyntheticExternalNativeBuildFallback(
+                        gradleProject = gradleProject,
+                        flutterSdkRootPath = flutterSdkRootPath
+                    )
+                    return@finalizeDsl
+                }
+                val handledByToolProvisioning =
+                    maybeHandleToolNdkProvisioning(
+                        gradleProject = gradleProject,
+                        toolNdkProvisioningProperties = toolNdkProvisioningProperties
+                    )
+                if (!handledByToolProvisioning) {
+                    configureSyntheticExternalNativeBuildFallback(
+                        gradleProject = gradleProject,
+                        flutterSdkRootPath = flutterSdkRootPath
+                    )
+                }
+            }
+            return
+        }
+
+        configureSyntheticExternalNativeBuildFallback(
+            gradleProject = gradleProject,
+            flutterSdkRootPath = flutterSdkRootPath
+        )
+    }
+
+    private fun getToolNdkProvisioningProperties(project: Project): ToolNdkProvisioningProperties? {
+        val androidSdkRoot = project.findProperty(PROP_ANDROID_SDK_ROOT)?.toString() ?: return null
+        val installedNdkVersions =
+            project
+                .findProperty(PROP_INSTALLED_NDK_VERSIONS)
+                ?.toString()
+                ?.split(",")
+                ?.map(String::trim)
+                ?.filter(String::isNotEmpty)
+                ?.toSet() ?: return null
+        val sdkManagerPath = project.findProperty(PROP_SDK_MANAGER_PATH)?.toString()
+        return ToolNdkProvisioningProperties(
+            androidSdkRoot = androidSdkRoot,
+            installedNdkVersions = installedNdkVersions,
+            sdkManagerPath = sdkManagerPath
+        )
+    }
+
+    private fun maybeHandleToolNdkProvisioning(
+        gradleProject: Project,
+        toolNdkProvisioningProperties: ToolNdkProvisioningProperties
+    ): Boolean {
+        val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+        if (configuredNdkVersion.isNullOrBlank()) {
+            return false
+        }
+
+        if (toolNdkProvisioningProperties.installedNdkVersions.contains(configuredNdkVersion)) {
+            return true
+        }
+
+        val sdkManagerPath = toolNdkProvisioningProperties.sdkManagerPath ?: return false
+        val execOps = gradleProject.serviceOf<ExecOperations>()
+        execOps
+            .exec {
+                commandLine(
+                    listOf(
+                        sdkManagerPath,
+                        "--sdk_root=${toolNdkProvisioningProperties.androidSdkRoot}",
+                        "--install",
+                        "ndk;$configuredNdkVersion"
+                    )
+                )
+            }.assertNormalExitValue()
+
+        val installedNdkMarker =
+            File(
+                toolNdkProvisioningProperties.androidSdkRoot,
+                "ndk/$configuredNdkVersion/source.properties"
+            )
+        if (!installedNdkMarker.exists()) {
+            throw GradleException(
+                "Android sdkmanager did not install NDK $configuredNdkVersion into ${toolNdkProvisioningProperties.androidSdkRoot}."
+            )
+        }
+        return true
+    }
+
+    private fun configureSyntheticExternalNativeBuildFallback(
+        gradleProject: Project,
+        flutterSdkRootPath: String
+    ) {
+        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
             "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
         )
@@ -828,6 +953,13 @@ object FlutterPluginUtils {
             )
         }
     }
+
+    @JvmStatic
+    @JvmName("isInvokingMetadataNdkVersionTask")
+    internal fun isInvokingMetadataNdkVersionTask(project: Project): Boolean =
+        project.gradle.startParameter.taskNames.any { taskName ->
+            taskName == TASK_PRINT_NDK_VERSION || taskName.endsWith(":$TASK_PRINT_NDK_VERSION")
+        }
 
     @JvmStatic
     @JvmName("isFlutterAppProject")
@@ -904,12 +1036,10 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForJavaVersion")
     internal fun addTaskForJavaVersion(project: Project) {
-        project.tasks.register("javaVersion") {
+        project.tasks.register("javaVersion", PrintTask::class.java) {
             description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
-            doLast {
-                println(VersionFetcher.getJavaVersion())
-            }
+            message.set(VersionFetcher.getJavaVersion().toString())
         }
     }
 
@@ -923,11 +1053,10 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForKGPVersion")
     internal fun addTaskForKGPVersion(project: Project) {
-        project.tasks.register("kgpVersion") {
+        project.tasks.register("kgpVersion", PrintTask::class.java) {
             description = "Print the current kgp version used by the project."
-            doLast {
-                println("KGP Version: " + VersionFetcher.getKGPVersion(project).toString())
-            }
+            val version = VersionFetcher.getKGPVersion(project)?.toString() ?: "null"
+            message.set("KGP Version: $version")
         }
     }
 
@@ -945,27 +1074,39 @@ object FlutterPluginUtils {
     @JvmName("addTaskForPrintBuildVariants")
     internal fun addTaskForPrintBuildVariants(project: Project) {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
-        val variantNames = project.objects.listProperty(String::class.java)
+        val variantsList = project.objects.listProperty(String::class.java)
 
+        // Collect variant names during configuration phase to avoid lifecycle violations
         androidComponents.onVariants { variant ->
-            variantNames.add(variant.name)
+            variantsList.add(variant.name)
         }
 
-        project.tasks.register("printBuildVariants") {
+        project.tasks.register("printBuildVariants", PrintTask::class.java) {
             description = "Prints out all build variants for this Android project"
-            doLast {
-                variantNames.get().forEach { name ->
-                    println("BuildVariant: $name")
-                }
-            }
+            message.set(variantsList.map { list -> list.joinToString("\n") { name -> "BuildVariant: $name" } })
         }
     }
 
-    // TODO(gmackall): Migrate to AGPs variant api.
-    //    https://github.com/flutter/flutter/issues/166550
-    @Suppress("DEPRECATION")
-    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
-        baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
+    // Add a task that can be called on Flutter projects that prints the effective ndkVersion
+    // configured for the Android app.
+    //
+    // This task prints the version in this format:
+    //
+    // NdkVersion: 28.2.13676358
+    //
+    // Format of the output of this task is kept for diagnostics and targeted testing.
+    @JvmStatic
+    @JvmName("addTaskForPrintNdkVersion")
+    internal fun addTaskForPrintNdkVersion(project: Project) {
+        project.tasks.register(TASK_PRINT_NDK_VERSION, PrintTask::class.java) {
+            description = "Prints out the configured ndkVersion for this Android project"
+            message.set(
+                project.provider {
+                    "$NDK_VERSION_OUTPUT_PREFIX${getConfiguredNdkVersion(project)}"
+                }
+            )
+        }
+    }
 
     /**
      * Adds required tasks for the AppLinkSettings feature.
@@ -1014,8 +1155,3 @@ object FlutterPluginUtils {
         }
     }
 }
-
-private data class PluginVersionPair(
-    val name: String,
-    val version: String
-)

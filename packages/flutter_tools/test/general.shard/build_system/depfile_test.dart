@@ -29,6 +29,18 @@ a.txt: b.txt
     expect(depfile.outputs.single.path, 'a.txt');
   });
 
+  testWithoutContext('Can parse depfile with relative paths and baseDirectory', () {
+    final Directory baseDirectory = fileSystem.directory('project')..createSync();
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync('''
+relative/a.txt: relative/b.txt
+''');
+    final Depfile depfile = depfileService.parse(depfileSource, baseDirectory);
+
+    expect(depfile.inputs.single.path, fileSystem.path.join('project', 'relative', 'b.txt'));
+    expect(depfile.outputs.single.path, fileSystem.path.join('project', 'relative', 'a.txt'));
+  });
+
   testWithoutContext('Can parse depfile with multiple inputs', () {
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync('''
@@ -141,7 +153,6 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
       ..writeAsStringSync(r'''
 a.txt
   : b.txt    c.txt
-
 
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);

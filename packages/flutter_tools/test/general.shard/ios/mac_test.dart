@@ -832,11 +832,11 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         final buildResult = XcodeBuildResult(
           success: false,
           stdout:
-              "error: The package product 'some-low-requirement-plugin' requires minimum platform version 14.0 "
-              'for the iOS platform, but this target supports 13.0 '
+              "error: The package product 'some-low-requirement-plugin' requires minimum platform version 16.0 "
+              'for the iOS platform, but this target supports 15.0 '
               "(in target 'FlutterGeneratedPluginSwiftPackage' from project 'FlutterGeneratedPluginSwiftPackage')\n"
-              "error: The package product 'cloud-firestore' requires minimum platform version 15.0 "
-              'for the iOS platform, but this target supports 13.0 '
+              "error: The package product 'cloud-firestore' requires minimum platform version 17.0 "
+              'for the iOS platform, but this target supports 15.0 '
               "(in target 'FlutterGeneratedPluginSwiftPackage' from project 'FlutterGeneratedPluginSwiftPackage')",
           xcodeBuildExecution: XcodeBuildExecution(
             buildCommands: buildCommands,
@@ -849,7 +849,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
               XCResultIssue.test(
                 subType: 'Target Integrity',
                 message:
-                    "The package product 'cloud-firestore' requires minimum platform version 15.0 for the iOS platform, but this target supports 13.0",
+                    "The package product 'cloud-firestore' requires minimum platform version 17.0 for the iOS platform, but this target supports 15.0",
               ),
             ],
           ),
@@ -869,7 +869,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         expect(
           logger.errorText,
           contains(
-            "To fix this error, increase your app's minimum platform version from 13.0 to at least 15.0",
+            "To fix this error, increase your app's minimum platform version from 15.0 to at least 17.0",
           ),
         );
         expect(logger.errorText, contains('or remove the cloud-firestore dependency.'));
@@ -889,8 +889,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         final buildResult = XcodeBuildResult(
           success: false,
           stdout:
-              "error: The package product 'cloud-firestore' requires minimum platform version 15.0 "
-              'for the iOS platform, but this target supports 13.0 '
+              "error: The package product 'cloud-firestore' requires minimum platform version 17.0 "
+              'for the iOS platform, but this target supports 15.0 '
               "(in target 'cloud_firestore' from project 'cloud_firestore')",
           xcodeBuildExecution: XcodeBuildExecution(
             buildCommands: buildCommands,
@@ -903,7 +903,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
               XCResultIssue.test(
                 subType: 'Target Integrity',
                 message:
-                    "The package product 'cloud-firestore' requires minimum platform version 15.0 for the iOS platform, but this target supports 13.0",
+                    "The package product 'cloud-firestore' requires minimum platform version 17.0 for the iOS platform, but this target supports 15.0",
               ),
             ],
           ),
@@ -923,6 +923,81 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         expect(
           logger.errorText,
           isNot(contains("To fix this error, increase your app's minimum platform version")),
+        );
+      },
+    );
+
+    testWithoutContext('iOS deployment target too low shows message', () async {
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(
+              message:
+                  "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 13.0, but the range of supported deployment target versions is 15.0 to 27.0.x.",
+              subType: 'Error',
+            ),
+          ],
+        ),
+      );
+      final fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        project: FakeFlutterProject(fileSystem: fs),
+      );
+      expect(
+        logger.errorText,
+        contains('The iOS deployment target is too low. Xcode requires at least 15.0.'),
+      );
+    });
+
+    testWithoutContext(
+      'iOS deployment target too low shows fallback message if version cannot be parsed',
+      () async {
+        final buildResult = XcodeBuildResult(
+          success: false,
+          stdout: '',
+          xcodeBuildExecution: XcodeBuildExecution(
+            buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+            appDirectory: '/blah/blah',
+            environmentType: EnvironmentType.physical,
+            buildSettings: buildSettings,
+          ),
+          xcResult: XCResult.test(
+            issues: <XCResultIssue>[
+              XCResultIssue.test(
+                message:
+                    "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x.",
+                subType: 'Error',
+              ),
+            ],
+          ),
+        );
+        final fs = MemoryFileSystem.test();
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          logger: logger,
+          analytics: fakeAnalytics,
+          fileSystem: fs,
+          platform: FlutterDarwinPlatform.ios,
+          project: FakeFlutterProject(fileSystem: fs),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            'The iOS deployment target is too low. Xcode requires at least the minimum supported version.',
+          ),
         );
       },
     );
@@ -1321,7 +1396,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -1335,7 +1410,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
-    String projectPath,
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
   }) async {

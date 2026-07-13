@@ -2178,7 +2178,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     markNeedsSemanticsUpdate();
     child._parent = this;
     if (attached) {
-      child.attach(_owner!);
+      child.attach(owner!);
     }
     redepthChild(child);
   }
@@ -2299,6 +2299,32 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   bool _debugMutationsLocked = false;
 
+  // Returns the closest ancestor that determines whether this RenderObject is
+  // currently allowed to mutate, and a boolean indicating whether this
+  // RenderObject is allowed to mutate.
+  //
+  // This method must only be called during layout, as mutations are always
+  // allowed before layout. A null return value indicates another render subtree
+  // is actively performing layout and, in the process, illegally mutating this
+  // RenderObject's subtree.
+  (RenderObject, bool)? get _debugClosestMutationRoot {
+    return switch (this) {
+      // This subtree is being mutated in a layout callback.
+      RenderObject(_doingThisLayoutWithCallback: true) => (this, true),
+      // A different part of the render tree is doing a layout callback,
+      // and this subtree is being reparented there, due to global key
+      // reparenting.
+      RenderObject(
+        owner: PipelineOwner(_debugAllowMutationsToDirtySubtrees: true),
+        _needsLayout: true,
+      ) =>
+        (this, true),
+      // This is the node currently doing layout.
+      RenderObject(_debugMutationsLocked: true) => (this, false),
+      RenderObject() => debugLayoutParent?._debugClosestMutationRoot,
+    };
+  }
+
   /// Whether tree mutations are currently permitted.
   ///
   /// This is only useful during layout. One should also not mutate the tree at
@@ -2307,7 +2333,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// Only valid when asserts are enabled. This will throw in release builds.
   bool get _debugCanPerformMutations {
-    late bool result;
+    late bool isMutationAllowed;
     assert(() {
       if (_debugDisposed) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2325,40 +2351,22 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       // check will be performed when they re-attach. This assert is only useful
       // during layout.
       if (owner == null || !owner.debugDoingLayout) {
-        result = true;
+        isMutationAllowed = true;
         return true;
       }
 
-      RenderObject? activeLayoutRoot = this;
-      while (activeLayoutRoot != null) {
-        final bool mutationsToDirtySubtreesAllowed =
-            activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
-        final bool doingLayoutWithCallback = activeLayoutRoot._doingThisLayoutWithCallback;
-        // Mutations on this subtree is allowed when:
-        // - the "activeLayoutRoot" subtree is being mutated in a layout callback.
-        // - a different part of the render tree is doing a layout callback,
-        //   and this subtree is being reparented to that subtree, as a result
-        //   of global key reparenting.
-        if (doingLayoutWithCallback ||
-            mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout) {
-          result = true;
-          return true;
-        }
-
-        if (!activeLayoutRoot._debugMutationsLocked) {
-          activeLayoutRoot = activeLayoutRoot.debugLayoutParent;
-        } else {
-          // activeLayoutRoot found.
-          break;
-        }
+      final RenderObject? activeLayoutRoot;
+      // If there is no mutation root, this subtree is likely being mutated by a different subtree
+      // which is not allowed.
+      (activeLayoutRoot, isMutationAllowed) = _debugClosestMutationRoot ?? (null, false);
+      if (isMutationAllowed) {
+        return true;
       }
-
       final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
       final culpritMethodName = debugActiveLayout.debugDoingThisLayout
           ? 'performLayout'
           : 'performResize';
       final culpritFullMethodName = '${debugActiveLayout.runtimeType}.$culpritMethodName';
-      result = false;
 
       if (activeLayoutRoot == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2426,7 +2434,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         ),
       ]);
     }());
-    return result;
+    return isMutationAllowed;
   }
 
   /// The [RenderObject] that's expected to call [layout] on this [RenderObject]
@@ -2565,6 +2573,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   bool? _isRelayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
+  ///
+  /// Layout callbacks are a special part of this render object's layout phase:
+  /// they are allowed to mutate child lists and dirty render subtrees while the
+  /// callback is executing. This flag lets debug-only assertions distinguish
+  /// that special callback phase from the regular [performLayout] body.
+  ///
+  /// This does not imply that a widget rebuild is currently in progress. A
+  /// layout callback can trigger rebuild work by mutating the render or element
+  /// tree, but this flag only describes the synchronous callback passed to
+  /// [invokeLayoutCallback].
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
   bool _doingThisLayoutWithCallback = false;
 
@@ -5310,6 +5328,7 @@ final class _SemanticsParentData {
         other.blocksUserActions == blocksUserActions &&
         other.explicitChildNodes == explicitChildNodes &&
         other.localeForChildren == localeForChildren &&
+        other.accessibilityFocusBlockType == accessibilityFocusBlockType &&
         setEquals<SemanticsTag>(other.tagsForChildren, tagsForChildren);
   }
 
@@ -5320,6 +5339,7 @@ final class _SemanticsParentData {
       blocksUserActions,
       explicitChildNodes,
       localeForChildren,
+      accessibilityFocusBlockType,
       Object.hashAllUnordered(tagsForChildren ?? const <SemanticsTag>{}),
     );
   }
@@ -5511,7 +5531,7 @@ typedef _MergeUpAndSiblingMergeGroups = (
 /// Walks the [_children] and produce semantics node for
 /// each [_RenderObjectSemantics] plus the sibling nodes.
 ///
-/// Phase 2, 3, 4 each depends on previous step to finished updating the the
+/// Phase 2, 3, 4 each depends on previous step to finished updating the
 /// entire _RenderObjectSemantics tree. All three of them require separate tree
 /// walk.
 class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeMixin {
@@ -5767,7 +5787,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// rendering subtree and forms a [_RenderObjectSemantics] tree where children
   /// are stored in [_children].
   ///
-  /// This method does the the phase 1 and 2 of the four phases documented on
+  /// This method does the phase 1 and 2 of the four phases documented on
   /// [_RenderObjectSemantics].
   ///
   /// Gather all the merge up _RenderObjectSemantics(s) by walking the rendering
@@ -6085,7 +6105,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Updates the [geometry] for this [_RenderObjectSemantics]s and the dirty
   /// children's subtree in [_children].
   ///
-  /// This method does the the phase 3 of the four phases documented on
+  /// This method does the phase 3 of the four phases documented on
   /// [_RenderObjectSemantics].
   ///
   /// This method is short-circuited if the subtree geometry won't
@@ -6161,7 +6181,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Ensures the semantics nodes from this render object semantics subtree are
   /// generated and up to date.
   ///
-  /// This method does the the phase 4 of the four phases documented on
+  /// This method does the phase 4 of the four phases documented on
   /// [_RenderObjectSemantics].
   ///
   /// This can only be called if the owning rendering object is a semantics

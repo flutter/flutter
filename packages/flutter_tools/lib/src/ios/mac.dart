@@ -309,6 +309,15 @@ Future<XcodeBuildResult> buildXcodeProject({
       ) ??
       <String, String>{};
 
+  if (buildSettings.isEmpty) {
+    // xcodebuild should have printed possible error messages already, as when
+    // it fails, it returns an empty build settings Map.
+    globals.printError(
+      'No Xcode build settings have been found. Please check possible errors above.',
+    );
+    return XcodeBuildResult(success: false);
+  }
+
   final String? targetBuildDirPath = buildSettings['TARGET_BUILD_DIR'];
   final Directory? targetBuildDir = targetBuildDirPath != null
       ? globals.fs.directory(targetBuildDirPath)
@@ -317,7 +326,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final List<String> xcodebuildCommandArgs = await globals.xcode!
       .fetchDependenciesAndGenerateXcodebuildArgs(
-        app.project.hostAppRoot.path,
+        app.project,
         globals.fs.directory(buildDirectoryPath),
         skipPackageUpdatesAndValidation: false,
       );
@@ -1127,6 +1136,15 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       unableToFindArmDestination: true,
     );
+  } else if (message.contains("deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to") &&
+      message.contains('but the range of supported deployment target versions is')) {
+    final String? minVersion = _parseMinDeploymentTarget(message);
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      iOSMinDeploymentTarget: minVersion,
+      hasIOSMinDeploymentTargetIssue: true,
+    );
   }
   return _XCResultIssueHandlingResult(
     requiresProvisioningProfile: false,
@@ -1151,7 +1169,9 @@ Future<bool> _handleIssues(
   var issueDetected = false;
   var modifiedPrecompiledSource = false;
   var unableToFindArmDestination = false;
+  var hasIOSMinDeploymentTargetIssue = false;
   String? missingPlatform;
+  String? iOSMinDeploymentTarget;
   final duplicateModules = <String>[];
   final missingModules = <String>[];
 
@@ -1178,6 +1198,12 @@ Future<bool> _handleIssues(
       }
       modifiedPrecompiledSource = handlingResult.modifiedPrecompiledSource;
       unableToFindArmDestination = handlingResult.unableToFindArmDestination;
+      if (handlingResult.iOSMinDeploymentTarget != null) {
+        iOSMinDeploymentTarget = handlingResult.iOSMinDeploymentTarget;
+      }
+      if (handlingResult.hasIOSMinDeploymentTargetIssue) {
+        hasIOSMinDeploymentTargetIssue = true;
+      }
       issueDetected = true;
     }
   } else if (xcResult != null) {
@@ -1281,6 +1307,8 @@ Future<bool> _handleIssues(
         '════════════════════════════════════════════════════════════════════════════════',
       );
     }
+  } else if (hasIOSMinDeploymentTargetIssue) {
+    logger.printError(_iOSDeploymentTargetTooLowMessage(iOSMinDeploymentTarget), emphasis: true);
   }
   return issueDetected;
 }
@@ -1477,6 +1505,26 @@ String? _parseMissingModule(String message) {
   return null;
 }
 
+String? _parseMinDeploymentTarget(String message) {
+  final pattern = RegExp(r'range of supported deployment target versions is ([0-9.]+) to');
+  return pattern.firstMatch(message)?.group(1);
+}
+
+String _iOSDeploymentTargetTooLowMessage(String? minVersion) {
+  final String versionText = minVersion ?? 'the minimum supported version';
+  return '''
+════════════════════════════════════════════════════════════════════════════════
+The iOS deployment target is too low. Xcode requires at least $versionText.
+
+To upgrade your iOS deployment target, follow these steps:
+  1. Open the project in Xcode:
+     open ios/Runner.xcworkspace
+  2. Select the "Runner" project in the project navigator.
+  3. Select the "Runner" TARGET, and in the "General" tab:
+     Update "Minimum Deployments" to at least $versionText.
+════════════════════════════════════════════════════════════════════════════════''';
+}
+
 // The result of [_handleXCResultIssue].
 class _XCResultIssueHandlingResult {
   _XCResultIssueHandlingResult({
@@ -1487,6 +1535,8 @@ class _XCResultIssueHandlingResult {
     this.missingModule,
     this.modifiedPrecompiledSource = false,
     this.unableToFindArmDestination = false,
+    this.iOSMinDeploymentTarget,
+    this.hasIOSMinDeploymentTargetIssue = false,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1510,6 +1560,10 @@ class _XCResultIssueHandlingResult {
   final bool modifiedPrecompiledSource;
 
   final bool unableToFindArmDestination;
+
+  final String? iOSMinDeploymentTarget;
+
+  final bool hasIOSMinDeploymentTargetIssue;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';

@@ -30,6 +30,7 @@
 #include "impeller/entity/contents/circle_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/contents/complex_rse_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
@@ -832,9 +833,30 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint)) {
+    Rect effective_rect = rect;
+    Color effective_color = paint.color;
+
+    if (paint.style == Paint::Style::kFill) {
+      effective_rect = UpscaledRect(rect);
+
+      if (effective_rect.IsEmpty()) {
+        // Rect is effectively invisible. Don't need to draw anything.
+        return;
+      }
+      if (effective_rect != rect) {
+        Scalar alpha_scaling = rect.Area() / effective_rect.Area();
+        if (alpha_scaling < kEhCloseEnough) {
+          // Rect is effectively invisible. Don't need to draw anything.
+          return;
+        }
+        effective_color =
+            paint.color.WithAlpha(paint.color.alpha * alpha_scaling);
+      }
+    }
+
     auto params = UberSDFParameters::MakeRect(
-        /*color=*/paint.color,
-        /*rect=*/rect,
+        /*color=*/effective_color,
+        /*rect=*/effective_rect,
         /*stroke=*/paint.GetStroke());
     AddRenderSDFEntityToCurrentPass(paint, params);
     return;
@@ -971,6 +993,36 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+    if (paint.style == Paint::Style::kFill) {
+      Rect rrect_bounds = round_rect.GetBounds();
+      Rect upscaled_bounds = UpscaledRect(rrect_bounds);
+
+      if (upscaled_bounds.IsEmpty()) {
+        // Rect is effectively invisible. Don't need to draw anything.
+        return;
+      }
+
+      if (upscaled_bounds != rrect_bounds) {
+        // The rrect is upscaled to 1 pixel minimum dimensions.
+        Scalar alpha_scaling = rrect_bounds.Area() / upscaled_bounds.Area();
+        if (alpha_scaling < kEhCloseEnough) {
+          // Rect is effectively invisible. Don't need to draw anything.
+          return;
+        }
+        Color effective_color =
+            paint.color.WithAlpha(paint.color.alpha * alpha_scaling);
+
+        // At a 1-pixel size, the rounded corners can be ignored. Draw a regular
+        // rect matching the upscaled bounds.
+        auto params = UberSDFParameters::MakeRect(
+            /*color=*/effective_color,
+            /*rect=*/upscaled_bounds,
+            /*stroke=*/std::nullopt);
+        AddRenderSDFEntityToCurrentPass(paint, params);
+        return;
+      }
+    }
+
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -1036,38 +1088,50 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) &&
-      round_superellipse.GetRadii().AreAllCornersSame()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
-    RoundSuperellipseParam::Octant octant_top =
-        round_superellipse_params.top_right.top;
-    RoundSuperellipseParam::Octant octant_right =
-        round_superellipse_params.top_right.right;
+    if (round_superellipse_params.all_corners_same) {
+      auto params = UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
 
-    auto adjusted_radii = RoundingRadii::MakeRadii(
-        Size(octant_top.circle_radius, octant_right.circle_radius));
+      AddRenderSDFEntityToCurrentPass(paint, params);
+      return;
+    } else {
+      auto contents = ComplexRoundedSuperellipseContents::Make(
+          /*color=*/paint.color_source ? Color::White() : paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
 
-    auto params = UberSDFParameters::MakeRoundedSuperellipse(
-        /*color=*/paint.color,
-        /*bounds=*/round_superellipse.GetBounds(),
-        /*superellipse_degree=*/Point(octant_top.se_n, octant_right.se_n),
-        /*superellipse_a=*/Point(octant_top.se_a, octant_right.se_a),
-        /*radii=*/adjusted_radii,
-        /*corner_angle_span=*/
-        Point(octant_top.circle_max_angle.radians,
-              octant_right.circle_max_angle.radians),
-        /*corner_circle_center_top=*/octant_top.circle_center,
-        /*corner_circle_center_right=*/octant_right.circle_center,
-        /*superellipse_c=*/octant_top.se_a - octant_right.se_a,
-        /*superellipse_scale=*/
-        Point(round_superellipse_params.top_right.signed_scale.Abs()),
-        /*stroke=*/paint.GetStroke());
+      const Geometry* geom = contents->GetGeometry();
 
-    AddRenderSDFEntityToCurrentPass(paint, params);
+      if (paint.color_source) {
+        std::shared_ptr<Contents> color_source_contents =
+            paint.CreateContents(renderer_, geom);
+        std::shared_ptr<Contents> final_contents =
+            ColorFilterContents::MakeBlend(
+                BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                                    FilterInput::Make(color_source_contents)});
 
-    return;
+        Paint new_paint = paint;
+        new_paint.color_source = nullptr;
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, new_paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(final_contents));
+      } else {
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(contents));
+      }
+      return;
+    }
   }
 
   if (paint.style == Paint::Style::kFill) {
@@ -1985,7 +2049,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   text_contents->SetColor(paint.color);
   text_contents->SetTextProperties(paint.color, paint.GetStroke());
 
-  entity.SetTransform(GetCurrentTransform());
+  entity.SetTransform(GetCurrentTransform().Translate(position));
 
   if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
                                      paint)) {
@@ -2495,6 +2559,39 @@ bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
     case BlendMode::kLuminosity:
       return true;
   }
+}
+
+Rect Canvas::UpscaledRect(const Rect& rect) const {
+  if (rect.IsEmpty() || GetCurrentTransform().HasPerspective2D()) {
+    // Minimum rect scaling not applicable for empty rects or when using a
+    // perspective transform. Return the unmodified input rect.
+    return rect;
+  }
+
+  Vector2 transform_scaling = GetCurrentTransform().GetBasisScaleXY();
+  if (transform_scaling.x <= 0.0f || transform_scaling.y <= 0.0f) {
+    // Rectangle is scaled to 0. Return an empty rectangle.
+    return Rect();
+  }
+
+  // Convert local rectangle size to device size (pixels).
+  Vector2 rect_device_size = Vector2(rect.GetSize()) * transform_scaling;
+
+  // Expand rect device size dimensions to a 1.0 minimum.
+  Vector2 expanded_rect_device_size = rect_device_size.Max(Vector2(1.0f, 1.0f));
+
+  if (expanded_rect_device_size == rect_device_size) {
+    // Minimum rect scaling not applicable - rectangle is already large enough.
+    // Return the unmodified rectangle.
+    return rect;
+  }
+
+  // Convert expanded rectangle from device size back to local size.
+  Vector2 expanded_rect_local_size =
+      Vector2(expanded_rect_device_size / transform_scaling);
+
+  return Rect::MakeEllipseBounds(rect.GetCenter(),
+                                 expanded_rect_local_size * 0.5f);
 }
 
 LazyRenderingConfig::LazyRenderingConfig(
