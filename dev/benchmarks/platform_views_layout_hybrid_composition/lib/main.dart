@@ -23,17 +23,6 @@ class PlatformViewApp extends StatefulWidget {
 
 class PlatformViewAppState extends State<PlatformViewApp> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future<void>.delayed(const Duration(seconds: 10), () {
-        print("10 seconds elapsed after first frame, exiting...");
-        exit(0);
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return const MaterialApp(title: 'Advanced Layout', home: PlatformViewLayout());
   }
@@ -55,7 +44,7 @@ class PlatformViewLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child: const Stack(children: <Widget>[DummyPlatformView()]),
+              child: const Stack(children: <Widget>[DummyPlatformView(), RotationContainer()]),
             ),
           );
         },
