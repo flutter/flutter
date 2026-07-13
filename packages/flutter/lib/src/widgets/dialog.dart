@@ -141,7 +141,7 @@ class _DialogWindowRoute<T> extends Route<T> {
             delegate: _DialogWindowDelegate(this),
             size: size,
           )
-        : DialogWindowController.sizedToContent(
+        : DialogWindowController.shrinkWrap(
             parent: parentController,
             title: 'Dialog',
             delegate: _DialogWindowDelegate(this),
