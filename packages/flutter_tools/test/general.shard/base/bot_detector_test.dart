@@ -182,5 +182,20 @@ void main() {
 
       expect(await azureDetector.isRunningOnAzure, isTrue);
     });
+  testWithoutContext('isRunningOnAzure returns false when an unexpected exception is thrown', () async {
+    final azureDetector = AzureDetector(
+      httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(
+          azureUrl,
+          responseError: ArgumentError(
+            'No host specified in URI http:///e2gerror.php',
+          ),
+        ),
+      ]),
+    );
+    expect(await azureDetector.isRunningOnAzure, isFalse);
+  },
+);
   });
+
 }
