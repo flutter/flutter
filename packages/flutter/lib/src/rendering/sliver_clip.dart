@@ -25,7 +25,7 @@ enum ClipOverlapBehavior {
   /// mechanism and may render underneath them if they are semi-transparent.
   none,
 
-  /// The clip strictly follows the straight edge of the overlapping sliver.
+  /// The clip follows the edge of the overlapping sliver.
   ///
   /// The clip rectangle is truncated along the axis of the scroll view so that
   /// it never intrudes into the overlap area.
