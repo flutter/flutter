@@ -52,7 +52,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   /// the child.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
-  RenderSliverClipRect({super.clipper, super.clipBehavior = .hardEdge, bool clipOverlap = true})
+  RenderSliverClipRect({super.clipper, super.clipBehavior = .antiAlias, bool clipOverlap = true})
     : super(clipOverlap: clipOverlap ? .followEdge : .none);
 
   @override
@@ -444,6 +444,6 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<CustomClipper<T>>('clipper', clipper, defaultValue: null));
     properties.add(DiagnosticsProperty<T?>('clip', _clip));
-    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.antiAlias));
   }
 }
