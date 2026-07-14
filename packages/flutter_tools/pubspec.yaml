@@ -26,7 +26,7 @@ dependencies:
   html: 0.15.6
   http: 1.6.0
   intl: 0.20.3
-  meta: 1.18.3
+  meta: 1.19.0
   multicast_dns: 0.3.3+1
   mustache_template: 2.0.5
   package_config: 2.2.0
@@ -57,8 +57,8 @@ dependencies:
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 1.5.0
-  hooks: 2.0.2
+  hooks_runner: 1.6.1
+  hooks: 2.1.0
   code_assets: 1.2.1
   data_assets: 0.20.0
 
@@ -127,4 +127,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ctgrgi
+# PUBSPEC CHECKSUM: 1aic3s

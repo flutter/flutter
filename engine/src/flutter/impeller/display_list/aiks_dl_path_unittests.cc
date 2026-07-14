@@ -276,8 +276,8 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
   bool invert_colors = false;
 
   auto callback = [=]() mutable -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (test->IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Scale", &scale, 0, 6);
       ImGui::SliderFloat("Rotate", &rotation, 0, 90);
       ImGui::SliderFloat("Offset", &offset, 0, 2);
@@ -371,6 +371,21 @@ TEST_P(AiksTest, DrawLinesWithFilledRects) {
     Point center = {(p0.x + p1.x) * 0.5f, (p0.y + p1.y) * 0.5f};
     builder.DrawRect(
         DlRect::MakeEllipseBounds(center, Size(length, width) * 0.5f),
+        fill_paint);
+  });
+}
+
+TEST_P(AiksTest, DrawLinesWithFilledRoundRects) {
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint fill_paint = paint;
+    fill_paint.setDrawStyle(DlDrawStyle::kFill);
+    Scalar length = p0.GetDistance(p1);
+    Point center = {(p0.x + p1.x) * 0.5f, (p0.y + p1.y) * 0.5f};
+    builder.DrawRoundRect(
+        DlRoundRect::MakeRectRadius(
+            DlRect::MakeEllipseBounds(center, Size(length, width) * 0.5f),
+            width * 0.5f),
         fill_paint);
   });
 }
@@ -509,8 +524,8 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
     static float scale = 3;
     static bool add_circle_clip = true;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
       ImGui::SliderFloat("Scale", &scale, 0, 6);
       ImGui::Checkbox("Circle clip", &add_circle_clip);
@@ -660,13 +675,15 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
 TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
   // Must be called before any methods that use the context to ensure that
   // this test is run with the antialias flag.
-  EnsureContextSupportsAntialiasLines();
+  if (!EnsureContextSupportsAntialiasLines()) {
+    GTEST_SKIP() << "This backend doesn't yet support experimental AA lines.";
+  }
 
   Scalar scale = 5.0;
   Scalar line_width = 10.f;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Scale", &scale, 0.001, 5);
       ImGui::SliderFloat("Width", &line_width, 1, 20);
 
@@ -716,15 +733,17 @@ TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
 TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
   // Must be called before any methods that use the context to ensure that
   // this test is run with the antialias flag.
-  EnsureContextSupportsAntialiasLines();
+  if (!EnsureContextSupportsAntialiasLines()) {
+    GTEST_SKIP() << "This backend doesn't yet support experimental AA lines.";
+  }
 
   float scale = 5.0f;
   float line_width = 10.f;
   float rotation = 0.f;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       // Use ImGui::SliderFloat for consistency
       ImGui::SliderFloat("Scale", &scale, 0.001f, 5.0f);
       ImGui::SliderFloat("Width", &line_width, 1.0f, 20.0f);
@@ -783,7 +802,9 @@ TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
 TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
   // Must be called before any methods that use the context to ensure that
   // this test is run with the antialias flag.
-  EnsureContextSupportsAntialiasLines();
+  if (!EnsureContextSupportsAntialiasLines()) {
+    GTEST_SKIP() << "This backend doesn't yet support experimental AA lines.";
+  }
 
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -922,8 +943,8 @@ TEST_P(AiksTest, FatStrokeArc) {
   DlScalar start_angle = 0;
   DlScalar end_angle = 90;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Stroke Width", &stroke_width, 1, 300);
       ImGui::SliderFloat("Aspect", &aspect, 0.5, 2.0);
       ImGui::SliderFloat("Start Angle", &start_angle, 0, 360);

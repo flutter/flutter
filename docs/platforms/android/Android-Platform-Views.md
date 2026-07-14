@@ -42,6 +42,7 @@ This mode is the latest hybrid composition strategy, and is designed to solve co
 
 ### Requirements
 - **Android API 34 or later**: Required for native transaction synchronization capabilities.
+- **Impeller**: [Impeller](https://docs.flutter.dev/perf/impeller) must be enabled.
 - **Vulkan Rendering**: The device must be capable of rendering with Vulkan.
 
 If these requirements are not met on the end-user device, Flutter will automatically fall back to the existing platform view strategy configured for the app.
