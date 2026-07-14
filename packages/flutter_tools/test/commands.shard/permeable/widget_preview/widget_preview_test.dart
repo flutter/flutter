@@ -286,7 +286,7 @@ void main() {
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
     await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
-    expect(fs.directory(rootProject).childDirectory('.widget_preview'), isNot(exists));
+    expect(rootProject.childDirectory('.widget_preview'), isNot(exists));
   }
 
   group('flutter widget-preview', () {
