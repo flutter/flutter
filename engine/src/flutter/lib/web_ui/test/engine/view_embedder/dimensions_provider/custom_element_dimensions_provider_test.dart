@@ -49,7 +49,7 @@ void doTests() {
       expect(computed, expected);
     });
 
-    test('limits physical size of element', () {
+    test('limits physical height of element', () {
       const double logicalWidth = 50;
       const double logicalHeight = 20000;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
@@ -59,6 +59,38 @@ void doTests() {
         ..style.height = '${logicalHeight}px';
 
       const expected = ui.Size(logicalWidth, 16384);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical width of element', () {
+      const double logicalWidth = 20000;
+      const double logicalHeight = 50;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(16384, logicalHeight);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical size of element', () {
+      const double logicalWidth = 20000;
+      const double logicalHeight = 20000;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(16384, 16384);
 
       final ui.Size computed = provider.computePhysicalSize();
 
