@@ -1368,53 +1368,48 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   @override
   bool inDirection(FocusNode currentNode, TraversalDirection direction) {
     final _FocusTraversalGroupNode? groupNode = FocusTraversalGroup._getGroupNode(currentNode);
-    groupNode?.isTraversing = true;
-    try {
-      final FocusScopeNode nearestScope = currentNode.nearestScope!;
-      final FocusNode? focusedChild = nearestScope.focusedChild;
-      if (focusedChild == null) {
-        final FocusNode firstFocus =
-            findFirstFocusInDirection(currentNode, direction) ?? currentNode;
-        switch (direction) {
-          case TraversalDirection.up:
-          case TraversalDirection.left:
-            _requestFocus(
-              firstFocus,
-              alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-              groupNode,
-            );
-          case TraversalDirection.right:
-          case TraversalDirection.down:
-            _requestFocus(
-              firstFocus,
-              alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-              groupNode,
-            );
-        }
-        return true;
+    final FocusScopeNode nearestScope = currentNode.nearestScope!;
+    final FocusNode? focusedChild = nearestScope.focusedChild;
+    if (focusedChild == null) {
+      final FocusNode firstFocus =
+          findFirstFocusInDirection(currentNode, direction) ?? currentNode;
+      switch (direction) {
+        case TraversalDirection.up:
+        case TraversalDirection.left:
+          _requestFocus(
+            firstFocus,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+            groupNode,
+          );
+        case TraversalDirection.right:
+        case TraversalDirection.down:
+          _requestFocus(
+            firstFocus,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+            groupNode,
+          );
       }
-      if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild, groupNode)) {
-        return true;
-      }
-      final FocusNode? found = _findNextFocusInDirection(
-        focusedChild,
-        nearestScope.traversalDescendants,
-        direction,
-      );
-      if (found != null) {
-        _pushPolicyData(direction, nearestScope, focusedChild);
-        return _requestTraversalFocusInDirection(
-          currentNode,
-          found,
-          nearestScope,
-          direction,
-          groupNode,
-        );
-      }
-      return _onEdgeForDirection(currentNode, focusedChild, groupNode, direction);
-    } finally {
-      groupNode?.isTraversing = false;
+      return true;
     }
+    if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild, groupNode)) {
+      return true;
+    }
+    final FocusNode? found = _findNextFocusInDirection(
+      focusedChild,
+      nearestScope.traversalDescendants,
+      direction,
+    );
+    if (found != null) {
+      _pushPolicyData(direction, nearestScope, focusedChild);
+      return _requestTraversalFocusInDirection(
+        currentNode,
+        found,
+        nearestScope,
+        direction,
+        groupNode,
+      );
+    }
+  return _onEdgeForDirection(currentNode, focusedChild, groupNode, direction);
   }
 }
 
@@ -2282,11 +2277,6 @@ class _FocusTraversalGroupNode extends FocusNode {
   FocusTraversalPolicy policy;
 
   FocusNode? lastRequestedFocus;
-
-  /// Whether the group is actively evaluating a focus traversal decision.
-  ///
-  /// It is set to true during [FocusTraversalPolicy.inDirection].
-  bool isTraversing = false;
 }
 
 class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
