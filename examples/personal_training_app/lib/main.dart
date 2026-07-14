@@ -1240,6 +1240,7 @@ class _AppRootState extends State<AppRoot> with SingleTickerProviderStateMixin {
       );
     } else {
       mainContent = MainNavigation(
+        isInstructor: _userRole == 'instructor',
         onLogout: () {
           print('🚪 Logging out client...');
           _clientProfileSubscription?.cancel();
@@ -1323,6 +1324,7 @@ class MainNavigation extends StatefulWidget {
   final Function(ClientProfile) onProfileUpdated;
   final List<Workout> workouts;
   final Function(Workout) onWorkoutUpdated;
+  final bool isInstructor;
 
   const MainNavigation({
     super.key,
@@ -1332,6 +1334,7 @@ class MainNavigation extends StatefulWidget {
     required this.onProfileUpdated,
     required this.workouts,
     required this.onWorkoutUpdated,
+    required this.isInstructor,
   });
 
   @override
@@ -1361,134 +1364,124 @@ class _MainNavigationState extends State<MainNavigation> {
           reps: 5,
           weight: 225,
           notes: 'Good form',
-        ),
-        Exercise(
-          name: 'Barbell Rows',
-          sets: 4,
-          reps: 6,
-          weight: 185,
-          notes: '',
-        ),
-      ],
-    ),
-  ];*/
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-      future: StorageHelper.getString('user_role'),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final userRole = snapshot.data ?? '';
-        final bool isInstructor = userRole == 'instructor';
-        final List<Widget> screens = [
-          HomeScreen(
-            workouts: widget.workouts,
-            clientProfile: widget.clientProfile,
-            onWorkoutUpdated: widget.onWorkoutUpdated,
-          ),
-          ClientProfileScreen(
-            profile: widget.clientProfile,
-            onProfileUpdated: widget.onProfileUpdated,
-            isInstructor: isInstructor,
-            onLogout: widget.onLogout,
-          ),
-          WorkoutHistoryScreen(workouts: widget.workouts),
-          ProgressScreen(
-            workouts: widget.workouts,
-            clientProfile: widget.clientProfile,
-            onProfileUpdated: widget.onProfileUpdated,
-          ),
-          const WorkoutOfWeekScreen(),
-          const ExerciseLibraryScreen(),
-          const StretchingScreen(),
-        ];
-        return Scaffold(
-          body: screens[_selectedIndex],
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            backgroundColor: const Color(0xFF2563EB),
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white70,
-            onTap: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            type: BottomNavigationBarType.fixed,
-            items: [
-              BottomNavigationBarItem(
-                label: 'Home',
-                icon: Builder(
-                  builder: (context) {
-                    final pendingCount = widget.workouts
-                        .where(
-                          (w) =>
-                              w.isReviewedByInstructor &&
-                              !w.isReviewAcknowledged &&
-                              w.instructorReview != null &&
-                              w.instructorReview!.isNotEmpty,
-                        )
-                        .length;
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(Icons.home),
-                        if (pendingCount > 0)
-                          Positioned(
-                            right: -8,
-                            top: -4,
-                            child: Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Text(
-                                '$pendingCount',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+            final List<Widget> screens = [
+              HomeScreen(
+                workouts: widget.workouts,
+                clientProfile: widget.clientProfile,
+                onWorkoutUpdated: widget.onWorkoutUpdated,
+              ),
+              ClientProfileScreen(
+                profile: widget.clientProfile,
+                onProfileUpdated: widget.onProfileUpdated,
+                isInstructor: widget.isInstructor,
+                onLogout: widget.onLogout,
+              ),
+              WorkoutHistoryScreen(workouts: widget.workouts),
+              ProgressScreen(
+                workouts: widget.workouts,
+                clientProfile: widget.clientProfile,
+                onProfileUpdated: widget.onProfileUpdated,
+              ),
+              const WorkoutOfWeekScreen(),
+              const ExerciseLibraryScreen(),
+              const StretchingScreen(),
+            ];
+            return Scaffold(
+              body: screens[_selectedIndex],
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: _selectedIndex,
+                backgroundColor: const Color(0xFF2563EB),
+                selectedItemColor: Colors.white,
+                unselectedItemColor: Colors.white70,
+                onTap: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                type: BottomNavigationBarType.fixed,
+                items: [
+                  BottomNavigationBarItem(
+                    label: 'Home',
+                    icon: Builder(
+                      builder: (context) {
+                        final pendingCount = widget.workouts
+                            .where(
+                              (w) =>
+                                  w.isReviewedByInstructor &&
+                                  !w.isReviewAcknowledged &&
+                                  w.instructorReview != null &&
+                                  w.instructorReview!.isNotEmpty,
+                            )
+                            .length;
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(Icons.home),
+                            if (pendingCount > 0)
+                              Positioned(
+                                right: -8,
+                                top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '$pendingCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
-                                textAlign: TextAlign.center,
                               ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'Profile',
+                    icon: Icon(
+                      Icons.person,
+                      color: widget.currentUserEmail != null &&
+                              widget.currentUserEmail!.isNotEmpty &&
+                              widget.clientProfile.username.isNotEmpty &&
+                              widget.clientProfile.username != widget.currentUserEmail
+                          ? Colors.orange
+                          : null,
+                    ),
+                  ),
+                  const BottomNavigationBarItem(
+                    label: 'History',
+                    icon: Icon(Icons.history),
+                  ),
+                  const BottomNavigationBarItem(
+                    label: 'Progress',
+                    icon: Icon(Icons.timeline),
+                  ),
+                  const BottomNavigationBarItem(
+                    label: 'Workout of Week',
+                    icon: Icon(Icons.star),
+                  ),
+                  const BottomNavigationBarItem(
+                    label: 'Exercise Library',
+                    icon: Icon(Icons.fitness_center),
+                  ),
+                  const BottomNavigationBarItem(
+                    label: 'Stretching',
+                    icon: Icon(Icons.self_improvement),
+                  ),
+                ],
               ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.history),
-                label: 'History',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.show_chart),
-                label: 'Progress',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.workspace_premium),
-                label: 'Circuit of the Week',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.fitness_center),
-                label: 'Exercises',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.accessibility_new),
-                label: 'Stretching',
+            );
               ),
             ],
           ),
