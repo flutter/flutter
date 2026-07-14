@@ -1836,6 +1836,8 @@ server:
       final File mainFile = libDir.childFile('main.dart');
       mainFile.writeAsStringSync('void main() {}');
     });
+    // TODO(nshahan): Safe to remove after
+    // https://github.com/flutter/flutter/issues/142060.
     testUsingContext(
       'no warning triggered when web hot reload flag not present',
       () async {
@@ -1877,6 +1879,8 @@ server:
         DeviceManager: () => testDeviceManager,
       },
       initializeFlutterRoot: false,
+      // https://github.com/flutter/flutter/issues/142060
+      skip: true,
     );
 
     testUsingContext(
@@ -1906,6 +1910,8 @@ server:
         DeviceManager: () => testDeviceManager,
       },
       initializeFlutterRoot: false,
+      // https://github.com/flutter/flutter/issues/142060
+      skip: true,
     );
   });
 }
