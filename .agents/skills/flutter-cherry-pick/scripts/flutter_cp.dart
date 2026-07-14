@@ -79,7 +79,7 @@ class CherryPickHelper {
       'POST',
       'repos/flutter/flutter/issues/$pr/labels',
       '-F',
-      'labels[]=cp:$channel',
+      'labels[]=cp: $channel',
     ]);
   }
 
