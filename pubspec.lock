@@ -494,10 +494,10 @@ packages:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: cb6ab96514ba9935c280fcacdb4b6e9d613bebf253910fecdc78351abd83dbba
+      sha256: e5af5628be2fbe3bbb195ded03e6c6f739b0c92db43d1e2a95620678fd844458
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.0"
+    version: "1.6.1"
   html:
     dependency: "direct main"
     description:
