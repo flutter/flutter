@@ -2516,6 +2516,7 @@ class WindowManager extends StatefulWidget {
   @internal
   const WindowManager({super.key, required this.initialWindows});
 
+/// The initial windows to be registered and managed by this window manager.
   final List<WindowEntry> initialWindows;
 
   @override
