@@ -24,6 +24,10 @@ namespace impeller {
 
 class PlaygroundImpl;
 
+namespace testing {
+class GoldenDigestManager;
+}
+
 enum class PlaygroundBackend {
   kMetal,
   kMetalSDF,
@@ -69,9 +73,17 @@ class Playground {
 
   using RenderCallback = std::function<bool(RenderTarget& render_target)>;
 
+  /// @brief Whether this instance will write a golden image of the output
+  ///        from |OpenPlaygroundHere|.
+  bool ShouldWriteGoldenImage();
+
+  /// @brief Sets a particular test to either write a golden or not, false
+  ///        by default.
+  void SetEnableWriteGolden(bool write_golden);
+
   bool OpenPlaygroundHere(const RenderCallback& render_callback);
 
-  bool OpenPlaygroundHere(SinglePassCallback pass_callback);
+  bool OpenPlaygroundHere(const SinglePassCallback& pass_callback);
 
   static std::shared_ptr<CompressedImage> LoadFixtureImageCompressed(
       std::shared_ptr<fml::Mapping> mapping);
@@ -101,9 +113,6 @@ class Playground {
   [[nodiscard]] fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
 
-  /// Returns true if `OpenPlaygroundHere` will actually render anything.
-  bool WillRenderSomething() const;
-
   using GLProcAddressResolver = std::function<void*(const char* proc_name)>;
   GLProcAddressResolver CreateGLProcAddressResolver() const;
 
@@ -117,6 +126,11 @@ class Playground {
   void SetGPUDisabled(bool disabled) const;
 
   RuntimeStageBackend GetRuntimeStageBackend() const;
+
+  /// @brief Initializes the provided |PipelineDescriptor| with appropriate
+  ///        default values to match the conditions under which a pipeline
+  ///        will be rendered.
+  bool InitializePipelineDescriptorForRendering(PipelineDescriptor& desc) const;
 
  protected:
   // This method could override testing::Test::TearDown() directly, but
@@ -138,6 +152,12 @@ class Playground {
   /// @brief Returns true if the platform can support wide gamuts.
   bool PlatformSupportsWideGamutTests() const;
 
+  /// @brief Returns true if the rendering path supports MSAA rendering.
+  bool RenderingSupportsMSAA() const;
+
+  /// @brief Returns the default sample count of the rendering path.
+  SampleCount GetDefaultSampleCount() const;
+
   /// @brief Make sure that when the context is later created that it
   ///        will support wide gamuts if the platform supports it.
   ///        Returns whether the platform supports wide gamut.
@@ -156,7 +176,10 @@ class Playground {
   ///
   /// Must be called before any other method except for the Ensure family
   /// of methods.
-  virtual void EnsureContextSupportsAntialiasLines();
+  ///
+  /// Callers should abort (such as via GTEST_SKIP) if the method returns
+  /// false if their behavior depends on the experimental AA lines.
+  [[nodiscard]] virtual bool EnsureContextSupportsAntialiasLines();
 
   /// @brief  Return an unmodifiable reference to the current switches.
   ///         The switches might change at the start of a test as it
@@ -170,6 +193,8 @@ class Playground {
       std::shared_ptr<TypographerContext> typographer_context);
 
   void SetWindowSize(ISize size);
+
+  virtual testing::GoldenDigestManager* GetGoldenDigestManager() const;
 
  private:
   const PlaygroundBackend backend_;
@@ -194,6 +219,7 @@ class Playground {
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
   std::shared_ptr<HostBuffer> host_buffer_;
+  bool should_write_golden_ = false;
 
   std::unique_ptr<PlaygroundImpl>& GetImpl() const;
 
@@ -202,6 +228,13 @@ class Playground {
   void SetupWindow();
 
   void SetCursorPosition(Point pos);
+
+  [[nodiscard]]
+  bool RenderImage(const RenderCallback& render_callback, bool write_image);
+
+  [[nodiscard]]
+  bool WriteGoldenImage(const RenderTarget& render_target,
+                        const std::string& postfix = "");
 
   Playground(const Playground&) = delete;
 
