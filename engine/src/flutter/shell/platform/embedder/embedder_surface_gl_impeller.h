@@ -86,6 +86,9 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
   // |EmbedderSurface|
   sk_sp<GrDirectContext> CreateResourceContext() const override;
 
+  // |EmbedderSurface|
+  void ReleaseResourceContext() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceGLImpeller);
 };
 
