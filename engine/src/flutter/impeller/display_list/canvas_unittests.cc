@@ -70,7 +70,7 @@ std::unique_ptr<Canvas> CreateTestCanvas(
 }
 
 TEST_P(AiksTest, TransformMultipliesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_MATRIX_NEAR(canvas->GetCurrentTransform(), Matrix());
@@ -111,7 +111,7 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 }
 
 TEST_P(AiksTest, CanvasCanPushPopCTM) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_EQ(canvas->GetSaveCount(), 1u);
@@ -129,7 +129,7 @@ TEST_P(AiksTest, CanvasCanPushPopCTM) {
 }
 
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   Matrix identity;
@@ -140,7 +140,7 @@ TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
 }
 
 TEST_P(AiksTest, BackdropCountDownNormal) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -175,7 +175,7 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -215,7 +215,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -252,7 +252,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
 // filters in the root pass. If we reach a count of 0 while in a nested
 // saveLayer, we should not restore to the onscreen.
 TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -285,7 +285,7 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
 TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -341,7 +341,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       runtime_effect, {}, uniform_data);
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -377,7 +377,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
 }
 
 TEST_P(AiksTest, SupportsBlitToOnscreen) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
@@ -410,7 +410,7 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
   }
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
     // Somehow there's a scaling factor between PlaygroundPoint and Canvas.
     Matrix ctm = Matrix::MakeScale(Vector2(1, 1) * 0.5);
@@ -420,12 +420,12 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
     static Scalar radius = 200;
 
     // Define the ImGui
-    ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 100);
       ImGui::SliderFloat("Radius", &radius, 0, 1000);
+      ImGui::End();
     }
-    ImGui::End();
 
     static PlaygroundPoint right_reference_var(
         ctm * (right_center + default_size / 2), 30, Color::White());
@@ -459,11 +459,12 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
 }
 
 TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
 
   TextureDescriptor desc;
   desc.size = {100, 100};
   desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  desc.usage = TextureUsage::kRenderTarget;
   auto texture =
       context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
 
@@ -543,6 +544,81 @@ TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
               Canvas::IsCompatibleWithSDFRendering(paint))
         << "Failure for BlendMode: " << BlendModeToString(blend_mode);
   }
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsEmptyForEmptyRect) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  Rect empty_rect = Rect::MakeXYWH(0, 0, 0, 10);
+  EXPECT_TRUE(canvas->UpscaledRect(empty_rect).IsEmpty());
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsUnmodifiedWithPerspective) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  canvas->Transform(Matrix::MakePerspective(Degrees(60), 1, 1, 100));
+  ASSERT_TRUE(canvas->GetCurrentTransform().HasPerspective2D());
+
+  Rect subpixel_rect = Rect::MakeXYWH(10, 10, 0.1f, 0.1f);
+  EXPECT_EQ(canvas->UpscaledRect(subpixel_rect), subpixel_rect);
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsEmptyWhenScaledToZero) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  canvas->Scale(Vector3(0.0f, 1.0f));
+  Rect rect = Rect::MakeXYWH(0, 0, 10, 10);
+  EXPECT_TRUE(canvas->UpscaledRect(rect).IsEmpty());
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsUnmodifiedWhenLargeEnough) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  Rect rect = Rect::MakeXYWH(0, 0, 10, 20);
+  EXPECT_EQ(canvas->UpscaledRect(rect), rect);
+
+  canvas->Scale(Vector3(0.5f, 0.5f));
+  EXPECT_EQ(canvas->UpscaledRect(rect), rect);
+}
+
+TEST_P(AiksTest, UpscaledRectExpandsSubPixelRectWithUnscaledCanvas) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  Point center = Point();
+  Size size = Size(0.2f, 10.0f);
+  Rect rect = Rect::MakeEllipseBounds(center, size * 0.5f);
+
+  Rect upscaled = canvas->UpscaledRect(rect);
+
+  Size expected_size = Size(1.0f, 10.0f);
+  Rect expected = Rect::MakeEllipseBounds(center, expected_size * 0.5f);
+  EXPECT_RECT_NEAR(upscaled, expected);
+}
+
+TEST_P(AiksTest, UpscaledRectExpandsSubPixelRectWithScaledCanvas) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  // Canvas is scaled by 2x in the X direction and 4x in the Y direction.
+  canvas->Scale(Vector3(2.0f, 4.0f));
+
+  Point center = Point();
+  Size size = Size(0.2f, 10.0f);
+  Rect rect = Rect::MakeEllipseBounds(center, size * 0.5f);
+
+  Rect upscaled = canvas->UpscaledRect(rect);
+
+  // Rect's device size is (0.2 * 2, 10.0 * 4) = (0.4, 40.0) pixels.
+  // It's expanded to (1.0, 40.0) pixels.
+  // In local space, this corresponds to (1.0 / 2.0, 40.0 / 4.0) = (0.5, 10.0).
+  Size expected_local_size = Size(0.5f, 10.0f);
+  Rect expected = Rect::MakeEllipseBounds(center, expected_local_size * 0.5f);
+  EXPECT_RECT_NEAR(upscaled, expected);
 }
 
 TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
