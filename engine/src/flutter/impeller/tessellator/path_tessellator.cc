@@ -314,6 +314,15 @@ void PathTessellator::PathToFilledVertices(const PathSource& source,
   pruner.PathEnd();
 }
 
+void PathTessellator::PathToStrokedVertices(const PathSource& source,
+                                            VertexWriter& writer,
+                                            Scalar scale) {
+  PathFillWriter path_writer(writer, scale);
+  PathPruner pruner(path_writer, true);
+  source.Dispatch(pruner);
+  pruner.PathEnd();
+}
+
 void PathTessellator::PathToTransformedFilledVertices(const PathSource& source,
                                                       VertexWriter& writer,
                                                       const Matrix& matrix) {
