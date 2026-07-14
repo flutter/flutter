@@ -123,9 +123,20 @@ class AndroidDevices extends PollingDeviceDiscovery {
   //    or serial name components.
   // 3. Group 3 (Extra Info): Optional trailing details (e.g. key:value pairs
   //    like "product:mokey model:mokey device:mokey transport_id:1" or "usb:123").
+  static const String _kDeviceStates =
+      'device|offline|unauthorized|no permissions|bootloader|recovery|sideload|rescue|connecting|authorizing|host|unknown';
+
   static final _kDeviceRegex = RegExp(
     r'^(.*?)(?:\s{2,}|\t+)'
-    r'(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|rescue|connecting|authorizing|host|unknown)'
+    '($_kDeviceStates)'
+    r'(?:\s+(.*)|$)',
+  );
+
+  // ADB may use a single space after a long mDNS serial. Restrict this fallback
+  // to serials without spaces so mDNS conflict names retain the column parser.
+  static final _kUnspacedSerialDeviceRegex = RegExp(
+    r'^(\S+)\s+'
+    '($_kDeviceStates)'
     r'(?:\s+(.*)|$)',
   );
 
@@ -160,9 +171,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
         continue;
       }
 
-      if (_kDeviceRegex.hasMatch(line)) {
-        final Match match = _kDeviceRegex.firstMatch(line)!;
-
+      final Match? match =
+          _kDeviceRegex.firstMatch(line) ?? _kUnspacedSerialDeviceRegex.firstMatch(line);
+      if (match != null) {
         final String deviceID = match[1]!;
         final String deviceState = match[2]!;
         String? rest = match[3];

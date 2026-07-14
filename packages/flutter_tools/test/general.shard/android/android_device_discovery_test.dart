@@ -238,6 +238,12 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
         'expectedId': '127.0.0.1:5555',
         'expectedStatus': 'success',
       },
+      <String, String>{
+        'input':
+            'adb-0123456789abcdef._adb-tls-connect._tcp device product:socrates model:22127RK46C device:socrates transport_id:1',
+        'expectedId': 'adb-0123456789abcdef._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
       // States that should go to diagnostics
       <String, String>{
         'input': '015d172c98400a03       offline',
