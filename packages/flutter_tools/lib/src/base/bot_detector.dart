@@ -125,7 +125,7 @@ class AzureDetector {
     } catch (_) {
       // Metadata detection is best-effort. Unexpected failures (for example,
       // malformed redirect URIs injected by transparent proxies) should not
-      // prevent FLutter from starting.
+      // prevent Flutter from starting.
       return _isRunningOnAzure = false;
     }
     // We got a response. We're running on Azure.
