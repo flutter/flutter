@@ -384,7 +384,9 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     required double mainAxisPosition,
     required double crossAxisPosition,
   }) {
-    if (clipBehavior != .none && clipOverlap != .none && mainAxisPosition < constraints.overlap) {
+    if (clipBehavior != .none &&
+        clipOverlap == .followEdge &&
+        mainAxisPosition < constraints.overlap) {
       return false;
     }
 

@@ -700,6 +700,59 @@ void main() {
 
       expect(renderSliver.debugLayer, isNull);
     });
+
+    testWidgets(
+      'preserveShape hit testing is received when pinned header is wrapped in SliverIgnorePointer',
+      (WidgetTester tester) async {
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+
+        var childTapped = false;
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: CustomScrollView(
+              controller: controller,
+              slivers: <Widget>[
+                const SliverIgnorePointer(
+                  sliver: SliverPersistentHeader(
+                    delegate: _SliverPersistentHeaderDelegate(),
+                    pinned: true,
+                  ),
+                ),
+                SliverClipRRect(
+                  clipOverlap: .preserveShape,
+                  borderRadius: .circular(40.0),
+                  sliver: SliverToBoxAdapter(
+                    child: GestureDetector(
+                      onTap: () {
+                        childTapped = true;
+                      },
+                      child: Container(height: 100.0, color: const Color(0xFF2196F3)),
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 1000.0)),
+              ],
+            ),
+          ),
+        );
+
+        controller.jumpTo(50.0);
+        await tester.pump();
+
+        // The header (0..100) covers the top of the SliverClipRRect (50..150),
+        // creating a 50px overlap. With preserveShape, the rounded clip shifts
+        // up so its corners remain visible inside the overlap band. Tapping at
+        // y=90 (mainAxisPosition 40 < overlap 50) lands inside that preserved
+        // shape. The hit is only received because the header is wrapped in a
+        // SliverIgnorePointer, so it lets the tap fall through to the child.
+        await tester.tapAt(const Offset(10.0, 90.0));
+        await tester.pump();
+
+        expect(childTapped, isTrue);
+      },
+    );
   });
 }
 
