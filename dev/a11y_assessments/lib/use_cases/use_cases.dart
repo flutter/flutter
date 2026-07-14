@@ -18,12 +18,15 @@ import 'close_button.dart';
 import 'date_picker.dart';
 import 'dialog.dart';
 import 'drawer.dart';
+import 'dropdown_menu.dart';
 import 'elevated_button.dart';
 import 'expansion_tile.dart';
 import 'filled_button.dart';
 import 'floating_action_button.dart';
 import 'icon_button.dart';
 import 'material_banner.dart';
+import 'menu_anchor.dart';
+import 'menu_bar.dart';
 import 'navigation_bar.dart';
 import 'navigation_drawer.dart';
 import 'navigation_rail.dart';
@@ -32,6 +35,7 @@ import 'popup_menu_button.dart';
 import 'radio.dart';
 import 'radio_list_tile.dart';
 import 'range_slider.dart';
+import 'search_anchor.dart';
 import 'search_bar.dart';
 import 'segmented_button.dart';
 import 'slider.dart';
@@ -114,4 +118,8 @@ final List<UseCase> useCases = <UseCase>[
   CloseButtonUseCase(),
   TextFormFieldUseCase(),
   SearchBarUseCase(),
+  SearchAnchorUseCase(),
+  DropdownMenuUseCase(),
+  MenuAnchorUseCase(),
+  MenuBarUseCase(),
 ];
