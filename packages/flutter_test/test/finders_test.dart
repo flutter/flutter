@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const kBlue = Color(0xFF0000FF);
+const _kBlue = Color(0xFF0000FF);
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -182,7 +182,7 @@ void main() {
               focusNode: focusNode,
               style: const TextStyle(),
               cursorColor: const Color(0xFF000000),
-              backgroundCursorColor: kBlue,
+              backgroundCursorColor: _kBlue,
             ),
           ),
         ),
@@ -874,7 +874,7 @@ void main() {
                       sliverToBoxAdapterTapped++;
                     },
                     child: Container(
-                      color: kBlue,
+                      color: _kBlue,
                       padding: const EdgeInsets.all(16.0),
                       child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
                     ),
@@ -914,7 +914,7 @@ void main() {
                       sliverToBoxAdapterTapped++;
                     },
                     child: Container(
-                      color: kBlue,
+                      color: _kBlue,
                       padding: const EdgeInsets.all(16.0),
                       child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
                     ),
