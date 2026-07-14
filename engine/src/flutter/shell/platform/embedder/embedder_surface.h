@@ -26,6 +26,8 @@ class EmbedderSurface {
 
   virtual sk_sp<GrDirectContext> CreateResourceContext() const;
 
+  virtual void ReleaseResourceContext() const;
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurface);
 };
