@@ -35,7 +35,7 @@ class MultiWindowApp extends StatefulWidget {
 
 class _MultiWindowAppState extends State<MultiWindowApp> {
   final RegularWindowController controller = RegularWindowController(
-    preferredSize: const Size(800, 600),
+    size: const Size(800, 600),
     title: 'Multi-Window Reference Application',
     delegate: MainControllerWindowDelegate(),
   );
