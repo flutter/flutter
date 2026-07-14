@@ -1437,19 +1437,21 @@ TEST(RectTest, IRectExpand) {
   EXPECT_EQ(rect.Expand(ISize{-10, -10}), IRect::MakeLTRB(110, 110, 190, 190));
 }
 
-TEST(RectTest, RectExpandToMinSizeNullForScaledToZero) {
+TEST(RectTest, RectExpandToMinTransformedSizeNullForScaledToZero) {
   auto rect = Rect();
   auto transform = Matrix::MakeScale(Vector3(0.0f, 1.0f));
-  EXPECT_EQ(rect.ExpandToMinSize({1.0f, 1.0f}, transform), std::nullopt);
+  EXPECT_EQ(rect.ExpandToMinTransformedSize({1.0f, 1.0f}, transform),
+            std::nullopt);
 }
 
-TEST(RectTest, RectExpandToMinSizeRectReturnsUnmodifiedWhenLargeEnough) {
+TEST(RectTest,
+     RectExpandToMinTransformedSizeRectReturnsUnmodifiedWhenLargeEnough) {
   Rect rect = Rect::MakeXYWH(0, 0, 10, 20);
   auto transform = Matrix::MakeScale(Vector3(0.5f, 0.5f));
-  EXPECT_EQ(rect.ExpandToMinSize({1.0f, 1.0f}, transform), rect);
+  EXPECT_EQ(rect.ExpandToMinTransformedSize({1.0f, 1.0f}, transform), rect);
 }
 
-TEST(RectTest, RectExpandToMinSizeRectWithIdentityTransform) {
+TEST(RectTest, RectExpandToMinTransformedSizeRectWithIdentityTransform) {
   Size size = Size(2.0f, 2.0f);
   Rect rect = Rect::MakeEllipseBounds(Point(), size * 0.5f);
 
@@ -1457,7 +1459,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithIdentityTransform) {
 
   // Expand to a width and height less than the original size.
   {
-    auto expanded = rect.ExpandToMinSize({0.5f, 0.75f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({0.5f, 0.75f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), size);
@@ -1466,7 +1468,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithIdentityTransform) {
 
   // Expand to a minimum width. Minimum height is less than the original size.
   {
-    auto expanded = rect.ExpandToMinSize({4.0f, 1.5f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({4.0f, 1.5f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), Size(4.0f, 2.0f));
@@ -1475,7 +1477,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithIdentityTransform) {
 
   // Expand to a minimum height. Minimum width is less than the original size.
   {
-    auto expanded = rect.ExpandToMinSize({1.5f, 4.0f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({1.5f, 4.0f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), Size(2.0f, 4.0f));
@@ -1484,7 +1486,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithIdentityTransform) {
 
   // Expand to a minimum width and height.
   {
-    auto expanded = rect.ExpandToMinSize({3.0f, 4.0f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({3.0f, 4.0f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), Size(3.0f, 4.0f));
@@ -1492,7 +1494,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithIdentityTransform) {
   }
 }
 
-TEST(RectTest, RectExpandToMinSizeRectWithScalingTransform) {
+TEST(RectTest, RectExpandToMinTransformedSizeRectWithScalingTransform) {
   Size size = Size(2.0f, 2.0f);
   Rect rect = Rect::MakeEllipseBounds(Point(), size * 0.5f);
 
@@ -1503,7 +1505,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithScalingTransform) {
   // Expand to a transformed width and height less than the transformed size of
   // the original rectangle.
   {
-    auto expanded = rect.ExpandToMinSize({3.0f, 4.0f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({3.0f, 4.0f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), size);
@@ -1513,7 +1515,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithScalingTransform) {
   // Expand to 5.0 transformed width.
   // This is equal to 5.0 / 2.0 = 2.5 local width.
   {
-    auto expanded = rect.ExpandToMinSize({5.0f, 4.0f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({5.0f, 4.0f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), Size(2.5f, 2.0f));
@@ -1523,7 +1525,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithScalingTransform) {
   // Expand to 9.0 transformed height.
   // This is equal to 9.0 / 3.0 = 3.0 local height.
   {
-    auto expanded = rect.ExpandToMinSize({3.0f, 9.0f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({3.0f, 9.0f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), Size(2.0f, 3.0));
@@ -1532,7 +1534,7 @@ TEST(RectTest, RectExpandToMinSizeRectWithScalingTransform) {
 
   // Expand both width and height.
   {
-    auto expanded = rect.ExpandToMinSize({5.0f, 9.0f}, transform);
+    auto expanded = rect.ExpandToMinTransformedSize({5.0f, 9.0f}, transform);
     ASSERT_TRUE(expanded.has_value());
     if (expanded.has_value()) {
       EXPECT_EQ(expanded.value().GetSize(), Size(2.5f, 3.0f));

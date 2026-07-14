@@ -204,7 +204,8 @@ static std::pair<Rect, Color> ExpandRectToPixelMinimum(const Rect& rect,
                                                        const Color& color,
                                                        const Matrix& transform,
                                                        bool scale_alpha) {
-  std::optional<Rect> expanded = rect.ExpandToMinSize({1.0f, 1.0f}, transform);
+  std::optional<Rect> expanded =
+      rect.ExpandToMinTransformedSize({1.0f, 1.0f}, transform);
   if (!expanded) {
     // Rect is scaled to 0.
     return {Rect(), color};
@@ -861,8 +862,8 @@ bool Canvas::AttemptDrawLineSDF(const Point& p0,
   if (!GetCurrentTransform().HasPerspective2D()) {
     auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
         rect, paint.color, GetCurrentTransform() * rect_to_line_transform,
-        // Don't scale alpha stroke width is 0. This draws a hairline that is
-        // always 1 pixel regardless of the transform.
+        // Don't scale alpha when stroke width is 0. This draws a hairline that
+        // is always 1 pixel regardless of the transform.
         /*scale_alpha=*/paint.stroke.width != 0.0f);
 
     if (expanded.IsEmpty()) {

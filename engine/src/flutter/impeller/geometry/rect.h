@@ -702,7 +702,7 @@ struct TRect {
   ///
   ///         If the transform has a scaling factor of zero in either dimension,
   ///         it cannot be expanded to the minimum size. This returns nullopt.
-  [[nodiscard]] constexpr std::optional<TRect<T>> ExpandToMinSize(
+  [[nodiscard]] constexpr std::optional<TRect<T>> ExpandToMinTransformedSize(
       TSize<T> min_transformed_size,
       const Matrix& transform) const {
     FML_DCHECK(!transform.HasPerspective2D());
