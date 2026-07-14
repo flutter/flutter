@@ -45,11 +45,8 @@ final class IconData {
   /// need to be explicitly opted out at build time). See [staticIconProvider]
   /// for more context.
   const IconData(
-    // ignore: experimental_member_use
     @mustBeConst this.codePoint, {
-    // ignore: experimental_member_use
     @mustBeConst this.fontFamily,
-    // ignore: experimental_member_use
     @mustBeConst this.fontPackage,
     this.matchTextDirection = false,
     this.fontFamilyFallback,
