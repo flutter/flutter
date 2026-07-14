@@ -483,8 +483,8 @@ TEST_P(AiksTest, CanRenderRoundedRectWithUniformRadii) {
   Scalar bottom_left = 60.f;
   Scalar bottom_right = 80.f;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("top_left", &top_left, 0, 250);
       ImGui::SliderFloat("top_right", &top_right, 0, 250);
       ImGui::SliderFloat("bottom_left", &bottom_left, 0, 250);
@@ -739,8 +739,8 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     static float stroked_alpha = 255.0;
     static float stroked_scale[2] = {1.0, 1.0};
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
       ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
       ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
@@ -2329,9 +2329,17 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
 // exceed the max texture size. See
 // https://github.com/flutter/flutter/issues/128912
 TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP() << "Swiftshader is running out of memory on this example.";
+  switch (GetBackend()) {
+    case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
+      break;
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
+    case PlaygroundBackend::kVulkan:
+      GTEST_SKIP() << "Platform is running out of memory on this example "
+                   << "(see https://github.com/flutter/flutter/issues/189286).";
   }
+
   DisplayListBuilder builder(DlRect::MakeSize(DlSize(1000, 1000)));
 
   auto filter = DlImageFilter::MakeMatrix(
@@ -2356,8 +2364,8 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
   Scalar corner = 1.f;
   bool stroked = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("width", &width, 0, 200);
       ImGui::SliderFloat("height", &height, 0, 200);
       ImGui::SliderFloat("corner", &corner, 0, 1);
@@ -2436,8 +2444,8 @@ TEST_P(AiksTest, PerspectiveRectangle) {
   bool diff_clip = false;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderInt("perspective%", &perspective, 0, 100);
       ImGui::Checkbox("use clip", &use_clip);
       if (use_clip) {
