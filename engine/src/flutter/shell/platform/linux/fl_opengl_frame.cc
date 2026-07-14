@@ -68,6 +68,16 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
   size_t width = layers[0]->size.width;
   size_t height = layers[0]->size.height;
 
+  if (width == 0 || height == 0) {
+    // A zero-sized layer has no content to show. Drop any existing frame so
+    // the renderer reports no frame rather than an empty framebuffer (a 0x0
+    // framebuffer would otherwise be treated as a valid frame while matching
+    // the "no frame" size of 0x0).
+    g_clear_object(&self->framebuffer);
+    g_clear_pointer(&self->pixels, g_free);
+    return;
+  }
+
   // Recreate the framebuffer if the frame size has changed.
   if (self->framebuffer == nullptr ||
       fl_framebuffer_get_width(self->framebuffer) != width ||

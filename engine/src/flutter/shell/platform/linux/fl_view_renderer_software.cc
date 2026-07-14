@@ -175,22 +175,30 @@ static void fl_view_renderer_software_present_layers(
     size_t width = layers[0]->size.width;
     size_t height = layers[0]->size.height;
 
-    // Recreate the surface if the frame size has changed.
-    if (self->surface == nullptr ||
-        static_cast<size_t>(cairo_image_surface_get_width(self->surface)) !=
-            width ||
-        static_cast<size_t>(cairo_image_surface_get_height(self->surface)) !=
-            height) {
+    if (width == 0 || height == 0) {
+      // A zero-sized layer has no content to show. Drop any existing frame so
+      // the renderer reports no frame rather than an empty surface (a 0x0
+      // surface would otherwise be treated as a valid frame while matching the
+      // "no frame" size of 0x0).
       g_clear_pointer(&self->surface, cairo_surface_destroy);
-      self->surface =
-          cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-    }
+    } else {
+      // Recreate the surface if the frame size has changed.
+      if (self->surface == nullptr ||
+          static_cast<size_t>(cairo_image_surface_get_width(self->surface)) !=
+              width ||
+          static_cast<size_t>(cairo_image_surface_get_height(self->surface)) !=
+              height) {
+        g_clear_pointer(&self->surface, cairo_surface_destroy);
+        self->surface =
+            cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+      }
 
-    cairo_t* cr = cairo_create(self->surface);
-    fl_compositor_software_composite_layers(self->compositor, cr, layers,
-                                            layers_count);
-    cairo_destroy(cr);
-    cairo_surface_flush(self->surface);
+      cairo_t* cr = cairo_create(self->surface);
+      fl_compositor_software_composite_layers(self->compositor, cr, layers,
+                                              layers_count);
+      cairo_destroy(cr);
+      cairo_surface_flush(self->surface);
+    }
   }
   g_mutex_unlock(&self->frame_mutex);
 
