@@ -53,7 +53,7 @@ import 'package:flutter/widgets.dart';
 ///       onGenerateRoute: (RouteSettings settings) {
 ///         return PageRouteBuilder<void>(
 ///           settings: settings,
-///           pageBuilder: (_, __, ___) => const Text('Generated'),
+///           pageBuilder: (_, _, _) => const Text('Generated'),
 ///         );
 ///       },
 ///     ),
@@ -85,12 +85,21 @@ class TestWidgetsApp extends StatelessWidget {
   /// programmatic navigation without needing to find the [Navigator] widget:
   ///
   /// ```dart
-  /// final navigatorKey = GlobalKey<NavigatorState>();
-  /// await tester.pumpWidget(TestWidgetsApp(
-  ///   navigatorKey: navigatorKey,
-  ///   home: const Text('Home'),
-  /// ));
-  /// navigatorKey.currentState!.pushNamed('/details');
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:flutter_test/flutter_test.dart';
+  ///
+  /// void main() {
+  ///   testWidgets('widgets app can use navigator test', (WidgetTester tester) async {
+  ///     final navigatorKey = GlobalKey<NavigatorState>();
+  ///
+  ///     await tester.pumpWidget(TestWidgetsApp(
+  ///       navigatorKey: navigatorKey,
+  ///       home: const Text('Home'),
+  ///     ));
+  ///
+  ///     navigatorKey.currentState!.pushNamed('/details');
+  ///   });
+  /// }
   /// ```
   ///
   /// See also:
@@ -188,8 +197,8 @@ class TestWidgetsApp extends StatelessWidget {
   ///     return PageRouteBuilder<T>(
   ///       settings: settings,
   ///       transitionDuration: const Duration(milliseconds: 300),
-  ///       pageBuilder: (context, _, __) => builder(context),
-  ///       transitionsBuilder: (_, animation, __, child) {
+  ///       pageBuilder: (context, _, _) => builder(context),
+  ///       transitionsBuilder: (_, animation, _, child) {
   ///         return FadeTransition(opacity: animation, child: child);
   ///       },
   ///     );
