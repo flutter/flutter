@@ -18,6 +18,7 @@ void doTests() {
 
   group('computePhysicalSize', () {
     late CustomElementDimensionsProvider provider;
+    late double originalDpr;
 
     setUp(() {
       sizeSource
@@ -25,11 +26,13 @@ void doTests() {
         ..style.height = '10px';
       domDocument.body!.append(sizeSource);
       provider = CustomElementDimensionsProvider(sizeSource);
+      originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     });
 
     tearDown(() {
       provider.close(); // cleanup
       sizeSource.remove();
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
     });
 
     test('returns physical size of element (width * dpr)', () {
@@ -91,6 +94,38 @@ void doTests() {
         ..style.height = '${logicalHeight}px';
 
       const expected = ui.Size(16384, 16384);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical width of element given custom dpr', () {
+      const double logicalWidth = 10000;
+      const double logicalHeight = 5000;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(16384, 10000);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical width of element given custom dpr', () {
+      const double logicalWidth = 5000;
+      const double logicalHeight = 10000;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(10000, 16384);
 
       final ui.Size computed = provider.computePhysicalSize();
 
