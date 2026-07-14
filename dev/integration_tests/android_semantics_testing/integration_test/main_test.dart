@@ -26,20 +26,9 @@ const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSe
 const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
 Future<void> setClipboard(String message) async {
-  final completer = Completer<void>();
-  Future<void> completeSetClipboard([Object? _]) async {
-    await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
-      'message': message,
-    });
-    completer.complete();
-  }
-
-  if (SchedulerBinding.instance.hasScheduledFrame) {
-    SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
-  } else {
-    await completeSetClipboard();
-  }
-  await completer.future;
+  await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
+    'message': message,
+  });
 }
 
 Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) async {
