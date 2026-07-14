@@ -92,7 +92,7 @@ class CopyFlutterBundle extends Target {
       environment,
       environment.outputDir,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
       buildMode: buildMode,
       flavor: flavor,
       additionalContent: <String, DevFSContent>{
@@ -229,50 +229,28 @@ class KernelSnapshot extends Target {
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
     TargetModel targetModel = TargetModel.flutter;
-    if (targetPlatform == TargetPlatform.fuchsia_x64 ||
-        targetPlatform == TargetPlatform.fuchsia_arm64) {
+    if (targetPlatform.type == .fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
     // Force linking of the platform for desktop embedder targets since these
     // do not correctly load the core snapshots in debug mode.
     // See https://github.com/flutter/flutter/issues/44724
-    final bool forceLinkPlatform;
-    switch (targetPlatform) {
-      case TargetPlatform.darwin:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.linux_x64:
-        forceLinkPlatform = true;
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-        forceLinkPlatform = false;
-      case TargetPlatform.unsupported:
-        TargetPlatform.throwUnsupportedTarget();
-    }
+    final bool forceLinkPlatform = switch (targetPlatform.type) {
+      .macos || .windows => true,
+      .linux => targetPlatform.cpuArch == .x64,
+      .unsupported => TargetPlatform.throwUnsupportedTarget(),
+      _ => false,
+    };
 
-    final String? targetOS = switch (targetPlatform) {
-      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => 'fuchsia',
-      TargetPlatform.android ||
-      TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 => 'android',
-      TargetPlatform.darwin => 'macos',
-      TargetPlatform.ios => 'ios',
-      TargetPlatform.linux_arm64 ||
-      TargetPlatform.linux_riscv64 ||
-      TargetPlatform.linux_x64 => 'linux',
-      TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
-      TargetPlatform.tester || TargetPlatform.web_javascript => null,
-      TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),
+    final String? targetOS = switch (targetPlatform.type) {
+      .fuchsia => 'fuchsia',
+      .android => 'android',
+      .macos => 'macos',
+      .ios => 'ios',
+      .linux => 'linux',
+      .windows => 'windows',
+      .tester || .web || .custom => null,
+      .unsupported => TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(

@@ -97,10 +97,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     buildDataAssets: buildDataAssets,
   );
 
-  final BuildMode buildMode = _getBuildMode(
-    environmentDefines,
-    targetPlatform == TargetPlatform.tester,
-  );
+  final BuildMode buildMode = _getBuildMode(environmentDefines, targetPlatform.type == .tester);
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
   final DartHooksResult linkResult;
   if (linkingEnabled) {
@@ -225,10 +222,7 @@ List<AssetBuildTarget> _getTargets({
     if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
   ];
 
-  final BuildMode buildMode = _getBuildMode(
-    environmentDefines,
-    targetPlatform == TargetPlatform.tester,
-  );
+  final BuildMode buildMode = _getBuildMode(environmentDefines, targetPlatform.type == .tester);
 
   return AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
@@ -262,10 +256,7 @@ Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnable
     if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
   ];
 
-  final BuildMode buildMode = _getBuildMode(
-    environmentDefines,
-    targetPlatform == TargetPlatform.tester,
-  );
+  final BuildMode buildMode = _getBuildMode(environmentDefines, targetPlatform.type == .tester);
 
   if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets)) {
     for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
@@ -485,7 +476,7 @@ Future<List<File>> installCodeAssets({
   required Uri targetUri,
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  final flutterTester = targetPlatform == TargetPlatform.tester;
+  final flutterTester = targetPlatform.type == .tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
@@ -962,27 +953,20 @@ Never _throwNativeAssetsLinkFailed() {
 }
 
 OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform.ios:
+  switch (platform.type) {
+    case .ios:
       return OS.iOS;
-    case TargetPlatform.darwin:
+    case .macos:
       return OS.macOS;
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
+    case .linux:
       return OS.linux;
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
+    case .windows:
       return OS.windows;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
+    case .fuchsia:
       return OS.fuchsia;
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
+    case .android:
       return OS.android;
-    case TargetPlatform.tester:
+    case .tester:
       if (const LocalPlatform().isMacOS) {
         return OS.macOS;
       } else if (const LocalPlatform().isLinux) {
@@ -992,9 +976,10 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
       } else {
         throw StateError('Unknown operating system');
       }
-    case TargetPlatform.web_javascript:
+    case .web:
       throw StateError('No dart builds for web yet.');
-    case TargetPlatform.unsupported:
+    case .custom:
+    case .unsupported:
       TargetPlatform.throwUnsupportedTarget();
   }
 }

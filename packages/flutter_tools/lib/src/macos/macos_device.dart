@@ -43,9 +43,6 @@ class MacOSDevice extends DesktopDevice {
   bool get supportsFlavors => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
-
-  @override
   Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override

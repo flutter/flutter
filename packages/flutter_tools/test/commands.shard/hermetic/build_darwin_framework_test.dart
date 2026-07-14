@@ -442,7 +442,7 @@ void main() {
 
         // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
         memoryFileSystem
-            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+            .directory('Artifact.flutterXcframework.ios.debug')
             .createSync(recursive: true);
 
         final Directory buildDir =
@@ -528,7 +528,7 @@ void main() {
 
         // Mock engine artifacts
         memoryFileSystem
-            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+            .directory('Artifact.flutterXcframework.ios.debug')
             .createSync(recursive: true);
 
         final Directory buildDir =

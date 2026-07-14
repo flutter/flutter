@@ -467,7 +467,7 @@ class FakeDesktopDevice extends DesktopDevice {
   String get name => 'dummy';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.tester, .unknown);
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;
@@ -517,7 +517,7 @@ class FakeMacOSDevice extends MacOSDevice {
   String get name => 'dummy';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.tester, .unknown);
 
   @override
   Future<bool> isSupported() async => true;

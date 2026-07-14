@@ -372,7 +372,7 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(
       Artifact.engineDartBinary,
-      platform: TargetPlatform.web_javascript,
+      platform: const TargetPlatform(.web, .unknown),
     ),
     args,
     workingDirectory: target is Directory ? target.path : target.dirname,
@@ -400,7 +400,7 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
   final args = <String>[
     globals.artifacts!.getArtifactPath(
       Artifact.engineDartBinary,
-      platform: TargetPlatform.web_javascript,
+      platform: const TargetPlatform(.web, .unknown),
     ),
     flutterToolsSnapshotPath,
     ...flutterCommandArgs,

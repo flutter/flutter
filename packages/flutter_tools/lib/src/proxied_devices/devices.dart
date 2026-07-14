@@ -493,7 +493,7 @@ class ProxiedDevice extends Device {
 
     final String id = _cast<String>(
       await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
-        'targetPlatform': _targetPlatform.getName(),
+        'targetPlatform': _targetPlatform.devicePlatformName,
         'applicationBinary': fileName,
       }),
     );

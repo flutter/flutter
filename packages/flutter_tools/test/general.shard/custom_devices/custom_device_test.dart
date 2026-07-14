@@ -118,7 +118,7 @@ void main() {
       expect(device.name, 'testlabel');
       expect(device.platformType, PlatformType.custom);
       expect(await device.sdkNameAndVersion, 'testsdknameandversion');
-      expect(await device.targetPlatform, TargetPlatform.linux_arm64);
+      expect(await device.targetPlatform, const TargetPlatform(.linux, .arm64));
       expect(await device.installApp(linuxApp), true);
       expect(await device.uninstallApp(linuxApp), true);
       expect(await device.isLatestBuildInstalled(linuxApp), false);
@@ -537,7 +537,7 @@ void main() {
       final runDebugCompleter = Completer<void>();
 
       final CustomDeviceConfig config = testConfig.copyWith(
-        platform: TargetPlatform.linux_arm64,
+        platform: const TargetPlatform(.linux, .arm64),
         postBuildCommand: const <String>[
           'testpostbuild',
           r'--buildMode=${buildMode}',
@@ -675,12 +675,12 @@ void main() {
 
   testWithoutContext('CustomDevice returns correct target platform', () async {
     final device = CustomDevice(
-      config: testConfig.copyWith(platform: TargetPlatform.linux_x64),
+      config: testConfig.copyWith(platform: const TargetPlatform(.linux, .x64)),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.empty(),
     );
 
-    expect(await device.targetPlatform, TargetPlatform.linux_x64);
+    expect(await device.targetPlatform, const TargetPlatform(.linux, .x64));
   });
 
   testWithoutContext(

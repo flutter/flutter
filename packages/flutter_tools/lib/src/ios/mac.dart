@@ -463,7 +463,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
+      final onlyActiveArch = activeArch == .fromHostPlatform(getCurrentHostPlatform());
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
@@ -729,7 +729,7 @@ bool publicHeadersChanged({
 }) {
   final String? basePath = artifacts?.getArtifactPath(
     Artifact.flutterFramework,
-    platform: TargetPlatform.ios,
+    platform: FlutterDarwinPlatform.ios.targetPlatform,
     mode: mode,
     environmentType: environmentType,
   );

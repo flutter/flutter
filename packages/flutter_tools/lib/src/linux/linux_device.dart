@@ -41,16 +41,6 @@ class LinuxDevice extends DesktopDevice {
   String get name => 'Linux';
 
   @override
-  late final Future<TargetPlatform> targetPlatform = () async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
-      return TargetPlatform.linux_x64;
-    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
-      return TargetPlatform.linux_riscv64;
-    }
-    return TargetPlatform.linux_arm64;
-  }();
-
-  @override
   Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override

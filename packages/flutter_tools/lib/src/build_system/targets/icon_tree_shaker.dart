@@ -140,9 +140,7 @@ class IconTreeShaker {
       }
 
       // Add space as an optional code point, as web uses it to measure the font height.
-      final optionalCodePoints = _targetPlatform == TargetPlatform.web_javascript
-          ? <int>[kSpacePoint]
-          : <int>[];
+      final optionalCodePoints = _targetPlatform.type == .web ? <int>[kSpacePoint] : <int>[];
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
         relativePath: entry.value,

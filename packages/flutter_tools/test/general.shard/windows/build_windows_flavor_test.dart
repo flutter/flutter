@@ -72,7 +72,7 @@ void main() {
 
   FakeCommand cmakeGenerationCommand({
     String? flavor,
-    TargetPlatform targetPlatform = TargetPlatform.windows_x64,
+    TargetPlatform targetPlatform = const TargetPlatform(.windows, .x64),
   }) {
     final String buildDir = flavor != null && flavor.isNotEmpty
         ? r'C:\build\windows\x64\' + flavor
@@ -93,10 +93,7 @@ void main() {
     );
   }
 
-  FakeCommand buildCommand(
-    String buildMode, {
-    String? flavor,
-  }) {
+  FakeCommand buildCommand(String buildMode, {String? flavor}) {
     final String buildDir = flavor != null && flavor.isNotEmpty
         ? r'C:\build\windows\x64\' + flavor
         : r'C:\build\windows\x64';
@@ -137,7 +134,7 @@ void main() {
       'returns legacy path when no flavor',
       () {
         expect(
-          getWindowsBuildDirectory(TargetPlatform.windows_x64),
+          getWindowsBuildDirectory(const TargetPlatform(.windows, .x64)),
           endsWith(fileSystem.path.join('windows', 'x64')),
         );
       },
@@ -151,7 +148,7 @@ void main() {
       'inserts flavor segment when flavor is set',
       () {
         expect(
-          getWindowsBuildDirectory(TargetPlatform.windows_x64, 'apple'),
+          getWindowsBuildDirectory(const TargetPlatform(.windows, .x64), 'apple'),
           endsWith(fileSystem.path.join('windows', 'x64', 'apple')),
         );
       },

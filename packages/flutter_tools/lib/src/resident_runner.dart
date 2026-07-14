@@ -738,7 +738,7 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.targetPlatform == TargetPlatform.web_javascript) {
+      if (device!.targetPlatform.type == .web) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -891,7 +891,7 @@ abstract class ResidentHandlers {
   }
 
   Future<bool> _takeVmServiceScreenshot(FlutterDevice device, File outputFile) async {
-    if (device.targetPlatform != TargetPlatform.web_javascript) {
+    if (device.targetPlatform.type != .web) {
       return false;
     }
     assert(supportsServiceProtocol);
@@ -1487,7 +1487,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.b.print();
       } else {
         final bool isRunningOnWeb = flutterDevices.every((FlutterDevice? flutterDevice) {
-          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
+          return flutterDevice?.targetPlatform.type == .web;
         });
 
         if (!isRunningOnWeb) {
@@ -1556,7 +1556,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
 
       // 3. Perform the standard, cross-platform eviction calls.
-      final supportsShaderReload = device.targetPlatform != TargetPlatform.web_javascript;
+      final supportsShaderReload = device.targetPlatform.type != .web;
       for (final String assetPath in devFS.assetPathsToEvict) {
         // Flutter GPU shader bundles reload the compiled ShaderLibrary in place
         // via the `ext.ui.gpu.reinitializeShaderLibrary` extension. It is
@@ -1578,7 +1578,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       // this throws an internal RPCError (-32603) instead of a standard MethodNotFound
       // error, which would break the hot reload.
       // See https://github.com/flutter/flutter/issues/137265
-      if (device.targetPlatform != TargetPlatform.web_javascript) {
+      if (device.targetPlatform.type != .web) {
         for (final String assetPath in devFS.shaderPathsToEvict) {
           futures.add(vmService.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
         }
@@ -1637,28 +1637,25 @@ class OperationResultExtraTiming {
 }
 
 Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
+  switch (platform.type) {
+    case .android:
+      if (platform.cpuArch == .unknown) {
+        return null;
+      }
       final FlutterProject project = FlutterProject.current();
       final String manifestPath = globals.fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.ios:
+    case .ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.android:
-    case TargetPlatform.darwin:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
+    case .macos:
+    case .fuchsia:
+    case .linux:
+    case .tester:
+    case .web:
+    case .windows:
+    case .custom:
       return null;
-    case TargetPlatform.unsupported:
+    case .unsupported:
       TargetPlatform.throwUnsupportedTarget();
   }
 }
@@ -1914,14 +1911,12 @@ class TerminalHandler {
         final bool isRunningOnWeb = residentRunner.flutterDevices.every((
           FlutterDevice? flutterDevice,
         ) {
-          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
+          return flutterDevice?.targetPlatform.type == .web;
         });
         if (residentRunner.isRunningDebug || !isRunningOnWeb) {
           // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
           return residentRunner.flutterDevices
-              .where(
-                (FlutterDevice? device) => device?.targetPlatform != TargetPlatform.web_javascript,
-              )
+              .where((FlutterDevice? device) => device?.targetPlatform.type != .web)
               .fold<bool>(
                 true,
                 (bool s, FlutterDevice? device) =>

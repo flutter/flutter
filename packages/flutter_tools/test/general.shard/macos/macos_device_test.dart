@@ -35,7 +35,7 @@ void main() {
     );
     final package = FakeMacOSApp();
 
-    expect(await device.targetPlatform, TargetPlatform.darwin);
+    expect(await device.targetPlatform, const TargetPlatform(.macos, .x64));
     expect(device.name, 'macOS');
     expect(await device.installApp(package), true);
     expect(await device.uninstallApp(package), true);

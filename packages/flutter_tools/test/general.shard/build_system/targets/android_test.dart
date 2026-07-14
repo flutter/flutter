@@ -174,7 +174,7 @@ void main() {
         command: <String>[
           artifacts.getArtifactPath(
             Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm64,
+            platform: const TargetPlatform(.android, .arm64),
             mode: BuildMode.release,
           ),
           '--deterministic',
@@ -187,7 +187,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
     environment.buildDir.childFile('native_assets.json').createSync();
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release);
 
     await androidAot.build(environment);
 
@@ -210,7 +210,7 @@ void main() {
         command: <String>[
           artifacts.getArtifactPath(
             Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm64,
+            platform: const TargetPlatform(.android, .arm64),
             mode: BuildMode.release,
           ),
           '--deterministic',
@@ -225,7 +225,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
     environment.buildDir.childFile('native_assets.json').createSync();
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release);
 
     await androidAot.build(environment);
 
@@ -252,7 +252,7 @@ void main() {
         command: <String>[
           artifacts.getArtifactPath(
             Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm64,
+            platform: const TargetPlatform(.android, .arm64),
             mode: BuildMode.release,
           ),
           '--deterministic',
@@ -269,7 +269,7 @@ void main() {
     environment.buildDir.childFile('app.dill').createSync();
     environment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release).build(environment);
+    await const AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release).build(environment);
   });
 
   testUsingContext(
@@ -294,7 +294,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_arm64,
+              platform: const TargetPlatform(.android, .arm64),
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -311,7 +311,10 @@ void main() {
       environment.buildDir.childFile('app.dill').createSync();
       environment.buildDir.childFile('native_assets.json').createSync();
 
-      await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release).build(environment);
+      await const AndroidAot(
+        TargetPlatform(.android, .arm64),
+        BuildMode.release,
+      ).build(environment);
     },
   );
 
@@ -326,7 +329,7 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release);
     const androidAotBundle = AndroidAotBundle(androidAot);
     // Create required files.
     environment.buildDir

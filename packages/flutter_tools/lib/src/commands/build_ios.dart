@@ -936,7 +936,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
     final app =
         await applicationPackages?.getPackageForPlatform(
-              TargetPlatform.ios,
+              FlutterDarwinPlatform.ios.targetPlatform,
               buildInfo: await cachedBuildInfo,
             )
             as BuildableIOSApp?;
@@ -978,7 +978,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
-    final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    final String typeName = globals.artifacts!.getEngineType(
+      FlutterDarwinPlatform.ios.targetPlatform,
+      buildInfo.mode,
+    );
     globals.printStatus(switch (xcodeBuildAction) {
       XcodeBuildAction.build => 'Building $app for $logTarget ($typeName)...',
       XcodeBuildAction.archive => 'Archiving $app...',

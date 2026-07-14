@@ -191,16 +191,6 @@ class AndroidDevice extends Device {
   }
 
   @override
-  late final Future<TargetPlatform> targetPlatform = () async {
-    return switch (await cpuArch) {
-      CpuArch.arm64 => TargetPlatform.android_arm64,
-      CpuArch.armv7 => TargetPlatform.android_arm,
-      CpuArch.x64 => TargetPlatform.android_x64,
-      CpuArch.x86 || CpuArch.riscv64 || CpuArch.unknown => TargetPlatform.unsupported,
-    };
-  }();
-
-  @override
   late final Future<CpuArch> cpuArch = () async {
     // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
     final String? abi = await _getProperty('ro.product.cpu.abi');
@@ -227,26 +217,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
-    switch (await targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-        return buildMode != BuildMode.jitRelease;
-      case TargetPlatform.android:
-      case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.unsupported:
-        throw UnsupportedError('Invalid target platform for Android');
-    }
+    return buildMode != .jitRelease;
   }
 
   @override
@@ -873,13 +844,9 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isSupported() async {
-    final TargetPlatform platform = await targetPlatform;
-    return switch (platform) {
-      TargetPlatform.android ||
-      TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 => true,
-      _ => false,
+    return switch (await cpuArch) {
+      .arm64 || .armv7 || .x64 => true,
+      .x86 || .riscv64 || .unknown => false,
     };
   }
 

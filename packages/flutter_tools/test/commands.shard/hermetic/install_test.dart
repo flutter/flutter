@@ -180,7 +180,7 @@ class FakeAndroidApk extends Fake implements AndroidApk {}
 
 class FakeIOSDevice extends Fake implements IOSDevice {
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.ios, .arm64);
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
@@ -194,7 +194,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .armv7);
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;

@@ -744,7 +744,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Copying Flutter.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
       Artifact.flutterXcframework,
-      platform: TargetPlatform.ios,
+      platform: FlutterDarwinPlatform.ios.targetPlatform,
       mode: buildInfo.mode,
     );
     final String flutterFrameworkFileName = globals.fs.path.basename(
@@ -798,7 +798,7 @@ end
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kTargetPlatform: TargetPlatform.ios.getName(),
+            kTargetPlatform: FlutterDarwinPlatform.ios.targetPlatform.getName(),
             kIosArchs: defaultIOSArchsForEnvironment(
               sdkType,
               globals.artifacts!,

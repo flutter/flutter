@@ -93,7 +93,7 @@ void main() {
         };
         final DartHooksResult result = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
-          targetPlatform: TargetPlatform.android_arm64,
+          targetPlatform: const TargetPlatform(.android, .arm64),
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
@@ -104,7 +104,7 @@ void main() {
         await installCodeAssets(
           dartHookResult: result,
           environmentDefines: environmentDefines,
-          targetPlatform: TargetPlatform.android_arm64,
+          targetPlatform: const TargetPlatform(.android, .arm64),
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
@@ -142,7 +142,7 @@ void main() {
           kBuildMode: BuildMode.debug.cliName,
           kMinSdkVersion: minSdkVersion,
         },
-        targetPlatform: TargetPlatform.android_x64,
+        targetPlatform: const TargetPlatform(.android, .x64),
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(),
@@ -170,7 +170,7 @@ void main() {
             kBuildMode: BuildMode.debug.cliName,
             kMinSdkVersion: minSdkVersion,
           },
-          targetPlatform: TargetPlatform.android_arm64,
+          targetPlatform: const TargetPlatform(.android, .arm64),
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),

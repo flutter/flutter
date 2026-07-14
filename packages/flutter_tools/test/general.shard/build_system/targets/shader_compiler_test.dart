@@ -74,7 +74,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.web_javascript,
+        targetPlatform: const TargetPlatform(.web, .unknown),
       ),
       true,
     );
@@ -114,7 +114,7 @@ void main() {
         await shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: const TargetPlatform(.ios, .arm64),
         ),
         true,
       );
@@ -155,7 +155,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.android,
+        targetPlatform: const TargetPlatform(.android, .unknown),
       ),
       true,
     );
@@ -194,7 +194,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.web_javascript,
+        targetPlatform: const TargetPlatform(.web, .unknown),
       ),
       true,
     );
@@ -233,7 +233,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.web_javascript,
+        targetPlatform: const TargetPlatform(.web, .unknown),
       );
       fail('unreachable');
     } on ShaderCompilerException catch (e) {
@@ -289,7 +289,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.android, .unknown));
 
     final DevFSContent? content = await developmentShaderCompiler.recompileShader(
       DevFSFileContent(fileSystem.file(fragPath)),
@@ -340,7 +340,7 @@ void main() {
         random: math.Random(0),
       );
 
-      developmentShaderCompiler.configureCompiler(TargetPlatform.tester);
+      developmentShaderCompiler.configureCompiler(const TargetPlatform(.tester, .unknown));
 
       final DevFSContent? content = await developmentShaderCompiler.recompileShader(
         DevFSFileContent(fileSystem.file(fragPath)),
@@ -391,7 +391,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.android, .unknown));
 
     final DevFSContent? content = await developmentShaderCompiler.recompileShader(
       DevFSFileContent(fileSystem.file(fragPath)),
@@ -442,7 +442,7 @@ void main() {
         random: math.Random(0),
       );
 
-      developmentShaderCompiler.configureCompiler(TargetPlatform.tester);
+      developmentShaderCompiler.configureCompiler(const TargetPlatform(.tester, .unknown));
 
       final DevFSContent? content = await developmentShaderCompiler.recompileShader(
         DevFSFileContent(fileSystem.file(fragPath)),
@@ -493,7 +493,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.android, .unknown));
 
     final DevFSContent? content = await developmentShaderCompiler.recompileShader(
       DevFSFileContent(fileSystem.file(fragPath)),
@@ -542,7 +542,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.web, .unknown));
 
     final DevFSContent? content = await developmentShaderCompiler.recompileShader(
       DevFSFileContent(fileSystem.file(fragPath)),
@@ -601,7 +601,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.android, .unknown));
 
     final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
 
@@ -659,7 +659,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.android, .unknown));
 
     final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
 
@@ -715,7 +715,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.android, .unknown));
 
     final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
 
@@ -770,7 +770,7 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+    developmentShaderCompiler.configureCompiler(const TargetPlatform(.android, .unknown));
 
     final shaderContent = DevFSByteContent(Uint8List.fromList(<int>[1, 2, 3, 4]));
 
@@ -820,7 +820,7 @@ void main() {
           shaderCompiler.compileShader(
             input: fileSystem.file(fragPath),
             outputPath: outputPath,
-            targetPlatform: TargetPlatform.ios,
+            targetPlatform: const TargetPlatform(.ios, .arm64),
           ),
           throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
         );
@@ -867,7 +867,7 @@ void main() {
           shaderCompiler.compileShader(
             input: fileSystem.file(fragPath),
             outputPath: outputPath,
-            targetPlatform: TargetPlatform.ios,
+            targetPlatform: const TargetPlatform(.ios, .arm64),
           ),
           throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
         );
@@ -913,7 +913,7 @@ void main() {
         final bool success = await shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: const TargetPlatform(.ios, .arm64),
           fatal: false,
         );
 
@@ -952,7 +952,7 @@ void main() {
         shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: const TargetPlatform(.ios, .arm64),
         ),
         throwsA(
           isA<ProcessException>().having(
@@ -1012,7 +1012,7 @@ void main() {
       final bool success1 = await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.ios,
+        targetPlatform: const TargetPlatform(.ios, .arm64),
         fatal: false,
       );
       expect(success1, false);
@@ -1026,7 +1026,7 @@ void main() {
       final bool success2 = await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.ios,
+        targetPlatform: const TargetPlatform(.ios, .arm64),
         fatal: false,
       );
       expect(success2, false);

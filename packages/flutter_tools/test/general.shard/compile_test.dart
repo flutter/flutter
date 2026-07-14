@@ -163,7 +163,7 @@ void main() {
       // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for targets other
       // than DDC is not currently supported as it's limited for use with the widget previewer.
       for (final TargetPlatform target in TargetPlatform.values.where(
-        (e) => e != .web_javascript,
+        (e) => e != const TargetPlatform(.web, .unknown),
       )) {
         try {
           const ResidentCompilerFactory().create(
@@ -190,7 +190,7 @@ void main() {
       // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for DDC is
       // supported.
       const ResidentCompilerFactory().create(
-        targetPlatform: .web_javascript,
+        targetPlatform: const TargetPlatform(.web, .unknown),
         buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -210,8 +210,8 @@ void main() {
       final processManager = FakeProcessManager.list([
         FakeCommand(
           command: const <String>[
-            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+            'Artifact.engineDartAotRuntime.web-javascript',
+            'Artifact.frontendServerSnapshotForEngineDartSdk.web-javascript',
             '--sdk-root',
             'sdkroot/',
             '--incremental',
@@ -285,8 +285,8 @@ void main() {
       final processManager = FakeProcessManager.list([
         FakeCommand(
           command: const <String>[
-            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+            'Artifact.engineDartAotRuntime.web-javascript',
+            'Artifact.frontendServerSnapshotForEngineDartSdk.web-javascript',
             '--sdk-root',
             'sdkroot/',
             '--incremental',

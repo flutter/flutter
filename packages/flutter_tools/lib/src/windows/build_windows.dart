@@ -170,10 +170,12 @@ Future<void> buildWindows(
 }
 
 String getCmakeWindowsArch(TargetPlatform targetPlatform) {
-  return switch (targetPlatform) {
-    TargetPlatform.windows_x64 => 'x64',
-    TargetPlatform.windows_arm64 => 'ARM64',
-    _ => throw Exception('Unsupported target platform "$targetPlatform".'),
+  if (targetPlatform.type != .windows) {
+    throw Exception('Unsupported target platform "$targetPlatform".');
+  }
+  return switch (targetPlatform.cpuArch) {
+    .arm64 => 'ARM64',
+    _ => 'x64',
   };
 }
 
