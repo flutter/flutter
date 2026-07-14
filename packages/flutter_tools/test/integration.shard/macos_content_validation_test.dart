@@ -291,7 +291,7 @@ void main() {
         ], workingDirectory: workingDirectory);
       });
     }
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] macOS content validation only runs on macOS.
 }
 
 void _checkFatBinary(File file, String buildModeLower, String expectedType) {
