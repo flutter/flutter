@@ -132,8 +132,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
     r'(?:\s+(.*)|$)',
   );
 
-  // ADB may use a single space after a long mDNS serial. Restrict this fallback
-  // to serials without spaces so mDNS conflict names retain the column parser.
+  /// ADB may use a single space after a long mDNS serial. Restrict this fallback
+  /// to serials without spaces so mDNS conflict names retain the column parser.
   static final _kUnspacedSerialDeviceRegex = RegExp(
     r'^(\S+)\s+'
     '($_kDeviceStates)'
