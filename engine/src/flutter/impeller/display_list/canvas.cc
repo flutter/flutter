@@ -35,6 +35,7 @@
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/line_contents.h"
+#include "impeller/entity/contents/path_sdf_contents.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -435,13 +436,17 @@ void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
+  std::unique_ptr<Geometry> geom;
   if (paint.style == Paint::Style::kFill) {
-    FillPathGeometry geom(path);
-    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    geom = std::make_unique<FillPathGeometry>(path);
   } else {
-    StrokePathGeometry geom(path, paint.stroke);
-    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    geom = std::make_unique<StrokePathGeometry>(path, paint.stroke);
   }
+
+  auto contents = PathSdfContents::Make(std::move(geom), paint.color);
+  AddRenderEntityWithFiltersToCurrentPass(
+      entity, contents->GetGeometry(), paint,
+      /*reuse_depth=*/false, std::move(contents));
 }
 
 void Canvas::DrawPaint(const Paint& paint) {
