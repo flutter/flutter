@@ -395,13 +395,18 @@ class Canvas {
       const Paint& paint,
       UberSDFParameters params,
       bool reuse_depth = false,
-      std::optional<Matrix> shape_transform = std::nullopt);
+      const std::optional<Matrix>& shape_transform = std::nullopt);
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
   /// Returns true if this operation is consistent with a DrawShadow-like
   /// operation.
   static bool IsShadowBlurDrawOperation(const Paint& paint);
+
+  bool AttemptDrawLineSDF(const Point& p0,
+                          const Point& p1,
+                          const Paint& paint,
+                          bool reuse_depth);
 
   bool AttemptDrawAntialiasedCircle(const Point& center,
                                     Scalar radius,

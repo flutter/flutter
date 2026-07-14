@@ -805,86 +805,99 @@ bool Canvas::AttemptDrawBlur(BlurShape& shape, const Paint& paint) {
   return true;
 }
 
+bool Canvas::AttemptDrawLineSDF(const Point& p0,
+                                const Point& p1,
+                                const Paint& paint,
+                                bool reuse_depth) {
+  if (!(renderer_.GetContext()->GetFlags().use_sdfs ||
+        renderer_.GetContext()->GetFlags().antialiased_lines) ||
+      !IsCompatibleWithSDFRendering(paint)) {
+    return false;
+  }
+  // Draw the line as a filled rectangle with width=line_length and
+  // height=stroke_width.
+
+  Paint rect_paint = paint;
+  rect_paint.style = Paint::Style::kFill;
+
+  Scalar line_length = p0.GetDistance(p1);
+  if (line_length == 0.0f && paint.stroke.cap == Cap::kButt) {
+    // 0 length line with butt caps is invisible.
+    return true;
+  }
+  Scalar half_stroke_width = paint.stroke.width * 0.5f;
+  Scalar half_length = line_length * 0.5f;
+
+  // For Butt stroke caps, the rect width is line_length. For Square and Round
+  // stroke caps, the rect extends past the line's endpoints by
+  // half_stroke_width at each end.
+  if (paint.stroke.cap != Cap::kButt) {
+    half_length += half_stroke_width;
+  }
+
+  // The axis-aligned origin-centered rect which the line will be drawn as.
+  Rect rect = Rect::MakeEllipseBounds(Point(0.0f, 0.0f),
+                                      Point(half_length, half_stroke_width));
+
+  // A transform matrix is used to rotate and translate the rect to match the
+  // position of the input line.
+
+  // Unit vector along the line. Fallback to (1, 0) if length is 0.
+  Vector2 u =
+      line_length > 0.0f ? ((p1 - p0) / line_length) : Point(1.0f, 0.0f);
+  Vector2 perp = u.PerpendicularRight();
+  Point center = (p0 + p1) * 0.5f;
+  Matrix rect_to_line_transform = Matrix::MakeColumn(
+      // X basis: unit vector along the line
+      u.x, u.y, 0.0f, 0.0f,
+      // Y basis: unit vector perpendicular to the line
+      perp.x, perp.y, 0.0f, 0.0f,
+      // Z basis: unchanged
+      0.0f, 0.0f, 1.0f, 0.0f,
+      // Translation: to line center
+      center.x, center.y, 0.0f, 1.0f);
+
+  // Expand rect to 1 pixel minimum dimensions if applicable.
+  if (!GetCurrentTransform().HasPerspective2D()) {
+    auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
+        rect, paint.color, GetCurrentTransform() * rect_to_line_transform,
+        // Don't scale alpha stroke width is 0. This draws a hairline that is
+        // always 1 pixel regardless of the transform.
+        /*scale_alpha=*/paint.stroke.width != 0.0f);
+
+    if (expanded.IsEmpty()) {
+      // Line is invisible due to transform scaling or alpha scaling.
+      return true;
+    }
+
+    rect_paint.color = alpha_scaled_color;
+    rect = expanded;
+  }
+
+  UberSDFParameters params;
+  if (paint.stroke.cap == Cap::kRound) {
+    params = UberSDFParameters::MakeRoundedRect(
+        /*color=*/rect_paint.color,
+        /*rect=*/rect,
+        /*radii=*/
+        RoundingRadii::MakeRadius(rect.GetHeight() * 0.5f),
+        /*stroke=*/std::nullopt);
+  } else {
+    params = UberSDFParameters::MakeRect(
+        /*color=*/rect_paint.color,
+        /*rect=*/rect,
+        /*stroke=*/std::nullopt);
+  }
+  AddRenderSDFEntityToCurrentPass(paint, params, reuse_depth,
+                                  /*shape_transform=*/rect_to_line_transform);
+  return true;
+}
+
 void Canvas::DrawLine(const Point& p0,
                       const Point& p1,
                       const Paint& paint,
                       bool reuse_depth) {
-  if ((renderer_.GetContext()->GetFlags().use_sdfs ||
-       renderer_.GetContext()->GetFlags().antialiased_lines) &&
-      IsCompatibleWithSDFRendering(paint)) {
-    // Draw the line as a filled rectangle with width=line_length and
-    // height=stroke_width.
-
-    Paint rect_paint = paint;
-    rect_paint.style = Paint::Style::kFill;
-
-    Scalar line_length = p0.GetDistance(p1);
-    Scalar half_stroke_width = paint.stroke.width * 0.5f;
-    Scalar half_length = line_length * 0.5f;
-
-    // For Butt stroke caps, the rect width is line_length. For Square and Round
-    // stroke caps, the rect extends past the line's endpoints by
-    // half_stroke_width at each end.
-    if (paint.stroke.cap != Cap::kButt) {
-      half_length += half_stroke_width;
-    }
-
-    // The axis-aligned origin-centered rect which the line will be drawn as.
-    Rect rect = Rect::MakeEllipseBounds(Point(0.0f, 0.0f),
-                                        Point(half_length, half_stroke_width));
-
-    // A transform matrix is used to rotate and translate the rect to match the
-    // position of the input line.
-
-    // Unit vector along the line. Fallback to (1, 0) if length is 0.
-    Point u =
-        line_length > 0.0f ? ((p1 - p0) / line_length) : Point(1.0f, 0.0f);
-    // Unit vector perpendicular to the line.
-    Point perp = Point(-u.y, u.x);
-    Point center = (p0 + p1) * 0.5f;
-    Matrix rect_to_line_transform = Matrix::MakeColumn(
-        // X basis: unit vector along the line
-        u.x, u.y, 0.0f, 0.0f,
-        // Y basis: unit vector perpendicular to the line
-        perp.x, perp.y, 0.0f, 0.0f,
-        // Z basis: unchanged
-        0.0f, 0.0f, 1.0f, 0.0f,
-        // Translation: to line center
-        center.x, center.y, 0.0f, 1.0f);
-
-    // Expand rect to 1 pixel minimum dimensions if applicable.
-    if (!GetCurrentTransform().HasPerspective2D()) {
-      auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
-          rect, paint.color, GetCurrentTransform() * rect_to_line_transform,
-          // Don't scale alpha stroke width is 0. This draws a hairline that is
-          // always 1 pixel regardless of the transform.
-          /*scale_alpha=*/paint.stroke.width != 0.0f);
-
-      if (expanded.IsEmpty()) {
-        // Line is invisible due to transform scaling or alpha scaling.
-        return;
-      }
-
-      rect_paint.color = alpha_scaled_color;
-      rect = expanded;
-    }
-
-    UberSDFParameters params;
-    if (paint.stroke.cap == Cap::kRound) {
-      params = UberSDFParameters::MakeRoundedRect(
-          /*color=*/rect_paint.color,
-          /*rect=*/rect,
-          /*radii=*/
-          RoundingRadii::MakeRadius(rect.GetHeight() * 0.5f),
-          /*stroke=*/std::nullopt);
-    } else {
-      params = UberSDFParameters::MakeRect(
-          /*color=*/rect_paint.color,
-          /*rect=*/rect,
-          /*stroke=*/std::nullopt);
-    }
-    AddRenderSDFEntityToCurrentPass(paint, params, reuse_depth,
-                                    /*shape_transform=*/rect_to_line_transform);
+  if (AttemptDrawLineSDF(p0, p1, paint, reuse_depth)) {
     return;
   }
 
@@ -895,7 +908,7 @@ void Canvas::DrawLine(const Point& p0,
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
 
   AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
-                                          /*reuse_depth=*/reuse_depth);
+                                          reuse_depth);
 }
 
 void Canvas::DrawDashedLine(const Point& p0,
@@ -2167,7 +2180,7 @@ void Canvas::AddRenderSDFEntityToCurrentPass(
     const Paint& paint,
     UberSDFParameters params,
     bool reuse_depth,
-    std::optional<Matrix> shape_transform) {
+    const std::optional<Matrix>& shape_transform) {
   Matrix transform = GetCurrentTransform();
   if (shape_transform.has_value()) {
     transform = transform * shape_transform.value();
@@ -2191,22 +2204,7 @@ void Canvas::AddRenderSDFEntityToCurrentPass(
     // UberSDF doesn't perform things like gradients so we blend the SDF
     // with the color source.
     std::shared_ptr<ColorSourceContents> color_source_contents =
-        paint.CreateContents(renderer_, geom);
-    if (shape_transform.has_value() && color_source_contents) {
-      // The color source is positioned in the canvas based on its effect
-      // transform matrix (color -> canvas). Shape is positioned in the canvas
-      // by the shape_transform matrix (shape -> canvas). We must align the
-      // color source to the shape by modifying the color source's transform to
-      // be (color -> canvas -> shape).
-      //
-      // Color source exposes its transform inverted, so calculate (shape ->
-      // canvas -> color) and use it to set color source's inverse transform.
-      Matrix shape_to_canvas = shape_transform.value();
-      Matrix canvas_to_color =
-          color_source_contents->GetInverseEffectTransform();
-      Matrix shape_to_color = canvas_to_color * shape_to_canvas;
-      color_source_contents->SetInverseEffectTransform(shape_to_color);
-    }
+        paint.CreateContents(renderer_, geom, shape_transform);
     std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
         BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
                             FilterInput::Make(color_source_contents)});

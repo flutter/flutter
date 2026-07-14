@@ -2782,10 +2782,8 @@ TEST_P(AiksTest, CanRenderLinesWithCapsAnglesAndAlphas) {
   };
   const std::vector<float> alphas = {1.0f, 0.75f, 0.5f, 0.25f};
   const std::vector<Radians> angles = {
-      Radians{0.0f},        // 0 degrees
-      Radians{kPi / 6.0f},  // 30 degrees
-      Radians{kPi / 4.0f},  // 45 degrees
-      Radians{kPi / 2.0f},  // 90 degrees
+      Degrees(0.0f),  Degrees(3.0f),  Degrees(30.0f), Degrees(45.0f),
+      Degrees(60.0f), Degrees(87.0f), Degrees(90.0f),
   };
 
   DlPaint paint;

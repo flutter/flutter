@@ -25,10 +25,6 @@ void ColorSourceContents::SetEffectTransform(Matrix matrix) {
   inverse_matrix_ = matrix.Invert();
 }
 
-void ColorSourceContents::SetInverseEffectTransform(Matrix matrix) {
-  inverse_matrix_ = matrix;
-}
-
 const Matrix& ColorSourceContents::GetInverseEffectTransform() const {
   return inverse_matrix_;
 }
