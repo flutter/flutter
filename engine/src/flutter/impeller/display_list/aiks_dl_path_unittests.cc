@@ -375,6 +375,21 @@ TEST_P(AiksTest, DrawLinesWithFilledRects) {
   });
 }
 
+TEST_P(AiksTest, DrawLinesWithFilledRoundRects) {
+  DrawLinesTest(this, [](DisplayListBuilder& builder, const DlPaint& paint,
+                         Point p0, Point p1, Scalar width) {
+    DlPaint fill_paint = paint;
+    fill_paint.setDrawStyle(DlDrawStyle::kFill);
+    Scalar length = p0.GetDistance(p1);
+    Point center = {(p0.x + p1.x) * 0.5f, (p0.y + p1.y) * 0.5f};
+    builder.DrawRoundRect(
+        DlRoundRect::MakeRectRadius(
+            DlRect::MakeEllipseBounds(center, Size(length, width) * 0.5f),
+            width * 0.5f),
+        fill_paint);
+  });
+}
+
 TEST_P(AiksTest, CanRenderTightConicPath) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);

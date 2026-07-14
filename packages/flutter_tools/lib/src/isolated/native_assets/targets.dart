@@ -259,8 +259,7 @@ class WindowsAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      // TODO(simolus3): Respect the mustMatchAppBuild option in cCompilerConfigWindows.
-      cCompilerConfigSync = await cCompilerConfigWindows();
+      cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
