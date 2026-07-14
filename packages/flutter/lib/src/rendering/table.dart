@@ -49,7 +49,7 @@ class TableCellParentData extends BoxParentData {
 
   /// Whether this cell is visible (not hidden by spanning cells).
   /// Hidden cells have both [rowSpan] and [colSpan] set to 0.
-  bool get _isVisible => _rowSpan != 0 && _colSpan != 0;
+  bool get _isVisible => rowSpan != 0 && colSpan != 0;
 
   /// Whether this cell spans multiple rows or columns.
   bool get _hasSpan => colSpan > 1 || rowSpan > 1;
@@ -1286,29 +1286,18 @@ class RenderTable extends RenderBox {
   Iterable<double>? _columnLefts;
   late double _tableWidth;
 
-  // Two bitmaps of hidden cells for border painting, both in logical row-major
-  // order (bit = y * columns + x). They differ in *why* a cell is hidden:
-  //
-  //  _cachedColSpanHiddenCells – cell is covered by a horizontal (colSpan) span,
-  //    i.e. the span origin is in the same row.  Used to skip *vertical* inner
-  //    borders that fall inside a spanning cell.
-  //
-  //  _cachedRowSpanHiddenCells – cell is covered by a vertical (rowSpan) span,
-  //    i.e. the span origin is in an earlier row.  Used to skip *horizontal*
-  //    inner borders that fall inside a spanning cell.
-  //
-  //  A cell at the corner of a rectangular span (colSpan > 1 AND rowSpan > 1)
-  //  has its bit set in **both** bitmaps.
+  // Records which cells are covered by a colSpan and/or rowSpan, used to skip
+  // the inner borders that fall inside a span while painting. Rebuilt during
+  // layout and null when the table has no spanning cells. See
+  // [TableSpannedCells].
   //
   // Row heights are not cached; they are computed on-the-fly as
   // _rowTops[i + 1] - _rowTops[i], which is O(1) per row.
-  Uint8List? _cachedColSpanHiddenCells;
-  Uint8List? _cachedRowSpanHiddenCells;
+  TableSpannedCells? _cachedSpannedCells;
 
   /// Invalidates the cached span information when the table structure changes.
   void _invalidateSpanCache() {
-    _cachedColSpanHiddenCells = null;
-    _cachedRowSpanHiddenCells = null;
+    _cachedSpannedCells = null;
   }
 
   @override
@@ -1467,16 +1456,10 @@ class RenderTable extends RenderBox {
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    // Two flat bitmaps for hidden-cell detection.
-    // colSpanHiddenBitmap: cells covered by a horizontal (colSpan) span;
-    //   used to skip vertical inner borders during painting.
-    // rowSpanHiddenBitmap: cells covered by a vertical (rowSpan) span;
-    //   used to skip horizontal inner borders during painting.
-    // Both are in logical row-major order: bit = y * columns + x.
-    // A cell at the corner of a rectangular span is set in both bitmaps.
-    final colSpanHiddenBitmap = Uint8List((rows * columns + 7) >> 3);
-    final rowSpanHiddenBitmap = Uint8List((rows * columns + 7) >> 3);
-    var hasCellSpans = false;
+    // Tracks which cells are covered by a colSpan and/or rowSpan so the inner
+    // borders that fall inside a span can be skipped while painting. See
+    // [TableSpannedCells].
+    final spannedCells = TableSpannedCells(rows: rows, columns: columns);
     // Use typed lists for predictable memory layout and faster indexed access.
     final columnStartPositions = Float64List(columns);
     final remainingRowSpanHeights = Float64List(rows);
@@ -1576,26 +1559,20 @@ class RenderTable extends RenderBox {
               if (dx == 0 && dy == 0) {
                 continue;
               }
-              hasCellSpans = true;
-              final int bit = (y + dy) * columns + (x + dx);
-              // dx > 0: covered by horizontal (colSpan) extent.
-              // dy > 0: covered by vertical (rowSpan) extent.
-              // Corner cells (dx > 0 AND dy > 0) get set in both.
+              // dx > 0: this cell is covered by the horizontal (colSpan) extent.
+              // dy > 0: this cell is covered by the vertical (rowSpan) extent.
+              // Corner cells (dx > 0 AND dy > 0) are marked as both.
               if (dx > 0) {
-                colSpanHiddenBitmap[bit >> 3] |= 1 << (bit & 7);
+                spannedCells.markColumnSpanned(x + dx, y + dy);
               }
               if (dy > 0) {
-                rowSpanHiddenBitmap[bit >> 3] |= 1 << (bit & 7);
+                spannedCells.markRowSpanned(x + dx, y + dy);
               }
             }
           }
         }
 
-        final int cellBit = y * columns + x;
-        final isHiddenCell =
-            (colSpanHiddenBitmap[cellBit >> 3] | rowSpanHiddenBitmap[cellBit >> 3]) &
-                (1 << (cellBit & 7)) !=
-            0;
+        final bool isHiddenCell = spannedCells.isSpanned(x, y);
         if (isHiddenCell) {
           assert(
             !childParentData._isVisible,
@@ -1703,11 +1680,7 @@ class RenderTable extends RenderBox {
 
         final childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
-        final int cellBit = y * columns + x;
-        final isHiddenCell =
-            (colSpanHiddenBitmap[cellBit >> 3] | rowSpanHiddenBitmap[cellBit >> 3]) &
-                (1 << (cellBit & 7)) !=
-            0;
+        final bool isHiddenCell = spannedCells.isSpanned(x, y);
         if (isHiddenCell) {
           assert(
             !childParentData._isVisible,
@@ -1761,14 +1734,9 @@ class RenderTable extends RenderBox {
     size = constraints.constrain(Size(_tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
 
-    // Publish the two hidden-cell bitmaps for use during border painting.
-    if (hasCellSpans) {
-      _cachedColSpanHiddenCells = colSpanHiddenBitmap;
-      _cachedRowSpanHiddenCells = rowSpanHiddenBitmap;
-    } else {
-      _cachedColSpanHiddenCells = null;
-      _cachedRowSpanHiddenCells = null;
-    }
+    // Publish the spanned-cell map for use during border painting, or clear it
+    // when the table has no spanning cells.
+    _cachedSpannedCells = spannedCells.hasSpannedCells ? spannedCells : null;
   }
 
   @override
@@ -1851,8 +1819,7 @@ class RenderTable extends RenderBox {
         rows: rows,
         columns: columns,
         rowTops: _rowTops,
-        colSpanHiddenCells: _cachedColSpanHiddenCells,
-        rowSpanHiddenCells: _cachedRowSpanHiddenCells,
+        spannedCells: _cachedSpannedCells,
         textDirection: textDirection,
       );
     }
