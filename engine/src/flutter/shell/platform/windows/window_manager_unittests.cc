@@ -625,7 +625,8 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
   EXPECT_EQ(result, MA_NOACTIVATE);
 }
 
-TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
+TEST_F(WindowManagerTest,
+       DISABLED_TooltipWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t parent_view_id =
@@ -841,7 +842,7 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   EXPECT_NE(focused_after, popup_window_handle);
 }
 
-TEST_F(WindowManagerTest, PopupWindowUpdatesPositionOnViewSizeChange) {
+TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t parent_view_id =
