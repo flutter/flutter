@@ -75,13 +75,18 @@ fml::Status CommandQueueVK::Submit(
     return fml::Status();
   };
 
+  std::shared_ptr<GpuSubmissionTracker> tracker =
+      context->GetMutableSubmissionTracker();
+  uint64_t submission_id = tracker->RecordSubmission();
+
   // This will be called later when the command completes.
-  auto fence_complete_callback = [completion_callback,
+  auto fence_complete_callback = [completion_callback, tracker, submission_id,
                                   tracked_objects =
                                       std::move(tracked_objects)]() mutable {
     // Ensure tracked objects are destructed before calling any final
     // callbacks.
     tracked_objects.clear();
+    tracker->RecordCompletion(submission_id);
     if (completion_callback) {
       completion_callback(CommandBuffer::Status::kCompleted);
     }
@@ -92,6 +97,7 @@ fml::Status CommandQueueVK::Submit(
   auto fence_status = context->GetFenceWaiter()->AddFence(
       std::move(fence), submit_callback, std::move(fence_complete_callback));
   if (!fence_status.ok()) {
+    tracker->RecordCompletion(submission_id);
     return fence_status;
   }
   reset.Release();
