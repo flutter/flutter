@@ -645,11 +645,9 @@ enum CpuArch {
   /// The [CpuArch] of the given [hostPlatform].
   factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
     return switch (hostPlatform) {
-      HostPlatform.darwin_x64 || HostPlatform.linux_x64 || HostPlatform.windows_x64 =>
-        CpuArch.x86_64,
-      HostPlatform.darwin_arm64 || HostPlatform.linux_arm64 || HostPlatform.windows_arm64 =>
-        CpuArch.arm64,
-      HostPlatform.linux_riscv64 => CpuArch.riscv64,
+      .darwin_x64 || .linux_x64 || .windows_x64 => CpuArch.x86_64,
+      .darwin_arm64 || .linux_arm64 || .windows_arm64 => CpuArch.arm64,
+      .linux_riscv64 => CpuArch.riscv64,
     };
   }
 }
