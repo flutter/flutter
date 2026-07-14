@@ -192,6 +192,16 @@ class AndroidDevice extends Device {
 
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
+    return switch (await cpuArch) {
+      CpuArch.arm64 => TargetPlatform.android_arm64,
+      CpuArch.armv7 => TargetPlatform.android_arm,
+      CpuArch.x86_64 => TargetPlatform.android_x64,
+      CpuArch.x86 || CpuArch.riscv64 || CpuArch.unknown => TargetPlatform.unsupported,
+    };
+  }();
+
+  @override
+  late final Future<CpuArch> cpuArch = () async {
     // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
     final String? abi = await _getProperty('ro.product.cpu.abi');
     switch (abi) {
@@ -202,16 +212,16 @@ class AndroidDevice extends Device {
         // to assuming 64 bit.
         final String? abilist = await _getProperty('ro.product.cpu.abilist');
         if (abilist == null || abilist.contains('arm64-v8a')) {
-          return TargetPlatform.android_arm64;
+          return CpuArch.arm64;
         } else {
-          return TargetPlatform.android_arm;
+          return CpuArch.armv7;
         }
       case 'armeabi-v7a':
-        return TargetPlatform.android_arm;
+        return CpuArch.armv7;
       case 'x86_64':
-        return TargetPlatform.android_x64;
+        return CpuArch.x86_64;
       default:
-        return TargetPlatform.unsupported;
+        return CpuArch.unknown;
     }
   }();
 
@@ -498,6 +508,7 @@ class AndroidDevice extends Device {
           app.id,
         ]),
         throwOnError: true,
+        timeout: const Duration(seconds: 30),
       );
       uninstallOut = uninstallResult.stdout;
     } on Exception catch (error) {
@@ -577,12 +588,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -687,6 +696,11 @@ class AndroidDevice extends Device {
           'disable-service-auth-codes',
           'true',
         ],
+        if (debuggingOptions.disableServiceOriginCheck) ...<String>[
+          '--ez',
+          'disable-service-origin-check',
+          'true',
+        ],
         if (debuggingOptions.dartFlags.isNotEmpty) ...<String>[
           '--es',
           'dart-flags',
@@ -701,7 +715,9 @@ class AndroidDevice extends Device {
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
-    if (result.contains('Error: ')) {
+    if (result.contains(
+      RegExp(r'(Error:|Error type|Security\s?exception)', caseSensitive: false),
+    )) {
       _logger.printError(result.trim(), wrap: false);
       return LaunchResult.failed();
     }
@@ -753,11 +769,17 @@ class AndroidDevice extends Device {
       if (userIdentifier != null) ...<String>['--user', userIdentifier],
       app.id,
     ]);
-    return _processUtils
-        .stream(command)
-        .then<bool>(
-          (int exitCode) => exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform),
-        );
+    try {
+      final RunResult result = await _processUtils.run(
+        command,
+        timeout: const Duration(seconds: 30),
+      );
+      final int exitCode = result.exitCode;
+      return exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform);
+    } on Exception catch (error) {
+      _logger.printError('adb shell am force-stop failed: $error');
+      return false;
+    }
   }
 
   @override

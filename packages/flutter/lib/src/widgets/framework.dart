@@ -1166,7 +1166,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
             'This error happens if you call setState() on a State object for a widget that '
             'no longer appears in the widget tree (e.g., whose parent widget no longer '
             'includes the widget in its build). This error can occur when code calls '
-            'setState() from a timer or an animation callback.',
+            'setState() from a timer, from an animation callback, or after an '
+            'asynchronous operation (such as an awaited network request or other '
+            'Future) completes after the widget has been removed from the tree.',
           ),
           ErrorHint(
             'The preferred solution is '
@@ -2416,12 +2418,29 @@ abstract class BuildContext {
   /// [Theme.of].
   ///
   /// This method should not be called from widget constructors or from
-  /// [State.initState] methods, because those methods would not get called
-  /// again if the inherited value were to change. To ensure that the widget
-  /// correctly updates itself when the inherited value changes, only call this
-  /// (directly or indirectly) from build methods, layout and paint callbacks,
-  /// or from [State.didChangeDependencies] (which is called immediately after
-  /// [State.initState]).
+  /// [State.initState] methods. While calling this method effectively registers
+  /// the [BuildContext] as a dependent for future rebuilds, the constructor and
+  /// [State.initState] are lifecycle-locked and only execute once during the
+  /// initial creation of the element.
+  ///
+  /// If an inherited value changes later, the framework will correctly trigger
+  /// the [State.build] method to run again, but it cannot re-run the
+  /// constructor or [State.initState]. Consequently, if any internal variables,
+  /// controllers, or side effects were initialized using a "snapshot" of the
+  /// inherited value in those one-time methods, they will retain their original,
+  /// now-obsolete values. This leads to a state desynchronization where the
+  /// widget's [State.build] method might be using updated data while its
+  /// internal logic remains bound to stale data captured during [State.initState].
+  ///
+  /// To ensure the widget stays in sync, call this (directly or indirectly)
+  /// from build methods, layout and paint callbacks, or from [State.didChangeDependencies].
+  ///
+  /// [State.didChangeDependencies] is called immediately after [State.initState]
+  /// and is re-invoked whenever the inherited widget this context depends on
+  /// changes, until the next time the widget or one of its ancestors is moved
+  /// (for example, because an ancestor is added or removed). This allows the
+  /// [State] to update internal variables or perform initialization logic that
+  /// depends on the inherited value before [State.build] is called.
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that
@@ -2435,12 +2454,6 @@ abstract class BuildContext {
   ///
   /// Calling this method is O(1) with a small constant factor, but will lead to
   /// the widget being rebuilt more often.
-  ///
-  /// Once a widget registers a dependency on a particular type by calling this
-  /// method, it will be rebuilt, and [State.didChangeDependencies] will be
-  /// called, whenever changes occur relating to that widget until the next time
-  /// the widget or one of its ancestors is moved (for example, because an
-  /// ancestor is added or removed).
   ///
   /// The [aspect] parameter is only used when `T` is an
   /// [InheritedWidget] subclasses that supports partial updates, like

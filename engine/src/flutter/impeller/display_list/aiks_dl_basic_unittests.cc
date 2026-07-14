@@ -482,8 +482,8 @@ TEST_P(AiksTest, CanRenderRoundedRectWithUniformRadii) {
   Scalar bottom_left = 60.f;
   Scalar bottom_right = 80.f;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("top_left", &top_left, 0, 250);
       ImGui::SliderFloat("top_right", &top_right, 0, 250);
       ImGui::SliderFloat("bottom_left", &bottom_left, 0, 250);
@@ -738,8 +738,8 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     static float stroked_alpha = 255.0;
     static float stroked_scale[2] = {1.0, 1.0};
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
       ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
       ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
@@ -1909,6 +1909,12 @@ TEST_P(AiksTest,
 
 // This makes sure the WideGamut named tests use 10-bit wide gamut pixel format.
 TEST_P(AiksTest, FormatWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
 }
@@ -2322,9 +2328,17 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
 // exceed the max texture size. See
 // https://github.com/flutter/flutter/issues/128912
 TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP() << "Swiftshader is running out of memory on this example.";
+  switch (GetBackend()) {
+    case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
+      break;
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
+    case PlaygroundBackend::kVulkan:
+      GTEST_SKIP() << "Platform is running out of memory on this example "
+                   << "(see https://github.com/flutter/flutter/issues/189286).";
   }
+
   DisplayListBuilder builder(DlRect::MakeSize(DlSize(1000, 1000)));
 
   auto filter = DlImageFilter::MakeMatrix(
@@ -2349,8 +2363,8 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
   Scalar corner = 1.f;
   bool stroked = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("width", &width, 0, 200);
       ImGui::SliderFloat("height", &height, 0, 200);
       ImGui::SliderFloat("corner", &corner, 0, 1);
@@ -2429,8 +2443,8 @@ TEST_P(AiksTest, PerspectiveRectangle) {
   bool diff_clip = false;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderInt("perspective%", &perspective, 0, 100);
       ImGui::Checkbox("use clip", &use_clip);
       if (use_clip) {
@@ -2494,6 +2508,59 @@ TEST_P(AiksTest, CanRenderFilledRoundSuperellipses) {
   builder.DrawRoundSuperellipse(
       DlRoundSuperellipse::MakeRectRadius(
           /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/20),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderAsymmetricRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(60.0f, 240.0f),
+              .top_right = Size(200.0f, 40.0f),
+              .bottom_left = Size(180.0f, 20.0f),
+              .bottom_right = Size(40.0f, 200.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(240.0f, 40.0f),
+              .top_right = Size(40.0f, 240.0f),
+              .bottom_left = Size(40.0f, 240.0f),
+              .bottom_right = Size(240.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(40.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(240.0f, 240.0f),
+          }),
       paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
