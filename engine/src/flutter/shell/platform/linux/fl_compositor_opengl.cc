@@ -7,6 +7,8 @@
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
+#include <cstring>
+
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_compositor_opengl_shader.h"
@@ -62,6 +64,41 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
   self->shader = fl_compositor_opengl_shader_new(opengl_manager);
 
   return self;
+}
+
+// Checks if the current OpenGL driver is known to have a broken or unsupported
+// glBlitFramebuffer implementation.
+static gboolean driver_supports_blit() {
+  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
+  if (vendor == nullptr) {
+    return TRUE;
+  }
+
+  // Note: List of unsupported vendors due to issue
+  // https://github.com/flutter/flutter/issues/152099
+  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
+  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
+
+  for (const char* unsupported : unsupported_vendors_fuzzy) {
+    if (strstr(vendor, unsupported) != nullptr) {
+      return FALSE;
+    }
+  }
+  for (const char* unsupported : unsupported_vendors_exact) {
+    if (strcmp(vendor, unsupported) == 0) {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+// Checks if glBlitFramebuffer can be used. It is a GLES3 / OpenGL 3.0 function
+// and may not be present on older drivers, so treat it as optional and fall
+// back to compositing with the shader when it is unavailable.
+static gboolean can_blit_framebuffer() {
+  return driver_supports_blit() &&
+         (epoxy_gl_version() >= 30 ||
+          epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 }
 
 static void composite_layer(FlCompositorOpenGL* self,
@@ -157,6 +194,7 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                     fl_framebuffer_get_id(self->framebuffer));
+  gboolean use_blit = can_blit_framebuffer();
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
@@ -165,21 +203,22 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
         const FlutterBackingStore* backing_store = layer->backing_store;
         FlFramebuffer* framebuffer =
             FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER,
-                          fl_framebuffer_get_id(framebuffer));
         // The first layer can be blitted, and following layers composited with
-        // this.
-        if (first_layer) {
+        // this. If glBlitFramebuffer is unavailable, composite the first layer
+        // with the shader instead.
+        if (first_layer && use_blit) {
+          glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                            fl_framebuffer_get_id(framebuffer));
           glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
                             layer->size.height, layer->offset.x,
                             layer->offset.y, layer->size.width,
                             layer->size.height, GL_COLOR_BUFFER_BIT,
                             GL_NEAREST);
-          first_layer = FALSE;
         } else {
           composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
                           width, height);
         }
+        first_layer = FALSE;
       } break;
       case kFlutterLayerContentTypePlatformView: {
         // TODO(robert-ancell) Not implemented -

@@ -267,6 +267,8 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
 
+  EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
+
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -304,6 +306,8 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("NVIDIA")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
+
+  EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
