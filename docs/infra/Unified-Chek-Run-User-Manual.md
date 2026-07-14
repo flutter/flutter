@@ -20,7 +20,7 @@ Clicking the **View more details on flutter-dashboard** link within the **Flutte
 
 # **Check run selection**
 
-By clicking on sha selector you can navigate though check runs for current pull request
+By clicking on the SHA selector, you can navigate through the check runs for the current pull request.
 
 <img width="1768" height="658" alt="Image" src="https://github.com/user-attachments/assets/a740685d-f113-4664-95d3-b7aa877a18a6" />
 
@@ -31,23 +31,23 @@ If the latest check-run is selected, the dashboard allows you to re-run specific
 <img width="872" height="388" alt="Image" src="https://github.com/user-attachments/assets/d444e2b3-bb2e-4f09-9a47-f5bb66d8c1e5" />
 
 **Filtering jobs**
-By clicking on Filter jobs button you can filter jobs by status, platform or regex
+By clicking on the **Filter jobs** button, you can filter jobs by status, platform, or regex.
 
 <img width="886" height="491" alt="Image" src="https://github.com/user-attachments/assets/ced24eff-6014-41db-bbbc-f948c45afe35" />
 
 <img width="886" height="491" alt="Image" src="https://github.com/user-attachments/assets/ca5ef372-5c84-4287-ba6b-cefb54dec89c" />
 
 **Troubleshooting**
-The presubmit dashboard for every failed job provides links to the LUCI UI for deeper investigation of the associated with this job LUCI build execution.
+The presubmit dashboard for every failed job provides links to the LUCI UI for deeper investigation of the LUCI build execution associated with this job.
 
 <img width="370" height="69" alt="Image" src="https://github.com/user-attachments/assets/3fe35d6d-5c9c-44b9-abef-d378ba89fd00" />
 
 # **Analyze logs with Gemini**
 
-If you have write permission to flutter repo and the selected check run is a latest one, for failed jobs you would be able to not only view logs of failed jobs but also analyze them with Gemini.
+If you have write permission to the Flutter repository and the selected check run is the latest one, you can not only view logs of failed jobs but also analyze them with Gemini.
 
 <img width="781" height="658" alt="Image" src="https://github.com/user-attachments/assets/46cac8e2-ffbd-4fdd-bd11-e9624c7269d9" />
 
-That will provide not only summary of a failure but also suggested fixes
+This will provide not only a summary of the failure but also suggested fixes.
 
 <img width="886" height="491" alt="Image" src="https://github.com/user-attachments/assets/1b1e1da8-e657-42ea-909f-aa203fc4450a" />
