@@ -3228,18 +3228,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(count, equals(5));
       });
 
-      testWidgets('clearCandidates preserves current selection', (
-        WidgetTester tester,
-      ) async {
+      testWidgets('clearCandidates preserves current selection', (WidgetTester tester) async {
         await pumpWidgetTreeWithABC(tester);
         final selection = InspectorSelection();
         addTearDown(selection.dispose);
-        final RenderParagraph renderObjectA = tester.renderObject<RenderParagraph>(
-          find.text('a'),
-        );
-        final RenderParagraph renderObjectB = tester.renderObject<RenderParagraph>(
-          find.text('b'),
-        );
+        final RenderParagraph renderObjectA = tester.renderObject<RenderParagraph>(find.text('a'));
+        final RenderParagraph renderObjectB = tester.renderObject<RenderParagraph>(find.text('b'));
 
         selection.candidates = <RenderObject>[renderObjectA, renderObjectB];
         expect(selection.current, renderObjectA);
@@ -3317,9 +3311,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<RenderObject> candidates = WidgetInspectorService.instance.selection.candidates;
       expect(candidates, isNot(contains(behindRender)));
 
-      final RenderObject sheetRender = tester.renderObject<RenderObject>(
-        find.byKey(sheetTextKey),
-      );
+      final RenderObject sheetRender = tester.renderObject<RenderObject>(find.byKey(sheetTextKey));
       expect(candidates, contains(sheetRender));
     });
 
@@ -3402,11 +3394,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.tap(find.byKey(innerTextKey), warnIfMissed: false);
       await tester.pump();
 
-      final RenderObject innerRender = tester.renderObject<RenderObject>(
-        find.byKey(innerTextKey),
-      );
-      final List<RenderObject> candidates =
-          WidgetInspectorService.instance.selection.candidates;
+      final RenderObject innerRender = tester.renderObject<RenderObject>(find.byKey(innerTextKey));
+      final List<RenderObject> candidates = WidgetInspectorService.instance.selection.candidates;
       expect(candidates, contains(innerRender));
     });
 
@@ -4619,7 +4608,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         _CreationLocation location = knownLocations[id]!;
         expect(location.file, equals(file));
         // ClockText widget.
-        expect(location.line, equals(58));
+        expect(location.line, equals(57));
         expect(location.column, equals(9));
         expect(location.name, equals('ClockText'));
         expect(count, equals(1));
@@ -4629,7 +4618,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         location = knownLocations[id]!;
         expect(location.file, equals(file));
         // Text widget in _ClockTextState build method.
-        expect(location.line, equals(93));
+        expect(location.line, equals(92));
         expect(location.column, equals(12));
         expect(location.name, equals('Text'));
         expect(count, equals(1));
@@ -4656,7 +4645,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         location = knownLocations[id]!;
         expect(location.file, equals(file));
         // ClockText widget.
-        expect(location.line, equals(58));
+        expect(location.line, equals(57));
         expect(location.column, equals(9));
         expect(location.name, equals('ClockText'));
         expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -4666,7 +4655,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         location = knownLocations[id]!;
         expect(location.file, equals(file));
         // Text widget in _ClockTextState build method.
-        expect(location.line, equals(93));
+        expect(location.line, equals(92));
         expect(location.column, equals(12));
         expect(location.name, equals('Text'));
         expect(count, equals(3)); // 3 clock widget instances rebuilt.
