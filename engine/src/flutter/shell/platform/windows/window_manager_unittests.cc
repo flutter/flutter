@@ -625,6 +625,8 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
   EXPECT_EQ(result, MA_NOACTIVATE);
 }
 
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
 TEST_F(WindowManagerTest,
        DISABLED_TooltipWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
@@ -842,6 +844,8 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   EXPECT_NE(focused_after, popup_window_handle);
 }
 
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
 TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
