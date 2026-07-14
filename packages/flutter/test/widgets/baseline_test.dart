@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'list_tile_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _debugChipColor = Color(0xFFCCCCCC);
 

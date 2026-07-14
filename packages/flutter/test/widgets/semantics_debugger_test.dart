@@ -10,7 +10,6 @@ import 'button_tester.dart';
 import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
 import 'slider_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _green = Color(0xFF4CAF50);
 const Color _amber = Color(0xFFFFC107);

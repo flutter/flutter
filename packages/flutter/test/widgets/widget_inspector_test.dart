@@ -23,7 +23,6 @@ import 'package:leak_tracker/leak_tracker.dart';
 import '../impeller_test_helpers.dart';
 import 'button_tester.dart';
 import 'widget_inspector_test_utils.dart';
-import 'widgets_app_tester.dart';
 
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
