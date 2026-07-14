@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOT_H_
-#define FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOT_H_
+#ifndef FLUTTER_IMPELLER_TESTING_SCREENSHOT_H_
+#define FLUTTER_IMPELLER_TESTING_SCREENSHOT_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -37,4 +37,4 @@ class Screenshot {
 }  // namespace testing
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOT_H_
+#endif  // FLUTTER_IMPELLER_TESTING_SCREENSHOT_H_
