@@ -1392,10 +1392,7 @@ _flutter.loader.load();
     final File partMapFile = environment.buildDir.childFile('main.dart_module1.wasm.map')
       ..createSync();
 
-    final targetWithMaps = Dart2WasmTarget(
-      const WasmCompilerConfig(sourceMaps: true),
-      const NoOpAnalytics(),
-    );
+    final targetWithMaps = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
     expect(
       targetWithMaps.buildFiles(environment).map((f) => f.path),
       containsAll(<File>[wasmFile, mjsFile, mapFile, partWasmFile, partMapFile].map((f) => f.path)),
