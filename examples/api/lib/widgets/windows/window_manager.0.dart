@@ -17,7 +17,12 @@ void main() {
     );
     runWidget(
       WindowManager(
-        child: RegularWindow(controller: controller, child: const MainWindow()),
+        initialWindows: [
+          WindowEntry(
+            controller: controller,
+            builder: (context) => const MainWindow(),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (e) {
