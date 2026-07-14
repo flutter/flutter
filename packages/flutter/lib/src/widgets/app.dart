@@ -15,8 +15,6 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import '../foundation/_features.dart' show isWindowingEnabled;
-import '_window.dart' show WindowManager;
 
 import 'actions.dart';
 import 'banner.dart';
