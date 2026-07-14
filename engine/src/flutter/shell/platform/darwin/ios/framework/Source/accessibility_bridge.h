@@ -54,25 +54,10 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                       std::unique_ptr<IosDelegate> ios_delegate = nullptr);
   ~AccessibilityBridge();
 
-  // Result of applying cached semantics to the current FlutterViewController's loaded view.
-  enum class ViewUpdateResult {
-    kViewNotLoaded,
-    kNoSemantics,
-    kUpdatedAccessibilityElements,
-  };
-
-  // Result of rebinding the bridge to a different FlutterViewController.
-  enum class ViewControllerUpdateResult {
-    kUnchanged,
-    kReboundToViewNotLoaded,
-    kReboundWithoutSemantics,
-    kReboundAndUpdatedAccessibilityElements,
-  };
-
-  // Updates the owner FlutterViewController and applies cached semantics to its loaded view.
-  ViewControllerUpdateResult SetViewController(FlutterViewController* view_controller);
-  // Called when the current FlutterViewController's root view changes or finishes loading.
-  ViewUpdateResult ViewDidChange();
+  // Updates the owner FlutterViewController.
+  void SetViewController(FlutterViewController* view_controller);
+  // Rebinds cached semantics after the current FlutterViewController's root view changes or loads.
+  void ViewDidChange(FlutterView* previous_view);
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
   // Returns true when a root semantics object is cached in the bridge.
@@ -105,9 +90,9 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void clearState();
 
  private:
-  bool AccessibilityElementsBelongToBridge(NSArray* elements) const;
+  bool AccessibilityElementsWereInstalledByBridge(NSArray* elements) const;
   void ClearAccessibilityElementsIfOwnedByBridge(UIView* view);
-  ViewUpdateResult UpdateAccessibilityElementsForCurrentView();
+  void UpdateAccessibilityElementsForCurrentView();
   void NotifySemanticsObjectsViewChanged();
   SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
   SemanticsObject* FindNextFocusableIfNecessary();
@@ -122,8 +107,6 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   __weak FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
-  // The loaded UIView this bridge last populated through accessibilityElements.
-  __weak UIView* current_view_with_accessibility_elements_;
 
   // If the this id is kSemanticObjectIdInvalid, it means either nothing has
   // been focused or the focus is currently outside of the flutter application

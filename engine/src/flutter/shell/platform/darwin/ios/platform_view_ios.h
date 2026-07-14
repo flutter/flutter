@@ -73,8 +73,10 @@ class PlatformViewIOS final : public PlatformView {
    *
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
+   *
+   * The `previous_view` is the Flutter view that was attached before this one, if any.
    */
-  void attachView();
+  void attachView(FlutterView* previous_view = nil);
 
   /**
    * Called through when an external texture such as video or camera is
@@ -141,18 +143,8 @@ class PlatformViewIOS final : public PlatformView {
   AccessibilityBridge* GetAccessibilityBridge() { return accessibility_bridge_.get(); }
 
  private:
-  // Result of synchronizing the accessibility bridge with the current owner view controller.
-  enum class AccessibilityBridgeUpdateResult {
-    kNoChange,
-    kBridgeCreated,
-    kBridgeRebound,
-    kBridgeReboundAndCachedSemanticsApplied,
-    kCachedSemanticsReapplied,
-  };
-
   void ApplyLocaleToOwnerController();
-  AccessibilityBridgeUpdateResult UpdateAccessibilityBridgeViewController();
-  AccessibilityBridgeUpdateResult UpdateAccessibilityBridgeForViewAttachment();
+  void UpdateAccessibilityBridgeViewController();
   void PostSemanticsUpdateNotification();
 
   /// Smart pointer for use with objective-c observers.

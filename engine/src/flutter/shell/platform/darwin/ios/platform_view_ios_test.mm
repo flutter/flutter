@@ -166,6 +166,87 @@ class MockDelegate : public PlatformView::Delegate {
   [engine stopMocking];
 }
 
+- (void)testSwappingOwnerControllersPreservesAccessibilityElementsInstalledByNewOwner {
+  flutter::MockDelegate first_delegate;
+  flutter::MockDelegate second_delegate;
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  id firstMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id secondMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id firstEngine = OCMClassMock([FlutterEngine class]);
+  id secondEngine = OCMClassMock([FlutterEngine class]);
+  OCMStub([firstEngine binaryMessenger]).andReturn(firstMessenger);
+  OCMStub([secondEngine binaryMessenger]).andReturn(secondMessenger);
+
+  id firstViewController = OCMClassMock([FlutterViewController class]);
+  id secondViewController = OCMClassMock([FlutterViewController class]);
+  UIView* firstView = [[UIView alloc] init];
+  UIView* secondView = [[UIView alloc] init];
+  OCMStub([firstViewController isViewLoaded]).andReturn(YES);
+  OCMStub([firstViewController engine]).andReturn(firstEngine);
+  OCMStub([firstViewController view]).andReturn(firstView);
+  OCMStub([firstViewController viewIfLoaded]).andReturn(firstView);
+  OCMStub([secondViewController isViewLoaded]).andReturn(YES);
+  OCMStub([secondViewController engine]).andReturn(secondEngine);
+  OCMStub([secondViewController view]).andReturn(secondView);
+  OCMStub([secondViewController viewIfLoaded]).andReturn(secondView);
+
+  auto first_platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/first_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  auto second_platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/second_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  first_platform_view->SetOwnerViewController(firstViewController);
+  first_platform_view->SetSemanticsTreeEnabled(true);
+  flutter::AccessibilityBridge* first_bridge = first_platform_view->GetAccessibilityBridge();
+  flutter::SemanticsNode first_root;
+  first_root.id = kRootNodeId;
+  flutter::SemanticsNodeUpdates first_update;
+  first_update[kRootNodeId] = first_root;
+  first_platform_view->UpdateSemantics(/*view_id=*/0, std::move(first_update),
+                                       flutter::CustomAccessibilityActionUpdates());
+
+  second_platform_view->SetOwnerViewController(secondViewController);
+  second_platform_view->SetSemanticsTreeEnabled(true);
+  flutter::AccessibilityBridge* second_bridge = second_platform_view->GetAccessibilityBridge();
+  flutter::SemanticsNode second_root;
+  second_root.id = kRootNodeId;
+  flutter::SemanticsNodeUpdates second_update;
+  second_update[kRootNodeId] = second_root;
+  second_platform_view->UpdateSemantics(/*view_id=*/0, std::move(second_update),
+                                        flutter::CustomAccessibilityActionUpdates());
+
+  first_platform_view->SetOwnerViewController(secondViewController);
+  SemanticsObjectContainer* second_view_root = secondView.accessibilityElements.firstObject;
+  XCTAssertEqual(second_view_root.semanticsObject.bridge.get(), first_bridge);
+
+  second_platform_view->SetOwnerViewController(firstViewController);
+  SemanticsObjectContainer* first_view_root = firstView.accessibilityElements.firstObject;
+  second_view_root = secondView.accessibilityElements.firstObject;
+  XCTAssertEqual(first_view_root.semanticsObject.bridge.get(), second_bridge);
+  XCTAssertEqual(second_view_root.semanticsObject.bridge.get(), first_bridge);
+
+  first_platform_view->SetSemanticsTreeEnabled(false);
+  second_platform_view->SetSemanticsTreeEnabled(false);
+  [firstEngine stopMocking];
+  [secondEngine stopMocking];
+}
+
 - (void)testUpdateSemanticsDoesNotLoadOwnerControllerView {
   flutter::MockDelegate mock_delegate;
   fml::MessageLoop::EnsureInitializedForCurrentThread();

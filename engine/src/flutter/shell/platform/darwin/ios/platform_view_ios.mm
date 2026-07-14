@@ -61,18 +61,16 @@ FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
 void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   std::lock_guard<std::mutex> guard(ios_surface_mutex_);
+  FlutterView* previous_view = static_cast<FlutterView*>(owner_controller_.viewIfLoaded);
   if (ios_surface_ || !owner_controller) {
     NotifyDestroyed();
     ios_surface_.reset();
-    if (accessibility_bridge_) {
-      accessibility_bridge_->SetViewController(nil);
-    }
   }
   owner_controller_ = owner_controller;
   ApplyLocaleToOwnerController();
 
-  // Add an observer that will clear out the owner_controller_ ivar and
-  // the accessibility_bridge_ in case the view controller is deleted.
+  // Add an observer that will clear the owner and detach the accessibility bridge if the view
+  // controller is deleted.
   dealloc_view_controller_observer_.reset([[NSNotificationCenter defaultCenter]
       addObserverForName:FlutterViewControllerWillDealloc
                   object:owner_controller_
@@ -80,15 +78,23 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
               usingBlock:^(NSNotification* note) {
                 // Implicit copy of 'this' is fine.
                 if (accessibility_bridge_) {
+                  FlutterViewController* deallocating_controller =
+                      static_cast<FlutterViewController*>(note.object);
+                  FlutterView* previous_view =
+                      static_cast<FlutterView*>(deallocating_controller.viewIfLoaded);
                   accessibility_bridge_->SetViewController(nil);
+                  accessibility_bridge_->ViewDidChange(previous_view);
                 }
                 owner_controller_ = nil;
               }]);
 
   if (owner_controller_ && owner_controller_.isViewLoaded) {
-    this->attachView();
+    this->attachView(previous_view);
   } else {
     UpdateAccessibilityBridgeViewController();
+    if (accessibility_bridge_) {
+      accessibility_bridge_->ViewDidChange(previous_view);
+    }
   }
   // Do not call `NotifyCreated()` here - let FlutterViewController take care
   // of that when its Viewport is sized.  If `NotifyCreated()` is called here,
@@ -96,7 +102,7 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
   // a framebuffer that will not be able to completely attach.
 }
 
-void PlatformViewIOS::attachView() {
+void PlatformViewIOS::attachView(FlutterView* previous_view) {
   FML_DCHECK(owner_controller_);
   FML_DCHECK(owner_controller_.isViewLoaded) << "FlutterViewController's view should be loaded "
                                                 "before attaching to PlatformViewIOS.";
@@ -105,17 +111,12 @@ void PlatformViewIOS::attachView() {
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
-  AccessibilityBridgeUpdateResult accessibility_bridge_update =
-      UpdateAccessibilityBridgeForViewAttachment();
-  switch (accessibility_bridge_update) {
-    case AccessibilityBridgeUpdateResult::kBridgeReboundAndCachedSemanticsApplied:
-    case AccessibilityBridgeUpdateResult::kCachedSemanticsReapplied:
+  UpdateAccessibilityBridgeViewController();
+  if (accessibility_bridge_) {
+    accessibility_bridge_->ViewDidChange(previous_view);
+    if (accessibility_bridge_->HasSemantics()) {
       PostSemanticsUpdateNotification();
-      break;
-    case AccessibilityBridgeUpdateResult::kNoChange:
-    case AccessibilityBridgeUpdateResult::kBridgeCreated:
-    case AccessibilityBridgeUpdateResult::kBridgeRebound:
-      break;
+    }
   }
 }
 
@@ -262,51 +263,20 @@ void PlatformViewIOS::ApplyLocaleToOwnerController() {
   }
 }
 
-PlatformViewIOS::AccessibilityBridgeUpdateResult
-PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
+void PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
   if (!semantics_tree_enabled_) {
-    return AccessibilityBridgeUpdateResult::kNoChange;
+    return;
   }
   if (accessibility_bridge_) {
-    switch (accessibility_bridge_->SetViewController(owner_controller_)) {
-      case AccessibilityBridge::ViewControllerUpdateResult::kUnchanged:
-        return AccessibilityBridgeUpdateResult::kNoChange;
-      case AccessibilityBridge::ViewControllerUpdateResult::kReboundToViewNotLoaded:
-      case AccessibilityBridge::ViewControllerUpdateResult::kReboundWithoutSemantics:
-        return AccessibilityBridgeUpdateResult::kBridgeRebound;
-      case AccessibilityBridge::ViewControllerUpdateResult::kReboundAndUpdatedAccessibilityElements:
-        return AccessibilityBridgeUpdateResult::kBridgeReboundAndCachedSemanticsApplied;
-    }
-    FML_UNREACHABLE();
+    accessibility_bridge_->SetViewController(owner_controller_);
+    return;
   }
   if (owner_controller_) {
     FlutterPlatformViewsController* platform_views_controller =
         owner_controller_.platformViewsController ?: platform_views_controller_;
     accessibility_bridge_ =
         std::make_unique<AccessibilityBridge>(owner_controller_, this, platform_views_controller);
-    return AccessibilityBridgeUpdateResult::kBridgeCreated;
   }
-  return AccessibilityBridgeUpdateResult::kNoChange;
-}
-
-PlatformViewIOS::AccessibilityBridgeUpdateResult
-PlatformViewIOS::UpdateAccessibilityBridgeForViewAttachment() {
-  AccessibilityBridgeUpdateResult view_controller_update =
-      UpdateAccessibilityBridgeViewController();
-  if (view_controller_update != AccessibilityBridgeUpdateResult::kNoChange) {
-    return view_controller_update;
-  }
-  if (!accessibility_bridge_) {
-    return AccessibilityBridgeUpdateResult::kNoChange;
-  }
-  switch (accessibility_bridge_->ViewDidChange()) {
-    case AccessibilityBridge::ViewUpdateResult::kViewNotLoaded:
-    case AccessibilityBridge::ViewUpdateResult::kNoSemantics:
-      return AccessibilityBridgeUpdateResult::kNoChange;
-    case AccessibilityBridge::ViewUpdateResult::kUpdatedAccessibilityElements:
-      return AccessibilityBridgeUpdateResult::kCachedSemanticsReapplied;
-  }
-  FML_UNREACHABLE();
 }
 
 PlatformViewIOS::ScopedObserver::ScopedObserver() {}
