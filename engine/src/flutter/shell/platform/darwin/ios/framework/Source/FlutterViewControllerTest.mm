@@ -678,23 +678,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertLessThan(capturedInset, 300.0);
 }
 
-- (void)testKeyboardAnimationWillWaitUIThreadVsync {
-  // We need to make sure the new viewport metrics get sent after the
-  // begin frame event has processed. And this test is to expect that the callback
-  // will sync with UI thread. So just simulate a lot of works on UI thread and
-  // test the keyboard animation callback will not execute until UI task completed.
-  // Related issue: https://github.com/flutter/flutter/issues/120555.
-
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+- (void)testKeyboardAnimationCallbackIsDeliveredAsynchronously {
+  // FlutterEnginePartialMock.uiTaskRunner runs on the current (test) message loop, so the vsync
+  // client's display-link registration and invalidation happen deterministically on this thread.
+  FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
                                                                                  bundle:nil];
-  // Post a task to UI thread to block the thread.
-  const int delayTime = 1;
-  [[engine uiTaskRunner] postTask:^{
-    sleep(delayTime);
-  }];
 
   id mockCADisplayLink = OCMClassMock([CADisplayLink class]);
   OCMStub(
@@ -702,21 +693,23 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                   selector:sel_registerName("onDisplayLink:")]));
 
   XCTestExpectation* expectation = [self expectationWithDescription:@"keyboard animation callback"];
-  __block CFTimeInterval fulfillTime = 0;
-  CFTimeInterval startTime = CACurrentMediaTime();
+  __block BOOL callbackExecuted = NO;
   [viewController.keyboardInsetManager
       setUpKeyboardAnimationVsyncClient:^(NSTimeInterval targetTime) {
-        fulfillTime = CACurrentMediaTime();
+        callbackExecuted = YES;
         [expectation fulfill];
       }];
 
   FlutterVSyncClient* client = viewController.keyboardInsetManager.keyboardAnimationVSyncClient;
   [client onDisplayLink:client.displayLink];
 
+  // The callback is dispatched to the main queue, so it must not have run synchronously within
+  // -onDisplayLink:.
+  XCTAssertFalse(callbackExecuted);
+
+  // Spinning the run loop drains the main queue, at which point the callback runs.
   [self waitForExpectationsWithTimeout:5.0 handler:nil];
-  NSTimeInterval epsilon = 0.005;
-  XCTAssertGreaterThanOrEqual(fulfillTime - startTime, delayTime - epsilon);
-  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  XCTAssertTrue(callbackExecuted);
   [mockCADisplayLink stopMocking];
 }
 
