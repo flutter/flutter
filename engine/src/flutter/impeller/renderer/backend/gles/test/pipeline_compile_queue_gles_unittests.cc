@@ -184,11 +184,14 @@ TEST(PipelineCompileQueueGLESTest, DestroyQueueWithPendingTasks) {
     });
 
     // Queue will be destroyed here with pending jobs.
-    // The destructor should block and wait for all jobs to complete.
+    // The destructor should ensure that the pending jobs are either executed
+    // or posted to the queue's thread.
   }
 
-  // All jobs should be completed before the queue is destroyed.
+  // Wait for completion of the jobs.
+  latch.Wait();
   EXPECT_EQ(completed_jobs, 3);
+
   thread.Join();
 }
 
