@@ -1214,9 +1214,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     FocusNode currentNode,
     FocusNode node,
     FocusScopeNode nearestScope,
-    TraversalDirection direction, 
+    TraversalDirection direction,
     _FocusTraversalGroupNode? groupNode,
-    
   ) {
     if (node is FocusScopeNode) {
       if (node.focusedChild != null) {
