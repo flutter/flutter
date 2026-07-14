@@ -302,7 +302,6 @@ Image _backdropBlurWithTileMode(TileMode? tileMode) {
 Future<Image> _backdropShaderWithFilterQuality(FilterQuality filterQuality) async {
   const int width = 16;
   const int height = 4;
-  double heightAsDouble = height.toDouble();
   const double stripeWidth = 1.0;
 
   final FragmentProgram program = await FragmentProgram.fromAsset(
@@ -313,7 +312,7 @@ Future<Image> _backdropShaderWithFilterQuality(FilterQuality filterQuality) asyn
   final Picture stripePicture = _makePicture((Canvas canvas) {
     for (int x = 0; x < width; x++) {
       canvas.drawRect(
-        Rect.fromLTWH(x * stripeWidth, 0, stripeWidth, heightAsDouble),
+        Rect.fromLTWH(x * stripeWidth, 0, stripeWidth, height.toDouble()),
         Paint()..color = x.isEven ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
       );
     }
@@ -321,7 +320,7 @@ Future<Image> _backdropShaderWithFilterQuality(FilterQuality filterQuality) asyn
 
   final Picture transparentPicture = _makePicture((Canvas canvas) {
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, width.toDouble(), heightAsDouble),
+      Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
       Paint()..color = const Color(0x00000000),
     );
   });
