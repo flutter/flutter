@@ -627,7 +627,7 @@ enum CpuArch {
   armv7,
   arm64,
   x86,
-  x86_64,
+  x64,
   riscv64;
 
   factory CpuArch.fromName(String name) {
@@ -636,7 +636,7 @@ enum CpuArch {
       'armv7' => CpuArch.armv7,
       'arm64' => CpuArch.arm64,
       'x86' => CpuArch.x86,
-      'x86_64' => CpuArch.x86_64,
+      'x64' => CpuArch.x64,
       'riscv64' => CpuArch.riscv64,
       _ => throw Exception('Unsupported CPU arch name "$name"'),
     };
@@ -645,7 +645,7 @@ enum CpuArch {
   /// The [CpuArch] of the given [hostPlatform].
   factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
     return switch (hostPlatform) {
-      .darwin_x64 || .linux_x64 || .windows_x64 => CpuArch.x86_64,
+      .darwin_x64 || .linux_x64 || .windows_x64 => CpuArch.x64,
       .darwin_arm64 || .linux_arm64 || .windows_arm64 => CpuArch.arm64,
       .linux_riscv64 => CpuArch.riscv64,
     };

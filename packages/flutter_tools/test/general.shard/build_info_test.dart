@@ -389,7 +389,7 @@ void main() {
     expect(CpuArch.fromName('armv7'), CpuArch.armv7);
     expect(CpuArch.fromName('arm64'), CpuArch.arm64);
     expect(CpuArch.fromName('x86'), CpuArch.x86);
-    expect(CpuArch.fromName('x86_64'), CpuArch.x86_64);
+    expect(CpuArch.fromName('x64'), CpuArch.x64);
     expect(CpuArch.fromName('riscv64'), CpuArch.riscv64);
     expect(() => CpuArch.fromName('bogus'), throwsException);
 
@@ -397,7 +397,7 @@ void main() {
     expect(CpuArch.armv7.name, 'armv7');
     expect(CpuArch.arm64.name, 'arm64');
     expect(CpuArch.x86.name, 'x86');
-    expect(CpuArch.x86_64.name, 'x86_64');
+    expect(CpuArch.x64.name, 'x64');
     expect(CpuArch.riscv64.name, 'riscv64');
   });
 }

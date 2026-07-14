@@ -195,7 +195,7 @@ class AndroidDevice extends Device {
     return switch (await cpuArch) {
       CpuArch.arm64 => TargetPlatform.android_arm64,
       CpuArch.armv7 => TargetPlatform.android_arm,
-      CpuArch.x86_64 => TargetPlatform.android_x64,
+      CpuArch.x64 => TargetPlatform.android_x64,
       CpuArch.x86 || CpuArch.riscv64 || CpuArch.unknown => TargetPlatform.unsupported,
     };
   }();
@@ -219,7 +219,7 @@ class AndroidDevice extends Device {
       case 'armeabi-v7a':
         return CpuArch.armv7;
       case 'x86_64':
-        return CpuArch.x86_64;
+        return CpuArch.x64;
       default:
         return CpuArch.unknown;
     }
@@ -588,10 +588,12 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        devicePlatform,
-        buildInfo: debuggingOptions.buildInfo,
-      ) as AndroidApk?;
+      builtPackage =
+          await ApplicationPackageFactory.instance!.getPackageForPlatform(
+                devicePlatform,
+                buildInfo: debuggingOptions.buildInfo,
+              )
+              as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {

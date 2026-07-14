@@ -783,7 +783,7 @@ class CustomDevice extends Device {
     // Custom devices only support Linux target platforms (see
     // CustomDeviceConfig), so the arch is derived from that.
     return switch (_config.platform) {
-      TargetPlatform.linux_x64 => CpuArch.x86_64,
+      TargetPlatform.linux_x64 => CpuArch.x64,
       _ => CpuArch.arm64,
     };
   }
