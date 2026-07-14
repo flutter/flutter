@@ -423,6 +423,15 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     };
   }
 
+  /// Computes the main-axis offset at which the clip's leading edge should
+  /// start so it reacts to the region overlapped by other slivers (such as a
+  /// pinned header).
+  ///
+  /// [insideClipExtent] is the part of the clip allowed to slide under the
+  /// overlap before its edge moves: the full extent for
+  /// [ClipOverlapBehavior.followEdge], or the straight middle rect for
+  /// [ClipOverlapBehavior.preserveShape]. The result is clamped between the
+  /// already-scrolled content and the current overlap.
   @protected
   double getClipOriginForOverlap(double insideClipExtent) {
     final double effectiveOverlap = math.max(0.0, constraints.overlap);
