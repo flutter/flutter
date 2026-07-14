@@ -77,7 +77,7 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
     super.key,
     required Widget sliver,
     this.clipper,
-    this.clipBehavior = .hardEdge,
+    this.clipBehavior = .antiAlias,
     this.clipOverlap = true,
   }) : super(child: sliver);
 
@@ -278,7 +278,7 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
     properties.add(
       DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null),
     );
-    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.antiAlias));
     properties.add(
       EnumProperty<ClipOverlapBehavior>(
         'clipOverlap',
