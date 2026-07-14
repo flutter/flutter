@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/golden_tests/metal_screenshot.h"
+#include "impeller/testing/metal/metal_screenshot.h"
 
 namespace impeller {
 namespace testing {
