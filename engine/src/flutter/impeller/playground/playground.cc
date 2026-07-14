@@ -187,17 +187,8 @@ bool Playground::EnsureContextSupportsWideGamut() {
   return true;
 }
 
-bool Playground::PlatformSupportsAtialiasLines() const {
-  // This used to only be enabled for Metal and MetalSDF, but all
-  // platforms should support it now.
-  return true;
-}
-
 bool Playground::EnsureContextSupportsAntialiasLines() {
   FML_CHECK(!context_) << "Must be called before a context is created.";
-  if (!PlatformSupportsAtialiasLines()) {
-    return false;
-  }
   switches_.flags.antialiased_lines = true;
   return true;
 }

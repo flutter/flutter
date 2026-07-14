@@ -171,9 +171,6 @@ class Playground {
   /// @see PlatformSupportsWideGamut()
   [[nodiscard]] virtual bool EnsureContextSupportsWideGamut();
 
-  /// @brief Returns true if the platform can support experimental AA lines.
-  bool PlatformSupportsAtialiasLines() const;
-
   /// @brief Make sure that when the context is later created that it
   ///        will support the experimental AA lines flag.
   ///

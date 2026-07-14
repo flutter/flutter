@@ -427,11 +427,14 @@ TEST_P(DlGoldenTest, BaselineHE) {
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
-    RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(10, 300),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                           });
+    if (!RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
+                                DlPoint::MakeXY(10, 300),
+                                TextRenderOptions{
+                                    .font_size = font_size,
+                                })
+             .ok()) {
+      return nullptr;
+    }
     return builder.Build();
   };
 
@@ -452,37 +455,34 @@ TEST_P(DlGoldenTest, BaselineHE) {
 TEST_P(DlGoldenTest, MaintainsSpace) {
   SetWindowSize(impeller::ISize(1024, 200));
   impeller::Scalar font_size = 300;
-  std::optional<DlRect> text_bounds;
-  auto callback = [&](const char* text,
-                      impeller::Scalar scale) -> sk_sp<DisplayList> {
-    DisplayListBuilder builder;
-    DlPaint paint;
-    paint.setColor(DlColor::ARGB(1, 0, 0, 0));
-    builder.DrawPaint(paint);
-    builder.Scale(scale, scale);
-    text_bounds = RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
-                                         DlPoint::MakeXY(10, 300),
-                                         TextRenderOptions{
-                                             .font_size = font_size,
-                                         });
-    return builder.Build();
-  };
 
   int32_t middle = 0;
   std::optional<int32_t> last_space;
   for (int i = 0; i <= 100; ++i) {
     Scalar scale = 0.440 + i / 1000.0;
-    text_bounds.reset();
+    absl::StatusOr<DlRect> text_bounds_or;
+    sk_sp<DisplayList> display_list;
+    {
+      DisplayListBuilder builder;
+      DlPaint paint;
+      paint.setColor(DlColor::ARGB(1, 0, 0, 0));
+      builder.DrawPaint(paint);
+      builder.Scale(scale, scale);
+      text_bounds_or = RenderTextInCanvasSkia(
+          &builder, "ui", "Roboto-Regular.ttf", DlPoint::MakeXY(10, 300),
+          TextRenderOptions{
+              .font_size = font_size,
+          });
+      display_list = builder.Build();
+    }
+    ASSERT_TRUE(text_bounds_or.ok());
+    ASSERT_TRUE(display_list);
     std::unique_ptr<impeller::testing::Screenshot> right =
-        MakeScreenshot(callback("ui", scale));
+        MakeScreenshot(display_list);
     if (!right) {
       GTEST_SKIP() << "making screenshots not supported.";
     }
-    if (text_bounds.has_value()) {
-      middle = std::rint(scale * text_bounds->GetCenter().y);
-    } else {
-      ASSERT_TRUE(text_bounds) << "text rendering did not return bounds";
-    }
+    middle = std::rint(scale * text_bounds_or->GetCenter().y);
 
     std::optional<int32_t> space = CalculateSpaceBetweenUI(right.get(), middle);
     ASSERT_TRUE(space.has_value());
@@ -536,12 +536,13 @@ TEST_P(DlGoldenTest, Subpixel) {
     DlPaint paint;
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
-    RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(offset_x, 180),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                               .is_subpixel = true,
-                           });
+    EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
+                                       DlPoint::MakeXY(offset_x, 180),
+                                       TextRenderOptions{
+                                           .font_size = font_size,
+                                           .is_subpixel = true,
+                                       })
+                    .ok());
     return builder.Build();
   };
 
@@ -576,12 +577,13 @@ TEST_P(DlGoldenTest, SubpixelScaled) {
     DlPaint paint;
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
-    RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(offset_x, 180),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                               .is_subpixel = true,
-                           });
+    EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
+                                       DlPoint::MakeXY(offset_x, 180),
+                                       TextRenderOptions{
+                                           .font_size = font_size,
+                                           .is_subpixel = true,
+                                       })
+                    .ok());
     return builder.Build();
   };
 
@@ -618,12 +620,13 @@ TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Translate(offset_x, 180);
-    RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(0, 0),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                               .is_subpixel = true,
-                           });
+    EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
+                                       DlPoint::MakeXY(0, 0),
+                                       TextRenderOptions{
+                                           .font_size = font_size,
+                                           .is_subpixel = true,
+                                       })
+                    .ok());
     return builder.Build();
   };
 

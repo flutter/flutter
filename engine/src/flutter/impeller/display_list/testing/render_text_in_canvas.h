@@ -11,6 +11,7 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace flutter {
 namespace testing {
@@ -23,7 +24,7 @@ struct TextRenderOptions {
   bool is_subpixel = false;
 };
 
-std::optional<DlRect> RenderTextInCanvasSkia(
+absl::StatusOr<DlRect> RenderTextInCanvasSkia(
     DlCanvas* canvas,
     const std::string& text,
     const std::string_view& font_fixture,

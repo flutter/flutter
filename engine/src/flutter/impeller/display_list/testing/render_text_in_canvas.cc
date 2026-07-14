@@ -11,7 +11,7 @@
 namespace flutter {
 namespace testing {
 
-std::optional<DlRect> RenderTextInCanvasSkia(
+absl::StatusOr<DlRect> RenderTextInCanvasSkia(
     DlCanvas* canvas,
     const std::string& text,
     const std::string_view& font_fixture,
@@ -20,7 +20,7 @@ std::optional<DlRect> RenderTextInCanvasSkia(
   auto c_font_fixture = std::string(font_fixture);
   auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
   if (!mapping) {
-    return {};
+    return absl::NotFoundError("Font fixture not found");
   }
   sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
   SkFont sk_font(font_mgr->makeFromData(mapping), options.font_size);
@@ -29,7 +29,7 @@ std::optional<DlRect> RenderTextInCanvasSkia(
   }
   auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
   if (!blob) {
-    return {};
+    return absl::InvalidArgumentError("String could not be converted to Blob");
   }
 
   auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
