@@ -178,9 +178,6 @@ void main() {
     },
   );
 
-  // Companion to the regression test above (issue #187543): verifies the fix
-  // preserves the existing behavior where, once a target accepts, the drag does
-  // not fall through to a lower overlapping target.
   testWidgets(
     'Drag and drop - an accepting upper DragTarget is not bypassed by a lower overlapping target',
     (WidgetTester tester) async {
