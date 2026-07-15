@@ -269,7 +269,10 @@ final class NmEntry {
     return switch (type) {
       '(__DATA,__objc_data)' || '(__DATA,__data)' =>
         (name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
-            name.startsWith(r'_OBJC_CLASS_$_Flutter')),
+            name.startsWith(r'_OBJC_CLASS_$_Flutter') ||
+            ((name.startsWith(r'_OBJC_METACLASS_$__TtC') ||
+                    name.startsWith(r'_OBJC_CLASS_$__TtC')) &&
+                name.contains('InternalFlutterSwift'))),
       _ => false,
     };
   }
