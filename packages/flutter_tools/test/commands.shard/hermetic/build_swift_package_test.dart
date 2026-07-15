@@ -380,6 +380,7 @@ void main() {
             version: Version(13, 0, 0),
           ),
         ));
+        pluginSwiftDependencies.cocoaPodBinaryTargetNamesToSkip.add('Sentry');
 
         // Plugin B represents a CocoaPod plugin
         final pluginB = FakePlugin(
@@ -390,6 +391,7 @@ void main() {
         fs
             .directory('$debugCocoaPodsDirectoryPath/PluginB.xcframework')
             .createSync(recursive: true);
+        fs.directory('$debugCocoaPodsDirectoryPath/Sentry.xcframework').createSync(recursive: true);
 
         // Plugin C represents a Native Asset
         fs
@@ -1599,7 +1601,7 @@ let package = Package(
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: true),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -2061,12 +2063,17 @@ let package = Package(
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
 
         final (
           List<SwiftPackageTargetDependency> targetDependencies,
           List<SwiftPackageTarget> packageTargets,
         ) = cocoapodDependencies.generateDependencies(
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
+          pluginSwiftDependencies: pluginSwiftDependencies,
         );
         expect(targetDependencies.length, 1);
         expect(packageTargets.length, 1);
@@ -2076,6 +2083,57 @@ let package = Package(
             name: "cocoapod_plugin",
             path: "Frameworks/CocoaPods/cocoapod_plugin.xcframework"
         )''');
+        expect(processManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('generateDependencies skips SwiftPM product dependencies', () {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        fs.directory('$debugCocoaPodsDirectoryPath/Sentry.xcframework').createSync(recursive: true);
+        fs
+            .directory('$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework')
+            .createSync(recursive: true);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final processManager = FakeProcessManager.list([]);
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: true),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        pluginSwiftDependencies.cocoaPodBinaryTargetNamesToSkip.add('Sentry');
+
+        final (
+          List<SwiftPackageTargetDependency> targetDependencies,
+          List<SwiftPackageTarget> packageTargets,
+        ) = cocoapodDependencies.generateDependencies(
+          xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
+          pluginSwiftDependencies: pluginSwiftDependencies,
+        );
+
+        expect(targetDependencies.length, 1);
+        expect(packageTargets.length, 1);
+        expect(targetDependencies[0].format(), contains('.target(name: "cocoapod_plugin")'));
+        expect(packageTargets[0].format(), contains('cocoapod_plugin.xcframework'));
+        expect(targetDependencies[0].format(), isNot(contains('Sentry')));
+        expect(packageTargets[0].format(), isNot(contains('Sentry')));
         expect(processManager, hasNoRemainingExpectations);
       });
     });
@@ -2194,6 +2252,108 @@ let package = Package(
             .childDirectory('PluginA')
             .childFile('Package.swift');
         expect(cachedManifest.existsSync(), isTrue);
+      });
+
+      testWithoutContext('processPlugins tracks Swift package product dependencies', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const FlutterDarwinPlatform targetPlatform = .ios;
+
+        final plugin = FakePlugin(name: 'sentry_flutter', darwinPlatform: targetPlatform);
+
+        final Directory appDirectory = fs.directory('/path/to/my_flutter_app')
+          ..createSync(recursive: true);
+        fs.currentDirectory = appDirectory;
+
+        fs.file(commandFilePath).createSync(recursive: true);
+        fs
+            .directory(plugin.path)
+            .childDirectory('ios')
+            .childDirectory(plugin.name)
+            .childFile('Package.swift')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_pluginManifest(pluginName: plugin.name));
+
+        final processManager = FakeProcessManager.list([
+          const FakeCommand(
+            command: ['swift', 'package', 'dump-package'],
+            stdout: '''
+{
+  "platforms": [
+    {
+      "platformName": "ios",
+      "version": "15.0"
+    }
+  ],
+  "targets": [
+    {
+      "dependencies": [
+        {
+          "product": [
+            "Sentry",
+            "sentry-cocoa",
+            null,
+            null
+          ]
+        }
+      ],
+      "name": "sentry_flutter",
+      "type": "regular"
+    }
+  ],
+  "dependencies": [
+    {
+      "fileSystem": [
+        {
+          "identity": "flutterframework"
+        }
+      ]
+    }
+  ]
+}
+''',
+          ),
+        ]);
+
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(
+            '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
+          ),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, '/path/to/flutter'),
+          fileSystem: fs,
+          flutterRoot: '/path/to/flutter',
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: appDirectory),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+
+        final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        final Directory cacheDir = fs.directory('output/.cache')..createSync(recursive: true);
+        final Directory pluginsDir = appDirectory.childDirectory(
+          'output/FlutterPluginRegistrant/Plugins',
+        )..createSync(recursive: true);
+
+        await pluginSwiftDependencies.processPlugins(
+          cacheDirectory: cacheDir,
+          plugins: [plugin],
+          pluginsDirectory: pluginsDir,
+        );
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(
+          pluginSwiftDependencies.cocoaPodBinaryTargetNamesToSkip,
+          containsAll(<String>['sentry_flutter', 'Sentry']),
+        );
       });
 
       testWithoutContext('generateDependencies', () async {
@@ -3203,12 +3363,17 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
 
         final (
           List<SwiftPackageTargetDependency> targetDependencies,
           List<SwiftPackageTarget> packageTargets,
         ) = cocoapodDependencies.generateDependencies(
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
+          pluginSwiftDependencies: pluginSwiftDependencies,
         );
         expect(targetDependencies.length, 1);
         expect(packageTargets.length, 1);

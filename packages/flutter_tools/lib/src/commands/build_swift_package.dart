@@ -526,6 +526,7 @@ class FlutterPluginRegistrantSwiftPackage {
       List<SwiftPackageTarget> cocoaPodTargets,
     ) = cocoapodDependencies.generateDependencies(
       xcframeworkOutput: xcframeworkOutput,
+      pluginSwiftDependencies: pluginSwiftDependencies,
     );
 
     final targetDependencies = <SwiftPackageTargetDependency>[
@@ -754,6 +755,11 @@ class FlutterPluginSwiftDependencies {
   >
   copiedPlugins = [];
 
+  @visibleForTesting
+  /// Binary target names that should not be added from CocoaPods output because they are already
+  /// provided by Swift Package dependencies of copied plugins.
+  final Set<String> cocoaPodBinaryTargetNamesToSkip = <String>{};
+
   /// Copy plugins from pubcache to [pluginsDirectory] and sets [highestSupportedVersion] to later
   /// be used when creating the FlutterPluginRegistrant.
   Future<void> processPlugins({
@@ -783,12 +789,16 @@ class FlutterPluginSwiftDependencies {
           String name,
           String swiftPackagePath,
           SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+          Set<String> cocoaPodBinaryTargetNamesToSkip,
           bool restoredFromCache,
         })
         result = await _processPlugin(plugin, pluginsDirectory, cacheDirectory);
         if (!result.restoredFromCache) {
           skipped = false;
         }
+        cocoaPodBinaryTargetNamesToSkip
+          ..add(result.name)
+          ..addAll(result.cocoaPodBinaryTargetNamesToSkip);
         copiedPlugins.add((
           name: result.name,
           swiftPackagePath: result.swiftPackagePath,
@@ -814,6 +824,7 @@ class FlutterPluginSwiftDependencies {
       String name,
       String swiftPackagePath,
       SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+      Set<String> cocoaPodBinaryTargetNamesToSkip,
       bool restoredFromCache,
     })
   >
@@ -826,11 +837,15 @@ class FlutterPluginSwiftDependencies {
         .childDirectory(plugin.name);
     final File cachedManifest = pluginCache.childFile('Package.swift');
     final File cachedVersionFile = pluginCache.childFile('${_targetPlatform.name}.version');
+    final File cachedCocoaPodBinaryTargetNamesToSkip = pluginCache.childFile(
+      '${_targetPlatform.name}.cocoapods_binary_targets_to_skip',
+    );
 
     final ({
       String name,
       String swiftPackagePath,
       SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+      Set<String> cocoaPodBinaryTargetNamesToSkip,
     })?
     cached = await _restoreFromCache(
       pluginCache: pluginCache,
@@ -839,12 +854,14 @@ class FlutterPluginSwiftDependencies {
       plugin: plugin,
       cachedManifest: cachedManifest,
       cachedVersionFile: cachedVersionFile,
+      cachedCocoaPodBinaryTargetNamesToSkip: cachedCocoaPodBinaryTargetNamesToSkip,
     );
     if (cached != null) {
       return (
         name: cached.name,
         swiftPackagePath: cached.swiftPackagePath,
         packageMinimumSupportedPlatform: cached.packageMinimumSupportedPlatform,
+        cocoaPodBinaryTargetNamesToSkip: cached.cocoaPodBinaryTargetNamesToSkip,
         restoredFromCache: true,
       );
     }
@@ -852,6 +869,9 @@ class FlutterPluginSwiftDependencies {
     final Map<String, Object?> manifestAsJson = await _parseSwiftPackage(manifest);
     final SwiftPackageSupportedPlatform? parsedPlatformVersion =
         _parseSwiftPackageSupportedPlatform(manifestAsJson);
+    final Set<String> cocoaPodBinaryTargetNamesToSkip = _getTargetProductDependencyNames(
+      manifestAsJson,
+    );
     final bool flutterDependencyFound = _hasFlutterDependency(manifestAsJson);
     if (!flutterDependencyFound) {
       final List<String> targetNames = _getTargetNames(manifestAsJson);
@@ -869,12 +889,15 @@ class FlutterPluginSwiftDependencies {
       manifest: manifest,
       cachedManifest: cachedManifest,
       cachedVersionFile: cachedVersionFile,
+      cachedCocoaPodBinaryTargetNamesToSkip: cachedCocoaPodBinaryTargetNamesToSkip,
       parsedPlatformVersion: parsedPlatformVersion,
+      cocoaPodBinaryTargetNamesToSkip: cocoaPodBinaryTargetNamesToSkip,
     );
     return (
       name: plugin.name,
       swiftPackagePath: swiftPackagePath,
       packageMinimumSupportedPlatform: parsedPlatformVersion,
+      cocoaPodBinaryTargetNamesToSkip: cocoaPodBinaryTargetNamesToSkip,
       restoredFromCache: false,
     );
   }
@@ -917,6 +940,7 @@ class FlutterPluginSwiftDependencies {
       String name,
       String swiftPackagePath,
       SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+      Set<String> cocoaPodBinaryTargetNamesToSkip,
     })?
   >
   _restoreFromCache({
@@ -926,6 +950,7 @@ class FlutterPluginSwiftDependencies {
     required Plugin plugin,
     required File cachedManifest,
     required File cachedVersionFile,
+    required File cachedCocoaPodBinaryTargetNamesToSkip,
   }) async {
     final fingerprinter = Fingerprinter(
       fileSystem: _utils.fileSystem,
@@ -947,7 +972,8 @@ class FlutterPluginSwiftDependencies {
 
     if (fingerprinter.doesFingerprintMatch() &&
         cachedManifest.existsSync() &&
-        cachedVersionFile.existsSync()) {
+        cachedVersionFile.existsSync() &&
+        cachedCocoaPodBinaryTargetNamesToSkip.existsSync()) {
       cachedManifest.copySync(manifest.path);
 
       SwiftPackageSupportedPlatform? parsedPlatform;
@@ -963,6 +989,10 @@ class FlutterPluginSwiftDependencies {
         name: plugin.name,
         swiftPackagePath: swiftPackagePath,
         packageMinimumSupportedPlatform: parsedPlatform,
+        cocoaPodBinaryTargetNamesToSkip: cachedCocoaPodBinaryTargetNamesToSkip
+            .readAsLinesSync()
+            .where((String name) => name.isNotEmpty)
+            .toSet(),
       );
     }
 
@@ -975,12 +1005,17 @@ class FlutterPluginSwiftDependencies {
     required File cachedManifest,
     required File manifest,
     required File cachedVersionFile,
+    required File cachedCocoaPodBinaryTargetNamesToSkip,
     required String basename,
     required SwiftPackageSupportedPlatform? parsedPlatformVersion,
+    required Set<String> cocoaPodBinaryTargetNamesToSkip,
   }) {
     // Append the basename to the manifest to force Xcode to re-cache the package when the version changes.
     cachedManifest.writeAsStringSync('${manifest.readAsStringSync()}\n\n// $basename');
     cachedVersionFile.writeAsStringSync(parsedPlatformVersion?.version.toString() ?? '');
+    cachedCocoaPodBinaryTargetNamesToSkip.writeAsStringSync(
+      (cocoaPodBinaryTargetNamesToSkip.toList()..sort()).join('\n'),
+    );
   }
 
   /// Determine the highest [SwiftPackageSupportedPlatform] from the list of plugins.
@@ -1071,6 +1106,27 @@ class FlutterPluginSwiftDependencies {
       }
     }
     return targetNames;
+  }
+
+  /// Parses the Swift package manifest to extract product dependency names used by regular targets.
+  Set<String> _getTargetProductDependencyNames(Map<String, Object?> manifestAsJson) {
+    final targetProductDependencyNames = <String>{};
+    if (manifestAsJson case {'targets': final List<Object?> targetData}) {
+      for (final Map<String, Object?> target in targetData.whereType<Map<String, Object?>>()) {
+        if (target case {'type': 'regular', 'dependencies': final List<Object?> dependenciesData}) {
+          for (final Map<String, Object?> dependency
+              in dependenciesData.whereType<Map<String, Object?>>()) {
+            if (dependency case {'product': final List<Object?> productData}) {
+              final Object? productName = productData.isEmpty ? null : productData.first;
+              if (productName is String) {
+                targetProductDependencyNames.add(productName);
+              }
+            }
+          }
+        }
+      }
+    }
+    return targetProductDependencyNames;
   }
 
   /// Injects the Flutter framework as a dependency into the Swift package using `swift` commands.
@@ -1816,11 +1872,13 @@ class CocoaPodPluginDependencies {
   /// ```
   (List<SwiftPackageTargetDependency>, List<SwiftPackageTarget>) generateDependencies({
     required Directory xcframeworkOutput,
+    required FlutterPluginSwiftDependencies pluginSwiftDependencies,
   }) {
     return generateDependenciesFromDirectory(
       fileSystem: _utils.fileSystem,
       directoryName: _kCocoaPods,
       xcframeworkDirectory: xcframeworkOutput.childDirectory(_kCocoaPods),
+      excludedNames: pluginSwiftDependencies.cocoaPodBinaryTargetNamesToSkip,
     );
   }
 }
@@ -2135,6 +2193,7 @@ Future<void> _produceXCFramework({
   required Directory xcframeworkDirectory,
   required FileSystem fileSystem,
   required String directoryName,
+  Set<String> excludedNames = const <String>{},
 }) {
   final targetDependencies = <SwiftPackageTargetDependency>[];
   final binaryTargets = <SwiftPackageTarget>[];
@@ -2143,6 +2202,9 @@ Future<void> _produceXCFramework({
     for (final FileSystemEntity entity in xcframeworkDirectory.listSync()) {
       if (entity is Directory && entity.basename.endsWith('xcframework')) {
         final String frameworkName = fileSystem.path.basenameWithoutExtension(entity.path);
+        if (excludedNames.contains(frameworkName)) {
+          continue;
+        }
         targetDependencies.add(SwiftPackageTargetDependency.target(name: frameworkName));
         binaryTargets.add(
           SwiftPackageTarget.binaryTarget(
