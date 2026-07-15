@@ -5,12 +5,12 @@
 import UIKit
 
 @objc public enum FlutterKeyboardMode: Int {
-  case hidden = 0
-  case docked = 1
-  case floating = 2
+  case hidden
+  case docked
+  case floating
 }
 
-public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
+public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> Void
 
 /// @brief Coordinates the animation of the bottom viewport inset in response to system keyboard
 /// visibility changes.
@@ -176,7 +176,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
     // only occurs when Minimized/Expanded Shortcuts Bar is dropped after dragging, which we later
     // use to categorize it as floating.
     if notification.name == UIResponder.keyboardWillChangeFrameNotification
-      && keyboardFrame.equalTo(.zero)
+      && keyboardFrame == .zero
     {
       return true
     }
@@ -188,13 +188,13 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
     }
 
     // Ignore keyboard notifications related to other apps or view controllers.
-    if isKeyboardNotification(forDifferentView: notification) {
+    if isKeyboardNotificationForDifferentView(notification) {
       return true
     }
     return false
   }
 
-  @objc public func isKeyboardNotification(forDifferentView notification: Notification) -> Bool {
+  @objc public func isKeyboardNotificationForDifferentView(_ notification: Notification) -> Bool {
     let info = notification.userInfo
     // Keyboard notifications related to other apps (e.g. in split view mode on iPad).
     // If the UIKeyboardIsLocalUserInfoKey key doesn't exist (this should not happen after iOS 8),
@@ -202,7 +202,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
     if let isLocal = info?[UIResponder.keyboardIsLocalUserInfoKey] as? Bool, !isLocal {
       return true
     }
-    guard let delegate = delegate else { return false }
+    guard let delegate else { return false }
     return delegate.engine()?.viewController !== (delegate as AnyObject)
   }
 
@@ -219,7 +219,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
     //
     // Floating includes undocked, split, floating, expanded shortcuts bar (when dragged and
     // dropped), and minimized shortcuts bar (when dragged and dropped).
-    guard let delegate = delegate else { return .hidden }
+    guard let delegate else { return .hidden }
 
     if notification.name == UIResponder.keyboardWillHideNotification {
       return .hidden
@@ -231,7 +231,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
 
     // If keyboard's dimensions and position are all zeroes, that means it's a Minimized/Expanded
     // Shortcuts Bar that has been dropped after dragging, which we categorize as floating.
-    if keyboardFrame.equalTo(.zero) {
+    if keyboardFrame == .zero {
       return .floating
     }
 
@@ -271,7 +271,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
   @objc public func calculateMultitaskingAdjustment(_ screenRect: CGRect, keyboardFrame: CGRect)
     -> CGFloat
   {
-    guard let delegate = delegate else { return 0 }
+    guard let delegate else { return 0 }
     if !delegate.isViewLoaded() {
       return 0
     }
@@ -305,7 +305,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
       return 0
     }
 
-    guard let delegate = delegate, delegate.isViewLoaded() else { return 0 }
+    guard let delegate, delegate.isViewLoaded() else { return 0 }
     let viewRectRelativeToScreen = delegate.convertViewRect(toScreen: delegate.view().bounds)
     let intersection = keyboardFrame.intersection(viewRectRelativeToScreen)
     let portionOfKeyboardInView = intersection.height
@@ -318,7 +318,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
   }
 
   @objc public func startKeyBoardAnimation(_ duration: TimeInterval) {
-    guard let delegate = delegate, delegate.isViewLoaded() else { return }
+    guard let delegate, delegate.isViewLoaded() else { return }
     let view = delegate.view()
 
     // When this method is called for the first time, initialize the keyboardAnimationView to get
@@ -381,7 +381,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
   }
 
   @objc public func handleKeyboardAnimationCallback(withTargetTime targetTime: CFTimeInterval) {
-    guard let delegate = delegate else { return }
+    guard let delegate else { return }
     if !delegate.isViewLoaded() { return }
 
     // Bail out if the view for tracking keyboard animation is nil.
@@ -460,7 +460,7 @@ public typealias FlutterKeyboardAnimationCallback = (CFTimeInterval) -> Void
       keyboardAnimationVSyncClient == nil,
       "keyboardAnimationVSyncClient must be nil when setting up.")
 
-    guard let delegate = delegate, let taskRunner = delegate.uiTaskRunner() else { return }
+    guard let delegate, let taskRunner = delegate.uiTaskRunner() else { return }
 
     // Make sure the new viewport metrics get sent after the begin frame event has processed.
     let vsyncCallback: (CFTimeInterval, CFTimeInterval) -> Void = { startTime, targetTime in
