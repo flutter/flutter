@@ -22,6 +22,8 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import java.io.File
 import java.io.IOException
 import java.nio.charset.StandardCharsets
@@ -42,6 +44,18 @@ object FlutterPluginUtils {
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
+    internal const val PROP_SDK_MANAGER_PATH = "flutter.sdkManagerPath"
+    internal const val PROP_ANDROID_SDK_ROOT = "flutter.androidSdkRoot"
+    internal const val PROP_INSTALLED_NDK_VERSIONS = "flutter.installedNdkVersions"
+    internal const val TASK_PRINT_NDK_VERSION = "printNdkVersion"
+    internal const val NDK_VERSION_OUTPUT_PREFIX = "NdkVersion: "
+
+    private data class ToolNdkProvisioningProperties(
+        val androidSdkRoot: String,
+        val installedNdkVersions: Set<String>,
+        val sdkManagerPath: String?
+    )
+
     internal const val PROP_FORCE_VERSION_CODE_IGNORING_ABI = "force-version-code-ignoring-abi"
 
     /**
@@ -514,6 +528,10 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
+    internal fun getConfiguredNdkVersion(project: Project): String? =
+        project.extensions.findByType(ApplicationExtension::class.java)?.ndkVersion
+            ?: getLegacyAndroidExtension(project).ndkVersion
+
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
      * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
@@ -771,6 +789,10 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
+        if (isFlutterAppProject(gradleProject) && isInvokingMetadataNdkVersionTask(gradleProject)) {
+            return
+        }
+
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
@@ -780,7 +802,126 @@ object FlutterPluginUtils {
             return
         }
 
-        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
+        val toolNdkProvisioningProperties = getToolNdkProvisioningProperties(gradleProject)
+        if (toolNdkProvisioningProperties != null) {
+            val androidComponents =
+                gradleProject.extensions.findByType(AndroidComponentsExtension::class.java)
+            if (androidComponents == null) {
+                configureSyntheticExternalNativeBuildFallback(
+                    gradleProject = gradleProject,
+                    flutterSdkRootPath = flutterSdkRootPath
+                )
+                return
+            }
+
+            androidComponents.finalizeDsl { _ ->
+                if (gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null) {
+                    return@finalizeDsl
+                }
+
+                val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+                if (
+                    !configuredNdkVersion.isNullOrBlank() &&
+                    toolNdkProvisioningProperties.installedNdkVersions.contains(
+                        configuredNdkVersion
+                    )
+                ) {
+                    return@finalizeDsl
+                }
+                if (
+                    toolNdkProvisioningProperties.sdkManagerPath == null ||
+                    gradleProject.gradle.startParameter.isOffline
+                ) {
+                    configureSyntheticExternalNativeBuildFallback(
+                        gradleProject = gradleProject,
+                        flutterSdkRootPath = flutterSdkRootPath
+                    )
+                    return@finalizeDsl
+                }
+                val handledByToolProvisioning =
+                    maybeHandleToolNdkProvisioning(
+                        gradleProject = gradleProject,
+                        toolNdkProvisioningProperties = toolNdkProvisioningProperties
+                    )
+                if (!handledByToolProvisioning) {
+                    configureSyntheticExternalNativeBuildFallback(
+                        gradleProject = gradleProject,
+                        flutterSdkRootPath = flutterSdkRootPath
+                    )
+                }
+            }
+            return
+        }
+
+        configureSyntheticExternalNativeBuildFallback(
+            gradleProject = gradleProject,
+            flutterSdkRootPath = flutterSdkRootPath
+        )
+    }
+
+    private fun getToolNdkProvisioningProperties(project: Project): ToolNdkProvisioningProperties? {
+        val androidSdkRoot = project.findProperty(PROP_ANDROID_SDK_ROOT)?.toString() ?: return null
+        val installedNdkVersions =
+            project
+                .findProperty(PROP_INSTALLED_NDK_VERSIONS)
+                ?.toString()
+                ?.split(",")
+                ?.map(String::trim)
+                ?.filter(String::isNotEmpty)
+                ?.toSet() ?: return null
+        val sdkManagerPath = project.findProperty(PROP_SDK_MANAGER_PATH)?.toString()
+        return ToolNdkProvisioningProperties(
+            androidSdkRoot = androidSdkRoot,
+            installedNdkVersions = installedNdkVersions,
+            sdkManagerPath = sdkManagerPath
+        )
+    }
+
+    private fun maybeHandleToolNdkProvisioning(
+        gradleProject: Project,
+        toolNdkProvisioningProperties: ToolNdkProvisioningProperties
+    ): Boolean {
+        val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+        if (configuredNdkVersion.isNullOrBlank()) {
+            return false
+        }
+
+        if (toolNdkProvisioningProperties.installedNdkVersions.contains(configuredNdkVersion)) {
+            return true
+        }
+
+        val sdkManagerPath = toolNdkProvisioningProperties.sdkManagerPath ?: return false
+        val execOps = gradleProject.serviceOf<ExecOperations>()
+        execOps
+            .exec {
+                commandLine(
+                    listOf(
+                        sdkManagerPath,
+                        "--sdk_root=${toolNdkProvisioningProperties.androidSdkRoot}",
+                        "--install",
+                        "ndk;$configuredNdkVersion"
+                    )
+                )
+            }.assertNormalExitValue()
+
+        val installedNdkMarker =
+            File(
+                toolNdkProvisioningProperties.androidSdkRoot,
+                "ndk/$configuredNdkVersion/source.properties"
+            )
+        if (!installedNdkMarker.exists()) {
+            throw GradleException(
+                "Android sdkmanager did not install NDK $configuredNdkVersion into ${toolNdkProvisioningProperties.androidSdkRoot}."
+            )
+        }
+        return true
+    }
+
+    private fun configureSyntheticExternalNativeBuildFallback(
+        gradleProject: Project,
+        flutterSdkRootPath: String
+    ) {
+        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
             "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
         )
@@ -813,6 +954,13 @@ object FlutterPluginUtils {
             )
         }
     }
+
+    @JvmStatic
+    @JvmName("isInvokingMetadataNdkVersionTask")
+    internal fun isInvokingMetadataNdkVersionTask(project: Project): Boolean =
+        project.gradle.startParameter.taskNames.any { taskName ->
+            taskName == TASK_PRINT_NDK_VERSION || taskName.endsWith(":$TASK_PRINT_NDK_VERSION")
+        }
 
     @JvmStatic
     @JvmName("isFlutterAppProject")
@@ -937,6 +1085,27 @@ object FlutterPluginUtils {
         project.tasks.register("printBuildVariants", PrintTask::class.java) {
             description = "Prints out all build variants for this Android project"
             message.set(variantsList.map { list -> list.joinToString("\n") { name -> "BuildVariant: $name" } })
+        }
+    }
+
+    // Add a task that can be called on Flutter projects that prints the effective ndkVersion
+    // configured for the Android app.
+    //
+    // This task prints the version in this format:
+    //
+    // NdkVersion: 28.2.13676358
+    //
+    // Format of the output of this task is kept for diagnostics and targeted testing.
+    @JvmStatic
+    @JvmName("addTaskForPrintNdkVersion")
+    internal fun addTaskForPrintNdkVersion(project: Project) {
+        project.tasks.register(TASK_PRINT_NDK_VERSION, PrintTask::class.java) {
+            description = "Prints out the configured ndkVersion for this Android project"
+            message.set(
+                project.provider {
+                    "$NDK_VERSION_OUTPUT_PREFIX${getConfiguredNdkVersion(project)}"
+                }
+            )
         }
     }
 

@@ -23,7 +23,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
@@ -2316,6 +2315,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (CGFloat)physicalViewInsetBottom {
   return _viewportMetrics.physical_view_inset_bottom;
+}
+
+- (FlutterFMLTaskRunner*)uiTaskRunner {
+  return self.engine.uiTaskRunner;
 }
 
 - (BOOL)isPadInSlideOverOrStageManagerMode {
