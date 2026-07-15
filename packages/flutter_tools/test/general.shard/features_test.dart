@@ -406,7 +406,7 @@ void main() {
         swiftPackageManager,
         allOf(<Matcher>[
           _onChannelIs('master', available: true, enabledByDefault: true),
-          _onChannelIs('stable', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: true, enabledByDefault: true),
           _onChannelIs('beta', available: true, enabledByDefault: true),
         ]),
       );
@@ -420,6 +420,29 @@ void main() {
     test('forwards to isEnabled', () {
       final checkFlags = _TestIsGetterForwarding(shouldInvoke: swiftPackageManager);
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
+    });
+  });
+
+  group('macosArm64Only', () {
+    test('is available on all channels, disabled by default', () {
+      expect(
+        macOSArm64Only,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: true, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(macOSArm64Only.configSetting, 'enable-macos-arm64-only');
+      expect(macOSArm64Only.environmentOverride, 'FLUTTER_MACOS_ARM64_ONLY');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: macOSArm64Only);
+      expect(checkFlags.isMacOSArm64OnlyEnabled, isTrue);
     });
   });
 }

@@ -29,6 +29,18 @@ enum class FlutterUIThreadPolicy {
   RunOnSeparateThread,
 };
 
+enum class FlutterAccessibilityMode {
+  Default,
+  IAccessible,
+  IAccessibleEx,
+};
+
+enum class FlutterImpellerSwitch {
+  Default,
+  Enabled,
+  Disabled,
+};
+
 // The data associated with a Flutter project needed to run it in an engine.
 class FlutterProjectBundle {
  public:
@@ -77,6 +89,14 @@ class FlutterProjectBundle {
   // Returns thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy() { return ui_thread_policy_; }
 
+  // Returns the accessibility mode.
+  FlutterAccessibilityMode accessibility_mode() const {
+    return accessibility_mode_;
+  }
+
+  // Returns the Impeller enablement switch.
+  FlutterImpellerSwitch impeller_switch() const { return impeller_switch_; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -98,6 +118,12 @@ class FlutterProjectBundle {
 
   // Thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy_;
+
+  // The current accessibility mode.
+  FlutterAccessibilityMode accessibility_mode_;
+
+  // The Impeller enablement switch.
+  FlutterImpellerSwitch impeller_switch_ = FlutterImpellerSwitch::Default;
 };
 
 }  // namespace flutter

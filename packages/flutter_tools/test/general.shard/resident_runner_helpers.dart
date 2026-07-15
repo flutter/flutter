@@ -90,6 +90,21 @@ final fakeVM = vm_service.VM(
 
 final fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
 
+/// Returns a [FakeVmServiceRequest] for the 'getVM' method with the provided
+/// [isolates].
+FakeVmServiceRequest getVm([List<vm_service.Isolate>? isolates]) {
+  // TODO(dantup): Remove this if vm_service is updated to convert nulls back
+  //  to empty lists.
+  //  See https://github.com/flutter/flutter/pull/185274#discussion_r3116379311
+  isolates ??= [];
+  return FakeVmServiceRequest(
+    method: 'getVM',
+    jsonResponse: vm_service.VM.parse(<String, Object>{
+      'isolates': isolates.map((isolate) => isolate.toJson()).toList(),
+    })!.toJson(),
+  );
+}
+
 final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
@@ -110,6 +125,11 @@ const evict = FakeVmServiceRequest(
 const evictShader = FakeVmServiceRequest(
   method: 'ext.ui.window.reinitializeShader',
   args: <String, Object>{'assetKey': 'foo.frag', 'isolateId': '1'},
+);
+
+const reinitializeShaderLibrary = FakeVmServiceRequest(
+  method: 'ext.ui.gpu.reinitializeShaderLibrary',
+  args: <String, Object>{'assetKey': 'foo.shaderbundle', 'isolateId': '1'},
 );
 
 final Uri testUri = Uri.parse('foo://bar');
@@ -133,7 +153,7 @@ class FakeDartDevelopmentService extends Fake
   Future<void> handleHotRestart(FlutterDevice? device) async {}
 
   @override
-  void shutdown() {}
+  Future<void> shutdown() async {}
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
@@ -214,9 +234,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Device? device;
-
-  @override
-  ApplicationPackage? package;
 
   @override
   Future<void> stopEchoingDeviceLog() async {}
@@ -369,7 +386,6 @@ class FakeDevice extends Fake implements Device {
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
     this.supportsFlutterExit = true,
-    this.name = 'FakeDevice',
   }) : _isLocalEmulator = isLocalEmulator,
        _targetPlatform = targetPlatform,
        _sdkNameAndVersion = sdkNameAndVersion;
@@ -377,9 +393,6 @@ class FakeDevice extends Fake implements Device {
   final bool _isLocalEmulator;
   final TargetPlatform _targetPlatform;
   final String _sdkNameAndVersion;
-
-  @override
-  String id = 'test-device-id';
 
   bool disposed = false;
   bool appStopped = false;
@@ -408,7 +421,7 @@ class FakeDevice extends Fake implements Device {
   Future<bool> get isLocalEmulator async => _isLocalEmulator;
 
   @override
-  String name;
+  String get name => 'FakeDevice';
 
   @override
   String get displayName => name;
@@ -519,4 +532,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

@@ -88,7 +88,7 @@ Future<T?> showRawDialog<T>({
           parentController: WindowScope.maybeOf(context),
           context: context,
           settings: routeSettings,
-          preferredSize: fullscreenDialog ? parentSize : null,
+          size: fullscreenDialog ? parentSize : null,
         ),
       );
     } on UnsupportedError catch (error, stacktrace) {
@@ -132,14 +132,20 @@ class _DialogWindowRoute<T> extends Route<T> {
     required this.parentController,
     required BuildContext context,
     super.settings,
-    Size? preferredSize,
+    Size? size,
   }) : _registry = WindowRegistry.maybeOf(context) {
-    _controller = DialogWindowController(
-      parent: parentController,
-      title: 'Dialog',
-      delegate: _DialogWindowDelegate(this),
-      preferredSize: preferredSize,
-    );
+    _controller = size != null
+        ? DialogWindowController(
+            parent: parentController,
+            title: 'Dialog',
+            delegate: _DialogWindowDelegate(this),
+            size: size,
+          )
+        : DialogWindowController.sizedToContent(
+            parent: parentController,
+            title: 'Dialog',
+            delegate: _DialogWindowDelegate(this),
+          );
   }
 
   final WidgetBuilder builder;

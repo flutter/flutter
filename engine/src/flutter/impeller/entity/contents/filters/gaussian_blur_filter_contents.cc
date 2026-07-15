@@ -207,38 +207,6 @@ Scalar FloorToDivisible(Scalar val, Scalar divisor) {
   }
 }
 
-// If `y_coord_scale` < 0.0, the Y coordinate is flipped. This is useful
-// for Impeller graphics backends that use a flipped framebuffer coordinate
-// space.
-//
-// Both input and output quads are expected to be in the order of [Top-Left,
-// Top-Right, Bottom-Left, Bottom-Right], a "Z-order" layout that conforms to
-// the return format of Rect::GetPoints().
-//
-// See also: IPRemapCoords in convergions.glsl.
-Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
-  if (texture_sampler_y_coord_scale < 0.0f) {
-    // The 4 points need reordering, because vertically flipping the quad:
-    //
-    //   0 → 1
-    //     ↙
-    //   2 → 3
-    //
-    // should be flipped to:
-    //
-    //   2 → 3
-    //     ↙
-    //   0 → 1
-    auto remap_point = [&](const Point& p) -> Point {
-      return Point(p.x, 1.0f - p.y);
-    };
-    return Quad{remap_point(input[2]), remap_point(input[3]),
-                remap_point(input[0]), remap_point(input[1])};
-  } else {
-    return input;
-  }
-}
-
 // Precomputes the line equation parameters for a quadrilateral's bounds.
 //
 // This function takes an array of 4 vertices and returns an array of 4
@@ -465,8 +433,6 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
 
           TextureFillVertexShader::FrameInfo frame_info;
           frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-          frame_info.texture_sampler_y_coord_scale =
-              input_texture->GetYCoordScale();
 
           TextureFillFragmentShader::FragInfo frag_info;
           frag_info.alpha = 1.0;
@@ -522,9 +488,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
                 renderer.GetDownsampleBoundedPipeline(pipeline_options));
 
             TextureDownsampleBoundedFragmentShader::BoundInfo bound_info;
-            bound_info.quad_line_params = PrecomputeQuadLineParameters(
-                RemapQuadCoords(pass_args.uv_bounds.value(),
-                                input_texture->GetYCoordScale()));
+            bound_info.quad_line_params =
+                PrecomputeQuadLineParameters(pass_args.uv_bounds.value());
             TextureDownsampleBoundedFragmentShader::BindBoundInfo(
                 pass, data_host_buffer.EmplaceUniform(bound_info));
           } else {
@@ -547,8 +512,6 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
 
           TextureFillVertexShader::FrameInfo frame_info;
           frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-          frame_info.texture_sampler_y_coord_scale =
-              input_texture->GetYCoordScale();
 
           TextureDownsampleFragmentShader::FragInfo frag_info;
           frag_info.edge = edge;
@@ -609,9 +572,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
   ContentContext::SubpassCallback subpass_callback =
       [&](const ContentContext& renderer, RenderPass& pass) {
         GaussianBlurVertexShader::FrameInfo frame_info;
-        frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1)),
-        frame_info.texture_sampler_y_coord_scale =
-            input_texture->GetYCoordScale();
+        frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
 
         HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
 
@@ -619,8 +580,12 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         options.primitive_type = PrimitiveType::kTriangleStrip;
         pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
+        KernelSamples kernel_info = GenerateBlurInfo(blur_info);
+        LerpHackResult lerped_kernel = LerpHackKernelSamples(kernel_info);
+
         GaussianBlurFragmentShader::FragInfo frag_info;
         frag_info.unpremultiply = blur_info.apply_unpremultiply;
+        frag_info.sample_count = lerped_kernel.sample_count;
         GaussianBlurFragmentShader::BindFragInfo(
             pass, data_host_buffer.EmplaceUniform(frag_info));
 
@@ -642,8 +607,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, data_host_buffer.EmplaceUniform(
-                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
+            pass,
+            data_host_buffer.EmplaceUniform(lerped_kernel.kernel_samples));
         return pass.Draw().ok();
       };
   if (destination_target.has_value()) {
@@ -777,7 +742,10 @@ GaussianBlurFilterContents::GaussianBlurFilterContents(
       mask_blur_style_(mask_blur_style),
       mask_geometry_(mask_geometry) {
   // This is supposed to be enforced at a higher level.
-  FML_DCHECK(mask_blur_style == BlurStyle::kNormal || mask_geometry);
+  FML_DCHECK(mask_blur_style == BlurStyle::kNormal ||
+             mask_blur_style == BlurStyle::kSolid ||
+             // mask_geometry is used for Inner and Outer modes only
+             mask_geometry);
 }
 
 // This value was extracted from Skia, see:
@@ -817,7 +785,8 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterSourceCoverage(
   Vector2 blur_radius = {CalculateBlurRadius(scaled_sigma.x),
                          CalculateBlurRadius(scaled_sigma.y)};
   Vector3 blur_radii =
-      effect_transform.Basis() * Vector3{blur_radius.x, blur_radius.y, 0.0};
+      (effect_transform.Basis() * Vector3{blur_radius.x, blur_radius.y, 0.0})
+          .Abs();
   return output_limit.Expand(Point(blur_radii.x, blur_radii.y));
 }
 
@@ -1093,33 +1062,36 @@ KernelSamples GenerateBlurInfo(BlurParameters parameters) {
 
 // This works by shrinking the kernel size by 2 and relying on lerp to read
 // between the samples.
-GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
-    KernelSamples parameters) {
-  GaussianBlurPipeline::FragmentShader::KernelSamples result = {};
+LerpHackResult LerpHackKernelSamples(const KernelSamples& parameters) {
+  LerpHackResult result = {};
   result.sample_count = ((parameters.sample_count - 1) / 2) + 1;
   int32_t middle = result.sample_count / 2;
   int32_t j = 0;
   FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
-  static_assert(sizeof(result.sample_data) ==
+  static_assert(sizeof(result.kernel_samples.sample_data) ==
                 sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
 
   for (int i = 0; i < result.sample_count; i++) {
     if (i == middle) {
-      result.sample_data[i].x = parameters.samples[j].uv_offset.x;
-      result.sample_data[i].y = parameters.samples[j].uv_offset.y;
-      result.sample_data[i].z = parameters.samples[j].coefficient;
+      result.kernel_samples.sample_data[i].x =
+          parameters.samples[j].uv_offset.x;
+      result.kernel_samples.sample_data[i].y =
+          parameters.samples[j].uv_offset.y;
+      result.kernel_samples.sample_data[i].z =
+          parameters.samples[j].coefficient;
       j++;
     } else {
       KernelSample left = parameters.samples[j];
       KernelSample right = parameters.samples[j + 1];
 
-      result.sample_data[i].z = left.coefficient + right.coefficient;
+      result.kernel_samples.sample_data[i].z =
+          left.coefficient + right.coefficient;
 
       Point uv = (left.uv_offset * left.coefficient +
                   right.uv_offset * right.coefficient) /
                  (left.coefficient + right.coefficient);
-      result.sample_data[i].x = uv.x;
-      result.sample_data[i].y = uv.y;
+      result.kernel_samples.sample_data[i].x = uv.x;
+      result.kernel_samples.sample_data[i].y = uv.y;
       j += 2;
     }
   }

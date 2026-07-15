@@ -489,6 +489,7 @@ class Overlay extends StatefulWidget {
     super.key,
     this.initialEntries = const <OverlayEntry>[],
     this.clipBehavior = Clip.hardEdge,
+    this.alwaysSizeToContent = false,
   });
 
   /// Wrap the provided `child` in an [Overlay] to allow other visual elements
@@ -497,8 +498,18 @@ class Overlay extends StatefulWidget {
   /// This is a convenience method over the regular [Overlay] constructor: It
   /// creates an [Overlay] and puts the provided `child` in an [OverlayEntry]
   /// at the bottom of that newly created Overlay.
-  static Widget wrap({Key? key, Clip clipBehavior = Clip.hardEdge, required Widget child}) {
-    return _WrappingOverlay(key: key, clipBehavior: clipBehavior, child: child);
+  static Widget wrap({
+    Key? key,
+    Clip clipBehavior = Clip.hardEdge,
+    bool alwaysSizeToContent = false,
+    required Widget child,
+  }) {
+    return _WrappingOverlay(
+      key: key,
+      clipBehavior: clipBehavior,
+      alwaysSizeToContent: alwaysSizeToContent,
+      child: child,
+    );
   }
 
   /// The entries to include in the overlay initially.
@@ -520,6 +531,18 @@ class Overlay extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Determines that the overlay should always size itself to content.
+  ///
+  /// Normally overlay will only size itself to content if the incoming
+  /// constraints are infinite and there is a [OverlayEntry] that can size
+  /// the overlay. Setting this to `true` will force this behavior even for
+  /// finite (but possibly loose) constraints.
+  ///
+  /// Setting this to true requires an [OverlayEntry] that can size the overlay
+  /// based on itself ([OverlayEntry.canSizeOverlay] set to true). If not provided
+  /// an exception is thrown.
+  final bool alwaysSizeToContent;
 
   /// The [OverlayState] from the closest instance of [Overlay] that encloses
   /// the given context within the closest [LookupBoundary], and, in debug mode,
@@ -889,6 +912,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     return _Theater(
       skipCount: children.length - onstageCount,
       clipBehavior: widget.clipBehavior,
+      alwaysSizeToContent: widget.alwaysSizeToContent,
       children: children.reversed.toList(growable: false),
     );
   }
@@ -904,9 +928,15 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 }
 
 class _WrappingOverlay extends StatefulWidget {
-  const _WrappingOverlay({super.key, this.clipBehavior = Clip.hardEdge, required this.child});
+  const _WrappingOverlay({
+    super.key,
+    this.clipBehavior = Clip.hardEdge,
+    required this.alwaysSizeToContent,
+    required this.child,
+  });
 
   final Clip clipBehavior;
+  final bool alwaysSizeToContent;
   final Widget child;
 
   @override
@@ -938,7 +968,11 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Overlay(clipBehavior: widget.clipBehavior, initialEntries: <OverlayEntry>[_entry]);
+    return Overlay(
+      clipBehavior: widget.clipBehavior,
+      alwaysSizeToContent: widget.alwaysSizeToContent,
+      initialEntries: <OverlayEntry>[_entry],
+    );
   }
 }
 
@@ -950,6 +984,7 @@ class _Theater extends MultiChildRenderObjectWidget {
   const _Theater({
     this.skipCount = 0,
     this.clipBehavior = Clip.hardEdge,
+    required this.alwaysSizeToContent,
     required List<_OverlayEntryWidget> super.children,
   }) : assert(skipCount >= 0),
        assert(children.length >= skipCount);
@@ -957,6 +992,8 @@ class _Theater extends MultiChildRenderObjectWidget {
   final int skipCount;
 
   final Clip clipBehavior;
+
+  final bool alwaysSizeToContent;
 
   @override
   _TheaterElement createElement() => _TheaterElement(this);
@@ -967,6 +1004,7 @@ class _Theater extends MultiChildRenderObjectWidget {
       skipCount: skipCount,
       textDirection: Directionality.of(context),
       clipBehavior: clipBehavior,
+      alwaysSizeToContent: alwaysSizeToContent,
     );
   }
 
@@ -975,7 +1013,8 @@ class _Theater extends MultiChildRenderObjectWidget {
     renderObject
       ..skipCount = skipCount
       ..textDirection = Directionality.of(context)
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..alwaysSizeToContent = alwaysSizeToContent;
   }
 
   @override
@@ -1159,10 +1198,12 @@ class _RenderTheater extends RenderBox
     required TextDirection textDirection,
     int skipCount = 0,
     Clip clipBehavior = Clip.hardEdge,
+    required bool alwaysSizeToContent,
   }) : assert(skipCount >= 0),
        _textDirection = textDirection,
        _skipCount = skipCount,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _alwaysSizeToContent = alwaysSizeToContent {
     addAll(children);
   }
 
@@ -1249,21 +1290,32 @@ class _RenderTheater extends RenderBox
     }
   }
 
+  bool get alwaysSizeToContent => _alwaysSizeToContent;
+  set alwaysSizeToContent(bool value) {
+    if (_alwaysSizeToContent != value) {
+      _alwaysSizeToContent = value;
+      markNeedsLayout();
+    }
+  }
+
+  bool _alwaysSizeToContent;
+
   // Adding/removing deferred child does not affect the layout of other children,
   // or that of the Overlay, so there's no need to invalidate the layout of the
   // Overlay.
   //
-  // When _skipMarkNeedsLayout is true, markNeedsLayout does not do anything.
-  bool _skipMarkNeedsLayout = false;
+  // When _outstandingDeferredChildUpdateCalls is positive, markNeedsLayout does
+  // not do anything.
+  int _outstandingDeferredChildUpdateCalls = 0;
   void _addDeferredChild(_RenderDeferredLayoutBox child) {
-    assert(!_skipMarkNeedsLayout);
-    _skipMarkNeedsLayout = true;
+    _outstandingDeferredChildUpdateCalls += 1;
     adoptChild(child);
     // The Overlay still needs repainting when a deferred child is added. Usually
     // `markNeedsLayout` implies `markNeedsPaint`, but here `markNeedsLayout` is
-    // skipped when the `_skipMarkNeedsLayout` flag is set.
+    // skipped when there are outstanding deferred add/remove calls.
     markNeedsPaint();
-    _skipMarkNeedsLayout = false;
+    _outstandingDeferredChildUpdateCalls -= 1;
+    assert(_outstandingDeferredChildUpdateCalls >= 0);
 
     // After adding `child` to the render tree, we want to make sure it will be
     // laid out in the same frame. This is done by calling markNeedsLayout on the
@@ -1273,18 +1325,18 @@ class _RenderTheater extends RenderBox
   }
 
   void _removeDeferredChild(_RenderDeferredLayoutBox child) {
-    assert(!_skipMarkNeedsLayout);
-    _skipMarkNeedsLayout = true;
+    _outstandingDeferredChildUpdateCalls += 1;
     dropChild(child);
     // The Overlay still needs repainting when a deferred child is dropped. See
     // the comment in `_addDeferredChild`.
     markNeedsPaint();
-    _skipMarkNeedsLayout = false;
+    _outstandingDeferredChildUpdateCalls -= 1;
+    assert(_outstandingDeferredChildUpdateCalls >= 0);
   }
 
   @override
   void markNeedsLayout() {
-    if (!_skipMarkNeedsLayout) {
+    if (_outstandingDeferredChildUpdateCalls == 0) {
       super.markNeedsLayout();
     }
   }
@@ -1338,7 +1390,7 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final Size size = constraints.biggest.isFinite
+    final Size size = !alwaysSizeToContent && constraints.biggest.isFinite
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
     final nonPositionedChildConstraints = BoxConstraints.tight(size);
@@ -1363,7 +1415,7 @@ class _RenderTheater extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (constraints.biggest.isFinite) {
+    if (!alwaysSizeToContent && constraints.biggest.isFinite) {
       return constraints.biggest;
     }
     return _findSizeDeterminingChild().getDryLayout(constraints);
@@ -1413,7 +1465,7 @@ class _RenderTheater extends RenderBox
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
-    if (constraints.biggest.isFinite) {
+    if (!alwaysSizeToContent && constraints.biggest.isFinite) {
       size = constraints.biggest;
     } else {
       sizeDeterminingChild = _findSizeDeterminingChild();
@@ -1441,6 +1493,20 @@ class _RenderTheater extends RenderBox
         return child;
       }
       child = childParentData.previousSibling;
+    }
+    if (alwaysSizeToContent) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'Overlay was asked to size itself to content but does not have a suitable child.',
+        ),
+        ErrorDescription(
+          'When `alwaysSizeToContent` is true, the Overlay requires at least one '
+          'non-positioned `OverlayEntry` with `canSizeOverlay` set to true to determine its size.',
+        ),
+        ErrorHint(
+          'Try removing alwaysSizeToContent=true or provide a suitable child that can size the Overlay',
+        ),
+      ]);
     }
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
@@ -1835,7 +1901,7 @@ class OverlayPortal extends StatefulWidget {
   /// called.
   ///
   /// Developers can use `overlayChildBuilder` to configure the overlay child
-  /// based on the the size and the location of [OverlayPortal.child] within the
+  /// based on the size and the location of [OverlayPortal.child] within the
   /// target [Overlay], as well as the size of the [Overlay] itself. This allows
   /// the overlay child to, for example, always follow [OverlayPortal.child] and
   /// at the same time resize itself base on how close it is to the edges of
@@ -2065,14 +2131,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
 // The occupant (a `RenderBox`) will be painted above the associated
 // [OverlayEntry], but below the [OverlayEntry] above that [OverlayEntry].
 //
-// Additionally, `_activate` and `_deactivate` are called when the overlay
-// child's `_OverlayPortalElement` activates/deactivates (for instance, during
-// global key reparenting).
-// `_OverlayPortalElement` removes its overlay child's render object from the
-// target `_RenderTheater` when it deactivates and puts it back on `activated`.
-// These 2 methods can be used to "hide" a child in the child model without
-// removing it, when the child is expensive/difficult to re-insert at the
-// correct location on `activated`.
+// Additionally, `_reattachFromLayoutSurrogate` and `_detachFromLayoutSurrogate`
+// are called when the overlay child's `_OverlayPortalElement` activates/deactivates
+// (for instance, during global key reparenting). `_OverlayPortalElement` removes
+// its overlay child's render object from the target `_RenderTheater` when it
+// deactivates and puts it back on `activated`. These 2 methods can be used to
+// "hide" a child in the child model without removing it, when the child is
+// expensive/difficult to re-insert at the correct location on `activated`.
 //
 // ### Equality
 //
@@ -2145,16 +2210,30 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
     }
   }
 
-  void _activate(_RenderDeferredLayoutBox child) {
-    // This call is allowed even when this location is invalidated.
-    // See _OverlayPortalElement.activate.
-    assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
+  /// Undoes _detachFromLayoutSurrogate by adding the given `child` back to the
+  /// `_theater`.
+  ///
+  /// This is called when the OverlayPortal is activated.
+  /// This call is allowed even when this location is invalidated.
+  void _reattachFromLayoutSurrogate(_RenderDeferredLayoutBox child) {
+    assert(
+      _overlayChildRenderBox == null,
+      '$this failed to reattach: _detachFromLayoutSurrogate must be called before _reattachFromLayoutSurrogate.',
+    );
     _theater._addDeferredChild(child);
     _overlayChildRenderBox = child;
   }
 
-  void _deactivate(_RenderDeferredLayoutBox child) {
-    // This call is allowed even when this location is invalidated.
+  /// Removes the given `child` from the `_theater` but keeps it in the child list
+  /// (unlike `_removeChild`).
+  ///
+  /// This is typically called when the [OverlayPortal] deactivates. Since every
+  /// [RenderObject] in the render tree must be attached, when an [OverlayPortal]
+  /// deactivates, it must remove the overlay child from the render tree instead
+  /// of just detaching it.
+  ///
+  /// This call is allowed even when this location is invalidated.
+  void _detachFromLayoutSurrogate(_RenderDeferredLayoutBox child) {
     _theater._removeDeferredChild(child);
     _overlayChildRenderBox = null;
   }
@@ -2164,12 +2243,15 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   //
   // Generally, `assert(_debugIsLocationValid())` should be used to prevent
   // invalid accesses to an invalid `_OverlayEntryLocation` object. Exceptions
-  // to this rule are _removeChild, _deactivate, which will be called when the
-  // OverlayPortal is being removed from the widget tree and may use the
-  // location information to perform cleanup tasks.
+  // to this rule are _removeChild, _detachFromLayoutSurrogate, which will be
+  // called when the OverlayPortal is being removed from the widget tree and
+  // may use the location information to perform cleanup tasks.
   //
-  // Another exception is the _activate method which is called by
-  // _OverlayPortalElement.activate. See the comment in _OverlayPortalElement.activate.
+  // Another exception is the _reattachFromLayoutSurrogate method which is
+  // called shortly after the `OverlayPortal` activates because it's possible
+  // that the widget subtree hasn't been rebuilt at that point, so we'll have
+  // to re-attach the overlay child render object using a potentially outdated
+  // location.
   bool _debugIsLocationValid() {
     if (_debugMarkLocationInvalidStackTrace == null) {
       return true;
@@ -2298,7 +2380,13 @@ class _OverlayPortal extends RenderObjectWidget {
   RenderObjectElement createElement() => _OverlayPortalElement(this);
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderLayoutSurrogateProxyBox();
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderLayoutSurrogateProxyBox(overlayLocation);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLayoutSurrogateProxyBox renderObject) {
+    renderObject.overlayLocation = overlayLocation;
+  }
 }
 
 class _OverlayPortalElement extends RenderObjectElement {
@@ -2349,37 +2437,12 @@ class _OverlayPortalElement extends RenderObjectElement {
   }
 
   @override
-  void activate() {
-    super.activate();
-    final box = _overlayChild?.renderObject as _RenderDeferredLayoutBox?;
-    if (box != null) {
-      assert(!box.attached);
-      assert(renderObject._deferredLayoutChild == box);
-      // updateChild has not been called at this point so the RenderTheater in
-      // the overlay location could be detached. Adding children to a detached
-      // RenderObject is still allowed however this isn't the most efficient.
-      (_overlayChild!.slot! as _OverlayEntryLocation)._activate(box);
-    }
-  }
-
-  @override
-  void deactivate() {
-    // Instead of just detaching the render objects, removing them from the
-    // render subtree entirely. This is a workaround for the
-    // !renderObject.attached assert in the `super.deactivate()` method.
-    final box = _overlayChild?.renderObject as _RenderDeferredLayoutBox?;
-    if (box != null) {
-      (_overlayChild!.slot! as _OverlayEntryLocation)._deactivate(box);
-    }
-    super.deactivate();
-  }
-
-  @override
   void insertRenderObjectChild(RenderBox child, _OverlayEntryLocation? slot) {
     assert(child.parent == null, "$child's parent is not null: ${child.parent}");
     if (slot != null) {
-      renderObject._deferredLayoutChild = child as _RenderDeferredLayoutBox;
-      slot._addChild(child);
+      // _deferredLayoutChild is assigned in _DeferredLayout.createRenderObject.
+      assert(renderObject._deferredLayoutChild == child);
+      slot._addChild(child as _RenderDeferredLayoutBox);
       renderObject.markNeedsSemanticsUpdate();
     } else {
       renderObject.child = child;
@@ -2426,9 +2489,9 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   const _DeferredLayout({
     // This widget must not be given a key: we currently do not support
     // reparenting between the overlayChild and child.
-    required Widget child,
+    required Widget super.child,
     this.childIdentifier,
-  }) : super(child: child);
+  });
 
   final Object? childIdentifier;
 
@@ -2508,7 +2571,13 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
   @override
   void redepthChildren() {
-    _layoutSurrogate.redepthChild(this);
+    // The layout surrogate can be adopted after this box enters the theater.
+    // Until then, the surrogate has no owner and cannot redepth this child.
+    // Once the surrogate is adopted, its own [redepthChildren] will restore the
+    // depth invariant.
+    if (_layoutSurrogate.attached) {
+      _layoutSurrogate.redepthChild(this);
+    }
     super.redepthChildren();
   }
 
@@ -2640,8 +2709,49 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
 // A RenderProxyBox that makes sure its `deferredLayoutChild` has a greater
 // depth than itself.
+//
+// This RenderObject also conditionally attaches and detaches the associated
+// [_RenderDeferredLayoutBox] when itself attaches and detaches from its
+// [PipelineOwner]. This guarantees that the deferred box's attached status is
+// always kept in sync with both the surrogate and its parent theater.
 class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
+  _RenderLayoutSurrogateProxyBox(this.overlayLocation);
+  // This variable is set as soon as the _DeferredLayout widget creates it, and
+  // it is only set to null when the _DeferredLayout widget is being removed
+  // from the tree.
   _RenderDeferredLayoutBox? _deferredLayoutChild;
+  _OverlayEntryLocation? overlayLocation;
+
+  bool _debugIsFirstAttach = true;
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    // If attach is called after _didDetachDeferredChild is set to true then
+    // it is always safe to put deferred child back because the theater must
+    // be an ancestor of both render objects.
+    if (_didDetachDeferredChild) {
+      _didDetachDeferredChild = false;
+      assert(_deferredLayoutChild != null);
+      assert(!_debugIsFirstAttach);
+      overlayLocation!._reattachFromLayoutSurrogate(_deferredLayoutChild!);
+    }
+    assert(() {
+      _debugIsFirstAttach = false;
+      return true;
+    }());
+  }
+
+  bool _didDetachDeferredChild = false;
+  @override
+  void detach() {
+    // Detaches the deferred child if this node is being detached, but only if the theater isn't
+    // already detached (so the deferred child will be detached by the theater).
+    if (_deferredLayoutChild case final deferredChild? when deferredChild.theater.attached) {
+      overlayLocation!._detachFromLayoutSurrogate(deferredChild);
+      _didDetachDeferredChild = true;
+    }
+    super.detach();
+  }
 
   @override
   void redepthChildren() {

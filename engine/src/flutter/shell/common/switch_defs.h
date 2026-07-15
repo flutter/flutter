@@ -126,6 +126,9 @@ DEF_SWITCH(DisableServiceAuthCodes,
            "disable-service-auth-codes",
            "Disable the requirement for authentication codes for communicating"
            " with the VM service.")
+DEF_SWITCH(DisableServiceOriginCheck,
+           "disable-service-origin-check",
+           "Disable the WebSocket origin check for the VM service.")
 DEF_SWITCH(EnableServicePortFallback,
            "enable-service-port-fallback",
            "Allow the VM service to fallback to automatic port selection if"
@@ -284,9 +287,10 @@ DEF_SWITCH(MergedPlatformUIThread,
 DEF_SWITCH(DisableMergedPlatformUIThread,
            "no-enable-merged-platform-ui-thread",
            "Disables merging of the UI and platform threads.")
-DEF_SWITCH(EnableAndroidSurfaceControl,
-           "enable-surface-control",
-           "Enable the SurfaceControl backed swapchain when supported.")
+DEF_SWITCH(EnableAndroidHcppAndSurfaceControl,
+           "enable-hcpp-and-surface-control",
+           "Enable the HCPP platform view mode and SurfaceControl backed "
+           "swapchain when supported.")
 DEF_SWITCH(EnableFlutterGPU,
            "enable-flutter-gpu",
            "Whether Flutter GPU is enabled.")
@@ -297,6 +301,9 @@ DEF_SWITCH(ImpellerLazyShaderMode,
 DEF_SWITCH(ImpellerAntialiasLines,
            "impeller-antialias-lines",
            "Experimental flag to test drawing lines with antialiasing.")
+DEF_SWITCH(ImpellerUseSDFs,
+           "impeller-use-sdfs",
+           "Whether to use SDFs for rendering in Impeller.")
 DEF_SWITCHES_END
 
 }  // namespace flutter

@@ -707,9 +707,11 @@ abstract class Device {
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 
+  /// The CPU architecture of the device.
+  Future<CpuArch> get cpuArch;
+
   /// Platform name for display only.
-  Future<String> get targetPlatformDisplayName async =>
-      getNameForTargetPlatform(await targetPlatform);
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   Future<String> get sdkNameAndVersion;
 
@@ -883,7 +885,8 @@ abstract class Device {
       'name': name,
       'id': id,
       'isSupported': await isSupported(),
-      'targetPlatform': getNameForTargetPlatform(await targetPlatform),
+      'targetPlatform': (await targetPlatform).getName(),
+      'cpuArch': (await cpuArch).name,
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
       'capabilities': <String, Object>{
@@ -943,6 +946,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
+    this.disableServiceOriginCheck = false,
     this.enableDds = true,
     this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
@@ -984,7 +988,7 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableSurfaceControl = false,
+    this.enableHcpp = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -993,8 +997,9 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
-    this.enableLocalDiscovery = false,
     this.webDevServerConfig,
+    this.testFlag = false,
+    this.iosProfileDebugger,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1020,25 +1025,27 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableSurfaceControl = false,
+    this.enableHcpp = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
-    this.enableLocalDiscovery = false,
+    this.testFlag = false,
+    this.iosProfileDebugger,
+    this.traceSystrace = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
        dartFlags = '',
        disableServiceAuthCodes = false,
+       disableServiceOriginCheck = false,
        enableDds = false,
        cacheStartupProfile = false,
        enableSoftwareRendering = false,
        skiaDeterministicRendering = false,
        traceSkia = false,
        traceSkiaAllowlist = null,
-       traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
        profileMicrotasks = false,
@@ -1066,6 +1073,7 @@ class DebuggingOptions {
     required this.dartFlags,
     required this.dartEntrypointArgs,
     required this.disableServiceAuthCodes,
+    required this.disableServiceOriginCheck,
     required this.enableDds,
     required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
@@ -1105,7 +1113,7 @@ class DebuggingOptions {
     required this.uninstallFirst,
     required this.uninstallApp,
     required this.enableDartProfiling,
-    required this.enableSurfaceControl,
+    required this.enableHcpp,
     required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
@@ -1114,9 +1122,9 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
-    required this.enableLocalDiscovery,
     this.webDevServerConfig,
-  });
+    this.iosProfileDebugger,
+  }) : testFlag = false;
 
   final bool debuggingEnabled;
 
@@ -1125,6 +1133,7 @@ class DebuggingOptions {
   final String dartFlags;
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
+  final bool disableServiceOriginCheck;
   final bool enableDds;
   final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
@@ -1152,7 +1161,7 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
-  final bool enableSurfaceControl;
+  final bool enableHcpp;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1161,8 +1170,11 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
-  final bool enableLocalDiscovery;
   final WebDevServerConfig? webDevServerConfig;
+  final bool testFlag;
+
+  /// Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.
+  final bool? iosProfileDebugger;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1223,6 +1235,7 @@ class DebuggingOptions {
       if (enableDartProfiling) '--enable-dart-profiling',
       if (profileStartup) '--profile-startup',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (disableServiceOriginCheck) '--disable-service-origin-check',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
@@ -1263,10 +1276,12 @@ class DebuggingOptions {
 
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
+    'iosProfileDebugger': iosProfileDebugger,
     'startPaused': startPaused,
     'dartFlags': dartFlags,
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
+    'disableServiceOriginCheck': disableServiceOriginCheck,
     'enableDds': enableDds,
     'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
@@ -1310,7 +1325,7 @@ class DebuggingOptions {
     'enableVulkanValidation': enableVulkanValidation,
     'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
-    'enableSurfaceControl': enableSurfaceControl,
+    'enableHcpp': enableHcpp,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
@@ -1329,17 +1344,18 @@ class DebuggingOptions {
     // with the google3 checked in binary.
     'dumpSkpOnShaderCompilation': false,
     'cacheSkSL': false,
-    'enableLocalDiscovery': enableLocalDiscovery,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
       DebuggingOptions._(
         buildInfo: buildInfo,
         debuggingEnabled: json['debuggingEnabled']! as bool,
+        iosProfileDebugger: json['iosProfileDebugger'] as bool?,
         startPaused: json['startPaused']! as bool,
         dartFlags: json['dartFlags']! as String,
         dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
         disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+        disableServiceOriginCheck: json['disableServiceOriginCheck'] as bool? ?? false,
         enableDds: json['enableDds']! as bool,
         cacheStartupProfile: json['cacheStartupProfile']! as bool,
         enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
@@ -1381,7 +1397,7 @@ class DebuggingOptions {
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
-        enableSurfaceControl: (json['enableSurfaceControl'] as bool?) ?? false,
+        enableHcpp: (json['enableHcpp'] as bool?) ?? false,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
@@ -1390,7 +1406,6 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
-        enableLocalDiscovery: (json['enableLocalDiscovery'] as bool?) ?? false,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',

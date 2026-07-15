@@ -15,8 +15,9 @@
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
@@ -91,9 +92,24 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(engine);
 
   // Ensure getters don't deref _shell when it's null, and instead return nullptr.
-  XCTAssertEqual(engine.platformTaskRunner.get(), nullptr);
-  XCTAssertEqual(engine.uiTaskRunner.get(), nullptr);
-  XCTAssertEqual(engine.rasterTaskRunner.get(), nullptr);
+  XCTAssertNil(engine.platformTaskRunner);
+  XCTAssertNil(engine.uiTaskRunner);
+  XCTAssertNil(engine.rasterTaskRunner);
+}
+
+- (void)testTaskRunnerPropertyStability {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  // Since the taskRunners are wrappers, ensure that we generate them once and they keep the same
+  // identity over time. This makes identity checks on the runners safe/possible.
+  XCTAssertNotNil(engine.platformTaskRunner);
+  XCTAssertEqual(engine.platformTaskRunner, engine.platformTaskRunner);
+  XCTAssertNotNil(engine.uiTaskRunner);
+  XCTAssertEqual(engine.uiTaskRunner, engine.uiTaskRunner);
+  XCTAssertNotNil(engine.rasterTaskRunner);
+  XCTAssertEqual(engine.rasterTaskRunner, engine.rasterTaskRunner);
 }
 
 - (void)testInfoPlist {
@@ -634,6 +650,7 @@ FLUTTER_ASSERT_ARC
       respondsToSelector:@selector(registerViewFactory:withId:gestureRecognizersBlockingPolicy:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(viewController)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(publish:)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(valuePublishedByPlugin:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(addMethodCallDelegate:channel:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(addApplicationDelegate:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(lookupKeyForAsset:)]);
@@ -660,6 +677,10 @@ FLUTTER_ASSERT_ARC
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [registrar publish:plugin];
   XCTAssertEqual(mockEngine.pluginPublications[pluginKey], plugin);
+
+  // Verify lookup forwards to FlutterEngine by fetching the published plugin
+  id published = [registrar valuePublishedByPlugin:pluginKey];
+  XCTAssertEqual(plugin, published);
 
   // Verify lookupKeyForAsset:, lookupKeyForAsset:fromPackage forward to engine
   [registrar lookupKeyForAsset:assetKey];
@@ -693,6 +714,7 @@ FLUTTER_ASSERT_ARC
       respondsToSelector:@selector(registerViewFactory:withId:gestureRecognizersBlockingPolicy:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(viewController)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(publish:)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(valuePublishedByPlugin:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(addMethodCallDelegate:channel:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(addApplicationDelegate:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(lookupKeyForAsset:)]);

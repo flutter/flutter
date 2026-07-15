@@ -15,6 +15,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  Widget buildDivider() {
+    return const Padding(
+      padding: EdgeInsets.all(4),
+      child: ColoredBox(
+        color: Color(0xFF000000),
+        child: SizedBox(height: 4, width: double.infinity),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final TextStyle? bodyStyle = Theme.of(context).textTheme.bodyLarge;
@@ -29,24 +39,24 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const .symmetric(horizontal: 16.0),
             child: Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: <Widget>[
                   const SizedBox(height: 16.0),
                   Align(
                     child: Text(
                       'Demonstration of automation tools support in Semantics for Text and RichText',
                       style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
+                      textAlign: .center,
                     ),
                   ),
                   const SizedBox(height: 16.0),
                   const Text(
                     'The identifier property in Semantics widget is used for UI testing with tools that work by querying the native accessibility, like UIAutomator, XCUITest, or Appium. It can be matched with CommonFinders.bySemanticsIdentifier.',
                   ),
-                  const Divider(),
+                  buildDivider(),
                   Text('Text Example:', style: bodyStyle),
                   const Text(
                     'This text has a custom label and an identifier. In Android, the label is used as the content-desc, and the identifier is used as the resource-id.',
@@ -54,7 +64,7 @@ class _MyAppState extends State<MyApp> {
                     semanticsIdentifier:
                         'This is a custom identifier that only the automation tools are able to see',
                   ),
-                  const Divider(),
+                  buildDivider(),
                   Text('Text.rich Example:', style: bodyStyle),
                   Text.rich(
                     TextSpan(
@@ -80,7 +90,7 @@ class _MyAppState extends State<MyApp> {
                       ],
                     ),
                   ),
-                  const Divider(),
+                  buildDivider(),
                   Text('Multi-tenant Example:', style: bodyStyle),
                   const SizedBox(height: 16),
                   Column(
@@ -111,7 +121,7 @@ class _MyAppState extends State<MyApp> {
                               ),
                             ],
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                         ),
                       ),
                       Center(
@@ -139,7 +149,7 @@ class _MyAppState extends State<MyApp> {
                               ),
                             ],
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                         ),
                       ),
                     ],

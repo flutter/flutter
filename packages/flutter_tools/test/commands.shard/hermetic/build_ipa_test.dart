@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -40,7 +41,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   Map<String, String> get overrides => _overrides;
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -137,13 +138,6 @@ void main() {
 ''');
     createCoreMockProjectFiles();
   }
-
-  const xattrCommand1 = FakeCommand(
-    command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
-  );
-  const xattrCommand2 = FakeCommand(
-    command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/'],
-  );
 
   // Sets up xcresulttool command for Xcode versions below 16.
   FakeCommand setUpLegacyXCResultCommand({
@@ -246,6 +240,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createCoreMockProjectFiles();
 
@@ -271,6 +277,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createCoreMockProjectFiles();
 
@@ -298,6 +316,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fileSystem.file('pubspec.yaml').createSync();
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
@@ -330,6 +360,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -359,6 +401,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -386,6 +440,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -419,11 +485,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -456,11 +531,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -514,11 +598,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -572,11 +665,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -629,11 +731,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -665,11 +776,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -722,11 +842,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -760,9 +889,6 @@ void main() {
       };
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: exportOptions.path),
       ]);
@@ -772,6 +898,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(
         command,
@@ -801,11 +939,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         const FakeCommand(
           command: <String>[
@@ -863,11 +1010,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -901,11 +1057,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -962,11 +1127,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -1025,11 +1199,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -1087,11 +1270,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(verbose: true),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -1120,11 +1312,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -1154,11 +1355,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         const FakeCommand(
           command: <String>[
             'xcrun',
@@ -1217,6 +1427,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -1247,6 +1469,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -1256,9 +1490,6 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
@@ -1315,11 +1546,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(),
       ]);
@@ -1360,11 +1600,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1403,11 +1652,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1450,11 +1708,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1505,13 +1772,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
-      fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
-        setUpFakeXcodeBuildHandler(exitCode: 1),
-      ]);
+      fakeProcessManager.addCommands(<FakeCommand>[setUpFakeXcodeBuildHandler(exitCode: 1)]);
       createMinimalMockProjectFiles();
 
       await expectLater(
@@ -1545,11 +1819,20 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1566,20 +1849,19 @@ void main() {
       );
 
       expect(logger.errorText, contains('Some Provisioning profile issue.'));
+      expect(logger.errorText, contains('Error: could not code sign the application.'));
+      expect(logger.errorText, contains('To resolve this issue, try the following steps:'));
+      expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
+      expect(logger.errorText, contains('In Runner > Signing & Capabilities, verify:'));
       expect(
         logger.errorText,
         contains(
-          'It appears that there was a problem signing your application prior to installation on the device.',
+          'In Xcode Settings > Accounts, verify the correct Apple Developer account is added',
         ),
       );
       expect(
         logger.errorText,
-        contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'),
-      );
-      expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
-      expect(
-        logger.errorText,
-        contains("Also try selecting 'Product > Build' to fix the problem."),
+        contains('Run Product > Build and fix any code signing issues shown by Xcode.'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1600,9 +1882,6 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1623,6 +1902,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -1661,9 +1952,6 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1690,6 +1978,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -1727,9 +2027,6 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1755,6 +2052,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -1792,9 +2101,6 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1815,6 +2121,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -1843,9 +2161,6 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1866,6 +2181,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -1903,9 +2230,6 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateIconContentsJsonPath)
@@ -1964,6 +2288,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -1998,9 +2334,6 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateIconContentsJsonPath)
@@ -2059,6 +2392,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -2089,9 +2434,6 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(projectIconContentsJsonPath)
@@ -2138,6 +2480,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -2166,9 +2520,6 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(projectIconContentsJsonPath)
@@ -2215,6 +2566,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -2243,9 +2606,6 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(projectIconContentsJsonPath)
@@ -2292,6 +2652,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -2320,9 +2692,6 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             // Uses unknown format version 123.
@@ -2370,6 +2739,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -2405,9 +2786,6 @@ void main() {
       ];
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             // The following json contains examples of:
@@ -2491,6 +2869,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -2526,9 +2916,6 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateLaunchImageContentsJsonPath)
@@ -2585,6 +2972,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
@@ -2619,9 +3018,6 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateLaunchImageContentsJsonPath)
@@ -2678,6 +3074,18 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 

@@ -15,6 +15,8 @@ import 'package:flutter/src/widgets/_window.dart'
         RegularWindow,
         RegularWindowController,
         RegularWindowControllerDelegate,
+        SatelliteWindow,
+        SatelliteWindowController,
         TooltipWindow,
         TooltipWindowController,
         WindowScope,
@@ -147,16 +149,118 @@ class _StubPopupWindowController extends PopupWindowController {
   BaseWindowController get parent => _StubRegularWindowController(tester);
 
   @override
-  bool get isActivated => true;
+  Size get contentSize => Size.zero;
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void destroy() {}
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
+
+  @override
+  Offset get offsetFromParent => Offset.zero;
+}
+
+class _StubSatelliteWindowController extends SatelliteWindowController {
+  _StubSatelliteWindowController({required this.tester}) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  final WidgetTester tester;
+
+  @override
+  BaseWindowController get parent => _StubRegularWindowController(tester);
 
   @override
   Size get contentSize => Size.zero;
 
   @override
-  void activate() {}
+  String get title => 'Stub Satellite Window';
+
+  @override
+  bool get isActivated => true;
+
+  @override
+  void setParent(BaseWindowController parent) {}
+
+  @override
+  void setSize(Size size) {}
 
   @override
   void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void setTitle(String title) {}
+
+  @override
+  void activate() {}
+
+  @override
+  void destroy() {}
+}
+
+// A controller that mutates its aspect values and notifies listeners, used to
+// verify that dependents rebuild when the controller notifies even though the
+// same controller instance is reused across rebuilds.
+class _MutableRegularWindowController extends RegularWindowController {
+  _MutableRegularWindowController(WidgetTester tester) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  Size _contentSize = Size.zero;
+  bool _activated = false;
+  bool _maximized = false;
+
+  @override
+  Size get contentSize => _contentSize;
+
+  @override
+  String get title => 'Mutable Window';
+
+  @override
+  bool get isActivated => _activated;
+
+  @override
+  bool get isMaximized => _maximized;
+
+  @override
+  bool get isMinimized => false;
+
+  @override
+  bool get isFullscreen => false;
+
+  @override
+  void setSize(Size size) {
+    _contentSize = size;
+    notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void setTitle(String title) {}
+
+  @override
+  void activate() {
+    _activated = true;
+    notifyListeners();
+  }
+
+  @override
+  void setMaximized(bool maximized) {
+    _maximized = maximized;
+    notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {}
+
+  @override
+  void setFullscreen(bool fullscreen, {Display? display}) {}
 
   @override
   void destroy() {}
@@ -177,7 +281,10 @@ void main() {
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createRegularWindowController(delegate: RegularWindowControllerDelegate()),
+          () => owner.createRegularWindowController(
+            delegate: RegularWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });
@@ -185,7 +292,10 @@ void main() {
       test('default WindowingOwner throws when accessing createDialogWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createDialogWindowController(delegate: DialogWindowControllerDelegate()),
+          () => owner.createDialogWindowController(
+            delegate: DialogWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });
@@ -214,6 +324,16 @@ void main() {
         expect(
           () => PopupWindow(
             controller: _StubPopupWindowController(tester: tester),
+            child: const Text('Test'),
+          ),
+          throwsUnsupportedError,
+        );
+      });
+
+      testWidgets('SatelliteWindow throws UnsupportedError', (WidgetTester tester) async {
+        expect(
+          () => SatelliteWindow(
+            controller: _StubSatelliteWindowController(tester: tester),
             child: const Text('Test'),
           ),
           throwsUnsupportedError,
@@ -331,6 +451,26 @@ void main() {
         expect(scope, isA<PopupWindowController>());
       });
 
+      testWidgets('Can access WindowScope.of for satellite windows', (WidgetTester tester) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        BaseWindowController? scope;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                scope = WindowScope.of(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(scope, isA<SatelliteWindowController>());
+      });
+
       testWidgets('Can access WindowScope.maybeOf for regular windows', (
         WidgetTester tester,
       ) async {
@@ -415,6 +555,28 @@ void main() {
         expect(scope, isA<PopupWindowController>());
       });
 
+      testWidgets('Can access WindowScope.maybeOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        BaseWindowController? scope;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                scope = WindowScope.maybeOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(scope, isA<SatelliteWindowController>());
+      });
+
       testWidgets('Can access WindowScope.contentSizeOf for regular windows', (
         WidgetTester tester,
       ) async {
@@ -490,6 +652,28 @@ void main() {
         await tester.pumpWidget(
           wrapWithView: false,
           PopupWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                size = WindowScope.contentSizeOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(size, equals(Size.zero));
+      });
+
+      testWidgets('Can access WindowScope.contentSizeOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        Size? size;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -591,6 +775,28 @@ void main() {
         expect(size, equals(Size.zero));
       });
 
+      testWidgets('Can access WindowScope.maybeContentSizeOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        Size? size;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                size = WindowScope.maybeContentSizeOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(size, equals(Size.zero));
+      });
+
       testWidgets('Can access WindowScope.titleOf for regular windows', (
         WidgetTester tester,
       ) async {
@@ -673,6 +879,28 @@ void main() {
         );
 
         expect(title, equals(''));
+      });
+
+      testWidgets('Can access WindowScope.titleOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        String? title;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                title = WindowScope.titleOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(title, equals('Stub Satellite Window'));
       });
 
       testWidgets('Can access WindowScope.maybeTitleOf for regular windows', (
@@ -763,6 +991,28 @@ void main() {
         expect(title, equals(''));
       });
 
+      testWidgets('Can access WindowScope.maybeTitleOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        String? title;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                title = WindowScope.maybeTitleOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(title, equals('Stub Satellite Window'));
+      });
+
       testWidgets('Can access WindowScope.isActivatedOf for regular windows', (
         WidgetTester tester,
       ) async {
@@ -851,6 +1101,28 @@ void main() {
         expect(isActivated, equals(true));
       });
 
+      testWidgets('Can access WindowScope.isActivatedOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isActivated;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isActivated = WindowScope.isActivatedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isActivated, equals(true));
+      });
+
       testWidgets('Can access WindowScope.maybeIsActivatedOf for regular windows', (
         WidgetTester tester,
       ) async {
@@ -926,6 +1198,28 @@ void main() {
         await tester.pumpWidget(
           wrapWithView: false,
           PopupWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isActivated = WindowScope.maybeIsActivatedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isActivated, isTrue);
+      });
+
+      testWidgets('Can access WindowScope.maybeIsActivatedOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isActivated;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1203,6 +1497,28 @@ void main() {
         expect(isMaximized, equals(false));
       });
 
+      testWidgets('Can access WindowScope.isMaximizedOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isMaximized;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isMaximized = WindowScope.isMaximizedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isMaximized, equals(false));
+      });
+
       testWidgets('Can access WindowScope.maybeIsMaximizedOf for regular windows', (
         WidgetTester tester,
       ) async {
@@ -1278,6 +1594,28 @@ void main() {
         await tester.pumpWidget(
           wrapWithView: false,
           PopupWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isMaximized = WindowScope.maybeIsMaximizedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isMaximized, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.maybeIsMaximizedOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isMaximized;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1379,6 +1717,28 @@ void main() {
         expect(isFullscreen, equals(false));
       });
 
+      testWidgets('Can access WindowScope.isFullscreenOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isFullscreen;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isFullscreen = WindowScope.isFullscreenOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isFullscreen, equals(false));
+      });
+
       testWidgets('Can access WindowScope.maybeIsFullscreenOf for regular windows', (
         WidgetTester tester,
       ) async {
@@ -1465,6 +1825,64 @@ void main() {
         );
 
         expect(isFullscreen, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.maybeIsFullscreenOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isFullscreen;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isFullscreen = WindowScope.maybeIsFullscreenOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isFullscreen, equals(false));
+      });
+
+      testWidgets('Dependent rebuilds when an aspect changes and the controller notifies', (
+        WidgetTester tester,
+      ) async {
+        final controller = _MutableRegularWindowController(tester);
+        addTearDown(controller.dispose);
+        final observed = <bool>[];
+        await tester.pumpWidget(
+          wrapWithView: false,
+          RegularWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                observed.add(WindowScope.isActivatedOf(context));
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(observed, <bool>[false]);
+
+        controller.activate();
+        await tester.pump();
+
+        expect(observed, <bool>[false, true]);
+      });
+
+      testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(controller: controller, child: Container()),
+        );
       });
     });
   });

@@ -16,17 +16,17 @@ class BlendFilterContentsTest : public EntityPlayground {
   /// Create a texture that has been cleared to transparent black.
   std::shared_ptr<Texture> MakeTexture(ISize size) {
     std::shared_ptr<CommandBuffer> command_buffer =
-        GetContentContext()->GetContext()->CreateCommandBuffer();
+        GetContentContext().GetContext()->CreateCommandBuffer();
     if (!command_buffer) {
       return nullptr;
     }
 
-    auto render_target = GetContentContext()->MakeSubpass(
+    auto render_target = GetContentContext().MakeSubpass(
         "Clear Subpass", size, command_buffer,
         [](const ContentContext&, RenderPass&) { return true; });
 
     if (!GetContentContext()
-             ->GetContext()
+             .GetContext()
              ->GetCommandQueue()
              ->Submit(/*buffers=*/{command_buffer})
              .ok()) {
@@ -49,17 +49,17 @@ TEST_P(BlendFilterContentsTest, AdvancedBlendColorAlignsColorTo4) {
   filter_contents.SetForegroundColor(Color(1.0, 0.0, 0.0, 1.0));
   filter_contents.SetBlendMode(BlendMode::kColorDodge);
 
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
   // Add random byte to get the HostBuffer in a bad alignment.
   uint8_t byte = 0xff;
-  BufferView buffer_view = renderer->GetTransientsDataBuffer().Emplace(
+  BufferView buffer_view = renderer.GetTransientsDataBuffer().Emplace(
       &byte, /*length=*/1, /*align=*/1);
   EXPECT_EQ(buffer_view.GetRange().offset, 4u);
   EXPECT_EQ(buffer_view.GetRange().length, 1u);
   Entity entity;
 
   std::optional<Entity> result = filter_contents.GetEntity(
-      *renderer, entity, /*coverage_hint=*/std::nullopt);
+      renderer, entity, /*coverage_hint=*/std::nullopt);
 
   EXPECT_TRUE(result.has_value());
 }

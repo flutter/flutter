@@ -20,6 +20,8 @@ import '../base/terminal.dart';
 import '../convert.dart' show utf8;
 import 'plist_parser.dart';
 
+typedef _CertificateTeamInfo = ({String teamId, String teamName});
+
 const _developmentTeamBuildSettingName = 'DEVELOPMENT_TEAM';
 const _codeSignStyleBuildSettingName = 'CODE_SIGN_STYLE';
 const _provisioningProfileSpecifierBuildSettingName = 'PROVISIONING_PROFILE_SPECIFIER';
@@ -30,34 +32,38 @@ const _codeSignSelectionCanceled = 'Code-signing setup canceled. Your changes ha
 /// User message when no development certificates are found in the keychain.
 ///
 /// The user likely never did any iOS development.
-const noCertificatesInstruction =
-    '''
+String noCertificatesInstruction({
+  bool includeTrustStep = true,
+  bool includeSimulatorAlternative = true,
+}) {
+  final simulatorAlternative = includeSimulatorAlternative
+      ? '\nOr run on an iOS simulator without code signing'
+      : '';
+  return '''
 ════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID
 in Xcode and create an iOS Development Certificate as well as a Provisioning\u0020
 Profile for your project by:
-$fixWithDevelopmentTeamInstruction
-  5- Trust your newly created Development Certificate on your iOS device
-     via Settings > General > Device Management > [your new certificate] > Trust
+${fixWithDevelopmentTeamInstruction(includeTrustStep: includeTrustStep)}
 
 For more information, please visit:
   https://developer.apple.com/library/content/documentation/IDEs/Conceptual/
   AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
-
-Or run on an iOS simulator without code signing
+$simulatorAlternative
 ════════════════════════════════════════════════════════════════════════════════''';
+}
 
 /// User message when there are no provisioning profile for the current app bundle identifier.
 ///
 /// The user did iOS development but never on this project and/or device.
-const noProvisioningProfileInstruction =
+String noProvisioningProfileInstruction =
     '''
 ════════════════════════════════════════════════════════════════════════════════
 No Provisioning Profile was found for your project's Bundle Identifier or your\u0020
 device. You can create a new Provisioning Profile for your project in Xcode for\u0020
 your team by:
-$fixWithDevelopmentTeamInstruction
+${fixWithDevelopmentTeamInstruction(includeTrustStep: false)}
 
 It's also possible that a previously installed app with the same Bundle\u0020
 Identifier was signed with a different certificate.
@@ -71,19 +77,25 @@ Or run on an iOS simulator without code signing
 /// Fallback error message for signing issues.
 ///
 /// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
-const noDevelopmentTeamInstruction =
+String noDevelopmentTeamInstruction =
     '''
 ════════════════════════════════════════════════════════════════════════════════
 Building a deployable iOS app requires a selected Development Team with a\u0020
 Provisioning Profile. Please ensure that a Development Team is selected by:
-$fixWithDevelopmentTeamInstruction
+${fixWithDevelopmentTeamInstruction(includeTrustStep: false)}
 
 For more information, please visit:
   https://flutter.dev/to/ios-development-team
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
-const fixWithDevelopmentTeamInstruction = '''
+
+String fixWithDevelopmentTeamInstruction({required bool includeTrustStep}) {
+  final trustStep = includeTrustStep
+      ? '\n  5- Trust your newly created Development Certificate on your iOS device\n'
+            '     via Settings > General > Device Management > [your new certificate] > Trust'
+      : '';
+  return '''
   1- Open the Flutter project's Xcode target with
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
@@ -94,7 +106,8 @@ const fixWithDevelopmentTeamInstruction = '''
          - Ensure you have a valid unique Bundle ID
          - Register your device with your Apple Developer Account
          - Let Xcode automatically provision a profile for your app
-  4- Build or run your project again''';
+  4- Build or run your project again$trustStep''';
+}
 
 /// Pattern to extract identity from list of identities.
 ///
@@ -121,6 +134,17 @@ final _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-
 /// `subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O/O=Company LLC/C=US`
 /// extracts `ABCDE1F2DH`
 final _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
+
+/// Pattern to extract O (Organization) from certificate subject.
+///
+/// Requires a separator character (comma, slash, or space) or start-of-string
+/// immediately before `O=` to avoid false positives on fields like `CO=`.
+///
+/// Example:
+///
+/// `subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US`
+/// extracts `Company LLC`
+final _certificateOrganizationExtractionPattern = RegExp(r'(?:^|[,/ ])O=([^,/\n]+)');
 
 /// Pattern to extract CN (Common Name) from certificate subject.
 ///
@@ -328,15 +352,15 @@ class XcodeCodeSigningSettings {
       _logger.printTrace('Unable to get code-sign settings on non-Mac platform.');
       return null;
     }
-    final bool toolsValidated = await _validateCodeSignSearchTools();
+    final bool toolsValidated = await validateCodeSignSearchTools();
     if (!toolsValidated) {
       return null;
     }
 
-    final List<String> validCodeSigningIdentities = await _getSigningIdentities();
+    final List<String> validCodeSigningIdentities = await getSigningIdentities();
     if (validCodeSigningIdentities.isEmpty) {
       if (shouldExitOnNoCerts) {
-        _logger.printError(noCertificatesInstruction, emphasis: true);
+        _logger.printError(noCertificatesInstruction(), emphasis: true);
         throwToolExit(
           'No development certificates available to code sign app for device deployment',
         );
@@ -378,7 +402,11 @@ class XcodeCodeSigningSettings {
 
     String? identity;
     if (savedCertChoice != null) {
-      identity = _validateSavedIdentity(savedCertChoice, validCodeSigningIdentities);
+      identity = _validateSavedIdentity(
+        savedCertChoice,
+        validCodeSigningIdentities,
+        printStatus: true,
+      );
       if (identity == null) {
         _logger.printError(
           'Saved signing certificate "$savedCertChoice" is not a valid development '
@@ -398,12 +426,34 @@ class XcodeCodeSigningSettings {
       }
     }
 
-    final String? developmentTeam = await _getDevelopmentTeamFromIdentity(identity);
+    final String? developmentTeam = await getDevelopmentTeamFromIdentity(identity);
     if (developmentTeam == null) {
       return null;
     }
     _logger.printStatus('Developer identity "$identity" selected for iOS code signing');
     return <String, String>{_developmentTeamBuildSettingName: developmentTeam};
+  }
+
+  /// Get the [ProvisioningProfile] from the Flutter config if it's saved.
+  Future<ProvisioningProfile?> getProvisioningProfileFromConfig(
+    List<String> validCodeSigningIdentities,
+  ) async {
+    final savedProfile =
+        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
+    if (savedProfile == null) {
+      return null;
+    }
+    return _validateSavedProfile(savedProfile, validCodeSigningIdentities);
+  }
+
+  /// Get the identity from the Flutter config if it's saved.
+  Future<String?> getIdentityFromCertFromConfig(List<String> validCodeSigningIdentities) async {
+    final savedCertChoice =
+        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
+    if (savedCertChoice == null) {
+      return null;
+    }
+    return _validateSavedIdentity(savedCertChoice, validCodeSigningIdentities);
   }
 
   void _saveCodeSignIdentity(String identity) {
@@ -417,7 +467,7 @@ class XcodeCodeSigningSettings {
   }
 
   /// Validates that command-line tools `security` and `openssl` are available.
-  Future<bool> _validateCodeSignSearchTools({bool printError = false}) async {
+  Future<bool> validateCodeSignSearchTools({bool printError = false}) async {
     // If the user's environment is missing the tools needed to find and read
     // certificates, abandon. Tools should be pre-equipped on macOS.
     if (!await _processUtils.exitsHappy(const <String>['which', 'security']) ||
@@ -433,7 +483,7 @@ class XcodeCodeSigningSettings {
   }
 
   /// Get list of code-signing identities.
-  Future<List<String>> _getSigningIdentities() async {
+  Future<List<String>> getSigningIdentities() async {
     String findIdentityStdout;
     try {
       findIdentityStdout = (await _processUtils.run(<String>[
@@ -541,6 +591,16 @@ class XcodeCodeSigningSettings {
     File certificate,
     List<String> validCodeSigningIdentities,
   ) async {
+    final String? commonName = await commonNameForCertificate(certificate);
+    if (commonName == null) {
+      _logger.printError('Unable to extract Common Name from certificate.');
+      return null;
+    }
+    return validCodeSigningIdentities.where((String id) => id.contains(commonName)).firstOrNull;
+  }
+
+  /// Extract the Common Name from the [certificate].
+  Future<String?> commonNameForCertificate(File certificate) async {
     final String resultsStdOut;
     try {
       final RunResult results = await _processUtils.run(<String>[
@@ -557,25 +617,26 @@ class XcodeCodeSigningSettings {
       _logger.printError('Unexpected failure from openssl: $error.');
       return null;
     }
-
     final String? commonName = _certificateCommonNameExtractionPattern
         .firstMatch(resultsStdOut)
         ?.group(1);
-    if (commonName == null) {
-      _logger.printError('Unable to extract Common Name from certificate.');
-      return null;
-    }
-    return validCodeSigningIdentities.where((String id) => id.contains(commonName)).firstOrNull;
+    return commonName;
   }
 
   /// Returns [identity] if it is found within [validCodeSigningIdentities] and
   /// prints a message that it was found.
-  String? _validateSavedIdentity(String identity, List<String> validCodeSigningIdentities) {
+  String? _validateSavedIdentity(
+    String identity,
+    List<String> validCodeSigningIdentities, {
+    bool printStatus = false,
+  }) {
     if (validCodeSigningIdentities.contains(identity)) {
-      _logger.printStatus(
-        'Found saved certificate choice "$identity". To clear, use "flutter config '
-        '--clear-ios-signing-settings".',
-      );
+      if (printStatus) {
+        _logger.printStatus(
+          'Found saved certificate choice "$identity". To clear, use "flutter config '
+          '--clear-ios-signing-settings".',
+        );
+      }
       return identity;
     }
     return null;
@@ -583,7 +644,16 @@ class XcodeCodeSigningSettings {
 
   /// Find the certificate for the [identity] and extract the development team /
   /// organizational unit from the certificate.
-  Future<String?> _getDevelopmentTeamFromIdentity(String identity) async {
+  Future<String?> getDevelopmentTeamFromIdentity(String identity) async {
+    final _CertificateTeamInfo? info = await _getCertificateTeamInfo(identity);
+    return info?.teamId;
+  }
+
+  /// Looks up [_CertificateTeamInfo] (team ID and team name) for the given
+  /// [identity] by running `security find-certificate` and `openssl x509 -subject`.
+  ///
+  /// Returns null if the certificate cannot be found or parsed.
+  Future<_CertificateTeamInfo?> _getCertificateTeamInfo(String identity) async {
     final String? signingCertificateId = _securityFindIdentityCertificateCnExtractionPattern
         .firstMatch(identity)
         ?.group(1);
@@ -632,16 +702,21 @@ class XcodeCodeSigningSettings {
       return null;
     }
 
-    final String? developmentTeam = _certificateOrganizationalUnitExtractionPattern
+    final String? teamId = _certificateOrganizationalUnitExtractionPattern
         .firstMatch(opensslOutput)
         ?.group(1);
-    if (developmentTeam == null) {
+    if (teamId == null) {
       _logger.printError(
         'Unable to parse development team from code-signing certificate $identity',
       );
       return null;
     }
-    return developmentTeam;
+
+    final String? teamName = _certificateOrganizationExtractionPattern
+        .firstMatch(opensslOutput)
+        ?.group(1);
+
+    return (teamId: teamId, teamName: teamName ?? '');
   }
 
   /// Select code-signinging settings and save to config.
@@ -659,7 +734,7 @@ class XcodeCodeSigningSettings {
     }
     _terminal.usesTerminalUi = true;
 
-    final bool toolsValidated = await _validateCodeSignSearchTools(printError: true);
+    final bool toolsValidated = await validateCodeSignSearchTools(printError: true);
     if (!toolsValidated) {
       return;
     }
@@ -684,9 +759,9 @@ class XcodeCodeSigningSettings {
     }
 
     if (style == _CodeSigningStyle.automatic) {
-      final List<String> validCodeSigningIdentities = await _getSigningIdentities();
+      final List<String> validCodeSigningIdentities = await getSigningIdentities();
       if (validCodeSigningIdentities.isEmpty) {
-        _logger.printError(noCertificatesInstruction, emphasis: true);
+        _logger.printError(noCertificatesInstruction(), emphasis: true);
         _logger.printWarning(_codeSignSelectionCanceled);
         return;
       }
@@ -696,7 +771,7 @@ class XcodeCodeSigningSettings {
         return;
       }
     } else if (style == _CodeSigningStyle.manual) {
-      final List<ProvisioningProfile> validProvisioningProfiles = await _getProvisioningProfiles();
+      final List<ProvisioningProfile> validProvisioningProfiles = await getProvisioningProfiles();
       if (validProvisioningProfiles.isEmpty) {
         _logger.printError(
           'No provisioning profiles were found. To learn how to create or download '
@@ -776,8 +851,22 @@ class XcodeCodeSigningSettings {
       emphasis: true,
     );
     final int count = validCodeSigningIdentities.length;
+
+    // Fetch team info for all identities so we can display it alongside
+    // the identity name.
+    final teamInfoMap = <String, _CertificateTeamInfo?>{};
+    for (final identity in validCodeSigningIdentities) {
+      teamInfoMap[identity] = await _getCertificateTeamInfo(identity);
+    }
+
     for (var i = 0; i < count; i++) {
-      _logger.printStatus('[${i + 1}] ${validCodeSigningIdentities[i]}');
+      final String identity = validCodeSigningIdentities[i];
+      final _CertificateTeamInfo? info = teamInfoMap[identity];
+      if (info != null) {
+        _logger.printStatus('[${i + 1}] $identity | Team: ${info.teamId} ${info.teamName}');
+      } else {
+        _logger.printStatus('[${i + 1}] $identity');
+      }
     }
     final String choice = await _terminal.promptForCharInput(
       List<String>.generate(count, (int number) => '${number + 1}')..add('q'),
@@ -805,7 +894,7 @@ class XcodeCodeSigningSettings {
   /// Get list of provisioning profiles from `~/Library/Developer/Xcode/UserData/Provisioning\ Profiles`.
   ///
   /// Only return non-Xcode-managed profiles with matching valid identities.
-  Future<List<ProvisioningProfile>> _getProvisioningProfiles() async {
+  Future<List<ProvisioningProfile>> getProvisioningProfiles({List<String>? validIdentities}) async {
     final Directory? profileDirectory = getProvisioningProfileDirectory(
       fileSystemUtils: _fileSystemUtils,
       fileSystem: _fileSystem,
@@ -815,7 +904,7 @@ class XcodeCodeSigningSettings {
       return <ProvisioningProfile>[];
     }
 
-    final List<String> validCodeSigningIdentities = await _getSigningIdentities();
+    final List<String> validCodeSigningIdentities = validIdentities ?? await getSigningIdentities();
 
     final profiles = <ProvisioningProfile>[];
     for (final FileSystemEntity entity in profileDirectory.listSync()) {

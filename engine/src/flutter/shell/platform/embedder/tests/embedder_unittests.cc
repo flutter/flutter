@@ -3647,7 +3647,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
   };
 
   // Send an event.
-  sample_event.timestamp = 1.0l;
+  sample_event.timestamp = 1.0;
   platform_task_runner->PostTask([&]() {
     FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
     message_latch->Signal();
@@ -3685,7 +3685,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
   EXPECT_EQ(echoed_events.size(), 1u);
 
   // Send a second event.
-  sample_event.timestamp = 10.0l;
+  sample_event.timestamp = 10.0;
   platform_task_runner->PostTask([&]() {
     FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
   });
@@ -4065,6 +4065,59 @@ TEST_F(EmbedderTest, CanSendPointer) {
   FlutterPointerEvent pointer_event = {};
   pointer_event.struct_size = sizeof(FlutterPointerEvent);
   pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.x = 123;
+  pointer_event.y = 456;
+  pointer_event.timestamp = static_cast<size_t>(1234567890);
+  pointer_event.view_id = 0;
+
+  FlutterEngineResult result =
+      FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
+  ASSERT_EQ(result, kSuccess);
+
+  count_latch.Wait();
+  message_latch.Wait();
+}
+
+/// Send a stylus pointer event to Dart and verify the buttons mask.
+TEST_F(EmbedderTest, CanSendStylusPointerButtons) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("pointer_data_packet_stylus_buttons");
+
+  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+  context.AddNativeCallback(
+      "SignalNativeCount",
+      CREATE_NATIVE_ENTRY([&count_latch](Dart_NativeArguments args) {
+        int count = tonic::DartConverter<int>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        EXPECT_EQ(count, 1);
+        count_latch.Signal();
+      }));
+  context.AddNativeCallback(
+      "SignalNativeMessage",
+      CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
+        auto message = tonic::DartConverter<std::string>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        EXPECT_EQ("buttons: 3", message);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(FlutterPointerEvent);
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.device_kind = kFlutterPointerDeviceKindStylus;
+  pointer_event.buttons =
+      kFlutterPointerButtonStylusContact | kFlutterPointerButtonStylusPrimary;
   pointer_event.x = 123;
   pointer_event.y = 456;
   pointer_event.timestamp = static_cast<size_t>(1234567890);

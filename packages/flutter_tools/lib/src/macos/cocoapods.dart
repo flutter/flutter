@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'package:file/file.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -18,7 +19,6 @@ import '../base/project_migrator.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../flutter_plugins.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
@@ -103,6 +103,7 @@ class CocoaPods {
     required Logger logger,
     required Platform platform,
     required Analytics analytics,
+    Abi? currentAbi,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
@@ -114,6 +115,7 @@ class CocoaPods {
          logger: logger,
          platform: platform,
          processManager: processManager,
+         currentAbi: currentAbi,
        );
 
   final FileSystem _fileSystem;
@@ -524,7 +526,7 @@ class CocoaPods {
     if (matches.isEmpty) {
       return null;
     }
-    final List<Plugin> plugins = await findPlugins(xcodeProject.parent);
+    final List<Plugin> plugins = await xcodeProject.getPlugins();
     for (final match in matches) {
       final String? missingPlugin = match.group(1);
       final String? requiringPlugin = match.group(2);

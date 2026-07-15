@@ -250,24 +250,64 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
       [callback, user_data]() { callback(user_data); });
 }
 
+bool FlutterDesktopEngineIsPlatformThread(FlutterDesktopEngineRef engine) {
+  return EngineFromHandle(engine)->task_runner()->RunsTasksOnCurrentThread();
+}
+
+void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
+                                                VoidCallback callback,
+                                                VoidCallback on_cancel,
+                                                void* user_data) {
+  FML_DCHECK(callback) << "Callback must not be null";
+  struct Context {
+    VoidCallback callback;
+    VoidCallback on_cancel;
+    void* user_data;
+    bool invoked = false;
+
+    ~Context() {
+      if (!invoked && on_cancel) {
+        on_cancel(user_data);
+      }
+    }
+  };
+
+  auto context =
+      std::make_shared<Context>(Context{callback, on_cancel, user_data});
+  EngineFromHandle(engine)->task_runner()->PostTask([context]() {
+    context->invoked = true;
+    context->callback(context->user_data);
+  });
+}
+
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
   return ViewFromHandle(view)->GetWindowHandle();
 }
 
 IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
-  auto egl_manager = ViewFromHandle(view)->GetEngine()->egl_manager();
+  auto engine = ViewFromHandle(view)->GetEngine();
+  IDXGIAdapter* adapter;
+  if (!FlutterDesktopEngineGetGraphicsAdapter(HandleForEngine(engine),
+                                              &adapter)) {
+    return nullptr;
+  }
+  return adapter;
+}
+
+bool FlutterDesktopEngineGetGraphicsAdapter(FlutterDesktopEngineRef engine,
+                                            IDXGIAdapter** adapter_out) {
+  auto egl_manager = EngineFromHandle(engine)->egl_manager();
   if (egl_manager) {
     Microsoft::WRL::ComPtr<ID3D11Device> d3d_device;
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgi_device;
     if (egl_manager->GetDevice(d3d_device.GetAddressOf()) &&
         SUCCEEDED(d3d_device.As(&dxgi_device))) {
-      IDXGIAdapter* adapter;
-      if (SUCCEEDED(dxgi_device->GetAdapter(&adapter))) {
-        return adapter;
+      if (SUCCEEDED(dxgi_device->GetAdapter(adapter_out))) {
+        return true;
       }
     }
   }
-  return nullptr;
+  return false;
 }
 
 bool FlutterDesktopEngineProcessExternalWindowMessage(
@@ -318,6 +358,13 @@ void FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
     FlutterDesktopWindowProcCallback delegate) {
   registrar->engine->window_proc_delegate_manager()
       ->UnregisterTopLevelWindowProcDelegate(delegate);
+}
+
+bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar,
+    IDXGIAdapter** adapter_out) {
+  return FlutterDesktopEngineGetGraphicsAdapter(
+      HandleForEngine(registrar->engine), adapter_out);
 }
 
 UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {

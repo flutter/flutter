@@ -59,6 +59,18 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
@@ -89,6 +101,18 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
@@ -117,6 +141,18 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -168,6 +204,18 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -207,6 +255,18 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -242,6 +302,18 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -293,6 +365,18 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -343,6 +427,18 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -382,6 +478,18 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
 
@@ -676,6 +784,41 @@ void main() {
   );
 
   testUsingContext(
+    'Passes enabled-deferred-loading to wasm when specified',
+    () async {
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await runner.run(<String>[
+        'build',
+        'web',
+        '--no-pub',
+        '--wasm',
+        '--enable-wasm-deferred-loading',
+      ]);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+
+            expect(
+              configs[0].toCommandOptions(BuildMode.release),
+              contains('--enable-deferred-loading'),
+            );
+            expect(
+              configs[1].toCommandOptions(BuildMode.release),
+              isNot(contains('--enable-deferred-loading')),
+            );
+          }),
+    },
+  );
+
+  testUsingContext(
     'Web build supports build-name and build-number',
     () async {
       final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
@@ -838,6 +981,18 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 

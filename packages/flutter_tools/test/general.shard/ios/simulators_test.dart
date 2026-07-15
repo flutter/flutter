@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -15,6 +19,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -32,6 +37,13 @@ final Platform macosPlatform = FakePlatform(
 );
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   late FakePlatform osx;
   late FileSystemUtils fsUtils;
   late MemoryFileSystem fileSystem;
@@ -57,6 +69,7 @@ void main() {
       () async {
         final simulator = IOSSimulator(
           '123',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -88,6 +101,7 @@ void main() {
     () async {
       final simulator = IOSSimulator(
         '123',
+        cpuArch: CpuArch.x86_64,
         name: 'iPhone 11',
         simControl: FakeSimControl(),
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -119,6 +133,7 @@ void main() {
         osx.environment['HOME'] = '/foo/bar';
         final simulator = IOSSimulator(
           '123',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -142,6 +157,7 @@ void main() {
         osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
         final simulator = IOSSimulator(
           '456',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -169,6 +185,7 @@ void main() {
     testWithoutContext('can be parsed from iOS-11-3', () async {
       final device = IOSSimulator(
         'x',
+        cpuArch: CpuArch.x86_64,
         name: 'iPhone SE',
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         simControl: simControl,
@@ -181,6 +198,7 @@ void main() {
     testWithoutContext('can be parsed from iOS 11.2', () async {
       final device = IOSSimulator(
         'x',
+        cpuArch: CpuArch.x86_64,
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -193,6 +211,7 @@ void main() {
     testWithoutContext('Has a simulator category', () async {
       final device = IOSSimulator(
         'x',
+        cpuArch: CpuArch.x86_64,
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -215,6 +234,7 @@ void main() {
       () async {
         final simulator = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'Apple TV',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
@@ -235,6 +255,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'Apple Watch',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
@@ -256,6 +277,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'iPad 2',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -277,6 +299,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'iPad Retina',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -298,6 +321,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 5',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -319,6 +343,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 5s',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -340,6 +365,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone SE',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -361,6 +387,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 7 Plus',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -382,6 +409,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone X',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -417,6 +445,7 @@ void main() {
       // Doesn't matter what the device is.
       final deviceUnderTest = IOSSimulator(
         'x',
+        cpuArch: CpuArch.x86_64,
         name: 'iPhone SE',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -443,6 +472,7 @@ void main() {
       () async {
         final device = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 9.3',
           simControl: simControl,
@@ -469,6 +499,7 @@ void main() {
       () async {
         final device = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
@@ -478,7 +509,9 @@ void main() {
             'eventType = logEvent AND '
             'processImagePath ENDSWITH "My Super Awesome App" AND '
             '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
-            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
+            'OR eventMessage CONTAINS "UIScene life cycle is required" '
+            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+            'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
             'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
             'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
             'NOT(eventMessage CONTAINS " libxpc.dylib ")';
@@ -513,6 +546,7 @@ void main() {
       () async {
         final device = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
@@ -521,7 +555,9 @@ void main() {
         const expectedPredicate =
             'eventType = logEvent AND '
             '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
-            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
+            'OR eventMessage CONTAINS "UIScene life cycle is required" '
+            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+            'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
             'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
             'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
             'NOT(eventMessage CONTAINS " libxpc.dylib ")';
@@ -591,6 +627,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.0',
             simControl: simControl,
@@ -635,6 +672,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
@@ -692,6 +730,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
@@ -736,9 +775,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           const logPredicate =
               'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
               'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-              'OR processImageUUID == senderImageUUID OR eventMessage CONTAINS "`UIScene` lifecycle'
-              ' will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene '
-              'lifecycle.") AND NOT(eventMessage CONTAINS ": could not find icon '
+              'OR processImageUUID == senderImageUUID '
+              'OR eventMessage CONTAINS "UIScene life cycle is required" '
+              'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+              'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
+              'AND NOT(eventMessage CONTAINS ": could not find icon '
               'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
               'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
           fakeProcessManager.addCommand(
@@ -774,6 +815,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -798,14 +840,88 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
 
       testUsingContext(
+        'log reader throws ToolExit when UIScene error message is detected',
+        () async {
+          const logPredicate =
+              'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
+              'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+              'OR processImageUUID == senderImageUUID '
+              'OR eventMessage CONTAINS "UIScene life cycle is required" '
+              'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+              'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
+              'AND NOT(eventMessage CONTAINS ": could not find icon '
+              'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+              'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+          fakeProcessManager.addCommand(
+            const FakeCommand(
+              command: <String>[
+                'xcrun',
+                'simctl',
+                'spawn',
+                '123456',
+                'log',
+                'stream',
+                '--style',
+                'json',
+                '--predicate',
+                logPredicate,
+              ],
+              stdout:
+                  '},{\n'
+                  '  "traceID" : 37579774151491588,\n'
+                  '  "eventMessage" : "UIScene life cycle is required",\n'
+                  '  "eventType" : "logEvent"\n'
+                  '},{\n',
+            ),
+          );
+
+          final device = IOSSimulator(
+            '123456',
+            cpuArch: CpuArch.x86_64,
+            name: 'iPhone 11',
+            simulatorCategory: 'iOS 11.0',
+            simControl: simControl,
+            logger: logger,
+          );
+          final DeviceLogReader logReader = device.getLogReader(
+            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+          );
+
+          final completer = Completer<void>();
+          runZonedGuarded<void>(
+            () {
+              logReader.logLines.listen((_) {});
+            },
+            (Object error, StackTrace stack) {
+              expect(error, isA<ToolExit>());
+              expect(error.toString(), contains(kUISceneMigrationRequiredError));
+              completer.complete();
+            },
+          );
+
+          await completer.future;
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => fakeProcessManager,
+          FileSystem: () => fileSystem,
+          Platform: () => osx,
+          Xcode: () => xcode,
+          Logger: () => logger,
+        },
+      );
+
+      testUsingContext(
         'log reader handles bad output',
         () async {
           const logPredicate =
               'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
               'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-              'OR processImageUUID == senderImageUUID OR eventMessage CONTAINS "`UIScene` lifecycle '
-              'will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene '
-              'lifecycle.") AND NOT(eventMessage CONTAINS ": could not find icon '
+              'OR processImageUUID == senderImageUUID '
+              'OR eventMessage CONTAINS "UIScene life cycle is required" '
+              'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+              'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
+              'AND NOT(eventMessage CONTAINS ": could not find icon '
               'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
               'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
           fakeProcessManager.addCommand(
@@ -828,6 +944,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
+            cpuArch: CpuArch.x86_64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -902,6 +1019,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     Xcode xcode;
     Xcode xcodeBadSimctl;
     late SimControl simControl;
+    late SimControl simControlBadSimctl;
     late IOSSimulatorUtils simulatorUtils;
     late IOSSimulatorUtils simulatorUtilsBadSimctl;
     late BufferLogger logger;
@@ -913,11 +1031,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       xcode = Xcode.test(processManager: FakeProcessManager.any());
 
       final fakeProcessManagerBadSimctl = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 0',
-        ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
           stderr: 'failed to run',
@@ -927,12 +1042,29 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       xcodeBadSimctl = Xcode.test(processManager: fakeProcessManagerBadSimctl);
       logger = BufferLogger.test();
       simControl = SimControl(logger: logger, processManager: fakeProcessManager, xcode: xcode);
+      simControlBadSimctl = SimControl(
+        logger: logger,
+        processManager: fakeProcessManager,
+        xcode: xcodeBadSimctl,
+      );
       simulatorUtils = IOSSimulatorUtils(
+        operatingSystemUtils: OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: osx,
+          processManager: FakeProcessManager.any(),
+        ),
         logger: logger,
         processManager: fakeProcessManager,
         xcode: xcode,
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
+        operatingSystemUtils: OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: osx,
+          processManager: FakeProcessManager.any(),
+        ),
         logger: logger,
         processManager: fakeProcessManager,
         xcode: xcodeBadSimctl,
@@ -1007,6 +1139,51 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
+    testWithoutContext('getConnectedDevices handles simctl not properly installed', () async {
+      final List<BootedSimDevice> devices = await simControlBadSimctl.getConnectedDevices();
+
+      expect(devices, isEmpty);
+      expect(
+        logger.traceText,
+        contains('Skipping iOS simulator discovery because simctl is not available.'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('getConnectedDevices handles simctl process exception', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
+          exception: ProcessException('xcrun', <String>[
+            'simctl',
+          ], 'Resource temporarily unavailable'),
+        ),
+      );
+
+      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
+
+      expect(devices, isEmpty);
+      expect(logger.errorText, contains('Error executing simctl:'));
+      expect(logger.errorText, contains('Resource temporarily unavailable'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('getConnectedDevices handles simctl file system exception', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
+          exception: FileSystemException('Resource temporarily unavailable'),
+        ),
+      );
+
+      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
+
+      expect(devices, isEmpty);
+      expect(logger.errorText, contains('Error executing simctl:'));
+      expect(logger.errorText, contains('Resource temporarily unavailable'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
     testWithoutContext(
       'IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed',
       () async {
@@ -1020,6 +1197,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
       final iosSimulatorA = IOSSimulator(
         'x',
+        cpuArch: CpuArch.x86_64,
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
@@ -1089,6 +1267,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testWithoutContext('simulator stopApp handles null app package', () async {
       final iosSimulator = IOSSimulator(
         'x',
+        cpuArch: CpuArch.x86_64,
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
@@ -1287,6 +1466,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1326,6 +1506,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1374,6 +1555,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1458,6 +1640,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1524,6 +1707,7 @@ flutter:
 
         final simulator = IOSSimulator(
           'test',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -1549,6 +1733,7 @@ flutter:
 
         final simulator = IOSSimulator(
           'test',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -1573,6 +1758,7 @@ flutter:
 
         final simulator = IOSSimulator(
           'test',
+          cpuArch: CpuArch.x86_64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -1590,6 +1776,7 @@ flutter:
     testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
       final simulator = IOSSimulator(
         'test',
+        cpuArch: CpuArch.x86_64,
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',

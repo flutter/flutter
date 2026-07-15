@@ -80,13 +80,13 @@ abstract class ViewRasterizer {
     final bitmapSize = BitmapSize.fromSize(frameSize);
 
     currentFrameSize = bitmapSize;
-    await prepareToDraw();
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 
+    await prepareToDraw();
     await viewEmbedder.submitFrame(recorder);
   }
 
@@ -163,6 +163,9 @@ abstract class DisplayCanvas {
 
   /// Initialize the overlay.
   void initialize();
+
+  /// Marks whether this canvas is used as an overlay between platform views.
+  void setIsOverlay(bool isOverlay) {}
 
   /// Disposes this overlay.
   void dispose();

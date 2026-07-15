@@ -6,100 +6,87 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
-import 'models.dart';
-import 'window_content.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-class DialogWindowContent extends StatelessWidget {
-  const DialogWindowContent({super.key, required this.window});
+import 'models.dart';
 
-  final DialogWindowController window;
+class DialogWindowContent extends StatelessWidget {
+  const DialogWindowContent({super.key, required this.dialogWindowController});
+
+  final DialogWindowController dialogWindowController;
 
   @override
   Widget build(BuildContext context) {
-    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
-      context,
-    );
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    final child = FocusScope(
-      autofocus: true,
-      child: Scaffold(
-        appBar: AppBar(title: Text('Dialog')),
-        body: SingleChildScrollView(
-          child: Center(
+    return Overlay.wrap(
+      alwaysSizeToContent: true,
+      child: FocusScope(
+        autofocus: true,
+        child: IntrinsicWidth(
+          child: Material(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: .min,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    final UniqueKey key = UniqueKey();
-                    windowManager.add(
-                      KeyedWindow(
-                        key: key,
-                        controller: DialogWindowController(
-                          preferredSize: windowSettings.dialogSize,
-                          delegate: CallbackDialogWindowControllerDelegate(
-                            onDestroyed: () => windowManager.remove(key),
-                          ),
-                          parent: window,
-                          title: 'Dialog',
-                        ),
+                AppBar(title: const Text('Dialog')),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: .min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          final WindowRegistry windowRegistry = WindowRegistry.of(context);
+
+                          late final WindowEntry entry;
+                          final controller = DialogWindowController(
+                            delegate: CallbackDialogWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Modal Dialog',
+                            size: windowSettings.dialogSize,
+                            parent: dialogWindowController,
+                          );
+
+                          entry = WindowEntry(
+                            controller: controller,
+                            builder: (BuildContext context) =>
+                                DialogWindowContent(dialogWindowController: controller),
+                          );
+                          windowRegistry.register(entry);
+                        },
+                        child: const Text('Create Modal Dialog'),
                       ),
-                    );
-                  },
-                  child: const Text('Create Modal Dialog'),
-                ),
-                const SizedBox(height: 20),
-                ListenableBuilder(
-                  listenable: window,
-                  builder: (BuildContext context, Widget? _) {
-                    final dpr = MediaQuery.of(context).devicePixelRatio;
-                    final windowSize = WindowScope.contentSizeOf(context);
-                    return Text(
-                      'View ID: ${window.rootView.viewId}\n'
-                      'Parent View ID: ${window.parent?.rootView.viewId ?? "None"}\n'
-                      'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'
-                      'Device Pixel Ratio: $dpr',
-                      textAlign: TextAlign.center,
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    window.destroy();
-                  },
-                  child: const Text('Close'),
+                      const SizedBox(height: 20),
+                      ListenableBuilder(
+                        listenable: dialogWindowController,
+                        builder: (BuildContext context, Widget? _) {
+                          final double dpr = MediaQuery.of(context).devicePixelRatio;
+                          final Size windowSize = WindowScope.contentSizeOf(context);
+                          return Text(
+                            'View ID: ${dialogWindowController.rootView.viewId}\n'
+                            'Parent View ID: ${dialogWindowController.parent?.rootView.viewId ?? "None"}\n'
+                            'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
+                            'Device Pixel Ratio: $dpr',
+                            textAlign: TextAlign.center,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          dialogWindowController.destroy();
+                        },
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
         ),
       ),
-    );
-
-    return ViewAnchor(
-      view: ListenableBuilder(
-        listenable: windowManager,
-        builder: (BuildContext context, Widget? child) {
-          final List<Widget> childViews = <Widget>[];
-          final childWindowList = windowManager.getWindows(parent: window);
-          for (final KeyedWindow childWindow in childWindowList) {
-            childViews.add(
-              WindowContent(
-                controller: childWindow.controller,
-                windowKey: childWindow.key,
-                onDestroyed: () => windowManager.remove(childWindow.key),
-                onError: () => windowManager.remove(childWindow.key),
-              ),
-            );
-          }
-
-          return ViewCollection(views: childViews);
-        },
-      ),
-      child: child,
     );
   }
 }

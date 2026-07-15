@@ -12,8 +12,8 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "include/gpu/ganesh/GrDirectContext.h"
 #include "shell/gpu/gpu_surface_vulkan_impeller.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 
@@ -29,7 +29,8 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
     uint32_t queue_family_index,
     VkQueue queue,
     const VulkanDispatchTable& vulkan_dispatch_table,
-    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
+    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+    impeller::Flags impeller_flags)
     : vk_(fml::MakeRefCounted<vulkan::VulkanProcTable>(
           vulkan_dispatch_table.get_instance_proc_address)),
       vulkan_dispatch_table_(vulkan_dispatch_table),
@@ -54,6 +55,7 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
   settings.shader_libraries_data = shader_mappings;
   settings.proc_address_callback =
       vulkan_dispatch_table.get_instance_proc_address;
+  settings.flags = impeller_flags;
 
   impeller::ContextVK::EmbedderData data;
   data.instance = instance;
@@ -77,8 +79,11 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
     return;
   }
 
-  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
-
+  if (impeller_flags.use_sdfs) {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (VulkanSDF).";
+  } else {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
+  }
   valid_ = true;
 }
 

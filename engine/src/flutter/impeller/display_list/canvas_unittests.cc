@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
-
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
@@ -13,6 +12,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
@@ -70,7 +70,7 @@ std::unique_ptr<Canvas> CreateTestCanvas(
 }
 
 TEST_P(AiksTest, TransformMultipliesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_MATRIX_NEAR(canvas->GetCurrentTransform(), Matrix());
@@ -111,7 +111,7 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 }
 
 TEST_P(AiksTest, CanvasCanPushPopCTM) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_EQ(canvas->GetSaveCount(), 1u);
@@ -129,7 +129,7 @@ TEST_P(AiksTest, CanvasCanPushPopCTM) {
 }
 
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   Matrix identity;
@@ -140,7 +140,7 @@ TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
 }
 
 TEST_P(AiksTest, BackdropCountDownNormal) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -175,7 +175,7 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -215,7 +215,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -252,7 +252,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
 // filters in the root pass. If we reach a count of 0 while in a nested
 // saveLayer, we should not restore to the onscreen.
 TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -285,7 +285,7 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
 TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -332,8 +332,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = flutter::DlRuntimeEffectImpeller::Make(runtime_stage);
@@ -342,7 +341,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       runtime_effect, {}, uniform_data);
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -378,11 +377,12 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
 }
 
 TEST_P(AiksTest, SupportsBlitToOnscreen) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
-  if (GetBackend() != PlaygroundBackend::kMetal) {
+  if (GetBackend() != PlaygroundBackend::kMetal &&
+      GetBackend() != PlaygroundBackend::kMetalSDF) {
     EXPECT_FALSE(canvas->SupportsBlitToOnscreen());
   } else {
     EXPECT_TRUE(canvas->SupportsBlitToOnscreen());
@@ -409,13 +409,8 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
         flutter::DlTileMode::kClamp);
   }
 
-  auto RectMakeCenterHalfSize = [](Point center, Point half_size) {
-    Size size(half_size.x * 2, half_size.y * 2);
-    return Rect::MakeOriginSize(center - half_size, size);
-  };
-
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
     // Somehow there's a scaling factor between PlaygroundPoint and Canvas.
     Matrix ctm = Matrix::MakeScale(Vector2(1, 1) * 0.5);
@@ -425,19 +420,19 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
     static Scalar radius = 200;
 
     // Define the ImGui
-    ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 100);
       ImGui::SliderFloat("Radius", &radius, 0, 1000);
+      ImGui::End();
     }
-    ImGui::End();
 
     static PlaygroundPoint right_reference_var(
         ctm * (right_center + default_size / 2), 30, Color::White());
     Point right_reference = i_ctm * DrawPlaygroundPoint(right_reference_var);
     Point half_size = (right_reference - right_center).Abs();
-    Rect left_bounds = RectMakeCenterHalfSize(left_center, half_size);
-    Rect right_bounds = RectMakeCenterHalfSize(right_center, half_size);
+    Rect left_bounds = Rect::MakeEllipseBounds(left_center, half_size);
+    Rect right_bounds = Rect::MakeEllipseBounds(right_center, half_size);
 
     Paint paint{
         .color = color,
@@ -461,6 +456,180 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
   };
 
   ASSERT_TRUE(Playground::OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
+  ContentContext& context = GetContentContext();
+
+  TextureDescriptor desc;
+  desc.size = {100, 100};
+  desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  desc.usage = TextureUsage::kRenderTarget;
+  auto texture =
+      context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  auto dl_image = impeller::DlImageImpeller::Make(texture);
+
+  context.SetTextureCachingEnabled(true);
+  auto cached_tex1 = dl_image->GetCachedTexture(context);
+  ASSERT_EQ(cached_tex1, texture);
+
+  auto cached_tex2 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex2, texture);
+
+  context.RemoveCachedTexture(dl_image.get());
+  auto cached_tex3 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex3, nullptr);
+
+  auto cached_tex4 = dl_image->GetCachedTexture(context);
+  ASSERT_EQ(cached_tex4, texture);
+
+  context.ClearCachedTextures();
+  auto cached_tex5 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex5, nullptr);
+
+  context.SetTextureCachingEnabled(false);
+}
+
+/// Verifies blend mode compatibility with SDF rendering.
+///
+/// The compatibility condition is:
+/// `mix(blend(src, dst), dst, 1 - sdf_alpha) == blend(src * sdf_alpha, dst)`
+TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
+  std::vector<Color> colors = {
+      Color::BlackTransparent(),
+      Color::Black(),
+      Color::White(),
+      Color::LimeGreen(),
+      Color::CornflowerBlue(),
+      Color::LimeGreen().WithAlpha(0.8),
+      Color::CornflowerBlue().WithAlpha(0.7),
+  };
+
+  for (int i = 0; i <= static_cast<int>(BlendMode::kLastMode); i++) {
+    BlendMode blend_mode = static_cast<BlendMode>(i);
+    bool blend_mode_is_compatible = true;
+
+    for (const auto& src : colors) {
+      for (const auto& dst : colors) {
+        for (Scalar sdf_alpha = 0.0; sdf_alpha < 1.01; sdf_alpha += 0.2) {
+          // `mix(blend(src, dst), dst, 1 - sdf_alpha)`:
+          // 1. Blend src onto dst.
+          Color blended = dst.Blend(src, blend_mode);
+          // 2. Mix with dst using sdf_alpha. Mix by lerping using
+          // pre-multiplied colors.
+          Color blended_then_sdf_alpha_applied =
+              Color::Lerp(blended.Premultiply(), dst.Premultiply(),
+                          1.0 - sdf_alpha)
+                  .Unpremultiply();
+
+          // `blend(src * sdf_alpha, dst)`:
+          // 1. Apply sdf_alpha to src's alpha.
+          Color sdf_alpha_applied = src.WithAlpha(src.alpha * sdf_alpha);
+          // 2. Blend onto dst.
+          Color sdf_alpha_applied_then_blended =
+              dst.Blend(sdf_alpha_applied, blend_mode);
+
+          // Compare results.
+          if (blended_then_sdf_alpha_applied !=
+              sdf_alpha_applied_then_blended) {
+            blend_mode_is_compatible = false;
+          }
+        }
+      }
+    }
+
+    Paint paint = {.blend_mode = blend_mode};
+    EXPECT_EQ(blend_mode_is_compatible,
+              Canvas::IsCompatibleWithSDFRendering(paint))
+        << "Failure for BlendMode: " << BlendModeToString(blend_mode);
+  }
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsEmptyForEmptyRect) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  Rect empty_rect = Rect::MakeXYWH(0, 0, 0, 10);
+  EXPECT_TRUE(canvas->UpscaledRect(empty_rect).IsEmpty());
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsUnmodifiedWithPerspective) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  canvas->Transform(Matrix::MakePerspective(Degrees(60), 1, 1, 100));
+  ASSERT_TRUE(canvas->GetCurrentTransform().HasPerspective2D());
+
+  Rect subpixel_rect = Rect::MakeXYWH(10, 10, 0.1f, 0.1f);
+  EXPECT_EQ(canvas->UpscaledRect(subpixel_rect), subpixel_rect);
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsEmptyWhenScaledToZero) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  canvas->Scale(Vector3(0.0f, 1.0f));
+  Rect rect = Rect::MakeXYWH(0, 0, 10, 10);
+  EXPECT_TRUE(canvas->UpscaledRect(rect).IsEmpty());
+}
+
+TEST_P(AiksTest, UpscaledRectReturnsUnmodifiedWhenLargeEnough) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  Rect rect = Rect::MakeXYWH(0, 0, 10, 20);
+  EXPECT_EQ(canvas->UpscaledRect(rect), rect);
+
+  canvas->Scale(Vector3(0.5f, 0.5f));
+  EXPECT_EQ(canvas->UpscaledRect(rect), rect);
+}
+
+TEST_P(AiksTest, UpscaledRectExpandsSubPixelRectWithUnscaledCanvas) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  Point center = Point();
+  Size size = Size(0.2f, 10.0f);
+  Rect rect = Rect::MakeEllipseBounds(center, size * 0.5f);
+
+  Rect upscaled = canvas->UpscaledRect(rect);
+
+  Size expected_size = Size(1.0f, 10.0f);
+  Rect expected = Rect::MakeEllipseBounds(center, expected_size * 0.5f);
+  EXPECT_RECT_NEAR(upscaled, expected);
+}
+
+TEST_P(AiksTest, UpscaledRectExpandsSubPixelRectWithScaledCanvas) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context);
+
+  // Canvas is scaled by 2x in the X direction and 4x in the Y direction.
+  canvas->Scale(Vector3(2.0f, 4.0f));
+
+  Point center = Point();
+  Size size = Size(0.2f, 10.0f);
+  Rect rect = Rect::MakeEllipseBounds(center, size * 0.5f);
+
+  Rect upscaled = canvas->UpscaledRect(rect);
+
+  // Rect's device size is (0.2 * 2, 10.0 * 4) = (0.4, 40.0) pixels.
+  // It's expanded to (1.0, 40.0) pixels.
+  // In local space, this corresponds to (1.0 / 2.0, 40.0 / 4.0) = (0.5, 10.0).
+  Size expected_local_size = Size(0.5f, 10.0f);
+  Rect expected = Rect::MakeEllipseBounds(center, expected_local_size * 0.5f);
+  EXPECT_RECT_NEAR(upscaled, expected);
+}
+
+TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
+  Paint paint;
+  paint.anti_alias = false;
+  EXPECT_FALSE(Canvas::IsCompatibleWithSDFRendering(paint));
+}
+
+TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
+  Paint paint;
+  EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
 }
 
 }  // namespace testing

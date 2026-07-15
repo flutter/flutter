@@ -544,10 +544,8 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
     convertedOptions[UIApplicationOpenURLOptionsAnnotationKey] = options.annotation;
   }
   convertedOptions[UIApplicationOpenURLOptionsOpenInPlaceKey] = @(options.openInPlace);
-  if (@available(iOS 14.5, *)) {
-    if (options.eventAttribution) {
-      convertedOptions[UIApplicationOpenURLOptionsEventAttributionKey] = options.eventAttribution;
-    }
+  if (options.eventAttribution) {
+    convertedOptions[UIApplicationOpenURLOptionsEventAttributionKey] = options.eventAttribution;
   }
   return convertedOptions;
 }
@@ -615,8 +613,9 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
     if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:@selector(application:
-                                         performActionForShortcutItem:completionHandler:)]) {
+    if ([delegate
+            respondsToSelector:@selector(
+                                   application:performActionForShortcutItem:completionHandler:)]) {
       if ([delegate application:application
               performActionForShortcutItem:shortcutItem
                          completionHandler:completionHandler]) {
@@ -688,8 +687,8 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
     if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:@selector(application:
-                                         continueUserActivity:restorationHandler:)]) {
+    if ([delegate
+            respondsToSelector:@selector(application:continueUserActivity:restorationHandler:)]) {
       if ([delegate application:application
               continueUserActivity:userActivity
                 restorationHandler:restorationHandler]) {

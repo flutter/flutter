@@ -419,7 +419,7 @@ class MethodChannel {
   ///     // Errors occurring on the platform side cause invokeMethod to throw
   ///     // PlatformExceptions.
   ///     try {
-  ///       return _channel.invokeMethod('play', <String, dynamic>{
+  ///       return await _channel.invokeMethod('play', <String, dynamic>{
   ///         'song': song.id,
   ///         'volume': volume,
   ///       });
@@ -697,7 +697,7 @@ class EventChannel {
       onListen: () async {
         binaryMessenger.setMessageHandler(name, (ByteData? reply) async {
           if (reply == null) {
-            controller.close();
+            await controller.close();
           } else {
             try {
               controller.add(codec.decodeEnvelope(reply));

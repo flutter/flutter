@@ -159,6 +159,7 @@ group("flutter") {
       "//flutter/display_list:display_list_builder_benchmarks",
       "//flutter/display_list:display_list_region_benchmarks",
       "//flutter/display_list:display_list_transform_benchmarks",
+      "//flutter/display_list:primitive_rendering_benchmarks",
       "//flutter/fml:fml_benchmarks",
       "//flutter/impeller/geometry:geometry_benchmarks",
       "//flutter/lib/ui:ui_benchmarks",
@@ -225,6 +226,10 @@ group("unittests") {
       "//flutter/third_party/tonic/tests:tonic_unittests",
       "//flutter/txt:txt_unittests",
     ]
+
+    if (!is_fuchsia) {
+      public_deps += [ "//flutter/lib/gpu:gpu_unittests" ]
+    }
 
     # The accessibility library only supports Mac and Windows at the moment.
     if (is_mac || is_win) {

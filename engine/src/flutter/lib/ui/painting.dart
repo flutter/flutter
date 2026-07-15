@@ -1021,10 +1021,6 @@ enum BlendMode {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/filter_quality.png)
 ///
-/// When building for the web using the `--web-renderer=html` option, filter
-/// quality has no effect. All images are rendered using the respective
-/// browser's default setting.
-///
 /// See also:
 ///
 ///  * [Paint.filterQuality], which is used to pass [FilterQuality] to the
@@ -2523,13 +2519,6 @@ Future<Codec> instantiateImageCodec(
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-///
-/// ## Compatibility note on the web
-///
-/// When running Flutter on the web, only the CanvasKit renderer supports image
-/// resizing capabilities (not the HTML renderer). So if image resizing is
-/// critical to your use case, and you're deploying to the web, you should
-/// build using the CanvasKit renderer.
 Future<Codec> instantiateImageCodecFromBuffer(
   ImmutableBuffer buffer, {
   int? targetWidth,
@@ -2580,13 +2569,6 @@ Future<Codec> instantiateImageCodecFromBuffer(
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-///
-/// ## Compatibility note on the web
-///
-/// When running Flutter on the web, only the CanvasKit renderer supports image
-/// resizing capabilities (not the HTML renderer). So if image resizing is
-/// critical to your use case, and you're deploying to the web, you should
-/// build using the CanvasKit renderer.
 Future<Codec> instantiateImageCodecWithSize(
   ImmutableBuffer buffer, {
   TargetImageSizeCallback? getTargetSize,
@@ -2597,7 +2579,7 @@ Future<Codec> instantiateImageCodecWithSize(
     final TargetImageSize targetSize = getTargetSize(descriptor.width, descriptor.height);
     assert(targetSize.width == null || targetSize.width! > 0);
     assert(targetSize.height == null || targetSize.height! > 0);
-    return descriptor.instantiateCodec(
+    return await descriptor.instantiateCodec(
       targetWidth: targetSize.width,
       targetHeight: targetSize.height,
     );
@@ -3014,7 +2996,10 @@ abstract class Path {
   /// angles going clockwise around the oval.
   ///
   /// The line segment added if `forceMoveTo` is false starts at the
-  /// current point and ends at the start of the arc.
+  /// current point and ends at the start of the arc. Note that this
+  /// method does not draw anything if the [sweepAngle] is a multiple
+  /// of $2\pi$ (e.g., $2\pi$, $4\pi$). If you need to draw a full
+  /// circle or an overlapping arc, use [addArc] as a workaround.
   void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo);
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -7287,6 +7272,11 @@ abstract class Canvas {
   /// Whether this shape is filled or stroked (or both) is controlled by
   /// [Paint.style]. If the path is filled, then sub-paths within it are
   /// implicitly closed (see [Path.close]).
+  ///
+  /// When drawing simple shapes (such as rectangles, ovals, or rounded
+  /// rectangles), prefer using methods such as [drawRect], [drawOval], or
+  /// [drawRRect] over [drawPath]. Methods that draw simple shapes are generally
+  /// more efficient than drawing a [Path].
   void drawPath(Path path, Paint paint);
 
   /// Draws the given [Image] into the canvas with its top-left corner at the

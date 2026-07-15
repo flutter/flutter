@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
+import 'semantics_tester.dart';
 
 void main() {
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
@@ -1858,32 +1858,30 @@ void main() {
     }
   });
 
-  testWidgets(
-    'OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is true',
-    (WidgetTester tester) async {
-      final theme = ThemeData();
+  testWidgets('OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: theme,
-          home: Center(
-            child: OutlinedButton(onPressed: () {}, child: const Text('button')),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: OutlinedButton(onPressed: () {}, child: const Text('button')),
         ),
-      );
+      ),
+    );
 
-      final InkWell buttonInkWell = tester.widget<InkWell>(
-        find.descendant(of: find.byType(OutlinedButton), matching: find.byType(InkWell)),
-      );
+    final InkWell buttonInkWell = tester.widget<InkWell>(
+      find.descendant(of: find.byType(OutlinedButton), matching: find.byType(InkWell)),
+    );
 
-      if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
-        expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
-      } else {
-        expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
-      }
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
+      expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
+    } else {
+      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('OutlinedButton uses InkRipple when useMaterial3 is false', (
     WidgetTester tester,
@@ -2290,11 +2288,11 @@ void main() {
   }
 
   testWidgets('OutlinedButton statesController', (WidgetTester tester) async {
-    testStatesController(null, tester);
+    await testStatesController(null, tester);
   });
 
   testWidgets('OutlinedButton.icon statesController', (WidgetTester tester) async {
-    testStatesController(const Icon(Icons.add), tester);
+    await testStatesController(const Icon(Icons.add), tester);
   });
 
   testWidgets('Disabled OutlinedButton statesController', (WidgetTester tester) async {

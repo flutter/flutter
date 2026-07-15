@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/host_window_tooltip.h"
 #include <cstdio>
+#include <memory>
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "shell/platform/windows/window_manager.h"
 
@@ -12,17 +13,14 @@ HostWindowTooltip::HostWindowTooltip(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     const BoxConstraints& constraints,
-    bool is_sized_to_content,
     GetWindowPositionCallback get_position_callback,
     HWND parent)
-    : HostWindow(window_manager, engine),
+    : HostWindowSized(window_manager, engine, /*resizable=*/false),
       get_position_callback_(get_position_callback),
       parent_(parent),
-      isolate_(Isolate::Current()),
-      view_alive_(std::make_shared<int>(0)) {
+      isolate_(Isolate::Current()) {
   // Use minimum constraints as initial size to ensure the view can be created
-  // with valid metrics. If is_sized_to_content is true, the size will be
-  // updated when content is rendered.
+  // with valid metrics.
   auto const initial_width =
       static_cast<double>(constraints.smallest().width());
   auto const initial_height =
@@ -37,32 +35,23 @@ HostWindowTooltip::HostWindowTooltip(
       .title = L"",
       .owner_window = parent,
       .nCmdShow = SW_SHOWNOACTIVATE,
-      .sizing_delegate = this,
-      .is_sized_to_content = is_sized_to_content});
+      .sizing_delegate = AsSizingDelegate(),
+      .is_sized_to_content = true});
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(parent_));
 }
 
-void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {
-  // This is called from the raster thread.
-  std::weak_ptr<int> weak_view_alive = view_alive_;
-  engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
-    auto const view_alive = weak_view_alive.lock();
-    if (!view_alive) {
-      return;
-    }
-    if (width_ == width && height_ == height) {
-      return;
-    }
+HostWindowTooltip::~HostWindowTooltip() {
+  // Reset the view while this most-derived object is still fully alive, to stop
+  // the raster thread from sizing it (via the overridden ApplyContentSize /
+  // GetWorkArea) before any subobject is torn down. See the destructor comment
+  // in host_window_sized.h for the rationale.
+  view_controller_.reset();
+}
 
-    if (is_being_destroyed_) {
-      return;
-    }
-
-    width_ = width;
-    height_ = height;
-    UpdatePosition();
-  });
+void HostWindowTooltip::ApplyContentSize(int32_t physical_width,
+                                         int32_t physical_height) {
+  UpdatePosition();
 }
 
 WindowRect HostWindowTooltip::GetWorkArea() const {
@@ -99,19 +88,23 @@ void HostWindowTooltip::UpdatePosition() {
   WindowRect work_area = GetWorkArea();
 
   IsolateScope scope(isolate_);
-  auto rect = get_position_callback_(
-      WindowSize{width_, height_},
-      WindowRect{parent_top_left.x, parent_top_left.y,
-                 parent_bottom_right.x - parent_top_left.x,
-                 parent_bottom_right.y - parent_top_left.y},
-      work_area);
+  std::unique_ptr<WindowRect, decltype(&free)> rect(
+      get_position_callback_(
+          WindowSize{physical_width_, physical_height_},
+          WindowRect{parent_top_left.x, parent_top_left.y,
+                     parent_bottom_right.x - parent_top_left.x,
+                     parent_bottom_right.y - parent_top_left.y},
+          work_area),
+      free);
+  if (!rect) {
+    return;
+  }
   SetWindowPos(window_handle_, nullptr, rect->left, rect->top, rect->width,
                rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
-  free(rect);
 
   // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.
-  if (rect->width < width_ || rect->height < height_) {
+  if (rect->width < physical_width_ || rect->height < physical_height_) {
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }

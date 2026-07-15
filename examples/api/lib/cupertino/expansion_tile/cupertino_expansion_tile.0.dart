@@ -87,7 +87,7 @@ class _TransitionTileSectionState extends State<TransitionTileSection> {
     return CupertinoExpansionTile(
       title: Text(
         '${widget.title} - ${_isExpanded ? 'Collapse me' : 'Tap to expand'}',
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        style: const TextStyle(fontSize: 18, fontWeight: .w600),
       ),
       controller: _controller,
       transitionMode: widget.transitionMode,

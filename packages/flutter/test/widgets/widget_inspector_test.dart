@@ -13,16 +13,17 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
 import '../impeller_test_helpers.dart';
+import 'button_tester.dart';
 import 'widget_inspector_test_utils.dart';
+import 'widgets_app_tester.dart';
 
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
@@ -52,7 +53,7 @@ class ClockDemo extends StatelessWidget {
   Widget makeClock(String label, int utcOffset) {
     return Stack(
       children: <Widget>[
-        const Icon(Icons.watch),
+        const Icon(IconData(0xe6ce, fontFamily: 'MaterialIcons')),
         Text(label),
         ClockText(utcOffset: utcOffset),
       ],
@@ -169,7 +170,7 @@ class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0
-        ..color = Colors.red;
+        ..color = const Color(0xFFFF0000);
       {
         final pictureLayer = PictureLayer(Offset.zero & size);
         final recorder = ui.PictureRecorder();
@@ -195,7 +196,7 @@ class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
             ..append(pictureLayer),
         );
       }
-      paint.color = Colors.blue;
+      paint.color = const Color(0xFF0000FF);
       context.canvas.drawLine(offset, offset.translate(size.width * 0.5, size.height * 0.5), paint);
       return true;
     }());
@@ -282,6 +283,24 @@ void main() {
   });
 
   _TestWidgetInspectorService.runTests();
+
+  testWidgets('WidgetInspector does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: WidgetInspector(
+            tapBehaviorButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            child: Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(WidgetInspector)), Size.zero);
+  });
 }
 
 class _TestWidgetInspectorService extends TestWidgetInspectorService {
@@ -429,8 +448,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         required GlobalKey key,
       }) {
         exitWidgetSelectionButtonKey = key;
-        return Material(
-          child: ElevatedButton(onPressed: onPressed, key: key, child: null),
+        return TestButton(
+          onPressed: onPressed,
+          key: key,
+          behavior: HitTestBehavior.opaque,
+          child: const SizedBox(width: 48.0, height: 48.0),
         );
       }
 
@@ -481,25 +503,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
             moveExitWidgetSelectionButtonBuilder: null,
             tapBehaviorButtonBuilder: null,
-            child: Material(
-              child: ListView(
-                children: <Widget>[
-                  ElevatedButton(
-                    key: topButtonKey,
-                    onPressed: () {
-                      log.add('top');
-                    },
-                    child: const Text('TOP'),
-                  ),
-                  ElevatedButton(
-                    key: bottomButtonKey,
-                    onPressed: () {
-                      log.add('bottom');
-                    },
-                    child: const Text('BOTTOM'),
-                  ),
-                ],
-              ),
+            child: ListView(
+              children: <Widget>[
+                TestButton(
+                  onPressed: () {
+                    log.add('top');
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(key: topButtonKey, height: 48.0, child: const Text('TOP')),
+                ),
+                TestButton(
+                  onPressed: () {
+                    log.add('bottom');
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(key: bottomButtonKey, height: 48.0, child: const Text('BOTTOM')),
+                ),
+              ],
             ),
           ),
         ),
@@ -609,8 +629,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         required GlobalKey key,
       }) {
         exitWidgetSelectionButtonKey = key;
-        return Material(
-          child: ElevatedButton(onPressed: onPressed, key: key, child: null),
+        return TestButton(
+          onPressed: onPressed,
+          key: key,
+          behavior: HitTestBehavior.opaque,
+          child: const SizedBox(width: 48.0, height: 48.0),
         );
       }
 
@@ -801,7 +824,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         RepaintBoundary(
           key: repaintBoundaryKey,
           child: ColoredBox(
-            color: Colors.grey,
+            color: const Color(0xFF9E9E9E),
             child: Transform(
               transform: mainTransform,
               child: Directionality(
@@ -811,13 +834,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   moveExitWidgetSelectionButtonBuilder: null,
                   tapBehaviorButtonBuilder: null,
                   child: ColoredBox(
-                    color: Colors.white,
+                    color: const Color(0xFFFFFFFF),
                     child: Center(
                       child: Container(
                         key: childKey,
                         height: 100.0,
                         width: 50.0,
-                        color: Colors.red,
+                        color: const Color(0xFFF44336),
                       ),
                     ),
                   ),
@@ -860,8 +883,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           required String semanticsLabel,
           required GlobalKey key,
         }) {
-          return Material(
-            child: ElevatedButton(onPressed: onPressed, key: key, child: null),
+          return TestButton(
+            onPressed: onPressed,
+            key: key,
+            behavior: HitTestBehavior.opaque,
+            child: const SizedBox(width: 48.0, height: 48.0),
           );
         };
       }
@@ -924,7 +950,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Disable automatic insertion of WidgetInspector into the widget tree by WidgetsApp.
       binding.debugExcludeRootWidgetInspector = true;
 
-      await tester.pumpWidget(WidgetsApp(color: Colors.red, builder: (_, _) => const Text('Foo')));
+      await tester.pumpWidget(
+        WidgetsApp(color: const Color(0xFFFF0000), builder: (_, _) => const Text('Foo')),
+      );
 
       // Verify that the widget inspector is disabled and there's no instances of WidgetInspector
       // in the tree.
@@ -998,13 +1026,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         required String semanticsLabel,
         required GlobalKey key,
       }) {
-        return Material(
-          child: ElevatedButton(
-            onPressed: onPressed,
-            key: key,
-            child: const Text('EXIT SELECT MODE'),
-          ),
-        );
+        return TestButton(onPressed: onPressed, key: key, child: const Text('EXIT SELECT MODE'));
       }
 
       Widget moveWidgetSelectionButtonBuilder(
@@ -1013,11 +1035,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         required String semanticsLabel,
         bool usesDefaultAlignment = true,
       }) {
-        return Material(
-          child: ElevatedButton(
-            onPressed: onPressed,
-            child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
-          ),
+        return TestButton(
+          onPressed: onPressed,
+          child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
         );
       }
 
@@ -1027,16 +1047,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         required String semanticsLabel,
         required bool selectionOnTapEnabled,
       }) {
-        return Material(
-          child: ElevatedButton(
-            onPressed: onPressed,
-            child: Text(selectionOnTapEnabled ? 'SELECTION ON TAP' : 'APP INTERACTION ON TAP'),
-          ),
+        return TestButton(
+          onPressed: onPressed,
+          child: Text(selectionOnTapEnabled ? 'SELECTION ON TAP' : 'APP INTERACTION ON TAP'),
         );
       }
 
       Finder buttonFinder(String buttonText) {
-        return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
+        return find.ancestor(of: find.text(buttonText), matching: find.byType(TestButton));
       }
 
       int navigateEventsCount() => service.dispatchedEvents('navigate', stream: 'ToolEvent').length;
@@ -1275,6 +1293,69 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         },
         // [intended] Test requires --track-widget-creation flag.
         skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+      );
+
+      testWidgets(
+        'Inspector buttons respect bottom viewPadding and do not overlap system navigation bar',
+        (WidgetTester tester) async {
+          WidgetInspectorService.instance.isSelectMode = true;
+
+          const fakeBottomPadding = 50.0;
+          const exitLabel = 'exit';
+          const moveLabel = 'move';
+          const tapLabel = 'tap';
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: fakeBottomPadding)),
+                child: WidgetInspector(
+                  exitWidgetSelectionButtonBuilder:
+                      (context, {required key, required onPressed, required semanticsLabel}) =>
+                          const Text(exitLabel),
+                  moveExitWidgetSelectionButtonBuilder:
+                      (
+                        context, {
+                        required onPressed,
+                        required semanticsLabel,
+                        bool? usesDefaultAlignment,
+                      }) => const Text(moveLabel),
+                  tapBehaviorButtonBuilder:
+                      (
+                        context, {
+                        required onPressed,
+                        required selectionOnTapEnabled,
+                        required semanticsLabel,
+                      }) => const Text(tapLabel),
+                  child: const SizedBox(),
+                ),
+              ),
+            ),
+          );
+
+          final Map<String, Finder> buttons = {
+            'exit': find.text(exitLabel),
+            'move': find.text(moveLabel),
+            'tap': find.text(tapLabel),
+          };
+
+          buttons.forEach((name, finder) {
+            expect(finder, findsOneWidget, reason: 'Button "$name" should exist');
+
+            final Positioned positioned = tester.widget<Positioned>(
+              find.ancestor(of: finder, matching: find.byType(Positioned)),
+            );
+
+            expect(
+              positioned.bottom,
+              fakeBottomPadding,
+              reason: 'Button "$name" should sit exactly above bottom viewPadding',
+            );
+          });
+
+          WidgetInspectorService.instance.isSelectMode = false;
+        },
       );
     });
 
@@ -3054,7 +3135,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             // because only the RichText element is part of the summary tree.
             expect(service.toObject(summarySelection['valueId']! as String), elementA);
 
-            // Verify tha the regular getSelectedWidget method still returns
+            // Verify that the regular getSelectedWidget method still returns
             // the RichText object not the Text element.
             final regularSelection =
                 (await service.testExtension(
@@ -3147,6 +3228,202 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         selection.currentElement = elementA;
         expect(count, equals(5));
       });
+
+      testWidgets('clearCandidates preserves current selection', (
+        WidgetTester tester,
+      ) async {
+        await pumpWidgetTreeWithABC(tester);
+        final selection = InspectorSelection();
+        addTearDown(selection.dispose);
+        final RenderParagraph renderObjectA = tester.renderObject<RenderParagraph>(
+          find.text('a'),
+        );
+        final RenderParagraph renderObjectB = tester.renderObject<RenderParagraph>(
+          find.text('b'),
+        );
+
+        selection.candidates = <RenderObject>[renderObjectA, renderObjectB];
+        expect(selection.current, renderObjectA);
+
+        selection.clearCandidates();
+        expect(selection.candidates, isEmpty);
+        expect(selection.current, renderObjectA);
+      });
+    });
+
+    testWidgets('inspector selection candidates are scoped to the active modal route', (
+      WidgetTester tester,
+    ) async {
+      WidgetInspectorService.instance.selection.clear();
+
+      final GlobalKey behindKey = GlobalKey();
+      final GlobalKey sheetTextKey = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetInspector(
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext context, Animation<double> a, Animation<double> b) {
+                    return Column(
+                      children: <Widget>[
+                        Text('behind', key: behindKey, textDirection: TextDirection.ltr),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push<void>(
+                              PageRouteBuilder<void>(
+                                pageBuilder:
+                                    (
+                                      BuildContext context,
+                                      Animation<double> a,
+                                      Animation<double> b,
+                                    ) {
+                                      return Center(
+                                        child: Text(
+                                          'in sheet',
+                                          key: sheetTextKey,
+                                          textDirection: TextDirection.ltr,
+                                        ),
+                                      );
+                                    },
+                              ),
+                            );
+                          },
+                          child: const Text('open sheet', textDirection: TextDirection.ltr),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final RenderObject behindRender = tester.renderObject<RenderObject>(find.byKey(behindKey));
+
+      await tester.tap(find.text('open sheet'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      WidgetInspectorService.instance.isSelectMode = true;
+      await tester.tap(find.byKey(sheetTextKey), warnIfMissed: false);
+      await tester.pump();
+      final List<RenderObject> candidates = WidgetInspectorService.instance.selection.candidates;
+      expect(candidates, isNot(contains(behindRender)));
+
+      final RenderObject sheetRender = tester.renderObject<RenderObject>(
+        find.byKey(sheetTextKey),
+      );
+      expect(candidates, contains(sheetRender));
+    });
+
+    testWidgets('inspector selection scopes to nested navigator inside overlay route', (
+      WidgetTester tester,
+    ) async {
+      WidgetInspectorService.instance.selection.clear();
+
+      final GlobalKey innerTextKey = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetInspector(
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext context, Animation<double> a, Animation<double> b) {
+                    return Column(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push<void>(
+                              PageRouteBuilder<void>(
+                                pageBuilder:
+                                    (
+                                      BuildContext overlayContext,
+                                      Animation<double> a,
+                                      Animation<double> b,
+                                    ) {
+                                      return SizedBox(
+                                        width: 300,
+                                        height: 300,
+                                        child: Navigator(
+                                          onGenerateRoute: (RouteSettings settings) {
+                                            return PageRouteBuilder<void>(
+                                              settings: settings,
+                                              pageBuilder:
+                                                  (
+                                                    BuildContext navContext,
+                                                    Animation<double> a,
+                                                    Animation<double> b,
+                                                  ) {
+                                                    return Center(
+                                                      child: Text(
+                                                        'nested inner',
+                                                        key: innerTextKey,
+                                                        textDirection: TextDirection.ltr,
+                                                      ),
+                                                    );
+                                                  },
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                              ),
+                            );
+                          },
+                          child: const Text('open overlay', textDirection: TextDirection.ltr),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open overlay'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      WidgetInspectorService.instance.isSelectMode = true;
+      await tester.tap(find.byKey(innerTextKey), warnIfMissed: false);
+      await tester.pump();
+
+      final RenderObject innerRender = tester.renderObject<RenderObject>(
+        find.byKey(innerTextKey),
+      );
+      final List<RenderObject> candidates =
+          WidgetInspectorService.instance.selection.candidates;
+      expect(candidates, contains(innerRender));
+    });
+
+    testWidgets('setSelection clears stale overlay candidates', (WidgetTester tester) async {
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementA = findElementABC('a');
+      final Element elementB = findElementABC('b');
+      WidgetInspectorService.instance.selection.candidates = <RenderObject>[
+        elementA.renderObject!,
+        elementB.renderObject!,
+      ];
+      expect(WidgetInspectorService.instance.selection.candidates.length, 2);
+
+      WidgetInspectorService.instance.setSelection(elementA);
+      expect(WidgetInspectorService.instance.selection.candidates, isEmpty);
+      expect(WidgetInspectorService.instance.selection.currentElement, elementA);
     });
 
     test('ext.flutter.inspector.disposeGroup', () async {
@@ -3843,7 +4120,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '$pubRootTest/different', 'arg1': '/unrelated/$pubRootTest'},
           );
@@ -3863,7 +4140,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
-            service.testExtension(
+            await service.testExtension(
               WidgetInspectorServiceExtensions.addPubRootDirectories.name,
               <String, String>{'arg0': 'file://$pubRootTest'},
             );
@@ -3882,11 +4159,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest},
           );
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest'},
           );
@@ -3905,7 +4182,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest, 'arg1': '/invalid/$pubRootTest'},
           );
@@ -3917,7 +4194,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             contains('createdByLocalProject'),
           );
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.removePubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest'},
           );
@@ -3940,7 +4217,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               .evaluate()
               .first;
           service.setSelection(richText, 'my-group');
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest},
           );
@@ -3965,7 +4242,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final pubRootFramework =
               '/${pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/')}';
           service.resetPubRootDirectories();
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootFramework},
           );
@@ -3986,7 +4263,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
 
           service.resetPubRootDirectories();
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootFramework, 'arg1': pubRootTest},
           );
@@ -4068,7 +4345,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '$pubRootTest/different', 'arg1': '/unrelated/$pubRootTest'},
           );
@@ -4088,7 +4365,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
-            service.testExtension(
+            await service.testExtension(
               WidgetInspectorServiceExtensions.addPubRootDirectories.name,
               <String, String>{'arg0': 'file://$pubRootTest', 'isolateId': '34'},
             );
@@ -4107,11 +4384,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest, 'isolateId': '34'},
           );
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest', 'isolateId': '34'},
           );
@@ -4130,7 +4407,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{
               'arg0': pubRootTest,
@@ -4146,7 +4423,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             contains('createdByLocalProject'),
           );
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.removePubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest', 'isolateId': '34'},
           );
@@ -4343,7 +4620,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         _CreationLocation location = knownLocations[id]!;
         expect(location.file, equals(file));
         // ClockText widget.
-        expect(location.line, equals(57));
+        expect(location.line, equals(58));
         expect(location.column, equals(9));
         expect(location.name, equals('ClockText'));
         expect(count, equals(1));
@@ -4353,7 +4630,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         location = knownLocations[id]!;
         expect(location.file, equals(file));
         // Text widget in _ClockTextState build method.
-        expect(location.line, equals(92));
+        expect(location.line, equals(93));
         expect(location.column, equals(12));
         expect(location.name, equals('Text'));
         expect(count, equals(1));
@@ -4380,7 +4657,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         location = knownLocations[id]!;
         expect(location.file, equals(file));
         // ClockText widget.
-        expect(location.line, equals(57));
+        expect(location.line, equals(58));
         expect(location.column, equals(9));
         expect(location.name, equals('ClockText'));
         expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -4390,7 +4667,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         location = knownLocations[id]!;
         expect(location.file, equals(file));
         // Text widget in _ClockTextState build method.
-        expect(location.line, equals(92));
+        expect(location.line, equals(93));
         expect(location.column, equals(12));
         expect(location.name, equals('Text'));
         expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -4793,7 +5070,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             child: RepaintBoundaryWithDebugPaint(
               child: ColoredBox(
                 key: outerContainerKey,
-                color: Colors.white,
+                color: const Color(0xFFFFFFFF),
                 child: Padding(
                   key: paddingKey,
                   padding: const EdgeInsets.all(100.0),
@@ -4812,13 +5089,17 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                         ),
                         child: ColoredBox(
                           key: redContainerKey,
-                          color: Colors.red,
+                          color: const Color(0xFFF44336),
                           child: ColoredBox(
                             key: whiteContainerKey,
-                            color: Colors.white,
+                            color: const Color(0xFFFFFFFF),
                             child: RepaintBoundary(
                               child: Center(
-                                child: Container(color: Colors.black, height: 10.0, width: 10.0),
+                                child: Container(
+                                  color: const Color(0xFF000000),
+                                  height: 10.0,
+                                  width: 10.0,
+                                ),
                               ),
                             ),
                           ),
@@ -5101,20 +5382,21 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
-        const Widget widget = Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: Row(
-              children: <Widget>[
-                Flexible(
-                  child: ColoredBox(color: Colors.green, child: Text('a')),
-                ),
-                Text('b'),
-              ],
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Row(
+                children: <Widget>[
+                  Flexible(
+                    child: ColoredBox(color: Color(0xFF00FF00), child: Text('a')),
+                  ),
+                  Text('b'),
+                ],
+              ),
             ),
           ),
         );
-        await tester.pumpWidget(widget);
       }
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with BoxParentData', (
@@ -5457,21 +5739,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(crossAxisAlignment, equals('start'));
       });
 
-      // TODO(justinmc): Don't test Cupertino interactions in Widgets tests.
-      // https://github.com/flutter/flutter/issues/177028
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError', (
         WidgetTester tester,
       ) async {
         // Regression test for https://github.com/flutter/flutter/issues/115228
         const Key leafKey = ValueKey<String>('ColoredBox');
         await tester.pumpWidget(
-          CupertinoApp(
-            home: CupertinoPageScaffold(
-              child: Builder(
-                builder: (BuildContext context) =>
-                    ColoredBox(key: leafKey, color: CupertinoTheme.of(context).primaryColor),
-              ),
-            ),
+          const TestWidgetsApp(
+            home: ColoredBox(key: leafKey, color: Color(0xFF0000FF)),
           ),
         );
 
@@ -5487,21 +5762,20 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       testWidgets(
-        'ext.flutter.inspector.getLayoutExplorerNode, on a ToolTip, does not throw StackOverflowError',
+        'ext.flutter.inspector.getLayoutExplorerNode, on a deeply nested widget, does not throw StackOverflowError',
         (WidgetTester tester) async {
           // Regression test for https://github.com/flutter/devtools/issues/5946
-          const Widget widget = MaterialApp(
-            home: Directionality(
+          await tester.pumpWidget(
+            const Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
                 child: Row(
                   children: <Widget>[
                     Flexible(
                       child: ColoredBox(
-                        color: Colors.green,
-                        child: Tooltip(
-                          message: 'a',
-                          child: ElevatedButton(onPressed: null, child: Text('a')),
+                        color: Color(0xFF00FF00),
+                        child: SizedBox(
+                          child: Padding(padding: EdgeInsets.zero, child: Text('a')),
                         ),
                       ),
                     ),
@@ -5510,12 +5784,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ),
             ),
           );
-          await tester.pumpWidget(widget);
 
-          final Element elevatedButton = tester.element(find.byType(ElevatedButton).first);
-          service.setSelection(elevatedButton, group);
+          final Element padding = tester.element(find.byType(Padding).first);
+          service.setSelection(padding, group);
 
-          final String id = service.toId(elevatedButton, group)!;
+          final String id = service.toId(padding, group)!;
 
           await service.testExtension(
             WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
@@ -5587,6 +5860,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
         // We need the runTest to setup the fake async in the test binding.
         await binding.runTest(() async {
+          // ignore: unawaited_futures
           binding.reassembleApplication();
           await binding.pump();
         }, () {});
@@ -5868,12 +6142,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       'getChildrenDetailsSubtree',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            title: 'Hello, World',
-            theme: ThemeData(primarySwatch: Colors.blue),
-            home: Scaffold(
-              appBar: AppBar(title: const Text('Hello, World')),
-              body: const Center(child: Text('Hello, World!')),
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(children: <Widget>[Text('Hello, World')]),
+                ),
+                Center(child: Text('Hello, World!')),
+              ],
             ),
           ),
         );
@@ -5897,22 +6175,26 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         service.addPubRootDirectories(<String>[pubRootTest]);
 
         final String summary = service.getRootWidgetSummaryTree('foo1');
-        // ignore: avoid_dynamic_calls
-        final childrenOfRoot = json.decode(summary)['children'] as List<Object?>;
-        final childrenOfMaterialApp =
-            (childrenOfRoot.first! as Map<String, Object?>)['children']! as List<Object?>;
-        final scaffold = childrenOfMaterialApp.first! as Map<String, Object?>;
-        expect(scaffold['description'], 'Scaffold');
-        final objectId = scaffold['valueId']! as String;
+        final childrenOfRoot =
+            (json.decode(summary) as Map<String, Object?>)['children']! as List<Object?>;
+        // Root -> Directionality -> Column -> [Padding, Center]
+        final directionality = childrenOfRoot.first! as Map<String, Object?>;
+        final childrenOfDirectionality = directionality['children']! as List<Object?>;
+        final column = childrenOfDirectionality.first! as Map<String, Object?>;
+        expect(column['description'], 'Column');
+        final childrenOfColumn = column['children']! as List<Object?>;
+        final padding = childrenOfColumn.first! as Map<String, Object?>;
+        expect(padding['description'], 'Padding');
+        final objectId = padding['valueId']! as String;
         final String details = service.getDetailsSubtree(objectId, 'foo2');
-        // ignore: avoid_dynamic_calls
-        final detailedChildren = json.decode(details)['children'] as List<Object?>;
+        final detailedChildren =
+            (json.decode(details) as Map<String, Object?>)['children']! as List<Object?>;
 
-        final appBars = <Map<String, Object?>>[];
+        final texts = <Map<String, Object?>>[];
         void visitChildren(List<Object?> children) {
           for (final Map<String, Object?> child in children.cast<Map<String, Object?>>()) {
-            if (child['description'] == 'AppBar') {
-              appBars.add(child);
+            if (child['description'] case final String desc when desc.startsWith('Text')) {
+              texts.add(child);
             }
             if (child.containsKey('children')) {
               visitChildren(child['children']! as List<Object?>);
@@ -5921,7 +6203,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         }
 
         visitChildren(detailedChildren);
-        expect(appBars.single, isNot(contains('children')));
+        expect(texts.single, isNot(contains('children')));
       },
       // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
@@ -5931,12 +6213,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          title: 'Hello World!',
-          home: Scaffold(
-            appBar: AppBar(title: const Text('Hello World!')),
-            body: const Center(child: Column(children: <Widget>[Text('Hello World!')])),
-          ),
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: Column(children: <Widget>[Text('Hello World!')])),
         ),
       );
 

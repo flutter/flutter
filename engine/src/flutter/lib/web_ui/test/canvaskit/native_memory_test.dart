@@ -17,30 +17,30 @@ void main() {
 void testMain() {
   setUpCanvasKitTest();
 
-  late _MockNativeMemoryFinalizationRegistry mockFinalizationRegistry;
+  late _MockFinalizer mockFinalizer;
+  final Finalizer originalFinalizer = UniqueRef.finalizer;
 
   setUp(() {
     TestSkDeletableMock.deleteCount = 0;
-    nativeMemoryFinalizationRegistry = mockFinalizationRegistry =
-        _MockNativeMemoryFinalizationRegistry();
+    UniqueRef.finalizer = mockFinalizer = _MockFinalizer();
   });
 
   tearDown(() {
-    nativeMemoryFinalizationRegistry = NativeMemoryFinalizationRegistry();
+    UniqueRef.finalizer = originalFinalizer;
   });
 
-  group(UniqueRef, () {
+  group(CkUniqueRef, () {
     test('create-dispose-collect cycle', () {
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
+      expect(mockFinalizer.registeredPairs, hasLength(0));
       final owner = Object();
       final nativeObject = TestSkDeletable();
-      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
+      final ref = CkUniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(ref.isDisposed, isFalse);
       expect(ref.nativeObject, same(nativeObject));
       expect(TestSkDeletableMock.deleteCount, 0);
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(1));
-      expect(mockFinalizationRegistry.registeredPairs.single.owner, same(owner));
-      expect(mockFinalizationRegistry.registeredPairs.single.ref, same(ref));
+      expect(mockFinalizer.registeredPairs, hasLength(1));
+      expect(mockFinalizer.registeredPairs.single.target, same(owner));
+      expect(mockFinalizer.registeredPairs.single.value, same(ref));
 
       ref.dispose();
       expect(TestSkDeletableMock.deleteCount, 1);
@@ -57,24 +57,22 @@ void testMain() {
       );
       expect(TestSkDeletableMock.deleteCount, 1);
 
-      // Simulate a GC
-      mockFinalizationRegistry.registeredPairs.single.ref.collect();
       expect(
-        reason: 'Manually disposed object should not be deleted again by GC.',
-        TestSkDeletableMock.deleteCount,
-        1,
+        reason: 'Manually disposed object should be detached from the registry.',
+        mockFinalizer.registeredPairs,
+        isEmpty,
       );
     });
 
     test('create-collect cycle', () {
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
+      expect(mockFinalizer.registeredPairs, hasLength(0));
       final owner = Object();
       final nativeObject = TestSkDeletable();
-      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
+      final ref = CkUniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(ref.isDisposed, isFalse);
       expect(ref.nativeObject, same(nativeObject));
       expect(TestSkDeletableMock.deleteCount, 0);
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(1));
+      expect(mockFinalizer.registeredPairs, hasLength(1));
 
       ref.collect();
       expect(TestSkDeletableMock.deleteCount, 1);
@@ -92,7 +90,7 @@ void testMain() {
       final nativeObject = TestSkDeletable();
 
       expect(Instrumentation.instance.debugCounters, <String, int>{});
-      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
+      final ref = CkUniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(Instrumentation.instance.debugCounters, <String, int>{'TestSkDeletable Created': 1});
       ref.dispose();
       expect(Instrumentation.instance.debugCounters, <String, int>{
@@ -109,7 +107,7 @@ void testMain() {
       final nativeObject = TestSkDeletable();
 
       expect(Instrumentation.instance.debugCounters, <String, int>{});
-      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
+      final ref = CkUniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(Instrumentation.instance.debugCounters, <String, int>{'TestSkDeletable Created': 1});
       ref.collect();
       expect(Instrumentation.instance.debugCounters, <String, int>{
@@ -120,9 +118,9 @@ void testMain() {
     });
   });
 
-  group(CountedRef, () {
+  group(CkCountedRef, () {
     test('single owner', () {
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
+      expect(mockFinalizer.registeredPairs, hasLength(0));
       final nativeObject = TestSkDeletable();
       final owner = TestCountedRefOwner(nativeObject);
       expect(owner.ref.debugReferrers, hasLength(1));
@@ -130,7 +128,7 @@ void testMain() {
       expect(owner.ref.refCount, 1);
       expect(owner.ref.nativeObject, nativeObject);
       expect(TestSkDeletableMock.deleteCount, 0);
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(1));
+      expect(mockFinalizer.registeredPairs, hasLength(1));
 
       owner.dispose();
       expect(owner.ref.debugReferrers, isEmpty);
@@ -150,7 +148,7 @@ void testMain() {
     });
 
     test('multiple owners', () {
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
+      expect(mockFinalizer.registeredPairs, hasLength(0));
       final nativeObject = TestSkDeletable();
       final owner1 = TestCountedRefOwner(nativeObject);
       expect(owner1.ref.debugReferrers, hasLength(1));
@@ -158,7 +156,7 @@ void testMain() {
       expect(owner1.ref.refCount, 1);
       expect(owner1.ref.nativeObject, nativeObject);
       expect(TestSkDeletableMock.deleteCount, 0);
-      expect(mockFinalizationRegistry.registeredPairs, hasLength(1));
+      expect(mockFinalizer.registeredPairs, hasLength(1));
 
       final TestCountedRefOwner owner2 = owner1.clone();
       expect(owner2.ref, same(owner1.ref));
@@ -172,7 +170,7 @@ void testMain() {
         reason:
             'Second owner does not add more native object owners. '
             'The underlying shared UniqueRef is the only one.',
-        mockFinalizationRegistry.registeredPairs,
+        mockFinalizer.registeredPairs,
         hasLength(1),
       );
 
@@ -205,12 +203,10 @@ void testMain() {
         throwsA(isA<AssertionError>()),
       );
 
-      // Simulate a GC
-      mockFinalizationRegistry.registeredPairs.single.ref.collect();
       expect(
-        reason: 'Manually disposed object should not be deleted again by GC.',
-        TestSkDeletableMock.deleteCount,
-        1,
+        reason: 'Manually disposed object should be detached from the registry.',
+        mockFinalizer.registeredPairs,
+        isEmpty,
       );
     });
   });
@@ -266,7 +262,7 @@ class TestCountedRefOwner implements StackTraceDebugger {
       _debugStackTrace = StackTrace.current;
       return true;
     }());
-    ref = CountedRef<TestCountedRefOwner, TestSkDeletable>(
+    ref = CkCountedRef<TestCountedRefOwner, TestSkDeletable>(
       nativeObject,
       this,
       'TestCountedRefOwner',
@@ -285,7 +281,7 @@ class TestCountedRefOwner implements StackTraceDebugger {
   StackTrace get debugStackTrace => _debugStackTrace;
   late StackTrace _debugStackTrace;
 
-  late final CountedRef<TestCountedRefOwner, TestSkDeletable> ref;
+  late final CkCountedRef<TestCountedRefOwner, TestSkDeletable> ref;
 
   void dispose() {
     ref.unref(this);
@@ -294,18 +290,24 @@ class TestCountedRefOwner implements StackTraceDebugger {
   TestCountedRefOwner clone() => TestCountedRefOwner.cloneOf(ref);
 }
 
-class _MockNativeMemoryFinalizationRegistry implements NativeMemoryFinalizationRegistry {
+class _MockFinalizer implements Finalizer {
   final List<_MockPair> registeredPairs = <_MockPair>[];
 
   @override
-  void register(Object owner, UniqueRef<JSObject> ref) {
-    registeredPairs.add(_MockPair(owner, ref));
+  void attach(Object target, Object value, {Object? detach}) {
+    registeredPairs.add(_MockPair(target, value, detach));
+  }
+
+  @override
+  void detach(Object detach) {
+    registeredPairs.removeWhere((pair) => pair.detach == detach);
   }
 }
 
 class _MockPair {
-  _MockPair(this.owner, this.ref);
+  _MockPair(this.target, this.value, this.detach);
 
-  Object owner;
-  UniqueRef<JSObject> ref;
+  Object target;
+  Object value;
+  Object? detach;
 }

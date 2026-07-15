@@ -61,7 +61,7 @@ FLUTTER_ASSERT_ARC
 
 - (id<UIFocusEnvironment>)parentFocusEnvironment {
   // The root SemanticsObject node's parent is the FlutterView.
-  return self.parent.focusItem ?: self.bridge->view();
+  return self.parent.focusItem ?: ([self isAccessibilityBridgeAlive] ? self.bridge->view() : nil);
 }
 
 - (NSArray<id<UIFocusEnvironment>>*)preferredFocusEnvironments {
@@ -89,6 +89,9 @@ FLUTTER_ASSERT_ARC
 // See also the `coordinateSpace` implementation.
 // TODO(LongCatIsLooong): use CoreGraphics types.
 - (CGRect)frame {
+  if (![self isAccessibilityBridgeAlive]) {
+    return CGRectZero;
+  }
   SkPoint quad[4] = {SkPoint::Make(self.node.rect.left(), self.node.rect.top()),
                      SkPoint::Make(self.node.rect.left(), self.node.rect.bottom()),
                      SkPoint::Make(self.node.rect.right(), self.node.rect.top()),
@@ -159,7 +162,8 @@ FLUTTER_ASSERT_ARC
 
 - (id<UICoordinateSpace>)coordinateSpace {
   // A regular SemanticsObject uses the same coordinate space as its parent.
-  return self.parent.coordinateSpace ?: self.bridge->view();
+  return self.parent.coordinateSpace
+             ?: ([self isAccessibilityBridgeAlive] ? self.bridge->view() : nil);
 }
 
 @end

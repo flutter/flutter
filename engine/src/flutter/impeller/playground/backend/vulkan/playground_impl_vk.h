@@ -14,12 +14,14 @@ class PlaygroundImplVK final : public PlaygroundImpl {
  public:
   static bool IsVulkanDriverPresent();
 
-  explicit PlaygroundImplVK(PlaygroundSwitches switches);
+  explicit PlaygroundImplVK(const PlaygroundSwitches& switches);
 
   ~PlaygroundImplVK();
 
   fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
+
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
 
  private:
   std::shared_ptr<Context> context_;

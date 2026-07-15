@@ -21,10 +21,8 @@ abstract class SkwasmShader implements ui.Shader {
 // An implementation that handles the storage, disposal, and finalization of
 // a native shader handle.
 class SkwasmNativeShader extends SkwasmObjectWrapper<RawShader> implements SkwasmShader {
-  SkwasmNativeShader(ShaderHandle handle) : super(handle, _registry);
-
-  static final SkwasmFinalizationRegistry<RawShader> _registry =
-      SkwasmFinalizationRegistry<RawShader>((ShaderHandle handle) => shaderDispose(handle));
+  SkwasmNativeShader(ShaderHandle handle)
+    : super(handle, (ShaderHandle h) => shaderDispose(h), 'Shader');
 
   @override
   bool get isGradient => false;
@@ -180,18 +178,26 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
   SkwasmImageShader._(super.handle);
 
   factory SkwasmImageShader.imageShader(
-    SkwasmImage image,
+    ui.Image image,
     ui.TileMode tmx,
     ui.TileMode tmy,
     Float64List? matrix4,
     ui.FilterQuality? filterQuality,
   ) {
+    final ImageHandle imageHandle;
+    if (image case EngineImage(backendImage: SkwasmImage(handle: final handle))) {
+      imageHandle = handle;
+    } else {
+      throw ArgumentError('The image used in this ImageShader must be a Skwasm image.');
+    }
+
     if (matrix4 != null) {
       return withStackScope((StackScope scope) {
         final RawMatrix33 localMatrix = scope.convertMatrix4toSkMatrix(matrix4);
+
         return SkwasmImageShader._(
           shaderCreateFromImage(
-            image.handle,
+            imageHandle,
             tmx.index,
             tmy.index,
             (filterQuality ?? ui.FilterQuality.none).index,
@@ -202,7 +208,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
     } else {
       return SkwasmImageShader._(
         shaderCreateFromImage(
-          image.handle,
+          imageHandle,
           tmx.index,
           tmy.index,
           (filterQuality ?? ui.FilterQuality.none).index,
@@ -216,7 +222,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
 class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     implements ui.FragmentProgram {
   SkwasmFragmentProgram._(this.name, RuntimeEffectHandle handle, this._shaderData)
-    : super(handle, _registry);
+    : super(handle, (RuntimeEffectHandle h) => runtimeEffectDispose(h), 'FragmentProgram');
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
     final shaderData = ShaderData.fromBytes(bytes);
@@ -234,11 +240,6 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     skStringFree(sourceString);
     return SkwasmFragmentProgram._(name, handle, shaderData);
   }
-
-  static final SkwasmFinalizationRegistry<RawRuntimeEffect> _registry =
-      SkwasmFinalizationRegistry<RawRuntimeEffect>(
-        (RuntimeEffectHandle handle) => runtimeEffectDispose(handle),
-      );
 
   final String name;
   int get floatUniformCount => _shaderData.floatCount;
@@ -261,12 +262,8 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
 }
 
 class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
-  SkwasmShaderData(int size) : super(uniformDataCreate(size), _registry);
-
-  static final SkwasmFinalizationRegistry<RawUniformData> _registry =
-      SkwasmFinalizationRegistry<RawUniformData>(
-        (UniformDataHandle handle) => uniformDataDispose(handle),
-      );
+  SkwasmShaderData(int size)
+    : super(uniformDataCreate(size), (UniformDataHandle h) => uniformDataDispose(h), 'ShaderData');
 
   Pointer<Void> get pointer => uniformDataGetPointer(handle);
 }
@@ -326,7 +323,19 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
-  bool get debugDisposed => _isDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('debugDisposed is only available when asserts are enabled.');
+  }
 
   @override
   void setFloat(int index, double value) {
@@ -354,7 +363,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     }
 
     final shader = SkwasmImageShader.imageShader(
-      image as SkwasmImage,
+      image,
       ui.TileMode.clamp,
       ui.TileMode.clamp,
       null,

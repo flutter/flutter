@@ -29,16 +29,24 @@ config("test_config") {
   # Add platform frameworks directory to search path for test frameworks.
   # Add platform lib to search path for test libraries/Swift modules.
   cflags = [ "-fvisibility=default" ]
+  ldflags = []
+  swiftflags = []
 
   if (is_ios) {
     _platform_path = ios_platform_path
+    swiftflags += [
+      "-target",
+      "$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim",
+    ]
+    cflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
+    ldflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
   } else if (is_mac) {
     _platform_path = mac_platform_path
     cflags += [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
-    ldflags = [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
+    ldflags += [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
   }
   cflags += [ "-F$_platform_path/Developer/Library/Frameworks" ]
-  swiftflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
+  swiftflags += [ "-F$_platform_path/Developer/Library/Frameworks" ]
   include_dirs = [ "$_platform_path/Developer/usr/lib" ]
   framework_dirs = [ "$_platform_path/Developer/Library/Frameworks" ]
   lib_dirs = [ "$_platform_path/Developer/usr/lib" ]
@@ -124,6 +132,23 @@ config("framework_relative_headers") {
   include_dirs = [ "framework/Headers" ]
 }
 
+source_set("flutter_engine_bindings") {
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
+  defines = [ "FLUTTER_FRAMEWORK" ]
+  configs += [ ":config" ]
+  sources = [
+    "framework/Headers/FlutterMacros.h",
+    "framework/Source/FlutterTracing.h",
+    "framework/Source/FlutterTracing.mm",
+  ]
+  deps = [ "//flutter/fml" ]
+  public_configs = [
+    "//flutter:config",
+    ":framework_relative_headers",
+  ]
+}
+
 source_set("InternalFlutterSwiftCommon") {
   # Targets should only ever depend on the framework target.
   # This allows code in this target to use types declared in the bridging
@@ -131,8 +156,12 @@ source_set("InternalFlutterSwiftCommon") {
   visibility = [ ":framework_common" ]
   configs += [ ":config" ]
   bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
-  sources = [ "framework/Source/Logger.swift" ]
+  sources = [
+    "framework/Source/Logger.swift",
+    "framework/Source/Tracing+TraceScope.swift",
+  ]
   public = framework_common_headers
+  deps = [ ":flutter_engine_bindings" ]
 }
 
 # Framework code shared between iOS and macOS.
@@ -164,7 +193,10 @@ source_set("framework_common") {
   ]
 
   deps = [ "//flutter/fml" ]
-  public_deps = [ ":InternalFlutterSwiftCommon" ]
+  public_deps = [
+    ":InternalFlutterSwiftCommon",
+    ":flutter_engine_bindings",
+  ]
 }
 
 test_fixtures("framework_common_fixtures") {
@@ -204,7 +236,10 @@ executable("framework_common_swift_unittests") {
     ":test_config",
     ":swift_testing_config",
   ]
-  sources = [ "framework/Source/LoggerTest.swift" ]
+  sources = [
+    "framework/Source/LoggerTest.swift",
+    "framework/Source/TracingTest.swift",
+  ]
   deps = [
     ":framework_common",
     ":swift_testing_main",

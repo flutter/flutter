@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'package:dds/dds_launcher.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -93,6 +95,7 @@ void main() {
     ddsLauncherCallback =
         ({
           required Uri remoteVmServiceUri,
+          String? appName = 'Fake App',
           Uri? serviceUri,
           bool enableAuthCodes = true,
           bool serveDevTools = false,
@@ -102,6 +105,9 @@ void main() {
           String? dartExecutable,
           String? google3WorkspaceRoot,
         }) async {
+          expect(appName, contains('Kind: Flutter'));
+          expect(appName, contains('Device: ephemeral'));
+          expect(appName, contains('Package: Fake Integration Test Package'));
           return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
         };
   });
@@ -155,6 +161,63 @@ void main() {
       await testDevice.kill();
 
       expect(testDevice.finished, completes);
+    },
+    overrides: <Type, Generator>{
+      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+            Logger? logger,
+          }) async => fakeVmServiceHost.vmService,
+    },
+  );
+
+  testUsingContext(
+    'kill() completes and logs warning when DDS shutdown times out',
+    () async {
+      final TestDevice localTestDevice = IntegrationTestTestDevice(
+        id: 1,
+        device: FakeDevice(
+          'ephemeral',
+          'ephemeral',
+          type: PlatformType.android,
+          launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
+        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        userIdentifier: '',
+        compileExpression: null,
+        ddsShutdownTimeout: const Duration(milliseconds: 10),
+      );
+
+      ddsLauncherCallback =
+          ({
+            required Uri remoteVmServiceUri,
+            String? appName = 'Fake App',
+            Uri? serviceUri,
+            bool enableAuthCodes = true,
+            bool serveDevTools = false,
+            Uri? devToolsServerAddress,
+            bool enableServicePortFallback = false,
+            List<String> cachedUserTags = const <String>[],
+            String? dartExecutable,
+            String? google3WorkspaceRoot,
+          }) async {
+            return HangingFakeDartDevelopmentServiceLauncher(
+              uri: Uri.parse('http://localhost:1234'),
+            );
+          };
+
+      await localTestDevice.start('entrypointPath');
+      await localTestDevice.kill();
+
+      expect(localTestDevice.finished, completes);
     },
     overrides: <Type, Generator>{
       ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
@@ -343,7 +406,10 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => FakeApplicationPackage();
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage {
+  @override
+  String get name => 'Fake Integration Test Package';
+}
 
 class FakeDeviceTrackingUninstall extends FakeDevice {
   FakeDeviceTrackingUninstall()
@@ -361,4 +427,28 @@ class FakeDeviceTrackingUninstall extends FakeDevice {
     uninstallAppCalled = true;
     return true;
   }
+}
+
+class HangingFakeDartDevelopmentServiceLauncher extends Fake
+    implements DartDevelopmentServiceLauncher {
+  HangingFakeDartDevelopmentServiceLauncher({required this.uri});
+
+  @override
+  final Uri uri;
+
+  @override
+  Uri? get devToolsUri => null;
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  Future<void> get done => _completer.future;
+
+  @override
+  Future<void> shutdown() async {
+    await _completer.future;
+  }
+
+  final _completer = Completer<void>();
 }

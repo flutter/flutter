@@ -2,16 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
@@ -29,14 +32,25 @@ const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout:
 const unameCommandForArm64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'aarch64');
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   late FakeProcessManager fakeProcessManager;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  Cache createCache(Platform platform) {
-    return Cache.test(platform: platform, processManager: fakeProcessManager);
+  Cache createCache(Platform platform, {Abi? currentAbi}) {
+    return Cache.test(
+      platform: platform,
+      processManager: fakeProcessManager,
+      currentAbi: currentAbi,
+    );
   }
 
   group('Cache.checkLockAcquired', () {
@@ -242,7 +256,7 @@ void main() {
       expect(await cache.isUpToDate(), isTrue);
     });
 
-    testWithoutContext('should update cached artifacts which are not up to date', () async {
+    testUsingContext('should update cached artifacts which are not up to date', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final artifact2 = FakeSecondaryCachedArtifact()..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -257,6 +271,39 @@ void main() {
       expect(artifact1.didUpdate, false);
       expect(artifact2.didUpdate, true);
     });
+
+    testUsingContext('should skip EngineCachedArtifacts when local engine is provided', () async {
+      final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+      final fileSystem = MemoryFileSystem.test();
+      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final artifact2 = FakeEngineCachedArtifact(cache)..upToDate = false;
+
+      final cacheWithArtifacts = Cache.test(
+        fileSystem: fileSystem,
+        artifacts: <CachedArtifact>[artifact1, artifact2],
+        processManager: FakeProcessManager.any(),
+      );
+
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      expect(artifact1.didUpdate, true);
+      expect(artifact2.didUpdate, false);
+    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+
+    testUsingContext('should skip engine_stamp artifact when local engine is provided', () async {
+      final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+      final fileSystem = MemoryFileSystem.test();
+      final artifact2 = FakeEngineStampArtifact()..upToDate = false;
+
+      final cacheWithArtifacts = Cache.test(
+        fileSystem: fileSystem,
+        artifacts: <CachedArtifact>[artifact1, artifact2],
+        processManager: FakeProcessManager.any(),
+      );
+
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      expect(artifact1.didUpdate, true);
+      expect(artifact2.didUpdate, false);
+    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
 
     testWithoutContext(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",
@@ -284,7 +331,7 @@ void main() {
       },
     );
 
-    testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
+    testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup(
         'storage.googleapis.com',
       )).first;
@@ -472,6 +519,361 @@ void main() {
 
       // After reset, index should start fresh
       expect(artifactUpdater.formatProgressMessage('new'), '[1/3] new');
+    });
+  });
+
+  group('DownloadProgress', () {
+    testWithoutContext('fraction and percent with known total', () {
+      final progress = DownloadProgress()..totalBytes = 1000;
+      progress.addBytesReceived(250);
+
+      expect(progress.fractionReceived, 0.25);
+      expect(progress.percentReceived, 25);
+    });
+
+    testWithoutContext('fraction and percent with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(500);
+
+      expect(progress.fractionReceived, 0.0);
+      expect(progress.percentReceived, 0);
+      expect(progress.hasKnownSize, false);
+    });
+
+    testWithoutContext('fraction clamps to 1.0 when bytesReceived exceeds total', () {
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(150);
+
+      expect(progress.fractionReceived, 1.0);
+      expect(progress.percentReceived, 100);
+    });
+
+    testWithoutContext('speed calculation', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+      const elapsed = Duration(seconds: 2);
+
+      expect(progress.speedBytesPerSecond(elapsed), 2500000.0);
+    });
+
+    testWithoutContext('speed is zero when elapsed is zero', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.speedBytesPerSecond(Duration.zero), 0.0);
+    });
+
+    testWithoutContext('timeRemaining with known total', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+      const elapsed = Duration(seconds: 2);
+
+      // 5MB received in 2s = 2.5MB/s, 5MB timeRemaining = 2s timeRemaining
+      final Duration? rem = progress.timeRemaining(elapsed);
+      expect(rem, isNotNull);
+      expect(rem!.inSeconds, 2);
+    });
+
+    testWithoutContext('timeRemaining is null with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.timeRemaining(const Duration(seconds: 2)), isNull);
+    });
+
+    testWithoutContext('timeRemaining is null when speed is zero', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      expect(progress.timeRemaining(Duration.zero), isNull);
+    });
+
+    testWithoutContext('renderProgressBar at 50%', () {
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(50);
+
+      final String bar = progress.renderProgressBar(20);
+      expect(bar.length, 20);
+      expect(bar, '${'█' * 10}${' ' * 10}');
+    });
+
+    testWithoutContext('renderProgressBar uses sub-character partial block', () {
+      // 46% of 20 cells: totalEighths = round(0.46 * 20 * 8) = 74
+      // fullBlocks=9, remainder=2 → partial='▎', emptyBlocks=10
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(46);
+
+      final String bar = progress.renderProgressBar(20);
+      expect(bar.length, 20);
+      expect(bar, '${'█' * 9}▎${' ' * 10}');
+    });
+
+    testWithoutContext('renderProgressBar returns empty with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(50);
+
+      expect(progress.renderProgressBar(20), '');
+    });
+
+    testWithoutContext('renderProgressBar returns empty with zero width', () {
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(50);
+
+      expect(progress.renderProgressBar(0), '');
+    });
+
+    testWithoutContext('formatBytes with known total', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      expect(progress.formatBytes(), matches(r'^\d+\.\d+MB/\d+\.\d+MB$'));
+    });
+
+    testWithoutContext('formatBytes with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.formatBytes(), matches(r'^\d+\.\d+MB$'));
+    });
+
+    testWithoutContext('formatSpeed', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(2000000);
+
+      expect(progress.formatSpeed(const Duration(seconds: 1)), matches(r'^\d+\.\d+MB/s$'));
+    });
+
+    testWithoutContext('formatRemaining with known total and speed', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String eta = progress.formatRemaining(const Duration(seconds: 2));
+      expect(eta, startsWith('ETA '));
+      expect(eta, contains('s'));
+    });
+
+    testWithoutContext('formatRemaining is empty with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.formatRemaining(const Duration(seconds: 2)), '');
+    });
+
+    testWithoutContext('formatProgressLine includes progress bar with known total', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 80,
+      );
+
+      expect(line, contains('50%'));
+      expect(line, matches(r'\d+\.\d+MB/\d+\.\d+MB'));
+      expect(line, contains('/s'));
+      expect(line, contains('█'));
+      expect(line, contains('▏'));
+      expect(line, contains('▕'));
+    });
+
+    testWithoutContext('formatProgressLine has fixed bar width and right-aligns info', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 80,
+      );
+
+      // Bar is fixed at 28 inner chars + 2 brackets = 30 visual chars.
+      // Line total must equal terminalWidth.
+      expect(line.length, 80);
+      // Info is right-aligned: the line must end with the info, no trailing spaces.
+      expect(line, endsWith('ETA 2.0s'));
+    });
+
+    testWithoutContext('formatProgressLine omits bar with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 80,
+      );
+
+      expect(line, isNot(contains('█')));
+      expect(line, matches(r'\d+\.\d+MB'));
+      expect(line, contains('/s'));
+    });
+
+    testWithoutContext('formatProgressLine omits bar when terminal too narrow', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 30,
+      );
+
+      expect(line, isNot(contains('█')));
+      expect(line, contains('50%'));
+    });
+
+    testWithoutContext('formatProgressLine never exceeds terminalWidth', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 30,
+      );
+
+      expect(line.length, lessThanOrEqualTo(30));
+    });
+
+    testWithoutContext(
+      'formatProgressLine does not have trailing whitespace with unknown total',
+      () {
+        final progress = DownloadProgress();
+        progress.addBytesReceived(5000000);
+
+        final String line = progress.formatProgressLine(
+          elapsed: const Duration(seconds: 2),
+          terminalWidth: 80,
+        );
+
+        expect(line, isNot(endsWith(' ')));
+      },
+    );
+
+    testWithoutContext('formatCompletionSummary', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(21100000);
+
+      expect(
+        progress.formatCompletionSummary(const Duration(seconds: 5)),
+        matches(r'^\(\d+\.\d+MB in \d+\.\d+s\)$'),
+      );
+    });
+  });
+
+  group('ArtifactUpdater download progress display', () {
+    late FileSystem fileSystem;
+    late Directory tempStorage;
+    late FakeStdio stdio;
+    late BufferLogger logger;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      tempStorage = fileSystem.systemTempDirectory.createTempSync('temp.');
+      stdio = FakeStdio();
+      logger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+    });
+
+    testWithoutContext(
+      'shows ANSI progress when stdio is provided and color is supported',
+      () async {
+        final body = List<int>.filled(1000, 0);
+        final updater = ArtifactUpdater(
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          logger: logger,
+          fileSystem: fileSystem,
+          tempStorage: tempStorage,
+          httpClient: FakeHttpClient.list(<FakeRequest>[
+            FakeRequest(
+              Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+              response: FakeResponse(body: body),
+            ),
+          ]),
+          platform: FakePlatform(),
+          allowedBaseUrls: <String>['https://storage.googleapis.com'],
+          stdio: stdio,
+        );
+
+        updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
+
+        await updater.downloadZipArchive(
+          'Test Artifact',
+          Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+          fileSystem.directory('output')..createSync(),
+        );
+
+        final String allOutput = stdio.writtenToStdout.join();
+
+        // Should have written the status message followed by newline
+        expect(allOutput, contains('[1/1] Test Artifact'));
+
+        // Should contain completion summary with size and time
+        expect(allOutput, contains('MB in'));
+        expect(allOutput, contains('s)'));
+
+        // Should contain ANSI clear codes for cleanup
+        expect(allOutput, contains('\x1B[K')); // clear to end of line
+        expect(allOutput, contains('\x1B[1A')); // cursor up
+
+        // Completion line should be right-aligned to terminal width (80).
+        final String completionLine = stdio.writtenToStdout.last.replaceAll('\n', '');
+        expect(completionLine.length, 80);
+      },
+    );
+
+    testWithoutContext('falls back to logger progress when stdio is not provided', () async {
+      final updater = ArtifactUpdater(
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        logger: logger,
+        fileSystem: fileSystem,
+        tempStorage: tempStorage,
+        httpClient: FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+            response: const FakeResponse(body: <int>[0, 0, 0]),
+          ),
+        ]),
+        platform: FakePlatform(),
+        allowedBaseUrls: <String>['https://storage.googleapis.com'],
+      );
+
+      updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
+
+      await updater.downloadZipArchive(
+        'Test Artifact',
+        Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+        fileSystem.directory('output')..createSync(),
+      );
+
+      // Without stdio, nothing should be written to stdout directly
+      expect(stdio.writtenToStdout, isEmpty);
+    });
+
+    testWithoutContext('falls back to logger progress when color is not supported', () async {
+      final noColorLogger = BufferLogger.test();
+
+      final updater = ArtifactUpdater(
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        logger: noColorLogger,
+        fileSystem: fileSystem,
+        tempStorage: tempStorage,
+        httpClient: FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+            response: const FakeResponse(body: <int>[0, 0, 0]),
+          ),
+        ]),
+        platform: FakePlatform(),
+        allowedBaseUrls: <String>['https://storage.googleapis.com'],
+        stdio: stdio,
+      );
+
+      updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
+
+      await updater.downloadZipArchive(
+        'Test Artifact',
+        Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+        fileSystem.directory('output')..createSync(),
+      );
+
+      // With stdio but no color support, should not write progress to stdout
+      expect(stdio.writtenToStdout, isEmpty);
     });
   });
 
@@ -695,7 +1097,7 @@ void main() {
   testWithoutContext('FontSubset artifacts on x64 linux', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
@@ -707,7 +1109,7 @@ void main() {
   testWithoutContext('FontSubset artifacts on arm64 linux', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
@@ -717,7 +1119,10 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on windows', () {
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'windows'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'windows'),
+      currentAbi: Abi.windowsX64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'windows'),
@@ -730,15 +1135,12 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on macos', () {
-    fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/sbin/sysctl'),
-      const FakeCommand(
-        command: <String>['sysctl', 'hw.optional.arm64'],
-        stdout: 'hw.optional.arm64: 0',
-      ),
-    ]);
+    fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'macos'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'macos'),
+      currentAbi: Abi.macosX64,
+    );
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
     cache.includeAllPlatforms = false;
 
@@ -766,7 +1168,10 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'fuchsia'),
+      currentAbi: Abi.linuxX64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -783,7 +1188,10 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'fuchsia'),
+      currentAbi: Abi.linuxArm64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -858,7 +1266,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts for x64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
     final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -871,7 +1279,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -1407,6 +1815,9 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   Exception? updateException;
 
   @override
+  String get name => 'fake';
+
+  @override
   Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
 
   @override
@@ -1439,6 +1850,73 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
   @override
   String stampName = 'ios-usb';
+}
+
+class FakeLocalEngineArtifacts extends Fake implements Artifacts {
+  @override
+  LocalEngineInfo get localEngineInfo => const LocalEngineInfo(
+    targetOutPath: 'out/android_debug_unopt',
+    hostOutPath: 'out/host_debug_unopt',
+  );
+
+  @override
+  bool get usesLocalArtifacts => true;
+}
+
+class FakeEngineCachedArtifact extends EngineCachedArtifact {
+  FakeEngineCachedArtifact(Cache cache)
+    : super('fake_engine', cache, DevelopmentArtifact.universal);
+
+  bool didUpdate = false;
+  bool upToDate = false;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
+
+  @override
+  List<List<String>> getBinaryDirs() => <List<String>>[];
+
+  @override
+  List<String> getLicenseDirs() => <String>[];
+
+  @override
+  List<String> getPackageDirs() => <String>[];
+}
+
+class FakeEngineStampArtifact extends Fake implements CachedArtifact {
+  bool upToDate = false;
+  bool didUpdate = false;
+
+  @override
+  String get name => 'engine_stamp';
+
+  @override
+  DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
 }
 
 class FakeSecondaryCache extends Fake implements Cache {

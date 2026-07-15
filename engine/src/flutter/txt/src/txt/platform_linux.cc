@@ -10,7 +10,7 @@
 #endif
 
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
-#include "include/ports/SkFontMgr_directory.h"
+#include "third_party/skia/include/ports/SkFontMgr_directory.h"
 #endif
 
 #if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)

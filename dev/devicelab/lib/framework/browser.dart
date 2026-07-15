@@ -104,19 +104,31 @@ class Chrome {
     final withDebugging = options.debugPort != null;
     final args = <String>[
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
-      if (options.url != null) options.url!,
+      ?options.url,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
-      if (options.headless ?? false) '--headless',
+      if (options.headless ?? false) ...<String>[
+        '--headless',
+        if (io.Platform.isLinux) ...<String>[
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--enable-unsafe-swiftshader',
+          '--disable-gpu-sandbox',
+        ],
+      ],
       if (withDebugging) '--remote-debugging-port=${options.debugPort}',
       '--window-size=${options.windowWidth},${options.windowHeight}',
       '--disable-extensions',
       '--disable-popup-blocking',
+      '--disable-renderer-backgrounding',
       // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
       '--bwsi',
       '--no-first-run',
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--password-store=basic',
+      '--disable-search-engine-choice-screen',
+      if (io.Platform.isMacOS) '--use-mock-keychain',
       if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
     ];
 
@@ -287,11 +299,16 @@ String _findSystemChromeExecutable() {
 Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
+
+  final String url = tabUrl ?? 'http://localhost';
   final chromeConnection = ChromeConnection('localhost', port);
-  final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
-    return tab.url.startsWith(tabUrl ?? 'http://localhost');
-  });
-  final ChromeTab tab = tabs.single;
+  final ChromeTab? tab = await chromeConnection.getTab(
+    (ChromeTab tab) => tab.url.startsWith(url),
+    retryFor: const Duration(seconds: 5),
+  );
+  if (tab == null) {
+    throw Exception('Chrome failed to open a tab for $url');
+  }
   final WipConnection debugConnection = await tab.connect();
   print('Connected to Chrome tab: ${tab.title} (${tab.url})');
   return debugConnection;

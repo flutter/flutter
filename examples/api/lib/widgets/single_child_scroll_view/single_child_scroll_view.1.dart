@@ -38,7 +38,7 @@ class SingleChildScrollViewExample extends StatelessWidget {
                       // A fixed-height child.
                       color: const Color(0xffeeee00), // Yellow
                       height: 120.0,
-                      alignment: Alignment.center,
+                      alignment: .center,
                       child: const Text('Fixed Height Content'),
                     ),
                     Expanded(
@@ -47,7 +47,7 @@ class SingleChildScrollViewExample extends StatelessWidget {
                       child: Container(
                         color: const Color(0xffee0000), // Red
                         height: 120.0,
-                        alignment: Alignment.center,
+                        alignment: .center,
                         child: const Text('Flexible Content'),
                       ),
                     ),

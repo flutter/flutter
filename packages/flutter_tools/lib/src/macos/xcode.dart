@@ -19,6 +19,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
+import '../xcode_project.dart';
 
 Version get xcodeRequiredVersion => Version(15, null, null);
 
@@ -231,6 +232,16 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageUpdatesAndValidation = true,
+  }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
+    xcodeProject,
+    buildDirectory,
+    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+  );
+
   Future<RunResult> cc(List<String> args) => _run('cc', args);
 
   Future<RunResult> clang(List<String> args) => _run('clang', args);
@@ -261,8 +272,16 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
-    return _fileSystem.directory(appPath).existsSync() ? appPath : null;
+    final String deviceHubPath = _fileSystem.path.join(
+      _fileSystem.path.dirname(selectPath),
+      'Applications',
+      'DeviceHub.app',
+    );
+    if (_fileSystem.directory(deviceHubPath).existsSync()) {
+      return deviceHubPath;
+    }
+    final String simulatorPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
+    return _fileSystem.directory(simulatorPath).existsSync() ? simulatorPath : null;
   }
 
   /// Gets the version number of the platform for the selected SDK.
@@ -283,6 +302,9 @@ class Xcode {
 }
 
 EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
+
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {

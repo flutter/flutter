@@ -1000,7 +1000,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero].
   ///
   /// If [indicator] is not null or provided from [TabBarTheme],
-  /// then [indicatorWeight] and [indicatorColor] are ignored.
+  /// then [indicatorColor] is ignored.
+  ///
+  /// The [indicatorWeight] does not affect the visual appearance of
+  /// the indicator when a custom [indicator] is provided. However,
+  /// it may still be used to compute the TabBar's preferred size.
   const TabBar({
     super.key,
     required this.tabs,

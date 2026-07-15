@@ -4,13 +4,12 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:file/local.dart';
-import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
+import 'package:convert/convert.dart';
+import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' as platform;
-
 import 'package:process/process.dart';
 
 import 'utils.dart';
@@ -61,7 +60,7 @@ Future<void> postProcess() async {
   // Recreate footer
   final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
   final footerFile = File(publishPath)..createSync(recursive: true);
-  createFooter(footerFile, version);
+  await createFooter(footerFile, version);
 }
 
 /// Gets the git revision of the current checkout. [fullLength] if true will return
@@ -150,7 +149,8 @@ Future<void> createFooter(
   @visibleForTesting String? branchParam,
   @visibleForTesting String? revisionParam,
 }) async {
-  final String timestamp = timestampParam ?? DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+  final String timestamp =
+      timestampParam ?? FixedDateTimeFormatter('YYYY-MM-DD hh:mm').encode(DateTime.now());
   final String gitBranch = branchParam ?? await getBranchName();
   final String revision = revisionParam ?? await gitRevision();
   final gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';

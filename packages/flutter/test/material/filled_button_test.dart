@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
+import 'semantics_tester.dart';
 
 void main() {
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
@@ -1763,32 +1763,30 @@ void main() {
     }
   });
 
-  testWidgets(
-    'FilledButton uses InkSparkle only for Android non-web when useMaterial3 is true',
-    (WidgetTester tester) async {
-      final theme = ThemeData();
+  testWidgets('FilledButton uses InkSparkle only for Android non-web when useMaterial3 is true', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: theme,
-          home: Center(
-            child: FilledButton(onPressed: () {}, child: const Text('button')),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: FilledButton(onPressed: () {}, child: const Text('button')),
         ),
-      );
+      ),
+    );
 
-      final InkWell buttonInkWell = tester.widget<InkWell>(
-        find.descendant(of: find.byType(FilledButton), matching: find.byType(InkWell)),
-      );
+    final InkWell buttonInkWell = tester.widget<InkWell>(
+      find.descendant(of: find.byType(FilledButton), matching: find.byType(InkWell)),
+    );
 
-      if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
-        expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
-      } else {
-        expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
-      }
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
+      expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
+    } else {
+      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('FilledButton.icon does not overflow', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77815
@@ -2210,11 +2208,11 @@ void main() {
   }
 
   testWidgets('FilledButton statesController', (WidgetTester tester) async {
-    testStatesController(null, tester);
+    await testStatesController(null, tester);
   });
 
   testWidgets('FilledButton.icon statesController', (WidgetTester tester) async {
-    testStatesController(const Icon(Icons.add), tester);
+    await testStatesController(const Icon(Icons.add), tester);
   });
 
   testWidgets('Disabled FilledButton statesController', (WidgetTester tester) async {

@@ -7,10 +7,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart' show TestCallbackPainter;
-import '../widgets/navigator_utils.dart';
+import '../widgets/widget_inspector_test_utils.dart';
+import 'navigator_utils.dart';
 
 late List<int> selectedTabs;
+
+/// A [CustomPainter] that invokes the [onPaint] callback when it is painted.
+class _TestCallbackPainter extends CustomPainter {
+  const _TestCallbackPainter({required this.onPaint});
+
+  /// The callback that is invoked when the painter paints.
+  final VoidCallback onPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    onPaint();
+  }
+
+  @override
+  bool shouldRepaint(covariant _TestCallbackPainter oldDelegate) => true;
+}
 
 class MockCupertinoTabController extends CupertinoTabController {
   MockCupertinoTabController({required super.initialIndex});
@@ -42,6 +58,10 @@ BottomNavigationBarItem tabGenerator(int index) {
 }
 
 void main() {
+  // Must be called before any testWidgets so the service is set before
+  // binding initialization triggers initServiceExtensions.
+  _TabScaffoldWidgetInspectorService.runTests();
+
   setUp(() {
     selectedTabs = <int>[];
   });
@@ -55,7 +75,7 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -230,7 +250,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -270,7 +290,7 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -293,7 +313,7 @@ void main() {
           controller: controller, // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -630,7 +650,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -652,7 +672,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -687,7 +707,7 @@ void main() {
           controller: oldController,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -707,7 +727,7 @@ void main() {
           tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(10, tabGenerator)),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              painter: TestCallbackPainter(
+              painter: _TestCallbackPainter(
                 onPaint: () {
                   tabsPainted.add(index);
                 },
@@ -818,7 +838,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
                   );
                 },
               ),
@@ -829,7 +849,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted1.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted1.add(index)),
                   );
                 },
               ),
@@ -861,7 +881,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
                   );
                 },
               ),
@@ -891,7 +911,7 @@ void main() {
                 controller: controller,
                 tabBuilder: (BuildContext context, int index) {
                   return CustomPaint(
-                    painter: TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
+                    painter: _TestCallbackPainter(onPaint: () => tabsPainted0.add(index)),
                   );
                 },
               ),
@@ -1403,6 +1423,57 @@ void main() {
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
   });
+}
+
+class _TabScaffoldWidgetInspectorService extends TestWidgetInspectorService {
+  // These tests need access to protected members of WidgetInspectorService.
+  static void runTests() {
+    final service = _TabScaffoldWidgetInspectorService();
+    final WidgetInspectorService previousInstance = WidgetInspectorService.instance;
+    WidgetInspectorService.instance = service;
+
+    tearDown(() {
+      service.resetAllState();
+      WidgetInspectorService.instance = previousInstance;
+    });
+
+    testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/115228
+      const group = 'test-group';
+      const Key leafKey = ValueKey<String>('ColoredBox');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Tab 1'),
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.search), label: 'Tab 2'),
+              ],
+            ),
+            tabBuilder: (BuildContext context, int index) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return ColoredBox(key: leafKey, color: CupertinoTheme.of(context).primaryColor);
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      final Element leaf = tester.element(find.byKey(leafKey));
+      service.setSelection(leaf, group);
+      final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
+      final String id = service.toId(diagnostic, group)!;
+
+      await service.testExtension(
+        WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+        <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+      );
+    });
+  }
 }
 
 CupertinoTabBar _buildTabBar({int selectedTab = 0}) {

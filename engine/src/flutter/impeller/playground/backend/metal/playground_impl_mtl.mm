@@ -62,7 +62,7 @@ void PlaygroundImplMTL::DestroyWindowHandle(WindowHandle handle) {
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
-PlaygroundImplMTL::PlaygroundImplMTL(PlaygroundSwitches switches)
+PlaygroundImplMTL::PlaygroundImplMTL(const PlaygroundSwitches& switches)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
       data_(std::make_unique<Data>()),
@@ -141,6 +141,10 @@ fml::Status PlaygroundImplMTL::SetCapabilities(
 
 void PlaygroundImplMTL::SetGPUDisabled(bool disabled) const {
   is_gpu_disabled_sync_switch_->SetSwitch(disabled);
+}
+
+RuntimeStageBackend PlaygroundImplMTL::GetRuntimeStageBackend() const {
+  return RuntimeStageBackend::kMetal;
 }
 
 }  // namespace impeller

@@ -244,7 +244,7 @@ void main() {
       getMaterial(tester).shape,
       RoundedRectangleBorder(
         side: BorderSide(color: lightTheme.colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
       ),
     );
     expect(getIconData(tester).color, lightTheme.colorScheme.primary);
@@ -275,7 +275,7 @@ void main() {
       getMaterial(tester).shape,
       RoundedRectangleBorder(
         side: BorderSide(color: darkTheme.colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
       ),
     );
     expect(getIconData(tester).color, darkTheme.colorScheme.primary);
@@ -3534,14 +3534,17 @@ void main() {
         }),
       ),
     );
+    const avatarX = 16.0;
+    const avatarY = 16.0;
+    const avatarRadius = 12.0;
     const selectScrimColor = Color(0x60191919);
     expect(
       rawChip,
-      paints..path(
-        color: selectScrimColor,
-        includes: <Offset>[const Offset(10, 10)],
-        excludes: <Offset>[const Offset(4, 4)],
-      ),
+      paints
+        // CircleAvatar background.
+        ..circle(x: avatarX, y: avatarY, radius: avatarRadius)
+        // Selection scrim overlay.
+        ..circle(color: selectScrimColor, x: avatarX, y: avatarY, radius: avatarRadius),
     );
   });
 
@@ -3566,14 +3569,17 @@ void main() {
         }),
       ),
     );
+    const avatarX = 18.0;
+    const avatarY = 18.0;
+    const avatarRadius = 10.0;
     const selectScrimColor = Color(0x60191919);
     expect(
       rawChip,
-      paints..path(
-        color: selectScrimColor,
-        includes: <Offset>[const Offset(11, 11)],
-        excludes: <Offset>[const Offset(4, 4)],
-      ),
+      paints
+        // CircleAvatar background.
+        ..circle(x: avatarX, y: avatarY, radius: avatarRadius)
+        // Selection scrim overlay.
+        ..circle(color: selectScrimColor, x: avatarX, y: avatarY, radius: avatarRadius),
     );
   });
 

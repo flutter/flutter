@@ -1,0 +1,54 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Material and Cupertino Code Freeze
+
+on:
+  # Safe because this workflow does not check out code or run arbitrary scripts.
+  # It only runs a metadata-based path filter to enforce freeze restrictions.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+    branches:
+      - master
+  merge_group:
+    branches:
+      - master
+
+permissions: read-all
+
+jobs:
+  check_freeze:
+    name: Check Code Freeze
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/flutter' }}
+
+    steps:
+      - name: Check for changes in frozen folders
+        if: github.event_name != 'merge_group'
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        id: filter
+        with:
+          token: ${{ github.token }}
+          filters: |
+            frozen:
+              - 'packages/flutter/lib/src/material/**'
+              - 'packages/flutter/lib/src/cupertino/**'
+              - 'packages/flutter/test/material/**'
+              - 'packages/flutter/test/cupertino/**'
+              - 'examples/api/lib/material/**'
+              - 'examples/api/lib/cupertino/**'
+              - 'examples/api/test/material/**'
+              - 'examples/api/test/cupertino/**'
+              - 'packages/flutter/lib/fix_data/fix_cupertino.yaml'
+              - 'packages/flutter/lib/fix_data/fix_material/**'
+              - 'packages/flutter/test_fixes/material/**'
+              - 'packages/flutter/test_fixes/cupertino/**'
+
+      - name: Fail on frozen changes
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+        run: |
+          echo "Error: Code changes detected during the current code freeze."
+          echo "If this is a critical fix that must land, please file an issue for team-design."
+          echo "Info: https://github.com/flutter/flutter/issues/184093"
+          exit 1

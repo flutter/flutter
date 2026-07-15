@@ -103,6 +103,7 @@ class FlutterTesterTestDevice extends TestDevice {
         '--vm-service-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort}',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+        if (debuggingOptions.disableServiceOriginCheck) '--disable-service-origin-check',
       ] else
         '--disable-vm-service',
       if (host!.type == InternetAddressType.IPv6) '--ipv6',
@@ -179,6 +180,9 @@ class FlutterTesterTestDevice extends TestDevice {
           logger.printTrace('test $id: Starting Dart Development Service');
           await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
+            appName:
+                'Kind: Flutter - Device: flutter tester - '
+                'Package: ${flutterProject?.manifest.appName ?? 'unknown'}',
             debuggingOptions: debuggingOptions,
           );
           forwardingUri = _ddsLauncher.uri;

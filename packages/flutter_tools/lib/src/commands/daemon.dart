@@ -844,6 +844,13 @@ class AppDomain extends Domain {
       }),
       appRunFuture,
     ]);
+
+    // If appRunFuture completes early due to a fatal initialization error
+    // without actually starting the app, we must explicitly throw an exception
+    // to prevent the IDE/client from hanging indefinitely.
+    if (!appStartedCompleter.isCompleted) {
+      throw DaemonException('App failed to start');
+    }
     return app;
   }
 
@@ -1151,7 +1158,7 @@ class DeviceDomain extends Domain {
 
   /// Creates an application package from a file in the temp directory.
   Future<String> uploadApplicationPackage(Map<String, Object?> args) async {
-    final TargetPlatform targetPlatform = getTargetPlatformForName(
+    final targetPlatform = TargetPlatform.fromName(
       _getStringArg(args, 'targetPlatform', required: true)!,
     );
     final File applicationBinary = daemon.proxyDomain.tempDirectory.childFile(
@@ -1252,7 +1259,7 @@ class DeviceDomain extends Domain {
     final tempFileName = 'screenshot_${_id++}';
     final File tempFile = daemon.proxyDomain.tempDirectory.childFile(tempFileName);
     await device.takeScreenshot(tempFile);
-    if (await tempFile.exists()) {
+    if (tempFile.existsSync()) {
       final String imageBase64 = base64.encode(await tempFile.readAsBytes());
       return imageBase64;
     } else {
@@ -1278,8 +1285,18 @@ class DeviceDomain extends Domain {
       devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
     }
 
+    FlutterProject? project;
+    try {
+      project = FlutterProject.current();
+    } on ToolExit catch (_) {
+      // In daemon mode the cwd may not be a Flutter project, so we just ignore
+      // these errors and use 'Unknown' as the package name below.
+    }
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
+      appName:
+          'Kind: Flutter - Device: ${device.displayName} - '
+          'Package: ${project?.manifest.appName ?? 'Unknown'}',
       disableServiceAuthCodes: disableServiceAuthCodes,
       enableDevTools: enableDevTools,
       devToolsServerAddress: devToolsServerAddress,
@@ -1301,7 +1318,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
 
-    device.dds.shutdown();
+    await device.dds.shutdown();
   }
 
   @override
@@ -1399,10 +1416,11 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
   return <String, Object?>{
     'id': device.id,
     'name': device.displayName,
-    'platform': getNameForTargetPlatform(await device.targetPlatform),
+    'platform': (await device.targetPlatform).getName(),
     'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),
+    'cpuArch': (await device.cpuArch).name,
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
     'sdk': await device.sdkNameAndVersion,
@@ -1665,7 +1683,7 @@ class ProxyDomain extends Domain {
     final String path = _getStringArg(args, 'path', required: true)!;
     final bool cacheResult = _getBoolArg(args, 'cacheResult') ?? false;
     final File file = tempDirectory.childFile(path);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       return null;
     }
     final File hashFile = file.parent.childFile('${file.basename}.hashes');
@@ -1688,7 +1706,7 @@ class ProxyDomain extends Domain {
   Future<bool?> updateFile(Map<String, Object?> args, Stream<List<int>>? binary) async {
     final String path = _getStringArg(args, 'path', required: true)!;
     final File file = tempDirectory.childFile(path);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       return null;
     }
     final List<Map<String, Object?>> deltaJson = (args['delta']! as List<Object?>)
@@ -1792,6 +1810,9 @@ class ProxyDomain extends Domain {
 /// A [Logger] which omits log messages to avoid breaking `--machine` formatting.
 final class MachineOutputLogger extends DelegatingLogger {
   MachineOutputLogger({required Logger parent}) : super(parent);
+
+  @override
+  bool get isMachine => true;
 
   AppDomain? _domain;
   late final AppInstance _app;

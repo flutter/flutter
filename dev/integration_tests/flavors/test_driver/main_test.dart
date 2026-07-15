@@ -20,7 +20,7 @@ void main() {
     }, timeout: Timeout.none);
 
     tearDownAll(() async {
-      driver.close();
+      await driver.close();
     });
   });
 }

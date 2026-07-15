@@ -12,8 +12,8 @@ library;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -71,9 +71,10 @@ void main() {
   testWidgets('timeStamp should be accurate to microsecond precision', (WidgetTester tester) async {
     final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-    await tester.pumpWidget(const CircularProgressIndicator());
+    await tester.pumpWidget(const SizedBox());
 
     final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
+    tester.binding.scheduleFrame();
     await tester.pump(const Duration(microseconds: 12345));
     final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
 
@@ -88,7 +89,7 @@ void main() {
       binding.elapseBlocking(const Duration(seconds: 1));
 
       expect(timerCalled, false);
-      binding.idle();
+      await binding.idle();
     });
 
     testWidgets('can use to simulate slow build', (WidgetTester tester) async {
@@ -114,7 +115,7 @@ void main() {
       );
 
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
-      binding.idle();
+      await binding.idle();
     });
   });
 
@@ -123,6 +124,7 @@ void main() {
   ) async {
     var responded = false;
     // The particular asset does not matter, as long as it exists.
+    // ignore: unawaited_futures
     rootBundle.load('AssetManifest.bin').then((ByteData data) {
       responded = true;
     });

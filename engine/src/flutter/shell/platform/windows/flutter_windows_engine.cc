@@ -194,8 +194,21 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 
   // Check for impeller support.
   auto& switches = project_->GetSwitches();
-  enable_impeller_ = std::find(switches.begin(), switches.end(),
-                               "--enable-impeller=true") != switches.end();
+  bool enable_impeller = true;
+  if (project_->impeller_switch() == FlutterImpellerSwitch::Enabled) {
+    enable_impeller = true;
+  } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
+    enable_impeller = false;
+  }
+  for (const auto& env_switch : switches) {
+    if (env_switch == "--enable-impeller" ||
+        env_switch == "--enable-impeller=true") {
+      enable_impeller = true;
+    } else if (env_switch == "--enable-impeller=false") {
+      enable_impeller = false;
+    }
+  }
+  enable_impeller_ = enable_impeller;
 
   egl_manager_ = egl::Manager::Create(
       static_cast<egl::GpuPreference>(project_->gpu_preference()));
@@ -290,6 +303,29 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::string executable_name = GetExecutableName();
   std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
+  if (enable_impeller_) {
+    if (std::find(switches.begin(), switches.end(),
+                  "--impeller-use-sdfs=true") == switches.end() &&
+        std::find(switches.begin(), switches.end(),
+                  "--impeller-use-sdfs=false") == switches.end()) {
+      switches.push_back("--impeller-use-sdfs=true");
+    }
+    if (std::find(switches.begin(), switches.end(), "--enable-impeller") ==
+            switches.end() &&
+        std::find(switches.begin(), switches.end(), "--enable-impeller=true") ==
+            switches.end()) {
+      // Impeller was enabled programmatically, so forward the switch to the
+      // engine.
+      switches.push_back("--enable-impeller");
+    }
+  } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
+    if (std::find(switches.begin(), switches.end(),
+                  "--enable-impeller=false") == switches.end()) {
+      // Impeller was disabled programmatically, so forward the switch to the
+      // engine.
+      switches.push_back("--enable-impeller=false");
+    }
+  }
   std::transform(
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
@@ -657,6 +693,13 @@ void FlutterWindowsEngine::RemoveView(FlutterViewId view_id) {
     std::unique_lock write_lock(views_mutex_);
 
     FML_DCHECK(views_.find(view_id) != views_.end());
+
+    // Reset text input state if the removed view is the active text input
+    // view, to prevent stale view references.
+    if (text_input_plugin_) {
+      text_input_plugin_->OnViewRemoved(view_id);
+    }
+
     views_.erase(view_id);
   }
 }

@@ -17,11 +17,8 @@ void main() {
     runWidget(
       RegularWindow(
         controller: RegularWindowController(
-          preferredSize: const Size(800, 600),
-          preferredConstraints: const BoxConstraints(
-            minWidth: 640,
-            minHeight: 480,
-          ),
+          size: const Size(800, 600),
+          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
           title: 'Example Window',
         ),
         child: const MaterialApp(home: MyApp()),
@@ -73,8 +70,8 @@ class _MyAppState extends State<MyApp> {
               parent: WindowScope.of(context),
               anchorRect: _getAnchorRect()!,
               positioner: const WindowPositioner(
-                parentAnchor: WindowPositionerAnchor.right,
-                childAnchor: WindowPositionerAnchor.left,
+                parentAnchor: .right,
+                childAnchor: .left,
               ),
               delegate: _CallbackPopupDelegate(
                 onDestroyCallback: () {
@@ -95,10 +92,10 @@ class _MyAppState extends State<MyApp> {
         PopupWindow(
           controller: _popupController!,
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const .all(8),
             color: Colors.black,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 const Text(
                   'This is a popup',
@@ -122,7 +119,7 @@ class _MyAppState extends State<MyApp> {
 
     return Scaffold(
       body: Center(
-        child: Row(mainAxisSize: MainAxisSize.min, children: children),
+        child: Row(mainAxisSize: .min, children: children),
       ),
     );
   }

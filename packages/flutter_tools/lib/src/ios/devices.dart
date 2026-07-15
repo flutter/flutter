@@ -67,6 +67,17 @@ In the meantime, we recommend these temporary workarounds:
   profile mode via --release or --profile flags.
 ════════════════════════════════════════════════════════════════════════════════''';
 
+/// The error message shown when an iOS app fails to launch because it has not
+/// been migrated to the UIScene lifecycle.
+const String kUISceneMigrationRequiredError = '''
+════════════════════════════════════════════════════════════════════════════════
+Your iOS app has not been migrated to the UIScene lifecycle.
+UIScene lifecycle is required on iOS 27 and later.
+
+To migrate your app, please follow the migration guide at:
+  https://flutter.dev/to/uiscene-migration
+════════════════════════════════════════════════════════════════════════════════''';
+
 enum IOSDeploymentMethod {
   iosDeployLaunch,
   iosDeployLaunchAndAttach,
@@ -362,6 +373,13 @@ class IOSDevice extends Device {
   final DarwinArch cpuArchitecture;
 
   @override
+  Future<CpuArch> get cpuArch async => switch (cpuArchitecture) {
+    .armv7 => CpuArch.armv7,
+    .arm64 => CpuArch.arm64,
+    .x86_64 => CpuArch.x86_64,
+  };
+
+  @override
   /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
   /// may not be accurate. Sometimes if it doesn't have a long enough time
   /// to connect, wireless devices will have an interface of `usb`/`attached`.
@@ -566,8 +584,12 @@ class IOSDevice extends Device {
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
       );
+
+      // This completer is used to intercept when the app crashes after the app launches but
+      // before the Dart VM service is found.
+      final appTerminatedCompleter = Completer<Uri?>();
       if (deviceLogReader is SharedIOSDeviceLogReader) {
-        await _addLogInterceptors(deviceLogReader);
+        await _addLogInterceptors(deviceLogReader, appTerminatedCompleter);
       }
 
       if (debuggingOptions.debuggingEnabled) {
@@ -677,6 +699,7 @@ class IOSDevice extends Device {
           vmServiceDiscovery: vmServiceDiscovery,
           package: package,
           deviceLogReader: deviceLogReader,
+          appTerminatedCompleter: appTerminatedCompleter,
         );
       } else if (isWirelesslyConnected) {
         // Wait for the Dart VM url to be discovered via logs (from `ios-deploy`)
@@ -836,7 +859,10 @@ class IOSDevice extends Device {
     _logger.printError('');
   }
 
-  Future<void> _addLogInterceptors(SharedIOSDeviceLogReader deviceLogReader) async {
+  Future<void> _addLogInterceptors(
+    SharedIOSDeviceLogReader deviceLogReader,
+    Completer<Uri?> appTerminatedCompleter,
+  ) async {
     final String? uisceneWarning = globals.userMessages.uiSceneMigrationWarning;
     if (uisceneWarning != null) {
       final uisceneWarningInterceptor = LogInterceptor(
@@ -852,10 +878,32 @@ class IOSDevice extends Device {
       deviceLogReader.addLogInterceptor(uisceneWarningInterceptor);
     }
 
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(uisceneCrashInterceptor);
+
     final LogInterceptor? jitCrashInterceptor = await _jitCrashInterceptor();
     if (jitCrashInterceptor != null) {
       deviceLogReader.addLogInterceptor(jitCrashInterceptor);
     }
+
+    final appTerminatedInterceptor = LogInterceptor(
+      identifier: 'app_terminated',
+      pattern: RegExp('^App terminated due to signal'),
+      action: () {
+        if (!appTerminatedCompleter.isCompleted) {
+          appTerminatedCompleter.complete();
+        }
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(appTerminatedInterceptor);
   }
 
   /// Find the Dart VM url using ProtocolDiscovery (logs from `idevicesyslog`)
@@ -868,47 +916,8 @@ class IOSDevice extends Device {
     ProtocolDiscovery? vmServiceDiscovery,
     IOSApp? package,
     required DeviceLogReader deviceLogReader,
+    required Completer<Uri?> appTerminatedCompleter,
   }) async {
-    Timer? maxWaitForCI;
-    final cancelCompleter = Completer<Uri?>();
-
-    // When testing in CI, wait a max of 10 minutes for the Dart VM to be found.
-    // Afterwards, stop the app from running and upload DerivedData Logs to debug
-    // logs directory. CoreDevices are run through Xcode and launch logs are
-    // therefore found in DerivedData.
-    if (debuggingOptions.usingCISystem && debuggingOptions.debugLogsDirectoryPath != null) {
-      maxWaitForCI = Timer(const Duration(minutes: 10), () async {
-        _logger.printError('Failed to find Dart VM after 10 minutes.');
-        await _xcodeDebug.exit();
-        final String? homePath = _platform.environment['HOME'];
-        Directory? derivedData;
-        if (homePath != null) {
-          derivedData = _fileSystem.directory(
-            _fileSystem.path.join(homePath, 'Library', 'Developer', 'Xcode', 'DerivedData'),
-          );
-        }
-        if (derivedData != null && derivedData.existsSync()) {
-          final Directory debugLogsDirectory = _fileSystem.directory(
-            debuggingOptions.debugLogsDirectoryPath,
-          );
-          debugLogsDirectory.createSync(recursive: true);
-          for (final FileSystemEntity entity in derivedData.listSync()) {
-            if (entity is! Directory || !entity.childDirectory('Logs').existsSync()) {
-              continue;
-            }
-            final Directory logsToCopy = entity.childDirectory('Logs');
-            final Directory copyDestination = debugLogsDirectory
-                .childDirectory('DerivedDataLogs')
-                .childDirectory(entity.basename)
-                .childDirectory('Logs');
-            _logger.printTrace('Copying logs ${logsToCopy.path} to ${copyDestination.path}...');
-            copyDirectory(logsToCopy, copyDestination);
-          }
-        }
-        cancelCompleter.complete();
-      });
-    }
-
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
     // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
@@ -927,20 +936,26 @@ class IOSDevice extends Device {
       if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
-    Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
+    Uri? localUri = await Future.any(<Future<Uri?>>[
+      ...discoveryOptions,
+      appTerminatedCompleter.future,
+    ]);
 
     // If the first future to return is null, wait for the other to complete
-    // unless canceled.
-    if (localUri == null && !cancelCompleter.isCompleted) {
+    // unless the app was terminated.
+    if (localUri == null && !appTerminatedCompleter.isCompleted) {
       final Future<List<Uri?>> allDiscoveryOptionsComplete = Future.wait(discoveryOptions);
-      await Future.any(<Future<Object?>>[allDiscoveryOptionsComplete, cancelCompleter.future]);
-      if (!cancelCompleter.isCompleted) {
-        // If it wasn't cancelled, that means one of the discovery options completed.
+      await Future.any(<Future<Object?>>[
+        allDiscoveryOptionsComplete,
+        appTerminatedCompleter.future,
+      ]);
+      if (!appTerminatedCompleter.isCompleted) {
+        // If it wasn't terminated, that means one of the discovery options completed.
         final List<Uri?> vmUrls = await allDiscoveryOptionsComplete;
         localUri = vmUrls.where((Uri? vmUrl) => vmUrl != null).firstOrNull;
       }
     }
-    maxWaitForCI?.cancel();
+
     if (deviceLogReader is SharedIOSDeviceLogReader) {
       deviceLogReader.removeLogInterceptorByIdentifier(kJITCrashLogInterceptorIdentifier);
     }
@@ -1071,27 +1086,53 @@ class IOSDevice extends Device {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
 
-      final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
-        deviceId: id,
-        bundlePath: package.deviceBundlePath,
-        bundleId: package.id,
-        launchArguments: launchArguments,
-        shutdownHooks: globals.shutdownHooks,
-      );
+      final bool shouldAttachDebugger =
+          debuggingOptions.buildInfo.isDebug ||
+          (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
 
-      // If it succeeds to launch with LLDB, return, otherwise continue on to
-      // try launching with Xcode.
-      if (launchSuccess) {
-        return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
-      } else {
-        deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
-        _analytics.send(
-          Event.appleUsageEvent(
-            workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
-            result: 'launch failed',
-          ),
+      if (shouldAttachDebugger) {
+        final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
+          deviceId: id,
+          bundlePath: package.deviceBundlePath,
+          bundleId: package.id,
+          launchArguments: launchArguments,
+          shutdownHooks: globals.shutdownHooks,
+          mode: debuggingOptions.buildInfo.mode,
         );
+
+        if (launchSuccess) {
+          return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
+        } else {
+          deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
+          _analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
+              result: 'launch failed',
+            ),
+          );
+        }
+      } else {
+        final bool launchSuccess = await _coreDeviceLauncher.launchAppAndStreamLogsWithoutDebugger(
+          deviceId: id,
+          bundlePath: package.deviceBundlePath,
+          bundleId: package.id,
+          launchArguments: launchArguments,
+          shutdownHooks: globals.shutdownHooks,
+        );
+
+        if (launchSuccess) {
+          return (launchSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
+        } else {
+          deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
+          _analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+              result: 'launch failed',
+            ),
+          );
+        }
       }
     }
 

@@ -12,8 +12,8 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../macos/application_package.dart';
 import '../project.dart';
+import 'application_package.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
 
@@ -44,6 +44,9 @@ class MacOSDevice extends DesktopDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override
   Future<String> get targetPlatformDisplayName async {

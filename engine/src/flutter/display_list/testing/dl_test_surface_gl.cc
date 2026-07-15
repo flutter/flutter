@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/testing/dl_test_surface_gl.h"
 
+#include "flutter/display_list/testing/skia/dl_test_surface_instance_skia.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
@@ -40,7 +41,7 @@ DlOpenGLSurfaceProvider::MakeOffscreenSurface(size_t width,
       kTopLeft_GrSurfaceOrigin, nullptr, false);
 
   offscreen_surface->getCanvas()->clear(SK_ColorTRANSPARENT);
-  return std::make_shared<DlSurfaceInstanceBase>(offscreen_surface);
+  return std::make_shared<DlSurfaceInstanceSkia>(offscreen_surface);
 }
 
 }  // namespace testing

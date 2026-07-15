@@ -17,11 +17,8 @@ void main() {
     runWidget(
       RegularWindow(
         controller: RegularWindowController(
-          preferredSize: const Size(800, 600),
-          preferredConstraints: const BoxConstraints(
-            minWidth: 640,
-            minHeight: 480,
-          ),
+          size: const Size(800, 600),
+          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
           title: 'Example Window',
         ),
         child: const MaterialApp(home: MyApp()),
@@ -66,7 +63,7 @@ class _MyAppState extends State<MyApp> {
         TooltipWindow(
           controller: _tooltipController!,
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const .all(8),
             color: Colors.black,
             child: const Text(
               'This is a tooltip',
@@ -96,7 +93,7 @@ class _MyAppState extends State<MyApp> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         color: _tooltipController != null ? Colors.blueAccent : Colors.blue,
-        padding: const EdgeInsets.all(12),
+        padding: const .all(12),
         child: Row(children: children),
       ),
     );

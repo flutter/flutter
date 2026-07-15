@@ -35,8 +35,7 @@ absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
     return runtime_stages_result.status();
   }
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(test->GetBackend())];
+      runtime_stages_result.value()[test->GetRuntimeStageBackend()];
   if (!runtime_stage) {
     return absl::InternalError("Runtime stage not found for backend.");
   }
@@ -53,6 +52,12 @@ absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
 
 // Regression test for https://github.com/flutter/flutter/issues/126701 .
 TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
+  // This test used to be excluded on Vulkan for impeller_golden_tests
+  // but has been running fine so far with the playground-based golden
+  // mechanism, so we will let it run as the underlying problem may
+  // have been fixed since the exclusion was added.
+  // https://github.com/flutter/flutter/blame/ad80825c24d770a19e33f67800fc0338a3b89ec7/engine/src/flutter/impeller/golden_tests/golden_playground_test_mac.cc#L109
+
   struct FragUniforms {
     Vector2 iResolution;
     Scalar iTime;
@@ -105,8 +110,7 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -179,8 +183,7 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -216,8 +219,7 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar xoffset = 50;
@@ -227,8 +229,8 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
   bool compare = false;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("xoffset", &xoffset, -50, 50);
       ImGui::SliderFloat("yoffset", &yoffset, -50, 50);
       ImGui::SliderFloat("xscale", &xscale, 0, 1);
@@ -304,15 +306,14 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 20.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::End();
     }
@@ -369,15 +370,14 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 5.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::End();
     }
@@ -433,8 +433,7 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 5.0;
@@ -443,8 +442,8 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   Vector2 circle_origin = Vector2(30.f, 30.f);
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::SliderFloat("clip_x", &clip_origin.x, 0, 2048.f);
       ImGui::SliderFloat("clip_y", &clip_origin.y, 0, 1536.f);
@@ -516,8 +515,7 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
       OpenAssetAsRuntimeStage("runtime_stage_border.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -577,8 +575,7 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
   auto runtime_stages_result = OpenAssetAsRuntimeStage("gradient.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -593,8 +590,8 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
   Scalar rotation = 45;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("rotation", &rotation, 0, 360);
       ImGui::End();
     }

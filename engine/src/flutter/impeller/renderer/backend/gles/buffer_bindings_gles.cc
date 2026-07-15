@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 
+#include <cstdint>
 #include <cstring>
 #include <vector>
 
@@ -51,7 +52,7 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
         return false;
       }
       attrib.size = input.vec_size;
-      auto type = ToVertexAttribType(input.type);
+      auto type = ToVertexAttribType(input.GetVertexAttributeFormat());
       if (!type.has_value()) {
         return false;
       }
@@ -59,6 +60,8 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
       attrib.normalized = GL_FALSE;
       attrib.offset = input.offset;
       attrib.stride = layout.stride;
+      attrib.vertex_attrib_divisor =
+          layout.input_rate == VertexInputRate::kInstance ? 1u : 0u;
       vertex_attrib_arrays[layout_i].push_back(attrib);
     }
   }
@@ -193,9 +196,26 @@ bool BufferBindingsGLES::ReadUniformsBindingsV2(const ProcTableGLES& gl,
 
 bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
                                               size_t binding,
-                                              size_t vertex_offset) {
+                                              size_t vertex_offset,
+                                              size_t instance) {
   if (binding >= vertex_attrib_arrays_.size()) {
     return false;
+  }
+
+  // For an emulated instanced draw (instance > 0), a binding whose attributes
+  // are all vertex-rate (divisor 0) does not change across instances, so the
+  // state bound for instance 0 still applies. Skip the redundant re-binding.
+  if (instance > 0u) {
+    bool has_instance_rate = false;
+    for (const auto& array : vertex_attrib_arrays_[binding]) {
+      if (array.vertex_attrib_divisor != 0u) {
+        has_instance_rate = true;
+        break;
+      }
+    }
+    if (!has_instance_rate) {
+      return true;
+    }
   }
 
   if (!gl.GetCapabilities()->IsES()) {
@@ -206,14 +226,33 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
 
   for (const auto& array : vertex_attrib_arrays_[binding]) {
     gl.EnableVertexAttribArray(array.index);
+    // For an emulated instanced draw, an instance-rate attribute is
+    // re-pointed at instance `instance`, since there is no hardware divisor
+    // to advance it. A non-instanced or hardware-instanced draw passes
+    // instance 0 and lets the divisor (if any) do the stepping.
+    size_t attribute_offset = vertex_offset + array.offset;
+    if (array.vertex_attrib_divisor != 0u) {
+      attribute_offset += instance * static_cast<size_t>(array.stride);
+    }
     gl.VertexAttribPointer(array.index,       // index
                            array.size,        // size (must be 1, 2, 3, or 4)
                            array.type,        // type
                            array.normalized,  // normalized
                            array.stride,      // stride
-                           reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                               vertex_offset + array.offset))  // pointer
+                           reinterpret_cast<const GLvoid*>(
+                               static_cast<uintptr_t>(attribute_offset))  // ptr
     );
+    // Set the instancing divisor when the driver supports it. It is core
+    // on ES 3.0+ and comes from GL_EXT_instanced_arrays on ES 2.0. When
+    // unavailable, only per-vertex (divisor 0) bindings are possible,
+    // which is the default. Setting it for every attribute (including
+    // divisor 0) also clears any stale divisor left by a prior pipeline,
+    // which matters on ES, where there is no vertex array object.
+    if (gl.VertexAttribDivisor.IsAvailable()) {
+      gl.VertexAttribDivisor(array.index, array.vertex_attrib_divisor);
+    } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+      gl.VertexAttribDivisorEXT(array.index, array.vertex_attrib_divisor);
+    }
   }
 
   return true;
@@ -334,6 +373,9 @@ bool BufferBindingsGLES::BindUniformBufferV3(
   absl::flat_hash_map<std::string, std::pair<GLint, GLuint>>::iterator it =
       ubo_locations_.find(metadata->name);
   if (it == ubo_locations_.end()) {
+    // This should only happen if we have GLESv3 but are using v2 shaders,
+    // as GLESv3 shaders compiled by impeller always have
+    // **named** uniform buffer blocks
     return BindUniformBufferV2(gl, buffer, metadata, device_buffer_gles);
   }
   const auto& [block_index, binding_point] = it->second;
@@ -471,7 +513,13 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     //--------------------------------------------------------------------------
     /// Bind the texture.
     ///
-    if (!texture_gles.Bind()) {
+    // The `texture_gles` reference is bound `const` because it is reached
+    // via a const view into the bound texture list, but `Bind()` mutates
+    // GLES-specific lazy-init bookkeeping (`slice_mip_initialized_`,
+    // `fence_`). The mutation is implementation detail of the GLES backend
+    // and is invisible to the higher abstraction; the `const_cast` is
+    // confined to this one call site.
+    if (!const_cast<TextureGLES&>(texture_gles).Bind()) {
       return std::nullopt;
     }
 

@@ -39,14 +39,7 @@ class BuildWebCommand extends BuildSubCommand {
     // Flutter web-specific options
     //
     argParser.addSeparator('Flutter web options');
-    argParser.addOption(
-      'base-href',
-      help:
-          'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is done to web/index.html file if this flag is not provided. '
-          'The value has to start and end with a slash "/". '
-          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
-    );
+    usesBaseHrefOption();
     argParser.addOption(
       'static-assets-url',
       help:
@@ -120,6 +113,11 @@ class BuildWebCommand extends BuildSubCommand {
       help:
           'Generate minified output for wasm. '
           'If not explicitly set, uses the compilation mode (debug, profile, release).',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'enable-wasm-deferred-loading',
+      help: 'Enable multi-module deferred loading for Wasm.',
       hide: !verboseHelp,
     );
     argParser.addFlag(
@@ -217,6 +215,7 @@ class BuildWebCommand extends BuildSubCommand {
           stripWasm: boolArg('strip-wasm'),
           sourceMaps: sourceMaps,
           minify: minifyWasm,
+          enableWasmDeferredLoading: boolArg('enable-wasm-deferred-loading'),
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
@@ -246,6 +245,7 @@ class BuildWebCommand extends BuildSubCommand {
             stripWasm: boolArg('strip-wasm'),
             sourceMaps: sourceMaps,
             minify: minifyWasm,
+            enableWasmDeferredLoading: boolArg('enable-wasm-deferred-loading'),
             dryRun: true,
           ),
       ];

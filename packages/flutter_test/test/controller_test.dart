@@ -579,7 +579,13 @@ void main() {
                         ListTile(title: Text('Item a-$i')),
                   ),
                 ),
-                const Divider(thickness: 5),
+                const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: ColoredBox(
+                    color: Color(0xFF000000),
+                    child: SizedBox(height: 5, width: double.infinity),
+                  ),
+                ),
                 Expanded(
                   child: ListView.builder(
                     key: const Key('listView-b'),
@@ -799,7 +805,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start where the slider is.
-        final expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 9);
+        final expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 8);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(start: find.byType(Slider)),
@@ -890,7 +896,7 @@ void main() {
         // We're expecting the traversal to end where the slider is, inclusive.
         final Iterable<Matcher> expectedMatchers = <Matcher>[
           ...fullTraversalMatchers,
-        ].getRange(0, 10);
+        ].getRange(0, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(end: find.byType(Slider)),
@@ -961,7 +967,7 @@ void main() {
         // We're expecting the traversal to start at the text field and end at the slider.
         final Iterable<Matcher> expectedMatchers = <Matcher>[
           ...fullTraversalMatchers,
-        ].getRange(1, 10);
+        ].getRange(1, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(
@@ -1250,7 +1256,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(invoked, isTrue);
-        expect(tester.semantics.find(find.byType(Slider)).value, equals(expected));
+        expect(
+          find.semantics.byFlag(SemanticsFlag.isSlider).evaluate().single.value,
+          equals(expected),
+        );
       });
 
       testWidgets('showOnScreen sends showOnScreen action', (WidgetTester tester) async {
@@ -1501,6 +1510,7 @@ void main() {
               const SnackBar(content: SizedBox(height: 40, width: 300), duration: duration),
             )
             .closed
+            // ignore: unawaited_futures
             .then((SnackBarClosedReason result) => reason = result);
         await tester.pumpFrames(tester.widget(find.byType(MaterialApp)), halfDuration);
 

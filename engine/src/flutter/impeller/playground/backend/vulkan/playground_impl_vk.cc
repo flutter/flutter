@@ -63,7 +63,7 @@ void PlaygroundImplVK::DestroyWindowHandle(WindowHandle handle) {
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
-PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
+PlaygroundImplVK::PlaygroundImplVK(const PlaygroundSwitches& switches)
     : PlaygroundImpl(switches), handle_(nullptr, &DestroyWindowHandle) {
   FML_CHECK(IsVulkanDriverPresent());
 
@@ -244,6 +244,10 @@ PlaygroundImplVK::CreateVKProcAddressResolver() const {
     return reinterpret_cast<void*>(::glfwGetInstanceProcAddress(
         reinterpret_cast<VkInstance>(instance), proc_name));
   };
+}
+
+RuntimeStageBackend PlaygroundImplVK::GetRuntimeStageBackend() const {
+  return RuntimeStageBackend::kVulkan;
 }
 
 }  // namespace impeller

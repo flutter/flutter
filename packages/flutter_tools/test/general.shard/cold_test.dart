@@ -238,6 +238,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName = 'Fake App',
     int? ddsPort,
     FlutterDevice? device,
     bool? ipv6,
@@ -336,4 +337,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

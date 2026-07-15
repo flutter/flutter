@@ -830,6 +830,17 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                                  uint64_t trace_flow_id);
 
   //----------------------------------------------------------------------------
+  /// @brief      Requests to perform framework hit test from the engine.
+  ///
+  /// @param[in]  view_id The identifier of the flutter view that
+  ///                     should be hit tested.
+  /// @param[in]  offset  The position in the view that should be hit tested.
+  ///
+  /// @return     The hit test response.
+  ///
+  HitTestResponse HitTest(int64_t view_id, const flutter::PointData offset);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the embedder encountered an
   ///             accessibility related action on the specified node. This call
   ///             originates on the platform view and has been forwarded to the
