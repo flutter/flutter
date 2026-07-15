@@ -437,6 +437,8 @@ class FirebaseService {
 
   /// Store/update the FCM token for a user (call this after login or token refresh)
   static Future<void> saveUserToken(String userId, String token) async {
+    await initialize();
+    if (Firebase.apps.isEmpty) return;
     final database = FirebaseDatabase.instance;
     final uidFromUsername = await getUidForUsername(userId);
     final uid = uidFromUsername ?? currentUid;
@@ -770,22 +772,54 @@ class FirebaseService {
   }
 
   static Stream<DatabaseEvent> watchWorkout(String workoutId) {
-    return _database.ref('workouts/$workoutId').onValue;
+    return (() async* {
+      await initialize();
+      if (Firebase.apps.isEmpty) return;
+      yield* _database.ref('workouts/$workoutId').onValue;
+    })();
   }
 
   static Stream<DatabaseEvent> watchAllWorkouts() {
-    return _database.ref('workouts').onValue;
+    return (() async* {
+      await initialize();
+      if (Firebase.apps.isEmpty) return;
+      yield* _database.ref('workouts').onValue;
+    })();
   }
 
   static Stream<DatabaseEvent> watchWorkoutIndex(String username) {
     final trimmed = username.trim();
-    return _database
-        .ref('storage/workoutIndexes/${_firebasePathKey(trimmed)}')
-        .onValue;
+    return (() async* {
+      await initialize();
+      if (Firebase.apps.isEmpty) return;
+      yield* _database
+          .ref('storage/workoutIndexes/${_firebasePathKey(trimmed)}')
+          .onValue;
+    })();
   }
 
   static Stream<DatabaseEvent> watchClientsList() {
-    return _database.ref('clientsList').onValue;
+    return (() async* {
+      await initialize();
+      if (Firebase.apps.isEmpty) return;
+      yield* _database.ref('clientsList').onValue;
+    })();
+  }
+
+  static Stream<DatabaseEvent> watchExerciseLibrary() {
+    return (() async* {
+      await initialize();
+      if (Firebase.apps.isEmpty) return;
+      yield* _database.ref('exerciseLibrary').onValue;
+    })();
+  }
+
+  static Stream<DatabaseEvent> watchStretchingLibrary() {
+    return (() async* {
+      await initialize();
+      if (Firebase.apps.isEmpty) return;
+      yield* _database.ref('stretchingLibrary').onValue;
+    })();
   }
 
   // User authentication data

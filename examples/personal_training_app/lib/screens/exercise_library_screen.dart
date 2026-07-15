@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/exercise_library.dart';
-import 'package:firebase_database/firebase_database.dart';
+import '../utils/firebase_service.dart';
 
 class ExerciseLibraryScreen extends StatefulWidget {
   const ExerciseLibraryScreen({super.key});
@@ -27,8 +27,8 @@ class _ExerciseLibraryScreenState extends State<ExerciseLibraryScreen> {
     ];
 
     return Scaffold(
-      body: StreamBuilder<DatabaseEvent>(
-        stream: FirebaseDatabase.instance.ref('exerciseLibrary').onValue,
+      body: StreamBuilder(
+        stream: FirebaseService.watchExerciseLibrary(),
         builder: (context, snapshot) {
           List<ExerciseDemo> exercises = [];
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {

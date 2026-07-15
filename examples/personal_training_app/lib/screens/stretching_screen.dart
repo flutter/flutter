@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/stretching_library.dart';
-import 'package:firebase_database/firebase_database.dart';
+import '../utils/firebase_service.dart';
 
 class StretchingScreen extends StatefulWidget {
   const StretchingScreen({super.key});
@@ -18,8 +18,8 @@ class _StretchingScreenState extends State<StretchingScreen> {
   Widget build(BuildContext context) {
     final categories = ['All', 'Upper Body', 'Lower Body', 'Full Body'];
     return Scaffold(
-      body: StreamBuilder<DatabaseEvent>(
-        stream: FirebaseDatabase.instance.ref('stretchingLibrary').onValue,
+      body: StreamBuilder(
+        stream: FirebaseService.watchStretchingLibrary(),
         builder: (context, snapshot) {
           List<StretchingExercise> stretches = [];
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {

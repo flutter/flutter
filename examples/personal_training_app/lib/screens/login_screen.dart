@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'instructor_bio_screen.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:personal_training_app/utils/firebase_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:personal_training_app/utils/storage_helper.dart';
@@ -142,9 +141,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final authError = FirebaseService.lastAuthError;
       final errorMessage = authError == 'operation-not-allowed'
           ? 'Email/Password sign-in is disabled in Firebase Auth. Enable it and try again.'
-          : (authError == null
-                ? 'Invalid username or password.'
-                : 'Unable to start secure session: $authError');
+          : (authError == 'firebase-not-initialized'
+            ? 'Firebase is not initialized on this build. Please reinstall the latest app build.'
+            : (authError == null
+              ? 'Invalid username or password.'
+              : 'Unable to start secure session: $authError'));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
@@ -184,16 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         await FirebaseService.saveUserToken(username, token);
-        final dbRef = FirebaseDatabase.instance.ref();
-        try {
-          await dbRef
-              .child('users')
-              .child(username)
-              .child('fcmToken')
-              .set(token);
-        } catch (e) {
-          debugPrint('Error saving FCM token: $e');
-        }
       }
     }
   }
@@ -314,16 +305,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 tokenFuture.then((token) async {
                   if (token != null) {
                     await FirebaseService.saveUserToken(username, token);
-                    final dbRef = FirebaseDatabase.instance.ref();
-                    try {
-                      await dbRef
-                          .child('users')
-                          .child(username)
-                          .child('fcmToken')
-                          .set(token);
-                    } catch (e) {
-                      debugPrint('Error saving FCM token: $e');
-                    }
                   }
                 });
               },
@@ -362,9 +343,11 @@ class _LoginScreenState extends State<LoginScreen> {
         final authError = FirebaseService.lastAuthError;
         final errorMessage = authError == 'operation-not-allowed'
             ? 'Email/Password sign-in is disabled in Firebase Auth. Enable it and try again.'
+          : (authError == 'firebase-not-initialized'
+            ? 'Firebase is not initialized on this build. Please reinstall the latest app build.'
             : (authError == null
-                  ? 'Unable to start secure session. Try again.'
-                  : 'Unable to start secure session: $authError');
+              ? 'Unable to start secure session. Try again.'
+              : 'Unable to start secure session: $authError'));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
@@ -377,16 +360,6 @@ class _LoginScreenState extends State<LoginScreen> {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         await FirebaseService.saveUserToken(enteredEmail, token);
-        final dbRef = FirebaseDatabase.instance.ref();
-        try {
-          await dbRef
-              .child('users')
-              .child(enteredEmail)
-              .child('fcmToken')
-              .set(token);
-        } catch (e) {
-          debugPrint('Error saving FCM token: $e');
-        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
