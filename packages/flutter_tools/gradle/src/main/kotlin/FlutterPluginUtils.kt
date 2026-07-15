@@ -9,6 +9,7 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
@@ -1130,9 +1131,12 @@ object FlutterPluginUtils {
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
+            if (variant !is ApplicationVariant) {
+                return@onVariants
+            }
             val manifestUpdater =
                 project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
-                    namespace.set(variant.namespace)
+                    applicationId.set(variant.applicationId)
                     // Flutter should always use project.layout.buildDirectory.file("deeplink.json")
                     // instead of relying on passing in a path.
                     if (project.hasProperty("outputPath")) {
