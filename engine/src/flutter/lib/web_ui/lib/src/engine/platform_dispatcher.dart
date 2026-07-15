@@ -58,6 +58,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   final Arena frameArena = Arena();
 
+  // The framework reports its first frame from a post-frame callback, while
+  // web renderers may still be rasterizing that frame asynchronously. Track
+  // pending renders so the browser event can wait for visible output.
+  final Set<Future<void>> _sceneRendersInProgress = <Future<void>>{};
+
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
@@ -563,7 +568,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       // Dispatched by the bindings to delay service worker initialization.
       case 'flutter/service_worker':
-        domWindow.dispatchEvent(createDomEvent('Event', 'flutter-first-frame'));
+        unawaited(_dispatchFirstFrameEventAfterRender());
         return;
 
       case 'flutter/textinput':
@@ -756,8 +761,26 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
     if (shouldRender) {
-      await renderer.renderScene(scene, target);
+      final sceneRender = renderer.renderScene(scene, target);
+      _sceneRendersInProgress.add(sceneRender);
+      try {
+        await sceneRender;
+      } finally {
+        _sceneRendersInProgress.remove(sceneRender);
+      }
     }
+  }
+
+  Future<void> _dispatchFirstFrameEventAfterRender() async {
+    try {
+      await Future.wait(_sceneRendersInProgress.toList());
+    } catch (_) {
+      // Rendering owns error reporting. A failed render is not a first frame.
+      return;
+    }
+    domWindow.requestAnimationFrame((_) {
+      domWindow.dispatchEvent(createDomEvent('Event', 'flutter-first-frame'));
+    });
   }
 
   @override
