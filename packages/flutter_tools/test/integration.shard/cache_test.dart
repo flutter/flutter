@@ -238,11 +238,8 @@ HostPlatform _identifyMacBinaryArch(String path) {
   // Expect STDOUT like:
   //   bin/cache/dart-sdk/bin/dart: Mach-O 64-bit executable x86_64
   final pattern = RegExp(r'Mach-O 64-bit executable (\w+)');
-  final ProcessResult result = processManager.runSync(<String>['file', _dartBinary.path]);
-  expect(
-    result,
-    ProcessResultMatcher(stdoutPattern: '${_dartBinary.path}: Mach-O 64-bit executable'),
-  );
+  final ProcessResult result = processManager.runSync(<String>['file', path]);
+  expect(result, ProcessResultMatcher(stdoutPattern: '$path: Mach-O 64-bit executable'));
   final RegExpMatch? match = pattern.firstMatch(result.stdout as String);
   if (match == null) {
     fail('Unrecognized STDOUT from `file`: "${result.stdout}"');
