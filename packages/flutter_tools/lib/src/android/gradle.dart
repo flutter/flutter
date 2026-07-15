@@ -584,27 +584,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // local.properties: -D propagates to every build in the invocation (unlike -P project
     // properties), needs no on-disk mutation, and works for plugins resolved from the pub cache.
     //
-    // This whole handshake (and the extra `printAgpVersion` Gradle invocation) is a stopgap.
+    // This whole handshake is a stopgap.
     // TODO(gmackall): Remove once AGP natively unifies its version across composite builds.
     if (await _hasMigratedAndroidPlugins(project)) {
-      final RunResult agpResult = await _processUtils.run(
-        <String>[gradleExecutablePath, ':app:printAgpVersion', '-q'],
-        workingDirectory: project.android.hostAppGradleRoot.path,
-        environment: _java?.environment,
-      );
-      String? agpVersion;
-      for (final String line in LineSplitter.split(agpResult.stdout)) {
-        if (line.startsWith('FLUTTER_AGP_VERSION=')) {
-          agpVersion = line.substring('FLUTTER_AGP_VERSION='.length).trim();
-          break;
-        }
-      }
-      if (agpVersion != null && agpVersion != 'unknown') {
-        options.add('-Dflutter.agp.version=$agpVersion');
-      } else {
-        _logger.printTrace('Could not determine the host app AGP version; '
-            'migrated plugin builds will use their default AGP version.');
-      }
+      options.add('-Pflutter.hasMigratedPlugins=true');
     }
 
     options.addAll(_getAndroidNdkProvisioningProperties());
@@ -710,7 +693,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   // AGP-version handshake that this gates is unneeded at that point.
   Future<bool> _hasMigratedAndroidPlugins(FlutterProject project) async {
     final List<Plugin> plugins = await findPlugins(project);
-    for (final Plugin plugin in plugins) {
+    for (final plugin in plugins) {
       if (!plugin.platforms.containsKey(AndroidPlugin.kConfigKey)) {
         continue;
       }

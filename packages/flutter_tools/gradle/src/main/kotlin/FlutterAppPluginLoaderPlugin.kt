@@ -25,14 +25,6 @@ private const val FLUTTER_SDK_PATH = "flutterSdkPath"
 @Suppress("unused") // This class is used by packages/flutter_tools/gradle/build.gradle.kts.
 class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
     override fun apply(settings: Settings) {
-        val isInvokingMetadataAgpVersionTask = settings.gradle.startParameter.taskNames.any { taskName ->
-            taskName == "printAgpVersion" || taskName.endsWith(":printAgpVersion")
-        }
-
-        if (isInvokingMetadataAgpVersionTask) {
-            // Skip loading plugins to avoid conflicts during metadata query.
-            return
-        }
 
         val flutterProjectRoot: File = settings.settingsDir.parentFile
 

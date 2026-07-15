@@ -50,7 +50,17 @@ class FlutterPlugin : Plugin<Project> {
         val rootProject = project.rootProject
         if (FlutterPluginUtils.isFlutterAppProject(project)) {
             addTaskForLockfileGeneration(rootProject)
-            addTaskForPrintingAgpVersion(project)
+            if (project.hasProperty("flutter.hasMigratedPlugins") &&
+                project.property("flutter.hasMigratedPlugins") == "true"
+            ) {
+                project.pluginManager.withPlugin("com.android.application") {
+                    val agpVersion = VersionFetcher.getAGPVersion(project)
+                    if (agpVersion != null) {
+                        val versionStr = "${agpVersion.major}.${agpVersion.minor}.${agpVersion.micro}"
+                        System.setProperty("flutter.agp.version", versionStr)
+                    }
+                }
+            }
         }
 
         val flutterRootSystemVal: String? = System.getenv("FLUTTER_ROOT")
@@ -291,23 +301,7 @@ class FlutterPlugin : Plugin<Project> {
         }
     }
 
-    private fun addTaskForPrintingAgpVersion(project: Project) {
-        project.tasks.register("printAgpVersion") {
-            doLast {
-                try {
-                    val agpVersion = VersionFetcher.getAGPVersion(project)
-                    if (agpVersion != null) {
-                        val versionStr = "${agpVersion.major}.${agpVersion.minor}.${agpVersion.micro}"
-                        println("FLUTTER_AGP_VERSION=$versionStr")
-                    } else {
-                        println("FLUTTER_AGP_VERSION=unknown")
-                    }
-                } catch (e: Exception) {
-                    println("FLUTTER_AGP_VERSION=unknown")
-                }
-            }
-        }
-    }
+
 
     private fun addFlutterTasks(projectToAddTasksTo: Project) {
         if (projectToAddTasksTo.state.failure != null) {

@@ -597,7 +597,7 @@ object FlutterPluginUtils {
         flutterRoot: File
     ) {
         val repoUrl: String = getFlutterEngineRepoUrl(project, flutterRoot)
-        project.repositories.maven { it.setUrl(project.uri(repoUrl)) }
+        project.repositories.maven { url = project.uri(repoUrl) }
     }
 
     /**
