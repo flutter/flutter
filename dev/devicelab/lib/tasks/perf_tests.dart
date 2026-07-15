@@ -1513,7 +1513,7 @@ class PerfTest {
                 if (data['average_cpu_usage'] != null) 'average_cpu_usage',
                 if (data['average_gpu_usage'] != null) 'average_gpu_usage',
               ],
-              if (measureMemory && !isAndroid) ...<String>[
+              if (measureMemory) ...<String>[
                 // See https://github.com/flutter/flutter/issues/68888
                 if (data['average_memory_usage'] != null) 'average_memory_usage',
                 if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
