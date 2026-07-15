@@ -514,7 +514,7 @@ class ResidentWebRunner extends ResidentRunner {
       }
     }
 
-    if (_connectionResult == null) {
+    if (supportsServiceProtocol && _connectionResult == null) {
       return _handleNoClientsAvailable(status);
     }
 
