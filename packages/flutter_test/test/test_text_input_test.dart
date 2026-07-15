@@ -2,21 +2,56 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210721"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
+    return PageRouteBuilder<T>(
+      settings: settings,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => builder(context),
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) => child,
+    );
+  }
+
+  Widget buildTestApp({required TextEditingController controller, required FocusNode focusNode}) {
+    return WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      pageRouteBuilder: defaultPageRouteBuilder,
+      home: SizedBox.expand(
+        child: Center(
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFFFF0000),
+            backgroundCursorColor: const Color(0xFFFAFAFA),
+          ),
+        ),
+      ),
+    );
+  }
+
   testWidgets('enterText works', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Material(child: TextField())));
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(buildTestApp(controller: controller, focusNode: focusNode));
 
     final EditableTextState state = tester.state(find.byType(EditableText));
     expect(state.textEditingValue.text, '');
@@ -38,11 +73,15 @@ void main() {
       'receiveAction() forwards exception when exception occurs during action processing',
       (WidgetTester tester) async {
         // Setup a widget that can receive focus so that we can open the keyboard.
-        const Widget widget = MaterialApp(home: Material(child: TextField()));
-        await tester.pumpWidget(widget);
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+        final focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+
+        await tester.pumpWidget(buildTestApp(controller: controller, focusNode: focusNode));
 
         // Keyboard must be shown for receiveAction() to function.
-        await tester.showKeyboard(find.byType(TextField));
+        await tester.showKeyboard(find.byType(EditableText));
 
         // Register a handler for the text input channel that throws an error. This
         // error should be reported within a PlatformException by TestTextInput.
@@ -110,39 +149,35 @@ void main() {
   // between tests.
   // Regression test for https://github.com/flutter/flutter/issues/171491.
   for (var i = 0; i < 2; i++) {
-    testWidgets(
-      'keyboard shortcut handling is cleared between tests (${i + 1}/2)',
-      (WidgetTester tester) async {
-        final client = _PerformSelectorInputClient();
+    testWidgets('keyboard shortcut handling is cleared between tests (${i + 1}/2)', (
+      WidgetTester tester,
+    ) async {
+      final client = _PerformSelectorInputClient();
 
-        final focusNode = FocusNode();
-        addTearDown(focusNode.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
 
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Scaffold(
-              body: Focus(focusNode: focusNode, autofocus: true, child: Container()),
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox.expand(
+            child: Focus(focusNode: focusNode, autofocus: true, child: Container()),
           ),
-        );
+        ),
+      );
 
-        final TextInputConnection connection = TextInput.attach(
-          client,
-          const TextInputConfiguration(),
-        );
-        addTearDown(() {
-          connection.close();
-        });
-        connection.show();
+      final TextInputConnection connection = TextInput.attach(
+        client,
+        const TextInputConfiguration(),
+      );
+      addTearDown(connection.close);
+      connection.show();
 
-        // Press the left arrow, which should trigger a "moveLeft:" selector call.
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft, platform: 'macos');
+      // Press the left arrow, which should trigger a "moveLeft:" selector call.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft, platform: 'macos');
 
-        expect(client.performSelectorCalled, isTrue);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-    );
+      expect(client.performSelectorCalled, isTrue);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
   }
 }
 

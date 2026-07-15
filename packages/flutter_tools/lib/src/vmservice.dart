@@ -46,12 +46,11 @@ const kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
-typedef WebSocketConnector =
-    Future<io.WebSocket> Function(
-      String url, {
-      io.CompressionOptions compression,
-      required Logger logger,
-    });
+typedef WebSocketConnector = Future<io.WebSocket> Function(
+  String url, {
+  io.CompressionOptions compression,
+  required Logger logger,
+});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -80,20 +79,19 @@ typedef ReloadSources = Future<void> Function(String isolateId, {bool force, boo
 
 typedef Restart = Future<void> Function({bool pause});
 
-typedef CompileExpression =
-    Future<String> Function(
-      String isolateId,
-      String expression,
-      List<String> definitions,
-      List<String> definitionTypes,
-      List<String> typeDefinitions,
-      List<String> typeBounds,
-      List<String> typeDefaults,
-      String libraryUri,
-      String? klass,
-      String? method,
-      bool isStatic,
-    );
+typedef CompileExpression = Future<String> Function(
+  String isolateId,
+  String expression,
+  List<String> definitions,
+  List<String> definitionTypes,
+  List<String> typeDefinitions,
+  List<String> typeBounds,
+  List<String> typeDefaults,
+  String libraryUri,
+  String? klass,
+  String? method,
+  bool isStatic,
+);
 
 Future<io.WebSocket> _defaultOpenChannel(
   String url, {
@@ -159,18 +157,17 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector =
-    Future<FlutterVmService> Function(
-      Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device? device,
-      required Logger logger,
-    });
+typedef VMServiceConnector = Future<FlutterVmService> Function(
+  Uri httpUri, {
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  FlutterProject? flutterProject,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+  io.CompressionOptions compression,
+  Device? device,
+  required Logger logger,
+});
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
@@ -700,6 +697,24 @@ class FlutterVmService {
     );
   }
 
+  /// Reload the Flutter GPU shader library compiled from the shader bundle at
+  /// [assetPath].
+  ///
+  /// Invokes `ext.ui.gpu.reinitializeShaderLibrary`, which the engine registers
+  /// lazily on the first `ShaderLibrary.fromAsset` in debug mode and no-ops if
+  /// no library is registered at [assetPath]. Returns null when the extension is
+  /// not registered (no Flutter GPU shader library has been loaded yet).
+  Future<Map<String, Object?>?> flutterReinitializeShaderLibrary(
+    String assetPath, {
+    required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.gpu.reinitializeShaderLibrary',
+      isolateId: isolateId,
+      args: <String, Object?>{'assetKey': assetPath},
+    );
+  }
+
   /// Exit the application by calling [exit] from `dart:io`.
   ///
   /// This method is only supported by certain embedders. This is
@@ -772,8 +787,7 @@ class FlutterVmService {
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
-      if (err.code == vm_service.RPCErrorKind.kMethodNotFound.code ||
-          err.isConnectionDisposedException) {
+      if (err.isServiceExtensionUnregisteredError || err.isConnectionDisposedException) {
         return null;
       }
       rethrow;
@@ -1027,4 +1041,13 @@ extension RPCErrorExtension on vm_service.RPCError {
       code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
       code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
       message.contains('Service connection disposed');
+
+  /// DWDS throws an internal error (-32603) when a service extension is called
+  /// but has not been registered yet, due to a null-assertion on the looked up method in JS.
+  /// On native platforms, this throws `kMethodNotFound` (-32601).
+  // TODO(kevmoo): Remove this work-around once https://github.com/dart-lang/sdk/issues/63424 is fixed.
+  bool get isServiceExtensionUnregisteredError =>
+      code == vm_service.RPCErrorKind.kMethodNotFound.code ||
+      (code == vm_service.RPCErrorKind.kInternalError.code &&
+          message.contains('Unexpected null value'));
 }

@@ -7,7 +7,6 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -63,7 +62,7 @@ class CkResizingCodec extends ResizingCodec {
     int? targetHeight,
     bool allowUpscaling = true,
   }) {
-    final ckImage = image as CkImage;
+    final ckImage = image as EngineImage;
     if (ckImage.imageSource == null) {
       return scaleImageIfNeeded(
         image,
@@ -81,8 +80,8 @@ class CkResizingCodec extends ResizingCodec {
     }
   }
 
-  CkImage _scaleImageUsingDomCanvas(
-    CkImage image, {
+  EngineImage _scaleImageUsingDomCanvas(
+    EngineImage image, {
     int? targetWidth,
     int? targetHeight,
     bool allowUpscaling = true,
@@ -90,10 +89,13 @@ class CkResizingCodec extends ResizingCodec {
     assert(image.imageSource != null);
     final int width = image.width;
     final int height = image.height;
+    // Calculate the target scaled dimensions while maintaining the aspect ratio if needed.
     final BitmapSize? scaledSize = scaledImageSize(width, height, targetWidth, targetHeight);
     if (scaledSize == null) {
       return image;
     }
+    // If upscaling is disabled and the target dimensions exceed the original size,
+    // do not perform scaling and return the original image.
     if (!allowUpscaling && (scaledSize.width > width || scaledSize.height > height)) {
       return image;
     }
@@ -133,7 +135,12 @@ class CkResizingCodec extends ResizingCodec {
     }
 
     image.dispose();
-    return CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    return EngineImage(
+      CkImageDelegate(skImage),
+      skImage.width().toInt(),
+      skImage.height().toInt(),
+      imageSource: ImageBitmapImageSource(bitmap),
+    );
   }
 }
 
@@ -143,9 +150,12 @@ ui.Image createCkImageFromImageElement(
   int naturalHeight,
 ) {
   SkImage? skImage;
+  // If software rendering is active, make the SkImage directly from the canvas source.
   if (CanvasKitRenderer.instance.isSoftware) {
     skImage = canvasKit.MakeImageFromCanvasImageSource(image);
   } else {
+    // If GPU-accelerated CanvasKit is active, create a lazy image from the HTML Image Element,
+    // which uploads the texture dynamically when painted. Specify pre-multiplied alpha and sRGB.
     skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
       image,
       SkPartialImageInfo(
@@ -161,7 +171,12 @@ ui.Image createCkImageFromImageElement(
     throw ImageCodecException('Failed to create image from Image.decode');
   }
 
-  return CkImage(skImage, imageSource: ImageElementImageSource(image));
+  return EngineImage(
+    CkImageDelegate(skImage),
+    skImage.width().toInt(),
+    skImage.height().toInt(),
+    imageSource: ImageElementImageSource(image),
+  );
 }
 
 class CkImageElementCodec extends HtmlImageElementCodec {
@@ -244,7 +259,9 @@ void skiaDecodeImageFromPixels(
         return callback(scaleImage(skImage, targetWidth, targetHeight));
       }
     }
-    return callback(CkImage(skImage));
+    return callback(
+      EngineImage(CkImageDelegate(skImage), skImage.width().toInt(), skImage.height().toInt()),
+    );
   });
 }
 
@@ -286,39 +303,51 @@ bool validUpscale(
 ///
 /// If either targetWidth or targetHeight is less than or equal to zero, it
 /// will be treated as if it is null.
-CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
-  assert(targetWidth != null || targetHeight != null);
-  if (targetWidth != null && targetWidth <= 0) {
-    targetWidth = null;
-  }
-  if (targetHeight != null && targetHeight <= 0) {
-    targetHeight = null;
-  }
-  if (targetWidth == null && targetHeight != null) {
-    targetWidth = (targetHeight * (image.width() / image.height())).round();
-  } else if (targetHeight == null && targetWidth != null) {
-    targetHeight = targetWidth ~/ (image.width() / image.height());
-  }
-
-  assert(targetWidth != null);
-  assert(targetHeight != null);
-
-  final recorder = CkPictureRecorder();
-  final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
-
-  final paint = CkPaint();
-  canvas.drawImageRect(
-    CkImage(image),
-    ui.Rect.fromLTWH(0, 0, image.width(), image.height()),
-    ui.Rect.fromLTWH(0, 0, targetWidth!.toDouble(), targetHeight!.toDouble()),
-    paint,
+EngineImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
+  final temporaryImage = EngineImage(
+    CkImageDelegate(image),
+    image.width().toInt(),
+    image.height().toInt(),
   );
+  try {
+    assert(targetWidth != null || targetHeight != null);
+    final int width = temporaryImage.width;
+    final int height = temporaryImage.height;
 
-  final CkPicture picture = recorder.endRecording();
-  final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);
+    var adjustedWidth = targetWidth;
+    var adjustedHeight = targetHeight;
+    if (adjustedWidth != null && adjustedWidth <= 0) {
+      adjustedWidth = null;
+    }
+    if (adjustedHeight != null && adjustedHeight <= 0) {
+      adjustedHeight = null;
+    }
 
-  final ckImage = finalImage as CkImage;
-  return ckImage;
+    final int finalTargetWidth =
+        adjustedWidth ??
+        (adjustedHeight != null ? (adjustedHeight * width / height).round() : width);
+    final int finalTargetHeight =
+        adjustedHeight ??
+        (adjustedWidth != null ? (adjustedWidth * height / width).round() : height);
+
+    final recorder = CkPictureRecorder();
+    final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+
+    final paint = CkPaint();
+    canvas.drawImageRect(
+      temporaryImage,
+      ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+      ui.Rect.fromLTWH(0, 0, finalTargetWidth.toDouble(), finalTargetHeight.toDouble()),
+      paint,
+    );
+
+    final CkPicture picture = recorder.endRecording();
+    final ui.Image finalImage = picture.toImageSync(finalTargetWidth, finalTargetHeight);
+
+    return finalImage as EngineImage;
+  } finally {
+    temporaryImage.dispose();
+  }
 }
 
 const String _kNetworkImageMessage = 'Failed to load network image.';
@@ -398,222 +427,29 @@ Future<Uint8List> readChunked(
   return result.toDart;
 }
 
-/// A [ui.Image] backed by an `SkImage` from Skia.
-class CkImage implements ui.Image, StackTraceDebugger {
-  CkImage(SkImage skImage, {this.imageSource}) {
-    box = CkCountedRef<CkImage, SkImage>(
-      skImage,
-      this,
-      'SkImage',
-      onDisposed: (CkImage image) {
-        ui.Image.onDispose?.call(image);
-        DownscaledImageCache.instance.disposeForBox(image.box);
-      },
-    );
-    _init();
-    ui.Image.onCreate?.call(this);
-    imageSource?.refCount++;
-  }
+/// A [BackendImage] backed by an `SkImage` from Skia.
+class CkImageDelegate implements BackendImage {
+  CkImageDelegate(this.skImage);
 
-  CkImage.cloneOf(this.box, {this.imageSource}) {
-    _init();
-    box.ref(this);
-    imageSource?.refCount++;
-  }
+  /// The underlying CanvasKit Skia image object.
+  final SkImage skImage;
 
-  void _init() {
-    assert(() {
-      _debugStackTrace = StackTrace.current;
-      return true;
-    }());
-  }
+  /// Returns the width of the image in pixels.
+  int get width => skImage.width().toInt();
 
-  @override
-  StackTrace get debugStackTrace => _debugStackTrace;
-  late StackTrace _debugStackTrace;
+  /// Returns the height of the image in pixels.
+  int get height => skImage.height().toInt();
 
-  // Use ref counting because `SkImage` may be deleted either due to this object
-  // being garbage-collected, or by an explicit call to [delete].
-  late final CkCountedRef<CkImage, SkImage> box;
-
-  /// If this [CkImage] is backed by an image source (either VideoFrame, <img>
-  /// element, or ImageBitmap), this is the backing image source. We read pixels
-  /// and byte data from the backing image source rather than from the [SkImage]
-  /// because of this bug: https://issues.skia.org/issues/40043810.
-  ImageSource? imageSource;
-
-  /// The underlying Skia image object.
-  ///
-  /// Do not store the returned value. It is memory-managed by [CkCountedRef].
-  /// Storing it may result in use-after-free bugs.
-  SkImage get skImage => box.nativeObject;
-
-  bool _disposed = false;
-
-  bool _debugCheckIsNotDisposed() {
-    assert(!_disposed, 'This image has been disposed.');
-    return true;
-  }
-
+  /// Releases the native memory allocated for the Skia image.
   @override
   void dispose() {
-    assert(!_disposed, 'Cannot dispose an image that has already been disposed.');
-    _disposed = true;
-    box.unref(this);
-
-    imageSource?.refCount--;
-    imageSource?.close();
-  }
-
-  @override
-  bool get debugDisposed {
-    bool? result;
-    assert(() {
-      result = _disposed;
-      return true;
-    }());
-
-    if (result != null) {
-      return result!;
-    }
-
-    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
-  }
-
-  @override
-  CkImage clone() {
-    assert(_debugCheckIsNotDisposed());
-    return CkImage.cloneOf(box, imageSource: imageSource);
-  }
-
-  @override
-  bool isCloneOf(ui.Image other) {
-    assert(_debugCheckIsNotDisposed());
-    return other is CkImage && other.skImage.isAliasOf(skImage);
-  }
-
-  @override
-  List<StackTrace>? debugGetOpenHandleStackTraces() => box.debugGetStackTraces();
-
-  @override
-  int get width {
-    assert(_debugCheckIsNotDisposed());
-    return skImage.width().toInt();
-  }
-
-  @override
-  int get height {
-    assert(_debugCheckIsNotDisposed());
-    return skImage.height().toInt();
-  }
-
-  @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
-    assert(_debugCheckIsNotDisposed());
-    switch (imageSource) {
-      case ImageElementImageSource():
-        final DomHTMLImageElement imageElement =
-            (imageSource! as ImageElementImageSource).imageElement;
-        return readPixelsFromDomImageSource(
-          imageElement,
-          format,
-          imageElement.naturalWidth.toInt(),
-          imageElement.naturalHeight.toInt(),
-        );
-      case ImageBitmapImageSource():
-        final DomImageBitmap imageBitmap = (imageSource! as ImageBitmapImageSource).imageBitmap;
-        return readPixelsFromDomImageSource(
-          imageBitmap,
-          format,
-          imageBitmap.width,
-          imageBitmap.height,
-        );
-      case VideoFrameImageSource():
-        final VideoFrame videoFrame = (imageSource! as VideoFrameImageSource).videoFrame;
-        if (videoFrame.format != 'I420' &&
-            videoFrame.format != 'I444' &&
-            videoFrame.format != 'I422') {
-          return readPixelsFromVideoFrame(videoFrame, format);
-        }
-      case null:
-    }
-    ByteData? data = _readPixelsFromSkImage(format);
-    data ??= _readPixelsFromImageViaSurface(format);
-    return data;
-  }
-
-  @override
-  ui.ColorSpace get colorSpace => ui.ColorSpace.sRGB;
-
-  ByteData? _readPixelsFromSkImage(ui.ImageByteFormat format) {
-    final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba
-        ? canvasKit.AlphaType.Unpremul
-        : canvasKit.AlphaType.Premul;
-    final ByteData? data = _encodeImage(
-      skImage: skImage,
-      format: format,
-      alphaType: alphaType,
-      colorType: canvasKit.ColorType.RGBA_8888,
-      colorSpace: SkColorSpaceSRGB,
-    );
-    return data;
-  }
-
-  ByteData _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
-    final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    surface.setSize(BitmapSize(width, height));
-    final SkSurface skiaSurface = surface.skSurface!;
-
-    final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
-    ckCanvas.clear(const ui.Color(0x00000000));
-    ckCanvas.drawImage(this, ui.Offset.zero, CkPaint());
-    final SkImage skImage = skiaSurface.makeImageSnapshot();
-
-    final imageInfo = SkImageInfo(
-      alphaType: canvasKit.AlphaType.Premul,
-      colorType: canvasKit.ColorType.RGBA_8888,
-      colorSpace: SkColorSpaceSRGB,
-      width: width.toDouble(),
-      height: height.toDouble(),
-    );
-    final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
     skImage.delete();
-
-    if (pixels == null) {
-      throw StateError('Unable to convert read pixels from SkImage.');
-    }
-    return pixels.buffer.asByteData();
   }
 
-  static ByteData? _encodeImage({
-    required SkImage skImage,
-    required ui.ImageByteFormat format,
-    required SkAlphaType alphaType,
-    required SkColorType colorType,
-    required ColorSpace colorSpace,
-  }) {
-    Uint8List? bytes;
-
-    if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
-      final imageInfo = SkImageInfo(
-        alphaType: alphaType,
-        colorType: colorType,
-        colorSpace: colorSpace,
-        width: skImage.width(),
-        height: skImage.height(),
-      );
-      bytes = skImage.readPixels(0, 0, imageInfo);
-    } else {
-      bytes = skImage.encodeToBytes(); // defaults to PNG 100%
-    }
-
-    return bytes?.buffer.asByteData(0, bytes.length);
-  }
-
+  /// Checks if this image delegate wraps a Skia image that is an alias (clone) of another.
   @override
-  String toString() {
-    assert(_debugCheckIsNotDisposed());
-    return '[$width\u00D7$height]';
+  bool isCloneOf(BackendImage other) {
+    return other is CkImageDelegate && other.skImage.isAliasOf(skImage);
   }
 }
 
@@ -637,90 +473,4 @@ ImageType tryDetectImageType(Uint8List data, String debugSource) {
     );
   }
   return imageType;
-}
-
-sealed class ImageSource {
-  DomCanvasImageSource get canvasImageSource;
-  int get width;
-  int get height;
-
-  /// The number of references to this image source.
-  ///
-  /// Calling [close] is a no-op if [refCount] is greater than 0.
-  ///
-  /// Only when [refCount] is 0 will the [close] method actually close the
-  /// image source.
-  int refCount = 0;
-
-  @visibleForTesting
-  bool debugIsClosed = false;
-
-  void close() {
-    if (refCount == 0) {
-      _doClose();
-      debugIsClosed = true;
-    }
-  }
-
-  void _doClose();
-}
-
-class VideoFrameImageSource extends ImageSource {
-  VideoFrameImageSource(this.videoFrame);
-
-  final VideoFrame videoFrame;
-
-  @override
-  void _doClose() {
-    // Do nothing. Skia will close the VideoFrame when the SkImage is disposed.
-  }
-
-  @override
-  int get height => videoFrame.displayHeight.toInt();
-
-  @override
-  int get width => videoFrame.displayWidth.toInt();
-
-  @override
-  DomCanvasImageSource get canvasImageSource => videoFrame;
-}
-
-class ImageElementImageSource extends ImageSource {
-  ImageElementImageSource(this.imageElement);
-
-  final DomHTMLImageElement imageElement;
-
-  @override
-  void _doClose() {
-    imageElement.src = '';
-  }
-
-  @override
-  int get height => imageElement.naturalHeight.toInt();
-
-  @override
-  int get width => imageElement.naturalWidth.toInt();
-
-  @override
-  DomCanvasImageSource get canvasImageSource => imageElement;
-}
-
-class ImageBitmapImageSource extends ImageSource {
-  ImageBitmapImageSource(this.imageBitmap);
-
-  final DomImageBitmap imageBitmap;
-
-  @override
-  void _doClose() {
-    imageBitmap.close();
-  }
-
-  @override
-  int get height => imageBitmap.height;
-
-  @override
-  int get width => imageBitmap.width;
-
-  @override
-  DomCanvasImageSource get canvasImageSource => imageBitmap;
 }
