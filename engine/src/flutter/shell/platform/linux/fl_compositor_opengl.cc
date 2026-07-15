@@ -21,6 +21,9 @@ struct _FlCompositorOpenGL {
   // TRUE if can share framebuffers between contexts.
   gboolean shareable;
 
+  // TRUE if glBlitFramebuffer can be used to composite the first layer.
+  gboolean can_blit;
+
   // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
 
@@ -53,18 +56,6 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 }
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
-
-FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
-                                             gboolean shareable) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
-      g_object_new(fl_compositor_opengl_get_type(), nullptr));
-
-  self->shareable = shareable;
-  self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
-  self->shader = fl_compositor_opengl_shader_new(opengl_manager);
-
-  return self;
-}
 
 // Checks if the current OpenGL driver is known to have a broken or unsupported
 // glBlitFramebuffer implementation.
@@ -99,6 +90,22 @@ static gboolean can_blit_framebuffer() {
   return driver_supports_blit() &&
          (epoxy_gl_version() >= 30 ||
           epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
+}
+
+FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
+                                             gboolean shareable) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
+      g_object_new(fl_compositor_opengl_get_type(), nullptr));
+
+  self->shareable = shareable;
+  self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
+  self->shader = fl_compositor_opengl_shader_new(opengl_manager);
+
+  // Determine once whether glBlitFramebuffer is available on this driver.
+  fl_opengl_manager_make_current(opengl_manager);
+  self->can_blit = can_blit_framebuffer();
+
+  return self;
 }
 
 static void composite_layer(FlCompositorOpenGL* self,
@@ -194,7 +201,6 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                     fl_framebuffer_get_id(self->framebuffer));
-  gboolean use_blit = can_blit_framebuffer();
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
@@ -206,7 +212,7 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
         // The first layer can be blitted, and following layers composited with
         // this. If glBlitFramebuffer is unavailable, composite the first layer
         // with the shader instead.
-        if (first_layer && use_blit) {
+        if (first_layer && self->can_blit) {
           glBindFramebuffer(GL_READ_FRAMEBUFFER,
                             fl_framebuffer_get_id(framebuffer));
           glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,

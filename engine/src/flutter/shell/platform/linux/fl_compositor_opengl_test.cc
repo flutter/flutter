@@ -24,7 +24,6 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   void SetUp() override {
     opengl_manager = fl_opengl_manager_new();
     renderable = fl_mock_renderable_new();
-    compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
     fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   }
 
@@ -44,6 +43,7 @@ TEST_F(FlCompositorOpenGLTest, Render) {
   // Present layer from a thread.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -79,6 +79,7 @@ TEST_F(FlCompositorOpenGLTest, Resize) {
   // Present a layer that is the old size.
   constexpr size_t width1 = 90;
   constexpr size_t height1 = 90;
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
   g_autoptr(FlFramebuffer) framebuffer1 =
       fl_framebuffer_new(GL_RGB, width1, height1, FALSE);
   FlutterBackingStore backing_store1 = {
@@ -135,6 +136,8 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
 
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
+
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -186,6 +189,8 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
+
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -230,6 +235,8 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
+
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -268,6 +275,8 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
 
   EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
+
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
 
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
@@ -309,6 +318,8 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
 
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
+
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -339,6 +350,7 @@ TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
   // Present layer of size 100x100.
   constexpr size_t width = 100;
   constexpr size_t height = 100;
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
