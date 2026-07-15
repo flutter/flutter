@@ -512,6 +512,63 @@ void main() {
 
       expect(renderSliver.debugLayer, isNull);
     });
+
+    testWidgets('leading clip stays pinned until insideClipExtent is scrolled', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              SliverClipRect(
+                clipper: const _CustomClipper30(),
+                sliver: SliverToBoxAdapter(
+                  child: Container(height: 400.0, color: const Color(0xFF2196F3)),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000.0)),
+            ],
+          ),
+        ),
+      );
+
+      final RenderSliverClipRect renderSliver = tester.renderObject(find.byType(SliverClipRect));
+
+      // The clipper insets the top by 30px, so at scrollOffset 0 the clip starts
+      // at y=30. The extent that can slide under the leading edge before it
+      // moves is 400 - 30 = 370 (insideClipExtent).
+      expect(renderSliver.constraints.scrollOffset, 0.0);
+      expect(renderSliver.getClip()!.top, 30.0);
+
+      // While insideClipExtent (370px) has not been fully consumed by the
+      // scroll, the leading edge stays pinned at the viewport's leading edge (0)
+      // rather than drifting up with the content.
+      controller.jumpTo(100.0);
+      await tester.pump();
+
+      expect(renderSliver.constraints.scrollOffset, 100.0);
+      expect(
+        renderSliver.getClip()!.top,
+        0.0,
+        reason: 'Leading clip should stay pinned while insideClipExtent is not consumed',
+      );
+
+      // Once the scroll exceeds insideClipExtent (370px), the leading edge is
+      // released and follows the content upwards: top becomes 370 - 385 = -15.
+      controller.jumpTo(385.0);
+      await tester.pump();
+
+      expect(renderSliver.constraints.scrollOffset, 385.0);
+      expect(
+        renderSliver.getClip()!.top,
+        -15.0,
+        reason: 'Leading clip should follow the content once insideClipExtent is consumed',
+      );
+    });
   });
 }
 

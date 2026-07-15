@@ -58,7 +58,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   @override
   Rect buildClip() {
     final Rect maxPaintRect = getMaxPaintRect();
-    Rect newClip = clipper?.getClip(maxPaintRect.size) ?? maxPaintRect;
+    Rect newClip = clipper?.getClip(maxPaintRect.size).shift(maxPaintRect.topLeft) ?? maxPaintRect;
 
     final double clipExtent = switch (constraints.axis) {
       Axis.horizontal => newClip.width,
@@ -73,7 +73,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
           bottom ?? newClip.bottom,
         );
 
-    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0.0) {
+    if (clipOverlap != ClipOverlapBehavior.none) {
       final double clipOrigin = getClipOriginForOverlap(clipExtent);
       newClip = switch (applyGrowthDirectionToAxisDirection(
         constraints.axisDirection,
@@ -186,10 +186,10 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
     final Rect maxPaintRect = getMaxPaintRect();
 
     RRect newClip =
-        clipper?.getClip(maxPaintRect.size) ??
+        clipper?.getClip(maxPaintRect.size).shift(maxPaintRect.topLeft) ??
         borderRadius.resolve(textDirection).toRRect(maxPaintRect);
 
-    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0.0) {
+    if (clipOverlap != ClipOverlapBehavior.none) {
       final double insideClipExtent = switch ((constraints.axis, clipOverlap)) {
         (Axis.horizontal, ClipOverlapBehavior.preserveShape) => newClip.middleRect.width,
         (Axis.vertical, ClipOverlapBehavior.preserveShape) => newClip.middleRect.height,
@@ -416,10 +416,12 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {
+    final Rect maxPaintRect = getMaxPaintRect();
     return switch (clipBehavior) {
       .none => null,
       .hardEdge || .antiAlias || .antiAliasWithSaveLayer =>
-        _clipper?.getApproximateClipRect(paintBounds.size) ?? Offset.zero & paintBounds.size,
+        _clipper?.getApproximateClipRect(maxPaintRect.size).shift(maxPaintRect.topLeft) ??
+            Offset.zero & paintBounds.size,
     };
   }
 
