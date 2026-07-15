@@ -164,6 +164,9 @@ abstract class DisplayCanvas {
   /// Initialize the overlay.
   void initialize();
 
+  /// Marks whether this canvas is used as an overlay between platform views.
+  void setIsOverlay(bool isOverlay) {}
+
   /// Disposes this overlay.
   void dispose();
 }

@@ -94,7 +94,7 @@ Future<void> buildMacOS({
       'to learn about adding macOS support to a project.',
     );
   }
-  const FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.macos;
+  const FlutterDarwinPlatform darwinPlatform = .macos;
   final migrators = <ProjectMigrator>[
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
@@ -245,10 +245,24 @@ Future<void> buildMacOS({
     final String excludedArches => excludedArches,
   };
 
+  final bool binaryContainsX86Slice =
+      archs == null && (excludedArchs == null || !excludedArchs.contains('x86_64'));
+  final bool allowsArm64Only = switch (globals.xcodeProjectInterpreter!.version?.major) {
+    null || < 27 => false,
+    _ => true,
+  };
+  if (buildInfo.isRelease && binaryContainsX86Slice && allowsArm64Only) {
+    globals.logger.printWarning(
+      'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+      'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+      'This will become the default behavior in a future Flutter release.',
+    );
+  }
+
   var hasMacOSMinDeploymentTargetIssue = false;
   String? macOSMinDeploymentTarget;
   try {
-    if (archs != null && excludedArchs != null && excludedArchs.contains('arm64')) {
+    if (archs != null && excludedArchs != null && excludedArchs.contains(archs)) {
       throwToolExit(
         'No Valid Target Arch: '
         'You have enabled the macOSArm64Only feature flag but '
@@ -294,9 +308,7 @@ Future<void> buildMacOS({
         if (line.contains("deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to") &&
             line.contains('but the range of supported deployment target versions is')) {
           hasMacOSMinDeploymentTargetIssue = true;
-          final pattern = RegExp(
-            r'range of supported deployment target versions is ([0-9.]+) to',
-          );
+          final pattern = RegExp(r'range of supported deployment target versions is ([0-9.]+) to');
           final RegExpMatch? match = pattern.firstMatch(line);
           if (match != null) {
             macOSMinDeploymentTarget = match.group(1);

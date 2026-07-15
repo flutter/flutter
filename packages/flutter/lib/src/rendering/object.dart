@@ -2303,8 +2303,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // currently allowed to mutate, and a boolean indicating whether this
   // RenderObject is allowed to mutate.
   //
-  // This method must only be called during layout as mutations are always allowed
-  // before layout.
+  // This method must only be called during layout, as mutations are always
+  // allowed before layout. A null return value indicates another render subtree
+  // is actively performing layout and, in the process, illegally mutating this
+  // RenderObject's subtree.
   (RenderObject, bool)? get _debugClosestMutationRoot {
     return switch (this) {
       // This subtree is being mutated in a layout callback.
@@ -2466,10 +2468,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// Whether the render tree this render object belongs to is attached to a [PipelineOwner].
   ///
-  /// This becomes true during the call to [attach].
-  ///
-  /// This becomes false during the call to [detach].
-  bool get attached => _owner != null;
+  /// This becomes true during the call to [attach], and becomes false during the call to [detach].
+  @nonVirtual
+  bool get attached => owner != null;
 
   /// Mark this render object as attached to the given owner.
   ///
