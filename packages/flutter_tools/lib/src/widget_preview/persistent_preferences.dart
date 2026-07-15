@@ -25,7 +25,7 @@ class PersistentPreferences {
 
   @visibleForTesting
   late final File file = fs.file(
-    fs.path.join(devtools.LocalFileSystem.devToolsDir(), _kPreferencesFileName),
+    fs.path.join(devtools.LocalFileSystemExtension.devToolsDir, _kPreferencesFileName),
   );
 
   late Map<String, Object> _map;
