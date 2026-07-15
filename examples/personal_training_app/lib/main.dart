@@ -137,6 +137,59 @@ Future<void> _initializeFirebase() async {
   }
 }
 
+Future<void> _initializePostLaunchServices() async {
+  // FCM setup (mobile only - skip on web to avoid service worker errors)
+  if (!kIsWeb) {
+    try {
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      final fcm = FirebaseMessaging.instance;
+      await fcm.requestPermission();
+      final token = await fcm.getToken().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => null,
+      );
+      _debugLog('🔑 [FCM] Device token: ${token ?? "(null)"}');
+
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        _debugLog('🔔 [FCM] Foreground message: ${message.messageId}');
+        if (message.notification != null) {
+          _debugLog(
+            '🔔 [FCM] Notification: ${message.notification!.title} - ${message.notification!.body}',
+          );
+          // Show a visible notification in-app
+          final navigator = navigatorKey.currentState;
+          if (navigator != null) {
+            final context = navigator.overlay?.context;
+            if (context != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '${message.notification!.title ?? 'Notification'}: ${message.notification!.body ?? ''}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  duration: const Duration(seconds: 4),
+                  backgroundColor: Colors.blueAccent,
+                ),
+              );
+            }
+          }
+        }
+      });
+    } catch (e) {
+      _debugLog('⚠️ FCM initialization error: $e');
+    }
+  }
+
+  try {
+    await StorageHelper.init();
+    print('✅ Storage initialized successfully');
+    await migrateWorkoutsToIncludeWarmUpCoolDown();
+  } catch (e) {
+    print('❌ Error initializing storage: $e');
+    // Continue anyway - app can work without storage
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -148,57 +201,9 @@ void main() async {
   }
   print('🚀 Starting app...');
   print('✅ Flutter binding initialized');
-
-  // FCM setup
-  // FCM setup (mobile only - skip on web to avoid service worker errors)
-  if (!kIsWeb) {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    final fcm = FirebaseMessaging.instance;
-    await fcm.requestPermission();
-    final token = await fcm.getToken().timeout(
-      const Duration(seconds: 10),
-      onTimeout: () => null,
-    );
-    _debugLog('🔑 [FCM] Device token: ${token ?? "(null)"}');
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _debugLog('🔔 [FCM] Foreground message: ${message.messageId}');
-      if (message.notification != null) {
-        _debugLog(
-          '🔔 [FCM] Notification: ${message.notification!.title} - ${message.notification!.body}',
-        );
-        // Show a visible notification in-app
-        final navigator = navigatorKey.currentState;
-        if (navigator != null) {
-          final context = navigator.overlay?.context;
-          if (context != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${message.notification!.title ?? 'Notification'}: ${message.notification!.body ?? ''}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                duration: const Duration(seconds: 4),
-                backgroundColor: Colors.blueAccent,
-              ),
-            );
-          }
-        }
-      }
-    });
-  }
-
-  try {
-    await StorageHelper.init();
-    print('✅ Storage initialized successfully');
-    await migrateWorkoutsToIncludeWarmUpCoolDown();
-  } catch (e) {
-    print('❌ Error initializing storage: $e');
-    // Continue anyway - app can work without storage
-  }
-
   print('🎨 Running app...');
   runApp(const PersonalTrainingApp());
+  unawaited(_initializePostLaunchServices());
 }
 
 class PersonalTrainingApp extends StatelessWidget {
