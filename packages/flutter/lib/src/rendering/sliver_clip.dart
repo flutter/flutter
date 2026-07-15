@@ -52,8 +52,11 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   /// the child.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
-  RenderSliverClipRect({super.clipper, super.clipBehavior = .antiAlias, bool clipOverlap = true})
-    : super(clipOverlap: clipOverlap ? .followEdge : .none);
+  RenderSliverClipRect({
+    super.clipper,
+    super.clipBehavior = .antiAlias,
+    super.clipOverlap = .followEdge,
+  });
 
   @override
   Rect buildClip() {
@@ -120,14 +123,6 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
       layer = null;
       context.paintChild(child!, offset);
     }
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<bool>('clipOverlap', clipOverlap != .none, defaultValue: true),
-    );
   }
 }
 
@@ -262,13 +257,6 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      EnumProperty<ClipOverlapBehavior>(
-        'clipOverlap',
-        clipOverlap,
-        defaultValue: ClipOverlapBehavior.followEdge,
-      ),
-    );
     properties.add(
       DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null),
     );
@@ -458,5 +446,12 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     properties.add(DiagnosticsProperty<CustomClipper<T>>('clipper', clipper, defaultValue: null));
     properties.add(DiagnosticsProperty<T?>('clip', _clip));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.antiAlias));
+    properties.add(
+      EnumProperty<ClipOverlapBehavior>(
+        'clipOverlap',
+        clipOverlap,
+        defaultValue: ClipOverlapBehavior.followEdge,
+      ),
+    );
   }
 }

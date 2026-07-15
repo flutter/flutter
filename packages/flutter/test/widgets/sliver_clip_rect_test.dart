@@ -12,7 +12,7 @@ import 'widgets_app_tester.dart';
 /// [SliverClipRect] and filler content. Suitable for all overlap-clipping tests.
 Widget _buildOverlapScenario({
   required ScrollController controller,
-  bool clipOverlap = true,
+  ClipOverlapBehavior clipOverlap = .followEdge,
   CustomClipper<Rect>? clipper,
   Axis scrollDirection = .vertical,
   bool reverse = false,
@@ -129,7 +129,7 @@ void main() {
           child: CustomScrollView(
             slivers: <Widget>[
               SliverClipRect(
-                clipOverlap: false,
+                clipOverlap: .none,
                 clipBehavior: .hardEdge,
                 sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0)),
               ),
@@ -303,45 +303,60 @@ void main() {
 
     group('overlap hit testing', () {
       final overlapTestCases =
-          <({String name, bool clipOverlap, Axis axis, bool reverse, bool expectHitInOverlap})>[
+          <
+            ({
+              String name,
+              ClipOverlapBehavior clipOverlap,
+              Axis axis,
+              bool reverse,
+              bool expectHitInOverlap,
+            })
+          >[
             (
-              name: 'clipOverlap blocks overlap hits (vertical)',
-              clipOverlap: true,
+              name: 'followEdge blocks overlap hits (vertical)',
+              clipOverlap: .followEdge,
               axis: .vertical,
               reverse: false,
               expectHitInOverlap: false,
             ),
             (
-              name: 'clipOverlap disabled allows overlap hits (vertical)',
-              clipOverlap: false,
+              name: 'none allows overlap hits (vertical)',
+              clipOverlap: .none,
               axis: .vertical,
               reverse: false,
               expectHitInOverlap: true,
             ),
             (
-              name: 'clipOverlap blocks overlap hits (horizontal)',
-              clipOverlap: true,
+              name: 'preserveShape blocks overlap hits (vertical)',
+              clipOverlap: .preserveShape,
+              axis: .vertical,
+              reverse: false,
+              expectHitInOverlap: false,
+            ),
+            (
+              name: 'followEdge blocks overlap hits (horizontal)',
+              clipOverlap: .followEdge,
               axis: .horizontal,
               reverse: false,
               expectHitInOverlap: false,
             ),
             (
-              name: 'clipOverlap disabled allows overlap hits (horizontal)',
-              clipOverlap: false,
+              name: 'none allows overlap hits (horizontal)',
+              clipOverlap: .none,
               axis: .horizontal,
               reverse: false,
               expectHitInOverlap: true,
             ),
             (
-              name: 'clipOverlap disabled allows overlap hits (vertical reverse)',
-              clipOverlap: false,
+              name: 'none allows overlap hits (vertical reverse)',
+              clipOverlap: .none,
               axis: .vertical,
               reverse: true,
               expectHitInOverlap: true,
             ),
             (
-              name: 'clipOverlap blocks overlap hits (horizontal reverse)',
-              clipOverlap: true,
+              name: 'followEdge blocks overlap hits (horizontal reverse)',
+              clipOverlap: .followEdge,
               axis: .horizontal,
               reverse: true,
               expectHitInOverlap: false,
