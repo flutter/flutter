@@ -35,8 +35,8 @@ config("test_config") {
   if (is_ios) {
     _platform_path = ios_platform_path
     swiftflags += [
-      "--deployment-target",
-      ios_testing_deployment_target,
+      "-target",
+      "$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim",
     ]
     cflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
     ldflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]

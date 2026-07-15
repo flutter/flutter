@@ -17,6 +17,7 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -628,7 +629,6 @@ window.\$dartLoader.loader.nextAttempt();
     if (_logger.isVerbose) {
       _logger.printTrace('Loading test suite $relativePath.');
     }
-
     final PoolResource lockResource = await _suiteLock.request();
 
     final Runtime browser = platform.runtime;
@@ -699,6 +699,8 @@ window.\$dartLoader.loader.nextAttempt();
       hostUrl,
       completer.future,
       headless: !_config.pauseAfterLoad,
+      logger: _logger,
+      webBrowserFlags: <String>[if (useWasm) '--disable-dev-shm-usage'],
     );
   }
 
@@ -760,7 +762,18 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket) {
+  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger) {
+    unawaited(
+      _browser.onExit.then((int exitCode) {
+        if (!_closed) {
+          _logger.printError(
+            'Chrome browser process (PID: ${_browser.pid}) '
+            'exited unexpectedly with code $exitCode during test execution.',
+          );
+        }
+      }),
+    );
+
     // The duration should be short enough that the debugging console is open as
     // soon as the user is done setting breakpoints, but long enough that a test
     // doing a lot of synchronous work doesn't trigger a false positive.
@@ -797,6 +810,7 @@ class BrowserManager {
   /// The browser instance that this is connected to via [_channel].
   final Chromium _browser;
   final Runtime _runtime;
+  final Logger _logger;
 
   /// The channel used to communicate with the browser.
   ///
@@ -859,11 +873,34 @@ class BrowserManager {
     bool debug = false,
     bool headless = true,
     List<String> webBrowserFlags = const <String>[],
+    required Logger logger,
   }) async {
     final Chromium chrome = await chromiumLauncher.launch(
       url.toString(),
       headless: headless,
       webBrowserFlags: webBrowserFlags,
+    );
+    unawaited(
+      Future<void>(() async {
+        try {
+          final ChromeTab? tab = await chrome.chromeConnection.getTab(
+            (ChromeTab tab) => tab.url.contains('index.html'),
+            retryFor: const Duration(seconds: 5),
+          );
+          if (tab != null) {
+            final WipConnection connection = await tab.connect();
+            await connection.runtime.enable();
+            connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+              logger.printStatus(
+                '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
+              );
+            });
+            connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
+              logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
+            });
+          }
+        } on Object catch (_) {}
+      }),
     );
     final completer = Completer<BrowserManager>();
 
@@ -888,7 +925,7 @@ class BrowserManager {
           if (completer.isCompleted) {
             return;
           }
-          completer.complete(BrowserManager._(chrome, runtime, webSocket));
+          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger));
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();

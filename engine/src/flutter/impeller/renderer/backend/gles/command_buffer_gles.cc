@@ -9,6 +9,7 @@
 
 #include "impeller/base/config.h"
 #include "impeller/renderer/backend/gles/blit_pass_gles.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/render_pass_gles.h"
 
 namespace impeller {
@@ -72,8 +73,21 @@ bool CommandBufferGLES::IsValid() const {
 // |CommandBuffer|
 bool CommandBufferGLES::OnSubmitCommands(bool block_on_schedule,
                                          CompletionCallback callback) {
+  // The reactor consumes commands on the GL thread and GL synchronizes
+  // buffer reuse implicitly, so submissions are tracked at reactor
+  // consumption granularity rather than GPU completion.
+  std::shared_ptr<GpuSubmissionTracker> tracker;
+  uint64_t submission_id = 0;
+  if (auto context = context_.lock()) {
+    tracker = ContextGLES::Cast(*context).GetMutableSubmissionTracker();
+    submission_id = tracker->RecordSubmission();
+  }
+
   if (reactor_->CanReactOnCurrentThread()) {
     const auto result = reactor_->React();
+    if (tracker) {
+      tracker->RecordCompletion(submission_id);
+    }
     if (callback) {
       callback(result ? CommandBuffer::Status::kCompleted
                       : CommandBuffer::Status::kError);
@@ -83,17 +97,25 @@ bool CommandBufferGLES::OnSubmitCommands(bool block_on_schedule,
 
   // Submission is accepted even when no GL context is current yet. The
   // reactor keeps previously encoded operations queued on this thread.
-  if (!callback) {
-    return true;
+  std::shared_ptr<DeferredCompletionCallback> deferred_callback;
+  if (callback) {
+    deferred_callback =
+        std::make_shared<DeferredCompletionCallback>(std::move(callback));
   }
-
-  auto deferred_callback =
-      std::make_shared<DeferredCompletionCallback>(std::move(callback));
   if (!reactor_->AddOperation(
-          [deferred_callback](const ReactorGLES& reactor) {
-            deferred_callback->Complete();
+          [deferred_callback, tracker,
+           submission_id](const ReactorGLES& reactor) {
+            if (tracker) {
+              tracker->RecordCompletion(submission_id);
+            }
+            if (deferred_callback) {
+              deferred_callback->Complete();
+            }
           },
           /*defer=*/true)) {
+    if (tracker) {
+      tracker->RecordCompletion(submission_id);
+    }
     return false;
   }
   return true;
