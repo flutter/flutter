@@ -38,6 +38,10 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
+  // "Designed for iPad" apps are only supported on Apple Silicon Macs.
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.arm64;
+
   @override
   Future<bool> isSupported() async =>
       _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
