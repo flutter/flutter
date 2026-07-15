@@ -58,9 +58,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   final Arena frameArena = Arena();
 
-  // The framework reports its first frame from a post-frame callback, while
-  // web renderers may still be rasterizing that frame asynchronously. Track
-  // pending renders so the browser event can wait for visible output.
+  /// The framework reports its first frame from a post-frame callback, while
+  /// web renderers may still be rasterizing that frame asynchronously. Track
+  /// pending renders so the browser event can wait for visible output.
   final Set<Future<void>> _sceneRendersInProgress = <Future<void>>{};
 
   /// The [EnginePlatformDispatcher] singleton.
