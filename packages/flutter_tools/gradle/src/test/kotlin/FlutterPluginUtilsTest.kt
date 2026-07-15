@@ -1959,15 +1959,12 @@ class FlutterPluginUtilsTest {
         every { mockDirectory.asFile } returns realFile
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
-        val mockBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
                 .buildTypes
-        } returns mockBuildTypes
-        every { mockBuildTypes.all(any<Action<com.android.build.gradle.internal.dsl.BuildType>>()) } answers {
-            firstArg<Action<com.android.build.gradle.internal.dsl.BuildType>>().execute(mockBuildType)
-        }
+                .iterator()
+        } returns mutableListOf(mockBuildType).iterator()
         every { mockBuildType.name } returns "Debug"
         every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
 
