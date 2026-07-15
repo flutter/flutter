@@ -4,19 +4,32 @@
 
 import UIKit
 
-/// Provides access to display capabilities and configuration metadata, such as the current
-/// maximum refresh rate and whether ProMotion's full refresh-rate range is enabled.
+/// Reports the device's display capabilities, including the maximum refresh rate a display can
+/// support and whether the full ProMotion refresh-rate range is unlocked for this app.
 ///
-/// This class is responsible for display link configuration management, such as querying the
-/// maximum supported refresh rate from the platform as well as plist-based configuration.
+/// The maximum refresh rate is the hardware ceiling for the display. On a ProMotion display the
+/// ceiling is commonly 120Hz, while CoreAnimation remains free to drive the panel at any rate at or
+/// below that ceiling depending on on-screen content, thermal state, and power settings. The live
+/// rate is derived separately, once per frame, from the timing of the `CADisplayLink` held by
+/// `VSyncClient`.
 ///
-/// On ProMotion iPhones, 120Hz variable refresh rate support must be explicitly unlocked by setting
-/// the `CADisableMinimumFrameDurationOnPhone` key (`disableMinimumFrameDurationOnPhoneKey`) to
-/// `true` in the application's `Info.plist`. iPad Pro devices will use 120Hz by default.
+/// The full ProMotion refresh-rate range must be explicitly unlocked by setting the
+/// `CADisableMinimumFrameDurationOnPhone` key (`disableMinimumFrameDurationOnPhoneKey`) to `true`
+/// in the application's `Info.plist`; iPad Pro devices default to the full range without this key.
 ///
-/// All mutable state is confined to `displayRefreshRate`, which is only ever read or written while
-/// holding a lock. All other stored properties are immutable, so instances are safe to share and
-/// read from any thread once constructed.
+/// Callers obtain the singleton instance via `shared` and typically use
+/// `maxRefreshRateEnabledOnIPhone` and `displayRefreshRate` to configure a `CADisplayLink`'s
+/// `preferredFrameRateRange`, either indirectly through a `VSyncClient`'s initializer or, in the
+/// case of `FlutterMetalLayer`, by configuring its own `CADisplayLink` similarly. The primary
+/// consumer is `VsyncWaiterIOS`, the C++ engine's vsync entry point, which owns a long-lived
+/// `VSyncClient` and re-reads `displayRefreshRate` on every vsync to detect ceiling changes at
+/// runtime and propagate them to the core engine. `KeyboardInsetManager` and
+/// `FlutterViewController` consult it the same way when configuring their own (short-lived)
+/// `VSyncClient` instances.
+///
+/// All mutable state is confined to the refresh-rate cache, which is only ever read or written
+/// while holding a lock; every other stored property is immutable, so instances are safe to share
+/// and read from any thread once constructed.
 @objc(FlutterDisplayLinkManager)
 public final class DisplayLinkManager: NSObject, @unchecked Sendable {
 
