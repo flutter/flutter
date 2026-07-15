@@ -102,10 +102,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final ByteData byteData = await rootBundle.load('images/coast.jpg');
   httpServer.listen((HttpRequest request) async {
-    const chunk_size = 2048;
+    const chunkSize = 2048;
     int offset = byteData.offsetInBytes;
     while (offset < byteData.lengthInBytes) {
-      final int length = min(byteData.lengthInBytes - offset, chunk_size);
+      final int length = min(byteData.lengthInBytes - offset, chunkSize);
       final Uint8List bytes = byteData.buffer.asUint8List(offset, length);
       offset += length;
       request.response.add(bytes);
@@ -118,7 +118,7 @@ Future<void> main() async {
   runApp(MyApp(port));
 }
 
-const int images = 50;
+const int imagesCount = 50;
 
 @immutable
 class MyApp extends StatelessWidget {
@@ -148,6 +148,22 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int _counter = 0;
 
+  late final controllers = <AnimationController>[
+    for (int i = 0; i < imagesCount; i++)
+      AnimationController(
+        duration: const Duration(milliseconds: 3600),
+        vsync: this,
+      )..repeat(),
+  ];
+
+  @override
+  void dispose() {
+    for (final controller in controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   void _incrementCounter() {
     setState(() {
       _counter++;
@@ -156,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Widget createImage(int index, Completer<bool> completer) {
     return Image.network(
-      'https://localhost:${widget.port}/${_counter * images + index}',
+      'https://localhost:${widget.port}/${_counter * imagesCount + index}',
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
         if (frame == 0 && !completer.isCompleted) {
           completer.complete(true);
@@ -168,11 +184,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final controllers = <AnimationController>[
-      for (int i = 0; i < images; i++)
-        AnimationController(duration: const Duration(milliseconds: 3600), vsync: this)..repeat(),
-    ];
-    final completers = <Completer<bool>>[for (int i = 0; i < images; i++) Completer<bool>()];
+    final completers = <Completer<bool>>[for (int i = 0; i < imagesCount; i++) Completer<bool>()];
     final List<Future<bool>> futures = completers
         .map((Completer<bool> completer) => completer.future)
         .toList();
@@ -188,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(children: createImageList(images, completers, controllers)),
+            Row(children: createImageList(imagesCount, completers, controllers)),
             const Text('You have pushed the button this many times:'),
             Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
           ],
