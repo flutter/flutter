@@ -421,99 +421,43 @@ void main() {
     );
 
     testUsingContext(
-      'discovers installation from Spotlight query',
+      'discovers installation without querying Spotlight',
       () {
-        // One in expected location.
-        final String studioInApplication = fileSystem.path.join(
+        final String applicationPlistFolder = fileSystem.path.join(
           '/',
-          'Application',
+          'Applications',
           'Android Studio.app',
-        );
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          studioInApplication,
           'Contents',
         );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
+        fileSystem.directory(applicationPlistFolder).createSync(recursive: true);
 
-        // Two in random location only Spotlight knows about.
-        final String randomLocation1 = fileSystem.path.join(
-          '/',
-          'random',
-          'Android Studio Preview.app',
-        );
-        final String randomLocation1PlistFolder = fileSystem.path.join(randomLocation1, 'Contents');
-        fileSystem.directory(randomLocation1PlistFolder).createSync(recursive: true);
-        final String randomLocation1PlistPath = fileSystem.path.join(
-          randomLocation1PlistFolder,
+        final String applicationsPlistFilePath = fileSystem.path.join(
+          applicationPlistFolder,
           'Info.plist',
         );
-        plistUtils.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
+        plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist2022_1;
 
-        final String randomLocation2 = fileSystem.path.join(
-          '/',
-          'random',
-          'Android Studio with Blaze.app',
-        );
-        final String randomLocation2PlistFolder = fileSystem.path.join(randomLocation2, 'Contents');
-        fileSystem.directory(randomLocation2PlistFolder).createSync(recursive: true);
-        final String randomLocation2PlistPath = fileSystem.path.join(
-          randomLocation2PlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
-        final String javaBin = fileSystem.path.join(
-          'jre',
-          'jdk',
+        final String javaBinary = fileSystem.path.join(
+          applicationPlistFolder,
+          'jbr',
           'Contents',
           'Home',
           'bin',
           'java',
         );
+        processManager.addCommand(
+          FakeCommand(command: <String>[javaBinary, '-version'], stderr: '123'),
+        );
 
-        // Spotlight finds the one known and two random installations.
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              'mdfind',
-              'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-            ],
-            stdout: '$randomLocation1\n$randomLocation2\n$studioInApplication',
-          ),
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(randomLocation1, 'Contents', javaBin),
-              '-version',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(randomLocation2, 'Contents', javaBin),
-              '-version',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(studioInApplicationPlistFolder, javaBin),
-              '-version',
-            ],
-          ),
-        ]);
+        final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-        // Results are de-duplicated, only 3 installed.
-        expect(AndroidStudio.allInstalled().length, 3);
+        expect(studio.version, equals(Version(2022, 1, null)));
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         FileSystemUtils: () => fsUtils,
         ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
         Platform: () => platform,
         PlistParser: () => plistUtils,
       },
@@ -826,16 +770,9 @@ void main() {
           'java',
         );
 
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              'mdfind',
-              'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-            ],
-            stdout: extractedDownloadZip,
-          ),
+        processManager.addCommand(
           FakeCommand(command: <String>[studioInApplicationJavaBinary, '-version']),
-        ]);
+        );
 
         final AndroidStudio studio = AndroidStudio.allInstalled().single;
 

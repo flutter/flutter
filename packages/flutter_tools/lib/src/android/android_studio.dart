@@ -11,7 +11,6 @@ import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
-import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 
@@ -318,25 +317,6 @@ class AndroidStudio {
         (FileSystemEntity e) => _pathsAreEqual(e.path, configuredStudioDir!.path),
       )) {
         candidatePaths.add(configuredStudioDir);
-      }
-    }
-
-    // Query Spotlight for unexpected installation locations.
-    var spotlightQueryResult = '';
-    try {
-      final ProcessResult spotlightResult = globals.processManager.runSync(<String>[
-        'mdfind',
-        // com.google.android.studio, com.google.android.studio-EAP
-        'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-      ]);
-      spotlightQueryResult = spotlightResult.stdout as String;
-    } on ProcessException {
-      // The Spotlight query is a nice-to-have, continue checking known installation locations.
-    }
-    for (final String studioPath in LineSplitter.split(spotlightQueryResult)) {
-      final Directory appBundle = globals.fs.directory(studioPath);
-      if (!candidatePaths.any((FileSystemEntity e) => e.path == studioPath)) {
-        candidatePaths.add(appBundle);
       }
     }
 
