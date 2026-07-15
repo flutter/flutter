@@ -201,7 +201,7 @@ class Playground {
 
  private:
   static void InitializeGLFWOnce();
-  static std::atomic_bool glfw_initialized_;
+  static std::atomic<bool> glfw_initialized_;
 
   const PlaygroundBackend backend_;
   PlaygroundSwitches switches_;

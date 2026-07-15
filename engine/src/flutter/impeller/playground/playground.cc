@@ -83,7 +83,7 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
-std::atomic_bool Playground::glfw_initialized_ = false;
+std::atomic<bool> Playground::glfw_initialized_ = false;
 
 void Playground::InitializeGLFWOnce() {
   // This guard is a hack to work around a problem where glfwCreateWindow
