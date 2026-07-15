@@ -23,10 +23,21 @@ typedef ParagraphImageGenerator = Uint8List Function();
 /// The paint canvas is scaled by the device pixel ratio to avoid pixelation
 /// that would happen if it wasn't resized.
 void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
-  _paintCanvas.width = rect.width.ceil();
-  _paintCanvas.height = rect.height.ceil();
-  _paintCanvas.style.width = '${rect.width / devicePixelRatio}px';
-  _paintCanvas.style.height = '${rect.height / devicePixelRatio}px';
+  final int physicalWidth = rect.width.ceil();
+  final int physicalHeight = rect.height.ceil();
+
+  _paintCanvas.width = physicalWidth;
+  _paintCanvas.height = physicalHeight;
+
+  // Use the rounded integer variables here, not rect.width / rect.heigh
+  // to keep the ratio correct
+  _paintCanvas.style.width = '${physicalWidth / devicePixelRatio}px';
+  _paintCanvas.style.height = '${physicalHeight / devicePixelRatio}px';
+
+  print(
+    '_resizePaintCanvas: $physicalWidth x $physicalHeight, style:${physicalWidth / devicePixelRatio}px x ${physicalHeight / devicePixelRatio}px',
+  );
+
   _paintContext.scale(devicePixelRatio, devicePixelRatio);
 }
 
@@ -53,21 +64,26 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   ui.Offset offset,
   double devicePixelRatio,
 ) {
-  // Define the paragraph rect (using advances, not selected rects)
-  // Source rect must take in account the scaling
-  final sourceRect = ui.Rect.fromLTWH(
-    0,
-    0,
-    ((paragraph.paintBounds.width) * devicePixelRatio).ceilToDouble(),
-    ((paragraph.paintBounds.height) * devicePixelRatio).ceilToDouble(),
-  );
-  // Target rect will be scaled by the canvas transform, so we don't scale it here
+  // paintBounds is already snapped to the physical grid, so we just multiply
+  final double physicalWidth = paragraph.paintBounds.width * devicePixelRatio;
+  final double physicalHeight = paragraph.paintBounds.height * devicePixelRatio;
+
+  final sourceRect = ui.Rect.fromLTWH(0, 0, physicalWidth, physicalHeight);
+
+  // You still must ensure the global canvas offset is snapped to physical pixels
+  final double snappedDx = (offset.dx * devicePixelRatio).roundToDouble() / devicePixelRatio;
+  final double snappedDy = (offset.dy * devicePixelRatio).roundToDouble() / devicePixelRatio;
+
   final targetRect = ui.Rect.fromLTWH(
-    (offset.dx + paragraph.paintBounds.left).floorToDouble(),
-    (offset.dy + paragraph.paintBounds.top).floorToDouble(),
-    (sourceRect.width / devicePixelRatio).ceilToDouble(),
-    (sourceRect.height / devicePixelRatio).ceilToDouble(),
+    snappedDx + paragraph.paintBounds.left,
+    snappedDy + paragraph.paintBounds.top,
+    paragraph.paintBounds.width,
+    paragraph.paintBounds.height,
   );
+
+  print('Source Physical Width: ${sourceRect.width}'); // Already physical, should be integer
+  print('Target Physical Left: ${targetRect.left * devicePixelRatio}'); // Must be integer
+  print('Target Physical Top: ${targetRect.top * devicePixelRatio}'); // Must be integer
 
   return (sourceRect, targetRect);
 }
@@ -145,6 +161,14 @@ abstract class WebParagraphPainter {
     }
 
     final TextLayout layout = _paragraph.getLayout();
+    if (_paragraph.text.isNotEmpty) {
+      // When the paragraph is empty, instead of setting the bounds to a zero rect, we let it unset.
+      // This will make it easy to detect when there's a bug in our painting pipeline that's trying
+      // to paint an empty paragraph.
+
+      // Calculate the actual paint bounds of the paragraph.
+      layout.calculatePaintBounds(ui.window.devicePixelRatio);
+    }
 
     final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateParagraph(
       _paragraph,
@@ -162,14 +186,21 @@ abstract class WebParagraphPainter {
     // so it will be cached together with the text blocks on Canvas2D canvas
     _paintAllBlocks(StyleElements.background, canvas, offset);
 
+    final Float64List matrix = canvas.getTransform();
+    final double mainTx = matrix[12];
+    final double mainTy = matrix[13];
+    print('Main Canvas Physical Translation: tx=$mainTx, ty=$mainTy');
+
     paintParagraphText(
       canvas,
       sourceRect,
       targetRect,
       generateParagraphImage: () {
-        _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
+        final double dpr = ui.window.devicePixelRatio;
 
-        // We only want to paint the actual paint bounds of the paragraph.
+        _resizePaintCanvas(dpr, sourceRect);
+
+        // This now evaluates to a perfect physical integer offset
         _paintContext.translate(-_paragraph.paintBounds.left, -_paragraph.paintBounds.top);
 
         // Fill out all the blocks on Canvas2D canvas
@@ -183,6 +214,15 @@ abstract class WebParagraphPainter {
           sourceRect.width.ceil(),
           sourceRect.height.ceil(),
         );
+
+        // Inside paint:
+        print('Physical Left Offset: ${_paragraph.paintBounds.left}');
+        print('Physical Top Offset: ${-_paragraph.paintBounds.top}');
+
+        // After _calculateParagraph:
+        print('Target Physical Left: ${targetRect.left * dpr}');
+        print('Target Physical Top: ${targetRect.top * dpr}');
+
         return imageData.data.buffer.asUint8List();
       },
     );
@@ -222,6 +262,7 @@ class DomCanvasParagraphPainter {
           case StyleElements.text:
             // For text and shadows we need to shift to the start of the span
             _paintContext.translate(block.spanShiftFromLineStart, 0);
+
             _fillBlockText(layout, block as TextBlock);
           case StyleElements.decorations:
             // For decorations we need to shift to the start of the block
@@ -246,7 +287,12 @@ class DomCanvasParagraphPainter {
   }
 
   static void _fillBlockText(TextLayout layout, TextBlock block) {
+    var first = true;
     for (final (WebCluster clusterText, bool isLtr) in block.getTextClustersInVisualOrder(layout)) {
+      if (first) {
+        first = false;
+        (clusterText as TextCluster).printDiff(0, 0);
+      }
       _fillTextCluster(clusterText, isLtr);
     }
   }

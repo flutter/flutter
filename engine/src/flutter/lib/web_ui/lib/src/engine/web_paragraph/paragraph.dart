@@ -164,14 +164,20 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
     List<ui.FontVariation>? fontVariations,
   }) {
     return WebTextStyle._(
-      fontFamily: fontFamily, // ?? 'Arial',
+      fontFamily: fontFamily,
+      // ?? 'Arial',
       fontFamilyFallback: fontFamilyFallback,
-      fontSize: fontSize, // ?? 14.0,
-      fontStyle: fontStyle, // ?? ui.FontStyle.normal,
-      fontWeight: fontWeight, // ?? ui.FontWeight.normal,
+      fontSize: fontSize,
+      // ?? 14.0,
+      fontStyle: fontStyle,
+      // ?? ui.FontStyle.normal,
+      fontWeight: fontWeight,
+      // ?? ui.FontWeight.normal,
       color: color,
-      foreground: foreground, // ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
-      background: background, // ?? (ui.Paint()..color = const ui.Color(0x00000000)),
+      foreground: foreground,
+      // ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
+      background: background,
+      // ?? (ui.Paint()..color = const ui.Color(0x00000000)),
       shadows: shadows,
       decoration: decoration,
       decorationColor: decorationColor,
@@ -527,14 +533,23 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
 
 abstract class SharedTextStyle {
   String? get fontFamily;
+
   List<String>? get fontFamilyFallback;
+
   double? get fontSize;
+
   ui.FontWeight? get fontWeight;
+
   ui.FontStyle? get fontStyle;
+
   ui.Locale? get locale => null;
+
   List<ui.FontFeature>? get fontFeatures => null;
+
   List<ui.FontVariation>? get fontVariations => null;
+
   double? get letterSpacing => null;
+
   double? get wordSpacing => null;
 
   String _buildCssFontString() {
@@ -612,6 +627,7 @@ class ClusterRange {
   int get size => end - start;
 
   bool get isEmpty => start == end;
+
   bool get isNotEmpty => !isEmpty;
 
   ClusterRange intersect(ClusterRange other) {
@@ -664,6 +680,7 @@ class ClusterRange {
 
 abstract class ParagraphSpan extends ui.TextRange {
   ParagraphSpan({required super.start, required super.end, required this.style});
+
   ParagraphSpan.collapsed(super.offset, this.style) : super.collapsed();
 
   final WebTextStyle style;
@@ -671,9 +688,11 @@ abstract class ParagraphSpan extends ui.TextRange {
   int get size => end - start;
 
   bool get isEmpty => start == end;
+
   bool get isNotEmpty => !isEmpty;
 
   double get fontBoundingBoxAscent;
+
   double get fontBoundingBoxDescent;
 
   List<WebCluster> extractClusters();
@@ -738,6 +757,7 @@ class TextSpan extends ParagraphSpan {
   });
 
   final String text;
+
   // We use TextSpan to get metrics from Chrome in many places,
   // including empty spans (for example when measuring strut) and
   // ellipsis span (which inherits textDirection from the span it attaches to).
@@ -989,6 +1009,15 @@ class WebParagraph implements ui.Paragraph {
       'longestLine=${longestLine.toStringAsFixed(4)} '
       'maxLineWidthWithTrailingSpaces=${maxLineWidthWithTrailingSpaces.toStringAsFixed(4)} lines=${_layout.lines.length}',
     );
+    print('layout(): ${lines.length}');
+    for (final TextLine line in lines) {
+      print(
+        'line[${line.lineNumber}] text:${line.textRange} spaces:${line.whitespacesRange} all:${line.allLineTextRange} corrected:${line.correctedAllLineTextRange} ${line.hardLineBreak}',
+      );
+    }
+    for (int i = text.length; i >= 0; i--) {
+      getLineBoundary(ui.TextPosition(offset: i));
+    }
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
@@ -1382,25 +1411,45 @@ abstract class StyleNode {
   }
 
   ui.Color? get _color;
+
   ui.TextDecoration? get _decoration;
+
   ui.Color? get _decorationColor;
+
   ui.TextDecorationStyle? get _decorationStyle;
+
   double? get _decorationThickness;
+
   ui.FontWeight? get _fontWeight;
+
   ui.FontStyle? get _fontStyle;
+
   ui.TextBaseline? get _textBaseline;
+
   String get _fontFamily;
+
   List<String>? get _fontFamilyFallback;
+
   List<ui.FontFeature>? get _fontFeatures;
+
   List<ui.FontVariation>? get _fontVariations;
+
   double get _fontSize;
+
   double? get _letterSpacing;
+
   double? get _wordSpacing;
+
   double? get _height;
+
   ui.TextLeadingDistribution? get _leadingDistribution;
+
   ui.Locale? get _locale;
+
   ui.Paint? get _background;
+
   ui.Paint? get _foreground;
+
   List<ui.Shadow>? get _shadows;
 }
 
@@ -1516,6 +1565,7 @@ class RootStyleNode extends StyleNode {
 
   @override
   ui.FontWeight? get _fontWeight => style.fontWeight;
+
   @override
   ui.FontStyle? get _fontStyle => style.fontStyle;
 

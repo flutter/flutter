@@ -38,7 +38,7 @@ class TextWrapper {
   }
 
   bool _isHardLineBreak(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.hardLineBreak);
+    return _layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
   }
 
   void breakLines(double maxWidth) {
@@ -48,20 +48,29 @@ class TextWrapper {
     final line = _LineBuilder(_layout, maxWidth);
 
     var hardLineBreak = false;
+    print('We have ${_layout.allClusters.length - 1} clusters');
     for (var index = 0; index < _layout.allClusters.length - 1; index += 1) {
       final WebCluster cluster = _layout.allClusters[index];
       final double widthCluster = cluster.advance.width;
       hardLineBreak = _isHardLineBreak(cluster);
 
+      print(
+        'cluster[$index] [${cluster.start}:${cluster.end}) $hardLineBreak "${_layout.paragraph.text.substring(cluster.start, cluster.end)}"',
+      );
       if (hardLineBreak) {
-        // Break the line and then continue with the current cluster as usual
+        print('found hard line break at $index');
+        // Break the line and then continue to the next cluster as usual
         line.consumePendingText();
+        // Consume the hard line break
+        line.addNewline(index);
 
-        // This is the case when the ellipsis will be added to the empty line; weird...
+        // This is the case when the ellipsis can be added to the empty line; weird...
         line.ellipsize(index);
         line.build(hardLineBreak);
         if (line.reachedMaxLines()) {
           break;
+        } else {
+          continue;
         }
       } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
@@ -75,6 +84,7 @@ class TextWrapper {
       }
 
       // Check if this is a (trailing) whitespace that does not affect the line width
+      print('cluster[${cluster.start}:${cluster.end}) $hardLineBreak ${_isWhitespace(cluster)}');
       if (_isWhitespace(cluster)) {
         line.consumePendingText();
         // Add the cluster to the current whitespace sequence (empty or not)
@@ -119,8 +129,12 @@ class TextWrapper {
     }
 
     // Make sure we didn't miss anything from the text
+    print(
+      'line._pendingTextEnd = ${line._pendingTextEnd} start=${line.start} _whitespaceStart=${line._whitespaceStart} _whitespaceEnd=${line._whitespaceEnd} ',
+    );
     assert(line.reachedEndOfText() || line.reachedMaxLines());
 
+    print('we have ${_layout.lines.length}');
     if (!line.reachedMaxLines()) {
       // Special case: we have only whitespaces in the whole paragraph
       if (_layout.lines.isEmpty && line.hasOnlyWhitespaces) {
@@ -132,19 +146,31 @@ class TextWrapper {
       }
       // Add the last line if there's anything left to add
       else if (line.isNotEmpty) {
+        print('not empty: ${line.start} == ${line._pendingTextEnd} | ${line._whitespaceEnd}');
         // Treat the end of text as a soft line break
         line.markSoftLineBreak(_layout.allClusters.length - 1);
+        print('+1b');
+        if (hardLineBreak && line._whitespaceEnd == _layout.paragraph.text.length) {
+          // There is an exception for the case when the text ends with \n
+          line._whitespaceStart = _layout.paragraph.text.length;
+          // Let's correct the line before the last
+          _layout.lines.last.allLineTextRange = ui.TextRange(
+            start: _layout.lines.last.allLineTextRange.start,
+            end: _layout.paragraph.text.length,
+          );
+        }
         line.build(hardLineBreak);
         // This is the line line with the text that fits in the given width, no need to ellipsize it
       }
     }
-
+    /*
     if (hardLineBreak) {
       // Flutter wants to have another (empty) line if \n is the last codepoint in the text
       // This empty line gets in a way of detecting line visual runs (there isn't any)
       // SkParagraph copies the content of the last line to this empty line, so we need to do the same?
       assert(_layout.lines.isNotEmpty);
       final TextLine lastLine = _layout.lines.last;
+      print('+1c');
       line._top += _layout.addLine(
         lastLine.textClusterRange,
         lastLine.whitespacesClusterRange,
@@ -152,7 +178,7 @@ class TextWrapper {
         line._top,
       );
     }
-
+*/
     _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
     _longestLine = math.max(_longestLine, line._longestLine);
     _maxLineWidthWithTrailingSpaces = math.max(_longestLine, line._maxLineWidthWithTrailingSpaces);
@@ -252,7 +278,8 @@ class _LineBuilder {
     final result = _whitespaceStart != _whitespaceEnd;
 
     if (!result) {
-      // When there's no whitespaces, the width of whitespaces is also 0.
+      // When there's no whitespaces, the width of whitespaces is also 0
+      // (unless we have only hard line break which also counts as a whitespace)
       assert(_widthWhitespaces == 0.0);
     }
 
@@ -280,6 +307,9 @@ class _LineBuilder {
   bool get hasSoftLineBreak => _hasSoftLineBreak;
   bool _hasSoftLineBreak = false;
 
+  bool get hasHardLineBreak => _hasHardLineBreak;
+  bool _hasHardLineBreak = false;
+
   void markSoftLineBreak(int index) {
     _hasSoftLineBreak = true;
 
@@ -303,6 +333,7 @@ class _LineBuilder {
 
   void addWhitespace(int index, double width) {
     assert(!hasPendingText);
+    print('addWhitespace $index + 1');
 
     _whitespaceEnd = index + 1;
     _pendingTextEnd = index + 1;
@@ -312,7 +343,13 @@ class _LineBuilder {
     assert(hasWhitespaces);
   }
 
+  void addNewline(int index) {
+    print('addNewline $index + 1');
+    _hasHardLineBreak = true;
+  }
+
   void addPendingText(int index, double width) {
+    print('addPendingText $index + 1');
     _pendingTextEnd = index + 1;
     _widthPendingText += width;
 
@@ -351,6 +388,7 @@ class _LineBuilder {
       _widthConsumedText + _widthWhitespaces,
     );
 
+    print('+line[$start:$_pendingTextEnd/$_whitespaceEnd) $hardLineBreak');
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
@@ -361,8 +399,14 @@ class _LineBuilder {
     // Reset the line builder to be ready for the next line.
 
     _hasSoftLineBreak = false;
+    _hasHardLineBreak = false;
 
-    start = _whitespaceEnd;
+    if (hardLineBreak) {
+      start = _whitespaceEnd + 1;
+      _pendingTextEnd = start;
+    } else {
+      start = _whitespaceEnd;
+    }
     _whitespaceStart = start;
     _whitespaceEnd = start;
 

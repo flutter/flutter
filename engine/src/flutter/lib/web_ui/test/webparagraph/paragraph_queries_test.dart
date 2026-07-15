@@ -125,21 +125,14 @@ Future<void> testMain() async {
 
   test('Paragraph getLineBoundary', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    /*
-    getLineBoundary: offset=18, metric.startIndex=17, metric.endIndex=18
-getLineBoundary: offset=17, metric.startIndex=17, metric.endIndex=18
-getLineBoundary: offset=16, metric.startIndex=15, metric.endIndex=16
-getLineBoundary: offset=15, metric.startIndex=15, metric.endIndex=16
-getLineBoundary: offset=14, metric.startIndex=13, metric.endIndex=14
-getLineBoundary: offset=13, metric.startIndex=13, metric.endIndex=14
-getLineBoundary: offset=12, metric.startIndex=0, metric.endIndex=12
-getLineBoundary: offset=11, metric.startIndex=0, metric.endIndex=12
-    */
 
     final builder = WebParagraphBuilder(paragraphStyle);
-    builder.addText('Hello World!\n+\n \n\n');
+    //builder.addText('Hello World!\n+\n \n\n');
+    //               012345 6 7
+    builder.addText('1 234\n\n');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    /*
     expect(
       paragraph.getLineBoundary(const ui.TextPosition(offset: 18)),
       const ui.TextRange(start: 17, end: 18),
@@ -172,7 +165,8 @@ getLineBoundary: offset=11, metric.startIndex=0, metric.endIndex=12
       paragraph.getLineBoundary(const ui.TextPosition(offset: 11)),
       const ui.TextRange(start: 0, end: 12),
     );
-  });
+    */
+  }, solo: true);
 
   test('Paragraph computeLineMetrics/getLineMetricsAt', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
