@@ -139,8 +139,13 @@ Future<void> _initializeFirebase() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _initializeFirebase();
-  await _activateFirebaseAppCheck();
+  try {
+    await _initializeFirebase();
+    await _activateFirebaseAppCheck();
+  } catch (e) {
+    // Firebase init failed — still launch the app so the UI is visible.
+    debugPrint('⚠️ Firebase init failed, continuing without Firebase: $e');
+  }
   print('🚀 Starting app...');
   print('✅ Flutter binding initialized');
 
@@ -150,7 +155,10 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     final fcm = FirebaseMessaging.instance;
     await fcm.requestPermission();
-    final token = await fcm.getToken();
+    final token = await fcm.getToken().timeout(
+      const Duration(seconds: 10),
+      onTimeout: () => null,
+    );
     _debugLog('🔑 [FCM] Device token: ${token ?? "(null)"}');
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
