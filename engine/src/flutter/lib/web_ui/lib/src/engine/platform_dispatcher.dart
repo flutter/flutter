@@ -761,7 +761,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
     if (shouldRender) {
-      final sceneRender = renderer.renderScene(scene, target);
+      final Future<void> sceneRender = renderer.renderScene(scene, target);
       _sceneRendersInProgress.add(sceneRender);
       try {
         await sceneRender;

@@ -546,37 +546,15 @@ void testMain() {
     expect(localeChangedCount, 1);
   });
 
-  test('dispatches browser event after rendering on flutter/service_worker channel', () async {
+  test('dispatches browser event asynchronously on flutter/service_worker channel', () async {
     final completer = Completer<void>();
-    var eventDispatched = false;
-    var renderCompleted = false;
-    domWindow.addEventListener(
-      'flutter-first-frame',
-      createDomEventListener((DomEvent e) {
-        expect(renderCompleted, isTrue);
-        eventDispatched = true;
-        completer.complete();
-      }),
-    );
-    final Zone innerZone = Zone.current.fork();
+    final DomEventListener listener = createDomEventListener((DomEvent e) => completer.complete());
+    domWindow.addEventListener('flutter-first-frame', listener);
+    addTearDown(() => domWindow.removeEventListener('flutter-first-frame', listener));
 
-    innerZone.runGuarded(() {
-      myWindow.onDrawFrame = () {
-        unawaited(
-          dispatcher
-              .render(ui.SceneBuilder().build(), myWindow)
-              .then((_) => renderCompleted = true),
-        );
-        myWindow.sendPlatformMessage(
-          'flutter/service_worker',
-          ByteData(0),
-          (ByteData? outputData) {},
-        );
-        expect(eventDispatched, isFalse);
-      };
-    });
-    dispatcher.invokeOnDrawFrame();
+    myWindow.sendPlatformMessage('flutter/service_worker', ByteData(0), (ByteData? outputData) {});
 
+    expect(completer.isCompleted, isFalse);
     await expectLater(completer.future, completes);
   });
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -87,6 +88,41 @@ void testMain() {
 
   tearDown(() {
     printWarning = originalPrintWarning;
+  });
+
+  test('first-frame browser event waits for an in-progress scene render', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+      createCanvas: () => FakeDisplayCanvas(),
+    );
+    final testRasterizer = TestRasterizer(view, displayFactory)
+      ..prepareCompleter = Completer<void>();
+    final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
+    renderer.rasterizers[view.viewId] = testRasterizer;
+    addTearDown(() => renderer.rasterizers[view.viewId] = originalRasterizer);
+
+    final eventCompleter = Completer<void>();
+    final DomEventListener listener = createDomEventListener(
+      (DomEvent event) => eventCompleter.complete(),
+    );
+    domWindow.addEventListener('flutter-first-frame', listener);
+    addTearDown(() => domWindow.removeEventListener('flutter-first-frame', listener));
+
+    final ui.Scene scene = ui.SceneBuilder().build();
+    addTearDown(scene.dispose);
+    final Future<void> renderFuture = EnginePlatformDispatcher.instance.render(scene, view);
+    ui.PlatformDispatcher.instance.sendPlatformMessage(
+      'flutter/service_worker',
+      ByteData(0),
+      (ByteData? response) {},
+    );
+
+    await Future<void>.delayed(Duration.zero);
+    expect(eventCompleter.isCompleted, isFalse);
+
+    testRasterizer.prepareCompleter!.complete();
+    await renderFuture;
+    await expectLater(eventCompleter.future, completes);
   });
 
   test('disposing platform view during prepareToDraw causes crash in submitFrame', () async {
