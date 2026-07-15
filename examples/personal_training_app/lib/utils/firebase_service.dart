@@ -10,7 +10,7 @@ import '../models/client_profile.dart';
 import 'security_helper.dart';
 
 class FirebaseService {
-  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static FirebaseAuth get _auth => FirebaseAuth.instance;
   static String? lastAuthError;
 
   static Future<void> signOut() async {
@@ -48,7 +48,19 @@ class FirebaseService {
         code == 'invalid-login-credentials';
   }
 
-  static String? get currentUid => _auth.currentUser?.uid;
+  static String? get currentUid {
+    if (Firebase.apps.isEmpty) return null;
+    return _auth.currentUser?.uid;
+  }
+
+  static Future<bool> _ensureFirebaseReadyForAuth() async {
+    await initialize();
+    if (Firebase.apps.isEmpty) {
+      lastAuthError = 'firebase-not-initialized';
+      return false;
+    }
+    return true;
+  }
 
   static String _clientAuthEmailFromUsername(String username) {
     final normalized = username.trim().toLowerCase().replaceAll(
@@ -143,7 +155,9 @@ class FirebaseService {
   ) async {
     lastAuthError = null;
     try {
-      await initialize();
+      if (!await _ensureFirebaseReadyForAuth()) {
+        return false;
+      }
       final email = _clientAuthEmailFromUsername(username);
       final existingUser = _auth.currentUser;
       if (existingUser != null && existingUser.email != email) {
@@ -191,7 +205,9 @@ class FirebaseService {
   ) async {
     lastAuthError = null;
     try {
-      await initialize();
+      if (!await _ensureFirebaseReadyForAuth()) {
+        return false;
+      }
       final existingUser = _auth.currentUser;
       if (existingUser != null && existingUser.email != email) {
         await _auth.signOut();
@@ -510,7 +526,7 @@ class FirebaseService {
     }
   }
 
-  static final FirebaseDatabase _database = FirebaseDatabase.instance;
+  static FirebaseDatabase get _database => FirebaseDatabase.instance;
   static bool _initialized = false;
   static bool _appCheckInitialized = false;
   static final RegExp _invalidKeyChars = RegExp(r'[.#$\[\]/]');
