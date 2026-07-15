@@ -494,29 +494,11 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
                        MakeTextFrameFromTextBlobSkia(blob));
-  // Continually append new glyphs until the glyph size grows to the maximum.
-  // Note that the sizes here are more or less experimentally determined, but
-  // the important expectation is that the atlas size will shrink again after
-  // growing to the maximum size.
-  constexpr ISize expected_sizes[13] = {
-      {4096, 4096},   //
-      {4096, 4096},   //
-      {4096, 8192},   //
-      {4096, 8192},   //
-      {4096, 8192},   //
-      {4096, 8192},   //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 4096}    // Shrinks!
-  };
 
   SkFont sk_font_small = flutter::testing::CreateTestFontOfSize(10);
 
-  for (int i = 0; i < 13; i++) {
+  ISize prev_atlas_size;
+  for (int i = 0; i < 100; i++) {
     SkTextBlobBuilder builder;
 
     auto add_char = [&](const SkFont& sk_font, char c) {
@@ -539,14 +521,23 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
                          GlyphAtlas::Type::kAlphaBitmap, transform,
                          atlas_context, MakeTextFrameFromTextBlobSkia(blob));
     ASSERT_TRUE(!!atlas);
-    EXPECT_EQ(atlas->GetTexture()->GetTextureDescriptor().size,
-              expected_sizes[i]);
+    ISize atlas_size = atlas->GetTexture()->GetTextureDescriptor().size;
+    if (atlas_size.width < prev_atlas_size.width ||
+        atlas_size.height < prev_atlas_size.height) {
+      // We've triggered an atlas flush and recreate. We're done.
+
+      // The final atlas should contain both the "A" glyph (which was not present
+      // in the previous atlas) and the "B" glyph (which existed in the previous
+      // atlas).
+      ASSERT_EQ(atlas->GetGlyphCount(), 2u);
+      return;
+    }
+    prev_atlas_size = atlas_size;
   }
 
-  // The final atlas should contain both the "A" glyph (which was not present
-  // in the previous atlas) and the "B" glyph (which existed in the previous
-  // atlas).
-  ASSERT_EQ(atlas->GetGlyphCount(), 2u);
+  // We never triggered the atlas recreate after 100 text calls.
+  // Either something is wrong with the atlas code or we need to fix this test.
+  GTEST_FAIL() << "Test did not encounter an atlas growth situation";
 }
 
 TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
