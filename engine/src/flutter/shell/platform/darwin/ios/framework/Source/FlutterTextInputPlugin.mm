@@ -10,6 +10,7 @@
 
 #include "unicode/uchar.h"
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
@@ -61,6 +62,7 @@ static NSString* const kOnInteractiveKeyboardPointerUpMethod =
     @"TextInput.onPointerUpForInteractiveKeyboard";
 
 #pragma mark - TextInputConfiguration Field Names
+static NSString* const kViewId = @"viewId";
 static NSString* const kSecureTextEntry = @"obscureText";
 static NSString* const kKeyboardType = @"inputType";
 static NSString* const kKeyboardAppearance = @"keyboardAppearance";
@@ -786,6 +788,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @end
 
 @interface FlutterTextInputPlugin ()
+@property(nonatomic, readonly, weak) id<FlutterTextInputPluginDelegate> textInputPluginDelegate;
 @property(nonatomic, readonly, weak) id<FlutterTextInputDelegate> textInputDelegate;
 @property(nonatomic, readonly) UIView* hostView;
 @end
@@ -2441,22 +2444,22 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 #pragma mark - Key Events Handling
 - (void)pressesBegan:(NSSet<UIPress*>*)presses
            withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [_textInputPlugin.viewController pressesBegan:presses withEvent:event];
+  [_textInputPlugin.currentViewController pressesBegan:presses withEvent:event];
 }
 
 - (void)pressesChanged:(NSSet<UIPress*>*)presses
              withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [_textInputPlugin.viewController pressesChanged:presses withEvent:event];
+  [_textInputPlugin.currentViewController pressesChanged:presses withEvent:event];
 }
 
 - (void)pressesEnded:(NSSet<UIPress*>*)presses
            withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [_textInputPlugin.viewController pressesEnded:presses withEvent:event];
+  [_textInputPlugin.currentViewController pressesEnded:presses withEvent:event];
 }
 
 - (void)pressesCancelled:(NSSet<UIPress*>*)presses
                withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
-  [_textInputPlugin.viewController pressesCancelled:presses withEvent:event];
+  [_textInputPlugin.currentViewController pressesCancelled:presses withEvent:event];
 }
 
 @end
@@ -2515,7 +2518,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 @end
 
-@interface FlutterTextInputPlugin ()
+@interface FlutterTextInputPlugin () {
+  /**
+   * The FlutterViewController to manage input for.
+   */
+  __weak FlutterViewController* _currentViewController;
+}
+
 // The current password-autofillable input fields that have yet to be saved.
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
@@ -2546,9 +2555,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   BOOL _pendingAutofillRemoval;
 }
 
-- (instancetype)initWithDelegate:(id<FlutterTextInputDelegate>)textInputDelegate {
+- (instancetype)initWithDelegate:(id<FlutterTextInputPluginDelegate>)delegate
+               textInputDelegate:(id<FlutterTextInputDelegate>)textInputDelegate {
   self = [super init];
   if (self) {
+    _textInputPluginDelegate = delegate;
     // `_textInputDelegate` is a weak reference because it should retain FlutterTextInputPlugin.
     _textInputDelegate = textInputDelegate;
     _autofillContext = [[NSMutableDictionary alloc] init];
@@ -2655,7 +2666,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (_keyboardView.superview != nil) {
     // Done to avoid the issue of a pointer up done without a screenshot
     // View must be loaded at this point.
-    UIScreen* screen = _viewController.flutterScreenIfViewLoaded;
+    UIScreen* screen = _currentViewController.flutterScreenIfViewLoaded;
     CGFloat screenHeight = screen.bounds.size.height;
     CGFloat keyboardHeight = _keyboardRect.size.height;
     // Negative velocity indicates a downward movement
@@ -2664,9 +2675,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
         animations:^{
           double keyboardDestination =
               shouldDismissKeyboardBasedOnVelocity ? screenHeight : screenHeight - keyboardHeight;
-          _keyboardViewContainer.frame = CGRectMake(
-              0, keyboardDestination, _viewController.flutterScreenIfViewLoaded.bounds.size.width,
-              _keyboardViewContainer.frame.size.height);
+          _keyboardViewContainer.frame =
+              CGRectMake(0, keyboardDestination,
+                         _currentViewController.flutterScreenIfViewLoaded.bounds.size.width,
+                         _keyboardViewContainer.frame.size.height);
         }
         completion:^(BOOL finished) {
           if (shouldDismissKeyboardBasedOnVelocity) {
@@ -2700,7 +2712,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)handlePointerMove:(CGFloat)pointerY {
   // View must be loaded at this point.
-  UIScreen* screen = _viewController.flutterScreenIfViewLoaded;
+  UIScreen* screen = _currentViewController.flutterScreenIfViewLoaded;
   CGFloat screenHeight = screen.bounds.size.height;
   CGFloat keyboardHeight = _keyboardRect.size.height;
   if (screenHeight - keyboardHeight <= pointerY) {
@@ -2732,10 +2744,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)hideKeyboardWithoutAnimationAndAvoidCursorDismissUpdate {
   [UIView setAnimationsEnabled:NO];
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  _cachedFirstResponder =
-      flutterApplication
-          ? flutterApplication.keyWindow.flutterFirstResponder
-          : self.viewController.flutterWindowSceneIfViewLoaded.keyWindow.flutterFirstResponder;
+  _cachedFirstResponder = flutterApplication
+                              ? flutterApplication.keyWindow.flutterFirstResponder
+                              : self.currentViewController.flutterWindowSceneIfViewLoaded.keyWindow
+                                    .flutterFirstResponder;
 
   _activeView.preventCursorDismissWhenResignFirstResponder = YES;
   [_cachedFirstResponder resignFirstResponder];
@@ -2745,7 +2757,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)takeKeyboardScreenshotAndDisplay {
   // View must be loaded at this point
-  UIScreen* screen = _viewController.flutterScreenIfViewLoaded;
+  UIScreen* screen = _currentViewController.flutterScreenIfViewLoaded;
   UIView* keyboardSnap = [screen snapshotViewAfterScreenUpdates:YES];
   keyboardSnap = [keyboardSnap resizableSnapshotViewFromRect:_keyboardRect
                                           afterScreenUpdates:YES
@@ -2756,7 +2768,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     UIApplication* flutterApplication = FlutterSharedApplication.application;
     UIView* rootView = flutterApplication
                            ? flutterApplication.delegate.window.rootViewController.view
-                           : self.viewController.viewIfLoaded.window.rootViewController.view;
+                           : self.currentViewController.viewIfLoaded.window.rootViewController.view;
     [rootView addSubview:_keyboardViewContainer];
   }
   _keyboardViewContainer.layer.zPosition = NSIntegerMax;
@@ -2914,6 +2926,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
+  FlutterViewIdentifier viewId = flutter::kFlutterImplicitViewId;
+  NSObject* requestViewId = configuration[kViewId];
+  if ([requestViewId isKindOfClass:[NSNumber class]]) {
+    viewId = [(NSNumber*)requestViewId longLongValue];
+  }
+  _currentViewController = [_textInputPluginDelegate viewControllerForIdentifier:viewId];
+  FML_DCHECK(_currentViewController != nil);
+
   [self resetAllClientIds];
 
   // Reset pending removal flags set by the previous clearTextInputClient call.
@@ -3060,11 +3080,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 // The UIView to add FlutterTextInputViews to.
 - (UIView*)hostView {
-  UIView* host = _viewController.view;
+  UIView* host = _currentViewController.view;
   NSAssert(host != nullptr,
            @"The application must have a host view since the keyboard client "
            @"must be part of the responder chain to function. The host view controller is %@",
-           _viewController);
+           _currentViewController);
   return host;
 }
 
@@ -3136,7 +3156,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     [_inputHider addSubview:inputView];
   }
 
-  if (_viewController.view == nil) {
+  if (_currentViewController.view == nil) {
     // If view controller's view has detached from flutter engine, we don't add _inputHider
     // in parent view to fallback and avoid crash.
     // https://github.com/flutter/flutter/issues/106404.
@@ -3183,6 +3203,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     _pendingAutofillRemoval = YES;
     _pendingInputViewRemoval = NO;
   }
+  _currentViewController = nil;
 }
 
 - (void)updateConfig:(NSDictionary*)dictionary {

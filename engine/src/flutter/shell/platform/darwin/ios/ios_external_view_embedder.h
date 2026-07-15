@@ -6,15 +6,29 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_EXTERNAL_VIEW_EMBEDDER_H_
 
 #include "flutter/flow/embedded_views.h"
+#include "flutter/flow/surface.h"
+#include "flutter/impeller/display_list/aiks_context.h"
+#include "flutter/impeller/renderer/backend/metal/context_mtl.h"
+#include "flutter/impeller/renderer/backend/metal/swapchain_transients_mtl.h"
+#include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#include "flutter/shell/platform/darwin/ios/ios_context.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 
 namespace flutter {
 
+class IOSSurfacesManager;
+
 class IOSExternalViewEmbedder : public ExternalViewEmbedder {
  public:
+  using CreateSurfaceFrameCallback =
+      std::function<std::unique_ptr<SurfaceFrame>(int64_t flutter_view_id,
+                                                  DlISize& frame_size)>;
+
   IOSExternalViewEmbedder(
       __weak FlutterPlatformViewsController* platform_views_controller,
-      const std::shared_ptr<IOSContext>& context);
+      const std::shared_ptr<IOSContext>& context,
+      const CreateSurfaceFrameCallback& create_surface_frame_callback);
 
   // |ExternalViewEmbedder|
   virtual ~IOSExternalViewEmbedder() override;
@@ -22,6 +36,10 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
  private:
   __weak FlutterPlatformViewsController* platform_views_controller_;
   std::shared_ptr<IOSContext> ios_context_;
+  const CreateSurfaceFrameCallback create_surface_frame_callback_;
+  std::unique_ptr<SurfaceFrame> pending_frame_;
+
+  void CollectView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
@@ -35,7 +53,8 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(DlISize frame_size,
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|

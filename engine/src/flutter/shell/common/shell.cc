@@ -2285,6 +2285,7 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
   FML_DCHECK(view_id != kFlutterImplicitViewId)
       << "Unexpected request to remove the implicit view #"
       << kFlutterImplicitViewId << ". This view should never be removed.";
+
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
     expected_frame_constraints_.erase(view_id);

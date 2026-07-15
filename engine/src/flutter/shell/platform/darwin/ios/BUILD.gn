@@ -329,6 +329,7 @@ if (enable_ios_unittests) {
       "framework/Source/accessibility_bridge_test.mm",
       "framework/Source/availability_version_check_test.mm",
       "ios_context_noop_unittests.mm",
+      "ios_external_view_embedder_unittests.mm",
       "ios_surface_noop_unittests.mm",
       "platform_message_handler_ios_test.mm",
       "platform_view_ios_test.mm",

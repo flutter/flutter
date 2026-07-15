@@ -8,6 +8,7 @@
 #include <ctime>
 #include <future>
 #include <memory>
+#include <mutex>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -5181,6 +5182,43 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
                                                 /*frame_size=*/DlISize(100, 0));
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                 *min_height));
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, ShouldNotDiscardLayerTreeAfterViewIsRemoved) {
+  Settings settings = CreateSettingsForFixture();
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  constexpr int64_t kSecondaryViewId = kImplicitViewId + 1;
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+  });
+
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell] {
+    shell->GetPlatformView()->SetViewportMetrics(
+        kSecondaryViewId, ViewportMetrics{1.0, 100, 100, 22, 0});
+  });
+
+  auto layer_tree =
+      std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                  /*frame_size=*/DlISize(100, 100));
+  ASSERT_FALSE(ShellTest::ShouldDiscardLayerTree(shell.get(), kSecondaryViewId,
+                                                 *layer_tree));
+
+  fml::AutoResetWaitableEvent remove_latch;
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell,
+                                                             &remove_latch] {
+    shell->GetPlatformView()->RemoveView(kSecondaryViewId, [&](bool removed) {
+      EXPECT_FALSE(removed);
+      remove_latch.Signal();
+    });
+  });
+  remove_latch.Wait();
+  ASSERT_FALSE(ShellTest::ShouldDiscardLayerTree(shell.get(), kSecondaryViewId,
+                                                 *layer_tree));
   DestroyShell(std::move(shell), task_runners);
 }
 

@@ -18,6 +18,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ * A unique identifier for a view within which Flutter content is hosted.
+ *
+ * Identifiers are guaranteed to be unique for views owned by a given engine but
+ * may collide for views owned by different engines.
+ */
+typedef int64_t FlutterViewIdentifier;
+
 @class FlutterEngine;
 
 /**
@@ -188,6 +196,17 @@ FLUTTER_DARWIN_EXPORT
  * this class method to testing features depends on UIAccessibilityIsVoiceOverRunning().
  */
 + (BOOL)isUIAccessibilityIsVoiceOverRunning;
+
+/**
+ * The identifier for this view controller, if it is attached.
+ *
+ * The identifier is assigned when the view controller is attached to a
+ * `FlutterEngine`.
+ *
+ * If the view controller is detached (see `FlutterViewController#attached`),
+ * reading this property throws an assertion.
+ */
+@property(nonatomic, readonly) FlutterViewIdentifier viewIdentifier;
 
 /**
  * True if at least one frame has rendered and the ViewController has appeared.

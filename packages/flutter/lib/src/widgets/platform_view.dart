@@ -17,6 +17,7 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'view.dart' show View;
 
 // Examples can assume:
 // PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
@@ -1013,6 +1014,7 @@ class _UiKitViewState
       viewType: widget.viewType,
       gestureBlockingPolicy: widget.gestureBlockingPolicy,
       layoutDirection: _layoutDirection!,
+      flutterViewId: View.of(context).viewId,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {

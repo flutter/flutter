@@ -143,7 +143,8 @@
 - (instancetype)initWithEmbeddedView:(UIView*)embeddedView
              platformViewsController:(FlutterPlatformViewsController*)platformViewsController
     gestureRecognizersBlockingPolicy:
-        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy;
+        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy
+                       flutterViewId:(FlutterViewIdentifier)flutterViewId;
 
 // Stop delaying any active touch sequence (and let it arrive the embedded view).
 - (void)releaseGesture;

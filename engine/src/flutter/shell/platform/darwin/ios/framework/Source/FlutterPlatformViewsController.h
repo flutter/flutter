@@ -18,6 +18,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
@@ -35,9 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
-/// The flutter view.
-@property(nonatomic, weak) UIView* _Nullable flutterView;
-
 /// @brief The flutter view controller.
 @property(nonatomic, weak) UIViewController<FlutterViewResponder>* _Nullable flutterViewController;
 
@@ -48,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
 /// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize;
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize flutterViewId:(int64_t)flutterViewId;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -97,7 +95,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// Called from the raster thread.
 - (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
-     withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext;
+       withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
+    withFlutterViewId:(int64_t)flutterViewId;
 
 /// @brief Handler for platform view message channels.
 - (void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -130,6 +129,18 @@ NS_ASSUME_NONNULL_BEGIN
 /// @brief Pushes the outstanding path clips to the mutator stack of each visited platform
 /// view
 - (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath;
+
+/// @brief Discards platform view composition state associated with the given FlutterView.
+///
+/// Called after the rasterizer collects a removed view.
+- (void)collectView:(int64_t)flutterViewId;
+
+- (void)attachToFlutterViewController:(__weak FlutterViewController*)controller;
+
+- (void)detachFromFlutterViewController:(int64_t)flutterViewId;
+
+- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
 
 @end
 
