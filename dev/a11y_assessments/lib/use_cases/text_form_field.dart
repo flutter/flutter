@@ -30,6 +30,7 @@ class _MainWidget extends StatefulWidget {
 class _MainWidgetState extends State<_MainWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final String pageTitle = getUseCaseName(TextFormFieldUseCase());
+  String _statusMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -74,10 +75,29 @@ class _MainWidgetState extends State<_MainWidget> {
             ElevatedButton(
               key: const Key('submit button'),
               onPressed: () {
-                _formKey.currentState!.validate();
+                if (_formKey.currentState!.validate()) {
+                  setState(() {
+                    _statusMessage = 'Form submitted successfully!';
+                  });
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Form submitted successfully!')));
+                } else {
+                  setState(() {
+                    _statusMessage = 'Validation failed';
+                  });
+                }
               },
               child: const Text('Submit'),
             ),
+            if (_statusMessage.isNotEmpty)
+              Semantics(
+                liveRegion: true,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(_statusMessage, key: const Key('status message')),
+                ),
+              ),
           ],
         ),
       ),

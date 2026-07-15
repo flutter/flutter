@@ -38,21 +38,25 @@ class _MainWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: ListView(
+        padding: const EdgeInsets.all(24.0),
         children: <Widget>[
           Semantics(
             label: 'Enabled dropdown menu',
             child: DropdownMenu<String>(
               key: const Key('enabled dropdown menu'),
               label: const Text('Fruit'),
+              expandedInsets: EdgeInsets.zero,
               initialSelection: _kOptions.first,
               dropdownMenuEntries: _kMenuEntries,
             ),
           ),
+          const SizedBox(height: 24.0),
           Semantics(
             label: 'Disabled dropdown menu',
             child: DropdownMenu<String>(
               key: const Key('disabled dropdown menu'),
               label: const Text('Fruit'),
+              expandedInsets: EdgeInsets.zero,
               enabled: false,
               initialSelection: _kOptions.first,
               dropdownMenuEntries: _kMenuEntries,

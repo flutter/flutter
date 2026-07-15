@@ -41,6 +41,17 @@ void main() {
       await tester.tap(find.byKey(const Key('submit button')));
       await tester.pumpAndSettle();
       expect(find.text('Please enter some text'), findsOneWidget);
+      expect(find.text('Validation failed'), findsOneWidget);
+    }
+
+    // Test successful form submission feedback
+    {
+      final Finder finder = find.byKey(const Key('enabled text form field'));
+      await tester.enterText(finder, 'test@example.com');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('submit button')));
+      await tester.pumpAndSettle();
+      expect(find.text('Form submitted successfully!'), findsWidgets);
     }
   });
 
