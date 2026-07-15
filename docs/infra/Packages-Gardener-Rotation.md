@@ -70,8 +70,7 @@ Our analysis options do not flag deprecated API usage ([context][deprecation con
 Once during your rotation, do a manual check for any new deprecations:
 1. Ensure that your local checkout is updated and has no changes.
 1. Comment out `deprecated_member_use: ignore` in `analysis_options.yaml` at the root of the repository.
-1. Run `dart run script/tool/bin/flutter_plugin_tools.dart analyze \
-   --custom-analysis=script/configs/custom_analysis.yaml`
+1. Run `dart run script/tool/bin/flutter_plugin_tools.dart analyze
 1. Compare the failures to [this list][deprecated api issues] to see if there is anything new, and if so file it.
     * Include the deprecated API in the issue name, and any details from the error message (e.g. suggested replacement) in the issue.
     * Add the `team-ecosystem`, `packages`, `p: deprecated api`, and `c: tech-debt` labels.
