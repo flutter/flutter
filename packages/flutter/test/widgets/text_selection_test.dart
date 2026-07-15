@@ -2176,8 +2176,8 @@ void main() {
                 controller: controller,
                 focusNode: focusNode,
                 selectionControls: customControls,
-                // Web CI defaults EditableText.selectAllOnFocus to true, which
-                // selects all text on focus and can prevent handle rebuilds.
+                // On the web selectAllOnFocus defaults to true, interfering with
+                // this test's programmatic selection.
                 selectAllOnFocus: false,
               ),
             ),
@@ -2230,8 +2230,8 @@ void main() {
               controller: controller,
               focusNode: focusNode,
               selectionControls: customControls,
-              // Web CI defaults EditableText.selectAllOnFocus to true, which
-              // selects all text on focus and can prevent handle rebuilds.
+              // On the web selectAllOnFocus defaults to true, interfering with
+              // this test's programmatic selection.
               selectAllOnFocus: false,
             ),
           ),
@@ -2542,4 +2542,72 @@ class _MockTextSelectionHandleControls extends TextSelectionControls
       ),
     );
   }
+}
+
+class DirectionalitySpyTextSelectionControls extends TextSelectionControls {
+  final List<TextSelectionHandleType> builtHandleTypes = <TextSelectionHandleType>[];
+
+  void clearBuiltHandleTypes() {
+    builtHandleTypes.clear();
+  }
+
+  // Wrap the handle in a widget with a Key that identifies its type.
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    builtHandleTypes.add(type);
+    return SizedBox.square(key: ValueKey<TextSelectionHandleType>(type), dimension: textLineHeight);
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.square(textLineHeight);
+  }
+}
+
+class _DirectionalityTestCase {
+  const _DirectionalityTestCase({
+    required this.description,
+    required this.ambientDirection,
+    required this.text,
+    required this.selectionBase,
+    required this.selectionExtent,
+    required this.expectedStartEndpointDirection,
+    required this.expectedEndEndpointDirection,
+    required this.expectedStartHandleType,
+    required this.expectedEndHandleType,
+  });
+
+  final String description;
+  final TextDirection ambientDirection;
+  final String text;
+  final int selectionBase;
+  final int selectionExtent;
+  final TextDirection expectedStartEndpointDirection;
+  final TextDirection expectedEndEndpointDirection;
+  final TextSelectionHandleType expectedStartHandleType;
+  final TextSelectionHandleType expectedEndHandleType;
 }

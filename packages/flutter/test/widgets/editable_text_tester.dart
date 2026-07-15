@@ -41,6 +41,7 @@ class TestTextField extends StatefulWidget {
     this.controller,
     this.onSubmitted,
     this.showSelectionHandles = false,
+    this.selectAllOnFocus,
   });
 
   final Iterable<String>? autofillHints;
@@ -132,6 +133,7 @@ class _TestTextFieldState extends State<TestTextField>
           style: widget.style ?? const TextStyle(), // required by editable text.
           controller: _effectiveController, // required by editable text.
           showSelectionHandles: widget.showSelectionHandles,
+          selectAllOnFocus: widget.selectAllOnFocus,
         ),
       ),
     );
