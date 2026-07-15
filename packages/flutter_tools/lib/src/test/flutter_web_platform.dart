@@ -17,7 +17,6 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -879,28 +878,6 @@ class BrowserManager {
       url.toString(),
       headless: headless,
       webBrowserFlags: webBrowserFlags,
-    );
-    unawaited(
-      Future<void>(() async {
-        try {
-          final ChromeTab? tab = await chrome.chromeConnection.getTab(
-            (ChromeTab tab) => tab.url.contains('index.html'),
-            retryFor: const Duration(seconds: 5),
-          );
-          if (tab != null) {
-            final WipConnection connection = await tab.connect();
-            await connection.runtime.enable();
-            connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
-              logger.printStatus(
-                '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
-              );
-            });
-            connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
-              logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
-            });
-          }
-        } on Object catch (_) {}
-      }),
     );
     final completer = Completer<BrowserManager>();
 
