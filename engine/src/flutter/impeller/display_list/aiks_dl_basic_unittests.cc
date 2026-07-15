@@ -10,6 +10,7 @@
 #include "display_list/effects/dl_image_filter.h"
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "flutter/impeller/geometry/constants.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -2761,6 +2762,53 @@ TEST_P(AiksTest, CompareDiffRoundRectAndRoundRect) {
   builder.DrawRoundRect(outer_rrect, DlPaint().setColor(DlColor::kSkyBlue()));
   builder.DrawRoundRect(inner_rrect,
                         DlPaint().setBlendMode(DlBlendMode::kClear));
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderLinesWithCapsAnglesAndAlphas) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  const float line_length = 30.0f;
+  const float stroke_width = 10.0f;
+  const float spacing = 50.0f;
+
+  const std::vector<flutter::DlStrokeCap> caps = {
+      flutter::DlStrokeCap::kButt,
+      flutter::DlStrokeCap::kSquare,
+      flutter::DlStrokeCap::kRound,
+  };
+  const std::vector<float> alphas = {1.0f, 0.75f, 0.5f, 0.25f};
+  const std::vector<Radians> angles = {
+      Degrees(0.0f),  Degrees(3.0f),  Degrees(30.0f), Degrees(45.0f),
+      Degrees(60.0f), Degrees(87.0f), Degrees(90.0f),
+  };
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(stroke_width);
+
+  for (const DlStrokeCap cap : caps) {
+    builder.Translate(spacing, 0.0f);
+    paint.setStrokeCap(cap);
+
+    for (const float alpha : alphas) {
+      builder.Translate(spacing, 0.0f);
+      paint.setColor(DlColor::kWhite().withAlphaF(alpha));
+
+      builder.Save();
+      for (const Radians angle : angles) {
+        builder.Translate(0.0f, spacing);
+        builder.DrawLine(DlPoint(0.0f, 0.0f),
+                         DlPoint(cos(angle.radians) * line_length,
+                                 sin(angle.radians) * line_length),
+                         paint);
+      }
+      builder.Restore();
+    }
+  }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
