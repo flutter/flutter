@@ -349,3 +349,37 @@ TEST_F(FlAccessibleNodeTest, SetActions) {
   EXPECT_STREQ(atk_action_get_name(ATK_ACTION(node), 0), "Tap");
   EXPECT_STREQ(atk_action_get_name(ATK_ACTION(node), 1), "LongPress");
 }
+
+// The AT-SPI bridge can keep nodes alive past engine teardown. Accessing a
+// node after its engine is destroyed must not dereference freed memory.
+// https://github.com/flutter/flutter/issues/188660
+TEST_F(FlAccessibleNodeTest, SurvivesEngineDestruction) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  FlEngine* local_engine = fl_engine_new(project);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_node_new(local_engine, 123, 0);
+  fl_accessible_node_set_actions(node, kFlutterSemanticsActionTap);
+
+  // Destroy the engine while the node is still alive.
+  g_object_unref(local_engine);
+
+  // Performing an action no longer reaches the engine, but does not crash.
+  EXPECT_FALSE(atk_action_do_action(ATK_ACTION(node), 0));
+}
+
+// Accessing a node after its parent is destroyed must not dereference freed
+// memory.
+TEST_F(FlAccessibleNodeTest, SurvivesParentDestruction) {
+  FlAccessibleNode* root = fl_accessible_node_new(engine, 123, 0);
+  g_autoptr(FlAccessibleNode) child = fl_accessible_node_new(engine, 123, 1);
+  fl_accessible_node_set_parent(child, ATK_OBJECT(root), 0);
+
+  // Destroy the parent while the child is still alive.
+  g_object_unref(root);
+
+  // The child no longer reports a parent, but does not crash.
+  EXPECT_EQ(atk_object_get_parent(ATK_OBJECT(child)), nullptr);
+  gint x = 0, y = 0, width = 0, height = 0;
+  atk_component_get_extents(ATK_COMPONENT(child), &x, &y, &width, &height,
+                            ATK_XY_SCREEN);
+}

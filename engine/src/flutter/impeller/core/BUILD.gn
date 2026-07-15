@@ -16,6 +16,8 @@ impeller_component("core") {
     "device_buffer_descriptor.h",
     "formats.cc",
     "formats.h",
+    "gpu_submission_tracker.cc",
+    "gpu_submission_tracker.h",
     "host_buffer.cc",
     "host_buffer.h",
     "idle_waiter.h",
@@ -55,6 +57,7 @@ impeller_component("allocator_unittests") {
     "allocator_unittests.cc",
     "buffer_view_unittests.cc",
     "sampler_descriptor_unittests.cc",
+    "shader_types_unittests.cc",
   ]
 
   deps = [

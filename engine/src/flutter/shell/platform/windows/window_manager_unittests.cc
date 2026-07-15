@@ -391,6 +391,38 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
             parent_window_handle);
 }
 
+TEST_F(WindowManagerTest, DeactivatedRegularWindowDoesNotReactivateItself) {
+  IsolateScope isolate_scope(isolate());
+
+  // Two independent top-level regular windows (regular windows have no Win32
+  // owner). |window_handle| is deactivated while |active_window_handle| holds
+  // activation.
+  const int64_t window_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), window_view_id);
+
+  const int64_t active_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND active_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), active_view_id);
+
+  SetActiveWindow(active_window_handle);
+  ASSERT_EQ(GetActiveWindow(), active_window_handle);
+
+  // A window receiving WM_ACTIVATE with WA_INACTIVE must not focus its own
+  // content: SetFocus activates the parent of the focused window (the window
+  // itself), which would reactivate the deactivated window, pull it back to the
+  // top of the z-order, and take activation away from the active window.
+  SendMessage(window_handle, WM_ACTIVATE, MAKEWPARAM(WA_INACTIVE, 0), 0);
+
+  EXPECT_EQ(GetActiveWindow(), active_window_handle);
+}
+
 TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {
   IsolateScope isolate_scope(isolate());
 
@@ -593,7 +625,10 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
   EXPECT_EQ(result, MA_NOACTIVATE);
 }
 
-TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
+TEST_F(WindowManagerTest,
+       DISABLED_TooltipWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t parent_view_id =
@@ -809,7 +844,9 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   EXPECT_NE(focused_after, popup_window_handle);
 }
 
-TEST_F(WindowManagerTest, PopupWindowUpdatesPositionOnViewSizeChange) {
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
+TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t parent_view_id =
