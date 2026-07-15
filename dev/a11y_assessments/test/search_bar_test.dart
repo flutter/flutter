@@ -18,9 +18,13 @@ void main() {
       final Finder finder = find.byKey(const Key('enabled search bar'));
       await tester.tap(finder);
       await tester.pumpAndSettle();
-      await tester.enterText(finder, 'abc');
+      await tester.enterText(find.byType(TextField).last, 'app');
       await tester.pumpAndSettle();
-      expect(find.text('abc'), findsOneWidget);
+      expect(find.text('apple'), findsOneWidget);
+
+      await tester.tap(find.text('apple'));
+      await tester.pumpAndSettle();
+      expect(find.text('Searched for "apple"'), findsWidgets);
     }
 
     // Test the disabled search bar

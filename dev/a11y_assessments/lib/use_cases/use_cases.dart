@@ -35,7 +35,6 @@ import 'popup_menu_button.dart';
 import 'radio.dart';
 import 'radio_list_tile.dart';
 import 'range_slider.dart';
-import 'search_anchor.dart';
 import 'search_bar.dart';
 import 'segmented_button.dart';
 import 'slider.dart';
@@ -118,7 +117,6 @@ final List<UseCase> useCases = <UseCase>[
   CloseButtonUseCase(),
   TextFormFieldUseCase(),
   SearchBarUseCase(),
-  SearchAnchorUseCase(),
   DropdownMenuUseCase(),
   MenuAnchorUseCase(),
   MenuBarUseCase(),
