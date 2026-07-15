@@ -30,11 +30,11 @@ class DisplayLinkManagerTest: XCTestCase {
     XCTAssertGreaterThan(shared.displayRefreshRate, 0.0)
   }
 
-  func testUpdateCachedDisplayRefreshRateIsReflectedByTheGetter() {
+  func testSettingDisplayRefreshRateIsReflectedByTheGetter() {
     let manager = DisplayLinkManager(maxRefreshRateEnabled: true, refreshRate: 60.0)
     XCTAssertEqual(manager.displayRefreshRate, 60.0)
 
-    manager.updateCachedDisplayRefreshRate(120.0)
+    manager.displayRefreshRate = 120.0
 
     XCTAssertEqual(manager.displayRefreshRate, 120.0)
   }
@@ -54,7 +54,7 @@ class DisplayLinkManagerTest: XCTestCase {
     // UIScreen.main's reported refresh rate can't be swizzled from a test, so this only
     // confirms that the notification handlers run to completion without crashing or
     // deadlocking. The locking/storage behavior they rely on is covered directly by
-    // testUpdateCachedDisplayRefreshRateIsReflectedByTheGetter above.
+    // testSettingDisplayRefreshRateIsReflectedByTheGetter above.
     XCTAssertGreaterThan(shared.displayRefreshRate, 0.0)
   }
 }

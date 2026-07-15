@@ -58,19 +58,24 @@ public final class DisplayLinkManager: NSObject, @unchecked Sendable {
 
   /// The maximum display refresh rate, in frames per second.
   @objc
-  public var displayRefreshRate: Double {
-    // We cache the refresh rate rather than query from UIKit on every read, since this can be read
-    // from background engine threads. The value is kept up-to-date by observing display-mode and
-    // low-power-mode change notifications, so callers always see an up-to-date value without
-    // polling UIKit themselves.
-    //
-    // This always reports the hardware/plist-configured maximum. Implement a means for callers to
-    // request a reduced maximum frame rate.
-    //
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/185759
-    refreshRateLock.lock()
-    defer { refreshRateLock.unlock() }
-    return _displayRefreshRate
+  public internal(set) var displayRefreshRate: Double {
+    get {
+      // We cache the refresh rate rather than query from UIKit on every read, since this can be
+      // read from background engine threads. The value is kept up-to-date by observing
+      // display-mode and low-power-mode change notifications, so callers always see an
+      // up-to-date value without polling UIKit themselves.
+      //
+      // This always reports the hardware/plist-configured maximum. Implement a means for
+      // callers to request a reduced maximum frame rate.
+      //
+      // TODO(cbracken): https://github.com/flutter/flutter/issues/185759
+      refreshRateLock.withLock { _displayRefreshRate }
+    }
+    // The setter is `internal` rather than `private` so tests can exercise the locking/storage
+    // behavior directly, without being able to change what `UIScreen.main` reports in a test host.
+    set {
+      refreshRateLock.withLock { _displayRefreshRate = newValue }
+    }
   }
 
   private var _displayRefreshRate: Double
@@ -122,7 +127,7 @@ public final class DisplayLinkManager: NSObject, @unchecked Sendable {
   private func startObservingDisplayConfigurationChanges() {
     let handleChange: (Notification) -> Void = { [weak self] _ in
       guard let self = self else { return }
-      self.updateCachedDisplayRefreshRate(Double(UIScreen.main.maximumFramesPerSecond))
+      self.displayRefreshRate = Double(UIScreen.main.maximumFramesPerSecond)
     }
     observers = [
       NotificationCenter.default.addObserver(
@@ -138,16 +143,5 @@ public final class DisplayLinkManager: NSObject, @unchecked Sendable {
         forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main,
         using: handleChange),
     ]
-  }
-
-  /// Updates the cached refresh rate under `refreshRateLock`.
-  ///
-  /// Used by the notification observers started in `startObservingDisplayConfigurationChanges()`.
-  /// Marking as `internal` rather than `private` to allow tests to exercise the locking/storage
-  /// behavior directly, without being able to change what `UIScreen.main` reports in a test host.
-  internal func updateCachedDisplayRefreshRate(_ newValue: Double) {
-    refreshRateLock.lock()
-    _displayRefreshRate = newValue
-    refreshRateLock.unlock()
   }
 }
