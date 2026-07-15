@@ -199,6 +199,10 @@ class EngineAutofillForm {
 
   final elements = <String, DomHTMLElement>{};
 
+  final Map<String, String> _lastSentAutofillText = <String, String>{};
+
+  final Map<String, String> _lastFrameworkText = <String, String>{};
+
   final Map<String, FieldItem> items;
 
   /// Identifier for the form.
@@ -376,6 +380,14 @@ class EngineAutofillForm {
         // If the form already has a dormant DOM element, let's use it instead of creating a new one.
         formElement = existingForm.formElement;
         elements.addAll(existingForm.elements);
+        // Carry over the per-field tracking so the reused form remembers the
+        // last framework value and the last value forwarded for each field.
+        // Each text input connection builds a new form instance, so without
+        // this the tracking would reset on every focus change and the form
+        // could not tell a programmatic framework update apart from a browser
+        // autofill.
+        _lastFrameworkText.addAll(existingForm._lastFrameworkText);
+        _lastSentAutofillText.addAll(existingForm._lastSentAutofillText);
       } else {
         formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
@@ -530,8 +542,33 @@ class EngineAutofillForm {
       final AutofillInfo autofill = items[key]!.autofillInfo;
       // Focused elements are updated directly through `setEditingState`.
       if (key != focusedElementId) {
-        // Non-focused elements do not have selection, and applying selection on them may cause them
-        // to gain focus unexpectedly.
+        // A non-focused field's DOM value and the framework's stored value can
+        // diverge in two ways. When the browser autofills the field while the
+        // form is dormant, the DOM holds a value the framework has not seen yet,
+        // so it must be forwarded and kept. Otherwise the framework is the source
+        // of truth, either it just changed (a programmatic update) or it is
+        // already in sync. The last framework value per field tells them apart:
+        // an autofill is an unchanged framework value next to a changed DOM value.
+        final domEditingState = EditingState.fromDomElement(element);
+        final String frameworkText = autofill.editingState.text;
+        final String lastFrameworkText =
+            _lastFrameworkText[autofill.uniqueIdentifier] ?? frameworkText;
+        _lastFrameworkText[autofill.uniqueIdentifier] = frameworkText;
+
+        final frameworkUnchanged = frameworkText == lastFrameworkText;
+        if (frameworkUnchanged &&
+            domEditingState.text.isNotEmpty &&
+            domEditingState.text != frameworkText) {
+          // The browser autofilled this field. Forward the new value and keep it
+          // instead of clearing it.
+          if (domEditingState.text != _lastSentAutofillText[autofill.uniqueIdentifier]) {
+            _sendAutofillEditingState(autofill.uniqueIdentifier, domEditingState);
+          }
+          continue;
+        }
+        // The framework wins: it changed (a programmatic update) or is in sync.
+        // Non-focused elements do not have selection, and applying selection on
+        // them may cause them to gain focus unexpectedly.
         autofill.editingState.applyTextToDomElement(element);
       }
     }
@@ -581,6 +618,7 @@ class EngineAutofillForm {
 
   /// Sends the 'TextInputClient.updateEditingStateWithTag' message to the framework.
   void _sendAutofillEditingState(String tag, EditingState editingState) {
+    _lastSentAutofillText[tag] = editingState.text;
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
@@ -1490,6 +1528,20 @@ abstract class DefaultTextEditingStrategy
   OnActionCallback? onAction;
 
   final List<DomSubscription> subscriptions = <DomSubscription>[];
+  Timer? _pendingBlurConnectionCloseTimer;
+
+  /// Overrides the result of [domDocument.hasFocus] for testing.
+  @visibleForTesting
+  bool? debugDocumentHasFocusOverride;
+
+  /// Overrides the result of [domDocument.visibilityState] for testing.
+  @visibleForTesting
+  String? debugDocumentVisibilityStateOverride;
+
+  bool get _documentHasFocus => debugDocumentHasFocusOverride ?? domDocument.hasFocus();
+
+  String get _documentVisibilityState =>
+      debugDocumentVisibilityStateOverride ?? domDocument.visibilityState;
 
   bool get hasAutofillGroup => inputConfiguration.autofillGroup != null;
 
@@ -1521,6 +1573,8 @@ abstract class DefaultTextEditingStrategy
     required OnActionCallback onAction,
   }) {
     assert(!isEnabled);
+    _pendingBlurConnectionCloseTimer?.cancel();
+    _pendingBlurConnectionCloseTimer = null;
 
     // The -1 tab index value makes this element not reachable by keyboard.
     domElement = inputConfig.inputType.createDomElement()..tabIndex = -1;
@@ -1657,6 +1711,9 @@ abstract class DefaultTextEditingStrategy
   @override
   void disable() {
     assert(isEnabled);
+    _pendingBlurConnectionCloseTimer?.cancel();
+    _pendingBlurConnectionCloseTimer = null;
+
     // Preserve the internal scroll position.
     if (geometry != null && lastEditingState != null) {
       final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
@@ -1801,6 +1858,20 @@ abstract class DefaultTextEditingStrategy
       // allowing the focus to move elsewhere.
       //
       // This is fixing https://github.com/flutter/flutter/issues/155265.
+      if (!_documentHasFocus) {
+        _pendingBlurConnectionCloseTimer?.cancel();
+        // When a browser tab is backgrounded, the input blur arrives before
+        // visibilitychange. Wait briefly so tab switches can keep the text
+        // connection alive, while ordinary window/iframe blurs still close it.
+        _pendingBlurConnectionCloseTimer = Timer(const Duration(milliseconds: 100), () {
+          _pendingBlurConnectionCloseTimer = null;
+          if (_documentVisibilityState == 'hidden' || _documentHasFocus) {
+            return;
+          }
+          textEditing.sendTextConnectionClosedToFrameworkIfAny();
+        });
+        return;
+      }
       textEditing.sendTextConnectionClosedToFrameworkIfAny();
     } else if (_viewForElement(willGainFocusElement) == activeDomElementView) {
       // If the focus stays within the same FlutterView, ensure the focus stays
