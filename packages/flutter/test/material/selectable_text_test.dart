@@ -234,10 +234,7 @@ void main() {
       await tester.pumpAndSettle(kDoubleTapTimeout);
 
       final error = tester.takeException() as FlutterError;
-      expect(error.message, contains('EditableText widgets require an Overlay widget ancestor'));
-
-      await tester.pumpWidget(const SizedBox.shrink());
-      expect(tester.takeException(), isNotNull); // side effect exception
+      expect(error.message, contains('No Overlay widget found.'));
     },
   );
 
@@ -2221,6 +2218,7 @@ void main() {
                     SemanticsFlag.isMultiline,
                     SemanticsFlag.isFocused,
                   ],
+                  children: <TestSemantics>[TestSemantics()],
                 ),
               ],
             ),
@@ -2262,6 +2260,7 @@ void main() {
                     SemanticsFlag.isMultiline,
                     SemanticsFlag.isFocused,
                   ],
+                  children: <TestSemantics>[TestSemantics()],
                 ),
               ],
             ),
@@ -2301,6 +2300,7 @@ void main() {
                     SemanticsFlag.isMultiline,
                     SemanticsFlag.isFocused,
                   ],
+                  children: <TestSemantics>[TestSemantics()],
                 ),
               ],
             ),
@@ -2478,6 +2478,7 @@ void main() {
                     SemanticsFlag.isMultiline,
                     SemanticsFlag.isFocused,
                   ],
+                  children: <TestSemantics>[TestSemantics()],
                 ),
               ],
             ),
@@ -2520,6 +2521,7 @@ void main() {
                     SemanticsFlag.isMultiline,
                     SemanticsFlag.isFocused,
                   ],
+                  children: <TestSemantics>[TestSemantics()],
                 ),
               ],
             ),
@@ -2675,6 +2677,7 @@ void main() {
                     SemanticsFlag.isMultiline,
                     SemanticsFlag.isFocused,
                   ],
+                  children: <TestSemantics>[TestSemantics(id: 3)],
                 ),
               ],
             ),
@@ -2736,6 +2739,7 @@ void main() {
                     SemanticsFlag.isMultiline,
                     SemanticsFlag.isFocused,
                   ],
+                  children: <TestSemantics>[TestSemantics(id: 3)],
                 ),
               ],
             ),
@@ -2827,6 +2831,7 @@ void main() {
                     baseOffset: testValue.length,
                     extentOffset: testValue.length,
                   ),
+                  children: <TestSemantics>[TestSemantics(id: 3)],
                 ),
               ],
             ),

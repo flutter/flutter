@@ -9898,6 +9898,7 @@ void main() {
           CupertinoApp(
             home: Center(
               child: CupertinoTextField(
+                  autofocus: true,
                 dragStartBehavior: DragStartBehavior.down,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder:
@@ -9914,6 +9915,7 @@ void main() {
             ),
           ),
         );
+        await tester.pump(); // Make sure the TextField is focused.
 
         expect(find.byKey(fakeMagnifier.key!), findsNothing);
 
@@ -10268,7 +10270,7 @@ void main() {
 
       // Double tapping a non-misspelled word shows the normal blue selection and
       // the selection handles.
-      expect(state.selectionOverlay, isNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
       await tester.tapAt(textOffsetToPosition(tester, 2));
       await tester.pump(const Duration(milliseconds: 50));
       expect(state.selectionOverlay!.handlesAreVisible, isFalse);

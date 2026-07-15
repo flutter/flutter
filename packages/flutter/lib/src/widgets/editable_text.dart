@@ -35,6 +35,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'context_menu_button_item.dart';
+import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
@@ -46,6 +47,7 @@ import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
+import 'overlay.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
@@ -62,6 +64,7 @@ import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
+import 'text_selection_widget.dart';
 import 'ticker_provider.dart';
 import 'undo_history.dart';
 import 'view.dart';
@@ -2492,6 +2495,60 @@ class EditableText extends StatefulWidget {
   }
 }
 
+class _LegacySelectionOverlayBridge extends TextSelectionOverlay {
+  _LegacySelectionOverlayBridge({
+    required super.value,
+    required super.context,
+    required super.startHandleLayerLink,
+    required super.endHandleLayerLink,
+    required super.toolbarLayerLink,
+    required super.renderObject,
+    super.selectionControls,
+    super.handlesVisible,
+    required super.selectionDelegate,
+    super.dragStartBehavior,
+    super.onSelectionHandleTapped,
+    required super.magnifierConfiguration,
+    required this.handlesAreVisibleBridge,
+    required this.toolbarIsVisibleBridge,
+  });
+
+  final bool handlesAreVisibleBridge;
+  final bool toolbarIsVisibleBridge;
+
+  @override
+  bool get handlesAreVisible => handlesAreVisibleBridge;
+
+  @override
+  bool get toolbarIsVisible => toolbarIsVisibleBridge;
+}
+
+enum _SelectionOverlayType {
+  toolbar,
+  spellCheckToolbar,
+  magnifier;
+
+  bool get isToolbar => switch (this) {
+    _SelectionOverlayType.toolbar || _SelectionOverlayType.spellCheckToolbar => true,
+    _SelectionOverlayType.magnifier => false,
+  };
+
+  bool get isMagnifier => switch (this) {
+    _SelectionOverlayType.magnifier => true,
+    _SelectionOverlayType.toolbar || _SelectionOverlayType.spellCheckToolbar => false,
+  };
+
+  bool get isNormalToolbar => switch (this) {
+    _SelectionOverlayType.toolbar => true,
+    _SelectionOverlayType.spellCheckToolbar || _SelectionOverlayType.magnifier => false,
+  };
+
+  bool get isSpellCheckToolbar => switch (this) {
+    _SelectionOverlayType.spellCheckToolbar => true,
+    _SelectionOverlayType.toolbar || _SelectionOverlayType.magnifier => false,
+  };
+}
+
 /// State for an [EditableText].
 class EditableTextState extends State<EditableText>
     with
@@ -2533,7 +2590,39 @@ class EditableTextState extends State<EditableText>
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
-  TextSelectionOverlay? _selectionOverlay;
+  bool _isHandleShowing = false;
+  _SelectionOverlayType? _overlayType;
+  WidgetBuilder? _spellCheckToolbarBuilder;
+
+  final MagnifierController _magnifierController = MagnifierController();
+  late final ContextMenuController _contextMenuController = ContextMenuController(
+    onRemove: _hideToolbar,
+  );
+  // ContextMenuController.remove must be called in dispose to unregister,
+  // but we don't want it to trigger a rebuild.
+  bool _isDisposing = false;
+  final ValueNotifier<MagnifierInfo> _magnifierInfo = ValueNotifier<MagnifierInfo>(
+    MagnifierInfo.empty,
+  );
+
+  final OverlayPortalController _selectionOverlayPortalController = OverlayPortalController(
+    debugLabel: 'EditableText Selection Overlay',
+  );
+
+  void _updatePortalVisibility() {
+    final bool hasVisibleElement = _isHandleShowing || _overlayType != null;
+
+    if (hasVisibleElement) {
+      if (!_selectionOverlayPortalController.isShowing) {
+        _selectionOverlayPortalController.show();
+      }
+    } else {
+      if (_selectionOverlayPortalController.isShowing) {
+        _selectionOverlayPortalController.hide();
+      }
+    }
+  }
+
   ScrollNotificationObserverState? _scrollNotificationObserver;
   ({TextEditingValue value, Rect selectionBounds})? _dataWhenToolbarShowScheduled;
   bool _listeningToScrollNotificationObserver = false;
@@ -3405,17 +3494,30 @@ class EditableTextState extends State<EditableText>
 
     // Hide the text selection toolbar on mobile when orientation changes.
     final Orientation orientation = MediaQuery.orientationOf(context);
-    if (_lastOrientation == null) {
-      _lastOrientation = orientation;
-      return;
-    }
     if (orientation != _lastOrientation) {
       _lastOrientation = orientation;
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        hideToolbar(false);
-      }
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        hideToolbar();
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          _disposeScrollNotificationObserver();
+          setState(() {
+            if (_overlayType?.isToolbar ?? false) {
+              _overlayType = null;
+            }
+          });
+
+        case TargetPlatform.android:
+          _disposeScrollNotificationObserver();
+          setState(() {
+            if (_overlayType?.isToolbar ?? false) {
+              _overlayType = null;
+            }
+            _isHandleShowing = false;
+          });
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          break;
       }
     }
 
@@ -3439,52 +3541,6 @@ class EditableTextState extends State<EditableText>
       widget.controller.addListener(_didChangeTextEditingValue);
       _updateRemoteEditingValueIfNeeded();
     }
-
-    // If only the identity of the context menu builder closure changed (e.g.
-    // an inline lambda on every rebuild), the [TextSelectionOverlay] does
-    // not need to be recreated.
-    //
-    // We just need to trigger a rebuild of the currently-shown toolbar so its
-    // overlay entry picks up the new closure.
-    final TextSelectionOverlay? selectionOverlay = _selectionOverlay;
-    if (selectionOverlay != null &&
-        selectionOverlay.toolbarIsVisible &&
-        widget.contextMenuBuilder != oldWidget.contextMenuBuilder &&
-        (widget.contextMenuBuilder == null) == (oldWidget.contextMenuBuilder == null)) {
-      // Deferred to the next frame because showToolbar() calls
-      // renderBox.localToGlobal(), which requires a fully laid-out render
-      // tree, and didUpdateWidget is called before layout.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && (_selectionOverlay?.toolbarIsVisible ?? false)) {
-          _selectionOverlay!.showToolbar();
-        }
-      });
-    }
-
-    if (_selectionOverlay != null &&
-        ((widget.contextMenuBuilder == null) != (oldWidget.contextMenuBuilder == null) ||
-            widget.selectionControls != oldWidget.selectionControls ||
-            widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
-            widget.dragStartBehavior != oldWidget.dragStartBehavior ||
-            widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
-      final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
-      final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
-      _selectionOverlay!.dispose();
-      _selectionOverlay = _createSelectionOverlay();
-      if (shouldShowToolbar || shouldShowHandles) {
-        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-          if (shouldShowToolbar) {
-            _selectionOverlay!.showToolbar();
-          }
-          if (shouldShowHandles) {
-            _selectionOverlay!.showHandles();
-          }
-        });
-      }
-    } else if (widget.controller.selection != oldWidget.controller.selection) {
-      _selectionOverlay?.update(_value);
-    }
-    _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
 
     if (widget.autofillClient != oldWidget.autofillClient) {
       _currentAutofillScope?.unregister(oldWidget.autofillClient?.autofillId ?? autofillId);
@@ -3578,10 +3634,8 @@ class EditableTextState extends State<EditableText>
 
   void _disposeScrollNotificationObserver() {
     _listeningToScrollNotificationObserver = false;
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
-      _scrollNotificationObserver = null;
-    }
+    _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
+    _scrollNotificationObserver = null;
   }
 
   TextInputStyle _getTextInputStyle(BuildContext context) {
@@ -3615,9 +3669,8 @@ class EditableTextState extends State<EditableText>
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _backingCursorBlinkOpacityController?.dispose();
-    _backingCursorBlinkOpacityController = null;
-    _selectionOverlay?.dispose();
-    _selectionOverlay = null;
+    _overlayType = null;
+    _isHandleShowing = false;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
     _liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
@@ -3628,6 +3681,8 @@ class EditableTextState extends State<EditableText>
     _appLifecycleListener.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
     FocusManager.instance.removeListener(_resetJustResumed);
+    _isDisposing = true;
+    _contextMenuController.remove();
     _disposeScrollNotificationObserver();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -4253,17 +4308,6 @@ class EditableTextState extends State<EditableText>
     }
   }
 
-  void _updateOrDisposeSelectionOverlayIfNeeded() {
-    if (_selectionOverlay != null) {
-      if (_hasFocus) {
-        _selectionOverlay!.update(_value);
-      } else {
-        _selectionOverlay!.dispose();
-        _selectionOverlay = null;
-      }
-    }
-  }
-
   final bool _platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
     TargetPlatform.android || TargetPlatform.iOS => true,
     TargetPlatform.fuchsia ||
@@ -4346,7 +4390,6 @@ class EditableTextState extends State<EditableText>
       return;
     }
     if (!_platformSupportsFadeOnScroll) {
-      _selectionOverlay?.updateForScroll();
       return;
     }
     // When the scroll begins and the toolbar is visible, hide it
@@ -4360,10 +4403,7 @@ class EditableTextState extends State<EditableText>
       if (_dataWhenToolbarShowScheduled != null) {
         return;
       }
-      final bool toolbarIsVisible =
-          _selectionOverlay != null &&
-          _selectionOverlay!.toolbarIsVisible &&
-          !_selectionOverlay!.spellCheckToolbarIsVisible;
+      final bool toolbarIsVisible = _overlayType?.isToolbar ?? false;
       if (!toolbarIsVisible) {
         return;
       }
@@ -4374,7 +4414,9 @@ class EditableTextState extends State<EditableText>
                 .map((TextBox box) => box.toRect())
                 .reduce((Rect result, Rect rect) => result.expandToInclude(rect));
       _dataWhenToolbarShowScheduled = (value: _value, selectionBounds: selectionBounds);
-      _selectionOverlay?.hideToolbar();
+      setState(() {
+        _overlayType = null;
+      });
     } else if (notification is ScrollEndNotification) {
       if (_dataWhenToolbarShowScheduled == null) {
         return;
@@ -4457,39 +4499,6 @@ class EditableTextState extends State<EditableText>
     return true;
   }
 
-  // Stable method reference that dispatches to the current
-  // widget.contextMenuBuilder.
-  //
-  // The identity of this method is constant across rebuilds, so passing it to
-  // the TextSelectionOverlay means the overlay never has to be recreated when
-  // only the builder closure changes.
-  Widget _contextMenuBuilder(BuildContext context) {
-    return widget.contextMenuBuilder!(context, this);
-  }
-
-  TextSelectionOverlay _createSelectionOverlay() {
-    final selectionOverlay = TextSelectionOverlay(
-      clipboardStatus: clipboardStatus,
-      context: context,
-      value: _value,
-      debugRequiredFor: widget,
-      toolbarLayerLink: _toolbarLayerLink,
-      startHandleLayerLink: _startHandleLayerLink,
-      endHandleLayerLink: _endHandleLayerLink,
-      renderObject: renderEditable,
-      selectionControls: widget.selectionControls,
-      selectionDelegate: this,
-      dragStartBehavior: widget.dragStartBehavior,
-      onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: widget.contextMenuBuilder == null || _webContextMenuEnabled
-          ? null
-          : _contextMenuBuilder,
-      magnifierConfiguration: widget.magnifierConfiguration,
-    );
-
-    return selectionOverlay;
-  }
-
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
@@ -4519,18 +4528,8 @@ class EditableTextState extends State<EditableText>
         requestKeyboard();
       case SelectionChangedCause.keyboard:
     }
-    if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
-      _selectionOverlay?.dispose();
-      _selectionOverlay = null;
-    } else {
-      if (_selectionOverlay == null) {
-        _selectionOverlay = _createSelectionOverlay();
-      } else {
-        _selectionOverlay!.update(_value);
-      }
-      _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
-      _selectionOverlay!.showHandles();
-    }
+    _isHandleShowing = widget.selectionControls != null || widget.contextMenuBuilder != null;
+    _updatePortalVisibility();
     // TODO(chunhtai): we should make sure selection actually changed before
     // we call the onSelectionChanged.
     // https://github.com/flutter/flutter/issues/76349.
@@ -4581,12 +4580,10 @@ class EditableTextState extends State<EditableText>
       // Enlarge the target rect by scrollPadding to ensure that caret is not
       // positioned directly at the edge after scrolling.
       double bottomSpacing = widget.scrollPadding.bottom;
-      if (_selectionOverlay?.selectionControls != null) {
-        final double handleHeight = _selectionOverlay!.selectionControls!
-            .getHandleSize(lineHeight)
-            .height;
+      if (widget.selectionControls != null) {
+        final double handleHeight = widget.selectionControls!.getHandleSize(lineHeight).height;
         final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
-        final Offset anchor = _selectionOverlay!.selectionControls!.getHandleAnchor(
+        final Offset anchor = widget.selectionControls!.getHandleAnchor(
           TextSelectionHandleType.collapsed,
           lineHeight,
         );
@@ -4644,9 +4641,10 @@ class EditableTextState extends State<EditableText>
     }
     final ui.FlutterView view = View.of(context);
     if (_lastBottomViewInset != view.viewInsets.bottom) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        _selectionOverlay?.updateForScroll();
-      }, debugLabel: 'EditableText.updateForScroll');
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration _) {},
+        debugLabel: 'EditableText.updateForScroll',
+      );
       if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
@@ -4834,8 +4832,6 @@ class EditableTextState extends State<EditableText>
 
   /// The current status of the text selection handles.
   @visibleForTesting
-  TextSelectionOverlay? get selectionOverlay => _selectionOverlay;
-
   int _obscureShowCharTicksPending = 0;
   int? _obscureLatestCharIndex;
 
@@ -4927,7 +4923,6 @@ class EditableTextState extends State<EditableText>
     }
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
-    _updateOrDisposeSelectionOverlayIfNeeded();
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() {
@@ -4939,7 +4934,6 @@ class EditableTextState extends State<EditableText>
   void _handleFocusChanged() {
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
-    _updateOrDisposeSelectionOverlayIfNeeded();
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
@@ -4953,6 +4947,9 @@ class EditableTextState extends State<EditableText>
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
+      _isHandleShowing = false;
+      _overlayType = null;
+      _updatePortalVisibility();
       setState(() {
         _currentPromptRectRange = null;
       });
@@ -5138,6 +5135,26 @@ class EditableTextState extends State<EditableText>
   late final RenderEditable renderEditable =
       _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
+  TextSelectionOverlay? get selectionOverlay {
+    if (widget.selectionControls == null) {
+      return null;
+    }
+    return _LegacySelectionOverlayBridge(
+      value: _value,
+      context: context,
+      startHandleLayerLink: _startHandleLayerLink,
+      endHandleLayerLink: _endHandleLayerLink,
+      toolbarLayerLink: _toolbarLayerLink,
+      renderObject: renderEditable,
+      selectionControls: widget.selectionControls,
+      handlesVisible: _isHandleShowing && widget.showSelectionHandles,
+      selectionDelegate: this,
+      magnifierConfiguration: widget.magnifierConfiguration,
+      handlesAreVisibleBridge: _isHandleShowing && widget.showSelectionHandles,
+      toolbarIsVisibleBridge: _overlayType?.isToolbar ?? false,
+    );
+  }
+
   @override
   TextEditingValue get textEditingValue => _value;
 
@@ -5159,7 +5176,10 @@ class EditableTextState extends State<EditableText>
       if (!widget.focusNode.hasFocus) {
         _flagInternalFocus();
         widget.focusNode.requestFocus();
-        _selectionOverlay ??= _createSelectionOverlay();
+        if (widget.selectionControls != null && widget.showSelectionHandles) {
+          _isHandleShowing = true;
+        }
+        _updatePortalVisibility();
       }
       return;
     }
@@ -5191,15 +5211,23 @@ class EditableTextState extends State<EditableText>
       return false;
     }
 
-    if (_selectionOverlay == null) {
+    if (!_hasFocus && widget.contextMenuBuilder == null) {
       return false;
     }
-    if (_selectionOverlay!.toolbarIsVisible) {
+
+    if (_overlayType?.isToolbar ?? false) {
       return false;
     }
     _liveTextInputStatus?.update();
     clipboardStatus.update();
-    _selectionOverlay!.showToolbar();
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) => const SizedBox.shrink(),
+    );
+    setState(() {
+      _overlayType = _SelectionOverlayType.toolbar;
+    });
+    _updatePortalVisibility();
     // Listen to parent scroll events when the toolbar is visible so it can be
     // hidden during a scroll on supported platforms.
     if (_platformSupportsFadeOnScroll) {
@@ -5213,21 +5241,42 @@ class EditableTextState extends State<EditableText>
 
   @override
   void hideToolbar([bool hideHandles = true]) {
+    // This calls _hideToolbar.
+    _contextMenuController.remove();
+    if (hideHandles) {
+      _hideHandles();
+    }
+  }
+
+  // Private helper method to actually hide the toolbar and update the state.
+  // Having a separate private method allows the ContextMenuController onRemove
+  // callback to trigger dismissal without re-entering the remove() loop,
+  // cleanly avoiding any infinite recursion without needing boolean guards.
+  void _hideToolbar() {
     // Stop listening to parent scroll events when toolbar is hidden.
     _disposeScrollNotificationObserver();
-    if (hideHandles) {
-      // Hide the handles and the toolbar.
-      _selectionOverlay?.hide();
-    } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
-      // Hide only the toolbar but not the handles.
-      _selectionOverlay?.hideToolbar();
+    if (_isDisposing) {
+      return;
     }
+    assert(mounted);
+    setState(() {
+      if (_overlayType?.isToolbar ?? false) {
+        _overlayType = null;
+      }
+    });
+    _updatePortalVisibility();
+  }
+
+  void _hideHandles() {
+    setState(() {
+      _isHandleShowing = false;
+    });
+    _updatePortalVisibility();
   }
 
   /// Toggles the visibility of the toolbar.
   void toggleToolbar([bool hideHandles = true]) {
-    final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
-    if (selectionOverlay.toolbarIsVisible) {
+    if (_overlayType?.isToolbar ?? false) {
       hideToolbar(hideHandles);
     } else {
       showToolbar();
@@ -5242,7 +5291,6 @@ class EditableTextState extends State<EditableText>
     if (!spellCheckEnabled ||
         _webContextMenuEnabled ||
         widget.readOnly ||
-        _selectionOverlay == null ||
         !_spellCheckResultsReceived ||
         findSuggestionSpanAtCursorIndex(textEditingValue.selection.extentOffset) == null) {
       // Only attempt to show the spell check suggestions toolbar if there
@@ -5257,10 +5305,52 @@ class EditableTextState extends State<EditableText>
       'suggestions',
     );
 
-    _selectionOverlay!.showSpellCheckSuggestionsToolbar((BuildContext context) {
-      return _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder!(context, this);
+    setState(() {
+      _overlayType = _SelectionOverlayType.spellCheckToolbar;
+      _isHandleShowing = false;
+      _spellCheckToolbarBuilder = (BuildContext context) {
+        return _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder!(context, this);
+      };
     });
+    _updatePortalVisibility();
     return true;
+  }
+
+  MagnifierInfo _buildMagnifier({
+    required RenderEditable renderEditable,
+    required Offset globalGesturePosition,
+    required TextPosition currentTextPosition,
+  }) {
+    final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
+    final positionAtEndOfLine = TextPosition(
+      offset: lineAtOffset.extentOffset,
+      affinity: TextAffinity.upstream,
+    );
+    final positionAtBeginningOfLine = TextPosition(offset: lineAtOffset.baseOffset);
+
+    final localLineBoundaries = Rect.fromPoints(
+      renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
+      renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
+    );
+    final overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
+    final Matrix4 transformToOverlay = renderEditable.getTransformTo(overlay);
+    final Rect overlayLineBoundaries = MatrixUtils.transformRect(
+      transformToOverlay,
+      localLineBoundaries,
+    );
+
+    final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+    final Rect overlayCaretRect = MatrixUtils.transformRect(transformToOverlay, localCaretRect);
+
+    final Offset overlayGesturePosition =
+        overlay?.globalToLocal(globalGesturePosition) ?? globalGesturePosition;
+
+    return MagnifierInfo(
+      fieldBounds: MatrixUtils.transformRect(transformToOverlay, renderEditable.paintBounds),
+      globalGesturePosition: overlayGesturePosition,
+      caretRect: overlayCaretRect,
+      currentLineBoundaries: overlayLineBoundaries,
+    );
   }
 
   /// Shows the magnifier at the position given by `positionToShow`,
@@ -5271,25 +5361,49 @@ class EditableTextState extends State<EditableText>
   ///
   /// Does nothing if a magnifier couldn't be shown, such as when the selection
   /// overlay does not currently exist.
-  void showMagnifier(Offset positionToShow) {
-    if (_selectionOverlay == null) {
+  void showMagnifier(Offset positionToShow, [MagnifierInfo? magnifierInfo]) {
+    if (!_hasFocus) {
       return;
     }
+    setState(() {
+      _overlayType = _SelectionOverlayType.magnifier;
+    });
+    _updatePortalVisibility();
 
-    if (_selectionOverlay!.magnifierExists) {
-      _selectionOverlay!.updateMagnifier(positionToShow);
-    } else {
-      _selectionOverlay!.showMagnifier(positionToShow);
+    final RenderEditable? renderEditable = this.renderEditable;
+    if (renderEditable != null) {
+      final MagnifierInfo info =
+          magnifierInfo ??
+          _buildMagnifier(
+            renderEditable: renderEditable,
+            globalGesturePosition: positionToShow,
+            currentTextPosition: renderEditable.getPositionForPoint(positionToShow),
+          );
+      if (_magnifierController.overlayEntry == null) {
+        final Widget? magnifier = widget.magnifierConfiguration.magnifierBuilder(
+          context,
+          _magnifierController,
+          _magnifierInfo,
+        );
+        if (magnifier != null) {
+          _magnifierInfo.value = info;
+          _magnifierController.show(context: context, builder: (_) => magnifier);
+        }
+      } else {
+        _magnifierInfo.value = info;
+      }
     }
   }
 
   /// Hides the magnifier.
   void hideMagnifier() {
-    if (_selectionOverlay == null) {
-      return;
-    }
-
-    _selectionOverlay!.hideMagnifier();
+    setState(() {
+      if (_overlayType?.isMagnifier ?? false) {
+        _overlayType = null;
+      }
+    });
+    _updatePortalVisibility();
+    _magnifierController.hide();
   }
 
   // Tracks the location a [_ScribblePlaceholder] should be rendered in the
@@ -5640,7 +5754,7 @@ class EditableTextState extends State<EditableText>
       _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent>(this);
 
   Object? _hideToolbarIfVisible(DismissIntent intent) {
-    if (_selectionOverlay?.toolbarIsVisible ?? false) {
+    if (_overlayType?.isNormalToolbar ?? false) {
       hideToolbar(false);
       return null;
     }
@@ -5651,7 +5765,7 @@ class EditableTextState extends State<EditableText>
     _hadFocusOnTapDown = true;
 
     if (widget.onTapOutside != null) {
-      widget.onTapOutside!(event);
+      widget.onTapOutside?.call(event);
     } else {
       _defaultOnTapOutside(context, event);
     }
@@ -5846,168 +5960,204 @@ class EditableTextState extends State<EditableText>
         actions: _actions,
         child: Builder(
           builder: (BuildContext context) {
-            return TextFieldTapRegion(
-              groupId: widget.groupId,
-              onTapOutside: _hasFocus
-                  ? (PointerDownEvent event) => _onTapOutside(context, event)
-                  : null,
-              onTapUpOutside: (PointerUpEvent event) => _onTapUpOutside(context, event),
-              debugLabel: kReleaseMode ? null : 'EditableText',
-              child: MouseRegion(
-                cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-                child: UndoHistory<TextEditingValue>(
-                  value: widget.controller,
-                  onTriggered: (TextEditingValue value) {
-                    userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+            return SelectionOverlayWidget(
+              controller: _selectionOverlayPortalController,
+              editableKey: _editableKey,
+              selection: _value.selection,
+              selectionDelegate: this,
+              onSelectionChanged:
+                  ({required TextSelection selection, required SelectionChangedCause? cause}) {
+                    userUpdateTextEditingValue(_value.copyWith(selection: selection), cause);
                   },
-                  shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
-                    if (!newValue.selection.isValid) {
-                      return false;
-                    }
-
-                    if (oldValue == null) {
-                      return true;
-                    }
-
-                    switch (defaultTargetPlatform) {
-                      case TargetPlatform.iOS:
-                      case TargetPlatform.macOS:
-                      case TargetPlatform.fuchsia:
-                      case TargetPlatform.linux:
-                      case TargetPlatform.windows:
-                        // Composing text is not counted in history coalescing.
-                        if (!widget.controller.value.composing.isCollapsed) {
-                          return false;
-                        }
-                      case TargetPlatform.android:
-                        // Gboard on Android puts non-CJK words in composing regions. Coalesce
-                        // composing text in order to allow the saving of partial words in that
-                        // case.
-                        break;
-                    }
-
-                    return oldValue.text != newValue.text ||
-                        oldValue.composing != newValue.composing;
-                  },
-                  undoStackModifier: (TextEditingValue value) {
-                    // On Android we should discard the composing region when pushing
-                    // a new entry to the undo stack. This prevents the TextInputPlugin
-                    // from restarting the input on every undo/redo when the composing
-                    // region is changed by the framework.
-                    return defaultTargetPlatform == TargetPlatform.android
-                        ? value.copyWith(composing: TextRange.empty)
-                        : value;
-                  },
-                  focusNode: widget.focusNode,
-                  controller: widget.undoController,
-                  child: Focus(
-                    focusNode: widget.focusNode,
-                    includeSemantics: false,
-                    debugLabel: kReleaseMode ? null : 'EditableText',
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (ScrollNotification notification) {
-                        _handleContextMenuOnScroll(notification);
-                        _scribbleCacheKey = null;
+              isHandleShowing: _isHandleShowing,
+              showSelectionHandles: widget.showSelectionHandles,
+              toolbarVisible: _overlayType?.isNormalToolbar ?? false,
+              spellCheckToolbarVisible: _overlayType?.isSpellCheckToolbar ?? false,
+              spellCheckToolbarBuilder: _spellCheckToolbarBuilder,
+              onMagnifierShow: (MagnifierInfo info) =>
+                  showMagnifier(info.globalGesturePosition, info),
+              onMagnifierUpdate: (MagnifierInfo info) =>
+                  showMagnifier(info.globalGesturePosition, info),
+              onMagnifierHide: hideMagnifier,
+              onDragEnd: () {
+                if (!_value.selection.isCollapsed) {
+                  showToolbar();
+                }
+              },
+              selectionControls: widget.selectionControls,
+              contextMenuBuilder: widget.contextMenuBuilder == null
+                  ? null
+                  : (BuildContext context) => widget.contextMenuBuilder!(context, this),
+              clipboardStatus: clipboardStatus,
+              startHandleLayerLink: _startHandleLayerLink,
+              endHandleLayerLink: _endHandleLayerLink,
+              toolbarLayerLink: _toolbarLayerLink,
+              dragStartBehavior: widget.dragStartBehavior,
+              onSelectionHandleTapped: widget.onSelectionHandleTapped,
+              child: TextFieldTapRegion(
+                groupId: widget.groupId,
+                onTapOutside: _hasFocus
+                    ? (PointerDownEvent event) => _onTapOutside(context, event)
+                    : null,
+                onTapUpOutside: (PointerUpEvent event) => _onTapUpOutside(context, event),
+                debugLabel: kReleaseMode ? null : 'EditableText',
+                child: MouseRegion(
+                  cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+                  child: UndoHistory<TextEditingValue>(
+                    value: widget.controller,
+                    onTriggered: (TextEditingValue value) {
+                      userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+                    },
+                    shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
+                      if (!newValue.selection.isValid) {
                         return false;
-                      },
-                      child: Scrollable(
-                        key: _scrollableKey,
-                        excludeFromSemantics: true,
-                        axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-                        controller: _scrollController,
-                        // On iOS a single-line TextField should not scroll.
-                        physics:
-                            widget.scrollPhysics ??
-                            (!_isMultiline && defaultTargetPlatform == TargetPlatform.iOS
-                                ? const _NeverUserScrollableScrollPhysics()
-                                : null),
-                        dragStartBehavior: widget.dragStartBehavior,
-                        restorationId: widget.restorationId,
-                        // If a ScrollBehavior is not provided, only apply scrollbars when
-                        // multiline. The overscroll indicator should not be applied in
-                        // either case, glowing or stretching.
-                        scrollBehavior:
-                            widget.scrollBehavior ??
-                            ScrollConfiguration.of(
-                              context,
-                            ).copyWith(scrollbars: _isMultiline, overscroll: false),
-                        viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                          return CompositedTransformTarget(
-                            link: _toolbarLayerLink,
-                            child: Semantics(
-                              inputType: inputType,
-                              onCopy: _semanticsOnCopy(controls),
-                              onCut: _semanticsOnCut(controls),
-                              onPaste: _semanticsOnPaste(controls),
-                              child: _ScribbleFocusable(
-                                editableKey: _editableKey,
-                                enabled: _stylusHandwritingEnabled,
-                                focusNode: widget.focusNode,
-                                updateSelectionRects: () {
-                                  _openInputConnection();
-                                  _updateSelectionRects(force: true);
-                                },
-                                child: SizeChangedLayoutNotifier(
-                                  child: _Editable(
-                                    key: _editableKey,
-                                    startHandleLayerLink: _startHandleLayerLink,
-                                    endHandleLayerLink: _endHandleLayerLink,
-                                    inlineSpan:
-                                        _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
-                                          lineHeightScaleFactor: lineHeightScaleFactor,
-                                          letterSpacing: letterSpacing,
-                                          wordSpacing: wordSpacing,
-                                          textSpan: buildTextSpan(),
-                                        ),
-                                    value: _value,
-                                    cursorColor: _cursorColor,
-                                    backgroundCursorColor: widget.backgroundCursorColor,
-                                    showCursor: _cursorVisibilityNotifier,
-                                    forceLine: widget.forceLine,
-                                    readOnly: widget.readOnly,
-                                    hasFocus: _hasFocus,
-                                    maxLines: widget.maxLines,
-                                    minLines: widget.minLines,
-                                    expands: widget.expands,
-                                    strutStyle: widget.strutStyle.merge(
-                                      StrutStyle(height: lineHeightScaleFactor),
+                      }
+
+                      if (oldValue == null) {
+                        return true;
+                      }
+
+                      switch (defaultTargetPlatform) {
+                        case TargetPlatform.iOS:
+                        case TargetPlatform.macOS:
+                        case TargetPlatform.fuchsia:
+                        case TargetPlatform.linux:
+                        case TargetPlatform.windows:
+                          // Composing text is not counted in history coalescing.
+                          if (!widget.controller.value.composing.isCollapsed) {
+                            return false;
+                          }
+                        case TargetPlatform.android:
+                          // Gboard on Android puts non-CJK words in composing regions. Coalesce
+                          // composing text in order to allow the saving of partial words in that
+                          // case.
+                          break;
+                      }
+
+                      return oldValue.text != newValue.text ||
+                          oldValue.composing != newValue.composing;
+                    },
+                    undoStackModifier: (TextEditingValue value) {
+                      // On Android we should discard the composing region when pushing
+                      // a new entry to the undo stack. This prevents the TextInputPlugin
+                      // from restarting the input on every undo/redo when the composing
+                      // region is changed by the framework.
+                      return defaultTargetPlatform == TargetPlatform.android
+                          ? value.copyWith(composing: TextRange.empty)
+                          : value;
+                    },
+                    focusNode: widget.focusNode,
+                    controller: widget.undoController,
+                    child: Focus(
+                      focusNode: widget.focusNode,
+                      includeSemantics: false,
+                      debugLabel: kReleaseMode ? null : 'EditableText',
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (ScrollNotification notification) {
+                          _handleContextMenuOnScroll(notification);
+                          _scribbleCacheKey = null;
+                          return false;
+                        },
+                        child: Scrollable(
+                          key: _scrollableKey,
+                          excludeFromSemantics: true,
+                          axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                          controller: _scrollController,
+                          // On iOS a single-line TextField should not scroll.
+                          physics:
+                              widget.scrollPhysics ??
+                              (!_isMultiline && defaultTargetPlatform == TargetPlatform.iOS
+                                  ? const _NeverUserScrollableScrollPhysics()
+                                  : null),
+                          dragStartBehavior: widget.dragStartBehavior,
+                          restorationId: widget.restorationId,
+                          // If a ScrollBehavior is not provided, only apply scrollbars when
+                          // multiline. The overscroll indicator should not be applied in
+                          // either case, glowing or stretching.
+                          scrollBehavior:
+                              widget.scrollBehavior ??
+                              ScrollConfiguration.of(
+                                context,
+                              ).copyWith(scrollbars: _isMultiline, overscroll: false),
+                          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                            final Widget result = CompositedTransformTarget(
+                              link: _toolbarLayerLink,
+                              child: Semantics(
+                                inputType: inputType,
+                                onCopy: _semanticsOnCopy(controls),
+                                onCut: _semanticsOnCut(controls),
+                                onPaste: _semanticsOnPaste(controls),
+                                child: _ScribbleFocusable(
+                                  editableKey: _editableKey,
+                                  enabled: _stylusHandwritingEnabled,
+                                  focusNode: widget.focusNode,
+                                  updateSelectionRects: () {
+                                    _openInputConnection();
+                                    _updateSelectionRects(force: true);
+                                  },
+                                  child: SizeChangedLayoutNotifier(
+                                    child: _Editable(
+                                      key: _editableKey,
+                                      startHandleLayerLink: _startHandleLayerLink,
+                                      endHandleLayerLink: _endHandleLayerLink,
+                                      inlineSpan:
+                                          _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
+                                            lineHeightScaleFactor: lineHeightScaleFactor,
+                                            letterSpacing: letterSpacing,
+                                            wordSpacing: wordSpacing,
+                                            textSpan: buildTextSpan(),
+                                          ),
+                                      value: _value,
+                                      cursorColor: _cursorColor,
+                                      backgroundCursorColor: widget.backgroundCursorColor,
+                                      showCursor: _cursorVisibilityNotifier,
+                                      forceLine: widget.forceLine,
+                                      readOnly: widget.readOnly,
+                                      hasFocus: _hasFocus,
+                                      maxLines: widget.maxLines,
+                                      minLines: widget.minLines,
+                                      expands: widget.expands,
+                                      strutStyle: widget.strutStyle.merge(
+                                        StrutStyle(height: lineHeightScaleFactor),
+                                      ),
+                                      selectionColor: (_overlayType?.isSpellCheckToolbar ?? false)
+                                          ? _spellCheckConfiguration.misspelledSelectionColor ??
+                                                widget.selectionColor
+                                          : widget.selectionColor,
+                                      textScaler: effectiveTextScaler,
+                                      textAlign: widget.textAlign,
+                                      textDirection: _textDirection,
+                                      locale: widget.locale,
+                                      textHeightBehavior:
+                                          widget.textHeightBehavior ??
+                                          DefaultTextHeightBehavior.maybeOf(context),
+                                      textWidthBasis: widget.textWidthBasis,
+                                      obscuringCharacter: widget.obscuringCharacter,
+                                      obscureText: widget.obscureText,
+                                      offset: offset,
+                                      rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                                      cursorWidth: widget.cursorWidth,
+                                      cursorHeight: widget.cursorHeight,
+                                      cursorRadius: widget.cursorRadius,
+                                      cursorOffset: widget.cursorOffset ?? Offset.zero,
+                                      selectionHeightStyle: widget.selectionHeightStyle,
+                                      selectionWidthStyle: widget.selectionWidthStyle,
+                                      paintCursorAboveText: widget.paintCursorAboveText,
+                                      enableInteractiveSelection: widget._userSelectionEnabled,
+                                      textSelectionDelegate: this,
+                                      devicePixelRatio: _devicePixelRatio,
+                                      promptRectRange: _currentPromptRectRange,
+                                      promptRectColor: widget.autocorrectionTextRectColor,
+                                      clipBehavior: widget.clipBehavior,
                                     ),
-                                    selectionColor:
-                                        _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                        ? _spellCheckConfiguration.misspelledSelectionColor ??
-                                              widget.selectionColor
-                                        : widget.selectionColor,
-                                    textScaler: effectiveTextScaler,
-                                    textAlign: widget.textAlign,
-                                    textDirection: _textDirection,
-                                    locale: widget.locale,
-                                    textHeightBehavior:
-                                        widget.textHeightBehavior ??
-                                        DefaultTextHeightBehavior.maybeOf(context),
-                                    textWidthBasis: widget.textWidthBasis,
-                                    obscuringCharacter: widget.obscuringCharacter,
-                                    obscureText: widget.obscureText,
-                                    offset: offset,
-                                    rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                                    cursorWidth: widget.cursorWidth,
-                                    cursorHeight: widget.cursorHeight,
-                                    cursorRadius: widget.cursorRadius,
-                                    cursorOffset: widget.cursorOffset ?? Offset.zero,
-                                    selectionHeightStyle: widget.selectionHeightStyle,
-                                    selectionWidthStyle: widget.selectionWidthStyle,
-                                    paintCursorAboveText: widget.paintCursorAboveText,
-                                    enableInteractiveSelection: widget._userSelectionEnabled,
-                                    textSelectionDelegate: this,
-                                    devicePixelRatio: _devicePixelRatio,
-                                    promptRectRange: _currentPromptRectRange,
-                                    promptRectColor: widget.autocorrectionTextRectColor,
-                                    clipBehavior: widget.clipBehavior,
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+
+                            return result;
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -6528,7 +6678,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
   final _ApplyTextBoundary _applyTextBoundary;
 
   void _hideToolbarIfTextChanged(ReplaceTextIntent intent) {
-    if (state._selectionOverlay == null || !state.selectionOverlay!.toolbarIsVisible) {
+    if (!(state._overlayType?.isNormalToolbar ?? false)) {
       return;
     }
     final TextEditingValue oldValue = intent.currentTextEditingValue;

@@ -752,6 +752,7 @@ void main() {
               inputType: SemanticsInputType.search,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+              children: isDesktop ? <TestSemantics>[TestSemantics()] : const <TestSemantics>[],
             );
 
       return TestSemantics.root(
@@ -957,6 +958,7 @@ void main() {
               currentValueLength: 0,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+              children: isDesktop ? <TestSemantics>[TestSemantics()] : const <TestSemantics>[],
             );
       return TestSemantics.root(
         children: <TestSemantics>[

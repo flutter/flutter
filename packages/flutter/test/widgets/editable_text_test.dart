@@ -5596,6 +5596,7 @@ void main() {
                             inputType: SemanticsInputType.text,
                             textSelection: TextSelection.collapsed(offset: controller.text.length),
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -13040,12 +13041,15 @@ void main() {
     // Find the FadeTransition in the toolbar and expect that it has not been
     // disposed.
     final FadeTransition fadeTransition = find
-        .byType(FadeTransition)
+        .descendant(
+          of: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_SelectionToolbarWrapper',
+          ),
+          matching: find.byType(FadeTransition),
+        )
         .evaluate()
         .map((Element element) => element.widget as FadeTransition)
-        .firstWhere((FadeTransition fadeTransition) {
-          return fadeTransition.child is CompositedTransformFollower;
-        });
+        .first;
     expect(fadeTransition.toString(), isNot(contains('DISPOSED')));
 
     // Turn off interactive selection and change the text, which triggers the

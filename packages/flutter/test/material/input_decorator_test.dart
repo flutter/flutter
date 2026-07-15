@@ -8516,7 +8516,7 @@ void main() {
 
     RenderObject getBorder() {
       return tester.renderObject(
-        find.descendant(of: find.byType(TextField), matching: find.byType(CustomPaint)),
+        find.descendant(of: find.byType(TextField), matching: find.byType(CustomPaint)).last,
       );
     }
 
