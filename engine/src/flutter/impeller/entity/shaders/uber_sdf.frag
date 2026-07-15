@@ -135,17 +135,42 @@ float distanceFromRoundedSuperellipse(vec2 p,
   return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
 }
 
+// Special case pixel size calculation for rectangles. The standard `pixelSize`
+// function uses SDF derivatives, which gives invalid results for very small
+// shapes, where adjacent device pixels span across opposing edges of the shape.
+// This function calculates pixel size for rectangles without using SDF
+// derivatives.
+float rectPixelSize(vec2 p) {
+  // The change in local coordinates per horizontal device pixel (device_dx)
+  // and vertical device pixel (device_dy).
+  vec2 device_dx = dFdx(v_position);
+  vec2 device_dy = dFdy(v_position);
+  // The size of a device pixel in terms of local coordinates.
+  vec2 device_pixel_size = vec2(length(vec2(device_dx.x, device_dy.x)),
+                                length(vec2(device_dx.y, device_dy.y)));
+
+  // Get pixel size in the direction perpendicular to the closest edge of the
+  // rectangle: device_pixel_size.x when closer to a vertical edge, and
+  // pixel_size.y when closer to a horizontal edge.
+  vec2 distance = abs(abs(p) - frag_info.size);
+  return (distance.x < distance.y) ? device_pixel_size.x : device_pixel_size.y;
+}
+
 float pixelSize(float sdf) {
   vec2 gradient = vec2(dFdx(sdf), dFdy(sdf));
   return length(gradient);
 }
 
+// Evaluates the SDF for the shape selected by frag_info.type.
+// Returns vec2(sdf, pixel_size).
 vec2 filledSDF(vec2 p) {
   float sdf;
   if (frag_info.type < 0.5) {  // Circle
     sdf = distanceFromCircle(p, frag_info.size.x);
   } else if (frag_info.type < 1.5) {  // Rect
     sdf = distanceFromRect(p, frag_info.size);
+    // Rect has its own separate logic for calculating pixel size.
+    return vec2(sdf, rectPixelSize(p));
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
@@ -160,6 +185,8 @@ vec2 filledSDF(vec2 p) {
   return vec2(sdf, pixelSize(sdf));
 }
 
+// Evaluates the stroked SDF for the shape selected by frag_info.type.
+// Returns vec2(sdf, pixel_size).
 vec2 strokedSDF(vec2 p) {
   vec2 base_sdf_and_pixel_size = filledSDF(p);
   float base_sdf = base_sdf_and_pixel_size.x;
@@ -186,6 +213,22 @@ vec2 strokedSDF(vec2 p) {
   return SDFStroke(base_sdf, base_pixel_size, frag_info.stroke_width);
 }
 
+// Converts linear coverage alpha to perceptual alpha.
+float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
+  // Gamma corrected alpha used for dark colors.
+  // Fast approximation for `1.0 - pow(1.0 - alpha, 1.0 / 2.2)`.
+  float alpha_dark = 1.0 - sqrt(1.0 - alpha);
+
+  // Gamma corrected alpha used for light colors.
+  // Fast approximation for `pow(alpha, 1.0 / 2.2)`.
+  float alpha_light = sqrt(alpha);
+
+  // Interpolate between the dark and light gamma corrected alphas based on the
+  // foreground luma.
+  float luma = dot(foreground_rgb, vec3(0.2126, 0.7152, 0.0722));
+  return mix(alpha_dark, alpha_light, luma);
+}
+
 void main() {
   vec2 p = v_position - frag_info.center;
 
@@ -195,6 +238,10 @@ void main() {
   float pixel_size = sdf_and_pixel_size.y;
 
   float alpha = SDFAlpha(sdf, pixel_size, frag_info.aa_pixels);
+  // Clamp alpha in case floating point precision errors cause it to be outside
+  // [0.0, 1.0].
+  alpha = clamp(alpha, 0.0, 1.0);
+  alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
