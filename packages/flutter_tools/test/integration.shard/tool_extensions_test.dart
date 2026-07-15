@@ -58,6 +58,21 @@ void main() {
     }
     expect(result.exitCode, 0);
   });
+
+  testWithoutContext('flutter devices outputs custom extension device when enabled', () async {
+    final ProcessResult result = await processManager.run(
+      <String>[flutterBin, 'devices'],
+      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+    );
+
+    if (isLinux) {
+      expect(result.stdout, contains('Linux Custom Extension Prototype Device'));
+    } else {
+      expect(result.stdout, isNot(contains('Linux Custom Extension Prototype Device')));
+    }
+    expect(result.exitCode, 0);
+  });
+
   testWithoutContext('tool extensions are disabled by default', () async {
     final ProcessResult doctorResult = await processManager.run(<String>[
       flutterBin,
@@ -73,6 +88,13 @@ void main() {
     ], environment: baseEnv);
     expect(configResult.stdout, isNot(contains('Extension Settings:')));
     expect(configResult.exitCode, 0);
+
+    final ProcessResult devicesResult = await processManager.run(<String>[
+      flutterBin,
+      'devices',
+    ], environment: baseEnv);
+    expect(devicesResult.stdout, isNot(contains('Linux Custom Extension Prototype Device')));
+    expect(devicesResult.exitCode, 0);
   });
 
   testWithoutContext('flutter create with custom template succeeds when enabled', () async {

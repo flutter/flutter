@@ -12,6 +12,7 @@ import '../base/os.dart';
 import '../features.dart';
 import 'config.dart';
 import 'diagnostics.dart';
+import 'extension_device_manager.dart';
 import 'extension_discovery.dart';
 
 /// Manages active tool extension isolate connections and exposes capability proxies.
@@ -39,6 +40,7 @@ class ExtensionManager {
   Future<void>? _initFuture;
   final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
   final List<ConfigurationExtension> _configurationExtensions = <ConfigurationExtension>[];
+  final List<DeviceService> _deviceExtensions = <DeviceService>[];
 
   /// Ensures entrypoints are initialized; idempotent.
   Future<void> ensureInitialized() {
@@ -96,6 +98,7 @@ class ExtensionManager {
     }
     _diagnosticsExtensions.clear();
     _configurationExtensions.clear();
+    _deviceExtensions.clear();
     for (final ExtensionConnection connection in _discovery.connections) {
       if (connection.capabilities.services.contains(DiagnosticsExtension.serviceNamespace)) {
         final client = DiagnosticsExtensionClient(connection, logger: _logger);
@@ -106,6 +109,10 @@ class ExtensionManager {
         final client = ConfigurationExtensionClient(connection, logger: _logger);
         await client.fetchTitle();
         _configurationExtensions.add(client);
+      }
+      if (connection.capabilities.services.contains(DeviceService.serviceNamespace)) {
+        final client = ExtensionDeviceClient(connection, logger: _logger);
+        _deviceExtensions.add(client);
       }
     }
     _isInitialized = true;
@@ -129,11 +136,21 @@ class ExtensionManager {
     return List<ConfigurationExtension>.unmodifiable(_configurationExtensions);
   }
 
+  /// Active [DeviceService] proxies for extensions supporting `'device'`.
+  List<DeviceService> get deviceExtensions {
+    assert(
+      _isInitialized,
+      'ExtensionManager.ensureInitialized() must be called before accessing deviceExtensions.',
+    );
+    return List<DeviceService>.unmodifiable(_deviceExtensions);
+  }
+
   /// Disposes all active extension isolate connections.
   Future<void> dispose() async {
     _logger.printTrace('ExtensionManager disposing all active connections.');
     _diagnosticsExtensions.clear();
     _configurationExtensions.clear();
+    _deviceExtensions.clear();
     _isInitialized = false;
     _initFuture = null;
     await _discovery.dispose();
