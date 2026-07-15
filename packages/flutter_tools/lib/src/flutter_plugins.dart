@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:pool/pool.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:yaml/yaml.dart';
 
@@ -30,6 +31,50 @@ import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
+
+/// Cache of parsed pubspec YAML content keyed by package root URI string.
+///
+/// Pre-built once per workspace via [buildPubspecCache] and passed to
+/// [findPlugins] to avoid re-reading the same pubspec files for every
+/// workspace project during `flutter pub get`.
+///
+/// A `null` value stored under a key means the package's `pubspec.yaml` was
+/// missing or could not be parsed — i.e. "looked up, no valid pubspec". An
+/// absent key means the package was not included in the cache at all (e.g.
+/// [buildPubspecCache] was not called for it), and a file-system fallback
+/// should be used instead.
+typedef PubspecCache = Map<String, YamlMap?>;
+
+/// Builds a [PubspecCache] for all packages in [packageConfig].
+///
+/// Reads pubspec.yaml files concurrently, capped at 16 parallel reads to
+/// avoid exhausting file descriptors on large workspaces.
+Future<PubspecCache> buildPubspecCache(
+  PackageConfig packageConfig, {
+  FileSystem? fileSystem,
+}) async {
+  final FileSystem fs = fileSystem ?? globals.fs;
+  final cache = <String, YamlMap?>{};
+  await Pool(64).forEach<Package, void>(packageConfig.packages, (Package package) async {
+    final key = package.root.toString();
+    final File pubspecFile = fs.file(package.root.resolve('pubspec.yaml'));
+    if (!pubspecFile.existsSync()) {
+      cache[key] = null;
+      return;
+    }
+    try {
+      final Object? parsed = loadYaml(await pubspecFile.readAsString());
+      cache[key] = parsed is YamlMap ? parsed : null;
+    } on YamlException catch (err) {
+      globals.printTrace('Failed to parse pubspec.yaml for ${package.name}: $err');
+      cache[key] = null;
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to read pubspec.yaml for ${package.name}: $err');
+      cache[key] = null;
+    }
+  }).drain<void>();
+  return cache;
+}
 
 Future<bool> _fileContentsUnchanged(File file, String renderedTemplate) async {
   if (!file.existsSync()) {
@@ -60,21 +105,32 @@ Future<Plugin?> _pluginFromPackage(
   Set<String> appDependencies, {
   required bool isDevDependency,
   FileSystem? fileSystem,
+  PubspecCache? pubspecCache,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
-  final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
-  if (!pubspecFile.existsSync()) {
-    return null;
+  YamlMap? pubspec;
+  // Use containsKey rather than a null check so that a cached null (meaning
+  // "pubspec.yaml is missing or unparseable") is distinguished from a cache
+  // miss (key absent), which falls back to reading the file from disk
+  if (pubspecCache != null && pubspecCache.containsKey(packageRoot.toString())) {
+    pubspec = pubspecCache[packageRoot.toString()];
+  } else {
+    final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
+    if (!pubspecFile.existsSync()) {
+      return null;
+    }
+    try {
+      final Object? parsed = loadYaml(await pubspecFile.readAsString());
+      pubspec = parsed is YamlMap ? parsed : null;
+    } on YamlException catch (err) {
+      globals.printTrace('Failed to parse plugin manifest for $name: $err');
+      // Do nothing, potentially not a plugin.
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to read plugin manifest for $name: $err');
+      // Do nothing, potentially not a plugin.
+    }
   }
-  Object? pubspec;
-
-  try {
-    pubspec = loadYaml(await pubspecFile.readAsString());
-  } on YamlException catch (err) {
-    globals.printTrace('Failed to parse plugin manifest for $name: $err');
-    // Do nothing, potentially not a plugin.
-  }
-  if (pubspec == null || pubspec is! YamlMap) {
+  if (pubspec == null) {
     return null;
   }
   final Object? flutterConfig = pubspec['flutter'];
@@ -103,22 +159,42 @@ Future<Plugin?> _pluginFromPackage(
 /// Returns a list of all plugins to be registered with the provided [project].
 ///
 /// If [throwOnError] is `true`, an empty package configuration is an error.
-Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = true}) async {
+Future<List<Plugin>> findPlugins(
+  FlutterProject project, {
+  bool throwOnError = true,
+  PubspecCache? pubspecCache,
+  PackageGraph? packageGraph,
+  PackageConfig? packageConfig,
+}) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    packageConfigFile,
-    logger: globals.logger,
-    throwOnError: throwOnError,
-  );
+
+  // Shared workspace resources (packageGraph, packageConfig) are only valid
+  // when the project is actually a member of the workspace — i.e. its name
+  // appears in the shared graph. Outside a workspace we load project-specific
+  // resources instead.
+  final bool useSharedResources =
+      packageGraph != null && packageGraph.dependencies.containsKey(project.manifest.appName);
+
+  final PackageConfig resolvedPackageConfig;
+  if (useSharedResources && packageConfig != null) {
+    resolvedPackageConfig = packageConfig;
+  } else {
+    final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
+    resolvedPackageConfig = await loadPackageConfigWithLogging(
+      packageConfigFile,
+      logger: globals.logger,
+      throwOnError: throwOnError,
+    );
+  }
   final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
     project,
-    packageConfig,
+    resolvedPackageConfig,
+    packageGraph: useSharedResources ? packageGraph : null,
   );
   for (final dependency in transitiveDependencies) {
     final String packageName = dependency.name;
-    final Package? package = packageConfig[packageName];
+    final Package? package = resolvedPackageConfig[packageName];
     if (package == null) {
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
@@ -133,6 +209,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
       project.manifest.dependencies,
       isDevDependency: dependency.isExclusiveDevDependency,
       fileSystem: fs,
+      pubspecCache: pubspecCache,
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -1222,8 +1299,16 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  PubspecCache? pubspecCache,
+  PackageGraph? packageGraph,
+  PackageConfig? packageConfig,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(
+    project,
+    pubspecCache: pubspecCache,
+    packageGraph: packageGraph,
+    packageConfig: packageConfig,
+  );
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
 
@@ -1308,8 +1393,16 @@ Future<void> injectPlugins(
   bool macOSPlatform = false,
   bool windowsPlatform = false,
   DarwinDependencyManagement? darwinDependencyManagement,
+  PubspecCache? pubspecCache,
+  PackageGraph? packageGraph,
+  PackageConfig? packageConfig,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(
+    project,
+    pubspecCache: pubspecCache,
+    packageGraph: packageGraph,
+    packageConfig: packageConfig,
+  );
 
   // Filter out dev dependencies for release builds.
   final List<Plugin> filteredPlugins;
@@ -1358,8 +1451,7 @@ Future<void> injectPlugins(
         darwinDependencyManagement ??
         DarwinDependencyManagement(
           project: project,
-          plugins: plugins,
-          cocoapods: globals.cocoaPods!,
+          cocoapods: globals.cocoaPods,
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
@@ -1368,17 +1460,19 @@ Future<void> injectPlugins(
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
-          logger: globals.logger,
           analytics: globals.analytics,
-          platform: globals.platform,
-          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-          config: globals.config,
         );
     if (iosPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.ios,
+        plugins: pluginsByPlatform[IOSPlugin.kConfigKey]!,
+      );
     }
     if (macOSPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.macos);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.macos,
+        plugins: pluginsByPlatform[MacOSPlugin.kConfigKey]!,
+      );
     }
   }
 }
@@ -1388,6 +1482,26 @@ Future<void> injectPlugins(
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
   return _readFileContent(project.flutterPluginsDependenciesFile) != null;
+}
+
+/// Resolves the plugin implementations for the platform specified by [platformKey].
+///
+/// Uses [_resolvePluginImplementations] with [_PluginResolutionType.nativeOrDart]
+/// to find which plugins are resolved for the given platform.
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
+List<Plugin> resolvePluginImplementationsForPlatform(
+  List<Plugin> plugins,
+  String platformKey, {
+  bool quiet = false,
+}) {
+  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
+    plugins,
+    pluginResolutionType: _PluginResolutionType.nativeOrDart,
+    quiet: quiet,
+  );
+  return pluginsByPlatform[platformKey] ?? [];
 }
 
 /// Resolves the plugin implementations for all platforms.
@@ -1426,9 +1540,13 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 /// see [resolvePlatformImplementation].
 ///
 /// Only plugins which provide the according platform implementation are returned.
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
 Map<String, List<Plugin>> _resolvePluginImplementations(
   List<Plugin> plugins, {
   required _PluginResolutionType pluginResolutionType,
+  bool quiet = false,
 }) {
   final pluginsByPlatform = <String, List<Plugin>>{
     AndroidPlugin.kConfigKey: <Plugin>[],
@@ -1451,6 +1569,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
       plugins,
       platformKey,
       pluginResolutionType: pluginResolutionType,
+      quiet: quiet,
     );
 
     if (hasPlatformPluginPubspecError) {
@@ -1472,11 +1591,15 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
 
 /// Resolves the plugins for the given [platformKey] (Dart-only or native
 /// implementations).
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
 (List<Plugin> pluginImplementations, bool hasPluginPubspecError, bool hasResolutionError)
 _resolvePluginImplementationsByPlatform(
   Iterable<Plugin> plugins,
   String platformKey, {
   _PluginResolutionType pluginResolutionType = _PluginResolutionType.nativeOrDart,
+  bool quiet = false,
 }) {
   var hasPluginPubspecError = false;
   var hasResolutionError = false;
@@ -1494,7 +1617,9 @@ _resolvePluginImplementationsByPlatform(
       pluginResolutionType: pluginResolutionType,
     );
     if (error != null) {
-      globals.printError(error);
+      if (!quiet) {
+        globals.printError(error);
+      }
       hasPluginPubspecError = true;
       continue;
     }
@@ -1533,18 +1658,22 @@ _resolvePluginImplementationsByPlatform(
           }
         } else {
           // Only warn, if neither an implementation for native nor for Dart is given.
-          globals.printWarning(
-            'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
-            'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey:` `pluginClass` or `dartPluginClass`.\n',
-          );
+          if (!quiet) {
+            globals.printWarning(
+              'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
+              'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+              'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey:` `pluginClass` or `dartPluginClass`.\n',
+            );
+          }
         }
       } else {
-        globals.printWarning(
-          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
-          'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-          'or create a plugin named $defaultImplPluginName.\n',
-        );
+        if (!quiet) {
+          globals.printWarning(
+            'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
+            'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+            'or create a plugin named $defaultImplPluginName.\n',
+          );
+        }
       }
     }
     if (implementsPluginName != null) {
@@ -1566,7 +1695,9 @@ _resolvePluginImplementationsByPlatform(
       defaultPackage: defaultImplementations[implCandidatesEntry.key],
     );
     if (error != null) {
-      globals.printError(error);
+      if (!quiet) {
+        globals.printError(error);
+      }
       hasResolutionError = true;
     } else if (resolution != null) {
       pluginResolution[implCandidatesEntry.key] = resolution;
@@ -1791,8 +1922,8 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
 /// implementation of a Dart only plugin to its interface.
-/// The new entrypoint wraps [currentMainUri], adds the `_PluginRegistrant` class,
-/// and writes the file to `newMainDart` at [FlutterProject.dartPluginRegistrant].
+/// The new entrypoint adds the `_PluginRegistrant` class and writes the file to
+/// `newMainDart` at [FlutterProject.dartPluginRegistrant].
 ///
 /// [mainFile] is the main entrypoint file, for example: `/<app>/lib/main.dart`.
 ///
@@ -1803,7 +1934,6 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
-  String currentMainUri,
   File mainFile,
 ) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
@@ -1817,7 +1947,6 @@ Future<void> generateMainDartWithPluginRegistrant(
     Cache.flutterRoot!,
   );
   final templateContext = <String, Object>{
-    'mainEntrypoint': currentMainUri,
     'dartLanguageVersion': entrypointVersion.toString(),
     AndroidPlugin.kConfigKey: <Object?>[],
     IOSPlugin.kConfigKey: <Object?>[],

@@ -96,7 +96,7 @@ function parse_args() {
     esac
     shift
   done
-  if [[ -z $STAGING_DIR ]]; then
+  if [[ -z "$STAGING_DIR" ]]; then
     STAGING_DIR=$(mktemp -d /tmp/dartdoc.XXXXX)
   fi
   DOC_DIR="$STAGING_DIR/doc"

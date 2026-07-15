@@ -202,6 +202,70 @@ class _StubSatelliteWindowController extends SatelliteWindowController {
   void destroy() {}
 }
 
+// A controller that mutates its aspect values and notifies listeners, used to
+// verify that dependents rebuild when the controller notifies even though the
+// same controller instance is reused across rebuilds.
+class _MutableRegularWindowController extends RegularWindowController {
+  _MutableRegularWindowController(WidgetTester tester) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  Size _contentSize = Size.zero;
+  bool _activated = false;
+  bool _maximized = false;
+
+  @override
+  Size get contentSize => _contentSize;
+
+  @override
+  String get title => 'Mutable Window';
+
+  @override
+  bool get isActivated => _activated;
+
+  @override
+  bool get isMaximized => _maximized;
+
+  @override
+  bool get isMinimized => false;
+
+  @override
+  bool get isFullscreen => false;
+
+  @override
+  void setSize(Size size) {
+    _contentSize = size;
+    notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void setTitle(String title) {}
+
+  @override
+  void activate() {
+    _activated = true;
+    notifyListeners();
+  }
+
+  @override
+  void setMaximized(bool maximized) {
+    _maximized = maximized;
+    notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {}
+
+  @override
+  void setFullscreen(bool fullscreen, {Display? display}) {}
+
+  @override
+  void destroy() {}
+}
+
 void main() {
   group('Windowing', () {
     group('isWindowingEnabled is false', () {
@@ -217,7 +281,10 @@ void main() {
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createRegularWindowController(delegate: RegularWindowControllerDelegate()),
+          () => owner.createRegularWindowController(
+            delegate: RegularWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });
@@ -225,7 +292,10 @@ void main() {
       test('default WindowingOwner throws when accessing createDialogWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createDialogWindowController(delegate: DialogWindowControllerDelegate()),
+          () => owner.createDialogWindowController(
+            delegate: DialogWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });
@@ -1777,6 +1847,33 @@ void main() {
         );
 
         expect(isFullscreen, equals(false));
+      });
+
+      testWidgets('Dependent rebuilds when an aspect changes and the controller notifies', (
+        WidgetTester tester,
+      ) async {
+        final controller = _MutableRegularWindowController(tester);
+        addTearDown(controller.dispose);
+        final observed = <bool>[];
+        await tester.pumpWidget(
+          wrapWithView: false,
+          RegularWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                observed.add(WindowScope.isActivatedOf(context));
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(observed, <bool>[false]);
+
+        controller.activate();
+        await tester.pump();
+
+        expect(observed, <bool>[false, true]);
       });
 
       testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {

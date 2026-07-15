@@ -5,24 +5,26 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'app/models.dart';
-import 'app/main_window.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/_window.dart';
+
+import 'app/main_window.dart';
+import 'app/models.dart';
 
 class MainControllerWindowDelegate with RegularWindowControllerDelegate {
   @override
   void onWindowDestroyed() {
     super.onWindowDestroyed();
-    exit(0);
+    ServicesBinding.instance.exitApplication(AppExitType.required);
   }
 }
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runWidget(MultiWindowApp());
+  runWidget(const MultiWindowApp());
 }
 
 class MultiWindowApp extends StatefulWidget {
@@ -34,7 +36,7 @@ class MultiWindowApp extends StatefulWidget {
 
 class _MultiWindowAppState extends State<MultiWindowApp> {
   final RegularWindowController controller = RegularWindowController(
-    preferredSize: const Size(800, 600),
+    size: const Size(800, 600),
     title: 'Multi-Window Reference Application',
     delegate: MainControllerWindowDelegate(),
   );

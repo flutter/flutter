@@ -107,13 +107,10 @@ void main() {
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
-    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
-    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');
-    expect(
-      getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.x86_64),
-      'ios-x86_64',
-    );
-    expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
+    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.arm64), 'ios-arm64');
+    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.armv7), 'ios-armv7');
+    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.x86_64), 'ios-x86_64');
+    expect(TargetPlatform.android.getName(), isNot(contains('ios')));
   });
 
   testUsingContext(
@@ -385,5 +382,22 @@ void main() {
           expect(buildMode.uppercaseFriendlyName, 'Jit release');
       }
     }
+  });
+
+  testWithoutContext('CpuArch', () {
+    expect(CpuArch.fromName('unknown'), CpuArch.unknown);
+    expect(CpuArch.fromName('armv7'), CpuArch.armv7);
+    expect(CpuArch.fromName('arm64'), CpuArch.arm64);
+    expect(CpuArch.fromName('x86'), CpuArch.x86);
+    expect(CpuArch.fromName('x86_64'), CpuArch.x86_64);
+    expect(CpuArch.fromName('riscv64'), CpuArch.riscv64);
+    expect(() => CpuArch.fromName('bogus'), throwsException);
+
+    expect(CpuArch.unknown.name, 'unknown');
+    expect(CpuArch.armv7.name, 'armv7');
+    expect(CpuArch.arm64.name, 'arm64');
+    expect(CpuArch.x86.name, 'x86');
+    expect(CpuArch.x86_64.name, 'x86_64');
+    expect(CpuArch.riscv64.name, 'riscv64');
   });
 }

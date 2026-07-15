@@ -6,6 +6,8 @@
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/display_list/image/dl_image_skia.h"
+
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "impeller/base/validation.h"
 #include "impeller/display_list/aiks_context.h"
@@ -221,7 +223,7 @@ FLUTTER_ASSERT_ARC
   }
 
   // This image should not escape local use by this flutter::Texture implementation
-  return flutter::DlImage::Make(skImage);
+  return flutter::DlImageSkia::Make(skImage);
 }
 
 - (sk_sp<flutter::DlImage>)wrapBGRAExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
@@ -262,7 +264,7 @@ FLUTTER_ASSERT_ARC
   }
 
   // This image should not escape local use by this flutter::Texture implementation
-  return flutter::DlImage::Make(skImage);
+  return flutter::DlImageSkia::Make(skImage);
 }
 
 @end
@@ -335,7 +337,6 @@ FLUTTER_ASSERT_ARC
   yDesc.size = impeller::ISize(yTex.width, yTex.height);
   yDesc.mip_count = 1;
   auto yTexture = impeller::TextureMTL::Wrapper(yDesc, yTex);
-  yTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
 
   impeller::TextureDescriptor uvDesc;
   uvDesc.storage_mode = impeller::StorageMode::kDevicePrivate;
@@ -343,8 +344,6 @@ FLUTTER_ASSERT_ARC
   uvDesc.size = impeller::ISize(uvTex.width, uvTex.height);
   uvDesc.mip_count = 1;
   auto uvTexture = impeller::TextureMTL::Wrapper(uvDesc, uvTex);
-  uvTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
-  ;
 
   return impeller::DlImageImpeller::MakeFromYUVTextures(aiks_context, yTexture, uvTexture,
                                                         colorSpace);
@@ -358,7 +357,6 @@ FLUTTER_ASSERT_ARC
   desc.size = impeller::ISize(rgbaTex.width, rgbaTex.height);
   desc.mip_count = 1;
   auto texture = impeller::TextureMTL::Wrapper(desc, rgbaTex);
-  texture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
   return impeller::DlImageImpeller::Make(texture);
 }
 @end

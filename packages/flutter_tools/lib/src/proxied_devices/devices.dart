@@ -44,18 +44,17 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     this.connection, {
     bool deltaFileTransfer = true,
     bool enableDdsProxy = false,
-    required Logger logger,
+    required this.logger,
     FileTransfer fileTransfer = const FileTransfer(),
   }) : _deltaFileTransfer = deltaFileTransfer,
        _enableDdsProxy = enableDdsProxy,
-       _logger = logger,
        _fileTransfer = fileTransfer,
        super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
-  final Logger _logger;
+  final Logger logger;
 
   final bool _deltaFileTransfer;
 
@@ -113,6 +112,10 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     final DeviceConnectionInterface? connectionInterface = connectionInterfaceName != null
         ? getDeviceConnectionInterfaceForName(connectionInterfaceName)
         : null;
+    // Casting to `String?` to be backward compatible with old daemon version
+    // which is not sending the cpuArch. It can be changed to `String` when we
+    // no longer need the backward compatibility.
+    final String? cpuArch = _cast<String?>(device['cpuArch']);
     return ProxiedDevice(
       connection,
       _cast<String>(device['id']),
@@ -120,7 +123,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       enableDdsProxy: _enableDdsProxy,
       category: Category.fromString(_cast<String>(device['category'])),
       platformType: PlatformType.fromString(_cast<String>(device['platformType'])),
-      targetPlatform: getTargetPlatformForName(_cast<String>(device['platform'])),
+      targetPlatform: TargetPlatform.fromName(_cast<String>(device['platform'])),
+      cpuArch: cpuArch != null ? CpuArch.fromName(cpuArch) : CpuArch.unknown,
       ephemeral: _cast<bool>(device['ephemeral']),
       isConnected: _cast<bool?>(device['isConnected']) ?? true,
       connectionInterface: connectionInterface ?? DeviceConnectionInterface.attached,
@@ -133,7 +137,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       supportsFlutterExit: _cast<bool>(capabilities['flutterExit']),
       supportsScreenshot: _cast<bool>(capabilities['screenshot']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
-      logger: _logger,
+      logger: logger,
       fileTransfer: _fileTransfer,
     );
   }
@@ -148,7 +152,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     } on String catch (e) {
       // Daemon actually does throw string types.
       if (e.contains('command not understood')) {
-        _logger.printTrace(
+        logger.printTrace(
           'The daemon is on an older version that does not support `device.getDiagnostics`.',
         );
         // Silently ignore.
@@ -177,6 +181,7 @@ class ProxiedDevice extends Device {
     required super.category,
     required super.platformType,
     required TargetPlatform targetPlatform,
+    required CpuArch cpuArch,
     required super.ephemeral,
     required this.isConnected,
     required this.connectionInterface,
@@ -198,6 +203,7 @@ class ProxiedDevice extends Device {
        _sdkNameAndVersion = sdkNameAndVersion,
        _supportsHardwareRendering = supportsHardwareRendering,
        _targetPlatform = targetPlatform,
+       _cpuArch = cpuArch,
        _logger = logger,
        _fileTransfer = fileTransfer,
        super(id);
@@ -269,6 +275,11 @@ class ProxiedDevice extends Device {
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
   TargetPlatform get targetPlatformSync => _targetPlatform;
+
+  final CpuArch _cpuArch;
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
+  CpuArch get cpuArchSync => _cpuArch;
 
   final String _sdkNameAndVersion;
   @override
@@ -482,7 +493,7 @@ class ProxiedDevice extends Device {
 
     final String id = _cast<String>(
       await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
-        'targetPlatform': getNameForTargetPlatform(_targetPlatform),
+        'targetPlatform': _targetPlatform.getName(),
         'applicationBinary': fileName,
       }),
     );
@@ -805,18 +816,18 @@ class ProxiedDartDevelopmentService
   ProxiedDartDevelopmentService(
     this.connection,
     this.deviceId, {
-    required Logger logger,
+    required this.logger,
     required ProxiedPortForwarder proxiedPortForwarder,
     required ProxiedPortForwarder devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
-  }) : _logger = logger,
-       _proxiedPortForwarder = proxiedPortForwarder,
+  }) : _proxiedPortForwarder = proxiedPortForwarder,
        _devicePortForwarder = devicePortForwarder,
        _localDds = localDds ?? DartDevelopmentService(logger: logger);
 
   final String deviceId;
 
-  final Logger _logger;
+  @override
+  final Logger logger;
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -887,7 +898,7 @@ class ProxiedDartDevelopmentService
     }
 
     if (remoteVMServicePort == null) {
-      _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
+      logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
       await startLocalDds();
       return;
     }
@@ -942,12 +953,12 @@ class ProxiedDartDevelopmentService
     }
 
     if (remoteUriStr == null) {
-      _logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
+      logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
       await startLocalDds();
       return;
     }
 
-    _logger.printTrace('Remote DDS started on $remoteUriStr.');
+    logger.printTrace('Remote DDS started on $remoteUriStr.');
 
     // Forward the port.
     final Uri remoteUri = Uri.parse(remoteUriStr);
@@ -958,8 +969,8 @@ class ProxiedDartDevelopmentService
     );
 
     _localUri = remoteUri.replace(port: localPort);
-    _logger.printTrace('Local port forwarded DDS on $_localUri.');
-    _logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
+    logger.printTrace('Local port forwarded DDS on $_localUri.');
+    logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
       'deviceId': deviceId,
       'remoteUri': remoteUri.toString(),
       'localUri': _localUri!.toString(),
@@ -969,7 +980,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> shutdown() async {
     if (_ddsStartedLocally) {
-      _localDds.shutdown();
+      await _localDds.shutdown();
       _ddsStartedLocally = false;
     } else {
       await connection.sendRequest('device.shutdownDartDevelopmentService', <String, Object?>{

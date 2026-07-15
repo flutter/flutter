@@ -53,6 +53,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
 
   @override
+  bool get isRecordUseEnabled => isEnabled(recordUse);
+
+  @override
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
 
   @override
@@ -72,6 +75,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isRiscv64SupportEnabled => isEnabled(riscv64);
+
+  @override
+  bool get isMacOSArm64OnlyEnabled => isEnabled(macOSArm64Only);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {

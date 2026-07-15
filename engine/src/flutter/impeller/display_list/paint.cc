@@ -4,6 +4,8 @@
 
 #include "impeller/display_list/paint.h"
 
+#include "impeller/display_list/dl_image_impeller.h"
+
 #include <memory>
 
 #include "flutter/display_list/effects/dl_color_filter.h"
@@ -60,12 +62,17 @@ void Paint::ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
 }
 
 std::shared_ptr<ColorSourceContents> Paint::CreateContents(
-    const Geometry* geometry) const {
+    const ContentContext& renderer,
+    const Geometry* geometry,
+    const std::optional<Matrix>& geometry_transform) const {
   if (color_source == nullptr) {
     auto contents = std::make_shared<SolidColorContents>(geometry);
     contents->SetColor(color);
     return contents;
   }
+
+  Matrix inverted_geometry_transform =
+      geometry_transform.has_value() ? geometry_transform->Invert() : Matrix();
 
   switch (color_source->type()) {
     case flutter::DlColorSourceType::kLinearGradient: {
@@ -87,7 +94,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetStops(std::move(stops));
       contents->SetEndPoints(start_point, end_point);
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
 
       std::array<Point, 2> bounds{start_point, end_point};
       auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
@@ -116,14 +124,11 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetStops(std::move(stops));
       contents->SetCenterAndRadius(center, radius);
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
 
-      auto radius_pt = Point(radius, radius);
-      std::array<Point, 2> bounds{center + radius_pt, center - radius_pt};
-      auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
-      if (intrinsic_size.has_value()) {
-        contents->SetColorSourceSize(intrinsic_size->GetSize().Max({1, 1}));
-      }
+      auto intrinsic_size = Rect::MakeCircleBounds(center, std::abs(radius));
+      contents->SetColorSourceSize(intrinsic_size.GetSize().Max({1, 1}));
       return contents;
     }
     case flutter::DlColorSourceType::kConicalGradient: {
@@ -148,15 +153,12 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetStops(std::move(stops));
       contents->SetCenterAndRadius(center, radius);
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
       contents->SetFocus(focus_center, focus_radius);
 
-      auto radius_pt = Point(radius, radius);
-      std::array<Point, 2> bounds{center + radius_pt, center - radius_pt};
-      auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
-      if (intrinsic_size.has_value()) {
-        contents->SetColorSourceSize(intrinsic_size->GetSize().Max({1, 1}));
-      }
+      auto intrinsic_size = Rect::MakeCircleBounds(center, std::abs(radius));
+      contents->SetColorSourceSize(intrinsic_size.GetSize().Max({1, 1}));
       return contents;
     }
     case flutter::DlColorSourceType::kSweepGradient: {
@@ -181,16 +183,19 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetColors(std::move(colors));
       contents->SetStops(std::move(stops));
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
 
       return contents;
     }
     case flutter::DlColorSourceType::kImage: {
       const flutter::DlImageColorSource* image_color_source =
           color_source->asImage();
-      FML_DCHECK(image_color_source &&
-                 image_color_source->image()->impeller_texture());
-      auto texture = image_color_source->image()->impeller_texture();
+      FML_DCHECK(image_color_source);
+      auto texture =
+          image_color_source->image()->asImpellerImage()->GetCachedTexture(
+              renderer);
+      FML_DCHECK(texture);
       auto x_tile_mode = static_cast<Entity::TileMode>(
           image_color_source->horizontal_tile_mode());
       auto y_tile_mode = static_cast<Entity::TileMode>(
@@ -205,7 +210,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetTexture(texture);
       contents->SetTileModes(x_tile_mode, y_tile_mode);
       contents->SetSamplerDescriptor(sampler_descriptor);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
       if (color_filter || invert_colors) {
         TiledTextureContents::ColorFilterProc filter_proc =
             [color_filter = color_filter,
@@ -256,11 +262,13 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
           contents->SetColor(Color::BlackTransparent());
           return contents;
         }
-        FML_DCHECK(image->image()->impeller_texture());
+        auto texture =
+            image->image()->asImpellerImage()->GetCachedTexture(renderer);
+        FML_DCHECK(texture);
         texture_inputs.push_back({
             .sampler_descriptor =
                 skia_conversions::ToSamplerDescriptor(image->sampling()),
-            .texture = image->image()->impeller_texture(),
+            .texture = std::move(texture),
         });
       }
 
@@ -276,10 +284,11 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
 }
 
 std::shared_ptr<Contents> Paint::WithFilters(
+    const ContentContext& renderer,
     std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, ColorFilterContents::AbsorbOpacity::kYes);
-  auto image_filter =
-      WithImageFilter(input, Matrix(), Entity::RenderingMode::kDirect);
+  auto image_filter = WithImageFilter(renderer, input, Matrix(),
+                                      Entity::RenderingMode::kDirect);
   if (image_filter) {
     input = image_filter;
   }
@@ -287,10 +296,11 @@ std::shared_ptr<Contents> Paint::WithFilters(
 }
 
 std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
+    const ContentContext& renderer,
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform) const {
   auto image_filter =
-      WithImageFilter(input, effect_transform,
+      WithImageFilter(renderer, input, effect_transform,
                       Entity::RenderingMode::kSubpassPrependSnapshotTransform);
   if (image_filter) {
     input = image_filter;
@@ -310,13 +320,14 @@ std::shared_ptr<Contents> Paint::WithMaskBlur(std::shared_ptr<Contents> input,
 }
 
 std::shared_ptr<FilterContents> Paint::WithImageFilter(
+    const ContentContext& renderer,
     const FilterInput::Variant& input,
     const Matrix& effect_transform,
     Entity::RenderingMode rendering_mode) const {
   if (!image_filter) {
     return nullptr;
   }
-  auto filter = WrapInput(image_filter, FilterInput::Make(input));
+  auto filter = WrapInput(renderer, image_filter, FilterInput::Make(input));
   filter->SetRenderingMode(rendering_mode);
   filter->SetEffectTransform(effect_transform);
   return filter;
@@ -393,6 +404,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
 
 std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const Paint& paint,
+    const ContentContext& renderer,
     const Geometry* geometry,
     std::shared_ptr<ColorSourceContents> contents,
     bool needs_color_filter,
@@ -424,7 +436,7 @@ std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   *out_geom = FillRectGeometry(expanded_local_bounds.value());
 
   std::shared_ptr<ColorSourceContents> expanded_contents =
-      paint.CreateContents(out_geom);
+      paint.CreateContents(renderer, out_geom);
   std::shared_ptr<Contents> final_contents = expanded_contents;
 
   /// 4. Apply the user set color filter on the GPU, if applicable.

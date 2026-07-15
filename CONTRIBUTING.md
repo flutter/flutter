@@ -54,6 +54,10 @@ If you want to help us triage, you are very welcome to do so!
    provide enough details that you can reproduce the problem, pointing out duplicates,
    and so on. Chat on the #hackers-triage channel to let us know what you're up to!
 
+   * **Do not** run an unsupervised agent that posts triage comments to the issue database.
+     Any automated agent needs to be approved in advance, after discussion with the
+     Flutter team.
+
 4. Familiarize yourself with our
    [issue hygiene](./docs/contributing/issue_hygiene/README.md) wiki page,
    which covers the meanings of some important GitHub labels and
@@ -91,12 +95,16 @@ for how to set up your development environment, or ask in #hackers-test on Disco
 Developing for Flutter
 ----------------------
 
-If you prefer to write code, consider starting with the list of good
-first issues for [Flutter][flutter-gfi] or for [Flutter DevTools][devtools-gfi].
+If you prefer to write code, find an issue that interests
+you in [Flutter][flutter-issues] or [Flutter DevTools][devtools-issues].
 Reference the respective sections below for further instructions.
 
-[flutter-gfi]: https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22
-[devtools-gfi]: https://github.com/flutter/devtools/labels/good%20first%20issue
+If you are looking for guidance on good starter issues in a
+specific component, consider asking in the #hackers-new
+[Discord channel](./docs/contributing/Chat.md).
+
+[flutter-issues]: https://github.com/flutter/flutter/issues
+[devtools-issues]: https://github.com/flutter/devtools/issues
 
 ### Framework and Engine
 
@@ -155,6 +163,14 @@ might be interested in helping other developers complete their contributions by 
 incomplete patch from the list of [issues with partial patches][has-partial-patch].
 
 [has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
+
+### Open Pull Request Limits
+
+To ensure our maintainers can provide timely and high-quality feedback, public Flutter repositories limit contributors without write access to **2 concurrent open pull requests per repository**.
+* **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
+* **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
+
+For more details on pull request expectations and code review, see our [Tree hygiene](./docs/contributing/Tree-hygiene.md) guide.
 
 
 Reviewing Code

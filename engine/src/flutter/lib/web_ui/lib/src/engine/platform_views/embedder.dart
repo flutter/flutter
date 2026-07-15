@@ -228,13 +228,13 @@ class PlatformViewEmbedder {
                   '${rrect.bottom}px ${rrect.left}px '
                   'round ${rrect.blRadiusX}px)';
             } else {
-              final path = ui.Path() as LayerPath;
+              final path = ui.Path() as EnginePath;
               path.addRRect(mutator.rrect!);
-              clipView.style.clipPath = 'path("${path.toSvgString()}")';
+              clipView.style.clipPath = 'path("${path.backendPath.toSvgString()}")';
+              path.collect();
             }
           } else if (mutator.path != null) {
-            final path = (mutator.path! as LazyPath).builtPath as LayerPath;
-            clipView.style.clipPath = 'path("${path.toSvgString()}")';
+            clipView.style.clipPath = 'path("${mutator.path!.backendPath.toSvgString()}")';
           }
           _resetAnchor(clipView);
           head = clipView;
@@ -454,6 +454,19 @@ class PlatformViewEmbedder {
       // The composition has not changed, so no DOM manipulation is needed.
       return;
     }
+    // A canvas needs to be stacked as an overlay (and thus styled with
+    // `position: absolute`) whenever it shares the composition with a
+    // platform view, since the platform view's DOM element sits between
+    // canvases in the stacking order. It also needs overlay positioning
+    // whenever there's more than one canvas, even without platform views,
+    // since multiple canvases need to occupy the same area without
+    // affecting each other's layout. A single canvas with no platform
+    // views can use normal positioning, which is cheaper for the browser
+    // to scroll.
+    final bool hasPlatformViews = composition.entities.any(
+      (CompositionEntity entity) => entity is CompositionPlatformView,
+    );
+    final bool needsOverlayPositioning = hasPlatformViews || composition.canvases.length > 1;
     final List<int> indexMap = _getIndexMapFromPreviousComposition(_activeComposition, composition);
     final List<int> existingIndexMap = indexMap.where((int index) => index != -1).toList();
 
@@ -501,6 +514,7 @@ class PlatformViewEmbedder {
         // canvas needs a display canvas.
         canvas.displayCanvas = rasterizer.getOverlay();
       }
+      canvas.displayCanvas!.setIsOverlay(needsOverlayPositioning);
     }
 
     // At this point, the DOM contains the static elements and the elements from
@@ -687,7 +701,8 @@ class Mutator {
   const Mutator.clipRect(ui.Rect rect) : this._(MutatorType.clipRect, rect, null, null, null, null);
   const Mutator.clipRRect(ui.RRect rrect)
     : this._(MutatorType.clipRRect, null, rrect, null, null, null);
-  const Mutator.clipPath(ui.Path path) : this._(MutatorType.clipPath, null, null, path, null, null);
+  const Mutator.clipPath(EnginePath path)
+    : this._(MutatorType.clipPath, null, null, path, null, null);
   const Mutator.transform(Matrix4 matrix)
     : this._(MutatorType.transform, null, null, null, matrix, null);
   const Mutator.opacity(int alpha) : this._(MutatorType.opacity, null, null, null, null, alpha);
@@ -697,7 +712,7 @@ class Mutator {
   final MutatorType type;
   final ui.Rect? rect;
   final ui.RRect? rrect;
-  final ui.Path? path;
+  final EnginePath? path;
   final Matrix4? matrix;
   final int? alpha;
 
@@ -755,7 +770,7 @@ class MutatorsStack extends Iterable<Mutator> {
     pushClipRRect(rsuperellipse.toApproximateRRect());
   }
 
-  void pushClipPath(ui.Path path) {
+  void pushClipPath(EnginePath path) {
     _mutators.add(Mutator.clipPath(path));
   }
 

@@ -77,17 +77,16 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
+    required bool resizable,
     String? title,
-    bool decorated = true,
   }) {
     final controller = RegularWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
+      size: size,
       title: title,
-      decorated: decorated,
     );
     _activeControllers.add(controller);
     return controller;
@@ -96,19 +95,18 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
+    required bool resizable,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
   }) {
     final controller = DialogWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
+      size: size,
       parent: parent,
       title: title,
-      decorated: decorated,
     );
     _activeControllers.add(controller);
     return controller;
@@ -118,7 +116,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -126,7 +124,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     final controller = TooltipWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -139,7 +137,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -147,7 +145,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     final controller = PopupWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       parent: parent,
       anchorRect: anchorRect,
       positioner: positioner,
@@ -176,15 +174,33 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
+    bool resizable = false,
     String? title,
   }) {
     throw UnimplementedError('Satellite windows are not yet implemented on macOS.');
   }
 }
 
-mixin _WindowControllerMixin {
+/// Platform specific functionality for all window controllers on macOS.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+abstract interface class WindowControllerMacOS {
+  /// Returns pointer to the underlying NSWindow.
+  ///
+  /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// The handle is only valid for the lifetime of the window. Once the window
+  /// is destroyed, this handle becomes invalid and must not be used.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  Pointer<Void> get windowHandle;
+}
+
+mixin _WindowControllerMixin implements WindowControllerMacOS {
   void _initController(WindowingOwnerMacOS owner) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -238,21 +254,22 @@ mixin _WindowControllerMixin {
 
   /// Returns window handle for the current window.
   /// The handle is a pointer to NSWindow instance.
-  Pointer<Void> getWindowHandle() {
+  @override
+  Pointer<Void> get windowHandle {
     _ensureNotDestroyed();
     return WindowingOwnerMacOS.getWindowHandle(rootView);
   }
 
   Size get contentSize {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.getWindowContentSize(getWindowHandle());
+    return _MacOSPlatformInterface.getWindowContentSize(windowHandle);
   }
 
   void destroy() {
     if (_destroyed) {
       return;
     }
-    final Pointer<Void> handle = getWindowHandle();
+    final Pointer<Void> handle = windowHandle;
     _MacOSPlatformInterface.destroyWindow(handle);
   }
 
@@ -295,7 +312,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createTooltipWindow(
-      preferredConstraints: contentSizeConstraints,
+      constraints: contentSizeConstraints,
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
@@ -317,7 +334,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
     if (positioner != null) {
       _positioner = positioner;
     }
-    _MacOSPlatformInterface.updateWindowPosition(getWindowHandle());
+    _MacOSPlatformInterface.updateWindowPosition(windowHandle);
   }
 
   @override
@@ -363,7 +380,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
   @override
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   final TooltipWindowControllerDelegate _delegate;
@@ -392,7 +409,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createPopupWindow(
-      preferredConstraints: contentSizeConstraints,
+      constraints: contentSizeConstraints,
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
@@ -414,12 +431,12 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
     if (positioner != null) {
       _positioner = positioner;
     }
-    _MacOSPlatformInterface.updateWindowPosition(getWindowHandle());
+    _MacOSPlatformInterface.updateWindowPosition(windowHandle);
   }
 
   @override
   Offset get offsetFromParent {
-    return _MacOSPlatformInterface.getOffsetInParent(getWindowHandle()).toOffset();
+    return _MacOSPlatformInterface.getOffsetInParent(windowHandle).toOffset();
   }
 
   @override
@@ -465,7 +482,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   @override
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   final PopupWindowControllerDelegate _delegate;
@@ -487,23 +504,16 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
   RegularWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
     required RegularWindowControllerDelegate delegate,
-    required Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    required Size? size,
+    BoxConstraints? constraints,
     String? title,
-    bool decorated = true,
   }) : _delegate = delegate,
        super.empty() {
-    if (!decorated) {
-      // TODO(team-macos): Implement undecorated windows on macOS.
-      // See https://github.com/flutter/flutter/issues/183560
-      throw UnimplementedError('Undecorated windows are not yet implemented on macOS.');
-    }
-
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createRegularWindow(
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
@@ -537,82 +547,82 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
   @internal
   void setSize(Size size) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowContentSize(getWindowHandle(), size);
+    _MacOSPlatformInterface.setWindowContentSize(windowHandle, size);
   }
 
   @override
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   @override
   void setTitle(String title) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowTitle(getWindowHandle(), title);
+    _MacOSPlatformInterface.setWindowTitle(windowHandle, title);
     notifyListeners();
   }
 
   @override
   Size get contentSize {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.getWindowContentSize(getWindowHandle());
+    return _MacOSPlatformInterface.getWindowContentSize(windowHandle);
   }
 
   @override
   void activate() {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.activate(getWindowHandle());
+    _MacOSPlatformInterface.activate(windowHandle);
   }
 
   @override
   void setMaximized(bool maximized) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setMaximized(getWindowHandle(), maximized);
+    _MacOSPlatformInterface.setMaximized(windowHandle, maximized);
   }
 
   @override
   bool get isMaximized {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isMaximized(getWindowHandle());
+    return _MacOSPlatformInterface.isMaximized(windowHandle);
   }
 
   @override
   void setMinimized(bool minimized) {
     _ensureNotDestroyed();
     if (minimized) {
-      _MacOSPlatformInterface.minimize(getWindowHandle());
+      _MacOSPlatformInterface.minimize(windowHandle);
     } else {
-      _MacOSPlatformInterface.unminimize(getWindowHandle());
+      _MacOSPlatformInterface.unminimize(windowHandle);
     }
   }
 
   @override
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isMinimized(getWindowHandle());
+    return _MacOSPlatformInterface.isMinimized(windowHandle);
   }
 
   @override
   void setFullscreen(bool fullscreen, {Display? display}) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setFullscreen(getWindowHandle(), fullscreen);
+    _MacOSPlatformInterface.setFullscreen(windowHandle, fullscreen);
   }
 
   @override
   bool get isFullscreen {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isFullscreen(getWindowHandle());
+    return _MacOSPlatformInterface.isFullscreen(windowHandle);
   }
 
   final RegularWindowControllerDelegate _delegate;
 
   @override
-  bool get isActivated => _MacOSPlatformInterface.isActivated(getWindowHandle());
+  bool get isActivated => _MacOSPlatformInterface.isActivated(windowHandle);
 
   @override
-  String get title => _MacOSPlatformInterface.getTitle(getWindowHandle());
+  String get title => _MacOSPlatformInterface.getTitle(windowHandle);
 }
 
 /// Implementation of [DialogWindowController] for the macOS platform.
@@ -628,24 +638,17 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   DialogWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
     required DialogWindowControllerDelegate delegate,
-    required Size? preferredSize,
+    required Size? size,
     this.parent,
-    BoxConstraints? preferredConstraints,
+    BoxConstraints? constraints,
     String? title,
-    bool decorated = true,
   }) : _delegate = delegate,
        super.empty() {
-    if (!decorated) {
-      // TODO(team-macos): Implement undecorated windows on macOS.
-      // See https://github.com/flutter/flutter/issues/183560
-      throw UnimplementedError('Undecorated windows are not yet implemented on macOS.');
-    }
-
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createDialogWindow(
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
@@ -680,20 +683,20 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   @internal
   void setSize(Size size) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowContentSize(getWindowHandle(), size);
+    _MacOSPlatformInterface.setWindowContentSize(windowHandle, size);
   }
 
   @override
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   @override
   void setTitle(String title) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowTitle(getWindowHandle(), title);
+    _MacOSPlatformInterface.setWindowTitle(windowHandle, title);
     notifyListeners();
   }
 
@@ -702,36 +705,36 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   @override
   Size get contentSize {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.getWindowContentSize(getWindowHandle());
+    return _MacOSPlatformInterface.getWindowContentSize(windowHandle);
   }
 
   @override
   void activate() {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.activate(getWindowHandle());
+    _MacOSPlatformInterface.activate(windowHandle);
   }
 
   @override
   void setMinimized(bool minimized) {
     _ensureNotDestroyed();
     if (minimized) {
-      _MacOSPlatformInterface.minimize(getWindowHandle());
+      _MacOSPlatformInterface.minimize(windowHandle);
     } else {
-      _MacOSPlatformInterface.unminimize(getWindowHandle());
+      _MacOSPlatformInterface.unminimize(windowHandle);
     }
   }
 
   @override
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isMinimized(getWindowHandle());
+    return _MacOSPlatformInterface.isMinimized(windowHandle);
   }
 
   @override
-  bool get isActivated => _MacOSPlatformInterface.isActivated(getWindowHandle());
+  bool get isActivated => _MacOSPlatformInterface.isActivated(windowHandle);
 
   @override
-  String get title => _MacOSPlatformInterface.getTitle(getWindowHandle());
+  String get title => _MacOSPlatformInterface.getTitle(windowHandle);
 
   @override
   final BaseWindowController? parent;
@@ -872,8 +875,8 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createRegularWindow({
-    required Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    required Size? size,
+    BoxConstraints? constraints,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
@@ -883,20 +886,20 @@ class _MacOSPlatformInterface {
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners;
 
-    if (preferredSize != null) {
+    if (size != null) {
       request.ref
         ..hasSize = true
-        ..contentSize.width = preferredSize.width
-        ..contentSize.height = preferredSize.height;
+        ..contentSize.width = size.width
+        ..contentSize.height = size.height;
     }
 
-    if (preferredConstraints != null) {
+    if (constraints != null) {
       request.ref
         ..hasConstraints = true
-        ..constraints.minWidth = preferredConstraints.minWidth
-        ..constraints.minHeight = preferredConstraints.minHeight
-        ..constraints.maxWidth = preferredConstraints.maxWidth
-        ..constraints.maxHeight = preferredConstraints.maxHeight;
+        ..constraints.minWidth = constraints.minWidth
+        ..constraints.minHeight = constraints.minHeight
+        ..constraints.maxWidth = constraints.maxWidth
+        ..constraints.maxHeight = constraints.maxHeight;
     }
     final int viewId = _createRegularWindow(
       WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -913,8 +916,8 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createDialogWindow({
-    required Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    required Size? size,
+    BoxConstraints? constraints,
     int? parentViewId,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
@@ -926,20 +929,20 @@ class _MacOSPlatformInterface {
       ..ref.onNotifyListeners = onNotifyListeners
       ..ref.parentViewId = parentViewId ?? 0;
 
-    if (preferredSize != null) {
+    if (size != null) {
       request.ref
         ..hasSize = true
-        ..contentSize.width = preferredSize.width
-        ..contentSize.height = preferredSize.height;
+        ..contentSize.width = size.width
+        ..contentSize.height = size.height;
     }
 
-    if (preferredConstraints != null) {
+    if (constraints != null) {
       request.ref
         ..hasConstraints = true
-        ..constraints.minWidth = preferredConstraints.minWidth
-        ..constraints.minHeight = preferredConstraints.minHeight
-        ..constraints.maxWidth = preferredConstraints.maxWidth
-        ..constraints.maxHeight = preferredConstraints.maxHeight;
+        ..constraints.minWidth = constraints.minWidth
+        ..constraints.minHeight = constraints.minHeight
+        ..constraints.maxWidth = constraints.maxWidth
+        ..constraints.maxHeight = constraints.maxHeight;
     }
     try {
       final int viewId = _createDialogWindow(
@@ -959,7 +962,7 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createTooltipWindow({
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required int parentViewId,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
@@ -984,10 +987,10 @@ class _MacOSPlatformInterface {
 
     request.ref
       ..hasConstraints = true
-      ..constraints.minWidth = preferredConstraints.minWidth
-      ..constraints.minHeight = preferredConstraints.minHeight
-      ..constraints.maxWidth = preferredConstraints.maxWidth
-      ..constraints.maxHeight = preferredConstraints.maxHeight;
+      ..constraints.minWidth = constraints.minWidth
+      ..constraints.minHeight = constraints.minHeight
+      ..constraints.maxWidth = constraints.maxWidth
+      ..constraints.maxHeight = constraints.maxHeight;
 
     final int viewId = _createTooltipWindow(PlatformDispatcher.instance.engineId!, request);
     _allocator.free(request);
@@ -1001,7 +1004,7 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createPopupWindow({
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required int parentViewId,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
@@ -1026,10 +1029,10 @@ class _MacOSPlatformInterface {
 
     request.ref
       ..hasConstraints = true
-      ..constraints.minWidth = preferredConstraints.minWidth
-      ..constraints.minHeight = preferredConstraints.minHeight
-      ..constraints.maxWidth = preferredConstraints.maxWidth
-      ..constraints.maxHeight = preferredConstraints.maxHeight;
+      ..constraints.minWidth = constraints.minWidth
+      ..constraints.minHeight = constraints.minHeight
+      ..constraints.maxWidth = constraints.maxWidth
+      ..constraints.maxHeight = constraints.maxHeight;
 
     final int viewId = _createPopupWindow(PlatformDispatcher.instance.engineId!, request);
     _allocator.free(request);

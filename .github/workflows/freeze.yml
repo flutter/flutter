@@ -5,8 +5,13 @@
 name: Material and Cupertino Code Freeze
 
 on:
-  pull_request_target:
+  # Safe because this workflow does not check out code or run arbitrary scripts.
+  # It only runs a metadata-based path filter to enforce freeze restrictions.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+    branches:
+      - master
+  merge_group:
     branches:
       - master
 
@@ -20,7 +25,8 @@ jobs:
 
     steps:
       - name: Check for changes in frozen folders
-        uses: dorny/paths-filter@v3
+        if: github.event_name != 'merge_group'
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: filter
         with:
           token: ${{ github.token }}
@@ -40,7 +46,7 @@ jobs:
               - 'packages/flutter/test_fixes/cupertino/**'
 
       - name: Fail on frozen changes
-        if: steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
         run: |
           echo "Error: Code changes detected during the current code freeze."
           echo "If this is a critical fix that must land, please file an issue for team-design."

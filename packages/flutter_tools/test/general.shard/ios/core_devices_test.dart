@@ -42,6 +42,13 @@ class LocalFileSystemFake extends Fake implements LocalFileSystem {
   File file(dynamic path) => memoryFileSystem.file(path);
 
   @override
+  Link link(dynamic path) => memoryFileSystem.link(path);
+
+  @override
+  FileSystemEntityType typeSync(String path, {bool followLinks = true}) =>
+      memoryFileSystem.typeSync(path, followLinks: followLinks);
+
+  @override
   Context get path => memoryFileSystem.path;
 
   @override
@@ -78,12 +85,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -105,12 +112,12 @@ void main() {
         final logger = BufferLogger.test();
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -134,12 +141,12 @@ void main() {
         final logger = BufferLogger.test();
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -159,12 +166,12 @@ void main() {
         final logger = BufferLogger.test();
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -207,12 +214,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -222,6 +229,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isTrue);
@@ -266,12 +274,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -281,6 +289,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isTrue);
@@ -318,12 +327,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -333,6 +342,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -363,12 +373,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -378,6 +388,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -414,12 +425,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -429,6 +440,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -459,12 +471,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -474,6 +486,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -506,12 +519,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -521,6 +534,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -555,12 +569,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB(attachSuccess: false);
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -570,6 +584,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -591,12 +606,12 @@ void main() {
         );
 
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           logger: logger,
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -625,12 +640,12 @@ void main() {
         );
 
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           logger: logger,
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -659,12 +674,12 @@ void main() {
         );
 
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           logger: logger,
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -693,12 +708,12 @@ void main() {
         );
 
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           logger: logger,
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -726,12 +741,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -756,12 +771,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -785,12 +800,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -813,12 +828,12 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
         final launcher = IOSCoreDeviceLauncher(
-          xcode: FakeXcode(),
           coreDeviceControl: fakeCoreDeviceControl,
           logger: logger,
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -4040,6 +4055,7 @@ class FakeLLDB extends Fake implements LLDB {
     required String deviceId,
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
+    required BuildMode mode,
   }) async {
     attemptedToAttach = true;
     attachedProcessId = appProcessId;
@@ -4156,11 +4172,4 @@ class FakeShutdownHooks extends Fake implements ShutdownHooks {
   Future<void> runShutdownHooks(Logger logger) async {
     _isShuttingDown = true;
   }
-}
-
-class FakeXcode extends Fake implements Xcode {
-  FakeXcode({Version? currentVersion}) : currentVersion = currentVersion ?? Version(15, 0, 0);
-
-  @override
-  final Version currentVersion;
 }

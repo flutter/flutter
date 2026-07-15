@@ -1028,7 +1028,7 @@ class LocalizationsGenerator {
     String className,
     String fileName,
     String header,
-    final LocaleInfo locale,
+    LocaleInfo locale,
   ) {
     final Iterable<String> methods = _allMessages.map((Message message) {
       var localeWithFallback = locale;
@@ -1058,11 +1058,18 @@ class LocalizationsGenerator {
     final LocaleInfo locale = bundle.locale;
     final baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
-    _allMessages.where((Message message) => message.messages[locale] == null).forEach((
-      Message message,
-    ) {
-      _addUnimplementedMessage(locale, message.resourceId);
-    });
+    // Only mark a message as unimplemented/untranslated for a regional subclass
+    // (e.g. en_US) if it is also missing in the parent base locale (e.g. en).
+    // If it is present in the parent locale, it will be correctly inherited
+    // at runtime via Dart class inheritance, so it shouldn't be reported as missing.
+    final parentLocale = LocaleInfo.fromString(locale.languageCode);
+    _allMessages
+        .where((Message message) {
+          return message.messages[locale] == null && message.messages[parentLocale] == null;
+        })
+        .forEach((Message message) {
+          _addUnimplementedMessage(locale, message.resourceId);
+        });
 
     final Iterable<String> methods = _allMessages
         .where((Message message) => message.parsedMessages[locale] != null)

@@ -59,6 +59,9 @@ abstract class FeatureFlags {
   /// Whether dart data assets building and bundling is enabled.
   bool get isDartDataAssetsEnabled => false;
 
+  /// Whether record use experiment is enabled.
+  bool get isRecordUseEnabled;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled;
 
@@ -79,8 +82,11 @@ abstract class FeatureFlags {
   /// Whether UIScene migration is enabled.
   bool get isUISceneMigrationEnabled;
 
-  /// Wether riscv64 support is enabled.
+  /// Whether riscv64 support is enabled.
   bool get isRiscv64SupportEnabled;
+
+  /// Whether to only build for arm64 when targeting macOS.
+  bool get isMacOSArm64OnlyEnabled;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -100,6 +106,7 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     dartDataAssets,
+    recordUse,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
@@ -107,6 +114,7 @@ abstract class FeatureFlags {
     lldbDebugging,
     uiSceneMigration,
     riscv64,
+    macOSArm64Only,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -117,7 +125,7 @@ abstract class FeatureFlags {
   }
 
   /// All Flutter feature flags that are enabled.
-  // This member is overriden in google3.
+  // This member is overridden in google3.
   Iterable<Feature> get allEnabledFeatures {
     return allFeatures.where(isEnabled);
   }
@@ -211,6 +219,16 @@ const dartDataAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
+/// Enable record use experiment.
+const recordUse = Feature(
+  name: 'record use experiment',
+  configSetting: 'enable-record-use',
+  environmentOverride: 'FLUTTER_RECORD_USE',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
@@ -291,6 +309,20 @@ const riscv64 = Feature(
   configSetting: 'enable-riscv64',
   environmentOverride: 'FLUTTER_RISCV64',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether to only build for arm64 when targeting macOS.
+const macOSArm64Only = Feature(
+  name: 'building arm64 architecture only for non-debug macOS builds',
+  extraHelpText:
+      'If enabled, macOS release and profile builds generate Apple Silicon binaries instead of universal binaries. '
+      'This feature is disabled by default, but will default to enabled in a future release, before Intel Mac support is eventually discontinued. '
+      'See https://flutter.dev/go/macos-intel-deprecation for details.',
+  configSetting: 'enable-macos-arm64-only',
+  environmentOverride: 'FLUTTER_MACOS_ARM64_ONLY',
+  master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
 );

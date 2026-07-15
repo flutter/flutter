@@ -14,8 +14,9 @@ import 'package:flutter/widgets.dart';
 ///
 /// This widget does not provide a concrete implementation of text selection handles
 /// out of the box, and instead uses [testTextSelectionHandleControls] as a default.
-/// A more robust implementation of text selection handles can be provided by
-/// setting [selectionControls].
+/// Selection handles are not shown by default unless [showSelectionHandles] is set
+/// to true. A more robust implementation of text selection handles can be provided
+/// by setting [selectionControls].
 ///
 /// This input field manages its own internal [TextEditingController]
 /// and [FocusNode] unless provided one. This field also provides defaults
@@ -39,6 +40,7 @@ class TestTextField extends StatefulWidget {
     this.style,
     this.controller,
     this.onSubmitted,
+    this.showSelectionHandles = false,
   });
 
   final Iterable<String>? autofillHints;
@@ -56,6 +58,7 @@ class TestTextField extends StatefulWidget {
   final TextStyle? style;
   final TextEditingController? controller;
   final ValueChanged<String>? onSubmitted;
+  final bool showSelectionHandles;
 
   @override
   State<TestTextField> createState() => _TestTextFieldState();
@@ -99,27 +102,32 @@ class _TestTextFieldState extends State<TestTextField>
 
   @override
   Widget build(BuildContext context) {
-    return _selectionGestureDetectorBuilder.buildGestureDetector(
-      behavior: HitTestBehavior.translucent,
-      child: EditableText(
-        key: editableTextKey,
-        autofillHints: widget.autofillHints,
-        autofocus: widget.autofocus,
-        backgroundCursorColor: _red, // required by editable text.
-        contextMenuBuilder: widget.contextMenuBuilder,
-        cursorColor: widget.cursorColor ?? _red, // required by editable text.
-        cursorOpacityAnimates: widget.cursorOpacityAnimates,
-        focusNode: _effectiveFocusNode, // required by editable text.
-        groupId: widget.groupId,
-        maxLines: widget.maxLines,
-        onChanged: widget.onChanged,
-        onSubmitted: widget.onSubmitted,
-        readOnly: widget.readOnly,
-        rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
-        selectionControls: widget.selectionControls ?? testTextSelectionHandleControls,
-        showCursor: widget.showCursor,
-        style: widget.style ?? const TextStyle(), // required by editable text.
-        controller: _effectiveController, // required by editable text.
+    return Semantics(
+      enabled: true,
+      onTap: widget.readOnly ? null : () => _effectiveFocusNode.requestFocus(),
+      child: _selectionGestureDetectorBuilder.buildGestureDetector(
+        behavior: HitTestBehavior.translucent,
+        child: EditableText(
+          key: editableTextKey,
+          autofillHints: widget.autofillHints,
+          autofocus: widget.autofocus,
+          backgroundCursorColor: _red, // required by editable text.
+          contextMenuBuilder: widget.contextMenuBuilder,
+          cursorColor: widget.cursorColor ?? _red, // required by editable text.
+          cursorOpacityAnimates: widget.cursorOpacityAnimates,
+          focusNode: _effectiveFocusNode, // required by editable text.
+          groupId: widget.groupId,
+          maxLines: widget.maxLines,
+          onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
+          readOnly: widget.readOnly,
+          rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
+          selectionControls: widget.selectionControls ?? testTextSelectionHandleControls,
+          showCursor: widget.showCursor,
+          style: widget.style ?? const TextStyle(), // required by editable text.
+          controller: _effectiveController, // required by editable text.
+          showSelectionHandles: widget.showSelectionHandles,
+        ),
       ),
     );
   }

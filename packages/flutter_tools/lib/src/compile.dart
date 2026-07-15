@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:usage/uuid/uuid.dart';
+import 'package:uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -62,6 +62,15 @@ class TargetModel {
 
   @override
   String toString() => _value;
+
+  /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
+  static TargetModel fromTargetPlatform(TargetPlatform? platform) {
+    return switch (platform) {
+      TargetPlatform.web_javascript => TargetModel.dartdevc,
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+      _ => TargetModel.flutter,
+    };
+  }
 }
 
 class CompilerOutput {
@@ -391,7 +400,8 @@ class KernelCompiler {
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    server.stderr.transform<String>(utf8.decoder).listen(_logger.printError);
+    // Use permissive decoder for compiler stderr which may contain invalid UTF-8
+    server.stderr.transform<String>(utf8AllowMalformed.decoder).listen(_logger.printError);
     server.stdout.transform(utf8LineDecoder).listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
@@ -726,6 +736,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
              fileSystem: fileSystem,
              trackWidgetCreation: buildInfo.trackWidgetCreation,
              dartDefines: buildInfo.dartDefines,
+             targetModel: targetModel,
              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
            ),
        extraFrontEndOptions = buildInfo.extraFrontEndOptions,
@@ -867,7 +878,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         nativeAssetsUri: nativeAssets,
       );
     }
-    final String inputKey = Uuid().generateV4();
+    final String inputKey = const Uuid().v4();
 
     if (nativeAssets != null && nativeAssets.isNotEmpty) {
       server.stdin.writeln('native-assets $nativeAssets');
@@ -991,14 +1002,16 @@ class DefaultResidentCompiler implements ResidentCompiler {
           onDone: () {
             // when outputFilename future is not completed, but stdout is closed
             // process has died unexpectedly.
-            if (_stdoutHandler.compilerOutput?.isCompleted == false) {
+            if (_stdoutHandler.compilerOutput?.isCompleted == false &&
+                !_shutdownHooks.isShuttingDown) {
               _stdoutHandler.compilerOutput?.complete();
               throwToolExit('The Dart compiler exited unexpectedly.');
             }
           },
         );
 
-    _server?.stderr.transform(utf8LineDecoder).listen(_logger.printError);
+    // Use permissive decoder for compiler stderr which may contain invalid UTF-8
+    _server?.stderr.transform(utf8AllowMalformedLineDecoder).listen(_logger.printError);
 
     unawaited(
       _server?.exitCode.then((int code) {
@@ -1066,7 +1079,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = Uuid().generateV4();
+    final String inputKey = const Uuid().v4();
     server.stdin
       ..writeln('compile-expression $inputKey')
       ..writeln(request.expression);

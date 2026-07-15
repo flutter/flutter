@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 
 #include <optional>
+#include <variant>
 
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rational.h"
@@ -17,14 +18,46 @@
 namespace impeller {
 
 struct GlyphProperties {
-  Color color = Color::Black();
+  enum class Tone {
+    kDark,
+    kLight,
+  };
+
+  using ToneOrColor = std::variant<Tone, Color>;
+  static constexpr ToneOrColor kDarkTone{Tone::kDark};
+  static constexpr ToneOrColor kLightTone{Tone::kLight};
+
+  // The tone or color of the glyph. Defaults to Tone::kDark.
+  //
+  // For alpha-channel-only glyphs, this stores a Tone (kDark or kLight). Use
+  // `ComputeTone` to determine the tone from a color.
+  //
+  // For glyphs with a built-in color, this stores the specific Color.
+  ToneOrColor tone_or_color;
   std::optional<StrokeParameters> stroke;
+
+  // Computes a Tone from a color. Use to set `tone_or_color` for an alpha-only
+  // Glyph.
+  //
+  // kLight is only used for macOS, where Apple's CoreText renders dark and
+  // light text differently, requiring different glyphs for each. On other
+  // platforms, this always returns kDark.
+  static Tone ComputeTone(const Color& c) {
+#if FML_OS_MACOSX && !FML_OS_IOS
+    // Uses BT.709 luma coefficients
+    // (https://en.wikipedia.org/wiki/Rec._709#Luma_coefficients) to determine
+    // whether a color is light or dark.
+    Scalar luma = c.red * 0.2126f + c.green * 0.7152f + c.blue * 0.0722f;
+    return (luma > 0.5f) ? Tone::kLight : Tone::kDark;
+#else
+    return Tone::kDark;
+#endif
+  }
 
   struct Equal {
     inline bool operator()(const impeller::GlyphProperties& lhs,
                            const impeller::GlyphProperties& rhs) const {
-      return lhs.color.ToARGB() == rhs.color.ToARGB() &&
-             lhs.stroke == rhs.stroke;
+      return lhs.tone_or_color == rhs.tone_or_color && lhs.stroke == rhs.stroke;
     }
   };
 };
@@ -85,27 +118,24 @@ enum SubpixelPosition : uint8_t {
 struct SubpixelGlyph {
   Glyph glyph;
   SubpixelPosition subpixel_offset;
-  std::optional<GlyphProperties> properties;
+  GlyphProperties properties;
 
   SubpixelGlyph(Glyph p_glyph,
                 SubpixelPosition p_subpixel_offset,
-                std::optional<GlyphProperties> p_properties)
+                GlyphProperties p_properties)
       : glyph(p_glyph),
         subpixel_offset(p_subpixel_offset),
         properties(p_properties) {}
 
   template <typename H>
   friend H AbslHashValue(H h, const SubpixelGlyph& sg) {
-    if (!sg.properties.has_value()) {
-      return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset);
-    }
     StrokeParameters stroke;
-    bool has_stroke = sg.properties->stroke.has_value();
+    bool has_stroke = sg.properties.stroke.has_value();
     if (has_stroke) {
-      stroke = sg.properties->stroke.value();
+      stroke = sg.properties.stroke.value();
     }
     return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset,
-                      sg.properties->color.ToARGB(), has_stroke, stroke.cap,
+                      sg.properties.tone_or_color, has_stroke, stroke.cap,
                       stroke.join, stroke.miter_limit, stroke.width);
   }
 
@@ -115,17 +145,10 @@ struct SubpixelGlyph {
       // Check simple non-optionals first.
       if (lhs.glyph.index != rhs.glyph.index ||
           lhs.glyph.type != rhs.glyph.type ||
-          lhs.subpixel_offset != rhs.subpixel_offset ||
-          // Mixmatch properties.
-          lhs.properties.has_value() != rhs.properties.has_value()) {
+          lhs.subpixel_offset != rhs.subpixel_offset) {
         return false;
       }
-      if (lhs.properties.has_value()) {
-        // Both have properties.
-        return GlyphProperties::Equal{}(lhs.properties.value(),
-                                        rhs.properties.value());
-      }
-      return true;
+      return GlyphProperties::Equal{}(lhs.properties, rhs.properties);
     }
   };
 };

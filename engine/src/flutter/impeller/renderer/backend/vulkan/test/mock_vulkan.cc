@@ -20,12 +20,27 @@ namespace testing {
 
 namespace {
 
+class MockDevice;
+
 struct MockCommandBuffer {
   explicit MockCommandBuffer(
       std::shared_ptr<std::vector<std::string>> called_functions)
       : called_functions_(std::move(called_functions)) {}
   std::shared_ptr<std::vector<std::string>> called_functions_;
   std::vector<VkImageMemoryBarrier> image_memory_barriers_;
+  std::vector<VkViewport> recorded_viewports_;
+};
+
+class MockQueue {
+ public:
+  explicit MockQueue(MockDevice& device) : device_(device) {}
+
+  MockDevice& device() const { return device_; }
+
+ private:
+  // The MockDevice owns the MockQueues, and each MockQueue holds a reference
+  // to its parent device.
+  MockDevice& device_;
 };
 
 struct MockQueryPool {};
@@ -51,7 +66,8 @@ static ISize currentImageSize = ISize{1, 1};
 
 class MockDevice final {
  public:
-  explicit MockDevice() : called_functions_(new std::vector<std::string>()) {}
+  explicit MockDevice()
+      : called_functions_(new std::vector<std::string>()), queue_(*this) {}
 
   MockCommandBuffer* NewCommandBuffer() {
     auto buffer = std::make_unique<MockCommandBuffer>(called_functions_);
@@ -89,6 +105,8 @@ class MockDevice final {
     called_functions_->push_back(function);
   }
 
+  MockQueue& GetQueue() { return queue_; }
+
  private:
   MockDevice(const MockDevice&) = delete;
 
@@ -105,11 +123,14 @@ class MockDevice final {
   Mutex commmand_pools_mutex_;
   std::vector<std::unique_ptr<MockCommandPool>> command_pools_
       IPLR_GUARDED_BY(commmand_pools_mutex_);
+
+  MockQueue queue_;
 };
 
 struct MockVulkanState {
   std::vector<std::string> instance_extensions;
   std::vector<std::string> instance_layers;
+  std::vector<std::string> device_extensions;
   std::function<void(VkPhysicalDevice physicalDevice,
                      VkFormat format,
                      VkFormatProperties* pFormatProperties)>
@@ -121,6 +142,9 @@ struct MockVulkanState {
       wait_for_fences_callback;
   std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
       acquire_next_image_callback;
+  // When > 0, the next vkCreateImage for a fixed-rate-compressed image returns
+  // VK_ERROR_COMPRESSION_EXHAUSTED_EXT and decrements (models PowerVR).
+  int compression_exhausted_create_image_failures = 0;
 };
 
 class MockVulkanStatePtr {
@@ -165,32 +189,46 @@ VkResult vkEnumerateInstanceExtensionProperties(
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
     *pPropertyCount = GetMockVulkanState().instance_extensions.size();
+    return VK_SUCCESS;
   } else {
     uint32_t count = 0;
+    VkResult result = VK_SUCCESS;
     for (const std::string& ext : GetMockVulkanState().instance_extensions) {
-      strncpy(pProperties[count].extensionName, ext.c_str(),
-              sizeof(VkExtensionProperties::extensionName));
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].extensionName,
+               sizeof(pProperties[count].extensionName), "%s", ext.c_str());
       pProperties[count].specVersion = 0;
       count++;
     }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkEnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
                                             VkLayerProperties* pProperties) {
   if (!pProperties) {
     *pPropertyCount = GetMockVulkanState().instance_layers.size();
+    return VK_SUCCESS;
   } else {
     uint32_t count = 0;
-    for (const std::string& layer : GetMockVulkanState().instance_layers) {
-      strncpy(pProperties[count].layerName, layer.c_str(),
-              sizeof(VkLayerProperties::layerName));
+    VkResult result = VK_SUCCESS;
+    for (const std::string& ext : GetMockVulkanState().instance_layers) {
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].layerName,
+               sizeof(pProperties[count].layerName), "%s", ext.c_str());
       pProperties[count].specVersion = 0;
       count++;
     }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkEnumeratePhysicalDevices(VkInstance instance,
@@ -227,6 +265,52 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
   }
 }
 
+void vkGetPhysicalDeviceFeatures2(VkPhysicalDevice physicalDevice,
+                                  VkPhysicalDeviceFeatures2* pFeatures) {
+  // Advertise the features the mock supports by walking the pNext chain.
+  auto* next = reinterpret_cast<VkBaseOutStructure*>(pFeatures->pNext);
+  while (next != nullptr) {
+    if (next->sType ==
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_COMPRESSION_CONTROL_FEATURES_EXT) {
+      reinterpret_cast<VkPhysicalDeviceImageCompressionControlFeaturesEXT*>(
+          next)
+          ->imageCompressionControl = VK_TRUE;
+    }
+    next = next->pNext;
+  }
+}
+
+VkResult vkGetPhysicalDeviceImageFormatProperties2(
+    VkPhysicalDevice physicalDevice,
+    const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+    VkImageFormatProperties2* pImageFormatProperties) {
+  // Report fixed-rate compression support when it is queried (i.e. the input
+  // carries a VkImageCompressionControlEXT and the output a
+  // VkImageCompressionPropertiesEXT).
+  bool compression_requested = false;
+  const auto* in =
+      reinterpret_cast<const VkBaseInStructure*>(pImageFormatInfo->pNext);
+  while (in != nullptr) {
+    if (in->sType == VK_STRUCTURE_TYPE_IMAGE_COMPRESSION_CONTROL_EXT) {
+      compression_requested = true;
+    }
+    in = in->pNext;
+  }
+  auto* out =
+      reinterpret_cast<VkBaseOutStructure*>(pImageFormatProperties->pNext);
+  while (compression_requested && out != nullptr) {
+    if (out->sType == VK_STRUCTURE_TYPE_IMAGE_COMPRESSION_PROPERTIES_EXT) {
+      auto* props = reinterpret_cast<VkImageCompressionPropertiesEXT*>(out);
+      props->imageCompressionFlags =
+          VK_IMAGE_COMPRESSION_FIXED_RATE_EXPLICIT_EXT;
+      props->imageCompressionFixedRateFlags =
+          VK_IMAGE_COMPRESSION_FIXED_RATE_4BPC_BIT_EXT;
+    }
+    out = out->pNext;
+  }
+  return VK_SUCCESS;
+}
+
 void vkGetPhysicalDeviceQueueFamilyProperties(
     VkPhysicalDevice physicalDevice,
     uint32_t* pQueueFamilyPropertyCount,
@@ -246,12 +330,24 @@ VkResult vkEnumerateDeviceExtensionProperties(
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
-    *pPropertyCount = 1;
+    *pPropertyCount = GetMockVulkanState().device_extensions.size();
+    return VK_SUCCESS;
   } else {
-    strcpy(pProperties[0].extensionName, "VK_KHR_swapchain");
-    pProperties[0].specVersion = 0;
+    uint32_t count = 0;
+    VkResult result = VK_SUCCESS;
+    for (const std::string& ext : GetMockVulkanState().device_extensions) {
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].extensionName,
+               sizeof(pProperties[count].extensionName), "%s", ext.c_str());
+      pProperties[count].specVersion = 0;
+      count++;
+    }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
@@ -341,6 +437,21 @@ VkResult vkCreateImage(VkDevice device,
                        const VkImageCreateInfo* pCreateInfo,
                        const VkAllocationCallbacks* pAllocator,
                        VkImage* pImage) {
+  reinterpret_cast<MockDevice*>(device)->AddCalledFunction("vkCreateImage");
+  // Simulate VK_ERROR_COMPRESSION_EXHAUSTED_EXT for fixed-rate-compressed image
+  // creates (the spec only returns this error for compression requests).
+  if (g_mock_vulkan_state &&
+      g_mock_vulkan_state->compression_exhausted_create_image_failures > 0) {
+    const auto* next =
+        reinterpret_cast<const VkBaseInStructure*>(pCreateInfo->pNext);
+    while (next != nullptr) {
+      if (next->sType == VK_STRUCTURE_TYPE_IMAGE_COMPRESSION_CONTROL_EXT) {
+        g_mock_vulkan_state->compression_exhausted_create_image_failures--;
+        return VK_ERROR_COMPRESSION_EXHAUSTED_EXT;
+      }
+      next = next->pNext;
+    }
+  }
   *pImage = reinterpret_cast<VkImage>(0xD0D0CACA);
   return VK_SUCCESS;
 }
@@ -436,6 +547,12 @@ VkResult vkCreateGraphicsPipelines(
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   mock_device->AddCalledFunction("vkCreateGraphicsPipelines");
   *pPipelines = reinterpret_cast<VkPipeline>(0x99999999);
+  return VK_SUCCESS;
+}
+
+VkResult vkDeviceWaitIdle(VkDevice device) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkDeviceWaitIdle");
   return VK_SUCCESS;
 }
 
@@ -542,6 +659,9 @@ void vkCmdSetViewport(VkCommandBuffer commandBuffer,
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
   mock_command_buffer->called_functions_->push_back("vkCmdSetViewport");
+  for (uint32_t i = 0; i < viewportCount; ++i) {
+    mock_command_buffer->recorded_viewports_.push_back(pViewports[i]);
+  }
 }
 
 void vkFreeCommandBuffers(VkDevice device,
@@ -582,10 +702,20 @@ VkResult vkDestroyFence(VkDevice device,
   return VK_SUCCESS;
 }
 
+void vkGetDeviceQueue(VkDevice device,
+                      uint32_t queueFamilyIndex,
+                      uint32_t queueIndex,
+                      VkQueue* pQueue) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  *pQueue = reinterpret_cast<VkQueue>(&mock_device->GetQueue());
+}
+
 VkResult vkQueueSubmit(VkQueue queue,
                        uint32_t submitCount,
                        const VkSubmitInfo* pSubmits,
                        VkFence fence) {
+  const MockQueue* mock_queue = reinterpret_cast<const MockQueue*>(queue);
+  mock_queue->device().AddCalledFunction("vkQueueSubmit");
   return VK_SUCCESS;
 }
 
@@ -874,6 +1004,14 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
         vkGetPhysicalDeviceFormatProperties);
   } else if (strcmp("vkGetPhysicalDeviceProperties", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkGetPhysicalDeviceProperties);
+  } else if (strcmp("vkGetPhysicalDeviceFeatures2", pName) == 0 ||
+             strcmp("vkGetPhysicalDeviceFeatures2KHR", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetPhysicalDeviceFeatures2);
+  } else if (strcmp("vkGetPhysicalDeviceImageFormatProperties2", pName) == 0 ||
+             strcmp("vkGetPhysicalDeviceImageFormatProperties2KHR", pName) ==
+                 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetPhysicalDeviceImageFormatProperties2);
   } else if (strcmp("vkGetPhysicalDeviceQueueFamilyProperties", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(
         vkGetPhysicalDeviceQueueFamilyProperties);
@@ -929,6 +1067,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreatePipelineLayout);
   } else if (strcmp("vkCreateGraphicsPipelines", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateGraphicsPipelines);
+  } else if (strcmp("vkDeviceWaitIdle", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDeviceWaitIdle);
   } else if (strcmp("vkDestroyDevice", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyDevice);
   } else if (strcmp("vkDestroyInstance", pName) == 0) {
@@ -961,6 +1101,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateFence);
   } else if (strcmp("vkDestroyFence", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyFence);
+  } else if (strcmp("vkGetDeviceQueue", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetDeviceQueue);
   } else if (strcmp("vkQueueSubmit", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkQueueSubmit);
   } else if (strcmp("vkWaitForFences", pName) == 0) {
@@ -1026,6 +1168,7 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
 
 MockVulkanContextBuilder::MockVulkanContextBuilder()
     : instance_extensions_({"VK_KHR_surface", "VK_MVK_macos_surface"}),
+      device_extensions_({"VK_KHR_swapchain"}),
       format_properties_callback_([](VkPhysicalDevice physicalDevice,
                                      VkFormat format,
                                      VkFormatProperties* pFormatProperties) {
@@ -1054,12 +1197,15 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   g_mock_vulkan_state.reset(new MockVulkanState());
   g_mock_vulkan_state->instance_extensions = instance_extensions_;
   g_mock_vulkan_state->instance_layers = instance_layers_;
+  g_mock_vulkan_state->device_extensions = device_extensions_;
   g_mock_vulkan_state->format_properties_callback = format_properties_callback_;
   g_mock_vulkan_state->physical_device_properties_callback =
       physical_properties_callback_;
   g_mock_vulkan_state->acquire_next_image_callback =
       acquire_next_image_callback_;
   g_mock_vulkan_state->wait_for_fences_callback = wait_for_fences_callback_;
+  g_mock_vulkan_state->compression_exhausted_create_image_failures =
+      compression_exhausted_create_image_failures_;
   settings.embedder_data = embedder_data_;
   std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
   return result;
@@ -1080,6 +1226,12 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(buffer);
   return mock_command_buffer->image_memory_barriers_;
+}
+
+const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(buffer);
+  return mock_command_buffer->recorded_viewports_;
 }
 
 }  // namespace testing

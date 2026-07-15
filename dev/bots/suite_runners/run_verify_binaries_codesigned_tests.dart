@@ -14,7 +14,7 @@ import '../utils.dart';
 
 Future<void> verifyCodesignedTestRunner() async {
   printProgress('${green}Running binaries codesign verification$reset');
-  await runCommand('flutter', <String>[
+  await runCommand(path.join(flutterRoot, 'bin', 'flutter'), <String>[
     'precache',
     '--android',
     '--ios',
@@ -23,13 +23,14 @@ Future<void> verifyCodesignedTestRunner() async {
 
   await verifyExist(flutterRoot);
   await verifySignatures(flutterRoot);
+  await verifyFatBinaries(flutterRoot);
 }
 
 /// Some binaries should always be codesigned, even on master. Verify that they
 /// are codesigned and have the correct entitlements.
 Future<void> verifyPreCodesignedTestRunner() async {
   printProgress('${green}Running binaries codesign verification$reset');
-  await runCommand('flutter', <String>[
+  await runCommand(path.join(flutterRoot, 'bin', 'flutter'), <String>[
     'precache',
     '--android',
     '--ios',
@@ -38,6 +39,7 @@ Future<void> verifyPreCodesignedTestRunner() async {
 
   await verifyExist(flutterRoot);
   await verifySignatures(flutterRoot, forRelease: false);
+  await verifyFatBinaries(flutterRoot);
 }
 
 const List<String> expectedEntitlements = <String>[
@@ -52,7 +54,10 @@ const List<String> expectedEntitlements = <String>[
 /// Binaries that are expected to be codesigned and have entitlements.
 ///
 /// This list should be kept in sync with the actual contents of Flutter's
-/// cache.
+/// cache. You may also need to update the
+/// `//flutter/build/archives:artifacts_entitlement_config`
+/// `//flutter/build/archives:dart_sdk_entitlement_config`
+/// gn targets which populate the entitlement files.
 List<String> binariesWithEntitlements(String flutterRoot) {
   final List<String> binaries = <String>[
     'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
@@ -96,6 +101,7 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
     'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/font-subset',
+    'artifacts/engine/darwin-x64/frontend_server_aot.dart.snapshot',
     'artifacts/engine/darwin-x64/impellerc',
     'artifacts/engine/darwin-x64/libpath_ops.dylib',
     'artifacts/engine/darwin-x64/libtessellator.dylib',
@@ -111,6 +117,17 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
     'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
     'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
     'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'dart-sdk/bin/snapshots/analysis_server_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dart2bytecode.dart.snapshot',
+    'dart-sdk/bin/snapshots/dart2js_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dart2wasm_product.snapshot',
+    'dart-sdk/bin/snapshots/dart_tooling_daemon_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dartdev_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dartdevc_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dds_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/gen_kernel_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/kernel_worker_aot.dart.snapshot',
   ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 
   presignedBinariesWithoutEntitlements(flutterRoot).forEach(binaries.add);
@@ -335,6 +352,43 @@ Future<void> verifySignatures(
   print('Verified that files are codesigned and have expected entitlements.');
 }
 
+/// Verify that specific binaries are fat binaries containing both x86_64 and arm64 slices.
+Future<void> verifyFatBinaries(
+  String flutterRoot, {
+  @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+}) async {
+  final List<String> fatBinaries =
+      presignedBinariesWithEntitlements(flutterRoot) +
+      presignedBinariesWithoutEntitlements(flutterRoot);
+  final failedBinaries = <String>[];
+
+  for (final binaryPath in fatBinaries) {
+    print('Verifying fat binary architectures for $binaryPath');
+    final io.ProcessResult result = await processManager.run(<String>['file', binaryPath]);
+
+    if (result.exitCode != 0) {
+      print('Failed to run file command on $binaryPath: \n${result.stderr}');
+      failedBinaries.add(binaryPath);
+      continue;
+    }
+
+    final output = result.stdout as String;
+    final bool containsX86_64 = output.contains('x86_64');
+    final bool containsArm64 = output.contains('arm64');
+
+    if (!containsX86_64 || !containsArm64) {
+      print('Binary $binaryPath is not a fat binary containing both x86_64 and arm64.');
+      print('Output: $output');
+      failedBinaries.add(binaryPath);
+    }
+  }
+
+  if (failedBinaries.isNotEmpty) {
+    throw Exception('Failed fat binary verification for:\n${failedBinaries.join('\n')}');
+  }
+  print('All expected fat binaries verified.');
+}
+
 /// Find every binary file in the given [rootDirectory].
 Future<List<String>> findBinaryPaths(
   String rootDirectory, {
@@ -394,7 +448,8 @@ Future<bool> isBinary(
     '-b', // is binary
     filePath,
   ]);
-  return (result.stdout as String).contains('application/x-mach-binary');
+  final output = result.stdout as String;
+  return output.contains('application/x-mach-binary') || output.contains('application/x-sharedlib');
 }
 
 /// Check if the binary has the expected entitlements.
