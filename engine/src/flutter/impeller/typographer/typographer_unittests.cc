@@ -526,9 +526,9 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
         atlas_size.height < prev_atlas_size.height) {
       // We've triggered an atlas flush and recreate. We're done.
 
-      // The final atlas should contain both the "A" glyph (which was not present
-      // in the previous atlas) and the "B" glyph (which existed in the previous
-      // atlas).
+      // The final atlas should contain both the "A" glyph (which was not
+      // present in the previous atlas) and the "B" glyph (which existed
+      // in the previous atlas).
       ASSERT_EQ(atlas->GetGlyphCount(), 2u);
       return;
     }
