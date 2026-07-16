@@ -300,7 +300,7 @@ abstract class BindingBase {
   }
 
   void _setupListenableHooks() {
-    Listenable.onError = (Object error, StackTrace? stackTrace, {ErrorContext? context}) {
+    Listenable.onError = (Object error, StackTrace? stackTrace, ErrorContext context) {
       switch (context) {
         case ErrorContext.assertion:
           if (error is FlutterError) {
@@ -313,7 +313,6 @@ abstract class BindingBase {
           };
           throw FlutterError(message);
         case ErrorContext.listener:
-        case null:
           FlutterError.reportError(
             FlutterErrorDetails(
               exception: error,

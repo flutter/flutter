@@ -638,10 +638,10 @@ packages:
     dependency: transitive
     description:
       name: listen
-      sha256: "40cfdfa71dc52a29c22873fc62458b9139cd36f65f96ffcfae2c21607bcc1dd6"
+      sha256: cb0ad74d7453d8f83a7c1fae401828681ef5df21d41a3a26a04af590c985d085
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-beta.3"
+    version: "1.0.0-beta.4"
   logging:
     dependency: "direct main"
     description:
