@@ -23,6 +23,7 @@ import '_window_io.dart' if (dart.library.js_interop) '_window_web.dart' as wind
 import '_window_positioner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'default_text_editing_shortcuts.dart';
 import 'framework.dart';
 import 'inherited_model.dart';
 import 'transitions.dart';
@@ -1686,7 +1687,10 @@ class DialogWindow extends StatelessWidget {
       listenable: controller,
       builder: (BuildContext context, Widget? widget) => WindowScope(
         controller: controller,
-        child: View(view: controller.rootView, child: child),
+        child: View(
+          view: controller.rootView,
+          child: DefaultTextEditingShortcuts(child: child),
+        ),
       ),
     );
   }
@@ -1730,7 +1734,10 @@ class TooltipWindow extends StatelessWidget {
       listenable: controller,
       builder: (BuildContext context, Widget? widget) => WindowScope(
         controller: controller,
-        child: View(view: controller.rootView, child: child),
+        child: View(
+          view: controller.rootView,
+          child: DefaultTextEditingShortcuts(child: child),
+        ),
       ),
     );
   }
@@ -1792,7 +1799,10 @@ class PopupWindow extends StatelessWidget {
       listenable: controller,
       builder: (BuildContext context, Widget? widget) => WindowScope(
         controller: controller,
-        child: View(view: controller.rootView, child: child),
+        child: View(
+          view: controller.rootView,
+          child: DefaultTextEditingShortcuts(child: child),
+        ),
       ),
     );
   }
@@ -1854,7 +1864,10 @@ class SatelliteWindow extends StatelessWidget {
       listenable: controller,
       builder: (BuildContext context, Widget? widget) => WindowScope(
         controller: controller,
-        child: View(view: controller.rootView, child: child),
+        child: View(
+          view: controller.rootView,
+          child: DefaultTextEditingShortcuts(child: child),
+        ),
       ),
     );
   }
