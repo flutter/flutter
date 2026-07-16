@@ -618,6 +618,19 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     return RangeValues(_unlerp(values.start), _unlerp(values.end));
   }
 
+  Widget _buildThumbFocusDetector({
+    required FocusNode focusNode,
+    required ValueChanged<bool> onShowFocusHighlight,
+  }) {
+    return FocusableActionDetector(
+      focusNode: focusNode,
+      enabled: _enabled,
+      includeFocusSemantics: false,
+      onShowFocusHighlight: onShowFocusHighlight,
+      child: const SizedBox.shrink(),
+    );
+  }
+
   // Finds the closest thumb. If both thumbs are close to each other and within
   // the touch radius, neither is selected immediately while the drag
   // displacement is zero. The first non-zero displacement determines which
@@ -805,19 +818,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         // Adds two invisible focus nodes to the range slider for its two thumbs.
         Row(
           children: <Widget>[
-            FocusableActionDetector(
+            _buildThumbFocusDetector(
               focusNode: startFocusNode,
-              enabled: _enabled,
-              includeFocusSemantics: false,
               onShowFocusHighlight: _handleStartFocusHighlightChanged,
-              child: const SizedBox.shrink(),
             ),
-            FocusableActionDetector(
+            _buildThumbFocusDetector(
               focusNode: endFocusNode,
-              enabled: _enabled,
-              includeFocusSemantics: false,
               onShowFocusHighlight: _handleEndFocusHighlightChanged,
-              child: const SizedBox.shrink(),
             ),
           ],
         ),
