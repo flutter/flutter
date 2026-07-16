@@ -27,10 +27,7 @@ void AiksPlayground::TearDown() {
   PlaygroundTest::TearDown();
 }
 
-bool AiksPlayground::ImGuiBegin(const char* name,
-                                bool* p_open,
-                                ImGuiWindowFlags flags) {
-  ImGui::Begin(name, p_open, flags);
+bool AiksPlaygroundWithGoldens::IsGoldenTestSuite() const {
   return true;
 }
 
