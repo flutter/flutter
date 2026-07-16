@@ -32,6 +32,19 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.44 Changes
 
+### [3.44.6](https://github.com/flutter/flutter/releases/tag/3.44.6)
+- [flutter/187980](https://github.com/flutter/flutter/issues/187980) On Linux, building asset bundles with native assets enabled without a native app build directory crashes due to missing `CMakeCache.txt`.
+- [flutter/188805](https://github.com/flutter/flutter/issues/188805) Fixes a crash when running Android instrumented tests.
+
+### [3.44.5](https://github.com/flutter/flutter/releases/tag/3.44.5)
+- [flutter/188718](https://github.com/flutter/flutter/issues/188718) When building Flutter Android apps and add-to-app modules using AGP < 9 with KGP, the tool incorrectly logs Built-in Kotlin migration warnings.
+- [flutter/186810](https://github.com/flutter/flutter/issues/186810) [flutter/187388](https://github.com/flutter/flutter/issues/187388) [flutter/187553](https://github.com/flutter/flutter/issues/187553) When building Android app bundles using flavors, or with an old app template combined with a plugin coming alphabetically before app, fixes problems with failing to include libapp.so in the produced app bundle.
+- [flutter/188035](https://github.com/flutter/flutter/issues/188035) When rendering text with shadows, the shadows would appear elsewhere on the screen, separate from the text.
+- [flutter/187237](https://github.com/flutter/flutter/issues/187237) Fixes a crash that can happen during app shutdown or rotation on some Android devices using Impeller/Vulkan with HCPP.
+
+### [3.44.4](https://github.com/flutter/flutter/releases/tag/3.44.4)
+- [flutter/188192](https://github.com/flutter/flutter/issues/188192) Fix bounds checking in Flutter Linux's FlAccessibleTextField.
+
 ### [3.44.3](https://github.com/flutter/flutter/releases/tag/3.44.3)
 - [flutter/186738](https://github.com/flutter/flutter/issues/186738) Demote flavor/platform asset skipping messages from warning to trace level to reduce build log noise.
 - [flutter/186899](https://github.com/flutter/flutter/issues/186899) On Android, destroying a texture before the GLES fence that it holds was used may cause a crash.
