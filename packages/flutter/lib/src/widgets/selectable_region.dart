@@ -540,8 +540,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
-    }
-    if (_webContextMenuEnabled) {
+    } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
@@ -1935,6 +1934,9 @@ class SelectableRegionState extends State<SelectableRegion>
   void dispose() {
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
+    if (_webContextMenuEnabled) {
+      PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+    }
     _selectionDelegate.dispose();
     _selectionStatusNotifier.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier

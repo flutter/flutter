@@ -142,6 +142,120 @@ void main() {
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   }, variant: _browserContextMenuEnabledVariants);
 
+  testWidgets(
+    'detach only clears the active client when detaching the active client',
+    (WidgetTester tester) async {
+      final focusNodeA = FocusNode();
+      final focusNodeB = FocusNode();
+      addTearDown(focusNodeA.dispose);
+      addTearDown(focusNodeB.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 100,
+                child: SelectableRegion(
+                  focusNode: focusNodeA,
+                  selectionControls: emptyTextSelectionControls,
+                  child: const SelectionSpy(),
+                ),
+              ),
+              SizedBox(
+                height: 100,
+                child: SelectableRegion(
+                  focusNode: focusNodeB,
+                  selectionControls: emptyTextSelectionControls,
+                  child: const SelectionSpy(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      focusNodeA.requestFocus();
+      await tester.pump();
+      final SelectionContainerDelegate delegateA =
+          PlatformSelectableRegionContextMenu.debugActiveClient!;
+
+      focusNodeB.requestFocus();
+      await tester.pump();
+      final SelectionContainerDelegate delegateB =
+          PlatformSelectableRegionContextMenu.debugActiveClient!;
+      expect(delegateB, isNot(same(delegateA)));
+
+      // Detaching a client that is not the active client must not clear
+      // the active client.
+      PlatformSelectableRegionContextMenu.detach(delegateA);
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, same(delegateB));
+
+      // Detaching the active client must clear it.
+      PlatformSelectableRegionContextMenu.detach(delegateB);
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+    },
+    variant: _browserContextMenuEnabledVariants,
+  );
+
+  testWidgets(
+    'losing focus detaches the client and does not reattach it',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: emptyTextSelectionControls,
+            child: const SelectionSpy(),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+      focusNode.unfocus();
+      await tester.pump();
+
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+    },
+    variant: _browserContextMenuEnabledVariants,
+  );
+
+  testWidgets(
+    'disposing a SelectableRegion detaches its client from the context menu',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: emptyTextSelectionControls,
+            child: const SelectionSpy(),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+      // Removing the SelectableRegion disposes its state without ever
+      // losing focus on the externally-owned focus node, so only the
+      // dispose-time detach can clear the static reference.
+      await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+    },
+    variant: _browserContextMenuEnabledVariants,
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/157579
   testWidgets('prevents default action of mousedown events', (WidgetTester tester) async {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
