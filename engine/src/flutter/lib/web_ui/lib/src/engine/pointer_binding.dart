@@ -482,6 +482,14 @@ class ClickDebouncer {
     EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(packet);
   }
 
+  /// Forwards [data] to the framework immediately, bypassing the debounce queue.
+  ///
+  /// For synthetic events that must not be queued or dropped by an in-progress
+  /// debounce, such as cancels that repair a pointer the browser abandoned.
+  void sendImmediately(List<ui.PointerData> data) {
+    _sendToFramework(null, data);
+  }
+
   /// Cancels any pending debounce process and forgets anything that happened so
   /// far.
   ///
@@ -1007,6 +1015,13 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   final Map<int, _ButtonSanitizer> _sanitizers = <int, _ButtonSanitizer>{};
 
+  /// Touch devices that went down and have not been released yet.
+  ///
+  /// A device leaves this set when the browser reports `pointerup` or
+  /// `pointercancel`, or when [_cancelAbandonedTouches] gives up on it. It is
+  /// what that method reconciles against the touches actually on the surface.
+  final Set<int> _downTouchDevices = <int>{};
+
   @visibleForTesting
   Iterable<int> debugTrackedDevices() => _sanitizers.keys;
 
@@ -1026,6 +1041,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   void _removePointerIfUnhoverable(DomPointerEvent event) {
     if (event.pointerType == 'touch') {
       _sanitizers.remove(event.pointerId);
+      _downTouchDevices.remove(_getPointerId(event));
     }
   }
 
@@ -1071,6 +1087,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         buttons: event.buttons!.toInt(),
       );
       _convertEventsToPointerData(data: pointerData, event: event, details: down);
+      if (event.pointerType == 'touch') {
+        _downTouchDevices.add(device);
+      }
       _callback(event, pointerData);
 
       if (event.target == _viewTarget) {
@@ -1177,9 +1196,77 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     }, checkModifiers: false);
 
+    // Safety net for touches the browser abandons without a `pointerup` or a
+    // `pointercancel`. See [_cancelAbandonedTouches].
+    addEventListener(_globalTarget, 'touchend', (DomEvent event) {
+      _cancelAbandonedTouches(event as DomTouchEvent);
+    });
+    addEventListener(_globalTarget, 'touchcancel', (DomEvent event) {
+      _cancelAbandonedTouches(event as DomTouchEvent);
+    });
+
     _addWheelEventListener((DomEvent event) {
       _handleWheelEvent(event);
     });
+  }
+
+  /// Cancels touch pointers that the browser stopped reporting mid-gesture.
+  ///
+  /// iOS WebKit stops dispatching pointer events for a touch once it promotes
+  /// that touch to a native gesture, such as dragging the caret inside a text
+  /// field. It delivers neither `pointerup` nor `pointercancel`, so the
+  /// framework is left with a pointer that never lifts, and any gesture
+  /// recognizer tracking it is wedged forever.
+  ///
+  /// Observed on iOS 27; iOS 26 does not do it. Gated to iOS because the
+  /// reconciliation below relies on WebKit behavior that other engines do not
+  /// guarantee, in particular that a `Touch.identifier` equals its pointer
+  /// event's `pointerId`. Despite its name, [isIosSafari] means WebKit on iOS,
+  /// so the gate covers every browser on iOS, not just Safari.
+  /// See: https://github.com/flutter/flutter/issues/188781
+  ///
+  /// On iOS WebKit, `touches` still reports the truth throughout: it lists the
+  /// touches in contact with the surface, and drops an abandoned one once the
+  /// finger leaves. Only the pointer events go missing. So any touch this class
+  /// believes is down, but which the browser does not report as being on the
+  /// surface, has been abandoned and must be cancelled.
+  ///
+  /// The cancel is sent straight to the framework rather than through the click
+  /// debouncer: it repairs an older, unrelated pointer, and must not be queued
+  /// or dropped by debouncing of a concurrent tap.
+  void _cancelAbandonedTouches(DomTouchEvent event) {
+    if (!isIosSafari || _downTouchDevices.isEmpty) {
+      return;
+    }
+
+    final onSurface = <int>{
+      for (final DomTouch touch in event.touches)
+        if (touch.identifier?.toInt() case final int device) device,
+    };
+    final Set<int> stale = _downTouchDevices.difference(onSurface);
+    if (stale.isEmpty) {
+      return;
+    }
+
+    final pointerData = <ui.PointerData>[];
+    final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
+    for (final device in stale) {
+      _sanitizers.remove(device);
+      // `convert` defaults `change` to `PointerChange.cancel`. It also replaces
+      // a cancel's coordinates with the pointer's last known location, so no
+      // position is supplied here.
+      _pointerDataConverter.convert(
+        pointerData,
+        viewId: _view.viewId,
+        timeStamp: timeStamp,
+        signalKind: ui.PointerSignalKind.none,
+        device: device,
+        pressureMax: 1.0,
+      );
+    }
+    _downTouchDevices.removeAll(stale);
+
+    PointerBinding.clickDebouncer.sendImmediately(pointerData);
   }
 
   // For each event that is de-coalesced from `event` and described in
