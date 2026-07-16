@@ -127,26 +127,26 @@ Future<void> testMain() async {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     final builder = WebParagraphBuilder(paragraphStyle);
-    builder.addText('Line1\nLine2\nLine3');
+    builder.addText('1 234\n\n');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.getLineBoundary(
         const ui.TextPosition(offset: 0 /* affinity: ui.TextAffinity.downstream */),
       ),
-      const ui.TextRange(start: 0, end: 6),
+      const ui.TextRange(start: 0, end: 5),
     );
     expect(
       paragraph.getLineBoundary(
         const ui.TextPosition(offset: 6 /* affinity: ui.TextAffinity.downstream */),
       ),
-      const ui.TextRange(start: 6, end: 12),
+      const ui.TextRange(start: 6, end: 7),
     );
     expect(
       paragraph.getLineBoundary(
-        const ui.TextPosition(offset: 12 /* affinity: ui.TextAffinity.downstream */),
+        const ui.TextPosition(offset: 7 /* affinity: ui.TextAffinity.downstream */),
       ),
-      const ui.TextRange(start: 12, end: 17),
+      const ui.TextRange(start: 6, end: 7),
     );
 
     expect(

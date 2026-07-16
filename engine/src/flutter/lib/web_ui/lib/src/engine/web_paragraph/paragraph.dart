@@ -913,6 +913,9 @@ class WebParagraph implements ui.Paragraph {
         'getBoxesForRange($start, $end, $boxHeightStyle, $boxWidthStyle): ${result.map((r) => r.toString()).toList()}',
       );
     }
+    print(
+      'getBoxesForRange($start, $end, $boxHeightStyle, $boxWidthStyle): ${result.map((r) => r.toString()).toList()}',
+    );
     return result;
   }
 
@@ -932,6 +935,8 @@ class WebParagraph implements ui.Paragraph {
     final ui.GlyphInfo? result = getGlyphInfoAt(
       position.offset + (position.affinity == ui.TextAffinity.downstream ? 0 : -1),
     );
+    print('getClosestGlyphInfoForOffset($offset): ${result?.graphemeClusterCodeUnitRange}');
+
     if (result == null) {
       WebParagraphDebug.apiTrace(
         'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
@@ -939,7 +944,6 @@ class WebParagraph implements ui.Paragraph {
       );
       return null;
     }
-
     WebParagraphDebug.apiTrace(
       'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
       'TextPosition(${position.offset}, ${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
@@ -959,6 +963,9 @@ class WebParagraph implements ui.Paragraph {
     }
     final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
     WebParagraphDebug.apiTrace('getGlyphInfoAt($codeUnitOffset): $result');
+    print(
+      'getGlyphInfoAt($codeUnitOffset): ${result?.graphemeClusterCodeUnitRange} ${result?.graphemeClusterLayoutBounds}',
+    );
     return result;
   }
 
@@ -989,6 +996,15 @@ class WebParagraph implements ui.Paragraph {
       'longestLine=${longestLine.toStringAsFixed(4)} '
       'maxLineWidthWithTrailingSpaces=${maxLineWidthWithTrailingSpaces.toStringAsFixed(4)} lines=${_layout.lines.length}',
     );
+    print('layout(): $numberOfLines');
+    for (final TextLine line in _layout.lines) {
+      print(
+        'line[${line.lineNumber}] text:[${line.allLineTextRange.start}:${line.allLineTextRange.end}) -spaces:${line.whitespacesRange.end} +newline:${line.hardLineBreakRange.end} ${line.hardLineBreakRange.isNotEmpty}',
+      );
+    }
+    for (int i = text.length; i >= 0; i--) {
+      getLineBoundary(ui.TextPosition(offset: i));
+    }
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
@@ -1037,10 +1053,38 @@ class WebParagraph implements ui.Paragraph {
       // When the offset is outside of the paragraph's range, we know it doesn't belong to any of
       // the lines.
       WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): null (out of text range)');
+      print('getLineNumberAt($codeUnitOffset): null 1');
       return null;
     }
 
+    if (_layout.lines.isEmpty || (_layout.lines.last.hardLineBreakRange.end <= codeUnitOffset)) {
+      print('getLineNumberAt($codeUnitOffset): null 2');
+      return null;
+    }
+
+    var startLine = 0;
+    int endLine = _layout.lines.length - 1;
+
+    while (endLine > startLine) {
+      // startLine + 1 <= endLine, so we have startLine <= midLine <= endLine - 1.
+      final int midLine = ((endLine + startLine) / 2).floor();
+      final ui.TextRange midLineRange = _layout.lines[midLine].allLineTextRange;
+      if (codeUnitOffset < midLineRange.start) {
+        endLine = midLine - 1;
+      } else if (midLineRange.end <= codeUnitOffset) {
+        startLine = midLine + 1;
+      } else {
+        print('getLineNumberAt($codeUnitOffset): $midLine');
+        return midLine;
+      }
+    }
+    assert(startLine == endLine);
+    print('getLineNumberAt($codeUnitOffset)| $startLine');
+    return startLine;
+
+    /*
     for (final TextLine line in _layout.lines) {
+      print('line[${line.lineNumber}]: ${line.allLineTextRange}');
       if (line.allLineTextRange.isBefore(codeUnitOffset)) {
         // We haven't reached the offset yet, keep going.
         continue;
@@ -1050,11 +1094,13 @@ class WebParagraph implements ui.Paragraph {
       }
 
       WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
+      print('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
       return line.lineNumber;
     }
 
     assert(false, 'getLineNumberAt($codeUnitOffset): null (out of range, should not happen)');
     return null;
+    */
   }
 
   void clearPaintCache() {
