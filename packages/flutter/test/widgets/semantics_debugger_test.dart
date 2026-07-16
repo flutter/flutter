@@ -563,6 +563,17 @@ void main() {
     );
     expect(tester.binding.semanticsEnabled, isTrue);
   }, semanticsEnabled: false);
+
+  testWidgets('SemanticsDebugger does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: SemanticsDebugger(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SemanticsDebugger)), Size.zero);
+  });
 }
 
 String _getMessageShownInSemanticsDebugger({

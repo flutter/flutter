@@ -59,6 +59,13 @@ static void moved_to_rect_cb(FlWindowMonitor* self,
                              GdkRectangle* final_rect,
                              gboolean flipped_x,
                              gboolean flipped_y) {
+  // According to the documentation, the final_rect can be null
+  // if the backend can't obtain it.
+  // Reference: https://docs.gtk.org/gdk3/signal.Window.moved-to-rect.html
+  if (final_rect == nullptr) {
+    return;
+  }
+
   flutter::IsolateScope scope(self->isolate);
   self->on_moved_to_rect(final_rect->x, final_rect->y, final_rect->width,
                          final_rect->height);
