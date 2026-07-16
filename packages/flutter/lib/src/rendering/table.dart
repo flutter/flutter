@@ -1459,7 +1459,7 @@ class RenderTable extends RenderBox {
     // Tracks which cells are covered by a colSpan and/or rowSpan so the inner
     // borders that fall inside a span can be skipped while painting. See
     // [TableSpannedCells].
-    final spannedCells = TableSpannedCells(rows: rows, columns: columns);
+    final spannedCells = TableSpannedCells._(rows: rows, columns: columns);
     // Use typed lists for predictable memory layout and faster indexed access.
     final columnStartPositions = Float64List(columns);
     final remainingRowSpanHeights = Float64List(rows);
@@ -1563,16 +1563,16 @@ class RenderTable extends RenderBox {
               // dy > 0: this cell is covered by the vertical (rowSpan) extent.
               // Corner cells (dx > 0 AND dy > 0) are marked as both.
               if (dx > 0) {
-                spannedCells.markColumnSpanned(x + dx, y + dy);
+                spannedCells._markColumnSpanned(x + dx, y + dy);
               }
               if (dy > 0) {
-                spannedCells.markRowSpanned(x + dx, y + dy);
+                spannedCells._markRowSpanned(x + dx, y + dy);
               }
             }
           }
         }
 
-        final bool isHiddenCell = spannedCells.isSpanned(x, y);
+        final bool isHiddenCell = spannedCells._isSpanned(x, y);
         if (isHiddenCell) {
           assert(
             !childParentData._isVisible,
@@ -1680,7 +1680,7 @@ class RenderTable extends RenderBox {
 
         final childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
-        final bool isHiddenCell = spannedCells.isSpanned(x, y);
+        final bool isHiddenCell = spannedCells._isSpanned(x, y);
         if (isHiddenCell) {
           assert(
             !childParentData._isVisible,
@@ -1736,7 +1736,7 @@ class RenderTable extends RenderBox {
 
     // Publish the spanned-cell map for use during border painting, or clear it
     // when the table has no spanning cells.
-    _cachedSpannedCells = spannedCells.hasSpannedCells ? spannedCells : null;
+    _cachedSpannedCells = spannedCells._hasSpannedCells ? spannedCells : null;
   }
 
   @override
@@ -1894,4 +1894,74 @@ class _Index {
 
   @override
   int get hashCode => Object.hash(y, x);
+}
+
+/// Records which cells in a table are covered ("hidden") by a spanning cell.
+///
+/// This is typically used by [TableBorder] to decide whether to skip painting
+/// some of the cell dividers.
+///
+/// A cell can be covered in two independent ways, and both are tracked here:
+///
+///  * **column-spanned** – covered by a horizontal (colSpan) span from a
+///    preceding cell in the same row.
+///  * **row-spanned** – covered by a vertical (rowSpan) span from a cell above.
+///
+/// A cell in the interior of a rectangular span is both column- and row-spanned.
+class TableSpannedCells {
+  // Only [RenderTable] populates this map, during layout. Consumers such as
+  // [TableBorder] receive it read-only, so painting can never mutate the flags
+  // that layout derived.
+  TableSpannedCells._({required int rows, required int columns})
+    : _columns = columns,
+      // Both flags of every cell are packed into a single bitmap, 8 bits to a
+      // byte: `* 2` reserves both bits for every cell, `+ 7` rounds the total
+      // bit count up so a trailing partial byte is still allocated, and `>> 3`
+      // converts the bit count to a byte count (an integer divide by 8).
+      _bits = Uint8List((rows * columns * 2 + 7) >> 3);
+
+  final int _columns;
+
+  // The packed flags, in row-major order. See [_bitIndexFor].
+  final Uint8List _bits;
+
+  // Whether any cell has been marked as covered by a span.
+  bool _hasSpannedCells = false;
+
+  // Each cell reserves two consecutive bits in [_bits]; these are their offsets
+  // within that pair.
+  static const int _columnSpanFlag = 0;
+  static const int _rowSpanFlag = 1;
+
+  // The absolute bit index of `flag` for the cell at (x, y). Cells are stored in
+  // row-major order and each cell owns two bits, hence the `* 2`.
+  int _bitIndexFor(int x, int y, int flag) => (y * _columns + x) * 2 + flag;
+
+  void _setFlag(int x, int y, int flag) {
+    final int bit = _bitIndexFor(x, y, flag);
+    // `bit >> 3` selects the byte holding the flag (bit ~/ 8) and `bit & 7` is
+    // the position within that byte (bit % 8).
+    _bits[bit >> 3] |= 1 << (bit & 7);
+    _hasSpannedCells = true;
+  }
+
+  bool _hasFlag(int x, int y, int flag) {
+    final int bit = _bitIndexFor(x, y, flag);
+    return _bits[bit >> 3] & (1 << (bit & 7)) != 0;
+  }
+
+  // Marks the cell at (x, y) as covered by a horizontal (colSpan) span.
+  void _markColumnSpanned(int x, int y) => _setFlag(x, y, _columnSpanFlag);
+
+  // Marks the cell at (x, y) as covered by a vertical (rowSpan) span.
+  void _markRowSpanned(int x, int y) => _setFlag(x, y, _rowSpanFlag);
+
+  // Whether the cell at (x, y) is covered by any span.
+  bool _isSpanned(int x, int y) => isColumnSpanned(x, y) || isRowSpanned(x, y);
+
+  /// Whether the cell at (`x`, `y`) is covered by a horizontal (colSpan) span.
+  bool isColumnSpanned(int x, int y) => _hasFlag(x, y, _columnSpanFlag);
+
+  /// Whether the cell at (`x`, `y`) is covered by a vertical (rowSpan) span.
+  bool isRowSpanned(int x, int y) => _hasFlag(x, y, _rowSpanFlag);
 }
