@@ -257,6 +257,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
+  Future<CpuArch> get cpuArch async => CpuArch.arm64;
+
+  @override
   Future<bool> get isLocalEmulator async => false;
 
   @override

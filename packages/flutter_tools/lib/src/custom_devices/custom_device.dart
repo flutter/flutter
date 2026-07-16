@@ -779,6 +779,16 @@ class CustomDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
 
   @override
+  Future<CpuArch> get cpuArch async {
+    // Custom devices only support Linux target platforms (see
+    // CustomDeviceConfig), so the arch is derived from that.
+    return switch (_config.platform) {
+      TargetPlatform.linux_x64 => CpuArch.x86_64,
+      _ => CpuArch.arm64,
+    };
+  }
+
+  @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     final String? appName = app.name;
     if (appName == null) {
