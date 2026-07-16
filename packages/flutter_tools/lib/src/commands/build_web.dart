@@ -116,6 +116,11 @@ class BuildWebCommand extends BuildSubCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag(
+      'enable-wasm-deferred-loading',
+      help: 'Enable multi-module deferred loading for Wasm.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
       'wasm-dry-run',
       defaultsTo: true,
       help:
@@ -210,6 +215,7 @@ class BuildWebCommand extends BuildSubCommand {
           stripWasm: boolArg('strip-wasm'),
           sourceMaps: sourceMaps,
           minify: minifyWasm,
+          enableWasmDeferredLoading: boolArg('enable-wasm-deferred-loading'),
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
@@ -239,6 +245,7 @@ class BuildWebCommand extends BuildSubCommand {
             stripWasm: boolArg('strip-wasm'),
             sourceMaps: sourceMaps,
             minify: minifyWasm,
+            enableWasmDeferredLoading: boolArg('enable-wasm-deferred-loading'),
             dryRun: true,
           ),
       ];

@@ -394,6 +394,16 @@ std::shared_ptr<Allocator> ContextMTL::GetResourceAllocator() const {
   return resource_allocator_;
 }
 
+std::shared_ptr<const GpuSubmissionTracker> ContextMTL::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextMTL::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
+}
+
 id<MTLDevice> ContextMTL::GetMTLDevice() const {
   return device_;
 }
