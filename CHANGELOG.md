@@ -33,7 +33,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ## Flutter 3.44 Changes
 
 ### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)
-- [flutter/189272](https://github.com/flutter/flutter/pull/189272) Fixes a resource leak that sometimes caused crashes when using external textures on some GPUs (such as Arm Mali).
+- [flutter/188161](https://github.com/flutter/flutter/issues/188161) Fixes a resource leak that sometimes caused crashes when using external textures on some GPUs (such as Arm Mali).
 
 ### [3.44.6](https://github.com/flutter/flutter/releases/tag/3.44.6)
 - [flutter/187980](https://github.com/flutter/flutter/issues/187980) On Linux, building asset bundles with native assets enabled without a native app build directory crashes due to missing `CMakeCache.txt`.
