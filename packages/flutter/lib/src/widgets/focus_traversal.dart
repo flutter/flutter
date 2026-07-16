@@ -2330,12 +2330,12 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
     final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
     final FocusNode? lastRequestedFocus = focusNode.lastRequestedFocus;
 
-    if (primaryFocus == null || lastRequestedFocus == null) {
+    if (lastRequestedFocus == null) {
       return;
     }
 
     if (primaryFocus != lastRequestedFocus) {
-      FocusScopeNode? scope = primaryFocus.nearestScope;
+      FocusScopeNode? scope = primaryFocus?.nearestScope;
       while (scope != null) {
         widget.policy.invalidateScopeData(scope);
         scope = scope.enclosingScope;
