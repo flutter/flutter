@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.44 Changes
 
+### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)
+- [flutter/189398](https://github.com/flutter/flutter/pull/189398) Migrate some performance benchmarks to run on Mac ARM machines in CI.
+- [flutter/189300](https://github.com/flutter/flutter/pull/189300) Improve speed of Mac Flutter tool integration tests in CI.
+- [flutter/189272](https://github.com/flutter/flutter/pull/189272) When apps that use external textures run on some GPUs (such as Arm Mali), it can cause a resource leak that eventually crashes the app.
+
 ### [3.44.6](https://github.com/flutter/flutter/releases/tag/3.44.6)
 - [flutter/187980](https://github.com/flutter/flutter/issues/187980) On Linux, building asset bundles with native assets enabled without a native app build directory crashes due to missing `CMakeCache.txt`.
 - [flutter/188805](https://github.com/flutter/flutter/issues/188805) Fixes a crash when running Android instrumented tests.
