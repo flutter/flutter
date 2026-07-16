@@ -637,7 +637,8 @@ ContentContext::ContentContext(
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->line.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
-    if (context_->GetFlags().use_sdfs) {
+    if (context_->GetFlags().use_sdfs ||
+        context_->GetFlags().antialiased_lines) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
       pipelines_->complex_rse.CreateDefault(*context_, options);
     }
