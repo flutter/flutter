@@ -84,7 +84,7 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
               (),
               (override));
 
-  MOCK_METHOD(HCURSOR, GetFlutterCursor, (), (override));
+  MOCK_METHOD(HCURSOR, GetFlutterCursor, (), (const, override));
 
   MOCK_METHOD(void, OnWindowStateEvent, (HWND, WindowStateEvent), (override));
 

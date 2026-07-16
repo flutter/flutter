@@ -124,7 +124,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   void OnHighContrastChanged() override;
 
   // |WindowBindingHandlerDelegate|
-  HCURSOR GetFlutterCursor() override;
+  HCURSOR GetFlutterCursor() const override;
 
   // Called on the raster thread when |CompositorOpenGL| receives an empty
   // frame. Returns true if the frame can be presented.

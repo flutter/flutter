@@ -169,7 +169,7 @@ class WindowBindingHandlerDelegate {
   // framework's cursor when the mouse re-enters the client area, as the
   // cursor may have been changed while over the non-client area (e.g. a
   // resize arrow over the window border).
-  virtual HCURSOR GetFlutterCursor() = 0;
+  virtual HCURSOR GetFlutterCursor() const = 0;
 
   // Called when a window receives an event that may alter application lifecycle
   // state.
