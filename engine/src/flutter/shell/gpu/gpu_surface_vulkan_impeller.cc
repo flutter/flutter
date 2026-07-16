@@ -56,8 +56,9 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     GPUSurfaceVulkanDelegate* delegate,
-    std::shared_ptr<impeller::Context> context)
-    : delegate_(delegate) {
+    std::shared_ptr<impeller::Context> context,
+    bool render_to_surface)
+    : delegate_(delegate), render_to_surface_(render_to_surface) {
   if (!context || !context->IsValid()) {
     return;
   }
@@ -74,7 +75,7 @@ GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
   // Create frame-throttling fences (signaled initially so the first
   // kMaxFramesInFlight frames do not block). Only the embedder-managed image
   // path uses these; the KHR swapchain enforces its own backpressure.
-  if (delegate_) {
+  if (delegate_ && render_to_surface_) {
     auto& context_vk = impeller::ContextVK::Cast(*impeller_context_);
     impeller::vk::FenceCreateInfo fence_ci;
     fence_ci.flags = impeller::vk::FenceCreateFlagBits::eSignaled;
@@ -146,6 +147,23 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
   if (size.IsEmpty()) {
     FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
     return nullptr;
+  }
+
+  if (!render_to_surface_) {
+    // An external view embedder renders the content through embedder
+    // backing stores; the root surface contributes nothing. Still mark the
+    // frame boundary so the pipeline library can run deferred work, which
+    // AcquireNextSurface would otherwise do.
+    if (auto pipeline_library = impeller_context_->GetPipelineLibrary()) {
+      impeller::PipelineLibraryVK::Cast(*pipeline_library)
+          .DidAcquireSurfaceFrame();
+    }
+    return std::make_unique<SurfaceFrame>(
+        nullptr, SurfaceFrame::FramebufferInfo{.supports_readback = true},
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
+          return true;
+        },
+        [](const SurfaceFrame& surface_frame) { return true; }, size);
   }
 
   if (delegate_ == nullptr) {

@@ -39,6 +39,7 @@ class TestGPUSurfaceVulkanDelegate : public GPUSurfaceVulkanDelegate {
   const vulkan::VulkanProcTable& vk() override { return *vk_; }
 
   FlutterVulkanImage AcquireImage(const DlISize& size) override {
+    acquire_image_count_++;
     if (!test_surface_ || surface_size_ != size) {
       test_surface_ = TestVulkanSurface::Create(*test_context_, size);
       surface_size_ = size;
@@ -55,11 +56,14 @@ class TestGPUSurfaceVulkanDelegate : public GPUSurfaceVulkanDelegate {
 
   bool PresentImage(VkImage image, VkFormat format) override { return true; }
 
+  int acquire_image_count() const { return acquire_image_count_; }
+
  private:
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   fml::RefPtr<TestVulkanContext> test_context_;
   std::unique_ptr<TestVulkanSurface> test_surface_;
   DlISize surface_size_ = {};
+  int acquire_image_count_ = 0;
 };
 
 TEST(GPUSurfaceVulkanImpeller, DisposesThreadLocalResources) {
@@ -70,8 +74,8 @@ TEST(GPUSurfaceVulkanImpeller, DisposesThreadLocalResources) {
 
   TestGPUSurfaceVulkanDelegate delegate;
 
-  std::unique_ptr<Surface> surface =
-      std::make_unique<GPUSurfaceVulkanImpeller>(&delegate, context);
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+      &delegate, context, /*render_to_surface=*/true);
 
   // Add a command pool to the global map.
   auto pool = context->GetCommandPoolRecycler()->Get();
@@ -83,6 +87,30 @@ TEST(GPUSurfaceVulkanImpeller, DisposesThreadLocalResources) {
   EXPECT_EQ(impeller::CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
 }
 
+TEST(GPUSurfaceVulkanImpeller, RenderToSurfaceDisabledYieldsNoOpFrame) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  auto context = impeller::ContextVK::Create(std::move(context_settings));
+
+  TestGPUSurfaceVulkanDelegate delegate;
+
+  // When an external view embedder handles presentation (as the Windows
+  // DirectComposition compositor does), the root surface renders nothing and
+  // must not pull an image from the delegate.
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+      &delegate, context, /*render_to_surface=*/false);
+  ASSERT_TRUE(surface->IsValid());
+
+  auto frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  EXPECT_EQ(delegate.acquire_image_count(), 0);
+
+  // Submitting the no-op frame succeeds without touching the delegate.
+  EXPECT_TRUE(frame->Submit());
+  EXPECT_EQ(delegate.acquire_image_count(), 0);
+}
+
 TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
   impeller::ContextVK::Settings context_settings;
   context_settings.proc_address_callback = vkGetInstanceProcAddr;
@@ -91,7 +119,8 @@ TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
 
   TestGPUSurfaceVulkanDelegate delegate;
 
-  auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(&delegate, context);
+  auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+      &delegate, context, /*render_to_surface=*/true);
 
   auto frame = surface->AcquireFrame(DlISize(100, 100));
   ASSERT_NE(frame, nullptr);
@@ -118,8 +147,8 @@ TEST(GPUSurfaceVulkanImpeller, TeardownAfterDeviceLossAbandonsResources) {
 
   TestGPUSurfaceVulkanDelegate delegate;
 
-  std::unique_ptr<Surface> surface =
-      std::make_unique<GPUSurfaceVulkanImpeller>(&delegate, context);
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+      &delegate, context, /*render_to_surface=*/true);
 
   // Populate the image view cache and exercise the fence ring with a frame.
   auto frame = surface->AcquireFrame(DlISize(100, 100));

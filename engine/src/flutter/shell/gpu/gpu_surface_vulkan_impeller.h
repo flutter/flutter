@@ -28,8 +28,9 @@ FML_TEST_CLASS(GPUSurfaceVulkanImpeller,
 
 class GPUSurfaceVulkanImpeller final : public Surface {
  public:
-  explicit GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
-                                    std::shared_ptr<impeller::Context> context);
+  GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
+                           std::shared_ptr<impeller::Context> context,
+                           bool render_to_surface);
 
   // |Surface|
   ~GPUSurfaceVulkanImpeller() override;
@@ -87,6 +88,11 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   // embedder-managed image path with a ring of fences.
   std::array<impeller::vk::UniqueFence, kMaxFramesInFlight> frame_fences_;
   size_t current_fence_index_ = 0;
+
+  // False when an external view embedder handles rendering: the frame is
+  // then a no-op and content reaches the screen through embedder-provided
+  // backing stores, matching GPUSurfaceGLImpeller.
+  bool render_to_surface_ = true;
 
   bool is_valid_ = false;
 

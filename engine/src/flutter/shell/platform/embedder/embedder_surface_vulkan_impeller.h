@@ -42,6 +42,7 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
       VkQueue queue,
       const VulkanDispatchTable& vulkan_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+      bool render_to_surface,
       impeller::Flags impeller_flags = {});
 
   ~EmbedderSurfaceVulkanImpeller() override;
@@ -63,6 +64,7 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   VulkanDispatchTable vulkan_dispatch_table_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
+  bool render_to_surface_ = true;
   std::shared_ptr<impeller::ContextVK> context_;
 
   // |EmbedderSurface|

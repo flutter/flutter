@@ -48,8 +48,12 @@ source_set("flutter_windows_source") {
     "compositor_opengl.h",
     "compositor_software.cc",
     "compositor_software.h",
+    "compositor_vulkan.cc",
+    "compositor_vulkan.h",
     "cursor_handler.cc",
     "cursor_handler.h",
+    "dcomp_presenter.cc",
+    "dcomp_presenter.h",
     "direct_manipulation.cc",
     "direct_manipulation.h",
     "display_manager.cc",
@@ -135,6 +139,10 @@ source_set("flutter_windows_source") {
     "text_input_manager.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
+    "vulkan_imported_image.cc",
+    "vulkan_imported_image.h",
+    "vulkan_manager.cc",
+    "vulkan_manager.h",
     "wchar_util.cc",
     "wchar_util.h",
     "window_binding_handler.h",
@@ -152,7 +160,10 @@ source_set("flutter_windows_source") {
   ]
 
   libs = [
+    "d3d11.lib",
+    "dcomp.lib",
     "dwmapi.lib",
+    "dxgi.lib",
     "imm32.lib",
   ]
 
@@ -186,6 +197,7 @@ source_set("flutter_windows_source") {
     "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
+    "//flutter/vulkan/procs",
 
     # libEGL_static MUST be ordered before libGLESv2_static in this list. If
     # reversed, a linker error will occur, reporting DllMain already defined in
@@ -225,6 +237,7 @@ executable("flutter_windows_unittests") {
     "compositor_opengl_unittests.cc",
     "compositor_software_unittests.cc",
     "cursor_handler_unittests.cc",
+    "dcomp_presenter_unittests.cc",
     "direct_manipulation_unittests.cc",
     "display_manager_unittests.cc",
     "dpi_utils_unittests.cc",
@@ -273,6 +286,8 @@ executable("flutter_windows_unittests") {
     "testing/wm_builders.cc",
     "testing/wm_builders.h",
     "text_input_plugin_unittest.cc",
+    "vulkan_imported_image_unittests.cc",
+    "vulkan_manager_unittests.cc",
     "window_manager_unittests.cc",
     "window_proc_delegate_manager_unittests.cc",
     "window_unittests.cc",

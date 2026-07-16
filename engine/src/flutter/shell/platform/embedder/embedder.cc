@@ -104,6 +104,15 @@ extern const intptr_t kPlatformStrongDillSize;
 #ifdef SHELL_ENABLE_VULKAN
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
+#include "impeller/core/texture.h"                               // nogncheck
+#include "impeller/renderer/backend/vulkan/context_vk.h"         // nogncheck
+#include "impeller/renderer/backend/vulkan/formats_vk.h"         // nogncheck
+#include "impeller/renderer/backend/vulkan/texture_source_vk.h"  // nogncheck
+#include "impeller/renderer/backend/vulkan/texture_vk.h"         // nogncheck
+#include "impeller/renderer/render_target.h"                     // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #endif  // SHELL_ENABLE_VULKAN
 
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
@@ -668,6 +677,10 @@ InferVulkanPlatformViewCreationCallback(
 
 #if IMPELLER_SUPPORTS_RENDERING
   if (enable_impeller) {
+    // When the embedder supplies a compositor, rendering happens through
+    // backing stores and the root surface is a no-op, matching OpenGL.
+    const bool render_to_surface = !view_embedder;
+
     flutter::EmbedderSurfaceVulkanImpeller::VulkanDispatchTable
         vulkan_dispatch_table = {
             .get_instance_proc_address =
@@ -687,7 +700,7 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder, impeller_flags);
+            view_embedder, render_to_surface, impeller_flags);
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -1310,6 +1323,167 @@ MakeRenderTargetFromBackingStoreImpeller(
 #endif
 }
 
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+namespace {
+// Wraps an embedder-provided VkImage as an Impeller texture source. The
+// image is borrowed and stays owned by the embedder; the image view is owned
+// by this source and destroyed with it. In-flight command buffers keep the
+// source alive through Impeller's tracked objects until GPU work completes.
+class EmbedderTextureSourceVK final : public impeller::TextureSourceVK {
+ public:
+  EmbedderTextureSourceVK(impeller::TextureDescriptor desc,
+                          impeller::vk::Image image,
+                          impeller::vk::UniqueImageView image_view)
+      : TextureSourceVK(desc),
+        image_(image),
+        image_view_(std::move(image_view)) {}
+
+  ~EmbedderTextureSourceVK() override = default;
+
+ private:
+  impeller::vk::Image GetImage() const override { return image_; }
+
+  impeller::vk::ImageView GetImageView() const override {
+    return image_view_.get();
+  }
+
+  impeller::vk::ImageView GetRenderTargetView(
+      uint32_t mip_level,
+      uint32_t array_layer) const override {
+    // Embedder backing store images are always a single 2D mip and layer.
+    return image_view_.get();
+  }
+
+  // The embedder's backing store is the final presentation target, not a
+  // sampled texture. Reporting it as a swapchain image makes the render
+  // pass leave it in VK_IMAGE_LAYOUT_GENERAL (instead of
+  // SHADER_READ_ONLY_OPTIMAL, which would require VK_IMAGE_USAGE_SAMPLED_BIT
+  // that the imported image does not have).
+  bool IsSwapchainImage() const override { return true; }
+
+  impeller::vk::Image image_;
+  impeller::vk::UniqueImageView image_view_;
+};
+}  // namespace
+#endif  // defined(SHELL_ENABLE_VULKAN) &&
+        // defined(IMPELLER_SUPPORTS_RENDERING)
+
+static std::unique_ptr<flutter::EmbedderRenderTarget>
+MakeRenderTargetFromBackingStoreImpeller(
+    FlutterBackingStore backing_store,
+    const fml::closure& on_release,
+    const std::shared_ptr<impeller::AiksContext>& aiks_context,
+    const FlutterBackingStoreConfig& config,
+    const FlutterVulkanBackingStore* vulkan) {
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+  if (!vulkan->image || !vulkan->image->image) {
+    FML_LOG(ERROR) << "Embedder supplied null Vulkan image.";
+    return nullptr;
+  }
+
+  auto vk_format = static_cast<impeller::vk::Format>(vulkan->image->format);
+  std::optional<impeller::PixelFormat> format =
+      impeller::VkFormatToImpellerFormat(vk_format);
+  if (!format.has_value()) {
+    FML_LOG(ERROR) << "Unsupported pixel format: "
+                   << impeller::vk::to_string(vk_format);
+    return nullptr;
+  }
+
+  const auto size = impeller::ISize(config.size.width, config.size.height);
+
+  impeller::TextureDescriptor resolve_tex_desc;
+  resolve_tex_desc.size = size;
+  resolve_tex_desc.format = format.value();
+  resolve_tex_desc.sample_count = impeller::SampleCount::kCount1;
+  resolve_tex_desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  resolve_tex_desc.usage = impeller::TextureUsage::kRenderTarget;
+
+  auto& context_vk = impeller::ContextVK::Cast(*aiks_context->GetContext());
+
+  impeller::vk::Image vk_image =
+      impeller::vk::Image(reinterpret_cast<VkImage>(vulkan->image->image));
+
+  impeller::vk::ImageViewCreateInfo view_info;
+  view_info.viewType = impeller::vk::ImageViewType::e2D;
+  view_info.format = vk_format;
+  view_info.image = vk_image;
+  view_info.subresourceRange.aspectMask =
+      impeller::vk::ImageAspectFlagBits::eColor;
+  view_info.subresourceRange.baseMipLevel = 0u;
+  view_info.subresourceRange.levelCount = 1u;
+  view_info.subresourceRange.baseArrayLayer = 0u;
+  view_info.subresourceRange.layerCount = 1u;
+
+  auto [view_result, image_view] =
+      context_vk.GetDevice().createImageViewUnique(view_info);
+  if (view_result != impeller::vk::Result::eSuccess) {
+    FML_LOG(ERROR) << "Could not create an image view for the embedder "
+                      "supplied Vulkan image: "
+                   << impeller::vk::to_string(view_result);
+    return nullptr;
+  }
+
+  const std::shared_ptr<impeller::Context>& context =
+      aiks_context->GetContext();
+
+  // Wrap the imported presentation image as the resolve target, mirroring
+  // SurfaceVK::WrapSwapchainImage. The MSAA color texture and depth-stencil
+  // are Impeller-allocated transients owned by the render target.
+  std::shared_ptr<impeller::Texture> resolve_tex =
+      std::make_shared<impeller::TextureVK>(
+          context, std::make_shared<EmbedderTextureSourceVK>(
+                       resolve_tex_desc, vk_image, std::move(image_view)));
+  resolve_tex->SetLabel("ImpellerBackingStoreResolve");
+
+  context->UpdateOffscreenLayerPixelFormat(format.value());
+
+  impeller::TextureDescriptor msaa_tex_desc;
+  msaa_tex_desc.storage_mode = impeller::StorageMode::kDeviceTransient;
+  msaa_tex_desc.type = impeller::TextureType::kTexture2DMultisample;
+  msaa_tex_desc.sample_count = impeller::SampleCount::kCount4;
+  msaa_tex_desc.format = format.value();
+  msaa_tex_desc.size = size;
+  msaa_tex_desc.usage = impeller::TextureUsage::kRenderTarget;
+
+  auto msaa_tex = context->GetResourceAllocator()->CreateTexture(msaa_tex_desc);
+  if (!msaa_tex) {
+    FML_LOG(ERROR) << "Could not allocate MSAA color texture.";
+    return nullptr;
+  }
+  msaa_tex->SetLabel("ImpellerBackingStoreColorMSAA");
+
+  impeller::ColorAttachment color0;
+  color0.texture = msaa_tex;
+  color0.clear_color = impeller::Color::DarkSlateGray();
+  color0.load_action = impeller::LoadAction::kClear;
+  color0.store_action = impeller::StoreAction::kMultisampleResolve;
+  color0.resolve_texture = resolve_tex;
+
+  impeller::RenderTarget render_target_desc;
+  render_target_desc.SetColorAttachment(color0, 0u);
+  render_target_desc.SetupDepthStencilAttachments(
+      *context,                           //
+      *context->GetResourceAllocator(),   //
+      size,                               //
+      /*msaa=*/true,                      //
+      /*label=*/"ImpellerBackingStore");  //
+
+  fml::closure image_destruct;
+  if (vulkan->destruction_callback) {
+    image_destruct = [callback = vulkan->destruction_callback,
+                      user_data = vulkan->user_data]() { callback(user_data); };
+  }
+
+  return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
+      backing_store, aiks_context,
+      std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
+      on_release, image_destruct);
+#else
+  return nullptr;
+#endif
+}
+
 static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     GrDirectContext* context,
     const FlutterBackingStoreConfig& config,
@@ -1522,7 +1696,9 @@ CreateEmbedderRenderTarget(
     }
     case kFlutterBackingStoreTypeVulkan: {
       if (enable_impeller) {
-        FML_LOG(ERROR) << "Unimplemented";
+        render_target = MakeRenderTargetFromBackingStoreImpeller(
+            backing_store, collect_callback.Release(), aiks_context, config,
+            &backing_store.vulkan);
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
