@@ -188,7 +188,6 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     // Note [placeElement]/[placeForm] are never reached via the normal
     // placement path in semantics mode ([initializeElementPlacement] is a
     // no-op), so the form must be set up explicitly here.
-    //
     if (hasAutofillGroup) {
       placeForm();
     }

@@ -245,14 +245,13 @@ class EngineAutofillForm {
   /// the form, in semantics mode, can be associated with it via the HTML `form`
   /// attribute.
   ///
-  /// It is a deterministic function of [formIdentifier] so it stays the same
-  /// when the form goes dormant and is woken again by a new instance. It is
-  /// also injective, distinct identifiers map to distinct ids, so when multiple
-  /// autofill forms coexist in one document, for example multi-view, multiple
-  /// autofill groups, or a dormant form left in the DOM, a focused element is
-  /// never associated with the wrong form. A hash would not guarantee this.
-  String get formDomId =>
-      'flt-af-${formIdentifier.codeUnits.map((int u) => u.toRadixString(16)).join('-')}';
+  /// Derived from [formIdentifier] so it stays the same when the form goes
+  /// dormant and is woken again by a new instance, and so that distinct
+  /// identifiers map to distinct ids. The latter matters when multiple autofill
+  /// forms coexist in one document, for example multi-view, multiple autofill
+  /// groups, or a dormant form left in the DOM, where a focused element must
+  /// never be associated with the wrong form.
+  String get formDomId => 'flt-af-$formIdentifier';
 
   /// Creates an [EngineAutofillForm] from the JSON representation of a Flutter
   /// framework `TextInputConfiguration` object.
@@ -350,7 +349,7 @@ class EngineAutofillForm {
   /// When [associateFocusedElementByAttribute] is true (semantics mode), the focused
   /// element is a real `<input>` owned by the semantics tree and must stay in
   /// its `<flt-semantics>` node. Moving it into the form regressed a11y tab
-  /// traversal (see flutter/flutter#180652, originally flutter/engine#25797).
+  /// traversal (see flutter/flutter#180652).
   /// Instead it is linked to the form via the HTML `form` attribute, and any
   /// synthetic placeholder previously created for that field is removed so the
   /// field is represented in the form exactly once.
