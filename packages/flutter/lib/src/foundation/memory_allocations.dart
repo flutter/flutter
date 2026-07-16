@@ -117,20 +117,14 @@ typedef MemoryAllocations = FlutterMemoryAllocations;
 /// added or removed listeners.
 class FlutterMemoryAllocations {
   FlutterMemoryAllocations._() {
-    Listenable.debugMaybeDispatchCreated = (String className, Object object) {
-      if (kFlutterMemoryAllocationsEnabled) {
-        dispatchObjectCreated(
-          library: 'package:flutter/foundation.dart',
-          className: className,
-          object: object,
-        );
-      }
-    };
-    Listenable.debugMaybeDispatchDisposed = (Object object) {
-      if (kFlutterMemoryAllocationsEnabled) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      Listenable.debugMaybeDispatchCreated = (String className, Object object) {
+        dispatchObjectCreated(library: 'foundation', className: className, object: object);
+      };
+      Listenable.debugMaybeDispatchDisposed = (Object object) {
         dispatchObjectDisposed(object: object);
-      }
-    };
+      };
+    }
   }
 
   /// The shared instance of [FlutterMemoryAllocations].
