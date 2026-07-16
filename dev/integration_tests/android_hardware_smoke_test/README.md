@@ -88,7 +88,7 @@ flowchart TD
 
 ### Instrumented On-Device Mode (OEM / Standalone)
 * **Orchestration**: Runs purely on the device under Android `AndroidJUnit4` runner.
-* **Execution**: Java JUnit code (`FlutterActivityTest.java`)
+* **Execution**: Kotlin JUnit code (`FlutterActivityTest.kt`)
   launches the main activity and sends the test payload
   over a JSON message channel.
   The app (`lib/main.dart`) renders the widget,
@@ -171,7 +171,7 @@ and to manage the local golden baselines.
 > and Host-Driven Driver Mode (CI).
 >
 > * **Instrumented On-Device Mode (OEM)**:
->   The native Java JUnit harness (`FlutterActivityTest.java`)
+>   The native Kotlin JUnit harness (`FlutterActivityTest.kt`)
 >   reads this value dynamically using the `PackageManager` API
 >   and routes it to Dart.
 > * **Host-Driven Driver Mode (CI / Host)**:
