@@ -2599,13 +2599,17 @@ void testMain() {
     // Touch 2 is absent from it though, which is what marks it as abandoned.
     rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2], remaining: <int>[3]));
 
+    // A cancelled touch is also removed, so exactly two events are emitted.
     expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(2));
     expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
     expect(packets[0].data[0].device, equals(2));
     expect(packets[0].data[0].buttons, equals(0));
     // The cancel is reported at the pointer's last known location.
     expect(packets[0].data[0].physicalX, equals(100 * dpi));
     expect(packets[0].data[0].physicalY, equals(101 * dpi));
+    expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
+    expect(packets[0].data[1].device, equals(2));
   }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
 
   test('does not cancel a touch that was released normally', () {
