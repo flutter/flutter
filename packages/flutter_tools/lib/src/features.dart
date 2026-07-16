@@ -88,6 +88,9 @@ abstract class FeatureFlags {
   /// Whether to only build for arm64 when targeting macOS.
   bool get isMacOSArm64OnlyEnabled;
 
+  /// Whether HCPP gating is enabled.
+  bool get isHcppEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -115,6 +118,7 @@ abstract class FeatureFlags {
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    hcpp,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -324,6 +328,16 @@ const macOSArm64Only = Feature(
   environmentOverride: 'FLUTTER_MACOS_ARM64_ONLY',
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Enable Hybrid Composition++ (HCPP) gating.
+const hcpp = Feature(
+  name: 'support for Hybrid Composition++ (HCPP)',
+  configSetting: 'enable-hcpp',
+  environmentOverride: 'FLUTTER_ENABLE_HCPP',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true),
 );
 

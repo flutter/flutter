@@ -554,6 +554,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
     this.isMacOSArm64OnlyEnabled = false,
+    this.isHcppEnabled = false,
   });
 
   @override
@@ -617,6 +618,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isMacOSArm64OnlyEnabled;
 
   @override
+  final bool isHcppEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -638,6 +642,7 @@ class TestFeatureFlags implements FeatureFlags {
       riscv64 => isRiscv64SupportEnabled,
       macOSArm64Only => isMacOSArm64OnlyEnabled,
       recordUse => isRecordUseEnabled,
+      hcpp => isHcppEnabled,
       _ => false,
     };
   }
@@ -664,6 +669,7 @@ class TestFeatureFlags implements FeatureFlags {
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    hcpp,
   ];
 
   @override

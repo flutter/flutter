@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -35,6 +36,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fake_vm_services.dart';
+import '../../src/fakes.dart';
 import '../../src/logging_logger.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -1555,6 +1557,76 @@ dev_dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    group('HCPP Gating', () {
+      testUsingContext(
+        'enableHcpp is true when --enable-hcpp is explicitly passed',
+        () async {
+          final testRunner = FakeFlutterTestRunner(0);
+          final testCommand = TestCommand(testRunner: testRunner);
+          final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+          await commandRunner.run(const <String>['test', '--no-pub', '--enable-hcpp']);
+          expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(),
+        },
+      );
+
+      testUsingContext(
+        'enableHcpp is false when --no-enable-hcpp is explicitly passed',
+        () async {
+          final testRunner = FakeFlutterTestRunner(0);
+          final testCommand = TestCommand(testRunner: testRunner);
+          final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+          await commandRunner.run(const <String>['test', '--no-pub', '--no-enable-hcpp']);
+          expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        },
+      );
+
+      testUsingContext(
+        'enableHcpp falls back to isHcppEnabled = true when flag not explicitly passed',
+        () async {
+          final testRunner = FakeFlutterTestRunner(0);
+          final testCommand = TestCommand(testRunner: testRunner);
+          final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+          await commandRunner.run(const <String>['test', '--no-pub']);
+          expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        },
+      );
+
+      testUsingContext(
+        'enableHcpp falls back to isHcppEnabled = false when flag not explicitly passed',
+        () async {
+          final testRunner = FakeFlutterTestRunner(0);
+          final testCommand = TestCommand(testRunner: testRunner);
+          final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+          await commandRunner.run(const <String>['test', '--no-pub']);
+          expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(),
+        },
+      );
+    });
 
     testUsingContext(
       'Passes web renderer into debugging options',
