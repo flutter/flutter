@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
+import 'test_page_tester.dart';
 
 void main() {
   const kBlack = Color(0xFF000000);
@@ -1869,7 +1870,56 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), Size.zero);
   });
+
+  testWidgets(
+    '_SelectableTextContainerDelegate._compareScreenOrder does not crash with unlaid-out fragments',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/151536
+      //
+      // Drives _SelectableTextContainerDelegate._compareScreenOrder by using
+      // Text.rich with WidgetSpan children. Each WidgetSpan placeholder splits
+      // the text into a separate _SelectableFragment, so the delegate must sort
+      // them — which invokes the comparator that accesses boundingBoxes.first
+      // on each fragment. See paragraph.dart:_getSelectableFragments — fragments
+      // are only created when placeholder characters exist in the plain text.
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Navigator(
+            pages: <Page<void>>[
+              TestPage<void>(
+                child: SelectableRegion(
+                  focusNode: focusNode,
+                  selectionControls: EmptyTextSelectionControls(),
+                  child: const Text.rich(
+                    TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(text: 'Before '),
+                        WidgetSpan(child: SizedBox(width: 8, height: 8)),
+                        TextSpan(text: ' middle '),
+                        WidgetSpan(child: SizedBox(width: 8, height: 8)),
+                        TextSpan(text: ' after'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const TestPage<void>(child: Text('Top page')),
+            ],
+            onDidRemovePage: _noopRemovePage,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Top page'), findsOneWidget);
+    },
+  );
 }
+
+void _noopRemovePage(Page<Object?> page) {}
 
 Future<void> _pumpTextWidget({
   required WidgetTester tester,

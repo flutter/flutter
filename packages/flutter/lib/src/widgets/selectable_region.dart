@@ -2576,13 +2576,27 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   Comparator<Selectable> get compareOrder => _compareScreenOrder;
 
   static int _compareScreenOrder(Selectable a, Selectable b) {
-    final Rect rectA = MatrixUtils.transformRect(a.getTransformTo(null), _getBoundingBox(a));
-    final Rect rectB = MatrixUtils.transformRect(b.getTransformTo(null), _getBoundingBox(b));
-    final int result = _compareVertically(rectA, rectB);
-    if (result != 0) {
-      return result;
+    try {
+      final Rect rectA = MatrixUtils.transformRect(a.getTransformTo(null), _getBoundingBox(a));
+      final Rect rectB = MatrixUtils.transformRect(b.getTransformTo(null), _getBoundingBox(b));
+      final int result = _compareVertically(rectA, rectB);
+      if (result != 0) {
+        return result;
+      }
+      return _compareHorizontally(rectA, rectB);
+    } on StateError {
+      // In release mode, accessing `size` on an unlaid-out RenderBox throws
+      // StateError. This happens when _RenderTheater skips layout for an
+      // obscured OverlayEntry but selectables remain registered.
+      // Treat unlaid-out selectables as equal in sort order — they will be
+      // properly positioned on the next frame when layout completes.
+      // See https://github.com/flutter/flutter/issues/151536
+      return 0;
+    } on AssertionError {
+      // In debug mode, hasSize/debugNeedsLayout asserts fire before
+      // StateError. Catch both to prevent crashes in all build modes.
+      return 0;
     }
-    return _compareHorizontally(rectA, rectB);
   }
 
   /// Compares two rectangles in the screen order solely by their vertical

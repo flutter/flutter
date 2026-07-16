@@ -6977,7 +6977,49 @@ void main() {
     expect(outerParagraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 3));
     expect(outerParagraph2.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
   });
+
+  testWidgets(
+    'MultiSelectableSelectionContainerDelegate._compareScreenOrder does not crash with unlaid-out selectables',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/151536
+      //
+      // When _RenderTheater skips laying out an obscured OverlayEntry, selectables
+      // in that entry remain registered with their SelectionContainerDelegate but
+      // their RenderBoxes have no size. _flushAdditions then calls _compareScreenOrder
+      // which accesses paintBounds/getTransformTo and throws StateError in release
+      // mode / AssertionError in debug. This test drives
+      // MultiSelectableSelectionContainerDelegate._compareScreenOrder via multiple
+      // sibling Text widgets under a single SelectableRegion.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Navigator(
+            pages: <Page<void>>[
+              TestPage<void>(
+                child: SelectableRegion(
+                  selectionControls: emptyTextSelectionControls,
+                  child: const Column(
+                    children: <Widget>[
+                      Text('Bottom page text A'),
+                      Text('Bottom page text B'),
+                      Text('Bottom page text C'),
+                    ],
+                  ),
+                ),
+              ),
+              const TestPage<void>(child: Text('Top page')),
+            ],
+            onDidRemovePage: _noopRemovePage,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Top page'), findsOneWidget);
+    },
+  );
 }
+
+void _noopRemovePage(Page<Object?> page) {}
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
   /// Copies the selected contents of all [Selectable]s, separating their
