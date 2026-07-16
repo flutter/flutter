@@ -8,6 +8,8 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' hide Border;
 
+import 'table.dart';
+
 /// Border specification for [Table] widgets.
 ///
 /// This is like [Border], with the addition of two sides: the inner horizontal
@@ -523,75 +525,4 @@ class TableBorder {
   @override
   String toString() =>
       'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
-}
-
-/// Records which cells in a table are covered ("hidden") by a spanning cell, so
-/// that the inner [TableBorder] dividers that fall inside a span can be skipped
-/// while painting.
-///
-/// A cell can be covered in two independent ways, and both are tracked here:
-///
-///  * **column-spanned** – covered by a horizontal (colSpan) span. The vertical
-///    inner border on the cell's leading edge is not painted.
-///  * **row-spanned** – covered by a vertical (rowSpan) span. The horizontal
-///    inner border on the cell's top edge is not painted.
-///
-/// A cell in the interior of a rectangular span is both column- and row-spanned.
-///
-/// Both flags for every cell are packed into a single [Uint8List] in row-major
-/// order. Callers use the named accessors and never manipulate the bits
-/// directly.
-class TableSpannedCells {
-  /// Creates a map able to hold the span flags for a `rows` × `columns` table.
-  TableSpannedCells({required int rows, required int columns})
-    : _columns = columns,
-      // Two flags per cell (column-spanned and row-spanned) are packed 8 bits
-      // to a byte: `* 2` reserves both bits for every cell, `+ 7` rounds the
-      // total bit count up so a trailing partial byte is still allocated, and
-      // `>> 3` converts the bit count to a byte count (an integer divide by 8).
-      _bits = Uint8List((rows * columns * 2 + 7) >> 3);
-
-  final int _columns;
-  final Uint8List _bits;
-  bool _hasSpannedCells = false;
-
-  // Each cell reserves two consecutive bits in [_bits]; these are their offsets
-  // within that pair.
-  static const int _columnSpanFlag = 0;
-  static const int _rowSpanFlag = 1;
-
-  // The absolute bit index of `flag` for the cell at (x, y). Cells are stored in
-  // row-major order and each cell owns two bits, hence the `* 2`.
-  int _bitIndexFor(int x, int y, int flag) => (y * _columns + x) * 2 + flag;
-
-  void _setFlag(int x, int y, int flag) {
-    final int bit = _bitIndexFor(x, y, flag);
-    // `bit >> 3` selects the byte holding the flag (bit ~/ 8) and `bit & 7` is
-    // the position within that byte (bit % 8).
-    _bits[bit >> 3] |= 1 << (bit & 7);
-    _hasSpannedCells = true;
-  }
-
-  bool _hasFlag(int x, int y, int flag) {
-    final int bit = _bitIndexFor(x, y, flag);
-    return _bits[bit >> 3] & (1 << (bit & 7)) != 0;
-  }
-
-  /// Whether any cell has been marked as covered by a span.
-  bool get hasSpannedCells => _hasSpannedCells;
-
-  /// Marks the cell at (`x`, `y`) as covered by a horizontal (colSpan) span.
-  void markColumnSpanned(int x, int y) => _setFlag(x, y, _columnSpanFlag);
-
-  /// Marks the cell at (`x`, `y`) as covered by a vertical (rowSpan) span.
-  void markRowSpanned(int x, int y) => _setFlag(x, y, _rowSpanFlag);
-
-  /// Whether the cell at (`x`, `y`) is covered by a horizontal (colSpan) span.
-  bool isColumnSpanned(int x, int y) => _hasFlag(x, y, _columnSpanFlag);
-
-  /// Whether the cell at (`x`, `y`) is covered by a vertical (rowSpan) span.
-  bool isRowSpanned(int x, int y) => _hasFlag(x, y, _rowSpanFlag);
-
-  /// Whether the cell at (`x`, `y`) is covered by any span.
-  bool isSpanned(int x, int y) => isColumnSpanned(x, y) || isRowSpanned(x, y);
 }
