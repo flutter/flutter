@@ -433,7 +433,7 @@ class BuildInfo {
 class AndroidBuildInfo {
   const AndroidBuildInfo(
     this.buildInfo, {
-    this.targetArchs = const <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64],
+    this.targetArchs = const <CpuArch>[.armv7, .arm64, .x64],
     this.splitPerAbi = false,
   });
 
@@ -628,12 +628,12 @@ enum CpuArch {
 
   factory CpuArch.fromName(String name) {
     return switch (name) {
-      'unknown' => CpuArch.unknown,
-      'armv7' => CpuArch.armv7,
-      'arm64' => CpuArch.arm64,
-      'x86' => CpuArch.x86,
-      'x64' || 'x86_64' => CpuArch.x64,
-      'riscv64' => CpuArch.riscv64,
+      'unknown' => .unknown,
+      'armv7' => .armv7,
+      'arm64' => .arm64,
+      'x86' => .x86,
+      'x64' || 'x86_64' => .x64,
+      'riscv64' => .riscv64,
       _ => throw Exception('Unsupported CPU arch name "$name"'),
     };
   }
@@ -641,9 +641,9 @@ enum CpuArch {
   /// The [CpuArch] of the given [hostPlatform].
   factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
     return switch (hostPlatform) {
-      .darwin_x64 || .linux_x64 || .windows_x64 => CpuArch.x64,
-      .darwin_arm64 || .linux_arm64 || .windows_arm64 => CpuArch.arm64,
-      .linux_riscv64 => CpuArch.riscv64,
+      .darwin_x64 || .linux_x64 || .windows_x64 => .x64,
+      .darwin_arm64 || .linux_arm64 || .windows_arm64 => .arm64,
+      .linux_riscv64 => .riscv64,
     };
   }
 
@@ -809,15 +809,15 @@ List<CpuArch> defaultIOSArchsForEnvironment(EnvironmentType environmentType, Art
   if (localEngineInfo != null) {
     final String localEngineName = localEngineInfo.localTargetName;
     if (localEngineName.contains('_arm64')) {
-      return <CpuArch>[CpuArch.arm64];
+      return <CpuArch>[.arm64];
     }
     if (localEngineName.contains('_sim')) {
-      return <CpuArch>[CpuArch.x64];
+      return <CpuArch>[.x64];
     }
   } else if (environmentType == EnvironmentType.simulator) {
-    return <CpuArch>[CpuArch.x64, CpuArch.arm64];
+    return <CpuArch>[.x64, .arm64];
   }
-  return <CpuArch>[CpuArch.arm64];
+  return <CpuArch>[.arm64];
 }
 
 /// The default set of macOS device architectures to build for.
@@ -826,11 +826,11 @@ List<CpuArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
     if (localEngineInfo.localTargetName.contains('_arm64')) {
-      return <CpuArch>[CpuArch.arm64];
+      return <CpuArch>[.arm64];
     }
-    return <CpuArch>[CpuArch.x64];
+    return <CpuArch>[.x64];
   }
-  return <CpuArch>[CpuArch.x64, CpuArch.arm64];
+  return <CpuArch>[.x64, .arm64];
 }
 
 /// Returns the [CpuArch] for the given architecture or platform [name].
@@ -847,11 +847,11 @@ CpuArch getCpuArchForName(String name) {
     'armv7' ||
     'armv7f' || // iPhone 4S.
     'armv7s' || // iPad 4.
-    'android-arm' => CpuArch.armv7,
+    'android-arm' => .armv7,
     'arm64' ||
     'arm64e' || // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
-    'android-arm64' => CpuArch.arm64,
-    'x86_64' || 'android-x64' => CpuArch.x64,
+    'android-arm64' => .arm64,
+    'x86_64' || 'android-x64' => .x64,
     _ => throw Exception('Unsupported CPU arch name "$name"'),
   };
 }
@@ -859,7 +859,7 @@ CpuArch getCpuArchForName(String name) {
 /// The set of Darwin (iOS/macOS) architectures configured in [defines], or a
 /// default of x86_64 and arm64 if unspecified.
 List<CpuArch> getCpuArchsFromEnv(Map<String, String> defines) {
-  const defaultDarwinArchitectures = <CpuArch>[CpuArch.x64, CpuArch.arm64];
+  const defaultDarwinArchitectures = <CpuArch>[.x64, .arm64];
   return defines[kDarwinArchs]?.split(' ').map(getCpuArchForName).toList() ??
       defaultDarwinArchitectures;
 }
@@ -867,11 +867,9 @@ List<CpuArch> getCpuArchsFromEnv(Map<String, String> defines) {
 HostPlatform getCurrentHostPlatform() {
   if (globals.platform.isMacOS) {
     return switch (globals.os.hostPlatform) {
-      HostPlatform.darwin_arm64 => HostPlatform.darwin_arm64,
-      HostPlatform.darwin_x64 => HostPlatform.darwin_x64,
-      final HostPlatform unsupported => throw Exception(
-        'Unsupported Darwin host platform "$unsupported"',
-      ),
+      HostPlatform.darwin_arm64 => .darwin_arm64,
+      HostPlatform.darwin_x64 => .darwin_x64,
+      _ => throw Exception('Unsupported Darwin host platform "${globals.os.hostPlatform}"'),
     };
   }
   if (globals.platform.isLinux) {
