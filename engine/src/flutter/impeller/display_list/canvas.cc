@@ -193,6 +193,38 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   );
 }
 
+/// @brief  Expands the rectangle to satisfy a 1-device-pixel minimum size using
+///         the given transform and scales alpha based on the ratio of local
+///         areas when `scale_alpha` is true.
+///
+///         If the shape is scaled to zero under the transform or if its alpha
+///         scales close to zero, an empty `Rect` is returned to indicate that
+///         the shape is effectively invisible.
+static std::pair<Rect, Color> ExpandRectToPixelMinimum(const Rect& rect,
+                                                       const Color& color,
+                                                       const Matrix& transform,
+                                                       bool scale_alpha) {
+  std::optional<Rect> expanded =
+      rect.ExpandToMinTransformedSize({1.0f, 1.0f}, transform);
+  if (!expanded) {
+    // Rect is scaled to 0.
+    return {Rect(), color};
+  }
+
+  // No alpha scaling needed.
+  if (!scale_alpha) {
+    return {expanded.value(), color};
+  }
+
+  // Scale alpha based on expanded ratio.
+  Scalar alpha_scaling = rect.Area() / expanded->Area();
+  if (alpha_scaling < kEhCloseEnough) {
+    // Rect is effectively invisible.
+    return {Rect(), color};
+  }
+  return {expanded.value(), color.WithAlpha(color.alpha * alpha_scaling)};
+}
+
 }  // namespace
 
 class Canvas::RRectBlurShape : public BlurShape {
@@ -774,27 +806,110 @@ bool Canvas::AttemptDrawBlur(BlurShape& shape, const Paint& paint) {
   return true;
 }
 
+bool Canvas::AttemptDrawLineSDF(const Point& p0,
+                                const Point& p1,
+                                const Paint& paint,
+                                bool reuse_depth) {
+  if (!(renderer_.GetContext()->GetFlags().use_sdfs ||
+        renderer_.GetContext()->GetFlags().antialiased_lines) ||
+      !IsCompatibleWithSDFRendering(paint)) {
+    return false;
+  }
+  // Draw the line as a filled rectangle with width=line_length and
+  // height=stroke_width.
+
+  Paint rect_paint = paint;
+  rect_paint.style = Paint::Style::kFill;
+
+  Scalar line_length = p0.GetDistance(p1);
+  if (line_length == 0.0f && paint.stroke.cap == Cap::kButt) {
+    // 0 length line with butt caps is invisible.
+    return true;
+  }
+  Scalar half_stroke_width = paint.stroke.width * 0.5f;
+  Scalar half_length = line_length * 0.5f;
+
+  // For Butt stroke caps, the rect width is line_length. For Square and Round
+  // stroke caps, the rect extends past the line's endpoints by
+  // half_stroke_width at each end.
+  if (paint.stroke.cap != Cap::kButt) {
+    half_length += half_stroke_width;
+  }
+
+  // The axis-aligned origin-centered rect which the line will be drawn as.
+  Rect rect = Rect::MakeEllipseBounds(Point(0.0f, 0.0f),
+                                      Point(half_length, half_stroke_width));
+
+  // A transform matrix is used to rotate and translate the rect to match the
+  // position of the input line.
+
+  // Unit vector along the line. Fallback to (1, 0) if length is 0.
+  Vector2 u =
+      line_length > 0.0f ? ((p1 - p0) / line_length) : Point(1.0f, 0.0f);
+  Vector2 perp = u.PerpendicularRight();
+  Point center = (p0 + p1) * 0.5f;
+  Matrix rect_to_line_transform = Matrix::MakeColumn(
+      // X basis: unit vector along the line
+      u.x, u.y, 0.0f, 0.0f,
+      // Y basis: unit vector perpendicular to the line
+      perp.x, perp.y, 0.0f, 0.0f,
+      // Z basis: unchanged
+      0.0f, 0.0f, 1.0f, 0.0f,
+      // Translation: to line center
+      center.x, center.y, 0.0f, 1.0f);
+
+  // Expand rect to 1 pixel minimum dimensions if applicable.
+  if (!GetCurrentTransform().HasPerspective2D()) {
+    auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
+        rect, paint.color, GetCurrentTransform() * rect_to_line_transform,
+        // Don't scale alpha when stroke width is 0. This draws a hairline that
+        // is always 1 pixel regardless of the transform.
+        /*scale_alpha=*/paint.stroke.width != 0.0f);
+
+    if (expanded.IsEmpty()) {
+      // Line is invisible due to transform scaling or alpha scaling.
+      return true;
+    }
+
+    rect_paint.color = alpha_scaled_color;
+    rect = expanded;
+  }
+
+  UberSDFParameters params;
+  if (paint.stroke.cap == Cap::kRound) {
+    params = UberSDFParameters::MakeRoundedRect(
+        /*color=*/rect_paint.color,
+        /*rect=*/rect,
+        /*radii=*/
+        RoundingRadii::MakeRadius(rect.GetHeight() * 0.5f),
+        /*stroke=*/std::nullopt);
+  } else {
+    params = UberSDFParameters::MakeRect(
+        /*color=*/rect_paint.color,
+        /*rect=*/rect,
+        /*stroke=*/std::nullopt);
+  }
+  AddRenderSDFEntityToCurrentPass(paint, params, reuse_depth,
+                                  /*shape_transform=*/rect_to_line_transform);
+  return true;
+}
+
 void Canvas::DrawLine(const Point& p0,
                       const Point& p1,
                       const Paint& paint,
                       bool reuse_depth) {
+  if (AttemptDrawLineSDF(p0, p1, paint, reuse_depth)) {
+    return;
+  }
+
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
 
-  if ((renderer_.GetContext()->GetFlags().antialiased_lines ||
-       renderer_.GetContext()->GetFlags().use_sdfs) &&
-      !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
-      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
-    auto contents = LineContents::Make(std::move(geometry), paint.color);
-    entity.SetContents(std::move(contents));
-    AddRenderEntityToCurrentPass(entity, reuse_depth);
-  } else {
-    AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
-                                            /*reuse_depth=*/reuse_depth);
-  }
+  AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
+                                          reuse_depth);
 }
 
 void Canvas::DrawDashedLine(const Point& p0,
@@ -824,6 +939,10 @@ void Canvas::DrawDashedLine(const Point& p0,
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
+  if (paint.style == Paint::Style::kFill && rect.IsEmpty()) {
+    return;
+  }
+
   if (IsShadowBlurDrawOperation(paint)) {
     RRectBlurShape shape(rect, 0.0f);
     if (AttemptDrawBlur(shape, paint)) {
@@ -833,9 +952,27 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint)) {
+    Rect effective_rect = rect;
+    Color effective_color = paint.color;
+
+    // Expand rect to 1 pixel minimum dimensions if applicable.
+    if (paint.style == Paint::Style::kFill &&
+        !GetCurrentTransform().HasPerspective2D()) {
+      auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
+          rect, paint.color, GetCurrentTransform(), /*scale_alpha=*/true);
+
+      if (expanded.IsEmpty()) {
+        // Rect is invisible due to transform scaling or alpha scaling.
+        return;
+      }
+
+      effective_rect = expanded;
+      effective_color = alpha_scaled_color;
+    }
+
     auto params = UberSDFParameters::MakeRect(
-        /*color=*/paint.color,
-        /*rect=*/rect,
+        /*color=*/effective_color,
+        /*rect=*/effective_rect,
         /*stroke=*/paint.GetStroke());
     AddRenderSDFEntityToCurrentPass(paint, params);
     return;
@@ -962,6 +1099,10 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
 }
 
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
+  if (paint.style == Paint::Style::kFill && round_rect.IsEmpty()) {
+    return;
+  }
+
   if (IsShadowBlurDrawOperation(paint)) {
     if (AttemptDrawBlurredRRect(round_rect, paint)) {
       return;
@@ -972,6 +1113,33 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+    // Expand rrect bounds to 1 pixel minimum dimensions if applicable.
+    if (paint.style == Paint::Style::kFill &&
+        !GetCurrentTransform().HasPerspective2D()) {
+      Rect rrect_bounds = round_rect.GetBounds();
+      auto [expanded, alpha_scaled_color] =
+          ExpandRectToPixelMinimum(rrect_bounds, paint.color,
+                                   GetCurrentTransform(), /*scale_alpha=*/true);
+
+      if (expanded.IsEmpty()) {
+        // RRect is invisible due to transform scaling or alpha scaling.
+        return;
+      }
+
+      // Pixel-minimum expansion is applicable if the expanded bounds is
+      // different from the original bounds.
+      if (expanded != rrect_bounds) {
+        // At a 1-pixel size, the rounded corners can be ignored. Draw a regular
+        // rect matching the expanded bounds.
+        auto params = UberSDFParameters::MakeRect(
+            /*color=*/alpha_scaled_color,
+            /*rect=*/expanded,
+            /*stroke=*/std::nullopt);
+        AddRenderSDFEntityToCurrentPass(paint, params);
+        return;
+      }
+    }
+
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -2009,10 +2177,18 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   AddRenderEntityToCurrentPass(entity, false);
 }
 
-void Canvas::AddRenderSDFEntityToCurrentPass(const Paint& paint,
-                                             UberSDFParameters params) {
+void Canvas::AddRenderSDFEntityToCurrentPass(
+    const Paint& paint,
+    UberSDFParameters params,
+    bool reuse_depth,
+    const std::optional<Matrix>& shape_transform) {
+  Matrix transform = GetCurrentTransform();
+  if (shape_transform.has_value()) {
+    transform = transform * shape_transform.value();
+  }
+
   Entity entity;
-  entity.SetTransform(GetCurrentTransform());
+  entity.SetTransform(transform);
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.color_source) {
@@ -2028,8 +2204,8 @@ void Canvas::AddRenderSDFEntityToCurrentPass(const Paint& paint,
   if (paint.color_source) {
     // UberSDF doesn't perform things like gradients so we blend the SDF
     // with the color source.
-    std::shared_ptr<Contents> color_source_contents =
-        paint.CreateContents(renderer_, geom);
+    std::shared_ptr<ColorSourceContents> color_source_contents =
+        paint.CreateContents(renderer_, geom, shape_transform);
     std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
         BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
                             FilterInput::Make(color_source_contents)});
@@ -2037,12 +2213,11 @@ void Canvas::AddRenderSDFEntityToCurrentPass(const Paint& paint,
     Paint new_paint = paint;
     new_paint.color_source = nullptr;
     AddRenderEntityWithFiltersToCurrentPass(entity, geom, new_paint,
-                                            /*reuse_depth=*/false,
+                                            reuse_depth,
                                             /*override_contents=*/
                                             std::move(final_contents));
   } else {
-    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
-                                            /*reuse_depth=*/false,
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint, reuse_depth,
                                             /*override_contents=*/
                                             std::move(contents));
   }

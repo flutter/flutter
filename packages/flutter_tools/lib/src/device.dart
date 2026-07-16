@@ -707,6 +707,9 @@ abstract class Device {
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 
+  /// The CPU architecture of the device.
+  Future<CpuArch> get cpuArch;
+
   /// Platform name for display only.
   Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
@@ -883,6 +886,7 @@ abstract class Device {
       'id': id,
       'isSupported': await isSupported(),
       'targetPlatform': (await targetPlatform).getName(),
+      'cpuArch': (await cpuArch).name,
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
       'capabilities': <String, Object>{
