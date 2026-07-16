@@ -68,6 +68,7 @@ class BuildInfo {
     String? packageConfigPath,
     PackageConfig? packageConfig,
     String? initializeFromDill,
+    bool? assumeInitializeFromDillUpToDate,
     List<String>? dartDefines,
     bool? includeUnsupportedPlatformLibraryStubs,
   }) {
@@ -95,7 +96,8 @@ class BuildInfo {
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig ?? this.packageConfig,
       initializeFromDill: initializeFromDill ?? this.initializeFromDill,
-      assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
+      assumeInitializeFromDillUpToDate:
+          assumeInitializeFromDillUpToDate ?? this.assumeInitializeFromDillUpToDate,
       buildNativeAssets: buildNativeAssets,
       useLocalCanvasKit: useLocalCanvasKit,
       includeUnsupportedPlatformLibraryStubs:
