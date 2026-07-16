@@ -2670,7 +2670,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
       .andReturn(@YES);
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -2702,7 +2705,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)
     testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -2715,7 +2721,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateNewVSyncClientWhenClientAlreadyExists {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
 
@@ -2736,7 +2745,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 60;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -2749,7 +2761,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testTriggerTouchRateCorrectionVSyncClientCorrectly {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
