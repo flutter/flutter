@@ -32,11 +32,7 @@ void _cleanGoldensDirectory(Directory directory) {
     return;
   }
   for (final FileSystemEntity entity in directory.listSync()) {
-    if (entity is File) {
-      if (path.basename(entity.path) != 'README.md') {
-        entity.deleteSync();
-      }
-    } else if (entity is Directory) {
+    if (path.basename(entity.path) != 'README.md') {
       entity.deleteSync(recursive: true);
     }
   }
