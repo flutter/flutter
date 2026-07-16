@@ -39,13 +39,14 @@ config("test_config") {
       "$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim",
     ]
     if (use_ios_simulator) {
-      cflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
-      ldflags +=
-          [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
+      _version_min_flag =
+          "-mios-simulator-version-min=$ios_testing_deployment_target"
     } else {
-      cflags += [ "-miphoneos-version-min=$ios_testing_deployment_target" ]
-      ldflags += [ "-miphoneos-version-min=$ios_testing_deployment_target" ]
+      _version_min_flag =
+          "-miphoneos-version-min=$ios_testing_deployment_target"
     }
+    cflags += [ _version_min_flag ]
+    ldflags += [ _version_min_flag ]
   } else if (is_mac) {
     _platform_path = mac_platform_path
     cflags += [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
