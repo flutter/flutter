@@ -20,6 +20,14 @@ List<ui.PointerData> _allPointerData(List<ui.PointerDataPacket> packets) {
   return packets.expand((ui.PointerDataPacket packet) => packet.data).toList();
 }
 
+/// Whether this browser exposes the `Touch` and `TouchEvent` constructors that
+/// [_createTouchEvent] needs.
+///
+/// Desktop Safari and Firefox only define them on devices with a touchscreen,
+/// so the touch tests below cannot build their input there.
+bool get _canConstructTouchEvents =>
+    domWindow.hasProperty('Touch'.toJS).toDart && domWindow.hasProperty('TouchEvent'.toJS).toDart;
+
 /// Builds a `touchend` or `touchcancel` reporting that the touches in [lifted]
 /// left the surface, while those in [remaining] are still on it.
 ///
@@ -2610,7 +2618,7 @@ void testMain() {
     expect(packets[0].data[0].physicalY, equals(101 * dpi));
     expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
     expect(packets[0].data[1].device, equals(2));
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   test('does not cancel a touch that was released normally', () {
     final context = _PointerEventContext();
@@ -2639,7 +2647,7 @@ void testMain() {
     rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2]));
 
     expect(packets, isEmpty);
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   // WebKit sometimes drops the `touchend` for an abandoned touch entirely, so
   // no event ever announces it. It is still caught because `touches` stops
@@ -2681,7 +2689,7 @@ void testMain() {
     expect(packets, hasLength(1));
     expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
     expect(packets[0].data[0].device, equals(2));
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   // The abandoned touch is neither named by this event nor the last finger on
   // the surface, so it is only detectable by being absent from `touches`.
@@ -2733,7 +2741,7 @@ void testMain() {
       isTrue,
       reason: 'pointer 4 is still down and must not be cancelled',
     );
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   // An aborted touch is normally cleaned up by the `pointercancel` that
   // accompanies `touchcancel`. This covers the case where the browser drops that
@@ -2764,7 +2772,7 @@ void testMain() {
     expect(packets, hasLength(1));
     expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
     expect(packets[0].data[0].device, equals(2));
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   // The reconciliation is gated to iOS WebKit, because it relies on WebKit
   // behavior other engines do not guarantee (notably that `Touch.identifier`
@@ -2788,7 +2796,7 @@ void testMain() {
     rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2]));
 
     expect(packets, isEmpty);
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   // The synthesized cancel repairs a pointer unrelated to any tap being
   // debounced, so it must reach the framework even while a click debounce is
@@ -2833,7 +2841,7 @@ void testMain() {
         .expand((ui.PointerDataPacket p) => p.data)
         .where((ui.PointerData d) => d.change == ui.PointerChange.cancel && d.device == 2);
     expect(cancels, isNotEmpty, reason: 'the repair cancel must not be swallowed by debouncing');
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   // The abandoned pointer's `down` must already have reached the framework
   // before its synthesized `cancel`, otherwise the framework sees cancel first.
@@ -2864,7 +2872,7 @@ void testMain() {
     expect(downIndex, greaterThanOrEqualTo(0));
     expect(cancelIndex, greaterThanOrEqualTo(0));
     expect(downIndex, lessThan(cancelIndex));
-  }, skip: isSafari); // TouchEvent cannot be constructed in desktop Safari.
+  }, skip: !_canConstructTouchEvents);
 
   test('does not synthesize pointer up if from different device', () {
     final context = _PointerEventContext();
