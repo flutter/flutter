@@ -1729,7 +1729,6 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..circle(color: sliderTheme.overlayColor)
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.overlappingShapeStrokeColor)
         ..circle(color: sliderTheme.thumbColor),
@@ -3895,6 +3894,154 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(RangeSlider)), Size.zero);
+  });
+
+  testWidgets('RangeSlider keeps drag overlay when touch moves outside thumb', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    addTearDown(() {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
+    });
+
+    const Color overlayColor = Color(0xff800080);
+    var values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  overlayColor: const WidgetStatePropertyAll<Color>(overlayColor),
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    final TestGesture gesture = await tester.startGesture(startThumbPos);
+    await gesture.moveBy(const Offset(40.0, -80.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints..circle(color: overlayColor),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+  });
+
+  testWidgets('RangeSlider touch focus does not show persistent overlay', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    addTearDown(() {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
+    });
+
+    const Color overlayColor = Color(0xff800080);
+    var values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  overlayColor: const WidgetStatePropertyAll<Color>(overlayColor),
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    final TestGesture gesture = await tester.startGesture(startThumbPos);
+    await tester.pump();
+    await gesture.moveBy(const Offset(10.0, 0.0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+  });
+
+  testWidgets('RangeSlider keyboard focus shows focused overlay', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    addTearDown(() {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
+    });
+
+    const Color overlayColor = Color(0xff800080);
+    var values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  overlayColor: const WidgetStatePropertyAll<Color>(overlayColor),
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    final startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints..circle(color: overlayColor),
+    );
   });
 
   testWidgets('RangeSlider taps should set focus on start/end thumbs', (WidgetTester tester) async {

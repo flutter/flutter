@@ -485,6 +485,24 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
   bool _dragging = false;
 
+  bool _showStartFocusHighlight = false;
+  void _handleStartFocusHighlightChanged(bool showFocusHighlight) {
+    if (showFocusHighlight != _showStartFocusHighlight) {
+      setState(() {
+        _showStartFocusHighlight = showFocusHighlight;
+      });
+    }
+  }
+
+  bool _showEndFocusHighlight = false;
+  void _handleEndFocusHighlightChanged(bool showFocusHighlight) {
+    if (showFocusHighlight != _showEndFocusHighlight) {
+      setState(() {
+        _showEndFocusHighlight = showFocusHighlight;
+      });
+    }
+  }
+
   bool _hovering = false;
   bool _showHoverHighlight = false;
   void _handleHoverChanged(bool hovering) {
@@ -668,6 +686,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     final states = <WidgetState>{
       if (!_enabled) WidgetState.disabled,
       if (_hovering) WidgetState.hovered,
+      if (_showStartFocusHighlight || _showEndFocusHighlight) WidgetState.focused,
       if (_dragging) WidgetState.dragged,
     };
 
@@ -770,6 +789,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           state: this,
           semanticFormatterCallback: widget.semanticFormatterCallback,
           hovering: _showHoverHighlight,
+          startThumbShowFocusHighlight: _showStartFocusHighlight,
+          endThumbShowFocusHighlight: _showEndFocusHighlight,
         ),
       ),
     );
@@ -784,12 +805,20 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         // Adds two invisible focus nodes to the range slider for its two thumbs.
         Row(
           children: <Widget>[
-            Focus(
+            FocusableActionDetector(
               focusNode: startFocusNode,
-              includeSemantics: false,
+              enabled: _enabled,
+              includeFocusSemantics: false,
+              onShowFocusHighlight: _handleStartFocusHighlightChanged,
               child: const SizedBox.shrink(),
             ),
-            Focus(focusNode: endFocusNode, includeSemantics: false, child: const SizedBox.shrink()),
+            FocusableActionDetector(
+              focusNode: endFocusNode,
+              enabled: _enabled,
+              includeFocusSemantics: false,
+              onShowFocusHighlight: _handleEndFocusHighlightChanged,
+              child: const SizedBox.shrink(),
+            ),
           ],
         ),
         MouseRegion(
@@ -835,6 +864,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.state,
     required this.semanticFormatterCallback,
     required this.hovering,
+    required this.startThumbShowFocusHighlight,
+    required this.endThumbShowFocusHighlight,
   });
 
   final RangeValues values;
@@ -849,6 +880,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final SemanticFormatterCallback? semanticFormatterCallback;
   final _RangeSliderState state;
   final bool hovering;
+  final bool startThumbShowFocusHighlight;
+  final bool endThumbShowFocusHighlight;
 
   @override
   _RenderRangeSlider createRenderObject(BuildContext context) {
@@ -868,6 +901,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
       hovering: hovering,
+      startThumbShowFocusHighlight: startThumbShowFocusHighlight,
+      endThumbShowFocusHighlight: endThumbShowFocusHighlight,
       gestureSettings: MediaQuery.gestureSettingsOf(context),
     );
   }
@@ -891,6 +926,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context).platform
       ..hovering = hovering
+      ..startThumbShowFocusHighlight = startThumbShowFocusHighlight
+      ..endThumbShowFocusHighlight = endThumbShowFocusHighlight
       ..gestureSettings = MediaQuery.gestureSettingsOf(context);
   }
 }
@@ -912,6 +949,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     required _RangeSliderState state,
     required TextDirection textDirection,
     required bool hovering,
+    required bool startThumbShowFocusHighlight,
+    required bool endThumbShowFocusHighlight,
     required DeviceGestureSettings gestureSettings,
   }) : assert(values.start >= 0.0 && values.start <= 1.0),
        assert(values.end >= 0.0 && values.end <= 1.0),
@@ -927,6 +966,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
        _onChanged = onChanged,
        _state = state,
        _textDirection = textDirection,
+       _startThumbShowFocusHighlight = startThumbShowFocusHighlight,
+       _endThumbShowFocusHighlight = endThumbShowFocusHighlight,
        _hovering = hovering {
     _updateLabelPainters();
     final team = GestureArenaTeam();
@@ -1176,6 +1217,28 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _updateForHover(_hovering);
   }
 
+  /// True if the start thumb should show the focus highlight.
+  bool get startThumbShowFocusHighlight => _startThumbShowFocusHighlight;
+  bool _startThumbShowFocusHighlight;
+  set startThumbShowFocusHighlight(bool value) {
+    if (value == _startThumbShowFocusHighlight) {
+      return;
+    }
+    _startThumbShowFocusHighlight = value;
+    markNeedsPaint();
+  }
+
+  /// True if the end thumb should show the focus highlight.
+  bool get endThumbShowFocusHighlight => _endThumbShowFocusHighlight;
+  bool _endThumbShowFocusHighlight;
+  set endThumbShowFocusHighlight(bool value) {
+    if (value == _endThumbShowFocusHighlight) {
+      return;
+    }
+    _endThumbShowFocusHighlight = value;
+    markNeedsPaint();
+  }
+
   /// True if the slider is interactive and the start thumb is being
   /// hovered over by a pointer.
   bool _hoveringStartThumb = false;
@@ -1205,7 +1268,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     if (hovered && (hoveringStartThumb || hoveringEndThumb)) {
       _state.overlayController.forward();
     } else {
-      _state.overlayController.reverse();
+      if (!_active) {
+        _state.overlayController.reverse();
+      }
     }
   }
 
@@ -1614,7 +1679,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final bool endThumbSelected = _lastThumbSelection == Thumb.end && !hoveringStartThumb;
     final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
-    if (_state.startFocusNode.hasFocus) {
+    if (startThumbShowFocusHighlight) {
       _sliderTheme.overlayShape!.paint(
         context,
         _startThumbCenter,
@@ -1631,7 +1696,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       );
     }
 
-    if (_state.endFocusNode.hasFocus) {
+    if (endThumbShowFocusHighlight) {
       _sliderTheme.overlayShape!.paint(
         context,
         _endThumbCenter,
