@@ -2602,8 +2602,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     if (rectA == null) {
       // Unavailable selectables sort after available ones instead of
-      // crashing; order self-corrects the next time selectables are
-      // flushed/re-sorted.
+      // crashing the sort.
       return 1;
     }
     if (rectB == null) {
