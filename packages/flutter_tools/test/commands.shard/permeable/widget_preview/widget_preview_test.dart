@@ -278,13 +278,7 @@ void main() {
       '--verbose',
       ?rootProject?.path,
     ], analysisServerFactoryOverride: analysisServerFactoryOverride);
-    // Don't perform analysis on Windows since `dart pub add` will use '\' for
-    // path dependencies and cause analysis to fail.
-    // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
-    // is resolved.
-    if (!platform.isWindows) {
-      await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
-    }
+    await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
     fs.currentDirectory = current;
   }
 
@@ -426,6 +420,58 @@ void main() {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
         expectSinglePreviewLaunchTimingEvent();
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'start copies host web directory to scaffold if it exists and removes stale files',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final Directory hostWebDir = rootProject.childDirectory('web')..createSync();
+        hostWebDir.childFile('index.html').writeAsStringSync('<html>custom index</html>');
+        final File staleFile = hostWebDir.childFile('stale.js')
+          ..writeAsStringSync('console.log("stale");');
+
+        await startWidgetPreview(rootProject: rootProject);
+
+        final Directory scaffoldWebDir = WidgetPreviewStartCommand.widgetPreviewScaffold
+            .childDirectory('web');
+        expect(scaffoldWebDir.existsSync(), true);
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expect(scaffoldWebDir.childFile('stale.js').readAsStringSync(), 'console.log("stale");');
+        expectSinglePreviewLaunchTimingEvent();
+
+        // Now remove stale.js from host, and add a new file.
+        staleFile.deleteSync();
+        hostWebDir.childFile('new.js').writeAsStringSync('console.log("new");');
+
+        // Run again
+        await startWidgetPreview(rootProject: rootProject);
+
+        expect(scaffoldWebDir.childFile('stale.js').existsSync(), false);
+        expect(scaffoldWebDir.childFile('new.js').readAsStringSync(), 'console.log("new");');
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expectNPreviewLaunchTimingEvents(2);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,

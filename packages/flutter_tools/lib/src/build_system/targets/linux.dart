@@ -137,6 +137,7 @@ abstract class BundleLinuxAssets extends Target {
       dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
+      flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
         'NativeAssetsManifest.json': DevFSFileContent(
