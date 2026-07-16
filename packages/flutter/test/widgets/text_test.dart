@@ -1986,6 +1986,50 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('_SelectableTextContainerDelegate._compareScreenOrder places unlaid-out selectables '
+      'last and keeps laid-out ones in a consistent, deterministic order', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Mixes laid-out and unlaid-out WidgetSpan selectables. The unlaid-out
+    // one sits between the two laid-out ones in the span order, but the
+    // sort must still place it after both — otherwise `List.sort`, which
+    // requires a consistent comparator, could scramble the laid-out ones'
+    // relative order too.
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    SelectedContent? content;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          selectionControls: EmptyTextSelectionControls(),
+          child: const Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(child: _OrderProbeSelectionSpy(label: 'A')),
+                WidgetSpan(child: _OrderProbeSelectionSpy(label: 'Z', unlaidOut: true)),
+                WidgetSpan(child: _OrderProbeSelectionSpy(label: 'B')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    state.selectAll();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(content?.plainText, 'ABZ');
+  });
 }
 
 void _noopRemovePage(Page<Object?> page) {}
@@ -2050,6 +2094,86 @@ class _RenderThrowingSelectionSpy extends RenderProxyBox with Selectable, Select
 
   @override
   int get contentLength => 0;
+
+  @override
+  final SelectionGeometry value = const SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
+}
+
+// Mock Selectable with a fixed [size] and [getSelectedContent] result, and an
+// optional forced-unlaid-out `boundingBoxes` — used by the text.dart
+// `_SelectableTextContainerDelegate._compareScreenOrder` ordering regression
+// test for https://github.com/flutter/flutter/issues/151536 to observe the
+// resulting selectable order through the concatenated selected content.
+class _OrderProbeSelectionSpy extends LeafRenderObjectWidget {
+  const _OrderProbeSelectionSpy({required this.label, this.unlaidOut = false});
+
+  final String label;
+  final bool unlaidOut;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderOrderProbeSelectionSpy(SelectionContainer.maybeOf(context), label, unlaidOut);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
+}
+
+class _RenderOrderProbeSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderOrderProbeSelectionSpy(SelectionRegistrar? registrar, this._label, this._unlaidOut) {
+    this.registrar = registrar;
+  }
+
+  final String _label;
+  final bool _unlaidOut;
+
+  @override
+  List<Rect> get boundingBoxes {
+    if (_unlaidOut) {
+      throw StateError('Bad state: RenderBox was not laid out (test)');
+    }
+    return <Rect>[Offset.zero & size];
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => const Size(20, 20);
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) => SelectionResult.end;
+
+  @override
+  SelectedContent? getSelectedContent() => SelectedContent(plainText: _label);
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  int get contentLength => _label.length;
 
   @override
   final SelectionGeometry value = const SelectionGeometry(
