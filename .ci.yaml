@@ -4694,7 +4694,6 @@ targets:
   - name: Mac plugin_test_darwin
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
