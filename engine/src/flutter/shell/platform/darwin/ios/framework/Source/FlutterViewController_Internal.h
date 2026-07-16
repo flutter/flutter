@@ -9,7 +9,6 @@
 
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
@@ -32,22 +31,12 @@ FLUTTER_DARWIN_EXPORT
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
-typedef NS_ENUM(NSInteger, FlutterKeyboardMode) {
-  // NOLINTBEGIN(readability-identifier-naming)
-  FlutterKeyboardModeHidden = 0,
-  FlutterKeyboardModeDocked = 1,
-  FlutterKeyboardModeFloating = 2,
-  // NOLINTEND(readability-identifier-naming)
-};
-
-typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval);
-
 @interface FlutterViewController () <FlutterViewResponder>
 
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 @property(nonatomic, readonly) BOOL isVoiceOverRunning;
 @property(nonatomic, strong) FlutterKeyboardManager* keyboardManager;
-@property(nonatomic, strong) FlutterKeyboardInsetManager* keyboardInsetManager;
+@property(nonatomic, strong) id<FlutterKeyboardInsetManagerProtocol> keyboardInsetManager;
 @property(nonatomic, readwrite) NSString* applicationLocale;
 
 /**

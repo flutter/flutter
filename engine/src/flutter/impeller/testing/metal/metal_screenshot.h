@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOT_H_
-#define FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOT_H_
+#ifndef FLUTTER_IMPELLER_TESTING_METAL_METAL_SCREENSHOT_H_
+#define FLUTTER_IMPELLER_TESTING_METAL_METAL_SCREENSHOT_H_
 
-#include "flutter/impeller/golden_tests/screenshot.h"
+#include "flutter/impeller/testing/screenshot.h"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreImage/CoreImage.h>
@@ -55,4 +55,4 @@ class MetalScreenshot : public Screenshot {
 }  // namespace testing
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_GOLDEN_TESTS_METAL_SCREENSHOT_H_
+#endif  // FLUTTER_IMPELLER_TESTING_METAL_METAL_SCREENSHOT_H_
