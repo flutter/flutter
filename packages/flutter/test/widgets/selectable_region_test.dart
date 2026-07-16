@@ -7017,6 +7017,58 @@ void main() {
       expect(find.text('Top page'), findsOneWidget);
     },
   );
+
+  testWidgets('MultiSelectableSelectionContainerDelegate._compareScreenOrder catches '
+      'StateError from unlaid-out selectables', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Red/green test that directly exercises the `on StateError` catch
+    // branch of MultiSelectableSelectionContainerDelegate._compareScreenOrder
+    // by registering mock Selectables whose `boundingBoxes` getter throws,
+    // simulating the production scenario where _RenderTheater skipped layout
+    // for an obscured OverlayEntry. Without the guard, _flushAdditions would
+    // propagate the StateError out of its post-frame callback and
+    // tester.takeException() would report it.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Column(
+            children: <Widget>[
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.stateError),
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.stateError),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('MultiSelectableSelectionContainerDelegate._compareScreenOrder catches '
+      'AssertionError from unlaid-out selectables', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Red/green test for the `on AssertionError` catch, which covers
+    // debug-mode builds where `assert(hasSize)` fires before the
+    // `_size ?? throw StateError(...)` expression in RenderBox.size.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Column(
+            children: <Widget>[
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.assertionError),
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.assertionError),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 void _noopRemovePage(Page<Object?> page) {}
@@ -7235,4 +7287,85 @@ class _TextSelectionControlsSpy extends TextSelectionControls with TextSelection
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
+}
+
+// Mock Selectable whose [boundingBoxes] getter throws — used by the
+// `_compareScreenOrder` regression tests for
+// https://github.com/flutter/flutter/issues/151536 to directly exercise the
+// `on StateError` / `on AssertionError` catch branches.
+enum _ThrowKind { stateError, assertionError }
+
+class _ThrowingSelectionSpy extends LeafRenderObjectWidget {
+  const _ThrowingSelectionSpy({required this.throwKind});
+
+  final _ThrowKind throwKind;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderThrowingSelectionSpy(SelectionContainer.maybeOf(context), throwKind);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
+}
+
+class _RenderThrowingSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderThrowingSelectionSpy(SelectionRegistrar? registrar, this._throwKind) {
+    this.registrar = registrar;
+  }
+
+  final _ThrowKind _throwKind;
+
+  @override
+  List<Rect> get boundingBoxes {
+    switch (_throwKind) {
+      case _ThrowKind.stateError:
+        throw StateError('Bad state: RenderBox was not laid out (test)');
+      case _ThrowKind.assertionError:
+        throw AssertionError('RenderBox was not laid out (test)');
+    }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.smallest;
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) => SelectionResult.end;
+
+  @override
+  SelectedContent? getSelectedContent() => null;
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  int get contentLength => 0;
+
+  @override
+  final SelectionGeometry value = const SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
 }
