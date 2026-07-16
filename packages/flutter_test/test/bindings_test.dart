@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -115,5 +116,11 @@ void main() {
       responded = true;
     });
     expect(responded, true);
+  });
+
+  group('HttpOverrides', () {
+    testWidgets('testWidgets registers HttpOverrides', (WidgetTester tester) async {
+      expect(HttpOverrides.current, isNotNull);
+    });
   });
 }
