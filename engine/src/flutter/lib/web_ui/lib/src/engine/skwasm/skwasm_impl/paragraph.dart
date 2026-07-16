@@ -837,10 +837,13 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
   final ui.StrutStyle? _strutStyle;
   final String? _ellipsis;
   final ui.Locale? _locale;
-  // TODO(dbebawy): honor hyphens once the configurable-soft-hyphen-string Skia
-  // change (https://skia-review.googlesource.com/c/skia/+/1205922) lands and a
-  // skwasm binding is exposed. Accepted and stored for now.
+  // TODO(dbebawy): hyphens is accepted and stored but not honored here yet.
+  // Neither Hyphens.manual nor Hyphens.hidden takes effect on Skwasm until a
+  // renderSoftHyphens setter is exposed on the Skwasm ParagraphStyle binding
+  // (the native engine wires this via SkParagraph::setRenderSoftHyphens).
   // https://github.com/flutter/flutter/issues/18443
+  // Customizing the hyphen string is separate future work:
+  // https://github.com/flutter/flutter/issues/189617
   final ui.Hyphens? _hyphens;
 
   @override
