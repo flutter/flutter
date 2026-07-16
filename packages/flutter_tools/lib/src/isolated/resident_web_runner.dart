@@ -355,6 +355,7 @@ class ResidentWebRunner extends ResidentRunner {
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            webDefines: _webDefines,
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -508,6 +509,7 @@ class ResidentWebRunner extends ResidentRunner {
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
           compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+          webDefines: _webDefines,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

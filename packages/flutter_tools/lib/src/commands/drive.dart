@@ -354,6 +354,7 @@ class DriveCommand extends RunCommandBase {
             if (traceStartup) 'trace-startup': traceStartup,
             if (web) 'no-launch-chrome': true,
           },
+          webDefines: extractWebDefines(),
         );
       } else {
         final Uri? uri = Uri.tryParse(stringArg(_kUseExistingApp)!);
