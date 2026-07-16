@@ -6,6 +6,8 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -520,9 +522,14 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
+  ///
+  /// The [deviceKind] is the pointer device that drove this update, if known,
+  /// so edge auto-scrolling can respect the enclosing scrollable's drag
+  /// devices. It is null when the driving device isn't known.
   const SelectionEdgeUpdateEvent.forStart({
     required this.globalPosition,
     TextGranularity? granularity,
+    this.deviceKind,
   }) : granularity = granularity ?? TextGranularity.character,
        super._(SelectionEventType.startEdgeUpdate);
 
@@ -532,9 +539,14 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
+  ///
+  /// The [deviceKind] is the pointer device that drove this update, if known,
+  /// so edge auto-scrolling can respect the enclosing scrollable's drag
+  /// devices. It is null when the driving device isn't known.
   const SelectionEdgeUpdateEvent.forEnd({
     required this.globalPosition,
     TextGranularity? granularity,
+    this.deviceKind,
   }) : granularity = granularity ?? TextGranularity.character,
        super._(SelectionEventType.endEdgeUpdate);
 
@@ -547,6 +559,17 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// Defaults to [TextGranularity.character].
   final TextGranularity granularity;
+
+  /// The pointer device that drove this selection edge update.
+  ///
+  /// Edge auto-scrolling uses this to decide whether the enclosing scrollable
+  /// should scroll while selecting: a paged scrollable ignores devices that
+  /// aren't in its [ScrollBehavior.dragDevices].
+  ///
+  /// This is null when the device isn't known, for example an event synthesized
+  /// to keep a newly added selectable in sync. A null value leaves
+  /// auto-scrolling untouched.
+  final PointerDeviceKind? deviceKind;
 }
 
 /// Extends the start or end of the selection by a given [TextGranularity].

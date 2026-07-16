@@ -1500,6 +1500,106 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('mouse selection drag does not edge auto-scroll a page-snapping scrollable', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149426.
+    // A mouse isn't one of a PageView's default drag devices, so dragging a
+    // selection past its edge shouldn't flip to the next page and snap back.
+    final controller = PageController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: testTextSelectionHandleControls,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: 5,
+            itemBuilder: (BuildContext context, int index) {
+              return Center(child: Text('Page $index'));
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.page, 0.0);
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.text('Page 0')),
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(controller.page, 0.0);
+
+    // Drag past the right edge. Without the fix this scrolls toward page 1.
+    await gesture.moveTo(tester.getBottomRight(find.byType(PageView)) + const Offset(40.0, 0.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.page, 0.0);
+    expect(tester.takeException(), isNull);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.page, 0.0);
+    expect(tester.takeException(), isNull);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.page, 0.0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mouse selection drag still edge auto-scrolls a non page-snapping scrollable', (
+    WidgetTester tester,
+  ) async {
+    // The counterpart to the PageView test above: the fix only touches paged
+    // scrollables. A plain ListView still scrolls while you drag-select with a
+    // mouse ("select to scroll"), even though a mouse isn't one of its drag
+    // devices. See https://github.com/flutter/flutter/issues/149426.
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: testTextSelectionHandleControls,
+          child: ListView.builder(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Center(child: Text('Item $index'));
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(paragraph0, 2),
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(controller.offset, 0.0);
+
+    // Drag past the right edge to kick off auto-scroll.
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(40.0, 0.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset, greaterThan(0.0));
+    expect(tester.takeException(), isNull);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   group('Complex cases', () {
     testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
       final controller = ScrollController();

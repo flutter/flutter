@@ -1122,6 +1122,7 @@ class SelectableRegionState extends State<SelectableRegion>
           SelectionEdgeUpdateEvent.forEnd(
             globalPosition: _selectionEndPosition!,
             granularity: textGranularity,
+            deviceKind: _lastPointerDeviceKind,
           ),
         ) ==
         SelectionResult.pending) {
@@ -1176,6 +1177,7 @@ class SelectableRegionState extends State<SelectableRegion>
           SelectionEdgeUpdateEvent.forStart(
             globalPosition: _selectionStartPosition!,
             granularity: textGranularity,
+            deviceKind: _lastPointerDeviceKind,
           ),
         ) ==
         SelectionResult.pending) {
