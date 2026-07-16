@@ -318,85 +318,82 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey portalKey = GlobalKey(debugLabel: 'moving-portal');
+    final controller = OverlayPortalController()..show();
     bool isMoved = false;
-    int moveCount = 0;
     late StateSetter setState;
+    final Widget portal = OverlayPortal.overlayChildLayoutBuilder(
+      key: portalKey,
+      controller: controller,
+      overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+        final Rect childRect = MatrixUtils.transformRect(
+          layoutInfo.childPaintTransform,
+          Offset.zero & layoutInfo.childSize,
+        );
+        return Positioned.fromRect(
+          rect: childRect.inflate(8.0),
+          child: const SizedBox(key: ValueKey<String>('portal-overlay')),
+        );
+      },
+      child: const SizedBox(key: ValueKey<String>('portal-target'), width: 100.0, height: 40.0),
+    );
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: DefaultTextStyle(
-          style: const TextStyle(),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              OverlayEntry(
-                builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setter) {
-                      setState = setter;
-                      return LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Text('Moves: $moveCount'),
-                                const SizedBox(height: 24.0),
-                                _PortalSlot(
-                                  key: const ValueKey<String>('top-slot'),
-                                  child: !isMoved
-                                      ? _MovingPortalTarget(
-                                          key: portalKey,
-                                          onTap: () {
-                                            setState(() {
-                                              isMoved = !isMoved;
-                                              moveCount += 1;
-                                            });
-                                          },
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(height: 80.0),
-                                _PortalSlot(
-                                  key: const ValueKey<String>('bottom-slot'),
-                                  child: isMoved
-                                      ? _MovingPortalTarget(
-                                          key: portalKey,
-                                          onTap: () {
-                                            setState(() {
-                                              isMoved = !isMoved;
-                                              moveCount += 1;
-                                            });
-                                          },
-                                        )
-                                      : null,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    setState = setter;
+                    return LayoutBuilder(
+                      builder: (BuildContext context, BoxConstraints constraints) {
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              SizedBox(
+                                key: const ValueKey<String>('top-slot'),
+                                height: 48.0,
+                                child: Center(child: isMoved ? null : portal),
+                              ),
+                              const SizedBox(height: 80.0),
+                              SizedBox(
+                                key: const ValueKey<String>('bottom-slot'),
+                                height: 48.0,
+                                child: Center(child: isMoved ? portal : null),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
 
     expect(find.byKey(const ValueKey<String>('portal-overlay')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey<String>('portal-overlay')));
+    setState(() {
+      isMoved = true;
+    });
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Moves: 1'), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('portal-overlay')), findsOneWidget);
     expect(
       tester.getCenter(find.byKey(const ValueKey<String>('portal-target'))).dy,
       greaterThan(tester.getCenter(find.byKey(const ValueKey<String>('top-slot'))).dy),
+    );
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('portal-overlay'))),
+      tester.getRect(find.byKey(const ValueKey<String>('portal-target'))).inflate(8.0),
     );
   });
 
@@ -459,65 +456,4 @@ class _NullElement extends Element {
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
-}
-
-class _PortalSlot extends StatelessWidget {
-  const _PortalSlot({super.key, required this.child});
-
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(height: 48.0, child: Center(child: child));
-  }
-}
-
-class _MovingPortalTarget extends StatefulWidget {
-  const _MovingPortalTarget({super.key, required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  State<_MovingPortalTarget> createState() => _MovingPortalTargetState();
-}
-
-class _MovingPortalTargetState extends State<_MovingPortalTarget> {
-  final OverlayPortalController _controller = OverlayPortalController()..show();
-
-  @override
-  Widget build(BuildContext context) {
-    return OverlayPortal.overlayChildLayoutBuilder(
-      controller: _controller,
-      overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
-        final Rect childRect = MatrixUtils.transformRect(
-          layoutInfo.childPaintTransform,
-          Offset.zero & layoutInfo.childSize,
-        );
-        return Positioned.fromRect(
-          rect: childRect.inflate(32.0),
-          child: GestureDetector(
-            key: const ValueKey<String>('portal-overlay'),
-            behavior: HitTestBehavior.translucent,
-            onTap: widget.onTap,
-            child: const DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.fromBorderSide(BorderSide(color: Color(0xffff5252), width: 2.0)),
-                color: Color(0x14ff5252),
-              ),
-            ),
-          ),
-        );
-      },
-      child: GestureDetector(
-        key: const ValueKey<String>('portal-target'),
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.onTap,
-        child: const SizedBox(
-          width: 100.0,
-          height: 40.0,
-          child: Center(child: Text('Move portal')),
-        ),
-      ),
-    );
-  }
 }
