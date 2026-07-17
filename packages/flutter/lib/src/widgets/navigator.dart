@@ -1323,7 +1323,7 @@ const TraversalEdgeBehavior kDefaultRouteDirectionalTraversalEdgeBehavior =
 /// such as Android, the system UI will provide a back button (outside the
 /// bounds of your application) that will allow the user to navigate back
 /// to earlier routes in your application's stack. On platforms that don't
-/// have this build-in navigation mechanism, the use of an [AppBar] (typically
+/// have this built-in navigation mechanism, the use of an [AppBar] (typically
 /// used in the [Scaffold.appBar] property) can automatically add a back
 /// button for user navigation.
 ///
@@ -3771,20 +3771,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
-    final bool navigatorCanPop = canPop();
-    final bool routeBlocksPop;
-    if (!navigatorCanPop) {
-      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
-      routeBlocksPop =
-          lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
-    } else {
-      routeBlocksPop = false;
-    }
-    final notification = NavigationNotification(canHandlePop: navigatorCanPop || routeBlocksPop);
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
       case SchedulerPhase.postFrameCallbacks:
-        notification.dispatch(context);
+        NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
       case SchedulerPhase.idle:
       case SchedulerPhase.midFrameMicrotasks:
       case SchedulerPhase.persistentCallbacks:
@@ -3793,9 +3783,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           if (!mounted) {
             return;
           }
-          notification.dispatch(context);
+          NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
         }, debugLabel: 'Navigator.dispatchNotification');
     }
+  }
+
+  bool _getNavigatorCanHandlePop() {
+    if (canPop()) {
+      return true;
+    }
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    return lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
   }
 
   bool _debugCheckPageApiParameters() {
@@ -5959,7 +5957,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification as-is.
-          if (notification.canHandlePop || !canPop()) {
+          if (notification.canHandlePop || !_getNavigatorCanHandlePop()) {
             return false;
           }
           // Otherwise, dispatch a new Notification with the correct canPop and

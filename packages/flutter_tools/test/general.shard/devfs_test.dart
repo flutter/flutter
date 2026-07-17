@@ -113,6 +113,25 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
+  testWithoutContext(
+    'DevFSFileContent.isModifiedAfter only depends on the file modification time',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final File file = fileSystem.file('foo.txt')..writeAsBytesSync(<int>[1, 2, 3], flush: true);
+      // A freshly constructed DevFSFileContent has no cached stat, as is the
+      // case for the entries of a newly built asset bundle. Such an entry must
+      // not be reported as modified when its file is older than the given time.
+      final content = DevFSFileContent(file);
+
+      final DateTime modified = file.statSync().modified;
+      expect(content.isModifiedAfter(modified.add(const Duration(seconds: 5))), isFalse);
+      expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isTrue);
+
+      file.deleteSync();
+      expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isFalse);
+    },
+  );
+
   testWithoutContext('DevFSStringCompressingBytesContent', () {
     final content = DevFSStringCompressingBytesContent('uncompressed string');
 
@@ -1083,6 +1102,9 @@ class DelayedFakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) => future;
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -1245,4 +1267,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) async {
     return DevFSByteContent(await inputShader.contentsAsBytes());
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart' show Version;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -68,6 +69,22 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
+  }
+}
+
+class FakeXcodeProjectInterpreterWithVersion extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithVersion({required this.version});
+
+  @override
+  final Version version;
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+    XcodeBasedProject xcodeProject, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
   }
 }
 
@@ -182,6 +199,12 @@ Details:  createItemModels creation requirements should not create capability it
 Function: createItemModels(for:itemModelSource:)
 Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
 Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-05-06 09:25:42.398 xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open log store at /Users/example/app/build/macos/Logs/Build
+2026-05-06 09:25:42.399 xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open Build log store: Error Domain=NSCocoaErrorDomain Code=4 "The file "LogStoreManifest.plist" doesn't exist." UserInfo={NSFilePath=/Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist, NSURL=file:///Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist, NSUnderlyingError=0x94bfe29d0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}. User info: {
+    NSFilePath = "/Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist";
+    NSURL = "file:///Users/example/app/build/macos/Logs/Build/LogStoreManifest.plist";
+    NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"";
+    }.
 STDERR STUFF
 ''',
       onRun: (List<String> command) {
@@ -454,6 +477,9 @@ STDERR STUFF
       expect(testLogger.errorText, isNot(contains('DVTAssertions: Warning in')));
       expect(testLogger.errorText, isNot(contains('createItemModels')));
       expect(testLogger.errorText, isNot(contains('_NSMainThread:')));
+      expect(testLogger.errorText, isNot(contains('IDELogStore')));
+      expect(testLogger.errorText, isNot(contains('LogStoreManifest.plist')));
+      expect(testLogger.errorText, isNot(contains('NSUnderlyingError')));
       expect(
         testLogger.errorText,
         isNot(contains('Please file a bug at https://feedbackassistant')),
@@ -1346,6 +1372,52 @@ STDERR STUFF
   );
 
   testUsingContext(
+    'Build with arm64 destination in release/profile mode if isMacOSArm64OnlyEnabled is true',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await runner.run(const <String>['build', 'macos', '--profile', '--no-pub']);
+      await runner.run(const <String>['build', 'macos', '--no-pub']);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // Still uses host arch in debug mode even if the flag is set.
+        setUpFakeXcodeBuildHandler('Debug'),
+        setUpFakeXcodeBuildHandler('Profile', additionalCommandArguments: <String>['ARCHS=arm64']),
+        setUpFakeXcodeBuildHandler('Release', additionalCommandArguments: <String>['ARCHS=arm64']),
+      ]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
     'Passes EXCLUDED_ARCHS from Xcode project to xcodebuild command',
     () async {
       createMinimalMockProjectFiles();
@@ -1396,6 +1468,55 @@ STDERR STUFF
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
         overrides: <String, String>{'EXCLUDED_ARCHS': 'x86_64'},
+      ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Fails when isMacOSArm64OnlyEnabled is true and arm64 is in EXCLUDED_ARCHS',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      await expectLater(
+        createTestCommandRunner(command).run(<String>['build', 'macos', '--release', '--no-pub']),
+        throwsToolExit(
+          message:
+              'No Valid Target Arch: '
+              'You have enabled the macOSArm64Only feature flag but '
+              "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
+              'Consider removing arm64 from EXCLUDED_ARCHS.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isMacOSArm64OnlyEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'EXCLUDED_ARCHS': 'arm64'},
       ),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
@@ -1453,6 +1574,58 @@ STDERR STUFF
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
         // Empty overrides - no EXCLUDED_ARCHS
       ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Prints warning when building a release app for macOS that contains an x86_64 slice and Xcode version is 27 or greater',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: testLogger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
+
+      expect(
+        testLogger.warningText,
+        contains(
+          'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+          'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+          'This will become the default behavior in a future Flutter release.',
+        ),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithVersion(version: Version(27, 0, 0)),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
