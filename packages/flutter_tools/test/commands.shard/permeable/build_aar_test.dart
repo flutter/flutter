@@ -413,6 +413,7 @@ void main() {
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               ...ndkProvisioningProperties,
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               'assembleAarRelease',
