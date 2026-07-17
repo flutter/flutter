@@ -437,3 +437,45 @@ By capturing the entire screen
 using native system compositor APIs (`adb` / `UiAutomation`) and cropping,
 the test asserts on the **true, final composited image**
 rendered by the device's GPU and system composer.
+
+### Why the Compile-Online / Run-Offline Split was not desirable
+
+An alternative execution model was considered:
+* **How it worked**: The build is split into
+  two sequential phases: compiling the test APK online
+  (`assembleDebugAndroidTest`), followed by
+  running the test execution completely offline
+  (`connectedDebugAndroidTest --offline`) to
+  insulate the emulator execution from Maven network flakes.
+
+While beneficial for network isolation,
+it was **not desirable** for several reasons:
+1. **UTP Dynamic Resolution Design**: The Android Gradle Plugin
+   (AGP) 8.x/9.x Unified Test Platform (UTP) runner resolves and
+   downloads its host-side runner plugins (like
+   `com.android.tools.utp:android-test-plugin-host-additional-test-output`)
+   dynamically via internal detached configurations at
+   runtime. These dependencies are not resolved during
+   compilation, causing the offline check to fail on
+   cold caches.
+2. **Maintenance Overhead / Double Execution**: To support
+   offline runs, we would either have to run a try-catch
+   online test execution first (which executes the entire
+   test suite twice, wasting CI resources) or manually
+   pin and declare all transitive UTP dependencies in the
+   `build.gradle.kts` file. Hardcoding UTP plugin versions
+   is highly brittle and breaks automatically whenever the
+   project upgrades its AGP version.
+3. **Redundant Safety**: Because the online compilation phase
+   (`assembleDebugAndroidTest`) already queries remote Maven
+   repositories for project dependencies, running the test
+   execution online does not introduce any new network
+   vectors that could flake. Gradle's internal dependency
+   caching guarantees subsequent execution remains
+   extremely fast.
+
+By executing `connectedDebugAndroidTest` online directly in
+a single step, the test suite executes exactly once,
+remains low maintenance across AGP upgrades, and
+cleanly bubbles up any legitimate compiler or runner
+errors without silent try-catch blocks.
