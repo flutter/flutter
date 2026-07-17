@@ -358,6 +358,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
+- (void)dispatchTouches:(NSSet*)touches pointerDataChangeOverride:(void*)overridden_change event:(UIEvent*)event;
 @end
 
 @interface FlutterViewControllerTest : XCTestCase
@@ -371,6 +372,28 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @property(nonatomic, readwrite) UITouchPhase phase;
 
+@end
+
+// Spy subclass for testing touch dispatch blocking when a native VC is presented.
+// Overrides dispatchTouches:pointerDataChangeOverride:event: with void* for the C++ pointer
+// parameter so ObjC selector dispatch matches without pulling in flutter::PointerData types.
+// Does not call super to avoid crashing on raw UITouch stubs in the loop body.
+@interface FlutterViewControllerDispatchTouchesSpy : FlutterViewController
+@property(nonatomic) BOOL touchesDispatched;
+@property(nonatomic, strong) UIViewController* stubbedPresentedViewController;
+@end
+
+@implementation FlutterViewControllerDispatchTouchesSpy
+- (UIViewController*)presentedViewController {
+  return self.stubbedPresentedViewController;
+}
+- (void)dispatchTouches:(NSSet*)touches
+    pointerDataChangeOverride:(void*)overridden_change
+                        event:(UIEvent*)event {
+  // Record that dispatch was attempted; do not call super to avoid processing
+  // raw UITouch stubs that would crash in the loop body.
+  self.touchesDispatched = YES;
+}
 @end
 
 @implementation FlutterViewControllerTest
@@ -3090,6 +3113,64 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNotNil(flutterViewController.engine);
   XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
   [appDelegate setMockLaunchEngine:nil];
+}
+
+// Regression tests for https://github.com/flutter/flutter/issues/14720
+// Touches must not be dispatched to Flutter when a native UIViewController is
+// presented on top of FlutterViewController via presentViewController:animated:completion:.
+
+- (FlutterViewControllerDispatchTouchesSpy*)
+    spyViewControllerWithPresentedViewController:(UIViewController*)presentedVC {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [[FlutterViewControllerDispatchTouchesSpy alloc] initWithEngine:self.mockEngine
+                                                              nibName:nil
+                                                               bundle:nil];
+  vc.stubbedPresentedViewController = presentedVC;
+  return vc;
+}
+
+- (void)testTouchesBeganNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseBegan;
+  UIEvent* event = nil;  // nil via variable suppresses -Wnonnull; event is unused by the fix path
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesBegan must not dispatch to Flutter when a native VC is presented");
+}
+
+- (void)testTouchesMovedNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseMoved;
+  UIEvent* event = nil;
+  [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesMoved must not dispatch to Flutter when a native VC is presented");
+}
+
+- (void)testTouchesEndedNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseEnded;
+  UIEvent* event = nil;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesEnded must not dispatch to Flutter when a native VC is presented");
+}
+
+- (void)testTouchesCancelledNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseCancelled;
+  UIEvent* event = nil;
+  [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesCancelled must not dispatch to Flutter when a native VC is presented");
 }
 
 @end
