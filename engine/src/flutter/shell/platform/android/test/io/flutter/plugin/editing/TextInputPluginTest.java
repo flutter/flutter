@@ -1359,6 +1359,51 @@ public class TextInputPluginTest {
     verify(textInputChannel, times(1)).setTextInputMethodHandler(isNull());
   }
 
+  @Test
+  public void isInputConnectionTarget_reflectsCurrentInputTarget() {
+    View testView = new View(ctx);
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    ArgumentCaptor<TextInputChannel.TextInputMethodHandler> handlerCaptor =
+        ArgumentCaptor.forClass(TextInputChannel.TextInputMethodHandler.class);
+    verify(textInputChannel).setTextInputMethodHandler(handlerCaptor.capture());
+
+    assertFalse(textInputPlugin.isInputConnectionTarget());
+
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+    assertTrue(textInputPlugin.isInputConnectionTarget());
+
+    textInputPlugin.clearTextInputClient();
+    assertFalse(textInputPlugin.isInputConnectionTarget());
+
+    handlerCaptor.getValue().setPlatformViewClient(1, true);
+    assertTrue(textInputPlugin.isInputConnectionTarget());
+
+    handlerCaptor.getValue().setPlatformViewClient(2, false);
+    assertFalse(textInputPlugin.isInputConnectionTarget());
+  }
+
   @SuppressWarnings("deprecation")
   // DartExecutor.send is deprecated.
   private void verifyInputConnection(TextInputChannel.TextInputType textInputType)

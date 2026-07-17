@@ -60,6 +60,7 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
+import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.lang.reflect.Field;
@@ -121,6 +122,28 @@ public class FlutterViewTest {
     // Value should not exclude descendants because platform views are added as child views and
     // can be eligible for autofill (e.g. a WebView).
     assertEquals(View.IMPORTANT_FOR_AUTOFILL_YES, flutterView.getImportantForAutofill());
+  }
+
+  @Test
+  public void onCheckIsTextEditor_reflectsTextInputPluginTarget() throws Exception {
+    FlutterView flutterView = new FlutterView(ctx);
+    assertFalse(flutterView.onCheckIsTextEditor());
+
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+
+    when(textInputPlugin.isInputConnectionTarget()).thenReturn(true);
+    assertTrue(flutterView.onCheckIsTextEditor());
+
+    when(textInputPlugin.isInputConnectionTarget()).thenReturn(false);
+    assertFalse(flutterView.onCheckIsTextEditor());
   }
 
   @Test

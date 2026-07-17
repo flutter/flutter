@@ -403,6 +403,14 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   }
 
   /**
+   * Returns whether the current input target creates its input connection through the Flutter view.
+   */
+  public boolean isInputConnectionTarget() {
+    return inputTarget.type == InputTarget.Type.FRAMEWORK_CLIENT
+        || inputTarget.type == InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW;
+  }
+
+  /**
    * Clears a platform view text input client if it is the current input target.
    *
    * <p>This is called when a platform view is disposed to make sure we're not hanging to a stale
