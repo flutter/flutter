@@ -444,6 +444,8 @@ def ShouldUpdateToolchain():
   """Check if the toolchain should be upgraded."""
   import sys
   sys.stderr.write("DEBUG: json_data_file = %s\n" % json_data_file)
+  sys.stderr.write("DEBUG: ENV DEPOT_TOOLS_WIN_TOOLCHAIN = %s\n" % os.environ.get('DEPOT_TOOLS_WIN_TOOLCHAIN'))
+  sys.stderr.write("DEBUG: ENV GYP_MSVS_VERSION = %s\n" % os.environ.get('GYP_MSVS_VERSION'))
   if not os.path.exists(json_data_file):
     sys.stderr.write("DEBUG: json_data_file does not exist\n")
     return True
