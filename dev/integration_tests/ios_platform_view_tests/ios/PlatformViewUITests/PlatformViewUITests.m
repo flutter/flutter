@@ -136,6 +136,41 @@ static NSArray<NSString *> *ElementLabels(XCUIElementQuery *query) {
       NSStringFromCGRect(item2FrameAfterReorder), self.app.debugDescription);
 }
 
+- (void)testDragScreen {
+  XCUIElement *entranceButton = self.app.buttons[@"drag test"];
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  [entranceButton tap];
+
+  XCUIElement *item3 = self.app.staticTexts[@"Item 3"];
+  XCUIElement *item1 = self.app.staticTexts[@"Item 1"];
+  XCTAssertTrue([item3 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  XCTAssertTrue([item1 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+
+  XCUICoordinate *dragStart =
+      [item3 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  XCUICoordinate *dragEnd =
+      [item1 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  [dragStart pressForDuration:1.0 thenDragToCoordinate:dragEnd];
+
+  XCUIElement *item2 = self.app.staticTexts[@"Item 2"];
+  XCUIElement *item5 = self.app.staticTexts[@"Item 5"];
+  XCTAssertTrue([item2 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  XCTAssertTrue([item5 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+
+  dragStart = [item2 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  dragEnd = [item5 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.9)];
+  [dragStart pressForDuration:1.0 thenDragToCoordinate:dragEnd];
+
+  XCUIElement *success = self.app.staticTexts[@"Drag Success"];
+  XCTAssertTrue([success waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+}
+
 - (void)testPlatformViewZOrder {
   XCUIElement *entranceButton = self.app.buttons[@"platform view z order test"];
   XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut], @"The element tree is %@", self.app.debugDescription);

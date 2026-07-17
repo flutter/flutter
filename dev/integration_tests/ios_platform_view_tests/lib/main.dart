@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
+import 'drag.dart';
 import 'reorderable_list_semantics.dart';
 
 void main() {
@@ -136,6 +137,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute<ReorderableListSemanticsScreen>(
                   builder: (BuildContext context) => const ReorderableListSemanticsScreen(),
+                ),
+              );
+            },
+          ),
+          TextButton(
+            child: const Text('drag test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<DragScreen>(
+                  builder: (BuildContext context) => const DragScreen(),
                 ),
               );
             },
