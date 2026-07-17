@@ -36,10 +36,14 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   return flutter::SemanticsAction::kScrollUp;
 }
 
-SkM44 GetGlobalTransform(SemanticsObject* reference) {
-  SkM44 globalTransform = [reference node].transform;
-  for (SemanticsObject* parent = [reference parent]; parent; parent = parent.parent) {
-    globalTransform = parent.node.transform * globalTransform;
+SkM44 GetGlobalTransform(SemanticsObject* reference, BOOL useHitTestTransform) {
+  SkM44 globalTransform =
+      useHitTestTransform ? [reference node].hitTestTransform : [reference node].transform;
+  for (SemanticsObject* parent = useHitTestTransform ? [reference hitTestParent]
+                                                     : [reference parent];
+       parent; parent = useHitTestTransform ? parent.hitTestParent : parent.parent) {
+    globalTransform = (useHitTestTransform ? parent.node.hitTestTransform : parent.node.transform) *
+                      globalTransform;
   }
   return globalTransform;
 }
@@ -50,7 +54,8 @@ SkPoint ApplyTransform(SkPoint& point, const SkM44& transform) {
 }
 
 CGPoint ConvertPointToGlobal(SemanticsObject* reference, CGPoint local_point) {
-  SkM44 globalTransform = GetGlobalTransform(reference);
+  BOOL useHitTestTransform = reference.hitTestParent != nil;
+  SkM44 globalTransform = GetGlobalTransform(reference, useHitTestTransform);
   SkPoint point = SkPoint::Make(local_point.x, local_point.y);
   point = ApplyTransform(point, globalTransform);
   // `rect` is in the physical pixel coordinate system. iOS expects the accessibility frame in
@@ -64,7 +69,8 @@ CGPoint ConvertPointToGlobal(SemanticsObject* reference, CGPoint local_point) {
 }
 
 CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
-  SkM44 globalTransform = GetGlobalTransform(reference);
+  BOOL useHitTestTransform = reference.hitTestParent != nil;
+  SkM44 globalTransform = GetGlobalTransform(reference, useHitTestTransform);
 
   SkPoint quad[4] = {
       SkPoint::Make(local_rect.origin.x, local_rect.origin.y),                          // top left
@@ -253,6 +259,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 /** Should only be called in conjunction with setting child/parent relationship. */
 @property(nonatomic, weak, readwrite) SemanticsObject* parent;
 
+/** Should only be called in conjunction with setting child/hitTestParent relationship. */
+@property(nonatomic, weak, readwrite) SemanticsObject* hitTestParent;
+
 @end
 
 @implementation SemanticsObject {
@@ -293,8 +302,12 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     child.parent = nil;
   }
   [_children removeAllObjects];
+  for (SemanticsObject* child in _childrenInHitTestOrder) {
+    child.hitTestParent = nil;
+  }
 
   _parent = nil;
+  _hitTestParent = nil;
   _inDealloc = YES;
 }
 
@@ -312,11 +325,13 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)setChildrenInHitTestOrder:(NSArray<SemanticsObject*>*)childrenInHitTestOrder {
   for (SemanticsObject* child in _childrenInHitTestOrder) {
-    child.parent = nil;
+    if (child.hitTestParent == self) {
+      child.hitTestParent = nil;
+    }
   }
   _childrenInHitTestOrder = [childrenInHitTestOrder copy];
   for (SemanticsObject* child in _childrenInHitTestOrder) {
-    child.parent = self;
+    child.hitTestParent = self;
   }
 }
 
@@ -341,7 +356,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
  * Whether calling `setSemanticsNode:` with `node` would cause a layout change.
  */
 - (BOOL)nodeWillCauseLayoutChange:(const flutter::SemanticsNode*)node {
-  return self.node.rect != node->rect || self.node.transform != node->transform;
+  return self.node.rect != node->rect || self.node.transform != node->transform ||
+         self.node.hitTestTransform != node->hitTestTransform;
 }
 
 /**

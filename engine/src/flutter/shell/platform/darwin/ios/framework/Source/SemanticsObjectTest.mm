@@ -113,6 +113,51 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual(hitTestResult, object2);
 }
 
+- (void)testAccessibilityHitTestUsesHitTestTransform {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* root = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* traversalParent = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* hitTestParent = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  SemanticsObject* overlayChild = [[SemanticsObject alloc] initWithBridge:bridge uid:3];
+
+  root.children = @[ traversalParent, hitTestParent ];
+  root.childrenInHitTestOrder = @[ hitTestParent ];
+  traversalParent.children = @[ overlayChild ];
+  hitTestParent.childrenInHitTestOrder = @[ overlayChild ];
+
+  flutter::SemanticsNode rootNode;
+  rootNode.id = 0;
+  rootNode.rect = SkRect::MakeXYWH(0, 0, 400, 400);
+  [root setSemanticsNode:&rootNode];
+
+  flutter::SemanticsNode traversalParentNode;
+  traversalParentNode.id = 1;
+  traversalParentNode.rect = SkRect::MakeXYWH(0, 0, 400, 400);
+  [traversalParent setSemanticsNode:&traversalParentNode];
+
+  flutter::SemanticsNode hitTestParentNode;
+  hitTestParentNode.id = 2;
+  hitTestParentNode.rect = SkRect::MakeXYWH(0, 0, 400, 400);
+  hitTestParentNode.transform = SkM44::Translate(200, 0);
+  hitTestParentNode.hitTestTransform = SkM44::Translate(200, 0);
+  [hitTestParent setSemanticsNode:&hitTestParentNode];
+
+  flutter::SemanticsNode overlayChildNode;
+  overlayChildNode.id = 3;
+  overlayChildNode.rect = SkRect::MakeXYWH(0, 0, 10, 10);
+  overlayChildNode.label = "overlay child";
+  overlayChildNode.transform = SkM44::Translate(100, 0);
+  overlayChildNode.hitTestTransform = SkM44::Translate(25, 0);
+  [overlayChild setSemanticsNode:&overlayChildNode];
+
+  CGFloat scale = (root.bridge->view().window.screen ?: UIScreen.mainScreen).scale;
+  id hitTestResult = [root _accessibilityHitTest:CGPointMake(225 / scale, 5 / scale) withEvent:nil];
+
+  XCTAssertEqual(hitTestResult, overlayChild);
+}
+
 - (void)testAccessibilityHitTestNoFocusableItem {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
