@@ -129,8 +129,10 @@ class ExamplesCrossImportChecker {
   /// The known cross imports in the `examples/api/lib/cupertino`
   /// and `examples/api/test/cupertino` directories.
   ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
+  /// These cross imports will be resolved first in flutter/packages/cupertino_ui
+  /// but until then, the old samples will be excluded here.
+  /// Eventually the old samples in flutter/flutter should be deleted,
+  /// at which point this exclusion list can be emptied.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/187645.
   static final Set<String> knownExamplesSlashApiCupertinoCrossImports = <String>{
