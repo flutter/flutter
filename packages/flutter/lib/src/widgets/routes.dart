@@ -1091,6 +1091,27 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // This is the combination of the two animations for the route.
   late Listenable _listenable;
 
+  // Merge of the navigator's userGestureInProgressNotifier and
+  // userGestureSettlingNotifier. Recreated only when the navigator changes (it
+  // may be null before the route is installed) so the ListenableBuilder keeps a
+  // stable subscription instead of resubscribing every build().
+  // https://github.com/flutter/flutter/issues/188840
+  Listenable? _cachedUserGestureListenable;
+  NavigatorState? _cachedUserGestureListenableNavigator;
+
+  Listenable get _userGestureListenable {
+    final NavigatorState? navigator = widget.route.navigator;
+    if (_cachedUserGestureListenable == null ||
+        _cachedUserGestureListenableNavigator != navigator) {
+      _cachedUserGestureListenableNavigator = navigator;
+      _cachedUserGestureListenable = Listenable.merge(<Listenable?>[
+        navigator?.userGestureInProgressNotifier,
+        navigator?.userGestureSettlingNotifier,
+      ]);
+    }
+    return _cachedUserGestureListenable!;
+  }
+
   /// The node this scope will use for its root [FocusScope] widget.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
   final ScrollController primaryScrollController = ScrollController();
@@ -1217,10 +1238,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                               // Rebuilds just the IgnorePointer and focus ability when
                               // userGestureInProgress or userGestureSettling changes.
                               ListenableBuilder(
-                                listenable: Listenable.merge(<Listenable?>[
-                                  widget.route.navigator?.userGestureInProgressNotifier,
-                                  widget.route.navigator?.userGestureSettlingNotifier,
-                                ]),
+                                listenable: _userGestureListenable,
                                 builder: (BuildContext context, Widget? child) {
                                   final bool ignoreEvents = _shouldIgnoreFocusRequest;
                                   focusScopeNode.canRequestFocus = !ignoreEvents;

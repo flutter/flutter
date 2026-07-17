@@ -904,8 +904,13 @@ class _CupertinoBackGestureController<T> {
       navigator.userGestureSettling = true;
       late AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
-        navigator.userGestureSettling = false;
-        navigator.didStopUserGesture();
+        // The navigator can be disposed mid-settle (e.g. an OS/theme change
+        // rebuilt the app). Touch its notifiers only while mounted, but always
+        // remove the listener so it can't leak.
+        if (navigator.mounted) {
+          navigator.userGestureSettling = false;
+          navigator.didStopUserGesture();
+        }
         controller.removeStatusListener(animationStatusCallback);
       };
       controller.addStatusListener(animationStatusCallback);

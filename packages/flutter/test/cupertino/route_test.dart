@@ -1909,6 +1909,70 @@ void main() {
     expect(navigator.userGestureSettling, false);
   });
 
+  testWidgets(
+    'Releasing a back gesture then tearing down the navigator mid-settle does not throw',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/188840.
+      //
+      // A released back swipe settles asynchronously, and a status listener
+      // clears the settling state when it completes. If the navigator is
+      // disposed first, that listener must not touch it.
+      await tester.pumpWidget(
+        const CupertinoApp(home: CupertinoPageScaffold(child: Text('Page 1'))),
+      );
+      final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      navigator.push(
+        CupertinoPageRoute<void>(
+          builder: (BuildContext context) => const CupertinoPageScaffold(child: Text('Page 2')),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Fully swipe back and release so the route settles to a pop.
+      final TestGesture gesture = await tester.startGesture(const Offset(5, 100));
+      await gesture.moveBy(const Offset(700, 0));
+      await gesture.up();
+      await tester.pump();
+      expect(navigator.userGestureSettling, true);
+
+      // Tear the whole app (and its navigator) down while the settle is still
+      // running, then flush any pending animation callbacks.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('userGestureSettling is cleared once a released back gesture finishes settling', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/188840: the
+    // settling flag must never stay stuck true after the gesture resolves.
+    await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Text('Page 1'))));
+    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) => const CupertinoPageScaffold(child: Text('Page 2')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // A short swipe that snaps back (the route stays) still triggers a settle.
+    final TestGesture gesture = await tester.startGesture(const Offset(5, 100));
+    await gesture.moveBy(const Offset(50, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(navigator.userGestureInProgress, true);
+    expect(navigator.userGestureSettling, true);
+
+    await tester.pumpAndSettle();
+    expect(navigator.userGestureInProgress, false);
+    expect(navigator.userGestureSettling, false);
+    expect(find.text('Page 2'), findsOneWidget);
+  });
+
   testWidgets('showCupertinoModalPopup uses root navigator by default', (
     WidgetTester tester,
   ) async {

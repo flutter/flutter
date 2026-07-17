@@ -5890,6 +5890,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void didStartUserGesture() {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
+      // A new gesture starts fresh; clear any settling state left by a previous
+      // gesture that was interrupted before it finished settling.
+      userGestureSettling = false;
       final int routeIndex = _getIndexBefore(
         _history.length - 1,
         _RouteEntry.willBePresentPredicate,
@@ -5913,6 +5916,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(_userGesturesInProgress > 0);
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
+      // The gesture is fully finished; it can no longer be settling.
+      userGestureSettling = false;
       for (final NavigatorObserver observer in _effectiveObservers) {
         observer.didStopUserGesture();
       }
