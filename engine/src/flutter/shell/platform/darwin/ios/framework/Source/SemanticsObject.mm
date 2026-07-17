@@ -167,14 +167,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     [_scrollView setShowsVerticalScrollIndicator:NO];
     [_scrollView setContentInset:UIEdgeInsetsZero];
     [_scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
-<<<<<<< HEAD
     [self reattachScrollViewToCurrentBridgeView];
-=======
-    UIView* containerView = self.bridgeView;
-    if (containerView) {
-      [containerView addSubview:_scrollView];
-    }
->>>>>>> upstream/master
   }
   return self;
 }
@@ -314,11 +307,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // The UIView will not necessarily be accessibility parent for this object.
   // The bridge informs the OS of the actual structure via
   // `accessibilityContainer` and `accessibilityElementAtIndex`.
-<<<<<<< HEAD
   self = [super initWithAccessibilityContainer:bridge->accessibilityContainerView()];
-=======
-  self = [super initWithAccessibilityContainer:bridge ? bridge->view() : nil];
->>>>>>> upstream/master
 
   if (self) {
     _weakBridge = bridge;
@@ -970,11 +959,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // The UIView will not necessarily be accessibility parent for this object.
   // The bridge informs the OS of the actual structure via
   // `accessibilityContainer` and `accessibilityElementAtIndex`.
-<<<<<<< HEAD
-  self = [super initWithAccessibilityContainer:bridge->accessibilityContainerView()];
-=======
-  self = [super initWithAccessibilityContainer:semanticsObject.bridgeView];
->>>>>>> upstream/master
+  flutter::AccessibilityBridgeIos* bridge = semanticsObject.bridge;
+  self = [super
+      initWithAccessibilityContainer:bridge ? bridge->accessibilityContainerView() : nil];
 
   if (self) {
     _semanticsObject = semanticsObject;
@@ -1037,19 +1024,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (id)accessibilityContainer {
-<<<<<<< HEAD
-  if (!_bridge) {
-    return nil;
-  }
+  flutter::AccessibilityBridgeIos* bridge = self.semanticsObject.bridge;
   if ([self.semanticsObject uid] == kRootNodeId) {
-    return _bridge->accessibilityContainerView();
+    return bridge ? bridge->accessibilityContainerView() : nil;
   }
   return self.semanticsObject.parent.accessibilityContainer;
-=======
-  return ([self.semanticsObject uid] == kRootNodeId)
-             ? self.semanticsObject.bridgeView
-             : self.semanticsObject.parent.accessibilityContainer;
->>>>>>> upstream/master
 }
 
 #pragma mark - UIAccessibilityAction overrides
