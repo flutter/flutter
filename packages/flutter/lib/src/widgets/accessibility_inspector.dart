@@ -56,13 +56,17 @@ class AccessibilityInspector {
 
     final PipelineOwner? pipelineOwner = findPipelineOwner();
     if (pipelineOwner == null) {
-      return <String, dynamic>{'error': 'No PipelineOwner with SemanticsOwner found'};
+      return <String, dynamic>{
+        'error': 'No PipelineOwner with SemanticsOwner found',
+        'needsFrame': true,
+      };
     }
 
     final SemanticsOwner semanticsOwner = pipelineOwner.semanticsOwner!;
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {
-      return <String, dynamic>{'error': 'rootSemanticsNode is null'};
+      RendererBinding.instance.ensureVisualUpdate();
+      return <String, dynamic>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
     }
 
     Map<String, dynamic> toJsonMap(SemanticsNode node) {

@@ -808,7 +808,6 @@ mixin WidgetsBinding
           return _forceRebuild();
         },
       );
-
       AccessibilityInspector.instance.initServiceExtensions(registerServiceExtension);
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
