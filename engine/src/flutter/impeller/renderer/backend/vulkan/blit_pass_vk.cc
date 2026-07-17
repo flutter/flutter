@@ -97,16 +97,26 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
   BarrierVK dst_barrier;
   dst_barrier.cmd_buffer = cmd_buffer;
   dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
-  // Wait for any prior buffer-to-image transfer writes to this destination
-  // before starting the image-to-image copy. In the atlas growth path,
-  // BulkUpdateAtlasBitmap writes rows 0..new_height via
-  // vkCmdCopyBufferToImage, then AddCopy(old->new) writes rows 0..old_height
-  // via vkCmdCopyImage. These writes overlap in rows 0..old_height. Without
-  // this barrier, the post-copy eTransfer->eFragmentShader barrier from
-  // BulkUpdateAtlasBitmap does NOT create a transitive dependency here because
-  // eTopOfPipe & eFragmentShader = empty - leaving a WAW hazard on AMD RDNA.
-  dst_barrier.src_access = vk::AccessFlagBits::eTransferWrite;
-  dst_barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  // The src_access and src_stage must match the texture's current layout,
+  // mirroring OnCopyBufferToTextureCommand below.
+  if (dst.GetLayout() == vk::ImageLayout::eTransferDstOptimal) {
+    // Wait for prior transfer writes to this destination before starting the
+    // image-to-image copy. In the atlas growth path, BulkUpdateAtlasBitmap
+    // writes rows 0..new_height via vkCmdCopyBufferToImage, then
+    // AddCopy(old->new) writes rows 0..old_height via vkCmdCopyImage. These
+    // writes overlap in rows 0..old_height. Without this barrier, the
+    // post-copy eTransfer->eFragmentShader barrier from BulkUpdateAtlasBitmap
+    // does NOT create a transitive dependency here because eTopOfPipe &
+    // eFragmentShader = empty - leaving a WAW hazard on AMD RDNA.
+    dst_barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+    dst_barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  } else {
+    // Normal path: the texture was last sampled in a fragment shader. A
+    // transfer write in an earlier layout is drained transitively by the
+    // barrier that transitioned the texture out of eTransferDstOptimal.
+    dst_barrier.src_access = vk::AccessFlagBits::eShaderRead;
+    dst_barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader;
+  }
   // dstAccessMask must only list accesses valid for TRANSFER_DST_OPTIMAL.
   // eShaderRead is not permitted in that layout; including it triggers AMD
   // best practices validation layer message ID -212008545 (0xF35D019F).
