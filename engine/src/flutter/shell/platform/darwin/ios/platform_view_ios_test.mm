@@ -232,14 +232,14 @@ class MockDelegate : public PlatformView::Delegate {
                                         flutter::CustomAccessibilityActionUpdates());
 
   first_platform_view->SetOwnerViewController(secondViewController);
-  SemanticsObjectContainer* second_view_root = secondView.accessibilityElements.firstObject;
-  XCTAssertEqual(second_view_root.semanticsObject.bridge.get(), first_bridge);
+  SemanticsObjectContainer* secondViewRoot = secondView.accessibilityElements.firstObject;
+  XCTAssertEqual(secondViewRoot.semanticsObject.bridge, first_bridge);
 
   second_platform_view->SetOwnerViewController(firstViewController);
-  SemanticsObjectContainer* first_view_root = firstView.accessibilityElements.firstObject;
-  second_view_root = secondView.accessibilityElements.firstObject;
-  XCTAssertEqual(first_view_root.semanticsObject.bridge.get(), second_bridge);
-  XCTAssertEqual(second_view_root.semanticsObject.bridge.get(), first_bridge);
+  SemanticsObjectContainer* firstViewRoot = firstView.accessibilityElements.firstObject;
+  secondViewRoot = secondView.accessibilityElements.firstObject;
+  XCTAssertEqual(firstViewRoot.semanticsObject.bridge, second_bridge);
+  XCTAssertEqual(secondViewRoot.semanticsObject.bridge, first_bridge);
 
   first_platform_view->SetSemanticsTreeEnabled(false);
   second_platform_view->SetSemanticsTreeEnabled(false);

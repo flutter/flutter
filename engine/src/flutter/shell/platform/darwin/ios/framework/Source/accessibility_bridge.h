@@ -54,10 +54,10 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                       std::unique_ptr<IosDelegate> ios_delegate = nullptr);
   ~AccessibilityBridge();
 
-  // Updates the owner FlutterViewController.
-  void SetViewController(FlutterViewController* view_controller);
-  // Rebinds cached semantics after the current FlutterViewController's root view changes or loads.
-  void ViewDidChange(FlutterView* previous_view);
+  // Rebinds the cached semantics tree from `previousView` to `viewController` without recreating
+  // the bridge. A non-nil new view controller must belong to the same engine because the platform
+  // views controller is fixed for the lifetime of the bridge.
+  void SetViewController(FlutterViewController* viewController, FlutterView* previousView);
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
   // Returns true when a root semantics object is cached in the bridge.
@@ -75,9 +75,11 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   UIView* view() const override { return view_controller_.view; }
 
-  UIView* viewIfLoaded() const override { return view_controller_.viewIfLoaded; }
+  UIView* ViewIfLoaded() const override { return view_controller_.viewIfLoaded; }
 
-  UIView* accessibilityContainerView() const override { return viewIfLoaded(); }
+  UIView* AccessibilityElementInitializationContainer() const override {
+    return ViewIfLoaded() ?: accessibility_element_init_container_;
+  }
 
   bool isVoiceOverRunning() const override { return view_controller_.isVoiceOverRunning; }
 
@@ -105,6 +107,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                                         NSMutableArray<NSNumber*>* doomed_uids);
 
   __weak FlutterViewController* view_controller_;
+  UIView* accessibility_element_init_container_;
   PlatformViewIOS* platform_view_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
 

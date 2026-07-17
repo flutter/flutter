@@ -781,6 +781,31 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual(container.accessibilityContainer, mock->view());
 }
 
+- (void)testBridgeViewIsNilWhileBridgeIsAliveAndViewIsNotLoaded {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isViewLoaded = false;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode root;
+  root.id = kRootNodeId;
+  root.rect = SkRect::MakeXYWH(0, 0, 100, 100);
+
+  FlutterSemanticsObject* rootObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                  uid:kRootNodeId];
+  [rootObject setSemanticsNode:&root];
+
+  XCTAssertNotNil(mock->view());
+  XCTAssertTrue(rootObject.bridge != nullptr);
+  XCTAssertNil(rootObject.bridgeView);
+  XCTAssertTrue(CGRectEqualToRect(rootObject.accessibilityFrame, CGRectZero));
+
+  SemanticsObjectContainer* container =
+      static_cast<SemanticsObjectContainer*>(rootObject.accessibilityContainer);
+  XCTAssertNotNil(container);
+  XCTAssertNil(container.accessibilityContainer);
+}
+
 - (void)testChildSemanticsObjectContainerAccessibilityContainerIsParentContainer {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;

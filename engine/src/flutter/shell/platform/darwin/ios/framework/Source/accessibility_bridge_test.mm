@@ -143,9 +143,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   return runner;
 }
 
-void StubLoadedView(id view_controller, id view) {
-  OCMStub([view_controller view]).andReturn(view);
-  OCMStub([view_controller viewIfLoaded]).andReturn(view);
+void StubLoadedView(id viewController, id view) {
+  OCMStub([viewController view]).andReturn(view);
+  OCMStub([viewController viewIfLoaded]).andReturn(view);
 }
 
 void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label = "root") {
@@ -188,7 +188,7 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   XCTAssertTrue(bridge.get());
 }
 
-- (void)testViewDidChangeRebindsWhenSameViewControllerLoadsView {
+- (void)testSetViewControllerRebindsWhenSameViewControllerLoadsView {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -234,11 +234,10 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
                                }
                                SemanticsObjectContainer* container = value[0];
                                SemanticsObject* object = container.semanticsObject;
-                               return object.uid == kRootNodeId &&
-                                      object.bridge.get() == bridge_ptr &&
+                               return object.uid == kRootNodeId && object.bridge == bridge_ptr &&
                                       object.node.label == "loaded later";
                              }]]);
-  bridge->ViewDidChange(/*previous_view=*/nil);
+  bridge->SetViewController(mockFlutterViewController, /*previousView=*/nil);
   OCMVerifyAll(mockFlutterView);
 
   [engine stopMocking];
@@ -273,6 +272,7 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   flutter::CustomAccessibilityActionUpdates actions;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
   OCMVerifyAll(mockFlutterView);
+  bridge->SetViewController(nil, /*previousView=*/nil);
 }
 
 - (void)testUpdateSemanticsOneNode {
@@ -323,7 +323,7 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   OCMVerifyAll(mockFlutterView);
 }
 
-- (void)testViewDidChangeClearsPreviousViewAccessibilityElementsOwnedByBridge {
+- (void)testSetViewControllerClearsPreviousViewAccessibilityElementsOwnedByBridge {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -340,28 +340,27 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
-  UIView* previous_view = [[UIView alloc] init];
-  UIView* next_view = [[UIView alloc] init];
-  id previous_view_controller = OCMClassMock([FlutterViewController class]);
-  id next_view_controller = OCMClassMock([FlutterViewController class]);
-  StubLoadedView(previous_view_controller, previous_view);
-  StubLoadedView(next_view_controller, next_view);
+  UIView* previousView = [[UIView alloc] init];
+  UIView* nextView = [[UIView alloc] init];
+  id previousViewController = OCMClassMock([FlutterViewController class]);
+  id nextViewController = OCMClassMock([FlutterViewController class]);
+  StubLoadedView(previousViewController, previousView);
+  StubLoadedView(nextViewController, nextView);
 
   auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previous_view_controller,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previousViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
   UpdateRootSemantics(bridge.get(), "owned");
 
-  XCTAssertNotNil(previous_view.accessibilityElements);
-  XCTAssertNil(next_view.accessibilityElements);
-  bridge->SetViewController(next_view_controller);
-  bridge->ViewDidChange(static_cast<FlutterView*>(previous_view));
-  XCTAssertNil(previous_view.accessibilityElements);
-  XCTAssertNotNil(next_view.accessibilityElements);
+  XCTAssertNotNil(previousView.accessibilityElements);
+  XCTAssertNil(nextView.accessibilityElements);
+  bridge->SetViewController(nextViewController, static_cast<FlutterView*>(previousView));
+  XCTAssertNil(previousView.accessibilityElements);
+  XCTAssertNotNil(nextView.accessibilityElements);
 }
 
-- (void)testViewDidChangeDoesNotClearPreviousViewAccessibilityElementsOwnedByAnotherBridge {
+- (void)testSetViewControllerDoesNotClearPreviousViewElementsOwnedByAnotherBridge {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -378,36 +377,35 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
-  UIView* previous_view = [[UIView alloc] init];
-  UIView* next_view = [[UIView alloc] init];
-  UIView* other_view = [[UIView alloc] init];
-  id previous_view_controller = OCMClassMock([FlutterViewController class]);
-  id next_view_controller = OCMClassMock([FlutterViewController class]);
-  id other_view_controller = OCMClassMock([FlutterViewController class]);
-  StubLoadedView(previous_view_controller, previous_view);
-  StubLoadedView(next_view_controller, next_view);
-  StubLoadedView(other_view_controller, other_view);
+  UIView* previousView = [[UIView alloc] init];
+  UIView* nextView = [[UIView alloc] init];
+  UIView* otherView = [[UIView alloc] init];
+  id previousViewController = OCMClassMock([FlutterViewController class]);
+  id nextViewController = OCMClassMock([FlutterViewController class]);
+  id otherViewController = OCMClassMock([FlutterViewController class]);
+  StubLoadedView(previousViewController, previousView);
+  StubLoadedView(nextViewController, nextView);
+  StubLoadedView(otherViewController, otherView);
 
   auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previous_view_controller,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previousViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
   auto other_bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/other_view_controller,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/otherViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
   UpdateRootSemantics(bridge.get(), "owned");
   UpdateRootSemantics(other_bridge.get(), "other");
-  NSArray* other_bridge_elements = other_view.accessibilityElements;
-  XCTAssertNotNil(other_bridge_elements);
-  previous_view.accessibilityElements = other_bridge_elements;
+  NSArray* otherBridgeElements = otherView.accessibilityElements;
+  XCTAssertNotNil(otherBridgeElements);
+  previousView.accessibilityElements = otherBridgeElements;
 
-  bridge->SetViewController(next_view_controller);
-  bridge->ViewDidChange(static_cast<FlutterView*>(previous_view));
-  XCTAssertEqual(previous_view.accessibilityElements, other_bridge_elements);
+  bridge->SetViewController(nextViewController, static_cast<FlutterView*>(previousView));
+  XCTAssertEqual(previousView.accessibilityElements, otherBridgeElements);
 }
 
-- (void)testViewDidChangeDoesNotClearPreviousViewAccessibilityElementsOwnedByUIKit {
+- (void)testSetViewControllerDoesNotClearPreviousViewAccessibilityElementsOwnedByUIKit {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -424,28 +422,27 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
-  UIView* previous_view = [[UIView alloc] init];
-  UIView* next_view = [[UIView alloc] init];
-  id previous_view_controller = OCMClassMock([FlutterViewController class]);
-  id next_view_controller = OCMClassMock([FlutterViewController class]);
-  StubLoadedView(previous_view_controller, previous_view);
-  StubLoadedView(next_view_controller, next_view);
+  UIView* previousView = [[UIView alloc] init];
+  UIView* nextView = [[UIView alloc] init];
+  id previousViewController = OCMClassMock([FlutterViewController class]);
+  id nextViewController = OCMClassMock([FlutterViewController class]);
+  StubLoadedView(previousViewController, previousView);
+  StubLoadedView(nextViewController, nextView);
 
   auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previous_view_controller,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previousViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
-  UIAccessibilityElement* native_element =
-      [[UIAccessibilityElement alloc] initWithAccessibilityContainer:previous_view];
-  NSArray* native_elements = @[ native_element ];
-  previous_view.accessibilityElements = native_elements;
+  UIAccessibilityElement* nativeElement =
+      [[UIAccessibilityElement alloc] initWithAccessibilityContainer:previousView];
+  NSArray* nativeElements = @[ nativeElement ];
+  previousView.accessibilityElements = nativeElements;
 
-  bridge->SetViewController(next_view_controller);
-  bridge->ViewDidChange(static_cast<FlutterView*>(previous_view));
-  XCTAssertEqual(previous_view.accessibilityElements, native_elements);
+  bridge->SetViewController(nextViewController, static_cast<FlutterView*>(previousView));
+  XCTAssertEqual(previousView.accessibilityElements, nativeElements);
 }
 
-- (void)testViewDidChangeDoesNotClearMixedAccessibilityElements {
+- (void)testSetViewControllerDoesNotClearMixedAccessibilityElements {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -462,28 +459,27 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
-  UIView* previous_view = [[UIView alloc] init];
-  UIView* next_view = [[UIView alloc] init];
-  id previous_view_controller = OCMClassMock([FlutterViewController class]);
-  id next_view_controller = OCMClassMock([FlutterViewController class]);
-  StubLoadedView(previous_view_controller, previous_view);
-  StubLoadedView(next_view_controller, next_view);
+  UIView* previousView = [[UIView alloc] init];
+  UIView* nextView = [[UIView alloc] init];
+  id previousViewController = OCMClassMock([FlutterViewController class]);
+  id nextViewController = OCMClassMock([FlutterViewController class]);
+  StubLoadedView(previousViewController, previousView);
+  StubLoadedView(nextViewController, nextView);
 
   auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previous_view_controller,
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/previousViewController,
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
   UpdateRootSemantics(bridge.get(), "owned");
-  id bridge_element = previous_view.accessibilityElements.firstObject;
-  UIAccessibilityElement* native_element =
-      [[UIAccessibilityElement alloc] initWithAccessibilityContainer:previous_view];
-  NSArray* mixed_elements = @[ bridge_element, native_element ];
-  previous_view.accessibilityElements = mixed_elements;
+  id bridgeElement = previousView.accessibilityElements.firstObject;
+  UIAccessibilityElement* nativeElement =
+      [[UIAccessibilityElement alloc] initWithAccessibilityContainer:previousView];
+  NSArray* mixedElements = @[ bridgeElement, nativeElement ];
+  previousView.accessibilityElements = mixedElements;
 
-  bridge->SetViewController(next_view_controller);
-  bridge->ViewDidChange(static_cast<FlutterView*>(previous_view));
-  XCTAssertEqual(previous_view.accessibilityElements, mixed_elements);
-  XCTAssertNotNil(next_view.accessibilityElements);
+  bridge->SetViewController(nextViewController, static_cast<FlutterView*>(previousView));
+  XCTAssertEqual(previousView.accessibilityElements, mixedElements);
+  XCTAssertNotNil(nextView.accessibilityElements);
 }
 
 - (void)testIsVoiceOverRunning {

@@ -74,9 +74,9 @@ class PlatformViewIOS final : public PlatformView {
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
    *
-   * The `previous_view` is the Flutter view that was attached before this one, if any.
+   * The `previousView` is the Flutter view that was attached before this one, if any.
    */
-  void attachView(FlutterView* previous_view = nil);
+  void attachView(FlutterView* previousView = nil);
 
   /**
    * Called through when an external texture such as video or camera is
@@ -144,7 +144,7 @@ class PlatformViewIOS final : public PlatformView {
 
  private:
   void ApplyLocaleToOwnerController();
-  void UpdateAccessibilityBridgeViewController();
+  void EnsureAccessibilityBridge();
   void PostSemanticsUpdateNotification();
 
   /// Smart pointer for use with objective-c observers.

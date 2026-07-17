@@ -45,6 +45,7 @@ AccessibilityBridge::AccessibilityBridge(
     __weak FlutterPlatformViewsController* platform_views_controller,
     std::unique_ptr<IosDelegate> ios_delegate)
     : view_controller_(view_controller),
+      accessibility_element_init_container_([[UIView alloc] initWithFrame:CGRectZero]),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
       objects_([[NSMutableDictionary alloc] init]),
@@ -66,14 +67,16 @@ AccessibilityBridge::~AccessibilityBridge() {
   clearState();
 }
 
-void AccessibilityBridge::SetViewController(FlutterViewController* view_controller) {
-  view_controller_ = view_controller;
-}
-
-void AccessibilityBridge::ViewDidChange(FlutterView* previous_view) {
-  UIView* current_view = viewIfLoaded();
-  if (previous_view != current_view) {
-    ClearAccessibilityElementsIfOwnedByBridge(previous_view);
+void AccessibilityBridge::SetViewController(FlutterViewController* viewController,
+                                            FlutterView* previousView) {
+  if (viewController) {
+    FML_DCHECK(viewController.platformViewsController == platform_views_controller_)
+        << "A reattached FlutterViewController must belong to the same FlutterEngine.";
+  }
+  view_controller_ = viewController;
+  UIView* currentView = ViewIfLoaded();
+  if (previousView != currentView) {
+    ClearAccessibilityElementsIfOwnedByBridge(previousView);
   }
   UpdateAccessibilityElementsForCurrentView();
   NotifySemanticsObjectsViewChanged();
@@ -112,7 +115,7 @@ void AccessibilityBridge::UpdateSemantics(
   // accessibility notifications are only useful once there is a loaded view with
   // accessibility elements to inspect.
   BOOL shouldPostAccessibilityNotifications =
-      view_controller_ && viewIfLoaded() &&
+      view_controller_ && ViewIfLoaded() &&
       !ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_);
   for (const auto& entry : nodes) {
     const flutter::SemanticsNode& node = entry.second;
@@ -213,7 +216,7 @@ void AccessibilityBridge::UpdateSemantics(
       previous_routes_.push_back([route uid]);
     }
   } else {
-    UIView* view = viewIfLoaded();
+    UIView* view = ViewIfLoaded();
     ClearAccessibilityElementsIfOwnedByBridge(view);
   }
 
@@ -404,8 +407,8 @@ bool AccessibilityBridge::AccessibilityElementsWereInstalledByBridge(NSArray* el
   if (![element isKindOfClass:[SemanticsObjectContainer class]]) {
     return false;
   }
-  SemanticsObject* semantics_object = ((SemanticsObjectContainer*)element).semanticsObject;
-  return semantics_object && semantics_object.bridge.get() == this;
+  SemanticsObject* semanticsObject = ((SemanticsObjectContainer*)element).semanticsObject;
+  return semanticsObject && semanticsObject.bridge == this;
 }
 
 void AccessibilityBridge::ClearAccessibilityElementsIfOwnedByBridge(UIView* view) {
@@ -418,16 +421,21 @@ void AccessibilityBridge::ClearAccessibilityElementsIfOwnedByBridge(UIView* view
 }
 
 void AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
-  UIView* view = viewIfLoaded();
+  UIView* view = ViewIfLoaded();
   if (!view) {
     return;
   }
   SemanticsObject* root = objects_[@(kRootNodeId)];
   if (!root) {
-    ClearAccessibilityElementsIfOwnedByBridge(view);
+    view.accessibilityElements = nil;
     return;
   }
-  view.accessibilityElements = @[ [root accessibilityContainer] ?: [NSNull null] ];
+  id accessibilityContainer = [root accessibilityContainer];
+  if (!accessibilityContainer) {
+    view.accessibilityElements = nil;
+    return;
+  }
+  view.accessibilityElements = @[ accessibilityContainer ];
 }
 
 void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {
@@ -437,10 +445,10 @@ void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {
 }
 
 void AccessibilityBridge::clearState() {
-  ClearAccessibilityElementsIfOwnedByBridge(viewIfLoaded());
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();
+  view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
 }  // namespace flutter
