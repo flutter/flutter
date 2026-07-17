@@ -66,11 +66,12 @@ static ISize currentImageSize = ISize{1, 1};
 
 class MockPhysicalDevice {
  public:
-  std::weak_ptr<MockDevice> CreateDevice();
+  std::weak_ptr<MockDevice>* CreateDevice();
   void DestroyDevice(const std::weak_ptr<MockDevice>& device);
 
  private:
   std::vector<std::shared_ptr<MockDevice>> devices_;
+  std::vector<std::unique_ptr<std::weak_ptr<MockDevice>>> weak_devices_;
 };
 
 class MockInstance {
@@ -160,15 +161,23 @@ class MockDevice final {
   MockQueue queue_;
 };
 
-std::weak_ptr<MockDevice> MockPhysicalDevice::CreateDevice() {
-  devices_.push_back(std::make_shared<MockDevice>(*this));
-  return devices_.back();
+std::weak_ptr<MockDevice>* MockPhysicalDevice::CreateDevice() {
+  auto strong_device = std::make_shared<MockDevice>(*this);
+  devices_.push_back(strong_device);
+  weak_devices_.push_back(
+      std::make_unique<std::weak_ptr<MockDevice>>(strong_device));
+  return weak_devices_.back().get();
 }
 
 void MockPhysicalDevice::DestroyDevice(
     const std::weak_ptr<MockDevice>& device) {
   std::shared_ptr<MockDevice> strong_device = device.lock();
   FML_CHECK(strong_device);
+
+  // Remove the strong reference to the device from the devices_ list but keep
+  // the weak pointer in weak_devices_ that is wrapped by the VkDevice handle.
+  // This allows MockDevice::Unwrap to safely detect that the VkDevice
+  // references a device that has been destroyed.
   std::erase(devices_, strong_device);
 }
 
@@ -403,8 +412,7 @@ VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
                         VkDevice* pDevice) {
   MockPhysicalDevice* mock_physical_device =
       reinterpret_cast<MockPhysicalDevice*>(physicalDevice);
-  *pDevice = reinterpret_cast<VkDevice>(
-      new std::weak_ptr<MockDevice>(mock_physical_device->CreateDevice()));
+  *pDevice = reinterpret_cast<VkDevice>(mock_physical_device->CreateDevice());
   return VK_SUCCESS;
 }
 
@@ -631,8 +639,6 @@ void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
     // mock_device is no longer usable after calling DestroyDevice
     mock_device->physical_device().DestroyDevice(*weak_device);
   }
-
-  delete weak_device;
 }
 
 void vkDestroyInstance(VkInstance instance,
