@@ -160,7 +160,8 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
     return;
   }
 
-  auto dimensions = dl_image->GetSize();
+  auto dimensions =
+      DlISize(texture->GetSize().width, texture->GetSize().height);
   auto color_type = ToSkColorType(texture->GetTextureDescriptor().format);
 
   if (dimensions.IsEmpty()) {
