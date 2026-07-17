@@ -1237,6 +1237,18 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     }
   }
 
+  // Tracks the device kind of the most recent pointer-down event so that
+  // _endInteraction can decide whether to drop focus. Touch/stylus interactions
+  // should not retain focus after the finger is lifted; keyboard-acquired focus
+  // should be preserved so the focus indicator keeps showing.
+  PointerDeviceKind? _lastPointerDeviceKind;
+
+  // True once _handleDragUpdate has fired at least once during the current
+  // interaction, meaning the user actually moved their finger. This is used to
+  // distinguish a real drag (should drop focus on touch) from a touch "tap"
+  // that happened to go through the drag-recognizer path (should keep focus).
+  bool _wasDragMoved = false;
+
   void _updateLabelPainters() {
     _updateLabelPainter(Thumb.start);
     _updateLabelPainter(Thumb.end);
@@ -1341,6 +1353,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     if (_active) {
       return;
     }
+    _wasDragMoved = false; // reset for each new interaction
 
     final double tapValue = clampDouble(_getValueFromGlobalPosition(globalPosition), 0.0, 1.0);
     _lastThumbSelection = sliderTheme.thumbSelector!(
@@ -1390,6 +1403,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    _wasDragMoved = true; // finger actually moved — this is a real drag
     if (!_state.mounted) {
       return;
     }
@@ -1457,16 +1471,46 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _state.overlayController.reverse();
   }
 
+  /// Drops focus from the active thumb when the interaction was a touch or
+  /// stylus drag. Taps are intentionally excluded so that tap-acquired focus
+  /// is preserved (e.g., tap a thumb then Tab to navigate to the other thumb).
+  void _unfocusIfTouchDrag() {
+    final bool isTouchInteraction =
+        _lastPointerDeviceKind == PointerDeviceKind.touch ||
+        _lastPointerDeviceKind == PointerDeviceKind.stylus ||
+        _lastPointerDeviceKind == PointerDeviceKind.invertedStylus;
+    if (isTouchInteraction && _lastThumbSelection != null) {
+      switch (_lastThumbSelection!) {
+        case Thumb.start:
+          _state.startFocusNode.unfocus();
+        case Thumb.end:
+          _state.endFocusNode.unfocus();
+      }
+    }
+  }
+
   void _handleDragStart(DragStartDetails details) {
     _startInteraction(details.globalPosition);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     _endInteraction();
+    // When the interaction was driven by touch or stylus AND the user actually
+    // moved their finger, drop focus so the overlay does not linger.
+    // If there was no movement (e.g., the drag recognizer won a tap-like
+    // gesture without any pointer movement), we preserve focus so that
+    // tap-acquired focus works correctly.
+    if (_wasDragMoved) {
+      _unfocusIfTouchDrag();
+    }
   }
 
   void _handleDragCancel() {
     _endInteraction();
+    // Note: do NOT call _unfocusIfTouchDrag here.
+    // _handleDragCancel fires when the drag recognizer loses the gesture
+    // arena to the tap recognizer (i.e. on a touch tap), so clearing focus
+    // here would incorrectly drop focus after a touch tap.
   }
 
   void _handleTapDown(TapDownDetails details) {
@@ -1484,6 +1528,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isEnabled) {
+      // Record the device kind so _endInteraction can decide whether to drop
+      // focus when the gesture ends (touch should not retain focus).
+      _lastPointerDeviceKind = event.kind;
       // We need to add the drag first so that it has priority.
       _drag.addPointer(event);
       _tap.addPointer(event);

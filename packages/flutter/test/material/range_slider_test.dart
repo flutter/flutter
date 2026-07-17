@@ -1726,10 +1726,12 @@ void main() {
     expect(values.end, moreOrLessEquals(0.5, epsilon: 0.03));
     await tester.pumpAndSettle();
 
+    // After the drag ends, focus is dropped (touch drag should not retain
+    // focus) so only the two overlapping thumbs and the overlapping stroke
+    // are expected — no focus overlay circle.
     expect(
       sliderBox,
       paints
-        ..circle(color: sliderTheme.overlayColor)
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.overlappingShapeStrokeColor)
         ..circle(color: sliderTheme.thumbColor),
@@ -3376,8 +3378,9 @@ void main() {
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
-    // 2 thumbs, 1 overlay for hover, and 1 overlay for focus.
-    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 4));
+    // 2 thumbs and 1 overlay for hover. The touch drag ended above so focus
+    // was dropped — no focus overlay circle is expected.
+    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 3));
 
     // Move away from thumb
     await gesture.moveTo(tester.getTopRight(find.byType(RangeSlider)));
@@ -4073,6 +4076,125 @@ void main() {
     expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
     expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
   });
+
+  testWidgets(
+    'RangeSlider touch drag releases focus after gesture ends',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/XXXXXX
+      // After a touch gesture ends, the dragged thumb should no longer have
+      // focus so the focus overlay does not linger on screen.
+      var values = const RangeValues(0.3, 0.7);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return RangeSlider(
+                    values: values,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+      final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+      final startFocusNode =
+          (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+      final endFocusNode =
+          (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+
+      // --- Start thumb: touch drag then release ---
+      final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+      // startGesture uses PointerDeviceKind.touch by default.
+      final TestGesture startGesture = await tester.startGesture(startThumbPos);
+      await tester.pump();
+      expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb gains focus during touch drag');
+
+      await startGesture.moveBy(const Offset(5, 0));
+      await startGesture.up();
+      await tester.pump();
+
+      // Focus should be cleared automatically after the touch gesture ends.
+      expect(
+        startFocusNode.hasFocus,
+        isFalse,
+        reason: 'Start thumb should lose focus after touch gesture ends',
+      );
+
+      // --- End thumb: touch drag then release ---
+      final Offset endThumbPos = topLeft + (bottomRight - topLeft) * 0.7;
+      final TestGesture endGesture = await tester.startGesture(endThumbPos);
+      await tester.pump();
+      expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb gains focus during touch drag');
+
+      await endGesture.moveBy(const Offset(-5, 0));
+      await endGesture.up();
+      await tester.pump();
+
+      expect(
+        endFocusNode.hasFocus,
+        isFalse,
+        reason: 'End thumb should lose focus after touch gesture ends',
+      );
+    },
+  );
+
+  testWidgets(
+    'RangeSlider keyboard-acquired focus is preserved after key interaction',
+    (WidgetTester tester) async {
+      // Keyboard navigation should keep the focus indicator visible so that
+      // users can see which thumb is active while navigating with arrow keys.
+      var values = const RangeValues(0.3, 0.7);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return RangeSlider(
+                    values: values,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final startFocusNode =
+          (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+
+      // Programmatically focus the start thumb (simulates keyboard Tab focus).
+      startFocusNode.requestFocus();
+      await tester.pump();
+      expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb has focus via keyboard');
+
+      // Pressing an arrow key should move the value but keep focus.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(
+        startFocusNode.hasFocus,
+        isTrue,
+        reason: 'Focus should be retained after keyboard interaction',
+      );
+    },
+  );
 }
 
 // A value indicator shape to log labelPainter text.
