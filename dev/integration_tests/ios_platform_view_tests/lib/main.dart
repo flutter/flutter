@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
+import 'reorderable_list_semantics.dart';
+
 void main() {
   // enableFlutterDriverExtension() will disable keyboard,
   // which is required for flutter_driver tests
@@ -123,6 +125,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute<AdMobBannerInScrollableListTestPage>(
                   builder: (BuildContext context) => const AdMobBannerInScrollableListTestPage(),
+                ),
+              );
+            },
+          ),
+          TextButton(
+            child: const Text('reorderable list semantics test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ReorderableListSemanticsScreen>(
+                  builder: (BuildContext context) => const ReorderableListSemanticsScreen(),
                 ),
               );
             },
