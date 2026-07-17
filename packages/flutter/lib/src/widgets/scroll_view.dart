@@ -344,7 +344,8 @@ abstract class ScrollView extends StatelessWidget {
   /// [ScrollView.center], or both, can configure a scroll view for
   /// [GrowthDirection.reverse].
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This sample shows a [CustomScrollView], with [Radio] buttons in the
   /// [AppBar.bottom] that change the [AxisDirection] to illustrate different
   /// configurations. The [CustomScrollView.anchor] and [CustomScrollView.center]
@@ -353,8 +354,13 @@ abstract class ScrollView extends StatelessWidget {
   /// illustrated on either side. The sliver that shares the
   /// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
   ///
-  /// ** See code in examples/api/lib/rendering/growth_direction/growth_direction.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// {@macro flutter.dartpad_guide}
+  ///
+  /// {@example /examples/api/lib/rendering/growth_direction/growth_direction.0.dart#body}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   final double anchor;
 

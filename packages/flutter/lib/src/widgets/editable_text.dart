@@ -1420,12 +1420,18 @@ class EditableText extends StatefulWidget {
   /// of editing, such as when pressing the "done" button on the keyboard. That
   /// default behavior can be overridden. See [onEditingComplete] for details.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// {@macro flutter.dartpad_guide}
+  ///
+  /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart#body}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   ///
   /// ## Handling emojis and other complex characters
@@ -1969,13 +1975,18 @@ class EditableText extends StatefulWidget {
   /// Additionally, set [ContentInsertionConfiguration.allowedMimeTypes]
   /// to limit the allowable mime types for inserted content.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
   ///
   /// This example shows how to access the data for inserted content in your
   /// `TextField`.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// {@macro flutter.dartpad_guide}
+  ///
+  /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart#body}
+  ///
+  /// </callout-box>
   ///
   /// If [contentInsertionConfiguration] is not provided, by default
   /// an empty list of mime types will be sent to the Flutter Engine.
@@ -2019,19 +2030,37 @@ class EditableText extends StatefulWidget {
   /// [contextMenuBuilder] is ignored and the
   /// [TextSelectionControls.buildToolbar] method is used instead.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// {@template flutter.dartpad_guide}
+  /// <small>
   ///
-  /// {@tool dartpad}
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  /// {@endtemplate}
+  ///
+  /// {@example /examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart#body}
+  ///
+  /// </callout-box>
+  ///
+  /// <callout-box>
+  ///
   /// This example shows how to show a custom button only when an email address
   /// is currently selected.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// {@macro flutter.dartpad_guide}
+  ///
+  /// {@example /examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart#body}
+  ///
+  /// </callout-box>
   ///
   /// See also:
   ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
