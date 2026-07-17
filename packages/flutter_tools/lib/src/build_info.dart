@@ -636,7 +636,7 @@ enum CpuArch {
       'armv7' => CpuArch.armv7,
       'arm64' => CpuArch.arm64,
       'x86' => CpuArch.x86,
-      'x64' => CpuArch.x64,
+      'x64' || 'x86_64' => CpuArch.x64,
       'riscv64' => CpuArch.riscv64,
       _ => throw Exception('Unsupported CPU arch name "$name"'),
     };
