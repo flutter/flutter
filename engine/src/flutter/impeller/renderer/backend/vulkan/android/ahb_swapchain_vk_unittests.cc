@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 
+#include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "impeller/toolkit/android/surface_control.h"
@@ -12,15 +13,6 @@ namespace impeller::android::testing {
 
 using impeller::testing::GetMockVulkanFunctions;
 using impeller::testing::MockVulkanContextBuilder;
-
-const std::vector<std::string> kAndroidDeviceExtensions = {
-    "VK_KHR_swapchain",
-    "VK_ANDROID_external_memory_android_hardware_buffer",
-    "VK_KHR_sampler_ycbcr_conversion",
-    "VK_KHR_external_memory",
-    "VK_EXT_queue_family_foreign",
-    "VK_KHR_dedicated_allocation",
-};
 
 class FakeSurfaceControl : public SurfaceControl {
  public:

@@ -64,10 +64,41 @@ struct MockFramebuffer {};
 
 static ISize currentImageSize = ISize{1, 1};
 
+class MockPhysicalDevice {
+ public:
+  std::weak_ptr<MockDevice> CreateDevice();
+  void DestroyDevice(const std::weak_ptr<MockDevice>& device);
+
+ private:
+  std::vector<std::shared_ptr<MockDevice>> devices_;
+};
+
+class MockInstance {
+ public:
+  MockPhysicalDevice& physical_device() { return physical_device_; }
+
+ private:
+  MockPhysicalDevice physical_device_;
+};
+
 class MockDevice final {
  public:
-  explicit MockDevice()
-      : called_functions_(new std::vector<std::string>()), queue_(*this) {}
+  explicit MockDevice(MockPhysicalDevice& physical_device)
+      : physical_device_(physical_device),
+        called_functions_(new std::vector<std::string>()),
+        queue_(*this) {}
+
+  MockPhysicalDevice& physical_device() { return physical_device_; }
+
+  // Get the MockDevice wrapped by a VkDevice handle and check that the
+  // VkDevice has not been destroyed.
+  static MockDevice* Unwrap(VkDevice vk_device) {
+    std::weak_ptr<MockDevice>* weak_device =
+        reinterpret_cast<std::weak_ptr<MockDevice>*>(vk_device);
+    std::shared_ptr strong_device = weak_device->lock();
+    FML_CHECK(strong_device);
+    return strong_device.get();
+  }
 
   MockCommandBuffer* NewCommandBuffer() {
     auto buffer = std::make_unique<MockCommandBuffer>(called_functions_);
@@ -112,6 +143,8 @@ class MockDevice final {
 
   MockDevice& operator=(const MockDevice&) = delete;
 
+  MockPhysicalDevice& physical_device_;
+
   Mutex called_functions_mutex_;
   std::shared_ptr<std::vector<std::string>> called_functions_
       IPLR_GUARDED_BY(called_functions_mutex_);
@@ -126,6 +159,18 @@ class MockDevice final {
 
   MockQueue queue_;
 };
+
+std::weak_ptr<MockDevice> MockPhysicalDevice::CreateDevice() {
+  devices_.push_back(std::make_shared<MockDevice>(*this));
+  return devices_.back();
+}
+
+void MockPhysicalDevice::DestroyDevice(
+    const std::weak_ptr<MockDevice>& device) {
+  std::shared_ptr<MockDevice> strong_device = device.lock();
+  FML_CHECK(strong_device);
+  std::erase(devices_, strong_device);
+}
 
 struct MockVulkanState {
   std::vector<std::string> instance_extensions;
@@ -237,7 +282,9 @@ VkResult vkEnumeratePhysicalDevices(VkInstance instance,
   if (!pPhysicalDevices) {
     *pPhysicalDeviceCount = 1;
   } else {
-    pPhysicalDevices[0] = reinterpret_cast<VkPhysicalDevice>(0xfeedface);
+    MockInstance* mock_instance = reinterpret_cast<MockInstance*>(instance);
+    pPhysicalDevices[0] =
+        reinterpret_cast<VkPhysicalDevice>(&mock_instance->physical_device());
   }
   return VK_SUCCESS;
 }
@@ -354,14 +401,17 @@ VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
                         const VkDeviceCreateInfo* pCreateInfo,
                         const VkAllocationCallbacks* pAllocator,
                         VkDevice* pDevice) {
-  *pDevice = reinterpret_cast<VkDevice>(new MockDevice());
+  MockPhysicalDevice* mock_physical_device =
+      reinterpret_cast<MockPhysicalDevice*>(physicalDevice);
+  *pDevice = reinterpret_cast<VkDevice>(
+      new std::weak_ptr<MockDevice>(mock_physical_device->CreateDevice()));
   return VK_SUCCESS;
 }
 
 VkResult vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo,
                           const VkAllocationCallbacks* pAllocator,
                           VkInstance* pInstance) {
-  *pInstance = reinterpret_cast<VkInstance>(0xbaadf00d);
+  *pInstance = reinterpret_cast<VkInstance>(new MockInstance());
   return VK_SUCCESS;
 }
 
@@ -388,7 +438,7 @@ VkResult vkCreatePipelineCache(VkDevice device,
                                const VkPipelineCacheCreateInfo* pCreateInfo,
                                const VkAllocationCallbacks* pAllocator,
                                VkPipelineCache* pPipelineCache) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreatePipelineCache");
   *pPipelineCache = reinterpret_cast<VkPipelineCache>(0xb000dead);
   return VK_SUCCESS;
@@ -398,7 +448,7 @@ VkResult vkCreateCommandPool(VkDevice device,
                              const VkCommandPoolCreateInfo* pCreateInfo,
                              const VkAllocationCallbacks* pAllocator,
                              VkCommandPool* pCommandPool) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateCommandPool");
   *pCommandPool =
       reinterpret_cast<VkCommandPool>(mock_device->NewCommandPool());
@@ -408,7 +458,7 @@ VkResult vkCreateCommandPool(VkDevice device,
 VkResult vkResetCommandPool(VkDevice device,
                             VkCommandPool commandPool,
                             VkCommandPoolResetFlags flags) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   if (flags & VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT) {
     mock_device->AddCalledFunction("vkResetCommandPoolReleaseResources");
   } else {
@@ -421,7 +471,7 @@ VkResult vkAllocateCommandBuffers(
     VkDevice device,
     const VkCommandBufferAllocateInfo* pAllocateInfo,
     VkCommandBuffer* pCommandBuffers) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkAllocateCommandBuffers");
   *pCommandBuffers =
       reinterpret_cast<VkCommandBuffer>(mock_device->NewCommandBuffer());
@@ -437,7 +487,7 @@ VkResult vkCreateImage(VkDevice device,
                        const VkImageCreateInfo* pCreateInfo,
                        const VkAllocationCallbacks* pAllocator,
                        VkImage* pImage) {
-  reinterpret_cast<MockDevice*>(device)->AddCalledFunction("vkCreateImage");
+  MockDevice::Unwrap(device)->AddCalledFunction("vkCreateImage");
   // Simulate VK_ERROR_COMPRESSION_EXHAUSTED_EXT for fixed-rate-compressed image
   // creates (the spec only returns this error for compression requests).
   if (g_mock_vulkan_state &&
@@ -454,6 +504,13 @@ VkResult vkCreateImage(VkDevice device,
   }
   *pImage = reinterpret_cast<VkImage>(0xD0D0CACA);
   return VK_SUCCESS;
+}
+
+void vkDestroyImage(VkDevice device,
+                    VkImage image,
+                    const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroyImage");
 }
 
 void vkGetImageMemoryRequirements2KHR(
@@ -487,6 +544,13 @@ VkResult vkCreateImageView(VkDevice device,
   return VK_SUCCESS;
 }
 
+void vkDestroyImageView(VkDevice device,
+                        VkImageView imageView,
+                        const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroyImageView");
+}
+
 VkResult vkCreateBuffer(VkDevice device,
                         const VkBufferCreateInfo* pCreateInfo,
                         const VkAllocationCallbacks* pAllocator,
@@ -515,7 +579,7 @@ VkResult vkCreateRenderPass(VkDevice device,
                             const VkAllocationCallbacks* pAllocator,
                             VkRenderPass* pRenderPass) {
   *pRenderPass = reinterpret_cast<VkRenderPass>(0x12341234);
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateRenderPass");
   return VK_SUCCESS;
 }
@@ -544,22 +608,31 @@ VkResult vkCreateGraphicsPipelines(
     const VkGraphicsPipelineCreateInfo* pCreateInfos,
     const VkAllocationCallbacks* pAllocator,
     VkPipeline* pPipelines) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateGraphicsPipelines");
   *pPipelines = reinterpret_cast<VkPipeline>(0x99999999);
   return VK_SUCCESS;
 }
 
 VkResult vkDeviceWaitIdle(VkDevice device) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDeviceWaitIdle");
   return VK_SUCCESS;
 }
 
 void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->AddCalledFunction("vkDestroyDevice");
-  delete reinterpret_cast<MockDevice*>(device);
+  std::weak_ptr<MockDevice>* weak_device =
+      reinterpret_cast<std::weak_ptr<MockDevice>*>(device);
+
+  {
+    MockDevice* mock_device = MockDevice::Unwrap(device);
+    mock_device->AddCalledFunction("vkDestroyDevice");
+
+    // mock_device is no longer usable after calling DestroyDevice
+    mock_device->physical_device().DestroyDevice(*weak_device);
+  }
+
+  delete weak_device;
 }
 
 void vkDestroyInstance(VkInstance instance,
@@ -567,12 +640,14 @@ void vkDestroyInstance(VkInstance instance,
   if (g_mock_vulkan_state) {
     g_mock_vulkan_state.reset();
   }
+  MockInstance* mock_instance = reinterpret_cast<MockInstance*>(instance);
+  delete mock_instance;
 }
 
 void vkDestroyPipeline(VkDevice device,
                        VkPipeline pipeline,
                        const VkAllocationCallbacks* pAllocator) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDestroyPipeline");
 }
 
@@ -580,7 +655,7 @@ VkResult vkCreateShaderModule(VkDevice device,
                               const VkShaderModuleCreateInfo* pCreateInfo,
                               const VkAllocationCallbacks* pAllocator,
                               VkShaderModule* pShaderModule) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateShaderModule");
   *pShaderModule = reinterpret_cast<VkShaderModule>(0x11111111);
   return VK_SUCCESS;
@@ -589,14 +664,14 @@ VkResult vkCreateShaderModule(VkDevice device,
 void vkDestroyShaderModule(VkDevice device,
                            VkShaderModule shaderModule,
                            const VkAllocationCallbacks* pAllocator) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDestroyShaderModule");
 }
 
 void vkDestroyPipelineCache(VkDevice device,
                             VkPipelineCache pipelineCache,
                             const VkAllocationCallbacks* pAllocator) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDestroyPipelineCache");
 }
 
@@ -668,14 +743,14 @@ void vkFreeCommandBuffers(VkDevice device,
                           VkCommandPool commandPool,
                           uint32_t commandBufferCount,
                           const VkCommandBuffer* pCommandBuffers) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkFreeCommandBuffers");
 }
 
 void vkDestroyCommandPool(VkDevice device,
                           VkCommandPool commandPool,
                           const VkAllocationCallbacks* pAllocator) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->DeleteCommandPool(
       reinterpret_cast<MockCommandPool*>(commandPool));
   mock_device->AddCalledFunction("vkDestroyCommandPool");
@@ -689,7 +764,7 @@ VkResult vkCreateFence(VkDevice device,
                        const VkFenceCreateInfo* pCreateInfo,
                        const VkAllocationCallbacks* pAllocator,
                        VkFence* pFence) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateFence");
   *pFence = reinterpret_cast<VkFence>(new MockFence());
   return VK_SUCCESS;
@@ -706,7 +781,7 @@ void vkGetDeviceQueue(VkDevice device,
                       uint32_t queueFamilyIndex,
                       uint32_t queueIndex,
                       VkQueue* pQueue) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   *pQueue = reinterpret_cast<VkQueue>(&mock_device->GetQueue());
 }
 
@@ -732,7 +807,6 @@ VkResult vkWaitForFences(VkDevice device,
 }
 
 VkResult vkGetFenceStatus(VkDevice device, VkFence fence) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   MockFence* mock_fence = reinterpret_cast<MockFence*>(fence);
   return mock_fence->GetStatus();
 }
@@ -762,7 +836,7 @@ VkResult vkCreateQueryPool(VkDevice device,
                            const VkAllocationCallbacks* pAllocator,
                            VkQueryPool* pQueryPool) {
   *pQueryPool = reinterpret_cast<VkQueryPool>(new MockQueryPool());
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateQueryPool");
   return VK_SUCCESS;
 }
@@ -770,7 +844,7 @@ VkResult vkCreateQueryPool(VkDevice device,
 void vkDestroyQueryPool(VkDevice device,
                         VkQueryPool queryPool,
                         const VkAllocationCallbacks* pAllocator) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDestroyQueryPool");
   delete reinterpret_cast<MockQueryPool*>(queryPool);
 }
@@ -783,7 +857,7 @@ VkResult vkGetQueryPoolResults(VkDevice device,
                                void* pData,
                                VkDeviceSize stride,
                                VkQueryResultFlags flags) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   if (dataSize == sizeof(uint32_t)) {
     uint32_t* data = static_cast<uint32_t*>(pData);
     for (auto i = firstQuery; i < queryCount; i++) {
@@ -803,7 +877,7 @@ VkResult vkCreateDescriptorPool(VkDevice device,
                                 const VkDescriptorPoolCreateInfo* pCreateInfo,
                                 const VkAllocationCallbacks* pAllocator,
                                 VkDescriptorPool* pDescriptorPool) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   *pDescriptorPool =
       reinterpret_cast<VkDescriptorPool>(new MockDescriptorPool());
   mock_device->AddCalledFunction("vkCreateDescriptorPool");
@@ -813,7 +887,7 @@ VkResult vkCreateDescriptorPool(VkDevice device,
 void vkDestroyDescriptorPool(VkDevice device,
                              VkDescriptorPool descriptorPool,
                              const VkAllocationCallbacks* pAllocator) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDestroyDescriptorPool");
   delete reinterpret_cast<MockDescriptorPool*>(descriptorPool);
 }
@@ -821,7 +895,7 @@ void vkDestroyDescriptorPool(VkDevice device,
 VkResult vkResetDescriptorPool(VkDevice device,
                                VkDescriptorPool descriptorPool,
                                VkDescriptorPoolResetFlags flags) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkResetDescriptorPool");
   return VK_SUCCESS;
 }
@@ -830,7 +904,7 @@ VkResult vkAllocateDescriptorSets(
     VkDevice device,
     const VkDescriptorSetAllocateInfo* pAllocateInfo,
     VkDescriptorSet* pDescriptorSets) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkAllocateDescriptorSets");
   return VK_SUCCESS;
 }
@@ -968,7 +1042,7 @@ void vkDestroyFramebuffer(VkDevice device,
 void vkTrimCommandPool(VkDevice device,
                        VkCommandPool commandPool,
                        VkCommandPoolTrimFlags flags) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkTrimCommandPool");
 }
 
@@ -988,6 +1062,29 @@ VkResult vkGetPipelineCacheData(VkDevice device,
     return VK_SUCCESS;
   }
 }
+
+#if FML_OS_ANDROID
+
+VkResult vkGetAndroidHardwareBufferPropertiesANDROID(
+    VkDevice device,
+    const struct AHardwareBuffer* buffer,
+    VkAndroidHardwareBufferPropertiesANDROID* pProperties) {
+  pProperties->memoryTypeBits = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+  auto* out = reinterpret_cast<VkBaseOutStructure*>(pProperties->pNext);
+  while (out != nullptr) {
+    if (out->sType ==
+        VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID) {
+      reinterpret_cast<VkAndroidHardwareBufferFormatPropertiesANDROID*>(out)
+          ->format = VK_FORMAT_R8G8B8A8_UNORM;
+    }
+    out = out->pNext;
+  }
+
+  return VK_SUCCESS;
+}
+
+#endif  // FML_OS_ANDROID
 
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
@@ -1037,6 +1134,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkBeginCommandBuffer);
   } else if (strcmp("vkCreateImage", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateImage);
+  } else if (strcmp("vkDestroyImage", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyImage);
   } else if (strcmp("vkGetInstanceProcAddr", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(GetMockVulkanProcAddress);
   } else if (strcmp("vkGetDeviceProcAddr", pName) == 0) {
@@ -1051,6 +1150,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkBindImageMemory);
   } else if (strcmp("vkCreateImageView", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateImageView);
+  } else if (strcmp("vkDestroyImageView", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyImageView);
   } else if (strcmp("vkCreateBuffer", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateBuffer);
   } else if (strcmp("vkGetBufferMemoryRequirements2KHR", pName) == 0 ||
@@ -1161,6 +1262,14 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
   } else if (strcmp("vkGetPipelineCacheData", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkGetPipelineCacheData);
   }
+
+#if FML_OS_ANDROID
+  if (strcmp("vkGetAndroidHardwareBufferPropertiesANDROID", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetAndroidHardwareBufferPropertiesANDROID);
+  }
+#endif  // FML_OS_ANDROID
+
   return noop;
 }
 
@@ -1213,7 +1322,7 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
 
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device) {
-  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
   return mock_device->GetCalledFunctions();
 }
 
