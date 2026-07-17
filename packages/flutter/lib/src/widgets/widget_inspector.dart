@@ -2460,13 +2460,13 @@ mixin WidgetInspectorService {
           return renderView.owner;
         }
       }
-      final PipelineOwner deprecatedOwner = RendererBinding.instance.pipelineOwner;
-      if (deprecatedOwner.semanticsOwner != null) {
-        return deprecatedOwner;
-      }
       final PipelineOwner rootOwner = RendererBinding.instance.rootPipelineOwner;
       if (rootOwner.semanticsOwner != null) {
         return rootOwner;
+      }
+      final PipelineOwner deprecatedOwner = RendererBinding.instance.pipelineOwner;
+      if (deprecatedOwner.semanticsOwner != null) {
+        return deprecatedOwner;
       }
       return null;
     }
@@ -2482,7 +2482,7 @@ mixin WidgetInspectorService {
     final SemanticsOwner semanticsOwner = pipelineOwner.semanticsOwner!;
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {
-      RendererBinding.instance.scheduleWarmUpFrame();
+      RendererBinding.instance.ensureVisualUpdate();
       return <String, dynamic>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
     }
 
@@ -2492,6 +2492,12 @@ mixin WidgetInspectorService {
       for (final SemanticsFlag flag in SemanticsFlag.values) {
         if (data.hasFlag(flag)) {
           flags.add(flag.name);
+        }
+      }
+      final actions = <String>[];
+      for (final SemanticsAction action in SemanticsAction.values) {
+        if (data.hasAction(action)) {
+          actions.add(action.name);
         }
       }
       final children = <Map<String, dynamic>>[];
@@ -2504,13 +2510,18 @@ mixin WidgetInspectorService {
         'label': data.label,
         'value': data.value,
         'hint': data.hint,
+        'tooltip': data.tooltip,
+        'increasedValue': data.increasedValue,
+        'decreasedValue': data.decreasedValue,
         'flags': flags,
+        'actions': actions,
         'rect': <String, double>{
           'left': node.rect.left,
           'top': node.rect.top,
           'width': node.rect.width,
           'height': node.rect.height,
         },
+        if (node.transform != null) 'transform': node.transform!.storage.toList(),
         'children': children,
       };
     }

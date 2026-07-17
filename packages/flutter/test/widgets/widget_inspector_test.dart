@@ -3560,8 +3560,25 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             explicitChildNodes: true,
             child: Column(
               children: <Widget>[
-                Semantics(label: 'Child Node 1', button: true, child: const Text('Button 1')),
-                Semantics(label: 'Child Node 2', value: '42', child: const Text('Value 2')),
+                Semantics(
+                  label: 'Child Node 1',
+                  button: true,
+                  tooltip: 'This is a tooltip',
+                  child: const Text('Button 1'),
+                ),
+                Semantics(
+                  label: 'Child Node 2',
+                  value: '42',
+                  increasedValue: '43',
+                  decreasedValue: '41',
+                  onIncrease: () {},
+                  onDecrease: () {},
+                  child: const Text('Value 2'),
+                ),
+                Transform.scale(
+                  scale: 2.0,
+                  child: Semantics(label: 'Child Node 3', child: const Text('Scaled')),
+                ),
               ],
             ),
           ),
@@ -3619,10 +3636,22 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Map<String, Object?> child1 = findNodeWithLabel(result2, 'Child Node 1');
       expect(child1, isNotEmpty);
       expect(child1['flags']! as List<Object?>, contains('isButton'));
+      expect(child1['tooltip'], equals('This is a tooltip'));
 
       final Map<String, Object?> child2 = findNodeWithLabel(result2, 'Child Node 2');
       expect(child2, isNotEmpty);
       expect(child2['value'], equals('42'));
+      expect(child2['increasedValue'], equals('43'));
+      expect(child2['decreasedValue'], equals('41'));
+      expect(child2['actions']! as List<Object?>, contains('increase'));
+      expect(child2['actions']! as List<Object?>, contains('decrease'));
+
+      final Map<String, Object?> child3 = findNodeWithLabel(result2, 'Child Node 3');
+      expect(child3, isNotEmpty);
+      expect(child3['transform'], isNotNull);
+      final transform = child3['transform']! as List<Object?>;
+      expect(transform, hasLength(16));
+      expect(transform[0], equals(2.0));
 
       service.resetAllState();
     }, semanticsEnabled: false);
