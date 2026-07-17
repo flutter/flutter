@@ -536,4 +536,13 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   setFlexProperties,
+
+  /// Name of service extension that, when called, returns the JSON serialized
+  /// semantics tree.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getSemanticsTree,
 }

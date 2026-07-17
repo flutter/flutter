@@ -3229,18 +3229,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(count, equals(5));
       });
 
-      testWidgets('clearCandidates preserves current selection', (
-        WidgetTester tester,
-      ) async {
+      testWidgets('clearCandidates preserves current selection', (WidgetTester tester) async {
         await pumpWidgetTreeWithABC(tester);
         final selection = InspectorSelection();
         addTearDown(selection.dispose);
-        final RenderParagraph renderObjectA = tester.renderObject<RenderParagraph>(
-          find.text('a'),
-        );
-        final RenderParagraph renderObjectB = tester.renderObject<RenderParagraph>(
-          find.text('b'),
-        );
+        final RenderParagraph renderObjectA = tester.renderObject<RenderParagraph>(find.text('a'));
+        final RenderParagraph renderObjectB = tester.renderObject<RenderParagraph>(find.text('b'));
 
         selection.candidates = <RenderObject>[renderObjectA, renderObjectB];
         expect(selection.current, renderObjectA);
@@ -3318,9 +3312,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<RenderObject> candidates = WidgetInspectorService.instance.selection.candidates;
       expect(candidates, isNot(contains(behindRender)));
 
-      final RenderObject sheetRender = tester.renderObject<RenderObject>(
-        find.byKey(sheetTextKey),
-      );
+      final RenderObject sheetRender = tester.renderObject<RenderObject>(find.byKey(sheetTextKey));
       expect(candidates, contains(sheetRender));
     });
 
@@ -3403,11 +3395,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.tap(find.byKey(innerTextKey), warnIfMissed: false);
       await tester.pump();
 
-      final RenderObject innerRender = tester.renderObject<RenderObject>(
-        find.byKey(innerTextKey),
-      );
-      final List<RenderObject> candidates =
-          WidgetInspectorService.instance.selection.candidates;
+      final RenderObject innerRender = tester.renderObject<RenderObject>(find.byKey(innerTextKey));
+      final List<RenderObject> candidates = WidgetInspectorService.instance.selection.candidates;
       expect(candidates, contains(innerRender));
     });
 
@@ -3560,6 +3549,83 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         }
       }
     });
+
+    testWidgets('ext.flutter.inspector.getSemanticsTree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            label: 'Root Node',
+            container: true,
+            explicitChildNodes: true,
+            child: Column(
+              children: <Widget>[
+                Semantics(label: 'Child Node 1', button: true, child: const Text('Button 1')),
+                Semantics(label: 'Child Node 2', value: '42', child: const Text('Value 2')),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // The first call registers semantics, schedules a frame, and returns an error map indicating root is null.
+      final result1 =
+          (await service.testExtension(
+                WidgetInspectorServiceExtensions.getSemanticsTree.name,
+                <String, String>{},
+              ))!
+              as Map<String, Object?>;
+
+      expect(result1['error'], equals('rootSemanticsNode is null'));
+      expect(result1['needsFrame'], isTrue);
+
+      // Pump a frame to build/flush the semantics tree.
+      await tester.pump();
+
+      // The second call returns the populated semantics tree.
+      final result2 =
+          (await service.testExtension(
+                WidgetInspectorServiceExtensions.getSemanticsTree.name,
+                <String, String>{},
+              ))!
+              as Map<String, Object?>;
+
+      expect(result2['error'], isNull);
+      expect(result2['needsFrame'], isNull);
+      expect(result2['id'], isNotNull);
+
+      // Let's explore the children structure recursively
+      Map<String, Object?> findNodeWithLabel(Map<String, Object?> node, String label) {
+        if ((node['label']! as String).contains(label)) {
+          return node;
+        }
+        final children = node['children']! as List<Object?>;
+        for (final child in children) {
+          final Map<String, Object?> result = findNodeWithLabel(
+            child! as Map<String, Object?>,
+            label,
+          );
+          if (result.isNotEmpty) {
+            return result;
+          }
+        }
+        return <String, Object?>{};
+      }
+
+      final Map<String, Object?> rootNode = findNodeWithLabel(result2, 'Root Node');
+      expect(rootNode, isNotEmpty);
+      expect(rootNode['id'], isNotNull);
+
+      final Map<String, Object?> child1 = findNodeWithLabel(result2, 'Child Node 1');
+      expect(child1, isNotEmpty);
+      expect(child1['flags']! as List<Object?>, contains('isButton'));
+
+      final Map<String, Object?> child2 = findNodeWithLabel(result2, 'Child Node 2');
+      expect(child2, isNotEmpty);
+      expect(child2['value'], equals('42'));
+
+      service.resetAllState();
+    }, semanticsEnabled: false);
 
     test('ext.flutter.inspector.getProperties', () async {
       const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
