@@ -1281,28 +1281,28 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil) {
+  if (self.presentedViewController != nil || self.isBeingDismissed) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil) {
+  if (self.presentedViewController != nil || self.isBeingDismissed) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil) {
+  if (self.presentedViewController != nil || self.isBeingDismissed) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil) {
+  if (self.presentedViewController != nil || self.isBeingDismissed) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];

@@ -374,18 +374,23 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @end
 
-// Spy subclass for testing touch dispatch blocking when a native VC is presented.
+// Spy subclass for testing touch dispatch blocking when a native VC is presented or when
+// FlutterViewController itself is being dismissed.
 // Overrides dispatchTouches:pointerDataChangeOverride:event: with void* for the C++ pointer
 // parameter so ObjC selector dispatch matches without pulling in flutter::PointerData types.
 // Does not call super to avoid crashing on raw UITouch stubs in the loop body.
 @interface FlutterViewControllerDispatchTouchesSpy : FlutterViewController
 @property(nonatomic) BOOL touchesDispatched;
 @property(nonatomic, strong) UIViewController* stubbedPresentedViewController;
+@property(nonatomic) BOOL stubbedIsBeingDismissed;
 @end
 
 @implementation FlutterViewControllerDispatchTouchesSpy
 - (UIViewController*)presentedViewController {
   return self.stubbedPresentedViewController;
+}
+- (BOOL)isBeingDismissed {
+  return self.stubbedIsBeingDismissed;
 }
 - (void)dispatchTouches:(NSSet*)touches
     pointerDataChangeOverride:(void*)overridden_change
@@ -3171,6 +3176,63 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesCancelled must not dispatch to Flutter when a native VC is presented");
+}
+
+// Regression tests for isBeingDismissed guard (companion to presentedViewController guard above).
+// Touches must not be dispatched to Flutter while FlutterViewController itself is being dismissed
+// (i.e. during its own disappearance animation).
+
+- (FlutterViewControllerDispatchTouchesSpy*)spyViewControllerBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [[FlutterViewControllerDispatchTouchesSpy alloc] initWithEngine:self.mockEngine
+                                                              nibName:nil
+                                                               bundle:nil];
+  vc.stubbedIsBeingDismissed = YES;
+  return vc;
+}
+
+- (void)testTouchesBeganNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseBegan;
+  UIEvent* event = nil;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesBegan must not dispatch to Flutter while FlutterViewController is being "
+                 @"dismissed");
+}
+
+- (void)testTouchesMovedNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseMoved;
+  UIEvent* event = nil;
+  [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesMoved must not dispatch to Flutter while FlutterViewController is being "
+                 @"dismissed");
+}
+
+- (void)testTouchesEndedNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseEnded;
+  UIEvent* event = nil;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesEnded must not dispatch to Flutter while FlutterViewController is being "
+                 @"dismissed");
+}
+
+- (void)testTouchesCancelledNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseCancelled;
+  UIEvent* event = nil;
+  [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesCancelled must not dispatch to Flutter while FlutterViewController is "
+                 @"being dismissed");
 }
 
 @end
