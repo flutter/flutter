@@ -2184,120 +2184,128 @@ flutter:
     },
   );
 
-  Environment? buildEnvironment;
+  group('web-defines', () {
+    Environment? buildEnvironment;
 
-  testUsingContext(
-    'passes web-defines to the build in profile mode',
-    () async {
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      setupMocks();
-      buildEnvironment = null;
-      final residentWebRunner = ResidentWebRunner(
-        flutterDevice,
-        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-        stayResident: false,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        analytics: globals.analytics,
-        systemClock: globals.systemClock,
-        webDefines: const <String, String>{'VERSION': 'v1.2.3'},
-      );
+    testUsingContext(
+      'passes web-defines to the build in profile mode',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+        buildEnvironment = null;
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+          stayResident: false,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
+        );
 
-      expect(await residentWebRunner.run(), 0);
-      expect(buildEnvironment, isNotNull);
-      expect(buildEnvironment!.defines['webDefine:VERSION'], 'v1.2.3');
-    },
-    overrides: <Type, Generator>{
-      BuildSystem: () =>
-          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-            buildEnvironment = environment;
-          }),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Pub: ThrowingPub.new,
-    },
-  );
+        expect(await residentWebRunner.run(), 0);
+        expect(buildEnvironment, isNotNull);
+        expect(buildEnvironment!.defines['webDefine:VERSION'], 'v1.2.3');
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          buildEnvironment = environment;
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
 
-  testUsingContext(
-    'passes web-defines to the rebuild after a hot restart in release mode',
-    () async {
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      setupMocks();
-      buildEnvironment = null;
-      final residentWebRunner = ResidentWebRunner(
-        flutterDevice,
-        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        analytics: globals.analytics,
-        systemClock: globals.systemClock,
-        webDefines: const <String, String>{'VERSION': 'v1.2.3'},
-      );
+    testUsingContext(
+      'passes web-defines to the rebuild after a hot restart in release mode',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+        buildEnvironment = null;
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
+        );
 
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-      await connectionInfoCompleter.future;
-      buildEnvironment = null;
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+        buildEnvironment = null;
 
-      final OperationResult result = await residentWebRunner.restart();
-      expect(result.code, 0);
-      expect(buildEnvironment, isNotNull);
-      expect(buildEnvironment!.defines['webDefine:VERSION'], 'v1.2.3');
-    },
-    overrides: <Type, Generator>{
-      BuildSystem: () =>
-          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-            buildEnvironment = environment;
-          }),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Pub: ThrowingPub.new,
-    },
-  );
+        final OperationResult result = await residentWebRunner.restart();
+        expect(result.code, 0);
+        expect(buildEnvironment, isNotNull);
+        expect(buildEnvironment!.defines['webDefine:VERSION'], 'v1.2.3');
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          buildEnvironment = environment;
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
 
-  testUsingContext(
-    'passes web-defines to the build in debug --wasm mode',
-    () async {
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      setupMocks();
-      buildEnvironment = null;
-      final residentWebRunner = ResidentWebRunner(
-        flutterDevice,
-        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
-        stayResident: false,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        analytics: globals.analytics,
-        systemClock: globals.systemClock,
-        webDefines: const <String, String>{'VERSION': 'v1.2.3'},
-      );
+    testUsingContext(
+      'passes web-defines to the build in debug --wasm mode',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+        buildEnvironment = null;
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
+          stayResident: false,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
+        );
 
-      expect(await residentWebRunner.run(), 0);
-      expect(buildEnvironment, isNotNull);
-      expect(buildEnvironment!.defines['webDefine:VERSION'], 'v1.2.3');
-    },
-    overrides: <Type, Generator>{
-      BuildSystem: () =>
-          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-            buildEnvironment = environment;
-          }),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Pub: ThrowingPub.new,
-    },
-  );
+        expect(await residentWebRunner.run(), 0);
+        expect(buildEnvironment, isNotNull);
+        expect(buildEnvironment!.defines['webDefine:VERSION'], 'v1.2.3');
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          buildEnvironment = environment;
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+  });
 }
 
 ResidentRunner setUpResidentRunner(
