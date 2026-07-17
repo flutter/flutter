@@ -3594,7 +3594,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               as Map<String, Object?>;
 
       expect(result1['error'], equals('rootSemanticsNode is null'));
-      expect(result1['needsFrame'], isTrue);
 
       // Pump a frame to build/flush the semantics tree.
       await tester.pump();
@@ -3608,7 +3607,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               as Map<String, Object?>;
 
       expect(result2['error'], isNull);
-      expect(result2['needsFrame'], isNull);
       expect(result2['id'], isNotNull);
 
       // Let's explore the children structure recursively

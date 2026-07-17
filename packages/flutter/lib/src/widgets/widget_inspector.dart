@@ -2473,17 +2473,13 @@ mixin WidgetInspectorService {
 
     final PipelineOwner? pipelineOwner = findPipelineOwner();
     if (pipelineOwner == null) {
-      return <String, dynamic>{
-        'error': 'No PipelineOwner with SemanticsOwner found',
-        'needsFrame': true,
-      };
+      return <String, dynamic>{'error': 'No PipelineOwner with SemanticsOwner found'};
     }
 
     final SemanticsOwner semanticsOwner = pipelineOwner.semanticsOwner!;
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {
-      RendererBinding.instance.ensureVisualUpdate();
-      return <String, dynamic>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
+      return <String, dynamic>{'error': 'rootSemanticsNode is null'};
     }
 
     Map<String, dynamic> toJsonMap(SemanticsNode node) {
