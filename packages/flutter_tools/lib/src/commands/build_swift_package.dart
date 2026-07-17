@@ -651,6 +651,20 @@ class FlutterFrameworkDependency {
           '${result.stdout}\n---\n${result.stderr}',
         );
       }
+      final String copiedPath = xcframeworkOutput
+          .childDirectory('${_targetPlatform.binaryName}.xcframework')
+          .path;
+      final ProcessResult chmodResult = await _utils.processManager.run(<String>[
+        'chmod',
+        '-R',
+        'u+w',
+        copiedPath,
+      ]);
+      if (chmodResult.exitCode != 0) {
+        _utils.logger.printTrace(
+          'Warning: Failed to explicitly make XCFramework writable at $copiedPath: ${chmodResult.stderr}',
+        );
+      }
       if (codesignIdentity != null) {
         final Directory copiedXCFramework = xcframeworkOutput.childDirectory(
           '${_targetPlatform.binaryName}.xcframework',
@@ -1418,9 +1432,9 @@ class AppFrameworkAndNativeAssetsDependencies {
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
-          kDarwinArchs: defaultMacOSArchsForEnvironment(
-            _utils.artifacts,
-          ).map((DarwinArch e) => e.name).join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(_utils.artifacts)
+              .map((DarwinArch e) => e.name)
+              .join(' '),
         };
     }
   }
