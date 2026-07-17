@@ -13,6 +13,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_ios.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 constexpr int32_t kRootNodeId = 0;
 // This can be arbitrary number as long as it is bigger than 0.
 constexpr float kScrollExtentMaxForInf = 1000;
@@ -39,17 +41,7 @@ constexpr float kScrollExtentMaxForInf = 1000;
  * The parent of this node in the node tree. Will be nil for the root node and
  * during transient state changes.
  */
-@property(nonatomic, weak, readonly) SemanticsObject* parent;
-
-/**
- * The accessibility bridge that this semantics object is attached to. This
- * object may use the bridge to access contextual application information. A weak
- * pointer is used because the platform view owns the accessibility bridge.
- * If you are referencing this property from an iOS callback, be sure to
- * use `isAccessibilityBridgeActive` to protect against the case where this
- * node may be orphaned.
- */
-@property(nonatomic, readonly) fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge;
+@property(nonatomic, weak, readonly, nullable) SemanticsObject* parent;
 
 /**
  * The semantics node used to produce this semantics object.
@@ -71,7 +63,7 @@ constexpr float kScrollExtentMaxForInf = 1000;
  * Direct children of this semantics object in hit test order. Each child's `parent` property
  * must be equal to this object.
  */
-@property(nonatomic, copy) NSArray<SemanticsObject*>* childrenInHitTestOrder;
+@property(nonatomic, copy, nullable) NSArray<SemanticsObject*>* childrenInHitTestOrder;
 
 /**
  * The UIAccessibility that represents this object.
@@ -86,12 +78,20 @@ constexpr float kScrollExtentMaxForInf = 1000;
  * Due to the fact that VoiceOver may hold onto SemanticObjects even after it shuts down,
  * there can be situations where the AccessibilityBridge is shutdown, but the SemanticObject
  * will still be alive. If VoiceOver is turned on again, it may try to access this orphaned
- * SemanticObject. Methods that are called from the accessiblity framework should use
- * this to guard against this case by just returning early if its bridge has been shutdown.
+ * SemanticObject. Methods that are called from the accessibility framework should use
+ * `bridge` (or `bridgeView`) to guard against this case by just returning early if its bridge
+ * has been shutdown.
  *
  * See https://github.com/flutter/flutter/issues/43795 for more information.
+ *
+ * Returns a raw pointer to the AccessibilityBridge if it is still alive, or nullptr if destroyed.
  */
-- (BOOL)isAccessibilityBridgeAlive;
+- (nullable flutter::AccessibilityBridgeIos*)bridge;
+
+/**
+ * Returns the underlying UIView from the bridge if alive, or nil if destroyed.
+ */
+- (nullable UIView*)bridgeView;
 
 /**
  * Updates this semantics object using data from the `node` argument.
@@ -104,11 +104,11 @@ constexpr float kScrollExtentMaxForInf = 1000;
 
 - (BOOL)nodeWillCauseScroll:(const flutter::SemanticsNode*)node;
 
-- (BOOL)nodeShouldTriggerAnnouncement:(const flutter::SemanticsNode*)node;
+- (BOOL)nodeShouldTriggerAnnouncement:(nullable const flutter::SemanticsNode*)node;
 
 - (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges;
 
-- (NSString*)routeName;
+- (nullable NSString*)routeName;
 
 - (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action;
 
@@ -236,12 +236,12 @@ constexpr float kScrollExtentMaxForInf = 1000;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)initWithAccessibilityContainer:(id)container NS_UNAVAILABLE;
-- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
-                                 bridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
-    NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject NS_DESIGNATED_INITIALIZER;
 
-@property(nonatomic, weak) SemanticsObject* semanticsObject;
+@property(nonatomic, weak, nullable) SemanticsObject* semanticsObject;
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_SEMANTICSOBJECT_H_
