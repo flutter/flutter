@@ -107,6 +107,17 @@ class ShadowPathGeometry {
       Scalar occluder_height,
       const Matrix& matrix);
 
+  /// Constructs an SDF gradient mesh for the given |PathSource| for the given
+  /// number of aa pixels when viewed under the given |matrix|.
+  ///
+  /// The tessellator is used to get a cached set of |Trigs| for the
+  /// radii associated with the mesh around various corners in the path.
+  static std::shared_ptr<ShadowVertices> MakeSDFVertices(
+      Tessellator& tessellator,
+      const PathSource& source,
+      const Matrix& matrix,
+      Scalar aa_pixels);
+
  private:
   std::shared_ptr<ShadowVertices> shadow_vertices_;
 };
