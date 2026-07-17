@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -470,8 +471,9 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
         if (rt_result != vk::Result::eSuccess) {
           VALIDATION_LOG << "Unable to create a render target image view: "
                          << vk::to_string(rt_result);
-          // Nothing owns the image yet; destroy it to avoid leaking the
-          // allocation.
+          // Destroy the views created so far, then the image.
+          rt_image_views.clear();
+          image_view.reset();
           vmaDestroyImage(allocator, vk_image, allocation);
           return;
         }
@@ -674,12 +676,18 @@ void AllocatorVK::DebugTraceMemoryStatistics() const {
     static constexpr size_t kRssToVmaRatio = 4;
     static constexpr size_t kBytesPerMB = 1024u * 1024u;
 
-    static thread_local int trim_cooldown = 0;
-    if (trim_cooldown > 0) {
-      --trim_cooldown;
+    // EmptyWorkingSet trims the whole process, so the cooldown is shared by
+    // all threads; a per-thread cooldown would let multiple raster threads
+    // (one per engine instance in the process) each trim on their own clock.
+    // Races on the counter are benign: a lost decrement only delays the next
+    // trim check by a frame.
+    static std::atomic<int> trim_cooldown = 0;
+    int cooldown = trim_cooldown.load(std::memory_order_relaxed);
+    if (cooldown > 0) {
+      trim_cooldown.store(cooldown - 1, std::memory_order_relaxed);
     }
 
-    if (trim_cooldown == 0) {
+    if (cooldown == 0) {
       size_t vma_mb = DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize();
       if (vma_mb < kMaxVmaMB) {
         PROCESS_MEMORY_COUNTERS pmc = {};
@@ -687,7 +695,7 @@ void AllocatorVK::DebugTraceMemoryStatistics() const {
         if (::GetProcessMemoryInfo(::GetCurrentProcess(), &pmc, sizeof(pmc))) {
           size_t rss_mb = pmc.WorkingSetSize / kBytesPerMB;
           if (rss_mb > kMinRssMB && rss_mb > vma_mb * kRssToVmaRatio) {
-            trim_cooldown = kTrimCooldownFrames;
+            trim_cooldown.store(kTrimCooldownFrames, std::memory_order_relaxed);
             ::EmptyWorkingSet(::GetCurrentProcess());
             FML_DLOG(INFO) << "Working set trimmed: " << rss_mb << " MB";
           }

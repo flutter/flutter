@@ -114,6 +114,17 @@ GPUSurfaceVulkanImpeller::~GPUSurfaceVulkanImpeller() {
           }
         }
       }
+    } else {
+      // After a device loss the driver's internal state may be corrupted and
+      // any further Vulkan call can fault inside the ICD (see
+      // ContextVK::MarkDeviceLost). Abandon the handles instead of destroying
+      // them, matching the AbandonForDriverCrash policy of the command pools.
+      for (auto& entry : cached_image_views_) {
+        (void)entry.second.release();
+      }
+      for (auto& fence : frame_fences_) {
+        (void)fence.release();
+      }
     }
   }
   cached_image_views_.clear();
@@ -284,14 +295,23 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       // in-flight frames to complete first to avoid destroying a
       // VkImageView the GPU may still reference
       // (VUID-vkDestroyImageView-imageView-01026).
-      for (size_t i = 0; i < kMaxFramesInFlight; i++) {
-        if (frame_fences_[i]) {
-          auto wait = context_vk.GetDevice().waitForFences(
-              {*frame_fences_[i]}, VK_TRUE, kFenceDrainTimeoutNs);
-          if (wait != impeller::vk::Result::eSuccess) {
-            FML_LOG(ERROR) << "Failed to wait for in-flight fence on resize: "
-                           << impeller::vk::to_string(wait);
+      if (!context_vk.IsDeviceLost()) {
+        for (size_t i = 0; i < kMaxFramesInFlight; i++) {
+          if (frame_fences_[i]) {
+            auto wait = context_vk.GetDevice().waitForFences(
+                {*frame_fences_[i]}, VK_TRUE, kFenceDrainTimeoutNs);
+            if (wait != impeller::vk::Result::eSuccess) {
+              FML_LOG(ERROR) << "Failed to wait for in-flight fence on resize: "
+                             << impeller::vk::to_string(wait);
+            }
           }
+        }
+      } else {
+        // Waiting on fences or destroying views is unsafe on a corrupted
+        // driver after a device loss; abandon the stale views instead (the
+        // embedder's old images are gone either way).
+        for (auto& entry : cached_image_views_) {
+          (void)entry.second.release();
         }
       }
       cached_image_views_.clear();
