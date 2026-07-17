@@ -276,8 +276,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get enableHcpp =>
-      argResults!.wasParsed('enable-hcpp') ? boolArg('enable-hcpp') : featureFlags.isHcppEnabled;
+
+  /// The explicit `--[no-]enable-hcpp` value, or null if the flag was not
+  /// passed.
+  ///
+  /// When null, no runtime override is sent to the device, so the built
+  /// manifest (which may include a value injected from the `enable-hcpp`
+  /// feature flag by the build) determines the behavior.
+  bool? get enableHcpp => argResults!.wasParsed('enable-hcpp') ? boolArg('enable-hcpp') : null;
   bool get testFlag => boolArg('test-flag');
 
   @override
@@ -680,7 +686,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
-      runEnableHcpp: enableHcpp,
+      runEnableHcpp: enableHcpp ?? featureFlags.isHcppEnabled,
     );
   })();
 

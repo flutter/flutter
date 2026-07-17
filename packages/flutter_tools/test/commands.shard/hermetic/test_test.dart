@@ -1593,15 +1593,19 @@ dev_dependencies:
         },
       );
 
+      // When the flag is not explicitly passed, no runtime override is sent to
+      // the device. The enable-hcpp feature flag is instead applied at build
+      // time (see BuildInfo.androidEnableHcpp), so that an explicit value in
+      // the app's manifest takes priority over the feature flag.
       testUsingContext(
-        'enableHcpp falls back to isHcppEnabled = true when flag not explicitly passed',
+        'enableHcpp is null when flag not explicitly passed, even if isHcppEnabled = true',
         () async {
           final testRunner = FakeFlutterTestRunner(0);
           final testCommand = TestCommand(testRunner: testRunner);
           final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
           await commandRunner.run(const <String>['test', '--no-pub']);
-          expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isTrue);
+          expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isNull);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1611,19 +1615,19 @@ dev_dependencies:
       );
 
       testUsingContext(
-        'enableHcpp falls back to isHcppEnabled = false when flag not explicitly passed',
+        'buildInfo.androidEnableHcpp is set from isHcppEnabled',
         () async {
           final testRunner = FakeFlutterTestRunner(0);
           final testCommand = TestCommand(testRunner: testRunner);
           final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
           await commandRunner.run(const <String>['test', '--no-pub']);
-          expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isFalse);
+          expect(testRunner.lastDebuggingOptionsValue.buildInfo.androidEnableHcpp, isTrue);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => TestFeatureFlags(),
+          FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
         },
       );
     });

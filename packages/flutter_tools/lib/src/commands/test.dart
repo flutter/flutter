@@ -12,7 +12,6 @@ import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
@@ -496,9 +495,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
-      enableHcpp: argResults!.wasParsed('enable-hcpp')
-          ? boolArg('enable-hcpp')
-          : featureFlags.isHcppEnabled,
+      // Only forward an explicit value; when unset the built manifest (which
+      // may include a value injected from the enable-hcpp feature flag)
+      // determines the behavior.
+      enableHcpp: argResults!.wasParsed('enable-hcpp') ? boolArg('enable-hcpp') : null,
       uninstallApp: boolArg('uninstall'),
     );
 

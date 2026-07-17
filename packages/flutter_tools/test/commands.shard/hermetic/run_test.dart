@@ -438,6 +438,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -492,6 +493,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -797,6 +799,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -848,6 +851,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -904,6 +908,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -961,6 +966,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -1022,8 +1028,12 @@ void main() {
         },
       );
 
+      // When the flag is not explicitly passed, no runtime override is sent to
+      // the device. The enable-hcpp feature flag is instead applied at build
+      // time (see BuildInfo.androidEnableHcpp), so that an explicit value in
+      // the app's manifest takes priority over the feature flag.
       testUsingContext(
-        'enableHcpp falls back to isHcppEnabled = true when flag not explicitly passed',
+        'enableHcpp is null when flag not explicitly passed, even if isHcppEnabled = true',
         () async {
           final devices = <Device>[
             FakeDevice(
@@ -1038,7 +1048,7 @@ void main() {
           } on ToolExit {
             // Ignore
           }
-          expect(command.enableHcpp, isTrue);
+          expect(command.enableHcpp, isNull);
         },
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
@@ -1049,32 +1059,8 @@ void main() {
         },
       );
 
-      testUsingContext(
-        'enableHcpp falls back to isHcppEnabled = false when flag not explicitly passed',
-        () async {
-          final devices = <Device>[
-            FakeDevice(
-              targetPlatform: TargetPlatform.android_arm,
-              platformType: PlatformType.android,
-            ),
-          ];
-          final command = TestRunCommandForUsageValues(devices: devices);
-          final CommandRunner<void> runner = createTestCommandRunner(command);
-          try {
-            await runner.run(<String>['run']);
-          } on ToolExit {
-            // Ignore
-          }
-          expect(command.enableHcpp, isFalse);
-        },
-        overrides: <Type, Generator>{
-          DeviceManager: () => testDeviceManager,
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => TestFeatureFlags(),
-        },
-      );
+      // The piping of the feature flag into BuildInfo.androidEnableHcpp is
+      // covered in flutter_command_test.dart.
     });
 
     group('--web-header', () {

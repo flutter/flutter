@@ -588,10 +588,12 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        devicePlatform,
-        buildInfo: debuggingOptions.buildInfo,
-      ) as AndroidApk?;
+      builtPackage =
+          await ApplicationPackageFactory.instance!.getPackageForPlatform(
+                devicePlatform,
+                buildInfo: debuggingOptions.buildInfo,
+              )
+              as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -680,10 +682,13 @@ class AndroidDevice extends Device {
         'enable-vulkan-validation',
         'true',
       ],
-      if (debuggingOptions.enableHcpp) ...<String>[
+      // Only pass an override when explicitly requested, so that the value in
+      // the built manifest (which the user may have set, or the tool may have
+      // injected from the enable-hcpp feature flag) wins otherwise.
+      if (debuggingOptions.enableHcpp != null) ...<String>[
         '--ez',
         'enable-hcpp-and-surface-control',
-        'true',
+        debuggingOptions.enableHcpp.toString(),
       ],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
