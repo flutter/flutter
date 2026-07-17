@@ -374,8 +374,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @end
 
-// Spy subclass for testing touch dispatch blocking when a native VC is presented or when
-// FlutterViewController itself is being dismissed.
 // Overrides dispatchTouches:pointerDataChangeOverride:event: with void* for the C++ pointer
 // parameter so ObjC selector dispatch matches without pulling in flutter::PointerData types.
 // Does not call super to avoid crashing on raw UITouch stubs in the loop body.
@@ -395,8 +393,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)dispatchTouches:(NSSet*)touches
     pointerDataChangeOverride:(void*)overridden_change
                         event:(UIEvent*)event {
-  // Record that dispatch was attempted; do not call super to avoid processing
-  // raw UITouch stubs that would crash in the loop body.
+  // Do not call super — raw UITouch stubs crash in the dispatch loop body.
   self.touchesDispatched = YES;
 }
 @end
@@ -3121,8 +3118,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 // Regression tests for https://github.com/flutter/flutter/issues/14720
-// Touches must not be dispatched to Flutter when a native UIViewController is
-// presented on top of FlutterViewController via presentViewController:animated:completion:.
 
 - (FlutterViewControllerDispatchTouchesSpy*)
     spyViewControllerWithPresentedViewController:(UIViewController*)presentedVC {
@@ -3178,9 +3173,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                  @"touchesCancelled must not dispatch to Flutter when a native VC is presented");
 }
 
-// Regression tests for isBeingDismissed guard (companion to presentedViewController guard above).
-// Touches must not be dispatched to Flutter while FlutterViewController itself is being dismissed
-// (i.e. during its own disappearance animation).
+// Regression tests for the isBeingDismissed guard.
 
 - (FlutterViewControllerDispatchTouchesSpy*)spyViewControllerBeingDismissed {
   FlutterViewControllerDispatchTouchesSpy* vc =
