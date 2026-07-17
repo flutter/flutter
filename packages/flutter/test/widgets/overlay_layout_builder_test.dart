@@ -323,6 +323,12 @@ void main() {
     final controller = OverlayPortalController()..show();
     bool isMoved = false;
     late StateSetter setState;
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
     final Widget portal = OverlayPortal.overlayChildLayoutBuilder(
       key: portalKey,
       controller: controller,
@@ -344,7 +350,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            overlayEntry = OverlayEntry(
               builder: (BuildContext context) {
                 return StatefulBuilder(
                   builder: (BuildContext context, StateSetter setter) {
