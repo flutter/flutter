@@ -24,7 +24,7 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
 
 class _EditableTextToolbarBuilderExampleAppState
     extends State<EditableTextToolbarBuilderExampleApp> {
-  TextEditingController? _controller;
+  late final TextEditingController _controller;
 
   void _showDialog(BuildContext context) {
     Navigator.of(context).push(
@@ -44,13 +44,12 @@ class _EditableTextToolbarBuilderExampleAppState
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
     }
-    _controller?.dispose();
     _controller = TextEditingController(text: text);
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller.dispose();
     if (kIsWeb) {
       BrowserContextMenu.enableContextMenu();
     }

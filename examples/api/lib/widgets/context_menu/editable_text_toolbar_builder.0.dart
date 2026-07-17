@@ -22,7 +22,7 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
 
 class _EditableTextToolbarBuilderExampleAppState
     extends State<EditableTextToolbarBuilderExampleApp> {
-  TextEditingController? _controller;
+  late final TextEditingController _controller;
 
   @override
   void initState() {
@@ -32,7 +32,6 @@ class _EditableTextToolbarBuilderExampleAppState
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
     }
-    _controller?.dispose();
     _controller = TextEditingController(
       text:
           'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
@@ -41,7 +40,7 @@ class _EditableTextToolbarBuilderExampleAppState
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller.dispose();
     if (kIsWeb) {
       BrowserContextMenu.enableContextMenu();
     }
