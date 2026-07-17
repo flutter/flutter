@@ -308,6 +308,7 @@
 /dev/devicelab/bin/tasks/plugin_test_android_standard.dart @stuartmorgan-g @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test_android_variants.dart @stuartmorgan-g @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @stuartmorgan-g @flutter/ios
+/dev/devicelab/bin/tasks/plugin_test_darwin.dart @stuartmorgan-g @flutter/ios
 /dev/devicelab/bin/tasks/plugin_test_linux.dart @stuartmorgan-g @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_macos.dart @vashworth @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_windows.dart @loic-sharma @flutter/desktop

@@ -4710,9 +4710,26 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: plugin_test_ios
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/151772
-      presubmit_max_attempts: "2"
-      test_timeout_secs: "3600"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac plugin_test_darwin
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: plugin_test_darwin
     runIf:
       - dev/**
       - packages/flutter_tools/**

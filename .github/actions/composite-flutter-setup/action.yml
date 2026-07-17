@@ -16,28 +16,32 @@ runs:
   steps:
       # Real checkout on github actions for pull requests
       - name: Checkout code (non-act pull_request)
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         if: github.event_name == 'pull_request' && !env.ACT
         with:
           fetch-depth: 0
           fetch-tags: true
           # Checkout the PR; not the merge commit - we need to describe tags
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       # Real checkout on github actions for post submit
       - name: Checkout code (non-act push)
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         if: github.event_name == 'push' && !env.ACT
         with:
           fetch-depth: 0
           fetch-tags: true
           # Checkout the PR; not the merge commit - we need to describe tags
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       # Fake checkout if running locally
       - name: Checkout code (act local)
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         if: env.ACT
+        with:
+          persist-credentials: false
 
       # If this is a branch / pr NOT on fluter/flutter, set the remote upstream
       # so the flutter tool can figure out the version
@@ -68,7 +72,11 @@ runs:
         id: android-sdk-version
         if: env.ACT
         run: |
-          echo "revision=${{inputs.ANDROID_TOOLS_VERSION}};${{inputs.ANDROID_PLATFORM}};build-tools;${{inputs.ANDROID_BUILDTOOLS}}" >> "$GITHUB_OUTPUT"
+          echo "revision=${INPUTS_ANDROID_TOOLS_VERSION};${INPUTS_ANDROID_PLATFORM};build-tools;${INPUTS_ANDROID_BUILDTOOLS}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUTS_ANDROID_TOOLS_VERSION: ${{inputs.ANDROID_TOOLS_VERSION}}
+          INPUTS_ANDROID_PLATFORM: ${{inputs.ANDROID_PLATFORM}}
+          INPUTS_ANDROID_BUILDTOOLS: ${{inputs.ANDROID_BUILDTOOLS}}
       - name: Android SDK Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: android-sdk-setup
@@ -83,12 +91,17 @@ runs:
           packages: 'tools platform-tools platforms;${{inputs.ANDROID_PLATFORM}} build-tools;${{inputs.ANDROID_BUILDTOOLS}}'
           log-accepted-android-sdk-licenses: false
           cmdline-tools-version: ${{ inputs.ANDROID_TOOLS_VERSION }}
-      - name: Setup Android SDK (warm cache)
+      - name: Setup Android SDK (warm cache) - Tools
         shell: bash
         if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
-        run: |
-          echo "/opt/android/sdk/cmdline-tools/${{ inputs.ANDROID_TOOLS_VERSION }}/bin" >> "$GITHUB_PATH"
-          echo "/opt/android/sdk/platform-tools" >> "$GITHUB_PATH"
+        run: echo "/opt/android/sdk/cmdline-tools/${INPUTS_ANDROID_TOOLS_VERSION}/bin" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
+        env:
+          INPUTS_ANDROID_TOOLS_VERSION: ${{ inputs.ANDROID_TOOLS_VERSION }}
+
+      - name: Setup Android SDK (warm cache) - Platform Tools
+        shell: bash
+        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
+        run: echo "/opt/android/sdk/platform-tools" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
 
       # ktlint is needed by tree analyze
       - name: ktlint cache
@@ -118,13 +131,11 @@ runs:
 
       - name: Add ktlint to PATH
         shell: bash
-        run: |
-          echo "${{ runner.temp }}/ktlint-bin" >> "$GITHUB_PATH"
+        run: echo "${{ runner.temp }}/ktlint-bin" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
 
       - name: Add `flutter` to the PATH
         shell: bash
-        run: |
-          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+        run: echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
 
       - name: Setup PUB_CACHE environment variable
         shell: bash
