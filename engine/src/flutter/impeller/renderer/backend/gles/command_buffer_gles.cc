@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
 
+#include <atomic>
 #include <memory>
 #include <utility>
 
@@ -85,6 +86,20 @@ bool CommandBufferGLES::OnSubmitCommands(bool block_on_schedule,
 
   if (reactor_->CanReactOnCurrentThread()) {
     const auto result = reactor_->React();
+    if (ContextGLES::IsJobPoolConstrainedDriver()) {
+      // Drivers prone to internal job-pool exhaustion crash once too many
+      // submitted jobs are awaiting retirement; this accumulates during long
+      // low-load sessions (small frames and uploads outpace the driver's
+      // retirement cadence). Periodically finish the queue so the pool stays
+      // shallow. See https://github.com/flutter/flutter/issues/189190.
+      constexpr uint64_t kJobPoolDrainInterval = 64;
+      static std::atomic<uint64_t> submission_count = 0;
+      if (submission_count.fetch_add(1, std::memory_order_relaxed) %
+              kJobPoolDrainInterval ==
+          kJobPoolDrainInterval - 1) {
+        reactor_->GetProcTable().Finish();
+      }
+    }
     if (tracker) {
       tracker->RecordCompletion(submission_id);
     }

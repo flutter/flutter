@@ -16,7 +16,47 @@
 #include "impeller/renderer/backend/gles/texture_gles.h"
 #include "impeller/renderer/command_queue.h"
 
+#if defined(__ANDROID__)
+#include <sys/system_properties.h>
+#endif  // defined(__ANDROID__)
+
+#include "flutter/fml/logging.h"
+
 namespace impeller {
+
+// static
+bool ContextGLES::IsJobPoolConstrainedPlatform(std::string_view platform) {
+  // The MT6779 (Helio P90, PowerVR Rogue GM9446) GL driver has a fixed-size
+  // internal job pool and dereferences null when an allocation from that
+  // pool fails inside glClear. Other MT67xx SoCs with PowerVR GPUs (e.g.
+  // MT6762/MT6765 with the GE8320) share the driver architecture and may
+  // need to be added here if reports confirm the same RM_GrowJobPool
+  // failure signature; MT67xx SoCs with Mali GPUs are unaffected.
+  return platform.starts_with("mt6779") || platform.starts_with("MT6779");
+}
+
+// static
+bool ContextGLES::IsJobPoolConstrainedDriver() {
+#if defined(__ANDROID__)
+  static const bool is_constrained = [] {
+    for (const char* name :
+         {"ro.board.platform", "ro.vendor.mediatek.platform"}) {
+      char value[PROP_VALUE_MAX];
+      if (__system_property_get(name, value) > 0 &&
+          IsJobPoolConstrainedPlatform(value)) {
+        FML_LOG(INFO) << "Impeller job-pool exhaustion mitigation active "
+                         "for platform: "
+                      << value;
+        return true;
+      }
+    }
+    return false;
+  }();
+  return is_constrained;
+#else
+  return false;
+#endif  // defined(__ANDROID__)
+}
 
 std::shared_ptr<ContextGLES> ContextGLES::Create(
     const Flags& flags,
@@ -192,6 +232,14 @@ bool ContextGLES::FinishQueue() {
 // |Context|
 bool ContextGLES::AddTrackingFence(
     const std::shared_ptr<Texture>& texture) const {
+  if (IsJobPoolConstrainedDriver()) {
+    // Report fences as unavailable so image uploads take the
+    // WaitUntilCompleted (glFinish) path. This retires the driver's internal
+    // jobs immediately instead of accumulating a fence (and its implicit
+    // flush) per uploaded texture, which exhausts the driver's job pool and
+    // crashes it. See https://github.com/flutter/flutter/issues/189190.
+    return false;
+  }
   if (!reactor_->GetProcTable().FenceSync.IsAvailable()) {
     return false;
   }
