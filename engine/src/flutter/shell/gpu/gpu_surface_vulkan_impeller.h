@@ -24,6 +24,8 @@ namespace flutter {
 namespace testing {
 FML_TEST_CLASS(GPUSurfaceVulkanImpeller,
                RecreatesTransientsWhenFrameSizeChanges);
+FML_TEST_CLASS(GPUSurfaceVulkanImpeller,
+               TeardownAfterDeviceLossAbandonsResources);
 }  // namespace testing
 
 class GPUSurfaceVulkanImpeller final : public Surface {
@@ -40,6 +42,8 @@ class GPUSurfaceVulkanImpeller final : public Surface {
  private:
   FML_FRIEND_TEST(testing::GPUSurfaceVulkanImpeller,
                   RecreatesTransientsWhenFrameSizeChanges);
+  FML_FRIEND_TEST(testing::GPUSurfaceVulkanImpeller,
+                  TeardownAfterDeviceLossAbandonsResources);
 
   /// Maximum number of frames that can be in-flight simultaneously.
   /// Matches the KHR swapchain's kMaxFramesInFlight = 2.
