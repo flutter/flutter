@@ -2100,6 +2100,10 @@ class FakeFeatureFlags implements FeatureFlags {
   @override
   bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;
 
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => false;
+
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
