@@ -60,16 +60,20 @@ abstract class UnpackDarwin extends Target {
     final String copiedPath = environment.outputDir
         .childDirectory(environment.fileSystem.path.basename(basePath))
         .path;
-    final ProcessResult chmodResult = await environment.processManager.run(<String>[
-      'chmod',
-      '-R',
-      'u+w',
-      copiedPath,
-    ]);
-    if (chmodResult.exitCode != 0) {
-      environment.logger.printTrace(
-        'Warning: Failed to explicitly make framework writable at $copiedPath: ${chmodResult.stderr}',
-      );
+    try {
+      final ProcessResult chmodResult = await environment.processManager.run(<String>[
+        'chmod',
+        '-R',
+        'u+w',
+        copiedPath,
+      ]);
+      if (chmodResult.exitCode != 0) {
+        environment.logger.printTrace(
+          'Warning: Failed to explicitly make framework writable at $copiedPath: ${chmodResult.stderr}',
+        );
+      }
+    } on ProcessException catch (e) {
+      environment.logger.printTrace('Warning: Failed to run chmod for $copiedPath: $e');
     }
   }
 
