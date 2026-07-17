@@ -494,10 +494,10 @@ packages:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: cb6ab96514ba9935c280fcacdb4b6e9d613bebf253910fecdc78351abd83dbba
+      sha256: e5af5628be2fbe3bbb195ded03e6c6f739b0c92db43d1e2a95620678fd844458
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.0"
+    version: "1.6.1"
   html:
     dependency: "direct main"
     description:
@@ -1163,10 +1163,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: "1fef9e8e11e2991bb773070d4656b7bd5d850967a2456cfc83cf47925ba79489"
+      sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.3"
+    version: "4.6.0"
   vector_math:
     dependency: "direct main"
     description:
