@@ -59,7 +59,6 @@ AndroidContext::ContextSettings CreateContextSettings(
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control = p_settings.enable_surface_control;
-  settings.impeller_flags.use_sdfs = p_settings.impeller_use_sdfs;
   return settings;
 }
 }  // namespace
