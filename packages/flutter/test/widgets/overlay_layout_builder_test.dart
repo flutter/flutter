@@ -313,8 +313,8 @@ void main() {
   });
 
   // Regression test for reactivating a shown overlayChildLayoutBuilder portal
-  // while a LayoutBuilder render object is running its layout callback.
-  testWidgets('shown portal can be reparented during LayoutBuilder layout', (
+  // after global key reparenting.
+  testWidgets('shown overlayChildLayoutBuilder portal can be reparented', (
     WidgetTester tester,
   ) async {
     final GlobalKey portalKey = GlobalKey(debugLabel: 'moving-portal');
@@ -347,27 +347,23 @@ void main() {
                 return StatefulBuilder(
                   builder: (BuildContext context, StateSetter setter) {
                     setState = setter;
-                    return LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              SizedBox(
-                                key: const ValueKey<String>('top-slot'),
-                                height: 48.0,
-                                child: Center(child: isMoved ? null : portal),
-                              ),
-                              const SizedBox(height: 80.0),
-                              SizedBox(
-                                key: const ValueKey<String>('bottom-slot'),
-                                height: 48.0,
-                                child: Center(child: isMoved ? portal : null),
-                              ),
-                            ],
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(
+                            key: const ValueKey<String>('top-slot'),
+                            height: 48.0,
+                            child: Center(child: isMoved ? null : portal),
                           ),
-                        );
-                      },
+                          const SizedBox(height: 80.0),
+                          SizedBox(
+                            key: const ValueKey<String>('bottom-slot'),
+                            height: 48.0,
+                            child: Center(child: isMoved ? portal : null),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 );
