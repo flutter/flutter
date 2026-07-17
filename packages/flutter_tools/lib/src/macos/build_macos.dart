@@ -238,7 +238,10 @@ Future<void> buildMacOS({
       <String>[
         '/usr/bin/env',
         ...xcodebuildCommandArgs,
-        if (xcodeWorkspace != null) ...<String>['-workspace', xcodeWorkspace.path] else ...<String>[
+        if (xcodeWorkspace != null) ...<String>[
+          '-workspace',
+          xcodeWorkspace.path,
+        ] else ...<String>[
           '-project',
           xcodeProject.path,
         ],

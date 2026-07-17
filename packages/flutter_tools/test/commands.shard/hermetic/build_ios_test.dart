@@ -169,7 +169,7 @@ void main() {
     bool verbose = false,
     bool simulator = false,
     bool customNaming = false,
-    bool noWorkspace = false,
+    bool hasWorkspace = true,
     bool disablePortPublication = false,
     String? deviceId,
     int exitCode = 0,
@@ -185,9 +185,12 @@ void main() {
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         '-allowProvisioningUpdates',
         '-allowProvisioningDeviceRegistration',
-        if (noWorkspace) ...<String>['-project', 'Runner.xcodeproj'] else ...<String>[
+        if (hasWorkspace) ...<String>[
           '-workspace',
           if (customNaming) 'RenamedWorkspace.xcworkspace' else 'Runner.xcworkspace',
+        ] else ...<String>[
+          '-project',
+          if (customNaming) 'RenamedProj.xcodeproj' else 'Runner.xcodeproj',
         ],
         '-scheme',
         'Runner',
@@ -672,7 +675,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         setUpFakeXcodeBuildHandler(
-          noWorkspace: true,
+          hasWorkspace: false,
           onRun: (_) {
             fileSystem
                 .directory('build/ios/Release-iphoneos/Runner.app')
