@@ -7,6 +7,9 @@ name: Delete Bot Branches
 on:
   pull_request:
     types: [closed]
+    branches:
+      - master
+      - 'flutter-*-candidate*'
 
 permissions:
   contents: write
