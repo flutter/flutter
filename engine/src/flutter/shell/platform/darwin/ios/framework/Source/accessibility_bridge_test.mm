@@ -500,6 +500,109 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertNotNil([child accessibilityContainer]);
 }
 
+- (void)testRemovedSemanticsDoesNotDetachReparentedChild {
+  // Regression test for https://github.com/flutter/flutter/issues/100946.
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  id engine = OCMClassMock([FlutterEngine class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
+                                                            opaque:YES
+                                                   enableWideGamut:NO];
+  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[NSMutableArray alloc] init];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+  flutter::SemanticsNodeUpdates first_update;
+
+  flutter::SemanticsNode root;
+  root.id = kRootNodeId;
+  root.childrenInTraversalOrder = {1};
+  root.childrenInHitTestOrder = {1};
+  first_update[root.id] = root;
+
+  flutter::SemanticsNode old_container;
+  old_container.id = 1;
+  old_container.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  old_container.childrenInTraversalOrder = {2};
+  old_container.childrenInHitTestOrder = {2};
+  first_update[old_container.id] = old_container;
+
+  flutter::SemanticsNode child;
+  child.id = 2;
+  child.label = "Item 2";
+  child.rect = SkRect::MakeXYWH(0, 0, 300, 60);
+  first_update[child.id] = child;
+
+  bridge->UpdateSemantics(/*nodes=*/first_update, /*actions=*/actions);
+  [accessibility_notifications removeAllObjects];
+  bridge->AccessibilityObjectDidBecomeFocused(child.id);
+
+  @autoreleasepool {
+    flutter::SemanticsNodeUpdates second_update;
+
+    flutter::SemanticsNode new_root;
+    new_root.id = kRootNodeId;
+    new_root.childrenInTraversalOrder = {3};
+    new_root.childrenInHitTestOrder = {3};
+    second_update[new_root.id] = new_root;
+
+    flutter::SemanticsNode new_container;
+    new_container.id = 3;
+    new_container.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+    new_container.transform = SkM44::Translate(0, 300);
+    new_container.childrenInTraversalOrder = {2};
+    new_container.childrenInHitTestOrder = {2};
+    second_update[new_container.id] = new_container;
+
+    bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
+  }
+
+  XCTAssertEqual([accessibility_notifications count], 1ul);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityLayoutChangedNotification);
+
+  SemanticsObjectContainer* rootContainer = flutterView.accessibilityElements[0];
+  SemanticsObjectContainer* newContainer = [rootContainer accessibilityElementAtIndex:1];
+  XCTAssertEqual(newContainer.semanticsObject.uid, 3);
+  SemanticsObject* reparentedChild = [newContainer accessibilityElementAtIndex:1];
+  XCTAssertEqual(reparentedChild.uid, child.id);
+  XCTAssertEqual(reparentedChild.accessibilityContainer, newContainer);
+  const CGFloat screenScale = UIScreen.mainScreen.scale;
+  CGRect expectedFrame = CGRectMake(0, 300 / screenScale, 300 / screenScale, 60 / screenScale);
+  XCTAssertTrue(CGRectEqualToRect(reparentedChild.accessibilityFrame, expectedFrame));
+}
+
 - (void)testScrollableSemanticsDeallocated {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
