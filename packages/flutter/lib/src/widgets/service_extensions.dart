@@ -536,13 +536,23 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   setFlexProperties,
+}
 
+/// Service extension constants for accessibility/semantics.
+///
+/// These constants will be used when registering service extensions in the
+/// framework, and they will also be used by tools and services that call these
+/// service extensions.
+///
+/// The String value for each of these extension names should be accessed by
+/// calling the `.name` property on the enum value.
+enum AccessibilityServiceExtensions {
   /// Name of service extension that, when called, returns the JSON serialized
   /// semantics tree.
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
   ///   extension is registered.
   getSemanticsTree,
 }

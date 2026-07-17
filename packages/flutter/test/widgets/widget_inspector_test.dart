@@ -3550,7 +3550,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
-    testWidgets('ext.flutter.inspector.getSemanticsTree', (WidgetTester tester) async {
+    testWidgets('ext.flutter.accessibility.getSemanticsTree', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -3585,13 +3585,21 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
+      final accessibilityExtensions = <String, ServiceExtensionCallback>{};
+      AccessibilityInspector.instance.initServiceExtensions(({
+        required String name,
+        required ServiceExtensionCallback callback,
+      }) {
+        accessibilityExtensions[name] = callback;
+      });
+
+      Future<Map<String, Object?>> callExtension(String name) async {
+        return json.decode(json.encode(await accessibilityExtensions[name]!(<String, String>{})))
+            as Map<String, Object?>;
+      }
+
       // The first call registers semantics, schedules a frame, and returns an error map indicating root is null.
-      final result1 =
-          (await service.testExtension(
-                WidgetInspectorServiceExtensions.getSemanticsTree.name,
-                <String, String>{},
-              ))!
-              as Map<String, Object?>;
+      final Map<String, Object?> result1 = await callExtension('accessibility.getSemanticsTree');
 
       expect(result1['error'], equals('rootSemanticsNode is null'));
 
@@ -3599,12 +3607,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       // The second call returns the populated semantics tree.
-      final result2 =
-          (await service.testExtension(
-                WidgetInspectorServiceExtensions.getSemanticsTree.name,
-                <String, String>{},
-              ))!
-              as Map<String, Object?>;
+      final Map<String, Object?> result2 = await callExtension('accessibility.getSemanticsTree');
 
       expect(result2['error'], isNull);
       expect(result2['id'], isNotNull);
@@ -3651,6 +3654,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(transform, hasLength(16));
       expect(transform[0], equals(2.0));
 
+      AccessibilityInspector.instance.resetAllState();
       service.resetAllState();
     }, semanticsEnabled: false);
 
