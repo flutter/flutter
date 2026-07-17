@@ -13,6 +13,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
@@ -38,6 +39,7 @@ object FlutterPluginUtils {
     // recommended to use these const values in tests.
     internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
+    internal const val PROP_ENABLE_HCPP = "enable-hcpp"
     internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
     internal const val PROP_TARGET = "target"
@@ -1152,6 +1154,43 @@ object FlutterPluginUtils {
                     DeepLinkJsonFromManifestTask::manifestFile,
                     DeepLinkJsonFromManifestTask::updatedManifest
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
+        }
+    }
+
+    /**
+     * Adds tasks that inject the `io.flutter.embedding.android.EnableHcpp` meta-data into the
+     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true` (i.e.
+     * when the `enable-hcpp` feature flag is enabled).
+     *
+     * The meta-data is only added when not already present in the merged manifest, so an
+     * explicit value in the developer's manifest always takes priority over the feature flag.
+     * An explicit `--enable-hcpp`/`--no-enable-hcpp` on `flutter run`/`flutter test` is passed
+     * to the engine at launch instead, which takes priority over the manifest at runtime.
+     *
+     * Should be called for both app and module (aar) projects, so that the feature flag also
+     * applies to add-to-app builds.
+     */
+    @JvmStatic
+    @JvmName("addTasksForEnableHcppManifest")
+    internal fun addTasksForEnableHcppManifest(project: Project) {
+        val enableHcpp: Boolean =
+            project.findProperty(PROP_ENABLE_HCPP)?.toString()?.toBoolean() ?: false
+        if (!enableHcpp) {
+            return
+        }
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants { variant ->
+            val hcppManifestUpdater =
+                project.tasks.register(
+                    "enableHcppInManifest${capitalize(variant.name)}",
+                    EnableHcppManifestTask::class.java
+                )
+            variant.artifacts
+                .use(hcppManifestUpdater)
+                .wiredWithFiles(
+                    EnableHcppManifestTask::manifestFile,
+                    EnableHcppManifestTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST)
         }
     }
 }

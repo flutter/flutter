@@ -304,6 +304,9 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
         }
+        // Applies to both app and module (aar) projects, so that the enable-hcpp feature flag
+        // also reaches add-to-app builds.
+        FlutterPluginUtils.addTasksForEnableHcppManifest(projectToAddTasksTo)
 
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)

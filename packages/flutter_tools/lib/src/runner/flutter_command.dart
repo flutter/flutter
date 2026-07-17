@@ -1524,6 +1524,7 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      androidEnableHcpp: featureFlags.isHcppEnabled,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,

@@ -683,6 +683,40 @@ void main() {
     );
 
     testUsingContext(
+      'sets androidEnableHcpp in BuildInfo from the enable-hcpp feature flag',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(buildInfo.androidEnableHcpp, isTrue);
+        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+      },
+    );
+
+    testUsingContext(
+      'sets androidEnableHcpp in BuildInfo when the enable-hcpp feature flag is disabled',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(buildInfo.androidEnableHcpp, isFalse);
+        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () => TestFeatureFlags(),
+      },
+    );
+
+    testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
         final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);

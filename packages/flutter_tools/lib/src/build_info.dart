@@ -48,6 +48,7 @@ class BuildInfo {
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.androidSkipBuildDependencyValidation = false,
+    this.androidEnableHcpp,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
@@ -93,6 +94,7 @@ class BuildInfo {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      androidEnableHcpp: androidEnableHcpp,
       packageConfig: packageConfig ?? this.packageConfig,
       initializeFromDill: initializeFromDill ?? this.initializeFromDill,
       assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
@@ -200,6 +202,15 @@ class BuildInfo {
   /// Whether to skip checking of individual versions of our Android build time
   /// dependencies.
   final bool androidSkipBuildDependencyValidation;
+
+  /// The value of the `enable-hcpp` feature flag, passed to Gradle so the
+  /// Flutter Gradle Plugin can inject the corresponding manifest metadata.
+  ///
+  /// The injection only happens when the merged manifest does not already
+  /// contain the `io.flutter.embedding.android.EnableHcpp` metadata, so an
+  /// explicit value in the app's manifest always takes priority. When null,
+  /// no property is passed and no injection happens.
+  final bool? androidEnableHcpp;
 
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
@@ -423,6 +434,7 @@ class BuildInfo {
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
+      if (androidEnableHcpp != null) '-Penable-hcpp=$androidEnableHcpp',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
       if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
     ];
