@@ -314,6 +314,8 @@ void main() {
 
   // Regression test for reactivating a shown overlayChildLayoutBuilder portal
   // after global key reparenting.
+  //
+  // Related issue: https://github.com/flutter/flutter/issues/188500.
   testWidgets('shown overlayChildLayoutBuilder portal can be reparented', (
     WidgetTester tester,
   ) async {
