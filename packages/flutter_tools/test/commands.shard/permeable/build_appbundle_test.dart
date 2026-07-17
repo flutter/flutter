@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -21,7 +22,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart' show FakeFlutterVersion;
+import '../../src/fakes.dart' show FakeFlutterVersion, TestFeatureFlags;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -71,6 +72,37 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from the enable-hcpp feature flag when not in the manifest',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildAppBundleCommand(projectPath);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
       },
     );
 
@@ -150,6 +182,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 

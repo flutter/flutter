@@ -12,6 +12,7 @@ import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -109,7 +110,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
-      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
+      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(
+        ifAbsent: featureFlags.isHcppEnabled,
+      ),
     );
   }
 

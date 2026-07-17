@@ -1099,8 +1099,14 @@ See the link below for more information:
     );
   }
 
-  bool computeHcppEnabled() {
-    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', false);
+  /// Returns the `io.flutter.embedding.android.EnableHcpp` manifest value.
+  ///
+  /// If there is no manifest file, or the key is not present, returns
+  /// [ifAbsent]. Callers should pass the value of the `enable-hcpp` feature
+  /// flag, which is what the build injects into the manifest when the key is
+  /// not explicitly set.
+  bool computeHcppEnabled({bool ifAbsent = false}) {
+    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', ifAbsent);
   }
 
   bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
