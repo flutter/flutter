@@ -6,7 +6,7 @@
 // narrowly defined text is selected.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() => runApp(const EditableTextToolbarBuilderExampleApp());
@@ -24,7 +24,7 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
 
 class _EditableTextToolbarBuilderExampleAppState
     extends State<EditableTextToolbarBuilderExampleApp> {
-  final TextEditingController _controller = TextEditingController(text: text);
+  TextEditingController? _controller;
 
   void _showDialog(BuildContext context) {
     Navigator.of(context).push(
@@ -44,10 +44,13 @@ class _EditableTextToolbarBuilderExampleAppState
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
     }
+    _controller?.dispose();
+    _controller = TextEditingController(text: text);
   }
 
   @override
   void dispose() {
+    _controller?.dispose();
     if (kIsWeb) {
       BrowserContextMenu.enableContextMenu();
     }
@@ -75,7 +78,7 @@ class _EditableTextToolbarBuilderExampleAppState
                       // Here we add an "Email" button to the default TextField
                       // context menu for the current platform, but only if an email
                       // address is currently selected.
-                      final TextEditingValue value = _controller.value;
+                      final TextEditingValue value = editableTextState.textEditingValue;
                       if (_isValidEmail(
                         value.selection.textInside(value.text),
                       )) {

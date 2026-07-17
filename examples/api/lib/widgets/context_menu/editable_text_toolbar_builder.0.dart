@@ -22,10 +22,7 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
 
 class _EditableTextToolbarBuilderExampleAppState
     extends State<EditableTextToolbarBuilderExampleApp> {
-  final TextEditingController _controller = TextEditingController(
-    text:
-        'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
-  );
+  TextEditingController? _controller;
 
   @override
   void initState() {
@@ -35,10 +32,16 @@ class _EditableTextToolbarBuilderExampleAppState
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
     }
+    _controller?.dispose();
+    _controller = TextEditingController(
+      text:
+          'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
+    );
   }
 
   @override
   void dispose() {
+    _controller?.dispose();
     if (kIsWeb) {
       BrowserContextMenu.enableContextMenu();
     }
@@ -55,7 +58,7 @@ class _EditableTextToolbarBuilderExampleAppState
             children: <Widget>[
               const SizedBox(height: 20.0),
               TextField(
-                controller: _controller,
+                controller: _controller!,
                 contextMenuBuilder:
                     (
                       BuildContext context,
@@ -70,8 +73,8 @@ class _EditableTextToolbarBuilderExampleAppState
                           ContextMenuButtonItem buttonItem,
                         ) {
                           return CupertinoButton(
-                            color: const Color(0xffaaaa00),
-                            disabledColor: const Color(0xffaaaaff),
+                            color: const Color(0xFFAAAA00),
+                            disabledColor: const Color(0xFFAAAAFF),
                             onPressed: buttonItem.onPressed,
                             padding: const .all(10.0),
                             pressedOpacity: 0.7,
