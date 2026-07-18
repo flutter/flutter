@@ -39,10 +39,10 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
   client_ = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:uiTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.shared.displayRefreshRate
                           callback:vsyncCallback];
-  max_refresh_rate_ = FlutterDisplayLinkManager.displayRefreshRate;
+  max_refresh_rate_ = FlutterDisplayLinkManager.shared.displayRefreshRate;
 }
 
 VsyncWaiterIOS::~VsyncWaiterIOS() {
@@ -52,7 +52,7 @@ VsyncWaiterIOS::~VsyncWaiterIOS() {
 }
 
 void VsyncWaiterIOS::AwaitVSync() {
-  double new_max_refresh_rate = FlutterDisplayLinkManager.displayRefreshRate;
+  double new_max_refresh_rate = FlutterDisplayLinkManager.shared.displayRefreshRate;
   if (fabs(new_max_refresh_rate - max_refresh_rate_) > kRefreshRateDiffToIgnore) {
     max_refresh_rate_ = new_max_refresh_rate;
     [client_ setMaxRefreshRate:max_refresh_rate_];

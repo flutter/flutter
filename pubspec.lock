@@ -238,11 +238,11 @@ packages:
     dependency: transitive
     description:
       path: "tool/dart_skills_lint"
-      ref: e4497873950727ee781fa411c1a2f624b1ec50c6
-      resolved-ref: e4497873950727ee781fa411c1a2f624b1ec50c6
+      ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
+      resolved-ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
       url: "https://github.com/flutter/skills"
     source: git
-    version: "0.3.0"
+    version: "0.4.0"
   dart_style:
     dependency: "direct main"
     description:
@@ -1163,10 +1163,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: "1fef9e8e11e2991bb773070d4656b7bd5d850967a2456cfc83cf47925ba79489"
+      sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.3"
+    version: "4.6.0"
   vector_math:
     dependency: "direct main"
     description:

@@ -1809,6 +1809,33 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
 
+  - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_instrumented_tests
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_vulkan_instrumented_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+
+  - name: Linux_android_emu android_hardware_smoke_opengles_instrumented_tests
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_opengles_instrumented_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4683,9 +4710,26 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: plugin_test_ios
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/151772
-      presubmit_max_attempts: "2"
-      test_timeout_secs: "3600"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac plugin_test_darwin
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: plugin_test_darwin
     runIf:
       - dev/**
       - packages/flutter_tools/**

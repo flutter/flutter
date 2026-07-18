@@ -1311,7 +1311,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  double displayRefreshRate = FlutterDisplayLinkManager.displayRefreshRate;
+  double displayRefreshRate = FlutterDisplayLinkManager.shared.displayRefreshRate;
   const double epsilon = 0.1;
   if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
 
@@ -1327,8 +1327,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       };
   _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:self.engine.platformTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.shared.displayRefreshRate
                           callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }

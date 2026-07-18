@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_PLAYGROUND_PLAYGROUND_H_
 #define FLUTTER_IMPELLER_PLAYGROUND_PLAYGROUND_H_
 
+#include <atomic>
 #include <chrono>
 #include <memory>
 
@@ -46,6 +47,8 @@ class Playground {
                       const PlaygroundSwitches& switches);
 
   virtual ~Playground();
+
+  static void OnTearDownTestEnvironment();
 
   static bool ShouldOpenNewPlaygrounds();
 
@@ -197,6 +200,9 @@ class Playground {
   virtual testing::GoldenDigestManager* GetGoldenDigestManager() const;
 
  private:
+  static void InitializeGLFWOnce();
+  static std::atomic<bool> glfw_initialized_;
+
   const PlaygroundBackend backend_;
   PlaygroundSwitches switches_;
 
