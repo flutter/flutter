@@ -1934,10 +1934,15 @@ class Transform extends SingleChildRenderObjectWidget {
 /// The [CompositedTransformTarget] must come earlier in the paint order than
 /// any linked [CompositedTransformFollower]s.
 ///
+/// {@macro flutter.widgets.CompositedTransformFollower.overlayPortal}
+///
 /// See also:
 ///
 ///  * [CompositedTransformFollower], the widget that can target this one.
 ///  * [LeaderLayer], the layer that implements this widget's logic.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformTarget extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///
@@ -1985,11 +1990,21 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// this widget is usually used as the root of an [OverlayEntry] in an app-wide
 /// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
 ///
+/// {@template flutter.widgets.CompositedTransformFollower.overlayPortal}
+/// [CompositedTransformFollower] and [CompositedTransformTarget] are
+/// incompatible with [OverlayPortal.overlayChildLayoutBuilder] and thus
+/// must not be used together. Consider using
+/// [OverlayPortal.overlayChildLayoutBuilder] instead
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [CompositedTransformTarget], the widget that this widget can target.
 ///  * [FollowerLayer], the layer that implements this widget's logic.
 ///  * [Transform], which applies an arbitrary transform to a child.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///
@@ -6738,6 +6753,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.invertColors = false,
     this.filterQuality = FilterQuality.medium,
     this.isAntiAlias = false,
+    this.blendMode = BlendMode.srcOver,
   });
 
   /// The image to display.
@@ -6872,6 +6888,16 @@ class RawImage extends LeafRenderObjectWidget {
   /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
   final bool isAntiAlias;
 
+  /// Used to combine the image with the destination when painting onto the
+  /// canvas. This is forwarded to [paintImage].
+  ///
+  /// Defaults to [BlendMode.srcOver].
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode blendMode;
+
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
@@ -6900,6 +6926,7 @@ class RawImage extends LeafRenderObjectWidget {
       invertColors: invertColors,
       isAntiAlias: isAntiAlias,
       filterQuality: filterQuality,
+      blendMode: blendMode,
     );
   }
 
@@ -6929,7 +6956,8 @@ class RawImage extends LeafRenderObjectWidget {
           : null
       ..invertColors = invertColors
       ..isAntiAlias = isAntiAlias
-      ..filterQuality = filterQuality;
+      ..filterQuality = filterQuality
+      ..blendMode = blendMode;
   }
 
   @override
@@ -6959,6 +6987,7 @@ class RawImage extends LeafRenderObjectWidget {
     );
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver));
   }
 }
 

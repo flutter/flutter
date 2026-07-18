@@ -35,11 +35,18 @@ config("test_config") {
   if (is_ios) {
     _platform_path = ios_platform_path
     swiftflags += [
-      "--deployment-target",
-      ios_testing_deployment_target,
+      "-target",
+      "$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim",
     ]
-    cflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
-    ldflags += [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
+    if (use_ios_simulator) {
+      _version_min_flag =
+          "-mios-simulator-version-min=$ios_testing_deployment_target"
+    } else {
+      _version_min_flag =
+          "-miphoneos-version-min=$ios_testing_deployment_target"
+    }
+    cflags += [ _version_min_flag ]
+    ldflags += [ _version_min_flag ]
   } else if (is_mac) {
     _platform_path = mac_platform_path
     cflags += [ "-mmacosx-version-min=$mac_testing_deployment_target" ]

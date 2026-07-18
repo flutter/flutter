@@ -347,7 +347,7 @@ void main() {
           expect(
             logger.warningText,
             contains(
-              '--flavor is only supported for Android, macOS, and iOS devices. '
+              '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
               'Flavor-related features may not function properly and could '
               'behave differently in a future release.',
             ),
@@ -1694,6 +1694,7 @@ server:
           'run',
           '--start-paused',
           '--disable-service-auth-codes',
+          '--disable-service-origin-check',
           '--use-test-fonts',
           '--trace-skia',
           '--trace-systrace',
@@ -1719,6 +1720,7 @@ server:
 
       expect(options.startPaused, true);
       expect(options.disableServiceAuthCodes, true);
+      expect(options.disableServiceOriginCheck, true);
       expect(options.useTestFonts, true);
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
@@ -1834,6 +1836,8 @@ server:
       final File mainFile = libDir.childFile('main.dart');
       mainFile.writeAsStringSync('void main() {}');
     });
+    // TODO(nshahan): Safe to remove after
+    // https://github.com/flutter/flutter/issues/142060.
     testUsingContext(
       'no warning triggered when web hot reload flag not present',
       () async {
@@ -1875,6 +1879,8 @@ server:
         DeviceManager: () => testDeviceManager,
       },
       initializeFlutterRoot: false,
+      // https://github.com/flutter/flutter/issues/142060
+      skip: true,
     );
 
     testUsingContext(
@@ -1904,6 +1910,8 @@ server:
         DeviceManager: () => testDeviceManager,
       },
       initializeFlutterRoot: false,
+      // https://github.com/flutter/flutter/issues/142060
+      skip: true,
     );
   });
 }
@@ -2092,6 +2100,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool? forcedWebEnableHotReload,
   }) async {
     return const BuildInfo(
       BuildMode.debug,

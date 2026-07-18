@@ -10,12 +10,14 @@
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
 
 #include "flutter/impeller/golden_tests/golden_digest.h"
-#include "flutter/impeller/golden_tests/metal_screenshotter.h"
-#include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
+#include "flutter/impeller/golden_tests/golden_screenshotter.h"
+#include "flutter/impeller/golden_tests/metal_golden_screenshotter.h"
+#include "flutter/impeller/golden_tests/vulkan_golden_screenshotter.h"
 #include "fml/closure.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/playground/playground_impl.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/render_pass.h"
@@ -150,7 +152,7 @@ bool GoldenPlaygroundTest::SaveScreenshot(
 struct GoldenPlaygroundTest::GoldenPlaygroundTestImpl {
   std::unique_ptr<PlaygroundImpl> test_vulkan_playground;
   std::unique_ptr<PlaygroundImpl> test_opengl_playground;
-  std::unique_ptr<testing::Screenshotter> screenshotter;
+  std::unique_ptr<testing::GoldenScreenshotter> screenshotter;
   ISize window_size = ISize{1024, 768};
 };
 
@@ -210,7 +212,7 @@ void GoldenPlaygroundTest::SetUp() {
             << "This metal device doesn't support wide gamut golden tests.";
       }
       pimpl_->screenshotter =
-          std::make_unique<testing::MetalScreenshotter>(switches);
+          std::make_unique<testing::MetalGoldenScreenshotter>(switches);
       break;
     case PlaygroundBackend::kVulkan: {
       if (switches.enable_wide_gamut) {
@@ -223,7 +225,7 @@ void GoldenPlaygroundTest::SetUp() {
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedVulkanPlayground(/*enable_validations=*/true);
       pimpl_->screenshotter =
-          std::make_unique<testing::VulkanScreenshotter>(playground);
+          std::make_unique<testing::VulkanGoldenScreenshotter>(playground);
       break;
     }
     case PlaygroundBackend::kOpenGLESSDF:
@@ -242,7 +244,7 @@ void GoldenPlaygroundTest::SetUp() {
       ::glfwMakeContextCurrent(
           reinterpret_cast<GLFWwindow*>(playground->GetWindowHandle()));
       pimpl_->screenshotter =
-          std::make_unique<testing::VulkanScreenshotter>(playground);
+          std::make_unique<testing::VulkanGoldenScreenshotter>(playground);
       break;
     }
   }
@@ -334,12 +336,6 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   return SaveScreenshot(std::move(screenshot));
 }
 
-bool GoldenPlaygroundTest::ImGuiBegin(const char* name,
-                                      bool* p_open,
-                                      ImGuiWindowFlags flags) {
-  return false;
-}
-
 std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {
@@ -389,8 +385,9 @@ std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
         << "We don't support creating multiple contexts for one test";
     pimpl_->test_vulkan_playground =
         MakeVulkanPlayground(enable_vulkan_validations);
-    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
-        pimpl_->test_vulkan_playground);
+    pimpl_->screenshotter =
+        std::make_unique<testing::VulkanGoldenScreenshotter>(
+            pimpl_->test_vulkan_playground);
     return pimpl_->test_vulkan_playground->GetContext();
   } else if (GetParam() == PlaygroundBackend::kOpenGLES ||
              GetParam() == PlaygroundBackend::kOpenGLESSDF) {
@@ -398,8 +395,9 @@ std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
         << "We don't support creating multiple contexts for one test";
     bool use_sdfs = (GetParam() == PlaygroundBackend::kOpenGLESSDF);
     pimpl_->test_opengl_playground = MakeOpenGLESPlayground(use_sdfs);
-    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
-        pimpl_->test_opengl_playground);
+    pimpl_->screenshotter =
+        std::make_unique<testing::VulkanGoldenScreenshotter>(
+            pimpl_->test_opengl_playground);
     return pimpl_->test_opengl_playground->GetContext();
   } else {
     FML_CHECK(false);
@@ -447,6 +445,26 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
 
 RuntimeStageBackend GoldenPlaygroundTest::GetRuntimeStageBackend() const {
   return pimpl_->screenshotter->GetPlayground().GetRuntimeStageBackend();
+}
+
+void GoldenPlaygroundTest::SetEnableWriteGolden(bool write_golden) {
+  if (!write_golden) {
+    // If we don't write a golden, we really don't have anything to do.
+    GTEST_SKIP() << "Test does not want a golden image written";
+  }
+}
+
+bool GoldenPlaygroundTest::InitializePipelineDescriptorForRendering(
+    PipelineDescriptor& desc) const {
+  // Match the golden harness render target: single-sampled, no depth/stencil.
+  // `ClearStencilAttachments` also resets the stencil pixel format on the
+  // pipeline, which Metal validation requires to match the target's lack of a
+  // stencil texture; `SetStencilAttachmentDescriptors(nullopt)` alone leaves
+  // the format set and trips that validation.
+  desc.SetSampleCount(SampleCount::kCount1);
+  desc.ClearStencilAttachments();
+  desc.ClearDepthAttachment();
+  return true;
 }
 
 }  // namespace impeller
