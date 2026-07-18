@@ -42,9 +42,12 @@ TEST(AndroidAHBSwapchainTest,
   auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
       context, std::make_shared<FakeSurfaceControl>(), {}, {100, 100}, false));
 
+  // Acquire a drawable but do not present it.
   auto image = ahb_swapchain->AcquireNextDrawable();
-  EXPECT_FALSE(image);
+  EXPECT_TRUE(image);
 
+  // Call AcquireNextDrawable again.  vkWaitForFences should not be called
+  // because no command was submitted and no fences are pending.
   ahb_swapchain->AcquireNextDrawable();
   EXPECT_FALSE(wait_for_fences_called);
 }
