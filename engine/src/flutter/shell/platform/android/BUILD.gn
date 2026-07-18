@@ -275,6 +275,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/image/MediaMetadataReader.java",
   "io/flutter/embedding/engine/image/Metadata.java",
   "io/flutter/embedding/engine/loader/ApplicationInfoLoader.java",
+  "io/flutter/embedding/engine/loader/CodePushSnapshotResolver.java",
   "io/flutter/embedding/engine/loader/FlutterApplicationInfo.java",
   "io/flutter/embedding/engine/loader/FlutterLoader.java",
   "io/flutter/embedding/engine/loader/ResourceExtractor.java",

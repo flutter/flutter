@@ -214,6 +214,14 @@ public final class FlutterEngineFlags {
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   /**
+   * Specifies the path to the isolate snapshot instructions file.
+   *
+   * <p>Used for OTA Dart code push when overriding only the application isolate snapshot.
+   */
+  public static final Flag ISOLATE_SNAPSHOT_INSTR =
+      new Flag("--isolate-snapshot-instr=", "IsolateSnapshotInstr", true);
+
+  /**
    * Enables Hybrid Composition++.
    *
    * <p>Allowed in release to opt-in to this platform views implementation in production. Settable
@@ -469,6 +477,7 @@ public final class FlutterEngineFlags {
               OLD_GEN_HEAP_SIZE,
               VM_SNAPSHOT_DATA,
               ISOLATE_SNAPSHOT_DATA,
+              ISOLATE_SNAPSHOT_INSTR,
               PURGE_PERSISTENT_CACHE,
               TRACE_STARTUP,
               LEAK_VM,

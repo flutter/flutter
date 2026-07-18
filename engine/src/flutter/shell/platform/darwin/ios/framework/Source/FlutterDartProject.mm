@@ -101,6 +101,21 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   }
 
   if (flutter::DartVM::IsRunningPrecompiledCode()) {
+    NSArray<NSString*>* documentPaths = NSSearchPathForDirectoriesInDomains(
+        NSDocumentDirectory, NSUserDomainMask, YES);
+    if (documentPaths.count > 0) {
+      NSString* activeDirectory = [documentPaths.firstObject
+          stringByAppendingPathComponent:@"code_push/active"];
+      NSString* dataPath = [activeDirectory stringByAppendingPathComponent:@"isolate_snapshot_data"];
+      NSString* instrPath =
+          [activeDirectory stringByAppendingPathComponent:@"isolate_snapshot_instr"];
+      if ([[NSFileManager defaultManager] fileExistsAtPath:dataPath] &&
+          [[NSFileManager defaultManager] fileExistsAtPath:instrPath]) {
+        settings.isolate_snapshot_data_path = dataPath.UTF8String;
+        settings.isolate_snapshot_instr_path = instrPath.UTF8String;
+      }
+    }
+
     if (hasExplicitBundle) {
       NSString* executablePath = bundle.executablePath;
       if ([[NSFileManager defaultManager] fileExistsAtPath:executablePath]) {

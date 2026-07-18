@@ -458,6 +458,18 @@ public class FlutterLoader {
             FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.engineArgument
                 + flutterApplicationInfo.isolateSnapshotData);
       } else {
+        CodePushSnapshotResolver.IsolateSnapshotPaths codePushSnapshots =
+            CodePushSnapshotResolver.resolveActiveIsolateSnapshotPaths(applicationContext);
+        if (codePushSnapshots != null) {
+          shellArgs.add(
+              0,
+              FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.engineArgument + codePushSnapshots.dataPath);
+          shellArgs.add(
+              0,
+              FlutterEngineFlags.ISOLATE_SNAPSHOT_INSTR.engineArgument
+                  + codePushSnapshots.instructionsPath);
+        }
+
         // Add default AOT shared library name arg. Note that if a different library
         // is set in the manifest, that value will take precedence and the default
         // libraries will be used as fallbacks in the order that they are added.

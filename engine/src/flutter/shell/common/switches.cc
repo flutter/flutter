@@ -403,6 +403,35 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
         {snapshot_asset_path, isolate_snapshot_instr_filename});
   }
 
+  // OTA code push may override only the application isolate snapshot while the
+  // VM continues to be resolved from the bundled AOT shared library.
+  auto resolve_snapshot_path =
+      [&snapshot_asset_path](const std::string& path) -> std::string {
+    if (path.empty()) {
+      return path;
+    }
+#if FML_OS_WIN
+    const bool is_absolute = path.size() >= 2 && path[1] == ':';
+#else
+    const bool is_absolute = !path.empty() && path.front() == '/';
+#endif
+    if (is_absolute) {
+      return path;
+    }
+    if (!snapshot_asset_path.empty()) {
+      return fml::paths::JoinPaths({snapshot_asset_path, path});
+    }
+    return path;
+  };
+  if (!isolate_snapshot_data_filename.empty()) {
+    settings.isolate_snapshot_data_path =
+        resolve_snapshot_path(isolate_snapshot_data_filename);
+  }
+  if (!isolate_snapshot_instr_filename.empty()) {
+    settings.isolate_snapshot_instr_path =
+        resolve_snapshot_path(isolate_snapshot_instr_filename);
+  }
+
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
                               &settings.temp_directory_path);
 
