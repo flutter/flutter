@@ -5,12 +5,9 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
-<<<<<<< HEAD
 #include <utility>
 
-=======
 #import "flutter/fml/message_loop.h"
->>>>>>> upstream/master
 #import "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
