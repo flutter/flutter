@@ -1007,11 +1007,11 @@ void main() {
     expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, -5));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/188305.
-  // While a node expands, its children must be clipped beneath the node (at the
-  // node's trailing edge) - including the first node, which used to clip at its
-  // leading edge and let its children paint over it.
   group('Animating node clips children below its trailing edge', () {
+    // Regression test for https://github.com/flutter/flutter/issues/188305.
+    // While a node expands, its children must be clipped beneath the node (at the
+    // node's trailing edge) - including the first node, which used to clip at its
+    // leading edge and let its children paint over it.
     const rowExtent = 40.0;
     const animationDuration = Duration(seconds: 1);
 
@@ -1084,9 +1084,9 @@ void main() {
       await tester.pump();
       await tester.pump(animationDuration ~/ 2); // Mid-animation.
 
-      final RenderTreeSliver renderTree = tester.allRenderObjects
-          .whereType<RenderTreeSliver>()
-          .first;
+      final RenderTreeSliver renderTree = tester.renderObject<RenderTreeSliver>(
+        find.byType(TreeSliver<String>),
+      );
       final List<double> clipTops = recordedClipTops(renderTree);
       // One row down (the node's trailing edge), not at the top (0.0).
       expect(clipTops, isNotEmpty);
@@ -1102,9 +1102,9 @@ void main() {
       await tester.pump();
       await tester.pump(animationDuration ~/ 2); // Mid-animation.
 
-      final RenderTreeSliver renderTree = tester.allRenderObjects
-          .whereType<RenderTreeSliver>()
-          .first;
+      final RenderTreeSliver renderTree = tester.renderObject<RenderTreeSliver>(
+        find.byType(TreeSliver<String>),
+      );
       final List<double> clipTops = recordedClipTops(renderTree);
       // The second node is at index 1, so its trailing edge is two rows down.
       expect(clipTops, isNotEmpty);

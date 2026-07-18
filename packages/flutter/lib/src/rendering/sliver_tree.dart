@@ -375,7 +375,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
       // parentIndex is always a real animating node (the unclipped first
       // segment is already painted), so its extent is added even when it is
       // index 0. Otherwise the clip starts at the parent's leading edge and its
-      // children paint over it. See https://github.com/flutter/flutter/issues/188305.
+      // children paint over it.
       final int parentIndex = math.max(segment.leadingIndex - 1, 0);
       final double leadingOffset =
           indexToLayoutOffset(0.0, parentIndex) + itemExtentBuilder(parentIndex, layoutDimensions)!;
