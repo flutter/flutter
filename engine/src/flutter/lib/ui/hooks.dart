@@ -419,8 +419,8 @@ void _notifyTextureFrameAvailable(int textureId) {
 }
 
 @pragma('vm:entry-point')
-void _markAllViewsDirty() {
-  PlatformDispatcher.instance._markAllViewsDirty();
+void _markAllViewsNeedRender() {
+  PlatformDispatcher.instance._markAllViewsNeedRender();
 }
 
 @pragma('vm:entry-point')

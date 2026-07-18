@@ -902,7 +902,7 @@ class Engine final : public RuntimeDelegate {
   ///             all views on the next frame, for example during lifecycle
   ///             events.
   ///
-  void MarkAllViewsDirty();
+  void MarkAllViewsNeedRender();
 
   // |RuntimeDelegate|
   void ScheduleFrame(bool regenerate_layer_trees) override;

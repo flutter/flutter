@@ -587,7 +587,7 @@ class PlatformConfiguration final {
   ///             all views on the next frame, for example during lifecycle
   ///             events.
   ///
-  void MarkAllViewsDirty();
+  void MarkAllViewsNeedRender();
 
   //----------------------------------------------------------------------------
   /// @brief      Retrieves the viewport metrics with the given ID managed by
