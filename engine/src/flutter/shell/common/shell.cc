@@ -1126,7 +1126,7 @@ void Shell::OnPlatformViewScheduleFrame() {
                                         // so force all views to redraw.
                                         // Without this only views with dirty
                                         // render objects would get repainted.
-                                        engine->MarkAllViewsDirty();
+                                        engine->MarkAllViewsNeedRender();
                                         engine->ScheduleFrame();
                                       }
                                     });

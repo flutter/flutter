@@ -1548,20 +1548,20 @@ void hooksTests() async {
     expectEquals(receivedTextureId, 1234);
   });
 
-  await test('onMarkAllViewsDirty preserves callback zone', () {
+  await test('onMarkAllViewsNeedRender preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     bool called = false;
 
     runZoned(() {
       innerZone = Zone.current;
-      PlatformDispatcher.instance.onMarkAllViewsDirty = () {
+      PlatformDispatcher.instance.onMarkAllViewsNeedRender = () {
         runZone = Zone.current;
         called = true;
       };
     });
 
-    _callHook('_markAllViewsDirty', 0);
+    _callHook('_markAllViewsNeedRender', 0);
     expectIdentical(runZone, innerZone);
     expectEquals(called, true);
   });
