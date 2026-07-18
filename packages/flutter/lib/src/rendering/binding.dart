@@ -65,7 +65,7 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onTextureFrameAvailable = handleTextureFrameAvailable
-      ..onMarkAllViewsDirty = markAllViewsDirty;
+      ..onMarkAllViewsNeedRender = markAllViewsNeedRender;
 
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
@@ -117,7 +117,7 @@ mixin RendererBinding
   /// on the next frame.
   @protected
   @visibleForTesting
-  void markAllViewsDirty() {
+  void markAllViewsNeedRender() {
     for (final RenderView view in renderViews) {
       view.markNeedsCompositeFrame();
     }
