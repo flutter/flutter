@@ -391,7 +391,7 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
   // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622956-applicationdidbecomeactive?language=objc
   if (state == "AppLifecycleState.resumed" ||
       state == "AppLifecycleState.inactive") {
-    MarkAllViewsDirty();
+    MarkAllViewsNeedRender();
     ScheduleFrame();
   }
   runtime_controller_->SetInitialLifecycleState(state);
@@ -512,8 +512,8 @@ std::string Engine::DefaultRouteName() {
   return "/";
 }
 
-void Engine::MarkAllViewsDirty() {
-  runtime_controller_->MarkAllViewsDirty();
+void Engine::MarkAllViewsNeedRender() {
+  runtime_controller_->MarkAllViewsNeedRender();
 }
 
 void Engine::ScheduleFrame(bool regenerate_layer_trees) {
