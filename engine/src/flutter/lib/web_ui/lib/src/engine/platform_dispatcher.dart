@@ -385,17 +385,17 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// A callback that is invoked when the application should re-render.
   @override
-  ui.MarkAllViewsDirtyCallback? get onMarkAllViewsDirty => _onMarkAllViewsDirty;
-  ui.MarkAllViewsDirtyCallback? _onMarkAllViewsDirty;
-  Zone _onMarkAllViewsDirtyZone = Zone.root;
+  ui.MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender => _onMarkAllViewsNeedRender;
+  ui.MarkAllViewsNeedRenderCallback? _onMarkAllViewsNeedRender;
+  Zone _onMarkAllViewsNeedRenderZone = Zone.root;
   @override
-  set onMarkAllViewsDirty(ui.MarkAllViewsDirtyCallback? callback) {
-    _onMarkAllViewsDirty = callback;
-    _onMarkAllViewsDirtyZone = Zone.current;
+  set onMarkAllViewsNeedRender(ui.MarkAllViewsNeedRenderCallback? callback) {
+    _onMarkAllViewsNeedRender = callback;
+    _onMarkAllViewsNeedRenderZone = Zone.current;
   }
 
-  void markAllViewsDirty() {
-    invoke(onMarkAllViewsDirty, _onMarkAllViewsDirtyZone);
+  void markAllViewsNeedRender() {
+    invoke(onMarkAllViewsNeedRender, _onMarkAllViewsNeedRenderZone);
   }
 
   @override

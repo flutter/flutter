@@ -17,7 +17,7 @@ typedef PlatformMessageCallback =
     void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
 typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
 typedef TextureFrameAvailableCallback = void Function(int textureId);
-typedef MarkAllViewsDirtyCallback = void Function();
+typedef MarkAllViewsNeedRenderCallback = void Function();
 
 /// A token that represents a root isolate.
 class RootIsolateToken {
@@ -72,8 +72,8 @@ abstract class PlatformDispatcher {
   TextureFrameAvailableCallback? get onTextureFrameAvailable;
   set onTextureFrameAvailable(TextureFrameAvailableCallback? callback);
 
-  MarkAllViewsDirtyCallback? get onMarkAllViewsDirty;
-  set onMarkAllViewsDirty(MarkAllViewsDirtyCallback? callback);
+  MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender;
+  set onMarkAllViewsNeedRender(MarkAllViewsNeedRenderCallback? callback);
 
   void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback);
 
