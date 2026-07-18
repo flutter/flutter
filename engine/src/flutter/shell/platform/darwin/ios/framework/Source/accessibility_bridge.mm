@@ -57,8 +57,11 @@ AccessibilityBridge::AccessibilityBridge(
          initWithName:@"flutter/accessibility"
       binaryMessenger:platform_view->GetOwnerViewController().engine.binaryMessenger
                 codec:[FlutterStandardMessageCodec sharedInstance]];
+  fml::WeakPtr<AccessibilityBridge> weak_self = GetWeakPtr();
   [accessibility_channel_ setMessageHandler:^(id message, FlutterReply reply) {
-    HandleEvent((NSDictionary*)message);
+    if (weak_self) {
+      weak_self->HandleEvent((NSDictionary*)message);
+    }
   }];
 }
 
