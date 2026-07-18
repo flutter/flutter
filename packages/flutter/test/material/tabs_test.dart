@@ -3668,8 +3668,8 @@ void main() {
           child: DefaultTabController(
             length: tabs.length,
             child: secondary
-                ? TabBar.secondary(indicatorWeight: 0.0, tabs: tabs)
-                : TabBar(indicatorWeight: 0.0, tabs: tabs),
+                ? const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs)
+                : const TabBar(indicatorWeight: 0.0, tabs: tabs),
           ),
         ),
       );
@@ -3711,34 +3711,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('TabBar asserts indicatorWeight: 0 with the default underline indicator', (
+  testWidgets('TabBar throws indicatorWeight: 0 with the default underline indicator', (
     WidgetTester tester,
   ) async {
     // With no indicator on the widget or the theme, the TabBar falls back to the
     // default underline indicator, which requires a positive indicatorWeight.
     const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+    final Matcher throwsInvalidIndicatorWeightError = isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      contains('Invalid indicatorWeight for TabBar.'),
+    );
 
     await tester.pumpWidget(
       boilerplate(
         useMaterial3: false,
         child: DefaultTabController(
           length: tabs.length,
-          child: TabBar(indicatorWeight: 0.0, tabs: tabs),
+          child: const TabBar(indicatorWeight: 0.0, tabs: tabs),
         ),
       ),
     );
-    expect(tester.takeException(), isAssertionError);
+    expect(tester.takeException(), throwsInvalidIndicatorWeightError);
 
     await tester.pumpWidget(
       boilerplate(
         useMaterial3: false,
         child: DefaultTabController(
           length: tabs.length,
-          child: TabBar.secondary(indicatorWeight: 0.0, tabs: tabs),
+          child: const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs),
         ),
       ),
     );
-    expect(tester.takeException(), isAssertionError);
+    expect(tester.takeException(), throwsInvalidIndicatorWeightError);
   });
 
   testWidgets('TabBar with custom indicator - directional indicatorPadding (LTR)', (
