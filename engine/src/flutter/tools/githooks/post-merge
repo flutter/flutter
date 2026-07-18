@@ -2,9 +2,9 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
+# Redirect output to stderr (>&2) to prevent polluting stdout when Git commands
+# are invoked programmatically by depot_tools or GN scripts.
 echo "Warning: Githooks location has moved to dev/tools/githooks!" >&2
 echo "Please run 'gclient runhooks' to update your githooks configuration." >&2
-exit 1
 
 
