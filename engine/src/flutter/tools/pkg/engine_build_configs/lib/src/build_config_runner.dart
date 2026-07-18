@@ -383,21 +383,56 @@ final class BuildRunner extends Runner {
     return result.ok;
   }
 
+  /// Generates and returns the ninja compilation database for the build.
+  ///
+  /// GN's default compile_commands.json generator only exports C and C++
+  /// targets and omits custom wrapper rules like `swiftc.py`. This invokes
+  /// `ninja -t compdb` to retrieve all compilation targets in the build graph
+  /// and falls back to reading `compile_commands.json` from disk if the command
+  /// fails or returns empty.
+  Future<String?> _getCompilationDatabase() async {
+    final String ninjaPath = p.join(
+      engineSrcDir.parent.parent.path,
+      'third_party',
+      'ninja',
+      'ninja',
+    );
+    final String outDir = p.join(engineSrcDir.path, 'out', build.ninja.config);
+    final ProcessRunnerResult result = await processRunner.runProcess(
+      <String>[ninjaPath, '-t', 'compdb'],
+      workingDirectory: io.Directory(outDir),
+      failOk: true,
+    );
+    if (result.exitCode == 0 && result.stdout.isNotEmpty) {
+      return result.stdout;
+    }
+    final commandsFile = io.File(p.join(outDir, 'compile_commands.json'));
+    if (commandsFile.existsSync()) {
+      return commandsFile.readAsString();
+    }
+    return null;
+  }
+
+  /// Performs post-GN build steps.
+  ///
+  /// Retrieves the full compilation database from Ninja and processes it to
+  /// strip compiler wrapper prefixes and expand Swift compilation rules for IDE
+  /// language server compatibility.
   Future<void> _postGn() async {
     if (dryRun) {
       return;
     }
 
-    final commandsFile = io.File(
-      p.join(engineSrcDir.path, 'out', build.ninja.config, 'compile_commands.json'),
-    );
-    if (!commandsFile.existsSync()) {
+    final String? rawContents = await _getCompilationDatabase();
+    if (rawContents == null) {
       return;
     }
 
-    final String contents = await commandsFile.readAsString();
-    final String updated = stripCompilerWrappers(contents);
-    if (contents != updated) {
+    final String updated = updateCompilationDatabase(rawContents);
+    final commandsFile = io.File(
+      p.join(engineSrcDir.path, 'out', build.ninja.config, 'compile_commands.json'),
+    );
+    if (rawContents != updated || !commandsFile.existsSync()) {
       await commandsFile.writeAsString(updated);
     }
   }
