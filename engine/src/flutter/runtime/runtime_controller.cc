@@ -325,9 +325,9 @@ bool RuntimeController::NotifyTextureFrameAvailable(int64_t texture_id) {
   return false;
 }
 
-bool RuntimeController::MarkAllViewsDirty() {
+bool RuntimeController::MarkAllViewsNeedRender() {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->MarkAllViewsDirty();
+    platform_configuration->MarkAllViewsNeedRender();
     return true;
   }
 
