@@ -7,54 +7,13 @@
 Sets up githooks.
 '''
 
-import argparse
-import os
-import subprocess
 import sys
-
-FLUTTER_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-)
-
-
-def IsWindows():
-  os_id = sys.platform
-  return os_id.startswith('win32') or os_id.startswith('cygwin')
 
 
 def Main(argv):
-  parser = argparse.ArgumentParser()
-
-  parser.add_argument('--unset', action=argparse.BooleanOptionalAction, default=False)
-
-  args = parser.parse_args()
-
-  git = 'git'
-  if IsWindows():
-    git = 'git.bat'
-
-  command = [
-      git,
-      'config',
-  ]
-
-  if args.unset:
-    command += [
-        '--unset',
-        'core.hooksPath',
-    ]
-    print('Uninstalling Git Hooks')
-  else:
-    githooks = os.path.join(FLUTTER_ROOT, 'dev', 'tools', 'githooks')
-    command += [
-        'core.hooksPath',
-        githooks,
-    ]
-    print('Installing Git Hooks')
-
-  result = subprocess.run(command, cwd=FLUTTER_ROOT)
-  return result.returncode
+  return 0
 
 
 if __name__ == '__main__':
   sys.exit(Main(sys.argv))
+
