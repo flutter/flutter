@@ -57,8 +57,8 @@ typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 /// The callback receives the ID of the texture that has a new frame available.
 typedef TextureFrameAvailableCallback = void Function(int textureId);
 
-/// Signature for [PlatformDispatcher.onMarkAllViewsDirty].
-typedef MarkAllViewsDirtyCallback = void Function();
+/// Signature for [PlatformDispatcher.onMarkAllViewsNeedRender].
+typedef MarkAllViewsNeedRenderCallback = void Function();
 
 /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
 ///
@@ -676,17 +676,17 @@ class PlatformDispatcher {
   }
 
   /// A callback that is invoked when the application should re-render.
-  MarkAllViewsDirtyCallback? get onMarkAllViewsDirty => _onMarkAllViewsDirty;
-  MarkAllViewsDirtyCallback? _onMarkAllViewsDirty;
-  Zone _onMarkAllViewsDirtyZone = Zone.root;
-  set onMarkAllViewsDirty(MarkAllViewsDirtyCallback? callback) {
-    _onMarkAllViewsDirty = callback;
-    _onMarkAllViewsDirtyZone = Zone.current;
+  MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender => _onMarkAllViewsNeedRender;
+  MarkAllViewsNeedRenderCallback? _onMarkAllViewsNeedRender;
+  Zone _onMarkAllViewsNeedRenderZone = Zone.root;
+  set onMarkAllViewsNeedRender(MarkAllViewsNeedRenderCallback? callback) {
+    _onMarkAllViewsNeedRender = callback;
+    _onMarkAllViewsNeedRenderZone = Zone.current;
   }
 
   // Called from the engine, via hooks.dart
-  void _markAllViewsDirty() {
-    _invoke(onMarkAllViewsDirty, _onMarkAllViewsDirtyZone);
+  void _markAllViewsNeedRender() {
+    _invoke(onMarkAllViewsNeedRender, _onMarkAllViewsNeedRenderZone);
   }
 
   // Called from the engine, via hooks.dart
