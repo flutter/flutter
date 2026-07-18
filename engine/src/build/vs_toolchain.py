@@ -442,21 +442,14 @@ def _GetDesiredVsToolchainHashes():
 
 def ShouldUpdateToolchain():
   """Check if the toolchain should be upgraded."""
-  import sys
-  sys.stderr.write("DEBUG: json_data_file = %s\n" % json_data_file)
-  sys.stderr.write("DEBUG: ENV DEPOT_TOOLS_WIN_TOOLCHAIN = %s\n" % os.environ.get('DEPOT_TOOLS_WIN_TOOLCHAIN'))
-  sys.stderr.write("DEBUG: ENV GYP_MSVS_VERSION = %s\n" % os.environ.get('GYP_MSVS_VERSION'))
   if not os.path.exists(json_data_file):
-    sys.stderr.write("DEBUG: json_data_file does not exist\n")
     return True
   with open(json_data_file, 'r') as tempf:
     toolchain_data = json.load(tempf)
   version = toolchain_data['version']
   env_version = GetVisualStudioVersion()
-  sys.stderr.write("DEBUG: json version = %s, env version = %s\n" % (version, env_version))
-  result = version != env_version
-  sys.stderr.write("DEBUG: ShouldUpdateToolchain returning %s\n" % result)
-  return result
+  return version != env_version
+
 
 
 def Update(force=False, no_download=False):
@@ -519,6 +512,8 @@ def Update(force=False, no_download=False):
     if no_download:
       get_toolchain_args.append('--no-download')
     subprocess.check_call(get_toolchain_args)
+
+
 
   return 0
 

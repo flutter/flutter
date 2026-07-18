@@ -6,5 +6,7 @@
 # are invoked programmatically by depot_tools or GN scripts.
 echo "Warning: Githooks location has moved to dev/tools/githooks!" >&2
 echo "Please run 'gclient runhooks' to update your githooks configuration." >&2
+exit 1
+
 
 
