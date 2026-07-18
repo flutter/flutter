@@ -101,12 +101,13 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   }
 
   if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    NSArray<NSString*>* documentPaths = NSSearchPathForDirectoriesInDomains(
-        NSDocumentDirectory, NSUserDomainMask, YES);
+    NSArray<NSString*>* documentPaths =
+        NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     if (documentPaths.count > 0) {
-      NSString* activeDirectory = [documentPaths.firstObject
-          stringByAppendingPathComponent:@"code_push/active"];
-      NSString* dataPath = [activeDirectory stringByAppendingPathComponent:@"isolate_snapshot_data"];
+      NSString* activeDirectory =
+          [documentPaths.firstObject stringByAppendingPathComponent:@"code_push/active"];
+      NSString* dataPath =
+          [activeDirectory stringByAppendingPathComponent:@"isolate_snapshot_data"];
       NSString* instrPath =
           [activeDirectory stringByAppendingPathComponent:@"isolate_snapshot_instr"];
       if ([[NSFileManager defaultManager] fileExistsAtPath:dataPath] &&
