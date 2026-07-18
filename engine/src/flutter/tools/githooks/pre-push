@@ -3,5 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-echo "Warning: Githooks location has moved to dev/tools/githooks!"
-echo "Please run 'gclient runhooks' to update your githooks configuration."
+echo "Warning: Githooks location has moved to dev/tools/githooks!" >&2
+echo "Please run 'gclient runhooks' to update your githooks configuration." >&2
+exit 1
+
+
