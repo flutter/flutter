@@ -241,9 +241,6 @@ struct Settings {
   // Whether to lazily initialize impeller PSO state.
   bool impeller_enable_lazy_shader_mode = false;
 
-  // An experimental mode that antialiases lines.
-  bool impeller_antialiased_lines = false;
-
   // Whether to use SDFs for rendering in Impeller.
   bool impeller_use_sdfs = false;
 

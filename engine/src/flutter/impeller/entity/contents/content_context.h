@@ -184,7 +184,6 @@ class ContentContext {
   PipelineRef GetFramebufferBlendSoftLightPipeline(ContentContextOptions opts) const;
   PipelineRef GetGaussianBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetGlyphAtlasPipeline(ContentContextOptions opts) const;
-  PipelineRef GetLinePipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientSSBOFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientUniformFillPipeline(ContentContextOptions opts) const;

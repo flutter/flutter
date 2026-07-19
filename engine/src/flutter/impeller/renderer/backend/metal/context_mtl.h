@@ -104,6 +104,14 @@ class ContextMTL final : public Context,
   std::shared_ptr<Allocator> GetResourceAllocator() const override;
 
   // |Context|
+  std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
+      const override;
+
+  // Mutable tracker for command buffer submission bookkeeping.
+  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
+      const;
+
+  // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;
 
   // |Context|
@@ -176,6 +184,8 @@ class ContextMTL final : public Context,
   std::shared_ptr<AllocatorMTL> resource_allocator_;
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
+  std::shared_ptr<GpuSubmissionTracker> submission_tracker_ =
+      std::make_shared<GpuSubmissionTracker>();
   Mutex tasks_awaiting_gpu_mutex_;
   std::deque<PendingTasks> tasks_awaiting_gpu_
       IPLR_GUARDED_BY(tasks_awaiting_gpu_mutex_);
