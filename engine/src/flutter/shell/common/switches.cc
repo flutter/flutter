@@ -549,6 +549,11 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       settings.merged_platform_ui_thread =
           Settings::MergedPlatformUIThread::kDisabled;
     } else if (merged_platform_ui == kMergedThreadMergeAfterLaunch) {
+      FML_CHECK(!require_merged_platform_ui_thread)
+          << "This platform does not support the "
+          << FlagForSwitch(Switch::MergedPlatformUIThread) << "="
+          << kMergedThreadMergeAfterLaunch << " flag";
+
       settings.merged_platform_ui_thread =
           Settings::MergedPlatformUIThread::kMergeAfterLaunch;
     }

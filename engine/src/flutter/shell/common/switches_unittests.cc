@@ -161,6 +161,18 @@ TEST(SwitchesTest, RequireMergedPlatformUIThread) {
                             "This platform does not support the "
                             "merged-platform-ui-thread=disabled flag");
 }
+
+TEST(SwitchesTest, RequireMergedPlatformUIThreadRejectsMergeAfterLaunch) {
+  fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+      {"command", "--merged-platform-ui-thread=mergeAfterLaunch"});
+  Settings settings = SettingsFromCommandLine(command_line);
+  EXPECT_EQ(settings.merged_platform_ui_thread,
+            Settings::MergedPlatformUIThread::kMergeAfterLaunch);
+
+  EXPECT_DEATH_IF_SUPPORTED(SettingsFromCommandLine(command_line, true),
+                            "This platform does not support the "
+                            "merged-platform-ui-thread=mergeAfterLaunch flag");
+}
 #endif  // !OS_FUCHSIA
 
 }  // namespace testing
