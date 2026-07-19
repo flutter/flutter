@@ -351,6 +351,64 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('ignores selection content in background Navigator pages', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/119772
+      StateSetter? setState;
+      var showForegroundPage = true;
+      SelectionRegistrar? backgroundRegistrar;
+      SelectionRegistrar? foregroundRegistrar;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: _selectableRegion(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter stateSetter) {
+                setState = stateSetter;
+                return Navigator(
+                  pages: <Page<void>>[
+                    TestPage<void>(
+                      key: const ValueKey<String>('background'),
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          backgroundRegistrar = SelectionContainer.maybeOf(context);
+                          return const Text('Background Page');
+                        },
+                      ),
+                    ),
+                    if (showForegroundPage)
+                      TestPage<void>(
+                        key: const ValueKey<String>('foreground'),
+                        child: Builder(
+                          builder: (BuildContext context) {
+                            foregroundRegistrar = SelectionContainer.maybeOf(context);
+                            return const Text('Foreground Page');
+                          },
+                        ),
+                      ),
+                  ],
+                  onPopPage: (_, _) => false,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(backgroundRegistrar, isNull);
+      expect(foregroundRegistrar, isNotNull);
+
+      setState!(() {
+        showForegroundPage = false;
+      });
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(backgroundRegistrar, isNotNull);
+    });
+
     testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
       final spy = UniqueKey();
 
