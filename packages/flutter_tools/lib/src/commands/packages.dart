@@ -397,12 +397,20 @@ class PackagesGetCommand extends FlutterCommand {
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         // We need to regenerate the platform specific tooling for both the
         // project itself and example (if present).
-        await project.regeneratePlatformSpecificTooling(
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-          pubspecCache: pubspecCache,
-          packageGraph: graph,
-          packageConfig: packageConfig,
-        );
+        //
+        // Workspace packages that do not depend on Flutter (such as a pub
+        // workspace root that is a plain Dart package) are skipped, so that a
+        // stray ios/ or android/ directory in one of them is not populated
+        // with Flutter project files.
+        // See https://github.com/flutter/flutter/issues/189550.
+        if (_dependsOnFlutter(graph, workspaceRootName)) {
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+            pubspecCache: pubspecCache,
+            packageGraph: graph,
+            packageConfig: packageConfig,
+          );
+        }
         if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
           final FlutterProject exampleProject = project.example;
           // Skip if the example is already a workspace root — it will be
@@ -421,6 +429,24 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     return FlutterCommandResult.success();
+  }
+
+  /// Whether [packageName] depends on the `flutter` package, directly or
+  /// transitively, according to the resolved package [graph].
+  static bool _dependsOnFlutter(PackageGraph graph, String packageName) {
+    final visited = <String>{};
+    final toVisit = <String>[packageName];
+    while (toVisit.isNotEmpty) {
+      final String current = toVisit.removeLast();
+      if (!visited.add(current)) {
+        continue;
+      }
+      if (current == 'flutter') {
+        return true;
+      }
+      toVisit.addAll(graph.dependencies[current] ?? const <String>[]);
+    }
+    return false;
   }
 
   late final Future<List<Plugin>> _pluginsFound = (() async {
