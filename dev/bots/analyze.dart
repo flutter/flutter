@@ -2806,6 +2806,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/tools/githooks/post-merge',
   'dev/tools/githooks/pre-push',
   'dev/tools/githooks/pre-rebase',
+  'dev/tools/githooks/setup.py',
 
   'packages/flutter_tools/bin/macos_assemble.sh',
   'packages/flutter_tools/bin/tool_backend.sh',
