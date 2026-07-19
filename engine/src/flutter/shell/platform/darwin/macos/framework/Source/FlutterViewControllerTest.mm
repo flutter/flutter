@@ -248,6 +248,40 @@ TEST_F(FlutterViewControllerTest, ReparentsPluginWhenAccessibilityDisabled) {
   EXPECT_TRUE(viewController.engine.textInputPlugin.superview == viewController.view);
 }
 
+TEST_F(FlutterViewControllerTest, TrackingAreaAsksForCursorUpdates) {
+  FlutterViewController* viewControllerMock = CreateMockViewController();
+  [viewControllerMock loadView];
+
+  // NSTrackingCursorUpdate is what makes AppKit send -cursorUpdate: when the pointer re-enters
+  // the view, which is how the cursor requested by the framework is restored without waiting on
+  // the UI thread.
+  NSArray<NSTrackingArea*>* trackingAreas = viewControllerMock.flutterView.trackingAreas;
+  ASSERT_EQ([trackingAreas count], 1u);
+  EXPECT_TRUE(trackingAreas[0].options & NSTrackingCursorUpdate);
+}
+
+TEST_F(FlutterViewControllerTest, CursorUpdateIsForwardedToFlutterView) {
+  FlutterViewController* viewControllerMock = CreateMockViewController();
+  [viewControllerMock loadView];
+
+  // The tracking area's owner is the view controller, but only FlutterView tracks the cursor the
+  // framework last requested, so the event has to be forwarded to reach it.
+  id flutterViewMock = OCMPartialMock(viewControllerMock.flutterView);
+  NSEvent* event = [NSEvent mouseEventWithType:NSEventTypeCursorUpdate
+                                      location:NSMakePoint(10, 10)
+                                 modifierFlags:0
+                                     timestamp:0
+                                  windowNumber:0
+                                       context:nil
+                                   eventNumber:0
+                                    clickCount:0
+                                      pressure:0];
+
+  [viewControllerMock cursorUpdate:event];
+
+  OCMVerify([flutterViewMock cursorUpdate:event]);
+}
+
 TEST_F(FlutterViewControllerTest, CanSetMouseTrackingModeBeforeViewLoaded) {
   NSString* fixtures = @(testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]

@@ -569,8 +569,15 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     return;
   }
   if (_mouseTrackingMode != kFlutterMouseTrackingModeNone && self.flutterView) {
+    // NSTrackingCursorUpdate makes AppKit send -cursorUpdate: when the pointer enters the
+    // tracking area, which is forwarded below to let FlutterView restore the cursor last
+    // requested by the framework. Without it the cursor is only restored after the pointer exit
+    // is round tripped through the framework, so anything that changes the cursor outside of
+    // Flutter (a resize arrow over the window border, a closing context menu) stays on screen
+    // for as long as the UI thread is busy.
     NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
-                                    NSTrackingInVisibleRect | NSTrackingEnabledDuringMouseDrag;
+                                    NSTrackingInVisibleRect | NSTrackingEnabledDuringMouseDrag |
+                                    NSTrackingCursorUpdate;
     switch (_mouseTrackingMode) {
       case kFlutterMouseTrackingModeInKeyWindow:
         options |= NSTrackingActiveInKeyWindow;
@@ -902,6 +909,12 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     return;
   }
   [self dispatchMouseEvent:event phase:kRemove];
+}
+
+- (void)cursorUpdate:(NSEvent*)event {
+  // The tracking area is owned by the view controller, so AppKit delivers this here rather than
+  // to the FlutterView that knows which cursor the framework last asked for.
+  [self.flutterView cursorUpdate:event];
 }
 
 - (void)mouseDown:(NSEvent*)event {
