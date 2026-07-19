@@ -34,7 +34,6 @@ PlatformViewIOS::PlatformViewIOS(
     IOSRenderingAPI rendering_api,
     __weak FlutterPlatformViewsController* platform_views_controller,
     const flutter::TaskRunners& task_runners,
-    const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
     : PlatformViewIOS(delegate,
                       IOSContext::Create(rendering_api,
@@ -135,16 +134,6 @@ std::shared_ptr<ExternalViewEmbedder> PlatformViewIOS::CreateExternalViewEmbedde
 // |PlatformView|
 std::shared_ptr<impeller::Context> PlatformViewIOS::GetImpellerContext() const {
   return ios_context_->GetImpellerContext();
-}
-
-// |PlatformView|
-void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
-  PlatformView::SetSemanticsEnabled(enabled);
-}
-
-// |PlatformView|
-void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
-  PlatformView::SetAccessibilityFeatures(flags);
 }
 
 // |PlatformView|

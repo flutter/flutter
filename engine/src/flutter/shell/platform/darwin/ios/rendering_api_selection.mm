@@ -28,18 +28,7 @@ bool ShouldUseMetalRenderer() {
   return ios_version_supports_metal;
 }
 
-IOSRenderingAPI GetRenderingAPIForProcess(bool force_software) {
-#if TARGET_OS_SIMULATOR
-  if (force_software) {
-    return IOSRenderingAPI::kSoftware;
-  }
-#else
-  if (force_software) {
-    [FlutterLogger logWarning:@"The --enable-software-rendering is only supported on simulator "
-                               "targets and will be ignored."];
-  }
-#endif  // TARGET_OS_SIMULATOR
-
+IOSRenderingAPI GetRenderingAPIForProcess() {
   static bool should_use_metal = ShouldUseMetalRenderer();
   if (should_use_metal) {
     return IOSRenderingAPI::kMetal;
