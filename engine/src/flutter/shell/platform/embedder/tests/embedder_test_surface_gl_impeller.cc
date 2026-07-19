@@ -46,7 +46,7 @@ TEST(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders) {
   const std::shared_ptr<impeller::ShaderLibrary> shaders =
       context->GetShaderLibrary();
   const std::shared_ptr<const impeller::ShaderFunction> func =
-      shaders->GetFunction("imp_line_fragment_main",
+      shaders->GetFunction("imp_uber_sdf_fragment_main",
                            impeller::ShaderStage::kFragment);
   const auto gles_func = impeller::ShaderFunctionGLES::Cast(func.get());
   const std::shared_ptr<const fml::Mapping> source =
@@ -68,7 +68,7 @@ TEST(EmbedderSurfaceGLImpellerTest, GLES2ContextDoesNotHaveGLES3Shaders) {
   const std::shared_ptr<impeller::ShaderLibrary> shaders =
       context->GetShaderLibrary();
   const std::shared_ptr<const impeller::ShaderFunction> func =
-      shaders->GetFunction("imp_line_fragment_main",
+      shaders->GetFunction("imp_uber_sdf_fragment_main",
                            impeller::ShaderStage::kFragment);
   const auto gles_func = impeller::ShaderFunctionGLES::Cast(func.get());
   const std::shared_ptr<const fml::Mapping> source =

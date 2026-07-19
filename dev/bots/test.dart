@@ -147,6 +147,10 @@ Future<void> main(List<String> args) async {
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
       'android_hardware_smoke_opengles_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles),
+      'android_hardware_smoke_vulkan_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan, runInstrumented: true),
+      'android_hardware_smoke_opengles_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles, runInstrumented: true),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
