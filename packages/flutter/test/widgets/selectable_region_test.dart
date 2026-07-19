@@ -357,7 +357,6 @@ void main() {
       StateSetter? setState;
       var showForegroundPage = true;
       SelectionRegistrar? backgroundRegistrar;
-      SelectionRegistrar? foregroundRegistrar;
 
       await tester.pumpWidget(
         TestWidgetsApp(
@@ -377,14 +376,9 @@ void main() {
                       ),
                     ),
                     if (showForegroundPage)
-                      TestPage<void>(
-                        key: const ValueKey<String>('foreground'),
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            foregroundRegistrar = SelectionContainer.maybeOf(context);
-                            return const Text('Foreground Page');
-                          },
-                        ),
+                      const TestPage<void>(
+                        key: ValueKey<String>('foreground'),
+                        child: Text('Foreground Page'),
                       ),
                   ],
                   onPopPage: (_, _) => false,
@@ -397,7 +391,6 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(backgroundRegistrar, isNull);
-      expect(foregroundRegistrar, isNotNull);
 
       setState!(() {
         showForegroundPage = false;
@@ -406,6 +399,20 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(backgroundRegistrar, isNotNull);
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Background Page'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        tester.getTopLeft(find.text('Background Page')),
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getBottomRight(find.text('Background Page')));
+      await gesture.up();
+      await tester.pump();
+
+      expect(paragraph.selections, isNotEmpty);
     });
 
     testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
