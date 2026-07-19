@@ -29,3 +29,5 @@ dependency_overrides:
 
 dev_dependencies:
   test: any
+
+# PUBSPEC CHECKSUM: 7b6nk2
