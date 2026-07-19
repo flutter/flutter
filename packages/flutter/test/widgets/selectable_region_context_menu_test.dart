@@ -12,7 +12,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
+import 'editable_text_tester.dart';
 import 'web_platform_view_registry_utils.dart';
+import 'widgets_app_tester.dart';
 
 extension on web.HTMLCollection {
   Iterable<web.Element?> get iterable =>
@@ -180,6 +182,7 @@ void main() {
     }
   }, variant: _browserContextMenuEnabledVariants);
 
+  // Regression test for https://github.com/flutter/flutter/issues/186459
   testWidgets('can rebuild SelectableRegion as browser context menu toggles', (
     WidgetTester tester,
   ) async {
@@ -188,12 +191,12 @@ void main() {
 
     late StateSetter rebuild;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             rebuild = setState;
             return SelectableRegion(
-              selectionControls: EmptyTextSelectionControls(),
+              selectionControls: testTextSelectionHandleControls,
               child: const Text('How are you?'),
             );
           },
@@ -201,16 +204,20 @@ void main() {
       ),
     );
 
-    Future<void> updateContextMenu(Future<void> update) async {
+    Future<void> updateContextMenu(Future<void> update, {bool settle = false}) async {
       await update;
       rebuild(() {});
-      await tester.pump();
+      if (settle) {
+        await tester.pumpAndSettle();
+      } else {
+        await tester.pump();
+      }
       expect(tester.takeException(), isNull);
     }
 
     await updateContextMenu(BrowserContextMenu.disableContextMenu());
     await updateContextMenu(BrowserContextMenu.enableContextMenu());
-    await updateContextMenu(BrowserContextMenu.disableContextMenu());
+    await updateContextMenu(BrowserContextMenu.disableContextMenu(), settle: true);
   }, variant: _browserContextMenuEnabledVariants);
 }
 
