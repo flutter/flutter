@@ -167,6 +167,7 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -197,6 +198,7 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -238,6 +240,7 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
