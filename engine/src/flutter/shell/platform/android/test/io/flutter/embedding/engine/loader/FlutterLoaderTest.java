@@ -1117,21 +1117,6 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsImpellerAntiAliasLinesFromMetadata() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ImpellerAntialiasLines",
-        defaultFlagTestValue,
-        "--impeller-antialias-lines");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ImpellerAntialiasLines",
-        defaultFlagTestValue,
-        "--impeller-antialias-lines");
-  }
-
-  @Test
   public void itSetsEnableOpenGLGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableOpenGLGPUTracing",

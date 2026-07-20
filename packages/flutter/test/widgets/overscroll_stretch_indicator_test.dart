@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -597,6 +598,105 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Disallow stretching overscroll during a fling', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    double indicatorNotification = 0;
+    await tester.pumpWidget(
+      NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (OverscrollIndicatorNotification notification) {
+          notification.disallowIndicator();
+          indicatorNotification += 1;
+          return false;
+        },
+        child: buildTest(box1Key, box2Key, box3Key, controller),
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    expect(indicatorNotification, 0.0);
+
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+
+    final Drag drag = controller.position.drag(DragStartDetails(), () {});
+    drag.update(
+      DragUpdateDetails(
+        globalPosition: Offset.zero,
+        delta: const Offset(0.0, -5000.0),
+        primaryDelta: -5000.0,
+      ),
+    );
+    drag.end(
+      DragEndDetails(
+        velocity: const Velocity(pixelsPerSecond: Offset(0.0, -5000.0)),
+        primaryVelocity: -5000.0,
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    expect(indicatorNotification, 1.0);
+    expect(findStretchEffect(tester).stretchStrength, 0.0);
+  });
+
+  testWidgets('Disallowed stretch does not persist into a new scroll sequence', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    var disallowStretch = true;
+    double indicatorNotification = 0;
+    await tester.pumpWidget(
+      NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (OverscrollIndicatorNotification notification) {
+          if (disallowStretch) {
+            notification.disallowIndicator();
+          }
+          indicatorNotification += 1;
+          return false;
+        },
+        child: buildTest(box1Key, box2Key, box3Key, controller),
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    expect(indicatorNotification, 0.0);
+
+    final TestGesture disallowedGesture = await tester.startGesture(
+      tester.getCenter(find.byType(CustomScrollView)),
+    );
+    await disallowedGesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    await disallowedGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(indicatorNotification, 1.0);
+    expect(findStretchEffect(tester).stretchStrength, 0.0);
+
+    disallowStretch = false;
+    controller.jumpTo(controller.position.maxScrollExtent / 2.0);
+    await tester.pump();
+
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -50.0), 10000.0);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(indicatorNotification, 2.0);
+    expect(findStretchEffect(tester).stretchStrength, isNot(0.0));
   });
 
   testWidgets('Stretch does not overflow bounds of container', (WidgetTester tester) async {

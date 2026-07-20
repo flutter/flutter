@@ -1053,44 +1053,96 @@ flutter:
         );
         fileSystem.file(materialIconsPath).createSync(recursive: true);
 
-        final String materialPath = fileSystem.path.join(
-          getFlutterRoot(),
+        final String flutterRoot = getFlutterRoot();
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                flutterRoot,
+                'packages',
+                'flutter',
+                'lib',
+                'src',
+                'material',
+                'shaders',
+                'ink_sparkle.frag',
+              ),
+            )
+            .createSync(recursive: true);
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                flutterRoot,
+                'packages',
+                'flutter',
+                'lib',
+                'src',
+                'widgets',
+                'shaders',
+                'stretch_effect.frag',
+              ),
+            )
+            .createSync(recursive: true);
+
+        final String materialShaderDir = fileSystem.path.join(
+          flutterRoot,
           'packages',
           'flutter',
           'lib',
           'src',
           'material',
+          'shaders',
         );
-        final Directory materialDir = fileSystem.directory(materialPath)
-          ..createSync(recursive: true);
-        for (final String shader in kMaterialShaders) {
-          materialDir.childFile(shader).createSync(recursive: true);
-        }
+        final String widgetsShaderDir = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'widgets',
+          'shaders',
+        );
 
-        final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+        (globals.processManager as FakeProcessManager).addCommand(
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
+              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
+              '--input=${fileSystem.path.join(materialShaderDir, 'ink_sparkle.frag')}',
+              '--input-type=frag',
+              '--include=$materialShaderDir',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        );
 
-        for (final shader in testShaders) {
-          (globals.processManager as FakeProcessManager).addCommand(
-            FakeCommand(
-              command: <String>[
-                impellerc,
-                '--sksl',
-                '--iplr',
-                '--json',
-                '--sl=${fileSystem.path.join(output.path, 'shaders', shader)}',
-                '--spirv=${fileSystem.path.join(output.path, 'shaders', '$shader.spirv')}',
-                '--input=${fileSystem.path.join(materialDir.path, 'shaders', shader)}',
-                '--input-type=frag',
-                '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-                '--include=$shaderLibDir',
-              ],
-              onRun: (_) {
-                fileSystem.file(outputPath).createSync(recursive: true);
-                fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-              },
-            ),
-          );
-        }
+        (globals.processManager as FakeProcessManager).addCommand(
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=${fileSystem.path.join(output.path, 'shaders', 'stretch_effect.frag')}',
+              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'stretch_effect.frag.spirv')}',
+              '--input=${fileSystem.path.join(widgetsShaderDir, 'stretch_effect.frag')}',
+              '--input-type=frag',
+              '--include=$widgetsShaderDir',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        );
 
         fileSystem.file('pubspec.yaml')
           ..createSync()

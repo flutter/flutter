@@ -54,10 +54,17 @@ void main(List<String> args) {
   }
 
   const FileSystem filesystem = LocalFileSystem();
-  final Directory tests = filesystem.directory(parsedArgs['test']! as String);
+  final Directory flutterSlashTestDirectory = filesystem.directory(parsedArgs['test']! as String);
   final Directory flutterRoot = filesystem.directory(parsedArgs['flutter-root']! as String);
+  final Directory flutterTestLibraryDirectory = flutterRoot
+      .childDirectory('packages')
+      .childDirectory('flutter_test');
 
-  final checker = TestsCrossImportChecker(testsDirectory: tests, flutterRoot: flutterRoot);
+  final checker = TestsCrossImportChecker(
+    flutterSlashTestDirectory: flutterSlashTestDirectory,
+    flutterTestLibraryDirectory: flutterTestLibraryDirectory,
+    flutterRoot: flutterRoot,
+  );
 
   if (!checker.check()) {
     reportErrorsAndExit('Some errors were found in the framework test imports.');
@@ -88,12 +95,14 @@ void main(List<String> args) {
 ///  - Libraries that do not have anything to do with Cupertino or Material should never import them.
 class TestsCrossImportChecker {
   TestsCrossImportChecker({
-    required this.testsDirectory,
+    required this.flutterSlashTestDirectory,
+    required this.flutterTestLibraryDirectory,
     required this.flutterRoot,
     this.filesystem = const LocalFileSystem(),
   });
 
-  final Directory testsDirectory;
+  final Directory flutterSlashTestDirectory;
+  final Directory flutterTestLibraryDirectory;
   final Directory flutterRoot;
   final FileSystem filesystem;
 
@@ -120,10 +129,8 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',
-    'packages/flutter/test/widgets/selectable_region_context_menu_test.dart',
     'packages/flutter/test/widgets/navigator_test.dart',
     'packages/flutter/test/widgets/navigator_restoration_test.dart',
-    'packages/flutter/test/widgets/scrollable_semantics_test.dart',
     'packages/flutter/test/widgets/form_test.dart',
     'packages/flutter/test/widgets/text_selection_toolbar_utils.dart',
     'packages/flutter/test/widgets/live_text_utils.dart',
@@ -153,11 +160,6 @@ class TestsCrossImportChecker {
   static final Set<String> knownRenderingCrossImports = <String>{
     'packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart',
     'packages/flutter/test/rendering/localized_fonts_test.dart',
-    'packages/flutter/test/rendering/box_test.dart',
-    'packages/flutter/test/rendering/pipeline_owner_tree_test.dart',
-    'packages/flutter/test/rendering/proxy_getters_and_setters_test.dart',
-    'packages/flutter/test/rendering/proxy_box_test.dart',
-    'packages/flutter/test/rendering/object_test.dart',
   };
   static final Set<String> knownSchedulerCrossImports = <String>{};
   static final Set<String> knownSemanticsCrossImports = <String>{};
@@ -174,7 +176,36 @@ class TestsCrossImportChecker {
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownFlutterSlashTestCrossImports = <String>{};
 
+  /// These tests are known to have cross imports. These cross imports
+  /// should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  ///
+  /// The files in this set belong to `packages/flutter_test`, or one of its subdirectories.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/177028.
+  static final Set<String> knownFlutterTestLibraryCrossImports = <String>{
+    'packages/flutter_test/lib/src/widget_tester.dart',
+    'packages/flutter_test/lib/src/finders.dart',
+    'packages/flutter_test/lib/src/matchers.dart',
+    'packages/flutter_test/test_fixes/flutter_test/animation_sheet_builder.dart',
+    'packages/flutter_test/test_fixes/flutter_test/matchers.dart',
+    'packages/flutter_test/test/navigator_test.dart',
+    'packages/flutter_test/test/mock_canvas_test.dart',
+    'packages/flutter_test/test/semantics_finder_test.dart',
+    'packages/flutter_test/test/accessibility_window_test.dart',
+    'packages/flutter_test/test/widget_tester_live_device_test.dart',
+    'packages/flutter_test/test/all_elements_test.dart',
+    'packages/flutter_test/test/utils/memory_leak_tests.dart',
+    'packages/flutter_test/test/widget_tester_test.dart',
+    'packages/flutter_test/test/live_widget_controller_test.dart',
+    'packages/flutter_test/test/accessibility_test.dart',
+    'packages/flutter_test/test/finders_test.dart',
+    'packages/flutter_test/test/controller_test.dart',
+    'packages/flutter_test/test/recording_canvas_test.dart',
+  };
+
   static final Set<String> _knownCrossImports = {
+    ...knownFlutterTestLibraryCrossImports,
     ...knownFlutterSlashTestCrossImports,
     ...knownWidgetsCrossImports,
     ...knownAnimationCrossImports,
@@ -192,7 +223,8 @@ class TestsCrossImportChecker {
     ...knownServicesCrossImports,
   };
 
-  static final RegExp _flutterTestPrefix = RegExp(r'packages[/\\]flutter[/\\]test');
+  // This matches both `packages/flutter/test` and `packages/flutter_test`.
+  static final RegExp _flutterTestPrefix = RegExp(r'packages[/\\]flutter[/\\_]test');
 
   /// Returns the [Set] of paths in [knownPaths] that are not in [files].
   static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
@@ -279,13 +311,14 @@ class TestsCrossImportChecker {
   /// Get a list of all the filenames that end in ".dart", grouped by library.
   Map<_Library, Set<File>> _getTestFiles() {
     final dartFilePattern = RegExp(r'\.dart$');
-    const _Library flutterTest = _OtherLibrary('packages/flutter/test');
-    final Map<_Library, Set<File>> mapping = {flutterTest: {}};
+    const _Library flutterSlashTest = _OtherLibrary('packages/flutter/test');
+    const _Library flutterTestLibrary = _OtherLibrary('packages/flutter_test');
+    final Map<_Library, Set<File>> mapping = {flutterSlashTest: {}, flutterTestLibrary: {}};
 
     // List the files directly under `packages/flutter/test` and then walk the subdirectories.
-    for (final FileSystemEntity fileOrDirectory in testsDirectory.listSync()) {
+    for (final FileSystemEntity fileOrDirectory in flutterSlashTestDirectory.listSync()) {
       if (fileOrDirectory is File && fileOrDirectory.absolute.path.contains(dartFilePattern)) {
-        mapping[flutterTest]?.add(fileOrDirectory);
+        mapping[flutterSlashTest]?.add(fileOrDirectory);
 
         continue;
       }
@@ -296,6 +329,31 @@ class TestsCrossImportChecker {
           for (final File file in fileOrDirectory.listSync(recursive: true).whereType<File>())
             if (file.absolute.path.contains(dartFilePattern)) file,
         };
+      }
+    }
+
+    // List the files directly under `packages/flutter_test` and then walk the subdirectories.
+    // Since packages/flutter_test is a library in itself,
+    // exclude generated directories like `packages/flutter_test/build` and `packages/flutter_test/.dart_tool`.
+    for (final FileSystemEntity fileSystemEntity in flutterTestLibraryDirectory.listSync()) {
+      if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
+        mapping[flutterTestLibrary]?.add(fileSystemEntity);
+
+        continue;
+      }
+
+      if (fileSystemEntity is Directory) {
+        final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+        if (directoryName == 'build' || directoryName == '.dart_tool') {
+          continue;
+        }
+
+        for (final File file in fileSystemEntity.listSync(recursive: true).whereType<File>()) {
+          if (file.absolute.path.contains(dartFilePattern)) {
+            mapping[flutterTestLibrary]?.add(file);
+          }
+        }
       }
     }
 
@@ -446,6 +504,7 @@ sealed class _Library {
   /// This is used for reporting mismatched cross imports.
   String get crossImportsListSymbolName {
     return switch (name) {
+      'packages/flutter_test' => 'knownFlutterTestLibraryCrossImports',
       'packages/flutter/test' => 'knownFlutterSlashTestCrossImports',
       'packages/flutter/test/animation' => 'knownAnimationCrossImports',
       'packages/flutter/test/cupertino' => 'knownCupertinoCrossImports',
@@ -476,6 +535,8 @@ sealed class _Library {
     }
 
     return switch (crossImportsListSymbolName) {
+      'knownFlutterTestLibraryCrossImports' =>
+        TestsCrossImportChecker.knownFlutterTestLibraryCrossImports,
       'knownFlutterSlashTestCrossImports' =>
         TestsCrossImportChecker.knownFlutterSlashTestCrossImports,
       'knownAnimationCrossImports' => TestsCrossImportChecker.knownAnimationCrossImports,
