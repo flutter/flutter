@@ -1167,12 +1167,19 @@ object FlutterPluginUtils {
      * An explicit `--enable-hcpp`/`--no-enable-hcpp` on `flutter run`/`flutter test` is passed
      * to the engine at launch instead, which takes priority over the manifest at runtime.
      *
-     * Should be called for both app and module (aar) projects, so that the feature flag also
-     * applies to add-to-app builds.
+     * Only applies to application projects. Injecting into a module (aar) library manifest
+     * would propagate into the host app's merged manifest, and if the host app explicitly sets
+     * the meta-data to a different value the manifest merger fails the host build with an
+     * attribute conflict ("Attribute meta-data#...EnableHcpp@value value=(false) ... is also
+     * present at [library] ... value=(true)") instead of letting the host win. Add-to-app hosts
+     * therefore control HCPP exclusively through their own manifest.
      */
     @JvmStatic
     @JvmName("addTasksForEnableHcppManifest")
     internal fun addTasksForEnableHcppManifest(project: Project) {
+        if (!isFlutterAppProject(project)) {
+            return
+        }
         val enableHcpp: Boolean =
             project.findProperty(PROP_ENABLE_HCPP)?.toString()?.toBoolean() ?: false
         if (!enableHcpp) {

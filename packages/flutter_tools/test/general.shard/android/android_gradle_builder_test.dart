@@ -2021,6 +2021,9 @@ Gradle Crashed
     );
 
     testUsingContext(
+      // The property is piped for consistency with app builds, but the Flutter
+      // Gradle Plugin only performs manifest injection for application
+      // projects, never for module (aar) library manifests.
       'build aar passes enable-hcpp to gradle',
       () async {
         final builder = AndroidGradleBuilder(

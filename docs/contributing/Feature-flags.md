@@ -414,6 +414,13 @@ platform-specific configuration that the engine or embedder reads. For example, 
 Plugin injects the corresponding `io.flutter.embedding.android.EnableHcpp` manifest
 metadata into the merged manifest, unless the developer set it explicitly.
 
+Note that this technique only works where the injected configuration cannot conflict
+with configuration the developer owns. For example, the `EnableHcpp` injection is
+limited to application projects: injecting into an add-to-app module (aar) manifest
+would merge into the host app's manifest, where a conflicting explicit value in the
+host manifest fails the host build in the Android manifest merger rather than taking
+priority.
+
 If an embedder needs feature flags and no such piping exists, you can instead use the project's platform-specific configuration.
 
 On Android, use `AndroidManifest.xml`:

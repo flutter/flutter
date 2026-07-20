@@ -295,6 +295,11 @@ void main() {
         final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
         for (final androidBuildInfo
             in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
+          // The property is piped to the aar gradle build for consistency, but
+          // the Flutter Gradle Plugin only consumes it for application
+          // projects: injecting into a module (aar) manifest would conflict
+          // with an explicit value in the add-to-app host's manifest and fail
+          // the host build in the manifest merger.
           expect(androidBuildInfo.buildInfo.androidEnableHcpp, isTrue);
         }
       },
@@ -305,19 +310,18 @@ void main() {
     );
 
     testUsingContext(
-      'explicit --no-enable-hcpp overrides the enable-hcpp feature flag',
+      'does not define --enable-hcpp',
       () async {
         final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
-        await runBuildAar(projectPath, arguments: <String>['--no-pub', '--no-enable-hcpp']);
-
-        final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
-        for (final androidBuildInfo
-            in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
-          expect(androidBuildInfo.buildInfo.androidEnableHcpp, isFalse);
-        }
+        // HCPP for add-to-app is controlled by the host app's manifest; an aar
+        // level flag would be a silent no-op, so the command must reject it.
+        await expectLater(
+          runBuildAar(projectPath, arguments: <String>['--no-pub', '--no-enable-hcpp']),
+          throwsA(isA<UsageException>()),
+        );
       },
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,

@@ -2669,4 +2669,47 @@ class FlutterPluginUtilsTest {
             mockPrintTask.description = "Prints out all build variants for this Android project"
         }
     }
+
+    // addTasksForEnableHcppManifest
+    @Test
+    fun `addTasksForEnableHcppManifest skips module (library) projects`() {
+        // Injecting into a library manifest would propagate into the host app's merged
+        // manifest, where a conflicting explicit host value fails the build in the manifest
+        // merger instead of taking priority. See addTasksForEnableHcppManifest.
+        val project = mockk<Project>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+
+        FlutterPluginUtils.addTasksForEnableHcppManifest(project)
+
+        // The function must return before reading properties or registering any tasks.
+        verify(exactly = 0) { project.findProperty(any()) }
+        verify(exactly = 0) { project.tasks }
+    }
+
+    @Test
+    fun `addTasksForEnableHcppManifest skips app projects when enable-hcpp is not true`() {
+        val project = mockk<Project>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
+        every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "false"
+
+        FlutterPluginUtils.addTasksForEnableHcppManifest(project)
+
+        verify(exactly = 0) { project.tasks }
+    }
+
+    @Test
+    fun `addTasksForEnableHcppManifest registers manifest transform on app projects`() {
+        val project = mockk<Project>()
+        val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
+        val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        every { project.extensions } returns extensions
+        every { extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
+        every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "true"
+        every { extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
+
+        FlutterPluginUtils.addTasksForEnableHcppManifest(project)
+
+        // The components extension is only fetched (and variants wired) once both gates pass.
+        verify(exactly = 1) { extensions.getByType(AndroidComponentsExtension::class.java) }
+    }
 }

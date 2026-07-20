@@ -203,13 +203,16 @@ class BuildInfo {
   /// dependencies.
   final bool androidSkipBuildDependencyValidation;
 
-  /// The value of the `enable-hcpp` feature flag, passed to Gradle so the
-  /// Flutter Gradle Plugin can inject the corresponding manifest metadata.
+  /// The effective `enable-hcpp` value (explicit CLI flag, or the feature
+  /// flag), passed to Gradle so the Flutter Gradle Plugin can inject the
+  /// corresponding manifest metadata.
   ///
-  /// The injection only happens when the merged manifest does not already
-  /// contain the `io.flutter.embedding.android.EnableHcpp` metadata, so an
-  /// explicit value in the app's manifest always takes priority. When null,
-  /// no property is passed and no injection happens.
+  /// The injection only happens for application projects, and only when the
+  /// merged manifest does not already contain the
+  /// `io.flutter.embedding.android.EnableHcpp` metadata, so an explicit value
+  /// in the app's manifest always takes priority. Module (aar) manifests are
+  /// never injected; the add-to-app host's manifest is the source of truth.
+  /// When null, no property is passed and no injection happens.
   final bool? androidEnableHcpp;
 
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
