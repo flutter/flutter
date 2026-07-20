@@ -50,6 +50,10 @@
 - (void)publish:(nonnull NSObject*)value {
 }
 
+- (nullable NSObject*)valuePublishedByPlugin:(nonnull NSString*)pluginKey {
+  return nil;
+}
+
 - (nonnull NSString*)lookupKeyForAsset:(nonnull NSString*)asset {
   return @"";
 }
