@@ -579,14 +579,14 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageTextureSizeMismatch) {
       .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
-      [&](const fml::StatusOr<sk_sp<SkImage>>& image) {
+      [&](const fml::StatusOr<sk_sp<SkImage>>& result) {
         did_call = true;
-        ASSERT_TRUE(image.ok());
-        ASSERT_TRUE(image.value());
+        ASSERT_TRUE(result.ok());
+        ASSERT_TRUE(result.value());
         // The SkImage size should match the size of the actual texture, not
         // the size of the DlImage.
-        EXPECT_EQ(desc.size.width, image.value()->width());
-        EXPECT_EQ(desc.size.height, image.value()->height());
+        EXPECT_EQ(desc.size.width, result.value()->width());
+        EXPECT_EQ(desc.size.height, result.value()->height());
       },
       snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);
