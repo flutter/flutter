@@ -473,7 +473,8 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
     int mip_filter,
     int width_address_mode,
     int height_address_mode,
-    int max_anisotropy) {
+    int max_anisotropy,
+    bool allow_manual_mip_sampling) {
   auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
   const flutter::gpu::Shader::TextureBinding* texture_binding =
       shader->GetUniformTexture(uniform_name);
@@ -487,6 +488,7 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
   sampler_desc.min_filter = flutter::gpu::ToImpellerMinMagFilter(min_filter);
   sampler_desc.mag_filter = flutter::gpu::ToImpellerMinMagFilter(mag_filter);
   sampler_desc.mip_filter = flutter::gpu::ToImpellerMipFilter(mip_filter);
+  sampler_desc.allow_manual_mip_sampling = allow_manual_mip_sampling;
   sampler_desc.width_address_mode =
       flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
   sampler_desc.height_address_mode =

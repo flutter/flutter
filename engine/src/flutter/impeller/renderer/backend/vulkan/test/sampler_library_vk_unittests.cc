@@ -35,6 +35,23 @@ TEST(SamplerLibraryVK, WorkaroundsCanDisableReadingFromMipLevels) {
   EXPECT_EQ(sampler->GetDescriptor().mip_filter, MipFilter::kBase);
 }
 
+TEST(SamplerLibraryVK, WorkaroundsPreserveExplicitManualMipSampling) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  auto library_vk = std::make_shared<SamplerLibraryVK>(
+      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
+  std::shared_ptr<SamplerLibrary> library = library_vk;
+
+  SamplerDescriptor desc;
+  desc.mip_filter = MipFilter::kLinear;
+  desc.allow_manual_mip_sampling = true;
+
+  library_vk->ApplyWorkarounds(WorkaroundsVK{.broken_mipmap_generation = true});
+
+  auto sampler = library->GetSampler(desc);
+  EXPECT_EQ(sampler->GetDescriptor().mip_filter, MipFilter::kLinear);
+}
+
 TEST(SamplerLibraryVK, MaxAnisotropyIsClampedToTheDeviceLimit) {
   auto const context = MockVulkanContextBuilder().Build();
 
