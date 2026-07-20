@@ -177,6 +177,122 @@ class EnableHcppManifestTaskTest {
     }
 
     @Test
+    fun preservesRealMergedManifestContent() {
+        // Fixture captured from an actual AGP 8.11.1 processDebugMainManifest output
+        // (MERGED_MANIFEST artifact), which is what this task transforms in practice.
+        val manifestFile =
+            createTempManifestFile(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="com.example.host" >
+
+                    <uses-sdk
+                        android:minSdkVersion="24"
+                        android:targetSdkVersion="36" />
+                    <!-- A comment that mimics real app manifests. -->
+                    <uses-permission android:name="android.permission.INTERNET" />
+
+                    <queries>
+                        <intent>
+                            <action android:name="android.intent.action.PROCESS_TEXT" />
+
+                            <data android:mimeType="text/plain" />
+                        </intent>
+                    </queries>
+
+                    <application
+                        android:debuggable="true"
+                        android:extractNativeLibs="false"
+                        android:hardwareAccelerated="true"
+                        android:label="Host"
+                        android:supportsRtl="true" >
+                        <activity
+                            android:name="com.example.host.MainActivity"
+                            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+                            android:exported="true"
+                            android:launchMode="singleTop"
+                            android:windowSoftInputMode="adjustResize" >
+                            <intent-filter>
+                                <action android:name="android.intent.action.MAIN" />
+
+                                <category android:name="android.intent.category.LAUNCHER" />
+                            </intent-filter>
+                        </activity>
+
+                        <meta-data
+                            android:name="flutterEmbedding"
+                            android:value="2" />
+                        <meta-data
+                            android:name="io.flutter.embedding.android.EnableImpeller"
+                            android:value="true" />
+                        <meta-data
+                            android:name="io.flutter.embedding.android.OldGenHeapSize"
+                            android:value="519" />
+                    </application>
+
+                </manifest>
+                """
+            )
+        val updatedManifest = createTempOutputFile()
+
+        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(manifestFile, updatedManifest)
+
+        assertEquals("true", findHcppMetadataValue(updatedManifest))
+
+        // The rewritten manifest must preserve all elements and attributes.
+        val manifest: Node =
+            groovy.xml
+                .XmlParser(false, false)
+                .parse(updatedManifest)
+        assertEquals("com.example.host", manifest.attribute("package"))
+        assertEquals(
+            "http://schemas.android.com/apk/res/android",
+            manifest.attribute("xmlns:android"),
+            "The android namespace declaration must be preserved"
+        )
+        val topLevel: List<Node> = manifest.children().filterIsInstance<Node>()
+        assertEquals("24", topLevel.first { it.name() == "uses-sdk" }.attribute("android:minSdkVersion"))
+        assertEquals(
+            "android.permission.INTERNET",
+            topLevel.first { it.name() == "uses-permission" }.attribute("android:name")
+        )
+        val queriesIntent: Node =
+            topLevel
+                .first { it.name() == "queries" }
+                .children()
+                .filterIsInstance<Node>()
+                .first { it.name() == "intent" }
+        assertEquals(
+            "text/plain",
+            queriesIntent.children().filterIsInstance<Node>().first { it.name() == "data" }.attribute("android:mimeType")
+        )
+        val applicationNode: Node = topLevel.first { it.name() == "application" }
+        assertEquals("Host", applicationNode.attribute("android:label"))
+        assertEquals("true", applicationNode.attribute("android:debuggable"))
+        val activityNode: Node =
+            applicationNode.children().filterIsInstance<Node>().first { it.name() == "activity" }
+        assertEquals("com.example.host.MainActivity", activityNode.attribute("android:name"))
+        assertEquals("singleTop", activityNode.attribute("android:launchMode"))
+        val intentFilter: Node =
+            activityNode.children().filterIsInstance<Node>().first { it.name() == "intent-filter" }
+        assertEquals(
+            "android.intent.action.MAIN",
+            intentFilter.children().filterIsInstance<Node>().first { it.name() == "action" }.attribute("android:name")
+        )
+        val metadataValuesByName: Map<Any?, Any?> =
+            applicationNode
+                .children()
+                .filterIsInstance<Node>()
+                .filter { it.name() == "meta-data" }
+                .associate { it.attribute("android:name") to it.attribute("android:value") }
+        assertEquals("2", metadataValuesByName["flutterEmbedding"])
+        assertEquals("true", metadataValuesByName["io.flutter.embedding.android.EnableImpeller"])
+        assertEquals("519", metadataValuesByName["io.flutter.embedding.android.OldGenHeapSize"])
+        assertEquals("true", metadataValuesByName[EnableHcppManifestTaskHelper.HCPP_METADATA_NAME])
+    }
+
+    @Test
     fun noMetadataInManifestWithoutInjection() {
         // Sanity check that the test helper does not find metadata that is not there.
         val manifestFile =

@@ -25,6 +25,10 @@ object EnableHcppManifestTaskHelper {
      *
      * If the meta-data is already present (with any value), the manifest is copied unmodified so
      * that an explicit value always wins over the feature flag based injection.
+     *
+     * When injecting, the manifest is reparsed and rewritten. XML comments are not preserved;
+     * the merged manifest is an intermediate artifact consumed by aapt2, which ignores them.
+     * All elements and attributes are preserved.
      */
     fun addEnableHcppMetadataIfAbsent(
         manifestFile: File,

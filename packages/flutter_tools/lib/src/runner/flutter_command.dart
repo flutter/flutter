@@ -1319,7 +1319,13 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'enable-hcpp',
       hide: !verboseHelp,
-      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
+      help:
+          'Whether to enable the HCPP platform view mode on the Impeller rendering backend. '
+          'On "run" and "test" an explicit value is passed to the engine at launch and takes '
+          'priority over the AndroidManifest.xml metadata. On build commands an explicit value '
+          'only overrides the enable-hcpp feature flag: it determines the default that is baked '
+          'into the manifest when the manifest does not already set '
+          'io.flutter.embedding.android.EnableHcpp, and an explicit manifest entry wins.',
     );
   }
 

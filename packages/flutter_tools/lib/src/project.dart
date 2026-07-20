@@ -1105,6 +1105,11 @@ See the link below for more information:
   /// [ifAbsent]. Callers should pass the value of the `enable-hcpp` feature
   /// flag, which is what the build injects into the manifest when the key is
   /// not explicitly set.
+  ///
+  /// This reads the app's primary source manifest, so it is an estimate of the
+  /// packaged value: it does not account for contributions from build
+  /// type/flavor overlay manifests or library manifests merged in at build
+  /// time. Intended for analytics, not for correctness-sensitive decisions.
   bool computeHcppEnabled({bool ifAbsent = false}) {
     return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', ifAbsent);
   }

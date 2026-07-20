@@ -203,7 +203,7 @@ void main() {
     );
 
     testUsingContext(
-      'reports hcpp analytics from an explicit manifest value over the enable-hcpp feature flag',
+      'reports hcpp analytics from an explicit manifest value over the feature flag and --enable-hcpp',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -221,7 +221,11 @@ void main() {
           ),
         );
 
-        await runBuildApkCommand(projectPath);
+        // An explicit manifest value also wins over an explicit --enable-hcpp
+        // on build commands: unlike run/test, builds have no runtime override
+        // channel, and the manifest injection never replaces an existing
+        // entry. The build flag only overrides the feature-flag default.
+        await runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']);
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -241,7 +245,6 @@ void main() {
         Analytics: () => fakeAnalytics,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
