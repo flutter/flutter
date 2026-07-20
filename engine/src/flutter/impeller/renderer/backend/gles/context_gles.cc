@@ -121,6 +121,16 @@ std::shared_ptr<Allocator> ContextGLES::GetResourceAllocator() const {
   return resource_allocator_;
 }
 
+std::shared_ptr<const GpuSubmissionTracker> ContextGLES::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextGLES::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
+}
+
 // |Context|
 std::shared_ptr<ShaderLibrary> ContextGLES::GetShaderLibrary() const {
   return shader_library_;
