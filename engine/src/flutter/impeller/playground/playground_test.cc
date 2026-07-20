@@ -115,6 +115,7 @@ class PlaygroundTestEnvironment : public ::testing::Environment {
       golden_manager_.reset();
     }
     PlaygroundImpl::OnTearDownTestEnvironment();
+    Playground::OnTearDownTestEnvironment();
   }
 
   static testing::GoldenDigestManager* GetGoldenDigestManager() {
