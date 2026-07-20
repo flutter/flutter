@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
+#include "flutter/impeller/testing/vulkan/vulkan_screenshotter.h"
 
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/impeller/golden_tests/metal_screenshot.h"
+#include "flutter/impeller/testing/metal/metal_screenshot.h"
 #define GLFW_INCLUDE_NONE
-#include "third_party/glfw/include/GLFW/glfw3.h"
 
 namespace impeller {
 namespace testing {
@@ -81,15 +80,29 @@ std::unique_ptr<Screenshot> ReadTexture(
 }
 }  // namespace
 
-VulkanScreenshotter::VulkanScreenshotter(
-    const std::unique_ptr<PlaygroundImpl>& playground)
-    : playground_(playground) {
-  FML_CHECK(playground_);
+VulkanScreenshotter::VulkanScreenshotter() {}
+
+std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  return ReadTexture(context, texture);
+}
+
+std::unique_ptr<Screenshot> Screenshotter::MakeOpenGLScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  return ReadTexture(context, texture);
+}
+
+std::unique_ptr<Screenshot> Screenshotter::MakeVulkanScreenshot(
+    std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  return ReadTexture(context, texture);
 }
 
 std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
     const AiksContext& aiks_context,
-    const std::shared_ptr<Texture> texture) {
+    const std::shared_ptr<Texture>& texture) {
   return ReadTexture(aiks_context.GetContext(), texture);
 }
 
