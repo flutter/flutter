@@ -298,9 +298,6 @@ DEF_SWITCH(ImpellerLazyShaderMode,
            "impeller-lazy-shader-mode",
            "Whether to defer initialization of all required PSOs for the "
            "Impeller backend. Defaults to false.")
-DEF_SWITCH(ImpellerAntialiasLines,
-           "impeller-antialias-lines",
-           "Experimental flag to test drawing lines with antialiasing.")
 DEF_SWITCH(ImpellerUseSDFs,
            "impeller-use-sdfs",
            "Whether to use SDFs for rendering in Impeller.")
