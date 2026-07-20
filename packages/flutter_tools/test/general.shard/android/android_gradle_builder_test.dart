@@ -2021,6 +2021,77 @@ Gradle Crashed
     );
 
     testUsingContext(
+      'build aar passes enable-hcpp to gradle',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+              '-Pflutter-root=/',
+              '-Poutput-dir=build/',
+              '-Pis-plugin=false',
+              '-PbuildNumber=1.0',
+              '-q',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              '-Penable-hcpp=true',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              'assembleAarRelease',
+            ],
+          ),
+        );
+
+        final File manifestFile = fileSystem.file('pubspec.yaml');
+        manifestFile.createSync(recursive: true);
+        manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        ''');
+
+        fileSystem.file('.android/gradlew').createSync(recursive: true);
+        fileSystem.file('.android/gradle.properties').writeAsStringSync('irrelevant');
+        fileSystem.file('.android/build.gradle').createSync(recursive: true);
+        fileSystem.directory('build/outputs/repo').createSync(recursive: true);
+
+        await builder.buildGradleAar(
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+              androidEnableHcpp: true,
+            ),
+          ),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          outputDirectory: fileSystem.directory('build/'),
+          target: '',
+          buildNumber: '1.0',
+        );
+
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidStudio: () => FakeAndroidStudio(),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
       'build aar passes sdkmanager path, sdk root, and validated installed ndk versions to gradle',
       () async {
         final builder = AndroidGradleBuilder(

@@ -282,6 +282,48 @@ void main() {
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
     }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+
+    testUsingContext(
+      'sets androidEnableHcpp from the enable-hcpp feature flag',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
+        await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+
+        final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
+        for (final androidBuildInfo
+            in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
+          expect(androidBuildInfo.buildInfo.androidEnableHcpp, isTrue);
+        }
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => fakeAndroidBuilder,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+      },
+    );
+
+    testUsingContext(
+      'explicit --no-enable-hcpp overrides the enable-hcpp feature flag',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
+        await runBuildAar(projectPath, arguments: <String>['--no-pub', '--no-enable-hcpp']);
+
+        final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
+        for (final androidBuildInfo
+            in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
+          expect(androidBuildInfo.buildInfo.androidEnableHcpp, isFalse);
+        }
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => fakeAndroidBuilder,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+      },
+    );
   });
 
   group('Gradle', () {
