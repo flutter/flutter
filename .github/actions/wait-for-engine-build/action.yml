@@ -23,6 +23,8 @@ runs:
         PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
         PUSH_BEFORE_SHA: ${{ github.event.before }}
+        INPUTS_CHECK_NAME: ${{ inputs.check-name }}
+        INPUTS_CHECK_REGEXP: ${{ inputs.check-regexp }}
       run: |
         # 1. Determine local base tracking SHA
         if [ "$EVENT_NAME" = "pull_request" ]; then
@@ -44,30 +46,29 @@ runs:
 
         # 3. Check if any file matches engine pattern using the helper script:
         if [ "$(printf '%s\n' "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
-          echo "Engine file changed - forced to wait for check-name: '${{ inputs.check-name }}', check-regexp: '${{ inputs.check-regexp }}'"
+          echo "Engine file changed - forced to wait for check-name: '${INPUTS_CHECK_NAME}', check-regexp: '${INPUTS_CHECK_REGEXP}'"
           echo "changed=true" >> "$GITHUB_OUTPUT"
         else
           echo "changed=false" >> "$GITHUB_OUTPUT"
         fi
 
-    # Note: lewagon/wait-on-check-action has a limit of 100 checks (pagination).
-    # Consider writing an API endpoint on flutter/cocoon that returns the status of an array of checks.
+    # Note: Use the Cocoon wait-for-tests action to poll the Cocoon API.
     - name: Wait for test check-in
       if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
-      uses: lewagon/wait-on-check-action@9312864dfbc9fd208e9c0417843430751c042800
+      uses: flutter/cocoon/packages/wait_for_tests@c82f779e201b2d22f43b531268cfbd2ce4fbd4ab
       with:
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
-        check-name: ${{ inputs.check-name }}
-        check-regexp: ${{ inputs.check-regexp }}
-        repo-token: ${{ inputs.github-token }}
-        wait-interval: 30 # seconds
-        checks-discovery-timeout: 3600 # Wait up to 1 hour for LUCI to register the check
-        allowed-conclusions: success,neutral
-        verbose: false
+        sha: ${{ github.event.pull_request.head.sha || github.sha }}
+        repo: ${{ github.repository }}
+        required-tests: ${{ inputs.check-name }}
 
-    - name: Redirect engine.version
+    - name: Redirect engine.version - Realm
       if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
       shell: bash
-      run: |
-        echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV
-        echo "FLUTTER_PREBUILT_ENGINE_VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+      run: echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV # zizmor: ignore[github-env]
+
+    - name: Redirect engine.version - Prebuilt Engine Version
+      if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      run: echo "FLUTTER_PREBUILT_ENGINE_VERSION=$HEAD_SHA" >> $GITHUB_ENV # zizmor: ignore[github-env]
+      env:
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
