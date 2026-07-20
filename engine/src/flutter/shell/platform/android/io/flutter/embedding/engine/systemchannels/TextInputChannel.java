@@ -607,6 +607,8 @@ public class TextInputChannel {
             return View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE;
           case "email":
             return View.AUTOFILL_HINT_EMAIL_ADDRESS;
+          case "emailOTPCode":
+            return "emailOTPCode";
           case "familyName":
             return "personFamilyName";
           case "fullStreetAddress":
