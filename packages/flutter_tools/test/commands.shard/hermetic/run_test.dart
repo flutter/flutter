@@ -1033,7 +1033,7 @@ void main() {
       // time (see BuildInfo.androidEnableHcpp), so that an explicit value in
       // the app's manifest takes priority over the feature flag.
       testUsingContext(
-        'enableHcpp is null when flag not explicitly passed, even if isHcppEnabled = true',
+        'explicitEnableHcpp is null when flag not explicitly passed, even if isHcppEnabled = true',
         () async {
           final devices = <Device>[
             FakeDevice(
@@ -1048,7 +1048,8 @@ void main() {
           } on ToolExit {
             // Ignore
           }
-          expect(command.enableHcpp, isNull);
+          expect(command.explicitEnableHcpp, isNull);
+          expect(command.enableHcpp, isTrue);
         },
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,

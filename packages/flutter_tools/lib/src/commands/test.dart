@@ -498,7 +498,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // Only forward an explicit value; when unset the built manifest (which
       // may include a value injected from the enable-hcpp feature flag)
       // determines the behavior.
-      enableHcpp: argResults!.wasParsed('enable-hcpp') ? boolArg('enable-hcpp') : null,
+      enableHcpp: explicitEnableHcpp,
       uninstallApp: boolArg('uninstall'),
     );
 

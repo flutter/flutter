@@ -12,7 +12,6 @@ import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -39,6 +38,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser.addMultiOption(
       'target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -111,7 +111,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
       buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(
-        ifAbsent: featureFlags.isHcppEnabled,
+        ifAbsent: enableHcpp,
       ),
     );
   }

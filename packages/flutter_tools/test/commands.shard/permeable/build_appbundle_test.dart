@@ -106,6 +106,36 @@ void main() {
       },
     );
 
+    testUsingContext(
+      'reports hcpp analytics from an explicit --no-enable-hcpp over the enable-hcpp feature flag',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+      },
+    );
+
     testUsingContext('alias aab', () async {
       final command = BuildAppBundleCommand(logger: BufferLogger.test());
       expect(command.aliases, contains('aab'));

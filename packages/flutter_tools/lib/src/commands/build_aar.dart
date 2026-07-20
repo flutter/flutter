@@ -50,6 +50,7 @@ class BuildAarCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: false);
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser.addMultiOption(
       'target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],

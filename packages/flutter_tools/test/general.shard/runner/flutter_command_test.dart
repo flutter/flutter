@@ -717,6 +717,46 @@ void main() {
     );
 
     testUsingContext(
+      'explicit --no-enable-hcpp overrides the enable-hcpp feature flag in BuildInfo',
+      () async {
+        final flutterCommand = DummyFlutterCommand()..addEnableHcppFlag(verboseHelp: false);
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--no-enable-hcpp']);
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(flutterCommand.explicitEnableHcpp, isFalse);
+        expect(buildInfo.androidEnableHcpp, isFalse);
+        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+      },
+    );
+
+    testUsingContext(
+      'explicit --enable-hcpp overrides the enable-hcpp feature flag in BuildInfo',
+      () async {
+        final flutterCommand = DummyFlutterCommand()..addEnableHcppFlag(verboseHelp: false);
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--enable-hcpp']);
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(flutterCommand.explicitEnableHcpp, isTrue);
+        expect(buildInfo.androidEnableHcpp, isTrue);
+        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () => TestFeatureFlags(),
+      },
+    );
+
+    testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
         final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);

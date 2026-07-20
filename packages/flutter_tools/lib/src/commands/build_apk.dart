@@ -9,7 +9,6 @@ import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -35,6 +34,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
         'split-per-abi',
@@ -111,9 +111,7 @@ class BuildApkCommand extends BuildSubCommand {
       buildApkTargetPlatform: _targetArchs.join(','),
       buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
-      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(
-        ifAbsent: featureFlags.isHcppEnabled,
-      ),
+      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
 

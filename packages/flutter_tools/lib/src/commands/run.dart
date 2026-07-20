@@ -276,14 +276,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-
-  /// The explicit `--[no-]enable-hcpp` value, or null if the flag was not
-  /// passed.
-  ///
-  /// When null, no runtime override is sent to the device, so the built
-  /// manifest (which may include a value injected from the `enable-hcpp`
-  /// feature flag by the build) determines the behavior.
-  bool? get enableHcpp => argResults!.wasParsed('enable-hcpp') ? boolArg('enable-hcpp') : null;
   bool get testFlag => boolArg('test-flag');
 
   @override
@@ -352,7 +344,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
-        enableHcpp: enableHcpp,
+        enableHcpp: explicitEnableHcpp,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
         traceSystrace: traceSystrace,
@@ -419,7 +411,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
-        enableHcpp: enableHcpp,
+        enableHcpp: explicitEnableHcpp,
         webDevServerConfig: webDevServerConfig,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
@@ -686,7 +678,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
-      runEnableHcpp: enableHcpp ?? featureFlags.isHcppEnabled,
+      runEnableHcpp: enableHcpp,
     );
   })();
 

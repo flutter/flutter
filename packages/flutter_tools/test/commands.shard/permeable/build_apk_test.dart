@@ -171,6 +171,36 @@ void main() {
     );
 
     testUsingContext(
+      'reports hcpp analytics from an explicit --no-enable-hcpp over the enable-hcpp feature flag',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildApkCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'apk',
+              commandHasTerminal: false,
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildApkBuildMode: 'release',
+              buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+      },
+    );
+
+    testUsingContext(
       'reports hcpp analytics from an explicit manifest value over the enable-hcpp feature flag',
       () async {
         final String projectPath = await createProject(

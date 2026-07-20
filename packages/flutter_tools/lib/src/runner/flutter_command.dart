@@ -1323,6 +1323,24 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
+  /// passed (or the command does not define it).
+  ///
+  /// Commands that launch the app (run/test/drive) forward this to the device
+  /// as a runtime override, which takes priority over the built manifest.
+  bool? get explicitEnableHcpp =>
+      (argResults?.options.contains('enable-hcpp') ?? false) && argResults!.wasParsed('enable-hcpp')
+      ? boolArg('enable-hcpp')
+      : null;
+
+  /// The effective HCPP preference: [explicitEnableHcpp] if the flag was
+  /// passed, otherwise the `enable-hcpp` feature flag.
+  ///
+  /// This is the value passed to gradle builds, where it is injected into the
+  /// manifest only when the manifest does not already contain an explicit
+  /// `io.flutter.embedding.android.EnableHcpp` entry.
+  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
+
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
       'test-flag',
@@ -1524,7 +1542,7 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
-      androidEnableHcpp: featureFlags.isHcppEnabled,
+      androidEnableHcpp: enableHcpp,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,
