@@ -487,6 +487,17 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return;
     }
 
+    // Validate Java and Gradle compatibility before invoking Gradle.
+    // This pre-flight check is done in Dart because:
+    // 1. If Java and Gradle are incompatible, Gradle can crash during build script
+    //    compilation (e.g. Kotlin DSL compilation failing on newer JDKs) before
+    //    the Flutter Gradle Plugin (DependencyVersionChecker) is even applied.
+    //    See https://github.com/flutter/flutter/issues/121501 for context on
+    //    how JDK upgrades lead to cryptic Gradle compilation crashes.
+    // 2. Reading the wrapper properties file is fast, avoiding a slow process spawn.
+    // 3. It reuses the existing compatibility matrix defined in gradle_utils.dart.
+    // This also helps address https://github.com/flutter/flutter/issues/167931
+    // by providing actionable version recommendations directly in the error.
     if (!androidBuildInfo.buildInfo.androidSkipBuildDependencyValidation) {
       final Version? javaVersionObj = _java?.version;
       final String? javaVersion = javaVersionObj != null
