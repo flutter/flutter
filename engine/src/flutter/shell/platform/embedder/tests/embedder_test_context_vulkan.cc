@@ -20,6 +20,25 @@ namespace flutter::testing {
 EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
     : EmbedderTestContext(std::move(assets_path)), surface_() {
   vulkan_context_ = fml::MakeRefCounted<TestVulkanContext>();
+
+  static const char* kInstanceExtensions[] = {
+      "VK_KHR_surface",
+#if defined(FML_OS_LINUX)
+      "VK_KHR_xcb_surface",
+#endif  // OS_LINUX
+#if defined(FML_OS_WIN)
+      "VK_KHR_win32_surface",
+#endif  // OS_WIN
+  };
+  constexpr size_t kInstanceExtensionCount =
+      sizeof(kInstanceExtensions) / sizeof(kInstanceExtensions[0]);
+
+  static const char* kDeviceExtensions[] = {
+      "VK_KHR_swapchain",
+  };
+  constexpr size_t kDeviceExtensionCount =
+      sizeof(kDeviceExtensions) / sizeof(kDeviceExtensions[0]);
+
   renderer_config_.type = FlutterRendererType::kVulkan;
   renderer_config_.vulkan = {
       .struct_size = sizeof(FlutterVulkanRendererConfig),
@@ -29,6 +48,10 @@ EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
       .device = vulkan_context_->device_->GetHandle(),
       .queue_family_index = vulkan_context_->device_->GetGraphicsQueueIndex(),
       .queue = vulkan_context_->device_->GetQueueHandle(),
+      .enabled_instance_extension_count = kInstanceExtensionCount,
+      .enabled_instance_extensions = kInstanceExtensions,
+      .enabled_device_extension_count = kDeviceExtensionCount,
+      .enabled_device_extensions = kDeviceExtensions,
       .get_instance_proc_address_callback =
           EmbedderTestContextVulkan::InstanceProcAddr,
       .get_next_image_callback =
@@ -63,6 +86,11 @@ void EmbedderTestContextVulkan::SetVulkanInstanceProcAddressCallback(
   renderer_config_.vulkan.get_instance_proc_address_callback = callback;
 }
 
+void EmbedderTestContextVulkan::SetVulkanPresentCallback(
+    VulkanPresentCallback callback) {
+  vulkan_present_callback_ = std::move(callback);
+}
+
 size_t EmbedderTestContextVulkan::GetSurfacePresentCount() const {
   return present_count_;
 }
@@ -74,6 +102,9 @@ VkImage EmbedderTestContextVulkan::GetNextImage(const DlISize& size) {
 bool EmbedderTestContextVulkan::PresentImage(VkImage image) {
   FireRootSurfacePresentCallbackIfPresent(
       [&]() { return surface_->GetSurfaceSnapshot(); });
+  if (vulkan_present_callback_) {
+    vulkan_present_callback_();
+  }
   present_count_++;
   return true;
 }

@@ -37,6 +37,8 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
       impeller::vk::Image(reinterpret_cast<VkImage>(embedder_desc->image));
   texture_device_memory_ = impeller::vk::DeviceMemory(
       reinterpret_cast<VkDeviceMemory>(embedder_desc->image_memory));
+  destruction_callback_ = embedder_desc->destruction_callback;
+  user_data_ = embedder_desc->user_data;
 
   needs_yuv_conversion_ = RequiresYCBCRConversion(
       static_cast<impeller::vk::Format>(embedder_desc->format));
@@ -58,6 +60,12 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
 
   yuv_conversion_ = std::move(yuv_conversion);
   is_valid_ = true;
+}
+
+EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() {
+  if (destruction_callback_) {
+    destruction_callback_(user_data_);
+  }
 }
 
 impeller::PixelFormat ToPixelFormat(int32_t vk_format) {
@@ -164,10 +172,6 @@ bool EmbedderExternalTextureSourceVulkan::CreateTextureImageView(
   texture_image_view_ = std::move(image_view.value);
   return true;
 }
-
-// |TextureSourceVK|
-EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() =
-    default;
 
 bool EmbedderExternalTextureSourceVulkan::IsValid() const {
   return is_valid_;
