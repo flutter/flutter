@@ -8,6 +8,8 @@ import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -19,6 +21,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.LocaleList;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -33,6 +36,8 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.annotation.Config;
+import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24) // LocaleList and scriptCode are API 24+.
@@ -341,6 +346,45 @@ public class FlutterJNITest {
 
     // Verify results.
     verify(listener, times(1)).resizeEngineView(100, 200);
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_36)
+  public void loadLibrary_usesReLinkerBelowApi37() {
+    FlutterJNI flutterJNI = spy(new FlutterJNI());
+    Context context = mock(Context.class);
+    // Avoid actually loading the native library during the test.
+    doNothing().when(flutterJNI).loadFlutterLibraryWithReLinker(any());
+    doNothing().when(flutterJNI).loadFlutterLibraryWithSystemLinker();
+
+    flutterJNI.loadLibrary(context);
+
+    verify(flutterJNI, times(1)).loadFlutterLibraryWithReLinker(context);
+    verify(flutterJNI, never()).loadFlutterLibraryWithSystemLinker();
+  }
+
+  @Test
+  public void loadLibrary_usesSystemLinkerOnApi37AndAbove() {
+    // TODO(gmackall): Update when robolectric supports testing on API 37.
+    // Robolectric 4.16 has no shadow for API 37 yet, so override SDK_INT directly rather than
+    // relying on @Config(sdk = API_LEVELS.API_37).
+    int originalSdkInt = Build.VERSION.SDK_INT;
+    try {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+
+      FlutterJNI flutterJNI = spy(new FlutterJNI());
+      Context context = mock(Context.class);
+      // Avoid actually loading the native library during the test.
+      doNothing().when(flutterJNI).loadFlutterLibraryWithReLinker(any());
+      doNothing().when(flutterJNI).loadFlutterLibraryWithSystemLinker();
+
+      flutterJNI.loadLibrary(context);
+
+      verify(flutterJNI, times(1)).loadFlutterLibraryWithSystemLinker();
+      verify(flutterJNI, never()).loadFlutterLibraryWithReLinker(any());
+    } finally {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
+    }
   }
 
   static class FlutterJNITester extends FlutterJNI {
