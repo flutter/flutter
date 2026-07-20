@@ -1732,6 +1732,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       result = routing!;
     }
 
+    if (isWindowingEnabled) {
+      result = WindowManager(child: result);
+    }
+
     if (widget.textStyle != null) {
       result = DefaultTextStyle(style: widget.textStyle!, child: result);
     }
@@ -1772,10 +1776,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       return true;
     }());
-
-    if (isWindowingEnabled) {
-      result = WindowManager(child: result);
-    }
 
     // TODO(victorsanni): https://github.com/flutter/flutter/issues/180319
     // Use actions and shortcuts to dismiss tooltips when esc is pressed instead
