@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityEventsDelegateTest {
   @Test
-  public void acessibilityEventsDelegate_forwardsAccessibilityEvents() {
+  public void accessibilityEventsDelegate_forwardsAccessibilityEvents() {
     final AccessibilityBridge mockAccessibilityBridge = mock(AccessibilityBridge.class);
     final View embeddedView = mock(View.class);
     final View originView = mock(View.class);
@@ -43,7 +43,7 @@ public class AccessibilityEventsDelegateTest {
   }
 
   @Test
-  public void acessibilityEventsDelegate_withoutBridge_noopsAccessibilityEvents() {
+  public void accessibilityEventsDelegate_withoutBridge_noopsAccessibilityEvents() {
     final View embeddedView = mock(View.class);
     final View originView = mock(View.class);
     final AccessibilityEvent event = mock(AccessibilityEvent.class);
@@ -56,7 +56,7 @@ public class AccessibilityEventsDelegateTest {
   }
 
   @Test
-  public void acessibilityEventsDelegate_forwardsHoverEvents() {
+  public void accessibilityEventsDelegate_forwardsHoverEvents() {
     final AccessibilityBridge mockAccessibilityBridge = mock(AccessibilityBridge.class);
     final MotionEvent event = mock(MotionEvent.class);
 
@@ -71,7 +71,7 @@ public class AccessibilityEventsDelegateTest {
   }
 
   @Test
-  public void acessibilityEventsDelegate_withoutBridge_noopsHoverEvents() {
+  public void accessibilityEventsDelegate_withoutBridge_noopsHoverEvents() {
     final MotionEvent event = mock(MotionEvent.class);
 
     AccessibilityEventsDelegate delegate = new AccessibilityEventsDelegate();
