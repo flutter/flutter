@@ -675,7 +675,11 @@ class PlatformDispatcher {
     _invoke1<int>(onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
   }
 
-  /// A callback that is invoked when the application should re-render.
+  /// A callback that is invoked when the engine requires the application to
+  /// re-render all of its views.
+  ///
+  /// On the next [onBeginFrame] or [onDrawFrame], the application should
+  /// invoke [FlutterView.render] on all of its [views].
   MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender => _onMarkAllViewsNeedRender;
   MarkAllViewsNeedRenderCallback? _onMarkAllViewsNeedRender;
   Zone _onMarkAllViewsNeedRenderZone = Zone.root;
