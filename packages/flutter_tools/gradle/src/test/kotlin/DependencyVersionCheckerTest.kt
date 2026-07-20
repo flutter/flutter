@@ -451,7 +451,7 @@ private object MockProjectFactory {
         every { mockProject.extra } returns mockExtraPropertiesExtension
 
         // Project path
-        every { mockProject.rootDir.path } returns FAKE_PROJECT_ROOT_DIR
+        every { mockProject.rootDir } returns java.io.File(FAKE_PROJECT_ROOT_DIR)
 
         // SDK
         val actionSlot = slot<Action<Project>>()

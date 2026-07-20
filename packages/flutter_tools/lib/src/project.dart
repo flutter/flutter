@@ -804,9 +804,8 @@ class AndroidProject extends FlutterProjectPlatform {
   /// the project's Gradle version is compatible with the AGP version and
   /// kotlin version used in build.gradle.
   Future<CompatibilityResult> hasValidJavaGradleAgpVersions() async {
-    final String? gradleVersion = await gradle.getGradleVersion(
+    final String? gradleVersion = await globals.gradleUtils?.getGradleVersion(
       hostAppGradleRoot,
-      globals.logger,
       globals.processManager,
     );
     final String? agpVersion = gradle.getAgpVersion(hostAppGradleRoot, globals.logger);

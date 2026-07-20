@@ -8,6 +8,12 @@ import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.int
+import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
@@ -85,36 +91,63 @@ object DependencyVersionChecker {
             "($projectDirectory/app/build.gradle(.kts))."
 
     // The following versions define our support policy for Gradle, Java, AGP, and KGP.
+    // They are loaded from a shared JSON file.
     // Before updating any "error" version, ensure that you have updated the corresponding
     // "warn" version for a full release to provide advanced warning. See
     // flutter.dev/go/android-dependency-versions for more.
     // Advice for maintainers for other areas of code that are impacted are documented
     // in packages/flutter_tools/lib/src/android/README.md.
 
-    @VisibleForTesting internal val warnGradleVersion: Version = Version(9, 1, 0)
+    private val supportVersions: JsonObject by lazy {
+        val stream = DependencyVersionChecker::class.java.getResourceAsStream("/android_support_versions.json")
+            ?: throw GradleException("Required resource android_support_versions.json not found")
+        val jsonText = stream.bufferedReader().use { it.readText() }
+        Json.parseToJsonElement(jsonText).jsonObject
+    }
 
-    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 14, 0)
+    private fun getVersionString(tool: String, type: String): String {
+        return supportVersions[tool]?.jsonObject?.get(type)?.jsonPrimitive?.content
+            ?: throw GradleException("Missing version config for $tool.$type")
+    }
+
+    private fun getIntVersion(tool: String, type: String): Int {
+        return supportVersions[tool]?.jsonObject?.get(type)?.jsonPrimitive?.int
+            ?: throw GradleException("Missing version config for $tool.$type")
+    }
+
+    private fun parseAgpVersion(versionString: String): AndroidPluginVersion {
+        val parts = versionString.split(".").map { it.toInt() }
+        return AndroidPluginVersion(
+            parts.getOrElse(0) { 0 },
+            parts.getOrElse(1) { 0 },
+            parts.getOrElse(2) { 0 }
+        )
+    }
+
+    @VisibleForTesting internal val warnGradleVersion: Version by lazy { Version.fromString(getVersionString("gradle", "warn")) }
+
+    @VisibleForTesting internal val errorGradleVersion: Version by lazy { Version.fromString(getVersionString("gradle", "error")) }
 
     // Java error and warn should align with packages/flutter_tools/lib/src/android/gradle_utils.dart.
-    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_17
+    @VisibleForTesting internal val warnJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(getVersionString("java", "warn")) }
 
-    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_17
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(getVersionString("java", "error")) }
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(9, 0, 1)
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(getVersionString("agp", "warn")) }
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(getVersionString("agp", "error")) }
 
-    @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 3, 20)
+    @VisibleForTesting internal val warnKGPVersion: Version by lazy { Version.fromString(getVersionString("kgp", "warn")) }
 
-    @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 2, 20)
+    @VisibleForTesting internal val errorKGPVersion: Version by lazy { Version.fromString(getVersionString("kgp", "error")) }
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
     // Non inclusive.
     @VisibleForTesting
-    internal val warnMinSdkVersion: Int = 24
+    internal val warnMinSdkVersion: Int by lazy { getIntVersion("minSdkVersion", "warn") }
 
     @VisibleForTesting
-    internal val errorMinSdkVersion: Int = 23
+    internal val errorMinSdkVersion: Int by lazy { getIntVersion("minSdkVersion", "error") }
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective

@@ -25,6 +25,7 @@ import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -484,6 +485,39 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // All automatically created files should exist.
     if (configOnly) {
       return;
+    }
+
+    if (!androidBuildInfo.buildInfo.androidSkipBuildDependencyValidation) {
+      final Version? javaVersionObj = _java?.version;
+      final String? javaVersion = javaVersionObj != null
+          ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
+          : null;
+      final String? gradleVersion = await _gradleUtils.getGradleVersion(
+        project.android.hostAppGradleRoot,
+        globals.processManager,
+      );
+      if (javaVersion != null && gradleVersion != null) {
+        if (!gradle.validateJavaAndGradle(
+          _logger,
+          javaVersion: javaVersion,
+          gradleVersion: gradleVersion,
+        )) {
+          final JavaGradleCompat? compat = gradle.getValidGradleVersionRangeForJavaVersion(
+            _logger,
+            javaV: javaVersion,
+          );
+          final gradleRangeInfo = compat != null
+              ? 'compatible Gradle versions for Java $javaVersion are ${compat.gradleMin} to ${compat.gradleMax ?? 'newer'}'
+              : 'compatible Gradle version for Java $javaVersion is unknown';
+          throwToolExit("""
+Gradle build failed due to Java/Gradle incompatibility.
+The Java version used for the build is $javaVersion, which is incompatible with Gradle $gradleVersion.
+To fix this, you can either:
+  1. Upgrade your project's Gradle version (typically in gradle-wrapper.properties to a version matching the range: $gradleRangeInfo).
+  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.
+Alternatively, you can bypass this check using "--android-skip-build-dependency-validation".""");
+        }
+      }
     }
 
     // Assembly work starts here.

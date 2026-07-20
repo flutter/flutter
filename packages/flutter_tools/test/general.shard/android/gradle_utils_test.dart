@@ -247,7 +247,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
 ''');
 
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.empty()),
         expectedVersion,
       );
     });
@@ -269,7 +269,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
 ''');
 
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.empty()),
         expectedVersion,
       );
     });
@@ -291,7 +291,7 @@ zipStorePath=wrapper/dists
 ''');
 
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.empty()),
         expectedVersion,
       );
     });
@@ -312,7 +312,7 @@ zipStorePath=wrapper/dists
       // FakeProcessManager.any is used here and not in other getGradleVersion
       // tests because this test does not care about process fallback logic.
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.any()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.any()),
         isNull,
       );
     });
@@ -341,10 +341,7 @@ OS:           Mac OS X 13.2.1 aarch64
           const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
         );
 
-      expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
-        expectedVersion,
-      );
+      expect(await gradleUtils.getGradleVersion(androidDirectory, processManager), expectedVersion);
     });
 
     testWithoutContext('returns the installed gradle with whitespace formatting', () async {
@@ -356,10 +353,7 @@ OS:           Mac OS X 13.2.1 aarch64
           const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
         );
 
-      expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
-        expectedVersion,
-      );
+      expect(await gradleUtils.getGradleVersion(androidDirectory, processManager), expectedVersion);
     });
 
     testWithoutContext(

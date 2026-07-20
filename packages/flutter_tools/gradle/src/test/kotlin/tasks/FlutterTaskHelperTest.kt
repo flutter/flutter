@@ -23,12 +23,11 @@ class FlutterTaskHelperTest {
     @Test
     fun `getAssetsDirectory returns correct path`() {
         val flutterTask = mockk<FlutterTask>()
-        val mockFile = mockk<File>()
         val flutterTaskOutputDirectory = "${File.separator}path${File.separator}to${File.separator}assets"
+        val mockFile = java.io.File(flutterTaskOutputDirectory)
         val expectedPath = "$flutterTaskOutputDirectory${File.separator}flutter_assets"
 
         every { flutterTask.outputDirectory } returns mockFile
-        every { mockFile.toString() } returns flutterTaskOutputDirectory
         val result = FlutterTaskHelper.getAssetsDirectory(flutterTask)
         assert(result == expectedPath)
     }
@@ -37,13 +36,12 @@ class FlutterTaskHelperTest {
     fun `getAssets returns correct CopySpec`() {
         val project = mockk<Project>()
         val flutterTask = mockk<FlutterTask>()
-        val mockFile = mockk<File>()
+        val fakeFromPath = "${File.separator}path${File.separator}to${File.separator}intermediate"
+        val mockFile = java.io.File(fakeFromPath)
         val mockCopySpec = mockk<CopySpec>()
         val copySpecActionSlot = slot<Action<in CopySpec>>()
-        val fakeFromPath = "${File.separator}path${File.separator}to${File.separator}intermediate"
 
         every { flutterTask.intermediateDir } returns mockFile
-        every { mockFile.toString() } returns fakeFromPath
         every { project.copySpec(capture(copySpecActionSlot)) } returns mockk()
 
         FlutterTaskHelper.getAssets(project, flutterTask)
@@ -60,13 +58,12 @@ class FlutterTaskHelperTest {
         val flutterTask = mockk<FlutterTask>()
         val mockCopySpec = mockk<CopySpec>()
         val copySpecActionSlot = slot<Action<in CopySpec>>()
-        val fakeIntermediateDirectory = mockk<File>()
         val fakeIntermediateDirectoryPath = "${File.separator}path${File.separator}to${File.separator}intermediate"
+        val fakeIntermediateDirectory = java.io.File(fakeIntermediateDirectoryPath)
 
         every { flutterTask.intermediateDir } returns fakeIntermediateDirectory
         every { flutterTask.buildMode } returns "release"
         every { flutterTask.targetPlatformValues } returns listOf("arm64-v8a", "x64")
-        every { fakeIntermediateDirectory.toString() } returns fakeIntermediateDirectoryPath
         every { project.copySpec(capture(copySpecActionSlot)) } returns mockk()
 
         FlutterTaskHelper.getSnapshots(project, flutterTask)
@@ -85,13 +82,12 @@ class FlutterTaskHelperTest {
         val flutterTask = mockk<FlutterTask>()
         val mockCopySpec = mockk<CopySpec>()
         val copySpecActionSlot = slot<Action<in CopySpec>>()
-        val fakeIntermediateDirectory = mockk<File>()
         val fakeIntermediateDirectoryPath = "${File.separator}path${File.separator}to${File.separator}intermediate"
+        val fakeIntermediateDirectory = java.io.File(fakeIntermediateDirectoryPath)
 
         every { flutterTask.intermediateDir } returns fakeIntermediateDirectory
         every { flutterTask.buildMode } returns "debug"
         every { flutterTask.targetPlatformValues } returns listOf("arm64-v8a", "x64")
-        every { fakeIntermediateDirectory.toString() } returns fakeIntermediateDirectoryPath
         every { project.copySpec(capture(copySpecActionSlot)) } returns mockk()
 
         FlutterTaskHelper.getSnapshots(project, flutterTask)

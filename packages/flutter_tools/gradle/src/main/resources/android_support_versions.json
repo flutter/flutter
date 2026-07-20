@@ -1,0 +1,23 @@
+{
+  "_comment": "Before updating any 'error' version, ensure you updated 'warn' version first. See go/android-dependency-versions",
+  "gradle": {
+    "warn": "9.1.0",
+    "error": "8.14.0"
+  },
+  "java": {
+    "warn": "17",
+    "error": "17"
+  },
+  "agp": {
+    "warn": "9.0.1",
+    "error": "8.11.1"
+  },
+  "kgp": {
+    "warn": "2.3.20",
+    "error": "2.2.20"
+  },
+  "minSdkVersion": {
+    "warn": 24,
+    "error": 23
+  }
+}

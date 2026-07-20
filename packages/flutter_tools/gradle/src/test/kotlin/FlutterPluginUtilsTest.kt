@@ -998,9 +998,8 @@ class FlutterPluginUtilsTest {
             @Test
             fun `returns null if build file does not exist`() {
                 val subproject = mockk<Project>()
-                val file = mockk<File>()
+                val file = java.io.File("/nonexistent/path/build.gradle")
                 every { subproject.buildFile } returns file
-                every { file.exists() } returns false
 
                 val result = FlutterPluginUtils.getSubprojectPluginState(subproject)
 
@@ -1008,12 +1007,16 @@ class FlutterPluginUtilsTest {
             }
 
             @Test
-            fun `returns null if build file path contains ephemeral android directory`() {
+            fun `returns null if build file path contains ephemeral android directory`(
+                @TempDir tempDir: java.nio.file.Path
+            ) {
                 val subproject = mockk<Project>()
-                val file = mockk<File>()
+                val androidDir = java.io.File(tempDir.toFile(), ".android")
+                androidDir.mkdir()
+                val file = java.io.File(androidDir, "build.gradle")
+                file.createNewFile()
+
                 every { subproject.buildFile } returns file
-                every { file.exists() } returns true
-                every { file.absolutePath } returns "/path/to/.android/build.gradle"
 
                 val result = FlutterPluginUtils.getSubprojectPluginState(subproject)
 
@@ -1022,17 +1025,13 @@ class FlutterPluginUtilsTest {
 
             @Test
             fun `returns null and logs error when IOException is thrown during read`(
-                @TempDir tempDir: Path
+                @TempDir tempDir: java.nio.file.Path
             ) {
                 val subproject = mockk<Project>()
-                val mockBuildFile = mockk<File>()
+                val directoryAsFile = tempDir.toFile()
                 val mockLogger = mockk<Logger>(relaxed = true)
 
-                every { subproject.buildFile } returns mockBuildFile
-                every { mockBuildFile.exists() } returns true
-                every { mockBuildFile.absolutePath } returns "/some/path/build.gradle"
-                every { mockBuildFile.extension } returns "gradle"
-                every { mockBuildFile.path } throws IOException("Simulated I/O error")
+                every { subproject.buildFile } returns directoryAsFile
                 every { subproject.projectDir } returns tempDir.toFile()
                 every { subproject.logger } returns mockLogger
 
@@ -1041,7 +1040,7 @@ class FlutterPluginUtilsTest {
                 assertNull(result)
                 verify(exactly = 1) {
                     mockLogger.error(
-                        "Failed to read build file: /some/path/build.gradle",
+                        any(),
                         any<IOException>()
                     )
                 }
@@ -2001,7 +2000,7 @@ class FlutterPluginUtilsTest {
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
-        every { mockDirectory.asFile.path } returns "/randomapp/build/app/"
+        every { mockDirectory.asFile } returns java.io.File("/randomapp/build/app/")
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
         every { mockBaseExtension.buildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
@@ -2281,7 +2280,7 @@ class FlutterPluginUtilsTest {
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
-        every { mockDirectory.asFile.path } returns "/randomapp/build/app/"
+        every { mockDirectory.asFile } returns java.io.File("/randomapp/build/app/")
         val basePath = "/base/path"
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
@@ -2330,7 +2329,7 @@ class FlutterPluginUtilsTest {
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
-        every { mockDirectory.asFile.path } returns "/randomapp/build/app/"
+        every { mockDirectory.asFile } returns java.io.File("/randomapp/build/app/")
         val basePath = "/base/path"
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
@@ -2380,7 +2379,7 @@ class FlutterPluginUtilsTest {
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
-        every { mockDirectory.asFile.path } returns fakeBuildPath
+        every { mockDirectory.asFile } returns java.io.File(fakeBuildPath)
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
         every {

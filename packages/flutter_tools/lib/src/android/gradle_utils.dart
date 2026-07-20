@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -68,9 +70,27 @@ const targetSdkVersion = '36';
 //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
 const ndkVersion = '28.2.13676358';
 final minBuildToolsVersion = Version(28, 0, 3);
+final Map<String, dynamic> _supportVersions = _loadSupportVersions();
+
+Map<String, dynamic> _loadSupportVersions() {
+  final String jsonPath = globals.fs.path.join(
+    Cache.flutterRoot!,
+    'packages',
+    'flutter_tools',
+    'gradle',
+    'src',
+    'main',
+    'resources',
+    'android_support_versions.json',
+  );
+  final String jsonContent = globals.fs.file(jsonPath).readAsStringSync();
+  return json.decode(jsonContent) as Map<String, dynamic>;
+}
+
 // Align with packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt.
-final errorJavaMinVersionAndroid = Version(17, 0, 0);
-final warnJavaMinVersionAndroid = Version(17, 0, 0);
+final Map<String, dynamic> javaVersions = _supportVersions['java'] as Map<String, dynamic>;
+final Version errorJavaMinVersionAndroid = Version.parse(javaVersions['error'] as String)!;
+final Version warnJavaMinVersionAndroid = Version.parse(javaVersions['warn'] as String)!;
 
 // Update these when new major versions of Java are supported by new Gradle
 // versions that we support.
@@ -287,6 +307,77 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 ''';
     propertiesFile.writeAsStringSync(propertyContents);
   }
+
+  /// Returns either the gradle-wrapper.properties value from the passed in
+  /// [directory] or if not present the version available in local path.
+  ///
+  /// If gradle version is not found null is returned.
+  /// [directory] should be an android directory with a build.gradle file.
+  Future<String?> getGradleVersion(Directory directory, ProcessManager processManager) async {
+    final File propertiesFile = getGradleWrapperFile(directory);
+
+    if (propertiesFile.existsSync()) {
+      final String wrapperFileContent = propertiesFile.readAsStringSync();
+
+      final RegExpMatch? distributionUrl = distributionUrlRegex.firstMatch(wrapperFileContent);
+      if (distributionUrl != null) {
+        final String? gradleVersion = parseGradleVersionFromDistributionUrl(
+          distributionUrl.group(0),
+        );
+        if (gradleVersion != null) {
+          return gradleVersion;
+        } else {
+          // Did not find gradle zip url. Likely this is a bug in our parsing.
+          _logger.printWarning(_formatParseWarning(wrapperFileContent, type: 'gradle'));
+        }
+      } else {
+        // If no distributionUrl log then treat as if there was no propertiesFile.
+        _logger.printTrace(
+          '$propertiesFile does not provide a Gradle version falling back to system gradle.',
+        );
+      }
+    } else {
+      // Could not find properties file.
+      _logger.printTrace('$propertiesFile does not exist falling back to system gradle');
+    }
+    // System installed Gradle version.
+    // TODO(reidbaker): Modify this gradle execution to use gradlew.
+    if (processManager.canRun('gradle')) {
+      final gradleVersionsVerbose =
+          (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
+      // Expected format:
+      /*
+
+  ------------------------------------------------------------
+  Gradle 7.6
+  ------------------------------------------------------------
+
+  Build time:   2022-11-25 13:35:10 UTC
+  Revision:     daece9dbc5b79370cc8e4fd6fe4b2cd400e150a8
+
+  Kotlin:       1.7.10
+  Groovy:       3.0.13
+  Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
+  JVM:          17.0.6 (Homebrew 17.0.6+0)
+  OS:           Mac OS X 13.2.1 aarch64
+      */
+      // Observation shows that the version can have 2 or 3 numbers.
+      // Inner parentheticals `(\.\d+)?` denote the optional third value.
+      // Outer parentheticals `Gradle (...)` denote a grouping used to extract
+      // the version number.
+      final gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
+      final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionsVerbose);
+      if (version == null) {
+        // Most likely a bug in our parse implementation/regex.
+        _logger.printWarning(_formatParseWarning(gradleVersionsVerbose, type: 'gradle'));
+        return null;
+      }
+      return version.group(1);
+    } else {
+      _logger.printTrace('Could not run system gradle');
+      return null;
+    }
+  }
 }
 
 /// Returns the Gradle version that the current Android plugin depends on when found,
@@ -329,79 +420,6 @@ String? parseGradleVersionFromDistributionUrl(String? distributionUrl) {
     return null;
   }
   return zipParts[1];
-}
-
-/// Returns either the gradle-wrapper.properties value from the passed in
-/// [directory] or if not present the version available in local path.
-///
-/// If gradle version is not found null is returned.
-/// [directory] should be an android directory with a build.gradle file.
-Future<String?> getGradleVersion(
-  Directory directory,
-  Logger logger,
-  ProcessManager processManager,
-) async {
-  final File propertiesFile = getGradleWrapperFile(directory);
-
-  if (propertiesFile.existsSync()) {
-    final String wrapperFileContent = propertiesFile.readAsStringSync();
-
-    final RegExpMatch? distributionUrl = distributionUrlRegex.firstMatch(wrapperFileContent);
-    if (distributionUrl != null) {
-      final String? gradleVersion = parseGradleVersionFromDistributionUrl(distributionUrl.group(0));
-      if (gradleVersion != null) {
-        return gradleVersion;
-      } else {
-        // Did not find gradle zip url. Likely this is a bug in our parsing.
-        logger.printWarning(_formatParseWarning(wrapperFileContent, type: 'gradle'));
-      }
-    } else {
-      // If no distributionUrl log then treat as if there was no propertiesFile.
-      logger.printTrace(
-        '$propertiesFile does not provide a Gradle version falling back to system gradle.',
-      );
-    }
-  } else {
-    // Could not find properties file.
-    logger.printTrace('$propertiesFile does not exist falling back to system gradle');
-  }
-  // System installed Gradle version.
-  // TODO(reidbaker): Modify this gradle execution to use gradlew.
-  if (processManager.canRun('gradle')) {
-    final gradleVersionsVerbose =
-        (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
-    // Expected format:
-    /*
-
-------------------------------------------------------------
-Gradle 7.6
-------------------------------------------------------------
-
-Build time:   2022-11-25 13:35:10 UTC
-Revision:     daece9dbc5b79370cc8e4fd6fe4b2cd400e150a8
-
-Kotlin:       1.7.10
-Groovy:       3.0.13
-Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
-JVM:          17.0.6 (Homebrew 17.0.6+0)
-OS:           Mac OS X 13.2.1 aarch64
-    */
-    // Observation shows that the version can have 2 or 3 numbers.
-    // Inner parentheticals `(\.\d+)?` denote the optional third value.
-    // Outer parentheticals `Gradle (...)` denote a grouping used to extract
-    // the version number.
-    final gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
-    final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionsVerbose);
-    if (version == null) {
-      // Most likely a bug in our parse implementation/regex.
-      logger.printWarning(_formatParseWarning(gradleVersionsVerbose, type: 'gradle'));
-      return null;
-    }
-    return version.group(1);
-  } else {
-    logger.printTrace('Could not run system gradle');
-    return null;
-  }
 }
 
 /// Returns the Kotlin Gradle Plugin (KGP) version that the current project
@@ -1595,7 +1613,7 @@ const _agpKgpCompatList = <AgpKgpCompat>[
     agpMax: '9.2.99',
     inclusiveMaxAgp: false,
   ),
-  // Documented max KGP is 2.3.10.
+  // Documented max KGP is 2.3.10, using 2.3.29 covers patch versions.
   // Documented max AGP is 9.2.0.
   AgpKgpCompat(
     kgpMin: '2.3.10',
