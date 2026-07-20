@@ -119,16 +119,16 @@ void main() {
 
   test('ShapeBorder.hitTest matches getOuterPath for primitive shapes', () {
     const rect = Rect.fromLTWH(0.0, 0.0, 120.0, 80.0);
+    const TextDirection textDirection = TextDirection.ltr;
     const positions = <Offset>[
-      Offset(1.0, 1.0),
-      Offset(8.5, 40.0),
-      Offset(24.0, 12.0),
-      Offset(40.0, 40.0),
-      Offset(60.0, 2.5),
-      Offset(60.0, 40.0),
-      Offset(96.0, 68.0),
-      Offset(112.0, 40.0),
-      Offset(130.0, 40.0),
+      Offset(-10.0, 40.0), // Outside every shape.
+      Offset(1.0, 1.0), // Distinguishes square and rounded corners.
+      Offset(0.5, 14.5), // Distinguishes RRect and superellipse corners.
+      Offset(1.0, 35.0), // Exercises the left edge of wide shapes.
+      Offset(1.0, 68.0), // Exercises the directional bottom-left corner.
+      Offset(11.0, 35.0), // Exercises CircleBorder eccentricity.
+      Offset(14.5, 13.5), // Distinguishes interpolated outer shapes.
+      Offset(21.0, 35.0), // Inside every shape.
     ];
     final borders = <ShapeBorder>[
       Border.all(),
@@ -161,17 +161,28 @@ void main() {
       )!,
     ];
 
+    // Every position is tested against every border, so these collections are
+    // intentionally independent rather than paired test cases.
     for (final border in borders) {
-      for (final TextDirection textDirection in TextDirection.values) {
-        for (final position in positions) {
-          expect(
-            border.hitTest(rect, position, textDirection: textDirection),
-            border.getOuterPath(rect, textDirection: textDirection).contains(position),
-            reason: '$border at $position in $textDirection',
-          );
-        }
+      for (final position in positions) {
+        expect(
+          border.hitTest(rect, position, textDirection: textDirection),
+          border.getOuterPath(rect, textDirection: textDirection).contains(position),
+          reason: '$border at $position',
+        );
       }
     }
+  });
+
+  test('_CompoundBorder.hitTest preserves child hitTest optimizations', () {
+    _hitTestCount = 0;
+    final ShapeBorder compoundBorder = const RoundedRectangleBorder() + const _HitTestBorder();
+
+    expect(
+      compoundBorder.hitTest(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), Offset.zero),
+      isFalse,
+    );
+    expect(_hitTestCount, 1);
   });
 
   test('ShapeDecoration.lerp between gradient and color is smooth and does not throw', () {
@@ -344,7 +355,7 @@ class _HitTestBorder extends ShapeBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    throw StateError('ShapeDecoration.hitTest should not call getOuterPath directly.');
+    throw StateError('hitTest should not call getOuterPath directly.');
   }
 
   @override

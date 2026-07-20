@@ -844,6 +844,11 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    return borders.first.hitTest(rect, position, textDirection: textDirection);
+  }
+
+  @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     borders.first.paintInterior(canvas, rect, paint, textDirection: textDirection);
   }
