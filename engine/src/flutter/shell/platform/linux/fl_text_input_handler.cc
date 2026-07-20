@@ -336,6 +336,12 @@ static void update_im_cursor_position(FlTextInputHandler* self) {
     return;
   }
 
+  // Cannot compute a position without a widget (e.g. after the view is
+  // disposed).
+  if (self->widget == nullptr) {
+    return;
+  }
+
   // Transform the x, y positions of the cursor from local coordinates to
   // Flutter view coordinates.
   gint x = self->composing_rect.x * self->editabletext_transform[0][0] +
@@ -480,8 +486,9 @@ void fl_text_input_handler_set_widget(FlTextInputHandler* self,
                                       GtkWidget* widget) {
   g_return_if_fail(FL_IS_TEXT_INPUT_HANDLER(self));
   self->widget = widget;
-  gtk_im_context_set_client_window(self->im_context,
-                                   gtk_widget_get_window(self->widget));
+  gtk_im_context_set_client_window(
+      self->im_context,
+      widget != nullptr ? gtk_widget_get_window(widget) : nullptr);
 }
 
 GtkWidget* fl_text_input_handler_get_widget(FlTextInputHandler* self) {
