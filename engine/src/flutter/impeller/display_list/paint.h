@@ -120,9 +120,22 @@ struct Paint {
   /// @brief   Whether this paint has a color filter that can apply opacity
   bool HasColorFilter() const;
 
+  /// @brief      Create a `ColorSourceContents` representing this paint's
+  ///             shader/colors.
+  /// @param[in]  renderer            The content context renderer.
+  /// @param[in]  geometry            The geometry the color source is drawn
+  ///                                 onto.
+  /// @param[in]  geometry_transform  An optional transform representing a
+  ///                                 layout/positioning transform applied to
+  ///                                 the geometry. If provided, this is used to
+  ///                                 adjust the color source's effect transform
+  ///                                 to align it with the geometry's coordinate
+  ///                                 space.
+  /// @return     The generated color source contents.
   std::shared_ptr<ColorSourceContents> CreateContents(
       const ContentContext& renderer,
-      const Geometry* geometry) const;
+      const Geometry* geometry,
+      const std::optional<Matrix>& geometry_transform = std::nullopt) const;
 
   std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
                                          bool is_solid_color,

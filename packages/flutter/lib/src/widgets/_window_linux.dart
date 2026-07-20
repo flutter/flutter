@@ -895,7 +895,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 /// See also:
 ///
 ///  * [PopupWindowController], the base class for popup windows.
-class PopupWindowControllerLinux extends PopupWindowController {
+class PopupWindowControllerLinux extends PopupWindowController implements WindowControllerLinux {
   /// Creates a new popup window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -1071,6 +1071,22 @@ class PopupWindowControllerLinux extends PopupWindowController {
       maxWidth: constraints.maxWidth.isInfinite ? 0x7fffffff : constraints.maxWidth.toInt(),
       maxHeight: constraints.maxHeight.isInfinite ? 0x7fffffff : constraints.maxHeight.toInt(),
     );
+  }
+
+  @override
+  ffi.Pointer<ffi.Void> get windowHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _window.instance.cast();
+  }
+
+  @override
+  ffi.Pointer<ffi.Void> get flutterViewHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _view.instance.cast();
   }
 }
 
