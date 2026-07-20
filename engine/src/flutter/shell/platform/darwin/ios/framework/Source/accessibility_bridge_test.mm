@@ -5,7 +5,9 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/fml/message_loop.h"
 #import "flutter/fml/thread.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
@@ -2517,6 +2519,71 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertTrue(CGPointEqualToPoint([rootObject accessibilityActivationPoint], CGPointZero));
   XCTAssertTrue(CGRectEqualToRect([rootObject accessibilityFrame], CGRectZero));
   XCTAssertNil([rootObject _accessibilityHitTest:CGPointZero withEvent:nil]);
+}
+
+- (void)testAccessibilityChannelCallbackAfterBridgeDestruction {
+  flutter::MockDelegate mock_delegate;
+  // PlatformViewIOS/AccessibilityBridge need to be called on the platform thread.
+  // Since the platform thread and UI thread are merged; we use the test's main thread.
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  id mockBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+
+  OCMStub([mockFlutterViewController engine]).andReturn(mockEngine);
+  OCMStub([mockEngine binaryMessenger]).andReturn(mockBinaryMessenger);
+
+  // AccessibilityBridge destructor calls clearState, which reads viewIfLoaded on the view
+  // controller. Stub it so bridge.reset() below doesn't hit an unstubbed selector.
+  OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(nil);
+
+  // Prevent SetOwnerViewController from taking the attachView path, which touches the real
+  // view/CALayer/IOSSurface mechanics and isn't relevant here, since we only care about the channel
+  // handler.
+  OCMStub([mockFlutterViewController isViewLoaded]).andReturn(NO);
+
+  __block FlutterBinaryMessageHandler capturedHandler = nil;
+  OCMStub([mockBinaryMessenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                     binaryMessageHandler:[OCMArg checkWithBlock:^BOOL(id obj) {
+                                       if (obj) {
+                                         capturedHandler = [obj copy];
+                                       }
+                                       return YES;
+                                     }]]);
+
+  platform_view->SetOwnerViewController(mockFlutterViewController);
+
+  auto bridge = std::make_unique<flutter::AccessibilityBridge>(
+      /*view_controller=*/mockFlutterViewController,
+      /*platform_view=*/platform_view.get(),
+      /*platform_views_controller=*/nil);
+
+  XCTAssertNotNil(capturedHandler);
+
+  // Destroy the AccessibilityBridge then invoke the message handler block to ensure no-op.
+  bridge.reset();
+  NSDictionary* event = @{@"type" : @"announce", @"data" : @{@"message" : @"test"}};
+  NSData* messageData = [[FlutterStandardMessageCodec sharedInstance] encode:event];
+  if (capturedHandler) {
+    capturedHandler(messageData, ^(NSData* reply){
+                    });
+  }
 }
 
 @end
