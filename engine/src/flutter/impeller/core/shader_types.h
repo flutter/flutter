@@ -164,6 +164,60 @@ struct SampledImageSlot {
   size_t binding;
 };
 
+/// @brief  The format of a single vertex attribute, combining its scalar kind,
+///         bit width, and component count.
+///
+///         Each backend maps these values to its own native vertex format, so
+///         this is the shared vocabulary for vertex inputs. The values are
+///         currently derived from a reflected `ShaderStageIOSlot` (see
+///         `ShaderStageIOSlot::GetVertexAttributeFormat`), so only the kinds
+///         that reflection produces are reachable.
+enum class VertexAttributeFormat {
+  /// Not a valid vertex attribute (a matrix input, an unsupported scalar kind,
+  /// or a component count outside 1 to 4).
+  kInvalid,
+
+  kFloat32,
+  kFloat32x2,
+  kFloat32x3,
+  kFloat32x4,
+
+  kFloat16,
+  kFloat16x2,
+  kFloat16x3,
+  kFloat16x4,
+
+  kSInt8,
+  kSInt8x2,
+  kSInt8x3,
+  kSInt8x4,
+
+  kUInt8,
+  kUInt8x2,
+  kUInt8x3,
+  kUInt8x4,
+
+  kSInt16,
+  kSInt16x2,
+  kSInt16x3,
+  kSInt16x4,
+
+  kUInt16,
+  kUInt16x2,
+  kUInt16x3,
+  kUInt16x4,
+
+  kSInt32,
+  kSInt32x2,
+  kSInt32x3,
+  kSInt32x4,
+
+  kUInt32,
+  kUInt32x2,
+  kUInt32x3,
+  kUInt32x4,
+};
+
 struct ShaderStageIOSlot {
   const char* name;
   size_t location;
@@ -193,6 +247,97 @@ struct ShaderStageIOSlot {
            offset == other.offset &&                     //
            relaxed_precision == other.relaxed_precision  //
         ;
+  }
+
+  /// @brief  Derives the flat vertex attribute format from this slot's scalar
+  ///         type, bit width, and component count.
+  ///
+  ///         Returns `kInvalid` for matrices, component counts outside 1 to 4,
+  ///         mismatched bit widths, and scalar kinds that are not valid vertex
+  ///         inputs (boolean, 64-bit integers, and doubles).
+  constexpr VertexAttributeFormat GetVertexAttributeFormat() const {
+    if (columns != 1u || vec_size < 1u || vec_size > 4u) {
+      return VertexAttributeFormat::kInvalid;
+    }
+    auto pick = [vec_size = vec_size](
+                    VertexAttributeFormat x1, VertexAttributeFormat x2,
+                    VertexAttributeFormat x3, VertexAttributeFormat x4) {
+      switch (vec_size) {
+        case 1:
+          return x1;
+        case 2:
+          return x2;
+        case 3:
+          return x3;
+        case 4:
+          return x4;
+        default:
+          return VertexAttributeFormat::kInvalid;
+      }
+    };
+    switch (type) {
+      case ShaderType::kFloat:
+        return bit_width == 32u ? pick(VertexAttributeFormat::kFloat32,
+                                       VertexAttributeFormat::kFloat32x2,
+                                       VertexAttributeFormat::kFloat32x3,
+                                       VertexAttributeFormat::kFloat32x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kHalfFloat:
+        return bit_width == 16u ? pick(VertexAttributeFormat::kFloat16,
+                                       VertexAttributeFormat::kFloat16x2,
+                                       VertexAttributeFormat::kFloat16x3,
+                                       VertexAttributeFormat::kFloat16x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kSignedByte:
+        return bit_width == 8u ? pick(VertexAttributeFormat::kSInt8,
+                                      VertexAttributeFormat::kSInt8x2,
+                                      VertexAttributeFormat::kSInt8x3,
+                                      VertexAttributeFormat::kSInt8x4)
+                               : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnsignedByte:
+        return bit_width == 8u ? pick(VertexAttributeFormat::kUInt8,
+                                      VertexAttributeFormat::kUInt8x2,
+                                      VertexAttributeFormat::kUInt8x3,
+                                      VertexAttributeFormat::kUInt8x4)
+                               : VertexAttributeFormat::kInvalid;
+      case ShaderType::kSignedShort:
+        return bit_width == 16u ? pick(VertexAttributeFormat::kSInt16,
+                                       VertexAttributeFormat::kSInt16x2,
+                                       VertexAttributeFormat::kSInt16x3,
+                                       VertexAttributeFormat::kSInt16x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnsignedShort:
+        return bit_width == 16u ? pick(VertexAttributeFormat::kUInt16,
+                                       VertexAttributeFormat::kUInt16x2,
+                                       VertexAttributeFormat::kUInt16x3,
+                                       VertexAttributeFormat::kUInt16x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kSignedInt:
+        return bit_width == 32u ? pick(VertexAttributeFormat::kSInt32,
+                                       VertexAttributeFormat::kSInt32x2,
+                                       VertexAttributeFormat::kSInt32x3,
+                                       VertexAttributeFormat::kSInt32x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnsignedInt:
+        return bit_width == 32u ? pick(VertexAttributeFormat::kUInt32,
+                                       VertexAttributeFormat::kUInt32x2,
+                                       VertexAttributeFormat::kUInt32x3,
+                                       VertexAttributeFormat::kUInt32x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnknown:
+      case ShaderType::kVoid:
+      case ShaderType::kBoolean:
+      case ShaderType::kSignedInt64:
+      case ShaderType::kUnsignedInt64:
+      case ShaderType::kAtomicCounter:
+      case ShaderType::kDouble:
+      case ShaderType::kStruct:
+      case ShaderType::kImage:
+      case ShaderType::kSampledImage:
+      case ShaderType::kSampler:
+        return VertexAttributeFormat::kInvalid;
+    }
+    FML_UNREACHABLE();
   }
 };
 

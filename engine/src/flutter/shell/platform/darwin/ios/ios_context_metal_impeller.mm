@@ -15,7 +15,6 @@ namespace flutter {
 namespace {
 impeller::Flags SettingsToFlags(const Settings& settings) {
   return impeller::Flags{
-      .antialiased_lines = settings.impeller_antialiased_lines,
       .use_sdfs = settings.impeller_use_sdfs,
   };
 }

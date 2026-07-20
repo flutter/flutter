@@ -9,7 +9,7 @@
 #include <cmath>
 #include "gtest/gtest.h"
 
-TEST(FlDartProjectTest, Null) {
+TEST(FlValueTest, Null) {
   g_autoptr(FlValue) value = fl_value_new_null();
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_NULL);
 }
@@ -886,7 +886,7 @@ TEST(FlValueTest, MapToString) {
                "int64_list, []: float_list, []: list, {}: map}");
 }
 
-TEST(FlDartProjectTest, Custom) {
+TEST(FlValueTest, Custom) {
   g_autoptr(FlValue) value =
       fl_value_new_custom(128, g_strdup("Hello World"), g_free);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
@@ -895,7 +895,7 @@ TEST(FlDartProjectTest, Custom) {
                "Hello World");
 }
 
-TEST(FlDartProjectTest, CustomNoDestroyNotify) {
+TEST(FlValueTest, CustomNoDestroyNotify) {
   g_autoptr(FlValue) value = fl_value_new_custom(128, "Hello World", nullptr);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
   ASSERT_EQ(fl_value_get_custom_type(value), 128);
@@ -903,7 +903,7 @@ TEST(FlDartProjectTest, CustomNoDestroyNotify) {
                "Hello World");
 }
 
-TEST(FlDartProjectTest, CustomObject) {
+TEST(FlValueTest, CustomObject) {
   g_autoptr(GObject) v = G_OBJECT(g_object_new(G_TYPE_OBJECT, nullptr));
   g_autoptr(FlValue) value = fl_value_new_custom_object(128, v);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);
@@ -911,7 +911,7 @@ TEST(FlDartProjectTest, CustomObject) {
   ASSERT_TRUE(G_IS_OBJECT(fl_value_get_custom_value_object(value)));
 }
 
-TEST(FlDartProjectTest, CustomObjectTake) {
+TEST(FlValueTest, CustomObjectTake) {
   g_autoptr(FlValue) value = fl_value_new_custom_object_take(
       128, G_OBJECT(g_object_new(G_TYPE_OBJECT, nullptr)));
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_CUSTOM);

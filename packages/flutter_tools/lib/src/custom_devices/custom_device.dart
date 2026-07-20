@@ -303,6 +303,7 @@ class CustomDeviceAppSession {
         ],
         if (debuggingOptions.startPaused) 'start-paused=true',
         if (debuggingOptions.disableServiceAuthCodes) 'disable-service-auth-codes=true',
+        if (debuggingOptions.disableServiceOriginCheck) 'disable-service-origin-check=true',
         if (debuggingOptions.dartFlags.isNotEmpty) 'dart-flags=${debuggingOptions.dartFlags}',
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',
@@ -776,6 +777,16 @@ class CustomDevice extends Device {
 
   @override
   Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
+
+  @override
+  Future<CpuArch> get cpuArch async {
+    // Custom devices only support Linux target platforms (see
+    // CustomDeviceConfig), so the arch is derived from that.
+    return switch (_config.platform) {
+      TargetPlatform.linux_x64 => CpuArch.x86_64,
+      _ => CpuArch.arm64,
+    };
+  }
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {

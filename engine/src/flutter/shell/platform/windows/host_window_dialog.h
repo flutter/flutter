@@ -35,6 +35,8 @@ class HostWindowDialog : public HostWindowSized {
                    bool sized_to_content,
                    bool resizable);
 
+  ~HostWindowDialog() override;
+
   void SetFullscreen(bool fullscreen,
                      std::optional<FlutterEngineDisplayId> display_id) override;
   bool GetFullscreen() const override;
