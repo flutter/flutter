@@ -178,12 +178,23 @@ SampleCount Playground::GetDefaultSampleCount() const {
 
 bool Playground::InitializePipelineDescriptorForRendering(
     PipelineDescriptor& desc) const {
-  // Match the golden/verirication harness render target:
+  // Match the golden/verification harness render target:
   // - msaa or single samples depending on the Context
-  // - no depth or stencil
+  // - depth and stencil formats from the Context
+  std::shared_ptr<Context> context = GetContext();
+  if (!context) {
+    return false;
+  }
   desc.SetSampleCount(GetDefaultSampleCount());
-  desc.ClearStencilAttachments();
-  desc.ClearDepthAttachment();
+
+  auto depth_stencil_format =
+      context->GetCapabilities()->GetDefaultDepthStencilFormat();
+  if (depth_stencil_format != PixelFormat::kUnknown) {
+    desc.SetDepthPixelFormat(depth_stencil_format);
+    desc.SetStencilPixelFormat(depth_stencil_format);
+    desc.SetDepthStencilAttachmentDescriptor(DepthAttachmentDescriptor{});
+    desc.SetStencilAttachmentDescriptors(StencilAttachmentDescriptor{});
+  }
   return true;
 }
 
@@ -271,6 +282,25 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
+bool Playground::IsBackendEnabled(PlaygroundBackend backend) const {
+  if (!SupportsBackend(backend)) {
+    return false;
+  }
+  switch (backend) {
+    case PlaygroundBackend::kMetal:
+      return switches_.backends_enabled.metal;
+    case PlaygroundBackend::kMetalSDF:
+      return switches_.backends_enabled.metal_sdf;
+    case PlaygroundBackend::kOpenGLES:
+      return switches_.backends_enabled.opengles;
+    case PlaygroundBackend::kOpenGLESSDF:
+      return switches_.backends_enabled.opengles_sdf;
+    case PlaygroundBackend::kVulkan:
+      return switches_.backends_enabled.vulkan;
+  }
+  FML_UNREACHABLE();
+}
+
 std::unique_ptr<PlaygroundImpl>& Playground::GetImpl() const {
   if (!impl_) {
     SetupContext();
@@ -301,7 +331,7 @@ void Playground::SetupWindow() {
 }
 
 bool Playground::IsPlaygroundEnabled() const {
-  return switches_.enable_playground;
+  return switches_.outputs_enabled.window;
 }
 
 void Playground::TearDownContextData() {
@@ -372,6 +402,7 @@ void Playground::SetEnableWriteGolden(bool write_golden) {
 }
 
 bool Playground::RenderImage(const RenderCallback& callback,
+                             bool is_onscreen,
                              bool write_result) {
   std::shared_ptr<Context> context = GetContext();
   if (!context) {
@@ -383,26 +414,36 @@ bool Playground::RenderImage(const RenderCallback& callback,
   ISize size(std::round(GetWindowSize().width * content_scale.x),
              std::round(GetWindowSize().height * content_scale.y));
 
-  std::string label =
-      write_result ? "Golden Render Pass" : "Playground Verification Pass";
-  RenderTargetAllocator render_target_allocator(
-      context->GetResourceAllocator());
+  std::unique_ptr<Surface> surface;
   RenderTarget render_target;
-  if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
-    render_target = render_target_allocator.CreateOffscreenMSAA(
-        *context, size, /*mip_count=*/1, label + " (MSAA)",
-        RenderTarget::kDefaultColorAttachmentConfigMSAA,
-        /*stencil_attachment_config=*/std::nullopt);
+  if (is_onscreen) {
+    surface = GetImpl()->AcquireSurfaceFrame(context);
+    if (!surface) {
+      return false;
+    }
+    render_target = surface->GetRenderTarget();
   } else {
-    render_target = render_target_allocator.CreateOffscreen(
-        *context, size, /*mip_count=*/1, label,
-        RenderTarget::kDefaultColorAttachmentConfig,
-        /*stencil_attachment_config=*/std::nullopt);
+    RenderTargetAllocator render_target_allocator(
+        context->GetResourceAllocator());
+    std::string label =
+        write_result ? "Golden Render Pass" : "Playground Verification Pass";
+    if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
+      render_target = render_target_allocator.CreateOffscreenMSAA(
+          *context, size, /*mip_count=*/1, label + " (MSAA)",
+          RenderTarget::kDefaultColorAttachmentConfigMSAA);
+    } else {
+      render_target = render_target_allocator.CreateOffscreen(
+          *context, size, /*mip_count=*/1, label,
+          RenderTarget::kDefaultColorAttachmentConfig);
+    }
   }
   if (!render_target.IsValid()) {
     return false;
   }
-  if (!callback(render_target)) {
+  if (!callback(render_target, is_onscreen)) {
+    return false;
+  }
+  if (is_onscreen && !surface->Present()) {
     return false;
   }
   if (write_result && !WriteGoldenImage(render_target)) {
@@ -463,19 +504,38 @@ bool Playground::OpenPlaygroundHere(
   }
   ::glfwSetWindowSize(window, GetWindowSize().width, GetWindowSize().height);
 
-  bool writing_golden = GetGoldenDigestManager() && should_write_golden_;
-  if (!switches_.enable_playground || writing_golden) {
-    bool success = RenderImage(render_callback, false);
-    if (success && writing_golden) {
-      // Render twice for a golden result so the second pass observes warmed
-      // pipeline and resource caches.
-      success = RenderImage(render_callback, true);
+  bool writing_golden = switches_.outputs_enabled.golden &&
+                        GetGoldenDigestManager() && should_write_golden_;
+  if (switches_.outputs_enabled.offscreen ||
+      switches_.outputs_enabled.onscreen || writing_golden) {
+    if (switches_.outputs_enabled.offscreen ||
+        switches_.outputs_enabled.golden) {
+      // For golden output, this is the first pass rendering so that the
+      // second pass observes warmed pipeline and resource caches.
+      if (!RenderImage(render_callback, /*is_onscreen=*/false,
+                       /*write_image=*/false)) {
+        return false;
+      }
     }
-    if (!success || !switches_.enable_playground) {
-      return success;
+    if (switches_.outputs_enabled.onscreen) {
+      if (!RenderImage(render_callback, /*is_onscreen=*/true,
+                       /*write_image=*/false)) {
+        return false;
+      }
+    }
+    if (writing_golden) {
+      // The output should have also been rendered above in the offscreen
+      // step so that this second pass observes warmed pipeline and resource
+      // caches.
+      if (!RenderImage(render_callback, /*is_onscreen=*/false,
+                       /*write_image=*/true)) {
+        return false;
+      }
     }
   }
-  FML_CHECK(switches_.enable_playground);
+  if (!switches_.outputs_enabled.window) {
+    return true;
+  }
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -536,7 +596,7 @@ bool Playground::OpenPlaygroundHere(
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(),
                                  ImGuiDockNodeFlags_PassthruCentralNode);
-    bool result = render_callback(render_target);
+    bool result = render_callback(render_target, true);
     ImGui::Render();
 
     // Render ImGui overlay.
@@ -576,7 +636,7 @@ bool Playground::OpenPlaygroundHere(
 
       pass->EncodeCommands();
 
-      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+      if (!context->SubmitOnscreen(std::move(buffer))) {
         return false;
       }
     }
@@ -596,8 +656,9 @@ bool Playground::OpenPlaygroundHere(
 }
 
 bool Playground::OpenPlaygroundHere(const SinglePassCallback& pass_callback) {
-  return OpenPlaygroundHere(
-      [context = GetContext(), &pass_callback](RenderTarget& render_target) {
+  return OpenPlaygroundHere(  //
+      [context = GetContext(), &pass_callback](RenderTarget& render_target,
+                                               bool is_onscreen) {
         auto buffer = context->CreateCommandBuffer();
         if (!buffer) {
           return false;
@@ -615,9 +676,21 @@ bool Playground::OpenPlaygroundHere(const SinglePassCallback& pass_callback) {
         }
 
         pass->EncodeCommands();
-        if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+
+        if (is_onscreen) {
+          if (!context->SubmitOnscreen(std::move(buffer))) {
+            return false;
+          }
+        } else {
+          if (!context->EnqueueCommandBuffer(buffer)) {
+            return false;
+          }
+        }
+
+        if (!context->FlushCommandBuffers()) {
           return false;
         }
+
         return true;
       });
 }

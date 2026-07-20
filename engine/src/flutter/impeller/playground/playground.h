@@ -74,7 +74,8 @@ class Playground {
 
   std::shared_ptr<TypographerContext> GetTypographerContext() const;
 
-  using RenderCallback = std::function<bool(RenderTarget& render_target)>;
+  using RenderCallback =
+      std::function<bool(RenderTarget& render_target, bool is_onscreen)>;
 
   /// @brief Whether this instance will write a golden image of the output
   ///        from |OpenPlaygroundHere|.
@@ -106,7 +107,12 @@ class Playground {
   std::shared_ptr<Texture> CreateTextureCubeForFixture(
       std::array<const char*, 6> fixture_names) const;
 
+  /// Returns true if this platform supports rendering to the indicated backend.
   static bool SupportsBackend(PlaygroundBackend backend);
+
+  /// Returns true if the platform supports the backend and it is enalbed by
+  /// the playground switches.
+  bool IsBackendEnabled(PlaygroundBackend backend) const;
 
   virtual std::unique_ptr<fml::Mapping> OpenAssetAsMapping(
       std::string asset_name) const = 0;
@@ -132,8 +138,10 @@ class Playground {
 
   /// @brief Initializes the provided |PipelineDescriptor| with appropriate
   ///        default values to match the conditions under which a pipeline
-  ///        will be rendered.
-  bool InitializePipelineDescriptorForRendering(PipelineDescriptor& desc) const;
+  ///        will be rendered and return true if the defaults were properly
+  ///        discovered (requires creation of a context).
+  [[nodiscard]] bool InitializePipelineDescriptorForRendering(
+      PipelineDescriptor& desc) const;
 
  protected:
   // This method could override testing::Test::TearDown() directly, but
@@ -236,7 +244,9 @@ class Playground {
   void SetCursorPosition(Point pos);
 
   [[nodiscard]]
-  bool RenderImage(const RenderCallback& render_callback, bool write_image);
+  bool RenderImage(const RenderCallback& render_callback,
+                   bool is_onscreen,
+                   bool write_image);
 
   [[nodiscard]]
   bool WriteGoldenImage(const RenderTarget& render_target,

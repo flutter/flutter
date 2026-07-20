@@ -20,6 +20,10 @@ void ComputePlaygroundTest::SetUp() {
     GTEST_SKIP() << "Playground doesn't support this backend type.";
     return;
   }
+  if (!IsBackendEnabled(GetParam())) {
+    GTEST_SKIP() << "This backend is disabled by the command line";
+    return;
+  }
 
   if (!Playground::ShouldOpenNewPlaygrounds()) {
     GTEST_SKIP() << "Skipping due to user action.";
