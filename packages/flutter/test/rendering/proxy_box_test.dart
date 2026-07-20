@@ -1070,6 +1070,23 @@ void main() {
     expect(backdropFilter.filterConfig, equals(filterConfig1));
     expect(() => backdropFilter.filter, throwsAssertionError);
   });
+
+  test('RenderProxyBoxMixin.computeDryBaseline returns null when the child has no baseline', () {
+    // Regression test for https://github.com/flutter/flutter/issues/189711
+    final child = _RenderNoBaseline();
+    final proxy = RenderSemanticsAnnotations(
+      child: child,
+      properties: const SemanticsProperties(),
+    );
+    layout(proxy);
+    expect(
+      proxy.getDryBaseline(
+        const BoxConstraints.tightFor(width: 40.0, height: 20.0),
+        TextBaseline.alphabetic,
+      ),
+      isNull,
+    );
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -1204,5 +1221,23 @@ class RenderBoxWithTestConstraints extends RenderProxyBox {
   @override
   Size computeDryLayout(TestConstraints constraints) {
     return constraints.constrain(Size.square(constraints.testValue));
+  }
+}
+
+
+class _RenderNoBaseline extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.constrain(const Size(40.0, 20.0));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(40.0, 20.0));
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return null;
   }
 }
