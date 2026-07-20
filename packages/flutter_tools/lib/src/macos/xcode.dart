@@ -199,11 +199,18 @@ class Xcode {
   /// Verifies that `devicectl` is installed by checking Xcode version and trying
   /// to run it. `devicectl` is made available in Xcode 15.
   bool get isDevicectlInstalled {
-    return _isDevicectlInstalled ??= _processUtils.exitsHappySync(<String>[
-      ...xcrunCommand(),
-      'devicectl',
-      '--version',
-    ]);
+    if (_isDevicectlInstalled == null) {
+      if (currentVersion == null) {
+        _isDevicectlInstalled = false;
+        return _isDevicectlInstalled!;
+      }
+      _isDevicectlInstalled = _processUtils.exitsHappySync(<String>[
+        ...xcrunCommand(),
+        'devicectl',
+        '--version',
+      ]);
+    }
+    return _isDevicectlInstalled ?? false;
   }
 
   bool get isRequiredVersionSatisfactory {
