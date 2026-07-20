@@ -125,19 +125,19 @@ public class FlutterViewTest {
   }
 
   @Test
-  public void onCheckIsTextEditor_reflectsTextInputPluginTarget() throws Exception {
+  @Test
+  public void onCheckIsTextEditor_reflectsTextInputPluginTarget() {
     FlutterView flutterView = new FlutterView(ctx);
     assertFalse(flutterView.onCheckIsTextEditor());
 
     FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
     when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
     when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
-    flutterView.attachToFlutterEngine(flutterEngine);
 
     TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
-    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
-    textInputPluginField.setAccessible(true);
-    textInputPluginField.set(flutterView, textInputPlugin);
+    when(flutterEngine.getTextInputPlugin()).thenReturn(textInputPlugin);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
 
     when(textInputPlugin.isInputConnectionTarget()).thenReturn(true);
     assertTrue(flutterView.onCheckIsTextEditor());
