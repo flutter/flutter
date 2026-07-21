@@ -252,10 +252,17 @@ class EnableHcppManifestTaskTest {
             "The android namespace declaration must be preserved"
         )
         val topLevel: List<Node> = manifest.children().filterIsInstance<Node>()
-        assertEquals("24", topLevel.first { it.name() == "uses-sdk" }.attribute("android:minSdkVersion"))
+        assertEquals(
+            "24",
+            topLevel
+                .first { it.name() == "uses-sdk" }
+                .attribute("android:minSdkVersion")
+        )
         assertEquals(
             "android.permission.INTERNET",
-            topLevel.first { it.name() == "uses-permission" }.attribute("android:name")
+            topLevel
+                .first { it.name() == "uses-permission" }
+                .attribute("android:name")
         )
         val queriesIntent: Node =
             topLevel
@@ -265,20 +272,34 @@ class EnableHcppManifestTaskTest {
                 .first { it.name() == "intent" }
         assertEquals(
             "text/plain",
-            queriesIntent.children().filterIsInstance<Node>().first { it.name() == "data" }.attribute("android:mimeType")
+            queriesIntent
+                .children()
+                .filterIsInstance<Node>()
+                .first { it.name() == "data" }
+                .attribute("android:mimeType")
         )
         val applicationNode: Node = topLevel.first { it.name() == "application" }
         assertEquals("Host", applicationNode.attribute("android:label"))
         assertEquals("true", applicationNode.attribute("android:debuggable"))
         val activityNode: Node =
-            applicationNode.children().filterIsInstance<Node>().first { it.name() == "activity" }
+            applicationNode
+                .children()
+                .filterIsInstance<Node>()
+                .first { it.name() == "activity" }
         assertEquals("com.example.host.MainActivity", activityNode.attribute("android:name"))
         assertEquals("singleTop", activityNode.attribute("android:launchMode"))
         val intentFilter: Node =
-            activityNode.children().filterIsInstance<Node>().first { it.name() == "intent-filter" }
+            activityNode
+                .children()
+                .filterIsInstance<Node>()
+                .first { it.name() == "intent-filter" }
         assertEquals(
             "android.intent.action.MAIN",
-            intentFilter.children().filterIsInstance<Node>().first { it.name() == "action" }.attribute("android:name")
+            intentFilter
+                .children()
+                .filterIsInstance<Node>()
+                .first { it.name() == "action" }
+                .attribute("android:name")
         )
         val metadataValuesByName: Map<Any?, Any?> =
             applicationNode
