@@ -119,7 +119,8 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
         '(__TEXT,__constg_swiftt)' ||
         '(__DATA_CONST,__const)' ||
         '(__DATA,__data)' ||
-        '(__DATA,__objc_data)' => entry.name.startsWith(r'_$s'),
+        '(__DATA,__objc_data)' ||
+        '(__DATA,__common)' => entry.name.startsWith(r'_$s'),
         _ => false,
       };
 
@@ -269,7 +270,10 @@ final class NmEntry {
     return switch (type) {
       '(__DATA,__objc_data)' || '(__DATA,__data)' =>
         (name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
-            name.startsWith(r'_OBJC_CLASS_$_Flutter')),
+            name.startsWith(r'_OBJC_CLASS_$_Flutter') ||
+            ((name.startsWith(r'_OBJC_METACLASS_$__TtC') ||
+                    name.startsWith(r'_OBJC_CLASS_$__TtC')) &&
+                name.contains('InternalFlutterSwift'))),
       _ => false,
     };
   }
