@@ -390,6 +390,7 @@ void main() {
     expect(CpuArch.fromName('arm64'), CpuArch.arm64);
     expect(CpuArch.fromName('x86'), CpuArch.x86);
     expect(CpuArch.fromName('x64'), CpuArch.x64);
+    expect(CpuArch.fromName('x86_64'), CpuArch.x64);
     expect(CpuArch.fromName('riscv64'), CpuArch.riscv64);
     expect(() => CpuArch.fromName('bogus'), throwsException);
 
