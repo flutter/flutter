@@ -6,6 +6,7 @@ on:
     # Actions can be delayed or dropped during heavy load periods,
     # e.g. top of the hour, first of the month. Offset accordingly.
     - cron: 40 09 2 2,5,8,11 *
+  workflow_dispatch:
 
 jobs:
   create_issue:
