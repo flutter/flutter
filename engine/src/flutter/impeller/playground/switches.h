@@ -118,12 +118,19 @@ struct PlaygroundSwitches {
 
   Flags flags;
 
+  std::optional<std::string> golden_output_dir;
+
   PlaygroundSwitches();
 
-  static absl::StatusOr<PlaygroundSwitches> FromCommandLine(
-      const fml::CommandLine& args);
+  static const PlaygroundSwitches& CommandLineSwitches();
+
+  static bool InitCommandLineSwitches(const fml::CommandLine& args,
+                                      const std::string& golden_option_name);
 
   bool operator==(const PlaygroundSwitches&) const = default;
+
+ private:
+  static std::optional<PlaygroundSwitches> command_line_switches_;
 };
 
 }  // namespace impeller

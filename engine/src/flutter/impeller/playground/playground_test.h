@@ -27,6 +27,7 @@ class PlaygroundTest : public Playground,
 
   virtual ~PlaygroundTest();
 
+  /// Initializes the default playground test environment.
   static bool SetupTestEnvironment();
 
   void SetUp() override;
@@ -59,9 +60,6 @@ class PlaygroundTest : public Playground,
   virtual bool IsGoldenTestSuite() const;
 
  private:
-  static PlaygroundSwitches kCommandLineSwitches;
-  friend class ComputePlaygroundTest;
-
   // |Playground|
   bool ShouldKeepRendering() const override;
 

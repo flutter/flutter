@@ -5,6 +5,16 @@
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
+impeller_component("playground_switches") {
+  testonly = true
+
+  sources = [
+    "switches.cc",
+    "switches.h",
+  ]
+  deps = [ "//flutter/testing:testing_lib" ]
+}
+
 impeller_component("playground") {
   testonly = true
 
@@ -13,8 +23,6 @@ impeller_component("playground") {
     "playground.h",
     "playground_impl.cc",
     "playground_impl.h",
-    "switches.cc",
-    "switches.h",
     "widgets.cc",
     "widgets.h",
   ]
@@ -50,6 +58,7 @@ impeller_component("playground") {
   }
 
   public_deps = [
+    ":playground_switches",
     "../fixtures:modern_shader_fixtures",
     "../fixtures:shader_fixtures",
     "../renderer",

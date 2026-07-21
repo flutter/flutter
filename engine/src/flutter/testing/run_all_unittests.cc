@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 #ifdef IMPELLER_UNITTEST_SUITE
   if (!impeller::testing::ImpellerUnittestSetup()) {
     FML_LOG(ERROR) << "Impeller unittest setup failure";
-    return -1;
+    return 1;
   }
 #endif  // IMPELLER_UNITTEST_SUITE
 

@@ -11,7 +11,7 @@
 namespace impeller {
 
 ComputePlaygroundTest::ComputePlaygroundTest()
-    : Playground(GetParam(), PlaygroundTest::kCommandLineSwitches) {}
+    : Playground(GetParam(), PlaygroundSwitches::CommandLineSwitches()) {}
 
 ComputePlaygroundTest::~ComputePlaygroundTest() = default;
 

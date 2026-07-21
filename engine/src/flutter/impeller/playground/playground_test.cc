@@ -18,7 +18,7 @@
 namespace impeller {
 
 PlaygroundTest::PlaygroundTest()
-    : Playground(GetParam(), kCommandLineSwitches) {
+    : Playground(GetParam(), PlaygroundSwitches::CommandLineSwitches()) {
   ImpellerValidationErrorsSetCallback(
       [](const char* message, const char* file, int line) -> bool {
         // GTEST_MESSAGE_AT_ can only be used in a function that returns void.
@@ -34,8 +34,6 @@ PlaygroundTest::PlaygroundTest()
         return true;
       });
 }
-
-PlaygroundSwitches PlaygroundTest::kCommandLineSwitches;
 
 PlaygroundTest::~PlaygroundTest() {
   ImpellerValidationErrorsSetCallback(nullptr);
@@ -92,17 +90,17 @@ class PlaygroundTestEnvironment : public ::testing::Environment {
   }
 
   void SetUp() override {
-    const fml::CommandLine& args = ::flutter::testing::GetArgsForProcess();
-    std::string golden_output_dir;
-    if (args.GetOptionValue("golden_output_dir", &golden_output_dir)) {
+    const PlaygroundSwitches& switches =
+        PlaygroundSwitches::CommandLineSwitches();
+    if (switches.golden_output_dir) {
       const std::optional<std::string> validated_dir =
-          ValidateGoldenDirectory(golden_output_dir);
+          ValidateGoldenDirectory(switches.golden_output_dir.value());
       if (validated_dir) {
         golden_manager_.emplace(*validated_dir);
       } else {
         FML_CHECK(validated_dir)
             << "Did not recognize golden output directory: "
-            << golden_output_dir;
+            << switches.golden_output_dir.value();
       }
     }
   }
@@ -170,15 +168,13 @@ bool PlaygroundTest::SetupTestEnvironment() {
   setenv("METAL_DEVICE_WRAPPER_TYPE", "1", true);
 #endif
 
-  auto switches_or = PlaygroundSwitches::FromCommandLine(
-      flutter::testing::GetArgsForProcess());
-  if (!switches_or.ok()) {
-    return false;
-  }
-  kCommandLineSwitches = switches_or.value();
+  bool success = PlaygroundSwitches::InitCommandLineSwitches(
+      flutter::testing::GetArgsForProcess(), "golden_output_dir");
 
+  // Complete our setup in case the switches failure is ignored by the caller.
   ::testing::AddGlobalTestEnvironment(new PlaygroundTestEnvironment());
-  return true;
+
+  return success;
 }
 
 impeller::testing::GoldenDigestManager* PlaygroundTest::GetGoldenDigestManager()
