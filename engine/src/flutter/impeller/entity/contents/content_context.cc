@@ -265,7 +265,6 @@ struct ContentContext::Pipelines {
   Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight;
   Variants<GaussianBlurPipeline> gaussian_blur;
   Variants<GlyphAtlasPipeline> glyph_atlas;
-  Variants<LinePipeline> line;
   Variants<LinearGradientFillPipeline> linear_gradient_fill;
   Variants<LinearGradientSSBOFillPipeline> linear_gradient_ssbo_fill;
   Variants<LinearGradientUniformFillPipeline> linear_gradient_uniform_fill;
@@ -305,6 +304,7 @@ struct ContentContext::Pipelines {
   Variants<VerticesUber1Shader> vertices_uber_1_;
   Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<UberSDFPipeline> uber_sdf;
+  Variants<ComplexRSEPipeline> complex_rse;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
 // Web doesn't support external texture OpenGL extensions
@@ -565,7 +565,8 @@ ContentContext::ContentContext(
       data_host_buffer_(HostBuffer::Create(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
-          context_->GetCapabilities()->GetMinimumUniformAlignment())),
+          context_->GetCapabilities()->GetMinimumUniformAlignment(),
+          context_->GetSubmissionTracker())),
       text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -579,7 +580,8 @@ ContentContext::ContentContext(
       context_->GetCapabilities()->NeedsPartitionedHostBuffer()
           ? HostBuffer::Create(
                 context_->GetResourceAllocator(), context_->GetIdleWaiter(),
-                context_->GetCapabilities()->GetMinimumUniformAlignment())
+                context_->GetCapabilities()->GetMinimumUniformAlignment(),
+                context_->GetSubmissionTracker())
           : data_host_buffer_;
   {
     TextureDescriptor desc;
@@ -634,10 +636,10 @@ ContentContext::ContentContext(
     pipelines_->solid_fill.CreateDefault(*context_, options);
     pipelines_->texture.CreateDefault(*context_, options);
     pipelines_->fast_gradient.CreateDefault(*context_, options);
-    pipelines_->line.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
+      pipelines_->complex_rse.CreateDefault(*context_, options);
     }
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
@@ -1207,6 +1209,11 @@ PipelineRef ContentContext::GetUberSDFPipeline(
   return GetPipeline(this, pipelines_->uber_sdf, opts);
 }
 
+PipelineRef ContentContext::GetComplexRSEPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->complex_rse, opts);
+}
+
 PipelineRef ContentContext::GetPorterDuffPipeline(
     BlendMode mode,
     ContentContextOptions opts) const {
@@ -1530,10 +1537,6 @@ PipelineRef ContentContext::GetDrawVerticesUberPipeline(
 PipelineRef ContentContext::GetCirclePipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->circle, opts);
-}
-
-PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->line, opts);
 }
 
 #ifdef IMPELLER_ENABLE_OPENGLES

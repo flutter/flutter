@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -282,5 +283,23 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FlutterVmService? vmService;
 
   @override
+  final DevelopmentShaderCompiler developmentShaderCompiler = const FakeShaderCompiler();
+
+  @override
   Future<void> handleHotRestart() async {}
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform? platform) {}
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

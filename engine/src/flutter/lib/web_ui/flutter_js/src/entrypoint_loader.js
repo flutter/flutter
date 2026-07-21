@@ -72,7 +72,7 @@ export class FlutterEntrypointLoader {
       entrypointBaseUrl = entryPointBaseUrl;
     }
     if (build.compileTarget === "dart2wasm") {
-      return this._loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded);
+      return this._loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded, config?.wasmDeferredModulesLoader);
     } else {
       const mainPath = build.mainJsPath ?? "main.dart.js";
       const entrypointUrl = resolveUrlWithSegments(entrypointBaseUrl, mainPath);
@@ -148,8 +148,9 @@ export class FlutterEntrypointLoader {
    * @param {*} deps
    * @param {string} entrypointBaseUrl
    * @param {import("./types").OnEntrypointLoadedCallback} onEntrypointLoaded
+   * @param {import("./types").DeferredWasmModulesLoader} wasmDeferredModulesLoader
    */
-  async _loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded) {
+  async _loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded, wasmDeferredModulesLoader) {
     if (!this._scriptLoaded) {
       this._scriptLoaded = true;
 
@@ -181,16 +182,18 @@ export class FlutterEntrypointLoader {
         importsPromise = Promise.resolve({});
       }
       const compiledDartApp = await compiledDartAppPromise;
+      const defaultLoadDeferredModules = (moduleNames, handleModule) =>
+        Promise.all(
+          moduleNames.map((moduleName) =>
+            handleModule(
+              moduleName,
+              fetch(resolveUrlWithSegments(entrypointBaseUrl, moduleName))
+            )
+          )
+        );
       const dartApp = await compiledDartApp.instantiate(await importsPromise, {
-        loadDynamicModule: async (wasmUri, mjsUri) => {
-          const wasmBytes = fetch(resolveUrlWithSegments(entrypointBaseUrl, wasmUri));
-          let mjsRuntimeUri = resolveUrlWithSegments(entrypointBaseUrl, mjsUri);
-          if (this._ttPolicy != null) {
-            mjsRuntimeUri = this._ttPolicy.createScriptURL(mjsRuntimeUri);
-          }
-          const mjsModule = import(mjsRuntimeUri);
-          return [await wasmBytes, await mjsModule];
-        }
+        loadDeferredModules:
+          wasmDeferredModulesLoader || defaultLoadDeferredModules,
       });
       await dartApp.invokeMain();
     }

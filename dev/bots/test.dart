@@ -53,6 +53,7 @@ import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
 import 'suite_runners/run_android_engine_tests.dart';
+import 'suite_runners/run_android_hardware_smoke_tests.dart';
 import 'suite_runners/run_android_java17_integration_tool_tests.dart';
 import 'suite_runners/run_android_preview_integration_tool_tests.dart';
 import 'suite_runners/run_customer_testing_tests.dart';
@@ -142,6 +143,14 @@ Future<void> main(List<String> args) async {
           runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests': () =>
           runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_hardware_smoke_vulkan_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
+      'android_hardware_smoke_opengles_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles),
+      'android_hardware_smoke_vulkan_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan, runInstrumented: true),
+      'android_hardware_smoke_opengles_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles, runInstrumented: true),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
