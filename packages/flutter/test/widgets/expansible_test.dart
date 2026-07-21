@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Controller expands and collapses the widget', (WidgetTester tester) async {
