@@ -219,6 +219,10 @@ void _setAssetManager(ui_web.AssetManager assetManager) {
   _assetManager = assetManager;
 }
 
+void setAssetManager(ui_web.AssetManager assetManager) {
+  _setAssetManager(assetManager);
+}
+
 final RegExp _hashedExtensionSuffixPattern = RegExp(
   r'\.[0-9a-f]{8}((?:\.(?:js|wasm|mjs)\.map)|(?:\.[^./]+))?$',
 );
