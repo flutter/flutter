@@ -13,6 +13,14 @@
 
 namespace impeller {
 
+struct PlaygroundSwitchOption {
+  PlaygroundSwitchOption(std::string name, bool& flag)
+      : name(std::move(name)), flag(flag) {}
+
+  std::string name;
+  bool& flag;
+};
+
 /// There are 4 different ways that a Playground test can be rendered:
 /// - offscreen - the default - renders the playground output to an
 ///   offscreen RenderTarget obtained from the context's allocator.
@@ -35,17 +43,17 @@ struct PlaygroundOutputs {
 
   bool Any() const { return offscreen || onscreen || golden || window; }
 
-  static constexpr std::array<std::string, 4> kNames = {
-      "offscreen",
-      "onscreen",
-      "golden",
-      "window",
+  std::array<PlaygroundSwitchOption, 4> switches() {
+    return {{
+        PlaygroundSwitchOption("offscreen", offscreen),
+        PlaygroundSwitchOption("onscreen", onscreen),
+        PlaygroundSwitchOption("golden", golden),
+        PlaygroundSwitchOption("window", window),
+    }};
   };
 
   bool operator==(const PlaygroundOutputs&) const = default;
 };
-static_assert(sizeof(PlaygroundOutputs) ==
-              sizeof(bool[PlaygroundOutputs::kNames.size()]));
 
 /// The default list of backends over which the playground tests will be
 /// executed depends mostly on which backends the platform supports, but
@@ -63,14 +71,18 @@ struct PlaygroundBackends {
     return metal || metal_sdf || opengles || opengles_sdf || vulkan;
   }
 
-  static constexpr std::array<std::string, 5> kNames = {
-      "Metal", "MetalSDF", "OpenGLES", "OpenGLESSDF", "Vulkan"  //
+  std::array<PlaygroundSwitchOption, 5> switches() {
+    return {{
+        PlaygroundSwitchOption("Metal", metal),
+        PlaygroundSwitchOption("MetalSDF", metal_sdf),
+        PlaygroundSwitchOption("OpenGLES", opengles),
+        PlaygroundSwitchOption("OpenGLESSDF", opengles_sdf),
+        PlaygroundSwitchOption("Vulkan", vulkan),
+    }};
   };
 
   bool operator==(const PlaygroundBackends&) const = default;
 };
-static_assert(sizeof(PlaygroundBackends) ==
-              sizeof(bool[PlaygroundBackends::kNames.size()]));
 
 struct PlaygroundSwitches {
   PlaygroundOutputs outputs_enabled;

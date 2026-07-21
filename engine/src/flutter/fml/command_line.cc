@@ -69,18 +69,20 @@ std::vector<std::string_view> CommandLine::GetOptionValues(
   return ret;
 }
 
-std::vector<std::string> CommandLine::GetOptionValues(std::string_view name,
-                                                      char delimiter) const {
-  std::vector<std::string> ret;
+std::vector<std::string_view> CommandLine::GetOptionValues(
+    std::string_view name,
+    char delimiter) const {
+  std::vector<std::string_view> ret;
   for (const auto& option : options_) {
     if (option.name == name) {
+      std::string_view val(option.value);
       size_t pos = 0u;
-      while (pos < option.value.size()) {
-        size_t end = option.value.find(delimiter, pos);
+      while (pos < val.size()) {
+        size_t end = val.find(delimiter, pos);
         if (end == std::string::npos) {
-          end = option.value.size();
+          end = val.size();
         }
-        ret.push_back(option.value.substr(pos, end - pos));
+        ret.push_back(val.substr(pos, end - pos));
         pos = end + 1;
       }
     }

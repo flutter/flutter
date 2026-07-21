@@ -119,8 +119,8 @@ class CommandLine final {
   // Gets all values of the option |name|. Returns all values, which may be
   // empty if the option is not specified. Multiple values may be specified
   // in each appearance of the option, separated by the |delimiter|.
-  std::vector<std::string> GetOptionValues(std::string_view name,
-                                           char delimiter) const;
+  std::vector<std::string_view> GetOptionValues(std::string_view name,
+                                                char delimiter) const;
 
   // Gets the value of the option |name|, with a default if the option is not
   // specified. (Note: This doesn't return a const reference, since this would

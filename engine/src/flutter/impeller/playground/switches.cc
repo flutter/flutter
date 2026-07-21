@@ -12,41 +12,44 @@
 
 namespace {
 
-template <std::size_t N>
-std::string FoldNames(const std::array<std::string, N>& array) {
+template <typename T, std::size_t N>
+std::string FoldNames(const std::array<T, N>& array) {
   return std::accumulate(array.begin(), array.end(), std::string{},
-                         [](const std::string& a, const std::string& b) {
-                           return a.size() == 0 ? b : a + "," + b;
+                         [](const std::string& a, const T& b) {
+                           return a.size() == 0 ? b.name : a + "," + b.name;
                          });
 }
 
 template <typename T>
 bool ProcessFlagListArg(const fml::CommandLine& args,
-                        T* flags_copy,
+                        T& flags,
                         const std::string& option_name) {
-  std::vector<std::string> options = args.GetOptionValues(option_name, ',');
+  std::vector<std::string_view> options =
+      args.GetOptionValues(option_name, ',');
   if (options.empty()) {
     return true;
   }
   bool success = true;
-  bool* flags_bool = reinterpret_cast<bool*>(flags_copy);
-  static_assert(sizeof(T) == sizeof(bool[T::kNames.size()]));
-  flags_copy->Clear();
+  flags.Clear();
+  auto switches = flags.switches();
   for (std::string_view option : options) {
-    auto found_it = std::find(T::kNames.begin(), T::kNames.end(), option);
-    if (found_it == T::kNames.end()) {
+    auto found_it =
+        std::find_if(switches.begin(), switches.end(),
+                     [&option](const impeller::PlaygroundSwitchOption& s) {
+                       return s.name == option;
+                     });
+    if (found_it == switches.end()) {
       FML_LOG(WARNING) << "Unrecognized value for " << option_name << " ("
-                       << option << ") must be one of [" << FoldNames(T::kNames)
+                       << option << ") must be one of [" << FoldNames(switches)
                        << "].";
       success = false;
     } else {
-      size_t index = std::distance(T::kNames.begin(), found_it);
-      flags_bool[index] = true;
+      found_it->flag = true;
     }
   }
-  if (!flags_copy->Any()) {
+  if (!flags.Any()) {
     FML_LOG(WARNING) << "No options specified for " << option_name << ".";
-    FML_LOG(WARNING) << "At least one of [" << FoldNames(T::kNames) << "] "
+    FML_LOG(WARNING) << "At least one of [" << FoldNames(switches) << "] "
                      << "should be specified.";
     success = false;
   }
@@ -66,14 +69,14 @@ PlaygroundSwitches::PlaygroundSwitches(const fml::CommandLine& args) {
         FML_LOG(WARNING) << "The enable_playground flag is ignored if "
                             "the playground_output flag is used.";
       }
-      ProcessFlagListArg(args, &outputs_enabled, "playground_output");
+      ProcessFlagListArg(args, outputs_enabled, "playground_output");
     } else if (args.HasOption("enable_playground")) {
       FML_LOG(WARNING) << "The enable_playground flag is deprecated in "
                           "favor of --playground_output=window.";
       outputs_enabled.window = true;
     }
   }
-  ProcessFlagListArg(args, &backends_enabled, "playground_backend");
+  ProcessFlagListArg(args, backends_enabled, "playground_backend");
   std::string timeout_str;
   if (args.GetOptionValue("playground_timeout_ms", &timeout_str)) {
     timeout = std::chrono::milliseconds(atoi(timeout_str.c_str()));
