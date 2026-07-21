@@ -53,7 +53,11 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
 
   auto context = impeller::ContextVK::Create(std::move(settings));
 
-  if (context && context->GetDriverInfo()->IsKnownBadDriver()) {
+  if (!context) {
+    return nullptr;
+  }
+
+  if (context->GetDriverInfo()->IsKnownBadDriver()) {
     FML_LOG(INFO)
         << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
     return nullptr;
