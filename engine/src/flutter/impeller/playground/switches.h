@@ -45,7 +45,7 @@ struct PlaygroundOutputs {
   bool Any() const { return offscreen || onscreen || golden || window; }
 
   std::array<PlaygroundSwitchOption, 4> switches() {
-    return {{
+    return std::array<PlaygroundSwitchOption, 4>{{
         PlaygroundSwitchOption("offscreen", offscreen),
         PlaygroundSwitchOption("onscreen", onscreen),
         PlaygroundSwitchOption("golden", golden),
@@ -73,7 +73,7 @@ struct PlaygroundBackends {
   }
 
   std::array<PlaygroundSwitchOption, 5> switches() {
-    return {{
+    return std::array<PlaygroundSwitchOption, 5>{{
         PlaygroundSwitchOption("Metal", metal),
         PlaygroundSwitchOption("MetalSDF", metal_sdf),
         PlaygroundSwitchOption("OpenGLES", opengles),
