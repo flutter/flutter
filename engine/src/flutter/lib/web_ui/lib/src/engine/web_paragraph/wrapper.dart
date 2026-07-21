@@ -373,8 +373,8 @@ class _LineBuilder {
     if (specialCase) {
       _top += _layout.addLine(
         ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
-        ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
         ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
+        ClusterRange(start: _newlineEnd, end: _newlineEnd),
         _top,
         true,
       );

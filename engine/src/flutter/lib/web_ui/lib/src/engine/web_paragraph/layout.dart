@@ -890,15 +890,9 @@ class TextLayout {
     for (final TextLine line in lines) {
       if (line.allLineTextRange.start <= codepointPosition &&
           line.allLineTextRange.end >= codepointPosition) {
-        print(
-          'getLineBoundary($codepointPosition) [${line.allLineTextRange.start} ${line.allLineTextRange.end}) isHardBreak=${line.hardLineBreakRange.isNotEmpty || line.lastLine}\n'
-          'endIncludingNewline=${line.hardLineBreakRange.end} '
-          'endExcludingWhitespaces=${line.whitespacesRange.end} ',
-        );
         return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
       }
     }
-    print('getLineBoundary($codepointPosition): empty');
     return ui.TextRange.empty;
   }
 }
@@ -1380,6 +1374,8 @@ class TextLine {
   late final double trailingSpacesWidth;
 
   double get fullWidth => advance.width + formattingShift + trailingSpacesWidth;
+
+  bool get hasHardLineBreak => hardLineBreakRange.isNotEmpty || lastLine;
 
   List<LineBlock> visualBlocks = <LineBlock>[];
 

@@ -215,7 +215,7 @@ Future<void> testMain() async {
             left = glyphInfo.graphemeClusterLayoutBounds.right;
             expect(glyphInfo.writingDirection, ui.TextDirection.ltr);
           } else {
-            assert(false, 'glyphInfo should not be null');
+            assert(false, '${paragraph.text.length}: glyphInfo[$i] should not be null');
           }
         }
       }
@@ -234,31 +234,32 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getClosestGlyphInfoForOffset', () {
-    const epsilon = 0.001;
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    final builder = WebParagraphBuilder(paragraphStyle);
+    const epsilon = 0.1;
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText('Line1\nLine2\nLine3');
-    final WebParagraph paragraph = builder.build();
+    const int length = 'Line1\nLine2\nLine3'.length;
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
-    for (final TextLine line in paragraph.getLayout().lines) {
-      for (final LineBlock visualBlock in line.visualBlocks) {
-        for (int i = visualBlock.textRange.start; i < visualBlock.textRange.end; i++) {
-          final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
-          if (glyphInfo != null) {
-            final center = ui.Offset(
-              glyphInfo.graphemeClusterLayoutBounds.left + epsilon,
-              glyphInfo.graphemeClusterLayoutBounds.center.dy,
-            );
-            final ui.GlyphInfo? closestGlyphInfo = paragraph.getClosestGlyphInfoForOffset(center);
-            if (closestGlyphInfo != null) {
-              expect(closestGlyphInfo, equals(glyphInfo));
-            } else {
-              assert(false, 'closestGlyphInfo should not be null');
-            }
-          } else {
-            assert(false, 'glyphInfo should not be null');
-          }
+    for (var i = 0; i < length; i++) {
+      final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
+      if (glyphInfo != null) {
+        final center = ui.Offset(
+          glyphInfo.graphemeClusterLayoutBounds.left + epsilon,
+          glyphInfo.graphemeClusterLayoutBounds.center.dy,
+        );
+        final ui.GlyphInfo? closestGlyphInfo = paragraph.getClosestGlyphInfoForOffset(center);
+        if (closestGlyphInfo != null) {
+          expect(
+            closestGlyphInfo,
+            equals(glyphInfo),
+            reason: 'Glyph[$i] @$center "${'Line1\nLine2\nLine3'.substring(i, i + 1)}"',
+          );
+        } else {
+          assert(false, '$length: closestGlyphInfo[$i] should not be null');
         }
+      } else {
+        assert(false, '$length: getGlyphInfoAt[$i] should not be null');
       }
     }
   });
