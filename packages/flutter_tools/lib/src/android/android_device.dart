@@ -550,9 +550,17 @@ class AndroidDevice extends Device {
 
     var builtPackage = package;
     final CpuArch cpuArch = await this.cpuArch;
-    if (cpuArch case .x86 || .riscv64 || .unknown) {
-      _logger.printError('Unsupported Android architecture: ${cpuArch.name}.');
-      return LaunchResult.failed();
+    switch (cpuArch) {
+      case CpuArch.armv7:
+      case CpuArch.arm64:
+      case CpuArch.x64:
+        break;
+      case CpuArch.x86:
+      case CpuArch.riscv64:
+      case CpuArch.unknown:
+        _logger.printError('Android platforms are only supported.');
+        return LaunchResult.failed();
+     }
     }
 
     if (!prebuiltApplication ||
