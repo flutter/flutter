@@ -81,12 +81,12 @@ List<Map<String, Object?>> expandSwiftEntry(Map<String, Object?> entry) {
 
   final origCommand = baseEntry['command'] as String?;
   if (origCommand == null) {
-    return <Map<String, Object?>>[baseEntry];
+    return [baseEntry];
   }
 
   final _SwiftcTranslation? translation = _translateSwiftcCommand(origCommand);
   if (translation == null) {
-    return <Map<String, Object?>>[baseEntry];
+    return [baseEntry];
   }
 
   final translatedEntry = <String, Object?>{
@@ -95,7 +95,7 @@ List<Map<String, Object?>> expandSwiftEntry(Map<String, Object?> entry) {
   };
 
   if (translation.swiftFiles.isEmpty) {
-    return <Map<String, Object?>>[translatedEntry];
+    return [translatedEntry];
   }
 
   final absSwiftFiles = <String>[
