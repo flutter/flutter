@@ -297,6 +297,7 @@ void main() {
   testWidgets('default text selection width style', (WidgetTester tester) async {
     const blue = Color(0xFF2196F3);
     const grey = Color(0xFF9E9E9E);
+    const black = Color(0xFF000000);
     const selectionColor = Color(0xFFFFFF00);
     controller.text = 'a b c\na b c d e f g';
 
@@ -307,7 +308,7 @@ void main() {
             controller: controller,
             focusNode: focusNode,
             maxLines: null,
-            style: const TextStyle(fontFamily: 'Roboto', fontSize: 14.0),
+            style: const TextStyle(fontFamily: 'Roboto', fontSize: 14.0, color: black),
             cursorColor: blue,
             backgroundCursorColor: grey,
             selectionColor: selectionColor,
