@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Display;
-import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
+
 import 'package:flutter/services.dart';
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show
         BaseWindowController,
@@ -28,244 +29,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'multi_view_testing.dart';
-
-class _StubRegularWindowController extends RegularWindowController {
-  _StubRegularWindowController(WidgetTester tester) : super.empty() {
-    rootView = FakeView(tester.view);
-  }
-
-  @override
-  Size get contentSize => Size.zero;
-
-  @override
-  String get title => 'Stub Window';
-
-  @override
-  bool get isActivated => true;
-
-  @override
-  bool get isMaximized => false;
-
-  @override
-  bool get isMinimized => false;
-
-  @override
-  bool get isFullscreen => false;
-
-  @override
-  void setSize(Size size) {}
-
-  @override
-  void setConstraints(BoxConstraints constraints) {}
-
-  @override
-  void setTitle(String title) {}
-
-  @override
-  void activate() {}
-
-  @override
-  void setMaximized(bool maximized) {}
-
-  @override
-  void setMinimized(bool minimized) {}
-
-  @override
-  void setFullscreen(bool fullscreen, {Display? display}) {}
-
-  @override
-  void destroy() {}
-}
-
-class _StubDialogWindowController extends DialogWindowController {
-  _StubDialogWindowController(WidgetTester tester) : super.empty() {
-    rootView = FakeView(tester.view);
-  }
-
-  @override
-  BaseWindowController? get parent => null;
-
-  @override
-  Size get contentSize => Size.zero;
-
-  @override
-  String get title => 'Stub Window';
-
-  @override
-  bool get isActivated => true;
-
-  @override
-  bool get isMinimized => false;
-
-  @override
-  void setSize(Size size) {}
-
-  @override
-  void setConstraints(BoxConstraints constraints) {}
-
-  @override
-  void setTitle(String title) {}
-
-  @override
-  void activate() {}
-
-  @override
-  void setMinimized(bool minimized) {}
-
-  @override
-  void destroy() {}
-}
-
-class _StubTooltipWindowController extends TooltipWindowController {
-  _StubTooltipWindowController({required this.tester}) : super.empty() {
-    rootView = FakeView(tester.view);
-  }
-
-  final WidgetTester tester;
-
-  @override
-  BaseWindowController get parent => _StubRegularWindowController(tester);
-
-  @override
-  Size get contentSize => Size.zero;
-
-  @override
-  void setConstraints(BoxConstraints constraints) {}
-
-  @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
-
-  @override
-  void destroy() {}
-}
-
-class _StubPopupWindowController extends PopupWindowController {
-  _StubPopupWindowController({required this.tester}) : super.empty() {
-    rootView = FakeView(tester.view);
-  }
-
-  final WidgetTester tester;
-
-  @override
-  BaseWindowController get parent => _StubRegularWindowController(tester);
-
-  @override
-  Size get contentSize => Size.zero;
-
-  @override
-  void setConstraints(BoxConstraints constraints) {}
-
-  @override
-  void destroy() {}
-
-  @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
-
-  @override
-  Offset get offsetFromParent => Offset.zero;
-}
-
-class _StubSatelliteWindowController extends SatelliteWindowController {
-  _StubSatelliteWindowController({required this.tester}) : super.empty() {
-    rootView = FakeView(tester.view);
-  }
-
-  final WidgetTester tester;
-
-  @override
-  BaseWindowController get parent => _StubRegularWindowController(tester);
-
-  @override
-  Size get contentSize => Size.zero;
-
-  @override
-  String get title => 'Stub Satellite Window';
-
-  @override
-  bool get isActivated => true;
-
-  @override
-  void setParent(BaseWindowController parent) {}
-
-  @override
-  void setSize(Size size) {}
-
-  @override
-  void setConstraints(BoxConstraints constraints) {}
-
-  @override
-  void setTitle(String title) {}
-
-  @override
-  void activate() {}
-
-  @override
-  void destroy() {}
-}
-
-// A controller that mutates its aspect values and notifies listeners, used to
-// verify that dependents rebuild when the controller notifies even though the
-// same controller instance is reused across rebuilds.
-class _MutableRegularWindowController extends RegularWindowController {
-  _MutableRegularWindowController(WidgetTester tester) : super.empty() {
-    rootView = FakeView(tester.view);
-  }
-
-  Size _contentSize = Size.zero;
-  bool _activated = false;
-  bool _maximized = false;
-
-  @override
-  Size get contentSize => _contentSize;
-
-  @override
-  String get title => 'Mutable Window';
-
-  @override
-  bool get isActivated => _activated;
-
-  @override
-  bool get isMaximized => _maximized;
-
-  @override
-  bool get isMinimized => false;
-
-  @override
-  bool get isFullscreen => false;
-
-  @override
-  void setSize(Size size) {
-    _contentSize = size;
-    notifyListeners();
-  }
-
-  @override
-  void setConstraints(BoxConstraints constraints) {}
-
-  @override
-  void setTitle(String title) {}
-
-  @override
-  void activate() {
-    _activated = true;
-    notifyListeners();
-  }
-
-  @override
-  void setMaximized(bool maximized) {
-    _maximized = maximized;
-    notifyListeners();
-  }
-
-  @override
-  void setMinimized(bool minimized) {}
-
-  @override
-  void setFullscreen(bool fullscreen, {Display? display}) {}
-
-  @override
-  void destroy() {}
-}
 
 void main() {
   group('Windowing', () {
@@ -398,7 +161,7 @@ void main() {
             },
           ];
 
-          for (final Widget Function(Widget) window in windows) {
+          for (final window in windows) {
             final textController = TextEditingController(text: 'Flutter');
             final focusNode = FocusNode();
             addTearDown(textController.dispose);
@@ -406,13 +169,16 @@ void main() {
             await tester.pumpWidget(
               wrapWithView: false,
               window(
-                EditableText(
-                  controller: textController,
-                  focusNode: focusNode,
-                  autofocus: true,
-                  style: const TextStyle(color: Color(0xFF000000)),
-                  cursorColor: const Color(0xFF000000),
-                  backgroundCursorColor: const Color(0xFF000000),
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: EditableText(
+                    controller: textController,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    style: const TextStyle(color: Color(0xFF000000)),
+                    cursorColor: const Color(0xFF000000),
+                    backgroundCursorColor: const Color(0xFF000000),
+                  ),
                 ),
               ),
             );
@@ -1948,4 +1714,242 @@ void main() {
       });
     });
   });
+}
+
+// A controller that mutates its aspect values and notifies listeners, used to
+// verify that dependents rebuild when the controller notifies even though the
+// same controller instance is reused across rebuilds.
+class _MutableRegularWindowController extends RegularWindowController {
+  _MutableRegularWindowController(WidgetTester tester) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  Size _contentSize = Size.zero;
+  bool _activated = false;
+  bool _maximized = false;
+
+  @override
+  Size get contentSize => _contentSize;
+
+  @override
+  bool get isActivated => _activated;
+
+  @override
+  bool get isFullscreen => false;
+
+  @override
+  bool get isMaximized => _maximized;
+
+  @override
+  bool get isMinimized => false;
+
+  @override
+  String get title => 'Mutable Window';
+
+  @override
+  void activate() {
+    _activated = true;
+    notifyListeners();
+  }
+
+  @override
+  void destroy() {}
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void setFullscreen(bool fullscreen, {Display? display}) {}
+
+  @override
+  void setMaximized(bool maximized) {
+    _maximized = maximized;
+    notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {}
+
+  @override
+  void setSize(Size size) {
+    _contentSize = size;
+    notifyListeners();
+  }
+
+  @override
+  void setTitle(String title) {}
+}
+
+class _StubDialogWindowController extends DialogWindowController {
+  _StubDialogWindowController(WidgetTester tester) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  @override
+  Size get contentSize => Size.zero;
+
+  @override
+  bool get isActivated => true;
+
+  @override
+  bool get isMinimized => false;
+
+  @override
+  BaseWindowController? get parent => null;
+
+  @override
+  String get title => 'Stub Window';
+
+  @override
+  void activate() {}
+
+  @override
+  void destroy() {}
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void setMinimized(bool minimized) {}
+
+  @override
+  void setSize(Size size) {}
+
+  @override
+  void setTitle(String title) {}
+}
+
+class _StubPopupWindowController extends PopupWindowController {
+  _StubPopupWindowController({required this.tester}) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  final WidgetTester tester;
+
+  @override
+  Size get contentSize => Size.zero;
+
+  @override
+  Offset get offsetFromParent => Offset.zero;
+
+  @override
+  BaseWindowController get parent => _StubRegularWindowController(tester);
+
+  @override
+  void destroy() {}
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
+}
+
+class _StubRegularWindowController extends RegularWindowController {
+  _StubRegularWindowController(WidgetTester tester) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  @override
+  Size get contentSize => Size.zero;
+
+  @override
+  bool get isActivated => true;
+
+  @override
+  bool get isFullscreen => false;
+
+  @override
+  bool get isMaximized => false;
+
+  @override
+  bool get isMinimized => false;
+
+  @override
+  String get title => 'Stub Window';
+
+  @override
+  void activate() {}
+
+  @override
+  void destroy() {}
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void setFullscreen(bool fullscreen, {Display? display}) {}
+
+  @override
+  void setMaximized(bool maximized) {}
+
+  @override
+  void setMinimized(bool minimized) {}
+
+  @override
+  void setSize(Size size) {}
+
+  @override
+  void setTitle(String title) {}
+}
+
+class _StubSatelliteWindowController extends SatelliteWindowController {
+  _StubSatelliteWindowController({required this.tester}) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  final WidgetTester tester;
+
+  @override
+  Size get contentSize => Size.zero;
+
+  @override
+  bool get isActivated => true;
+
+  @override
+  BaseWindowController get parent => _StubRegularWindowController(tester);
+
+  @override
+  String get title => 'Stub Satellite Window';
+
+  @override
+  void activate() {}
+
+  @override
+  void destroy() {}
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void setParent(BaseWindowController parent) {}
+
+  @override
+  void setSize(Size size) {}
+
+  @override
+  void setTitle(String title) {}
+}
+
+class _StubTooltipWindowController extends TooltipWindowController {
+  _StubTooltipWindowController({required this.tester}) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  final WidgetTester tester;
+
+  @override
+  Size get contentSize => Size.zero;
+
+  @override
+  BaseWindowController get parent => _StubRegularWindowController(tester);
+
+  @override
+  void destroy() {}
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
 }
