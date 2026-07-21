@@ -14,7 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'button_tester.dart';
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
@@ -497,33 +496,31 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgets(
-    'Engine is notified of ignored pointer signals (no scroll physics)',
-    (WidgetTester tester) async {
-      await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
-      final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-      // Create a hover event so that |testPointer| has a location when generating the scroll.
-      testPointer.hover(scrollEventLocation);
+  testWidgets('Engine is notified of ignored pointer signals (no scroll physics)', (
+    WidgetTester tester,
+  ) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
 
-      var allowedPlatformDefault = false;
-      await tester.sendEventToBinding(
-        testPointer.scroll(
-          const Offset(0.0, 20.0),
-          onRespond: ({required bool allowPlatformDefault}) {
-            allowedPlatformDefault = allowPlatformDefault;
-          },
-        ),
-      );
+    var allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ),
+    );
 
-      expect(
-        allowedPlatformDefault,
-        isTrue,
-        reason: 'Engine should be notified of ignored scroll pointer signals.',
-      );
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    expect(
+      allowedPlatformDefault,
+      isTrue,
+      reason: 'Engine should be notified of ignored scroll pointer signals.',
+    );
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Engine is notified of accepted and rejected scroll events', (
     WidgetTester tester,
@@ -703,39 +700,37 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'Still scrolls horizontally when other keys are pressed at the same time',
-    (WidgetTester tester) async {
-      await pumpTest(
-        tester,
-        debugDefaultTargetPlatformOverride,
-        scrollDirection: Axis.horizontal,
-        axisModifier: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
-      );
+  testWidgets('Still scrolls horizontally when other keys are pressed at the same time', (
+    WidgetTester tester,
+  ) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+    );
 
-      final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-      // Create a hover event so that |testPointer| has a location when generating the scroll.
-      testPointer.hover(scrollEventLocation);
-      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-      // Vertical input not accepted
-      expect(getScrollOffset(tester), 0.0);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
 
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
-      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-      // Vertical flipped & accepted.
-      expect(getScrollOffset(tester), 20.0);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
-      await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical flipped & accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+    await tester.pump();
 
-      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-      // Vertical input not accepted
-      expect(getScrollOffset(tester), 20.0);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
 
   group('setCanDrag to false with active drag gesture: ', () {
     Future<void> pumpTestWidget(WidgetTester tester, {required bool canDrag}) {
@@ -1791,6 +1786,17 @@ void main() {
       );
     },
   );
+
+  testWidgets('Scrollable does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollable(viewportBuilder: (_, _) => const Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollable)), Size.zero);
+  });
 }
 
 // ignore: must_be_immutable

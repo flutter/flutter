@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
 import 'sliver_utils.dart';
-import 'widgets_app_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
