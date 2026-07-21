@@ -105,7 +105,7 @@ class Form extends StatefulWidget {
   ///   ancestor is found.
   static FormState? maybeOf(BuildContext context) {
     final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
-    return scope?.formState;
+    return scope?._formState;
   }
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
@@ -451,19 +451,21 @@ class FormState extends State<Form> {
 }
 
 class _FormScope extends InheritedWidget {
-  const _FormScope({required super.child, required this.formState, required this.generation});
+  const _FormScope({required super.child, required FormState formState, required int generation})
+    : _formState = formState,
+      _generation = generation;
 
-  final FormState formState;
+  final FormState _formState;
 
   /// Incremented every time a form field has changed. This lets us know when
   /// to rebuild the form.
-  final int generation;
+  final int _generation;
 
   /// The [Form] associated with this widget.
-  Form get form => formState.widget;
+  Form get form => _formState.widget;
 
   @override
-  bool updateShouldNotify(_FormScope old) => generation != old.generation;
+  bool updateShouldNotify(_FormScope old) => _generation != old._generation;
 }
 
 /// Signature for validating a form field.
@@ -865,7 +867,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       includeSemantics: focusIncludesSemantics,
       onFocusChange: (bool value) {
         if (!value) {
-          setState(_validate);
+          setState(() {
+            _validate();
+          });
         }
       },
       focusNode: _focusNode,
