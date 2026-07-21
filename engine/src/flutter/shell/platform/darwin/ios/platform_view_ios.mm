@@ -12,6 +12,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
@@ -181,7 +182,7 @@ void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
 
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
-  return std::make_unique<VsyncWaiterIOS>(task_runners_);
+  return std::make_unique<VsyncWaiterIOS>(task_runners_, FlutterDisplayLinkManager.shared);
 }
 
 // |PlatformView|

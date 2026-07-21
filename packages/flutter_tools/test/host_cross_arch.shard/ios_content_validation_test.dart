@@ -289,7 +289,10 @@ void main() {
                   'VERBOSE_SCRIPT_LOGGING': '1',
                   'FLUTTER_BUILD_MODE': 'release',
                   'ACTION': 'install',
+                  'FLUTTER_ROOT': flutterRoot,
                   'FLUTTER_BUILD_DIR': 'build',
+                  'FLUTTER_BUILD_NAME': '1.0.0',
+                  'FLUTTER_BUILD_NUMBER': '1',
                   // Skip bitcode stripping since we just checked that above.
                 },
               );
