@@ -210,12 +210,6 @@ bool Playground::EnsureContextSupportsWideGamut() {
   return true;
 }
 
-bool Playground::EnsureContextSupportsAntialiasLines() {
-  FML_CHECK(!context_) << "Must be called before a context is created.";
-  switches_.flags.antialiased_lines = true;
-  return true;
-}
-
 std::shared_ptr<Context> Playground::GetContext() const {
   if (!context_) {
     SetupContext();
