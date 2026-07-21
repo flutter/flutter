@@ -15,6 +15,10 @@ repositories {
 
 apply plugin: "com.android.library"
 
+configurations {
+  mockitoAgent
+}
+
 rootProject.buildDir = project.property("build_dir")
 
 // Shows warnings for usage of deprecated API usages.
@@ -51,6 +55,12 @@ android {
 
     unitTests.all {
       jvmArgs "-Xmx8g" // Max JVM heap size is 8G/30G available in the CI bot.
+      jvmArgumentProviders.add(new CommandLineArgumentProvider() {
+        @Override
+        Iterable<String> asArguments() {
+          return ["-javaagent:${configurations.mockitoAgent.asPath}"]
+        }
+      })
       maxHeapSize "8g"
       maxParallelForks availableProcessors // The CI bot has 8 CPUs.
       testLogging {
@@ -77,6 +87,9 @@ android {
     testImplementation "androidx.test.ext:junit:1.2.1"
 
     testImplementation "org.mockito:mockito-core:5.17.0"
+    mockitoAgent("org.mockito:mockito-core:5.17.0") {
+      transitive = false
+    }
   }
 
   // Configure the embedding dependencies.
