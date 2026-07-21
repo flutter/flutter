@@ -65,13 +65,6 @@ TaskFunction createPlatformChannelSwiftSampleTest() {
   ).call;
 }
 
-TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/android_views',
-    'lib/main.dart',
-  ).call;
-}
-
 TaskFunction createHybridAndroidViewsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/hybrid_android_views',
@@ -302,9 +295,9 @@ class DriverTest {
       // Make the device ID available in the driver code, so tools like ADB can
       // reference it if needed.
       final env = <String, String>{
-        if (environment != null) ...environment!,
+        ...?environment,
         'FLUTTER_DEVICE_ID_NUMBER': deviceId,
-        if (devicelabAdbPath != null) 'FLUTTER_ADB_PATH': devicelabAdbPath,
+        'FLUTTER_ADB_PATH': ?devicelabAdbPath,
       };
 
       final options = <String>[

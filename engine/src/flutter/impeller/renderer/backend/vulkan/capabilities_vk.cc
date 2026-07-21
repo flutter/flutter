@@ -451,6 +451,11 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
     // We require this for enabling wireframes in the playground. But its not
     // necessarily a big deal if we don't have this feature.
     required.fillModeNonSolid = supported.fillModeNonSolid;
+
+    // Enable anisotropic filtering when available. Samplers with
+    // `max_anisotropy` greater than 1 may only be created when this feature
+    // is enabled.
+    required.samplerAnisotropy = supported.samplerAnisotropy;
   }
   // VK_KHR_sampler_ycbcr_conversion features.
   if (IsExtensionInList(
@@ -537,6 +542,10 @@ bool CapabilitiesVK::SupportsPrimitiveRestart() const {
 }
 
 bool CapabilitiesVK::Supports32BitPrimitiveIndices() const {
+  return true;
+}
+
+bool CapabilitiesVK::SupportsManuallyMippedTextures() const {
   return true;
 }
 
@@ -673,6 +682,15 @@ bool CapabilitiesVK::SetPhysicalDevice(
   max_render_pass_attachment_size_ =
       ISize{device_properties_.limits.maxFramebufferWidth,
             device_properties_.limits.maxFramebufferHeight};
+
+  // Anisotropic filtering is gated on the samplerAnisotropy feature. When the
+  // feature is unavailable, report a maximum of 1 (disabled). The device limit
+  // is a float but is always an integer in practice, so floor it.
+  max_sampler_anisotropy_ =
+      enabled_features.get().features.samplerAnisotropy
+          ? static_cast<uint32_t>(
+                device_properties_.limits.maxSamplerAnisotropy)
+          : 1u;
 
   // Molten, Vulkan on Metal, cannot support triangle fans because Metal doesn't
   // support triangle fans.
@@ -868,6 +886,10 @@ ISize CapabilitiesVK::GetMaximumRenderPassAttachmentSize() const {
   return max_render_pass_attachment_size_;
 }
 
+uint32_t CapabilitiesVK::GetMaxSamplerAnisotropy() const {
+  return max_sampler_anisotropy_;
+}
+
 void CapabilitiesVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
   has_primitive_restart_ = !workarounds.slow_primitive_restart_performance;
   has_framebuffer_fetch_ = !workarounds.input_attachment_self_dependency_broken;
@@ -879,6 +901,10 @@ bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {
 
 bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
   return false;
+}
+
+bool CapabilitiesVK::SupportsFramebufferRenderMipmap() const {
+  return true;
 }
 
 bool CapabilitiesVK::SupportsTextureCompression(

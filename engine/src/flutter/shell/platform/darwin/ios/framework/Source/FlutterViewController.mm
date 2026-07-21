@@ -23,7 +23,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
@@ -366,7 +365,9 @@ typedef struct MouseState {
   _statusBarStyle = UIStatusBarStyleDefault;
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
-  _keyboardInsetManager = [[FlutterKeyboardInsetManager alloc] initWithDelegate:self];
+  _keyboardInsetManager =
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:self
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
@@ -682,6 +683,17 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
                             : [self isSceneStateMatching:UISceneActivationStateBackground];
 }
 
+- (BOOL)shouldHandleSceneNotification:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (notification.object == nil) {
+    return YES;
+  }
+  UIWindowScene* scene = self.flutterWindowSceneIfViewLoaded;
+  if (scene == nil) {
+    return YES;
+  }
+  return notification.object == scene;
+}
+
 - (BOOL)isApplicationStateMatching:(UIApplicationState)match
                    withApplication:(UIApplication*)application {
   switch (application.applicationState) {
@@ -978,25 +990,40 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Scene lifecycle notifications
 
 - (void)sceneBecameActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneBecameActive");
   [self appOrSceneBecameActive];
 }
 
 - (void)sceneWillResignActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneWillResignActive");
   [self appOrSceneWillResignActive];
 }
 
 - (void)sceneWillDisconnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self appOrSceneWillTerminate];
 }
 
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneDidEnterBackground");
   [self appOrSceneDidEnterBackground];
 }
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (![self shouldHandleSceneNotification:notification]) {
+    return;
+  }
   TRACE_EVENT0("flutter", "sceneWillEnterForeground");
   [self appOrSceneWillEnterForeground];
 }
@@ -1286,7 +1313,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  double displayRefreshRate = FlutterDisplayLinkManager.displayRefreshRate;
+  double displayRefreshRate = FlutterDisplayLinkManager.shared.displayRefreshRate;
   const double epsilon = 0.1;
   if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
 
@@ -1302,8 +1329,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       };
   _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:self.engine.platformTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.shared.displayRefreshRate
                           callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
@@ -2117,12 +2144,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
   NSTimeInterval time = [NSProcessInfo processInfo].systemUptime;
   BOOL isRunningOnMac = NO;
-  if (@available(iOS 14.0, *)) {
-    // This "stationary pointer" heuristic is not reliable when running within macOS.
-    // We instead receive a scroll cancel event directly from AppKit.
-    // See gestureRecognizer:shouldReceiveEvent:
-    isRunningOnMac = [NSProcessInfo processInfo].iOSAppOnMac;
-  }
+  // This "stationary pointer" heuristic is not reliable when running within macOS.
+  // We instead receive a scroll cancel event directly from AppKit.
+  // See gestureRecognizer:shouldReceiveEvent:
+  isRunningOnMac = [NSProcessInfo processInfo].iOSAppOnMac;
   if (!isRunningOnMac && CGPointEqualToPoint(oldLocation, _mouseState.location) &&
       time > self.scrollInertiaEventStartline) {
     // iPadOS reports trackpad movements events with high (sub-pixel) precision. When an event
@@ -2292,6 +2317,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (CGFloat)physicalViewInsetBottom {
   return _viewportMetrics.physical_view_inset_bottom;
+}
+
+- (FlutterFMLTaskRunner*)uiTaskRunner {
+  return self.engine.uiTaskRunner;
 }
 
 - (BOOL)isPadInSlideOverOrStageManagerMode {

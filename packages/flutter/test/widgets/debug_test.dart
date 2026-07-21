@@ -8,8 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   test('debugChildrenHaveDuplicateKeys control test', () {
     const key = Key('key');
@@ -326,5 +324,167 @@ void main() {
 
     renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
+  });
+
+  group('debugPaintFocusBoxes', () {
+    const kPrimaryFocusColor = Color(0xF000FF00);
+    const kAncestorOfPrimaryFocusColor = Color(0xF00000FF);
+    const kFocusableColor =  Color(0xF000FFFF);
+    const kSkipTraversalColor =  Color(0xF0FFFF00);
+    const kNotFocusableColor = Color(0xF0FF0000);
+
+    testWidgets('adds a border on each Focus widget if enabled',
+        (WidgetTester tester) async {
+      debugPaintFocusBoxes = true;
+
+      final nodePrimary = FocusNode(debugLabel: 'primary');
+      final nodeParent = FocusNode(debugLabel: 'parent');
+      final nodeFocusable = FocusNode(debugLabel: 'focusable');
+      final nodeSkipTraversal = FocusNode(debugLabel: 'skipTraversal', skipTraversal: true);
+      final nodeNotFocusable = FocusNode(debugLabel: 'notFocusable', canRequestFocus: false);
+
+      addTearDown(nodePrimary.dispose);
+      addTearDown(nodeParent.dispose);
+      addTearDown(nodeFocusable.dispose);
+      addTearDown(nodeSkipTraversal.dispose);
+      addTearDown(nodeNotFocusable.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: nodeParent,
+                child: Focus(
+                  focusNode: nodePrimary,
+                  child: const SizedBox(width: 10, height: 10),
+                ),
+              ),
+              Focus(focusNode: nodeFocusable, child: const SizedBox(width: 10, height: 10)),
+              Focus(focusNode: nodeSkipTraversal, child: const SizedBox(width: 10, height: 10)),
+              Focus(focusNode: nodeNotFocusable, child: const SizedBox(width: 10, height: 10)),
+            ],
+          ),
+        ),
+      );
+
+      nodePrimary.requestFocus();
+      await tester.pumpAndSettle();
+
+      Color borderColorOf(FocusNode node) {
+        final Finder finder = find.descendant(
+          of: find.byWidgetPredicate((w) => w is Focus && w.focusNode == node),
+          matching: find.byType(DecoratedBox),
+        );
+        final DecoratedBox box = tester.widget<DecoratedBox>(finder.first);
+        return ((box.decoration as BoxDecoration).border! as Border).top.color;
+      }
+
+      expect(borderColorOf(nodePrimary), kPrimaryFocusColor);
+      expect(borderColorOf(nodeParent), kAncestorOfPrimaryFocusColor);
+      expect(borderColorOf(nodeFocusable), kFocusableColor);
+      expect(borderColorOf(nodeSkipTraversal), kSkipTraversalColor);
+      expect(borderColorOf(nodeNotFocusable), kNotFocusableColor);
+
+      debugPaintFocusBoxes = false;
+    });
+
+    testWidgets('does not add a border if disabled',
+        (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Focus(
+            focusNode: focusNode,
+            child: const SizedBox(width: 100, height: 100),
+          ),
+        ),
+      );
+
+      expect(find.byType(DecoratedBox), findsNothing);
+    });
+
+    testWidgets('border updates when focus changes', (WidgetTester tester) async {
+      debugPaintFocusBoxes = true;
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Focus(
+            focusNode: focusNode,
+            child: const SizedBox(width: 100, height: 100),
+          ),
+        ),
+      );
+
+      Color borderColor() {
+        final Finder finder = find.descendant(
+          of: find.byWidgetPredicate((w) => w is Focus && w.focusNode == focusNode),
+          matching: find.byType(DecoratedBox),
+        );
+        final DecoratedBox box = tester.widget<DecoratedBox>(finder.first);
+        return ((box.decoration as BoxDecoration).border! as Border).top.color;
+      }
+
+      // Start unfocused: cyan.
+      expect(borderColor(), kFocusableColor);
+
+      // Gain primary focus: green.
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+      expect(borderColor(), kPrimaryFocusColor);
+
+      // Skip traversal but primary focus: green.
+      focusNode.skipTraversal = true;
+      await tester.pumpAndSettle();
+      expect(borderColor(), kPrimaryFocusColor);
+
+      // Lose primary focus and skip traversal: yellow.
+      focusNode.unfocus();
+      await tester.pumpAndSettle();
+      expect(borderColor(), kSkipTraversalColor);
+
+      // Not focusable: red.
+      focusNode.canRequestFocus = false;
+      await tester.pumpAndSettle();
+      expect(borderColor(), kNotFocusableColor);
+
+      debugPaintFocusBoxes = false;
+    });
+
+    testWidgets('no exceptions with multiple focus states', (WidgetTester tester) async {
+      debugPaintFocusBoxes = true;
+      final primary = FocusNode();
+      final unfocusable = FocusNode(canRequestFocus: false);
+      final skipTraversalNode = FocusNode(skipTraversal: true);
+      addTearDown(primary.dispose);
+      addTearDown(unfocusable.dispose);
+      addTearDown(skipTraversalNode.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: primary, child: const SizedBox(width: 10, height: 10)),
+              Focus(focusNode: unfocusable, child: const SizedBox(width: 10, height: 10)),
+              Focus(focusNode: skipTraversalNode, child: const SizedBox(width: 10, height: 10)),
+            ],
+          ),
+        ),
+      );
+
+      primary.requestFocus();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      debugPaintFocusBoxes = false;
+    });
   });
 }

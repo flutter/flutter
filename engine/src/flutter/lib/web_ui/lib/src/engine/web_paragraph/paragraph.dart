@@ -5,16 +5,8 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../dom.dart';
-import '../renderer.dart';
-import '../text/paragraph.dart';
-import '../util.dart';
-import '../view_embedder/style_manager.dart';
-import 'debug.dart';
-import 'layout.dart';
-import 'painter.dart';
 
 @visibleForTesting
 const String kPlaceholderChar = '\uFFFC';
@@ -147,7 +139,7 @@ enum StyleElements {
 
 enum ShadowDirection { left, right, top, bottom }
 
-class WebTextStyle implements ui.TextStyle {
+class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
   factory WebTextStyle({
     String? fontFamily,
     List<String>? fontFamilyFallback,
@@ -172,7 +164,7 @@ class WebTextStyle implements ui.TextStyle {
     List<ui.FontVariation>? fontVariations,
   }) {
     return WebTextStyle._(
-      originalFontFamily: fontFamily, // ?? 'Arial',
+      fontFamily: fontFamily, // ?? 'Arial',
       fontFamilyFallback: fontFamilyFallback,
       fontSize: fontSize, // ?? 14.0,
       fontStyle: fontStyle, // ?? ui.FontStyle.normal,
@@ -197,7 +189,7 @@ class WebTextStyle implements ui.TextStyle {
   }
 
   WebTextStyle._({
-    required this.originalFontFamily,
+    required this.fontFamily,
     required this.fontFamilyFallback,
     required this.fontSize,
     required this.fontStyle,
@@ -220,10 +212,15 @@ class WebTextStyle implements ui.TextStyle {
     required this.fontVariations,
   });
 
-  final String? originalFontFamily;
+  @override
+  final String? fontFamily;
+  @override
   final List<String>? fontFamilyFallback;
+  @override
   final double? fontSize;
+  @override
   final ui.FontStyle? fontStyle;
+  @override
   final ui.FontWeight? fontWeight;
   final ui.Color? color;
   final ui.Paint? foreground;
@@ -233,13 +230,18 @@ class WebTextStyle implements ui.TextStyle {
   final ui.Color? decorationColor; // Defaults to foreground color
   final ui.TextDecorationStyle? decorationStyle; // Defaults to none
   final double? decorationThickness; // Defaults to 1
+  @override
   final double? letterSpacing;
+  @override
   final double? wordSpacing;
   final double? height;
   final ui.TextBaseline? textBaseline;
   final ui.TextLeadingDistribution? leadingDistribution;
+  @override
   final ui.Locale? locale;
+  @override
   final List<ui.FontFeature>? fontFeatures;
+  @override
   final List<ui.FontVariation>? fontVariations;
 
   /// Merges this text style with [other] and returns the new text style.
@@ -248,7 +250,7 @@ class WebTextStyle implements ui.TextStyle {
   /// overrides it.
   WebTextStyle mergeWith(WebTextStyle other) {
     return WebTextStyle._(
-      originalFontFamily: other.originalFontFamily ?? originalFontFamily,
+      fontFamily: other.fontFamily ?? fontFamily,
       fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
       fontSize: other.fontSize ?? fontSize,
       fontStyle: other.fontStyle ?? fontStyle,
@@ -280,7 +282,7 @@ class WebTextStyle implements ui.TextStyle {
     if (other is! WebTextStyle) {
       return false;
     }
-    return other.originalFontFamily == originalFontFamily &&
+    return other.fontFamily == fontFamily &&
         listEquals<String>(other.fontFamilyFallback, fontFamilyFallback) &&
         other.fontSize == fontSize &&
         other.fontStyle == fontStyle &&
@@ -310,7 +312,7 @@ class WebTextStyle implements ui.TextStyle {
     final List<ui.FontFeature>? fontFeatures = this.fontFeatures;
     final List<ui.FontVariation>? fontVariations = this.fontVariations;
     return Object.hash(
-      originalFontFamily,
+      fontFamily,
       fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
       fontSize,
       fontStyle,
@@ -356,7 +358,7 @@ class WebTextStyle implements ui.TextStyle {
     assert(() {
       final double? fontSize = this.fontSize;
       result =
-          'fontFamily: ${originalFontFamily ?? ""} '
+          'fontFamily: ${fontFamily ?? ""} '
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
           'fontStyle: ${fontStyle != null ? fontStyle.toString().replaceFirst("FontStyle.", "") : ""} '
           'fontWeight: ${fontWeight != null ? fontWeight.toString().replaceFirst("FontWeight.", "") : ""} '
@@ -403,13 +405,145 @@ class WebTextStyle implements ui.TextStyle {
     return result;
   }
 
+  bool hasElement(StyleElements element) {
+    switch (element) {
+      case StyleElements.background:
+        // Transparent background is equivalent to no background
+        // We do not check for transparency in other paints (like foreground) because
+        // it seems unnatural to have a transparent paint on them
+        return background != null && background!.color.a != 0;
+      case StyleElements.shadows:
+        return shadows != null && shadows!.isNotEmpty;
+      case StyleElements.decorations:
+        return decoration != null &&
+            decoration! != ui.TextDecoration.none &&
+            decorationStyle != null &&
+            decorationColor != null;
+      case StyleElements.text:
+        return true;
+    }
+  }
+}
+
+class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
+  WebStrutStyle({
+    this.fontFamily,
+    this.fontFamilyFallback,
+    this.fontSize,
+    double? height,
+    // TODO(jlavrova): Implement leadingDistribution.
+    this.leadingDistribution,
+    this.leading,
+    this.fontWeight,
+    this.fontStyle,
+    this.forceStrutHeight,
+  }) : height = height == ui.kTextHeightNone ? null : height;
+
+  @override
+  final String? fontFamily;
+  @override
+  final List<String>? fontFamilyFallback;
+  @override
+  final double? fontSize;
+  final double? height;
+  final double? leading;
+  @override
+  final ui.FontWeight? fontWeight;
+  @override
+  final ui.FontStyle? fontStyle;
+  final bool? forceStrutHeight;
+  final ui.TextLeadingDistribution? leadingDistribution;
+  double strutAscent = 0;
+  double strutDescent = 0;
+  double strutLeading = 0;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is WebStrutStyle &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.height == height &&
+        other.leading == leading &&
+        other.leadingDistribution == leadingDistribution &&
+        other.fontWeight == fontWeight &&
+        other.fontStyle == fontStyle &&
+        other.forceStrutHeight == forceStrutHeight &&
+        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      fontFamily,
+      fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback!) : null,
+      fontSize,
+      height,
+      leading,
+      leadingDistribution,
+      fontWeight,
+      fontStyle,
+      forceStrutHeight,
+    );
+  }
+
+  void calculateMetrics() {
+    if (fontSize == null || fontSize! < 0) {
+      return;
+    }
+
+    applyToContext(layoutContext);
+
+    final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
+
+    strutLeading = leading == null ? 0 : leading! * fontSize!;
+
+    if (height != null) {
+      // The half leading flag doesn't take effect unless there's height override.
+      if (leadingDistribution == ui.TextLeadingDistribution.even) {
+        final double occupiedHeight =
+            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
+        // Distribute the flexible height evenly over and under.
+        final double flexibleHeight = (height! * fontSize! - occupiedHeight) / 2;
+        strutAscent = strutTextMetrics.fontBoundingBoxAscent + flexibleHeight;
+        strutDescent = strutTextMetrics.fontBoundingBoxDescent + flexibleHeight;
+      } else {
+        final double strutMetricsHeight =
+            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
+        final double strutHeightMultiplier = strutMetricsHeight == 0
+            ? height!
+            : height! * fontSize! / strutMetricsHeight;
+        strutAscent = strutTextMetrics.fontBoundingBoxAscent * strutHeightMultiplier;
+        strutDescent = strutTextMetrics.fontBoundingBoxDescent * strutHeightMultiplier;
+      }
+    } else {
+      strutAscent = strutTextMetrics.fontBoundingBoxAscent;
+      strutDescent = strutTextMetrics.fontBoundingBoxDescent;
+    }
+  }
+}
+
+abstract class SharedTextStyle {
+  String? get fontFamily;
+  List<String>? get fontFamilyFallback;
+  double? get fontSize;
+  ui.FontWeight? get fontWeight;
+  ui.FontStyle? get fontStyle;
+  ui.Locale? get locale => null;
+  List<ui.FontFeature>? get fontFeatures => null;
+  List<ui.FontVariation>? get fontVariations => null;
+  double? get letterSpacing => null;
+  double? get wordSpacing => null;
+
   String _buildCssFontString() {
     final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
     final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
     final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
-    final String cssFontFamily = canonicalizeFontFamily(originalFontFamily)!;
-
-    return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
+    final String cssFontFamily = fontFamily ?? StyleManager.defaultFontFamily;
+    final String fullFontName = canonicalizeFontFamily(cssFontFamily, fontFamilyFallback)!;
+    return '$cssFontStyle $cssFontWeight ${cssFontSize}px $fullFontName';
   }
 
   String _buildLetterSpacingString() {
@@ -421,7 +555,7 @@ class WebTextStyle implements ui.TextStyle {
   }
 
   String _buildLangString() {
-    return locale != null ? '${locale!.languageCode}-${locale!.countryCode}' : '';
+    return locale != null ? locale!.toLanguageTag() : 'inherit';
   }
 
   void _applyFontFeatures(DomCanvasRenderingContext2D context) {
@@ -462,25 +596,6 @@ class WebTextStyle implements ui.TextStyle {
     context.wordSpacing = _buildWordSpacingString();
     context.lang = _buildLangString();
     _applyFontFeatures(context);
-  }
-
-  bool hasElement(StyleElements element) {
-    switch (element) {
-      case StyleElements.background:
-        // Transparent background is equivalent to no background
-        // We do not check for transparency in other paints (like foreground) because
-        // it seems unnatural to have a transparent paint on them
-        return background != null && background!.color.a != 0;
-      case StyleElements.shadows:
-        return shadows != null && shadows!.isNotEmpty;
-      case StyleElements.decorations:
-        return decoration != null &&
-            decoration! != ui.TextDecoration.none &&
-            decorationStyle != null &&
-            decorationColor != null;
-      case StyleElements.text:
-        return true;
-    }
   }
 }
 
@@ -673,23 +788,11 @@ class TextSpan extends ParagraphSpan {
     if (intersect.isEmpty) {
       return ui.Rect.zero;
     }
-    // This `selection` is relative to the span, but blocks should be positioned relative to the line.
-    final ui.Rect beforeSelection = _metrics.getSelection(
-      block.textRange.start - start,
-      intersect.start - start,
-    );
     final ui.Rect intersectSelection = _metrics.getSelection(
       intersect.start - start,
       intersect.end - start,
     );
-
-    // We need 2 selections to calculate the distance between the beginning of the line block and the intersection
-    return ui.Rect.fromLTWH(
-      block.shiftFromLineStart + intersectSelection.left - beforeSelection.left,
-      intersectSelection.top,
-      intersectSelection.width,
-      intersectSelection.height,
-    );
+    return intersectSelection.shift(ui.Offset(block.spanShiftFromLineStart, 0));
   }
 
   ui.Rect getBlockBounds(TextBlock block) {
@@ -746,105 +849,6 @@ class TextSpan extends ParagraphSpan {
 
   @override
   int get hashCode => Object.hash(start, end, style, text);
-}
-
-class WebStrutStyle implements ui.StrutStyle {
-  WebStrutStyle({
-    this.fontFamily,
-    this.fontFamilyFallback,
-    this.fontSize,
-    double? height,
-    // TODO(jlavrova): Implement leadingDistribution.
-    this.leadingDistribution,
-    this.leading,
-    this.fontWeight,
-    this.fontStyle,
-    this.forceStrutHeight,
-  }) : height = height == ui.kTextHeightNone ? null : height;
-
-  final String? fontFamily;
-  final List<String>? fontFamilyFallback;
-  final double? fontSize;
-  final double? height;
-  final double? leading;
-  final ui.FontWeight? fontWeight;
-  final ui.FontStyle? fontStyle;
-  final bool? forceStrutHeight;
-  final ui.TextLeadingDistribution? leadingDistribution;
-  double strutAscent = 0;
-  double strutDescent = 0;
-  double strutLeading = 0;
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is WebStrutStyle &&
-        other.fontFamily == fontFamily &&
-        other.fontSize == fontSize &&
-        other.height == height &&
-        other.leading == leading &&
-        other.leadingDistribution == leadingDistribution &&
-        other.fontWeight == fontWeight &&
-        other.fontStyle == fontStyle &&
-        other.forceStrutHeight == forceStrutHeight &&
-        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      fontFamily,
-      fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback!) : null,
-      fontSize,
-      height,
-      leading,
-      leadingDistribution,
-      fontWeight,
-      fontStyle,
-      forceStrutHeight,
-    );
-  }
-
-  void calculateMetrics() {
-    if (fontSize == null || fontSize! < 0) {
-      return;
-    }
-
-    final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
-    final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
-    final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
-    final String cssFontFamily = canonicalizeFontFamily(fontFamily)!;
-
-    layoutContext.font = '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
-    final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
-
-    strutLeading = leading == null ? 0 : leading! * fontSize!;
-
-    if (height != null) {
-      // The half leading flag doesn't take effect unless there's height override.
-      if (leadingDistribution == ui.TextLeadingDistribution.even) {
-        final double occupiedHeight =
-            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
-        // Distribute the flexible height evenly over and under.
-        final double flexibleHeight = (height! * fontSize! - occupiedHeight) / 2;
-        strutAscent = strutTextMetrics.fontBoundingBoxAscent + flexibleHeight;
-        strutDescent = strutTextMetrics.fontBoundingBoxDescent + flexibleHeight;
-      } else {
-        final double strutMetricsHeight =
-            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
-        final double strutHeightMultiplier = strutMetricsHeight == 0
-            ? height!
-            : height! * fontSize! / strutMetricsHeight;
-        strutAscent = strutTextMetrics.fontBoundingBoxAscent * strutHeightMultiplier;
-        strutDescent = strutTextMetrics.fontBoundingBoxDescent * strutHeightMultiplier;
-      }
-    } else {
-      strutAscent = strutTextMetrics.fontBoundingBoxAscent;
-      strutDescent = strutTextMetrics.fontBoundingBoxDescent;
-    }
-  }
 }
 
 /// An implementation of [ui.Paragraph] based on the new Enhanced TextMetrics API.
@@ -904,9 +908,11 @@ class WebParagraph implements ui.Paragraph {
       boxHeightStyle,
       boxWidthStyle,
     );
-    WebParagraphDebug.apiTrace(
-      'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
-    );
+    if (WebParagraphDebug.apiLogging || WebParagraphDebug.logging) {
+      WebParagraphDebug.apiTrace(
+        'getBoxesForRange($start, $end, $boxHeightStyle, $boxWidthStyle): ${result.map((r) => r.toString()).toList()}',
+      );
+    }
     return result;
   }
 
@@ -915,26 +921,28 @@ class WebParagraph implements ui.Paragraph {
     final ui.TextPosition result = text.isEmpty
         ? const ui.TextPosition(offset: 0)
         : _layout.getPositionForOffset(offset);
-    WebParagraphDebug.apiTrace('getPositionForOffset("$text", $offset): $result');
+    WebParagraphDebug.apiTrace('getPositionForOffset($offset): $result');
     return result;
   }
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
     final ui.TextPosition position = getPositionForOffset(offset);
-    assert(position.offset < text.length || text.isEmpty);
-    final ui.GlyphInfo? result = getGlyphInfoAt(position.offset);
+    assert(position.offset != 0 || position.affinity != ui.TextAffinity.upstream);
+    final ui.GlyphInfo? result = getGlyphInfoAt(
+      position.offset + (position.affinity == ui.TextAffinity.downstream ? 0 : -1),
+    );
     if (result == null) {
       WebParagraphDebug.apiTrace(
-        'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
-        'TextPosition(${position.offset},${position.affinity.toString().replaceFirst('TextAffinity.', '')}) Glyph: null',
+        'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
+        'TextPosition(${position.offset}, ${position.affinity.toString().replaceFirst('TextAffinity.', '')}) Glyph: null',
       );
       return null;
     }
 
     WebParagraphDebug.apiTrace(
-      'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
-      'TextPosition(${position.offset},${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
+      'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
+      'TextPosition(${position.offset}, ${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
       '${result.graphemeClusterLayoutBounds} '
       'TextRange: [${result.graphemeClusterCodeUnitRange.start}:${result.graphemeClusterCodeUnitRange.end}) '
       'TextDirection: ${result.writingDirection.toString().replaceFirst('TextDirection.', '')} ',
@@ -945,11 +953,12 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
-    if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
+    if (codeUnitOffset < 0 || codeUnitOffset > text.length) {
+      WebParagraphDebug.apiTrace('getGlyphInfoAt($codeUnitOffset): null');
       return null;
     }
     final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
-    WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): $result');
+    WebParagraphDebug.apiTrace('getGlyphInfoAt($codeUnitOffset): $result');
     return result;
   }
 
@@ -966,7 +975,7 @@ class WebParagraph implements ui.Paragraph {
       return ui.TextRange(start: text.length, end: text.length);
     }
     final ui.TextRange result = _layout.getWordBoundary(codepointPosition);
-    WebParagraphDebug.apiTrace('getWordBoundary("$text", $position): $result');
+    WebParagraphDebug.apiTrace('getWordBoundary($position): $result');
     return result;
   }
 
@@ -983,18 +992,15 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
+    WebParagraphDebug.apiTrace('paint("$text", $offset)');
     _painter.paint(canvas, offset);
   }
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int codepointPosition = switch (position.affinity) {
-      ui.TextAffinity.upstream => position.offset - 1,
-      ui.TextAffinity.downstream => position.offset,
-    };
-
+    final int codepointPosition = position.offset;
     final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
-    WebParagraphDebug.apiTrace('getLineBoundary("$text", $position): $result');
+    WebParagraphDebug.apiTrace('getLineBoundary($position): $result');
     return result;
   }
 
@@ -1004,14 +1010,14 @@ class WebParagraph implements ui.Paragraph {
     for (final TextLine line in _layout.lines) {
       metrics.add(line.getMetrics());
     }
-    WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
+    WebParagraphDebug.apiTrace('computeLineMetrics($metrics');
     return metrics;
   }
 
   @override
   ui.LineMetrics? getLineMetricsAt(int lineNumber) {
     if (lineNumber < 0 || lineNumber >= _layout.lines.length) {
-      WebParagraphDebug.apiTrace('getLineMetricsAt("$text", $lineNumber): null (out of range)');
+      WebParagraphDebug.apiTrace('getLineMetricsAt(lineNumber): null (out of range)');
       return null;
     }
     WebParagraphDebug.apiTrace(
@@ -1030,29 +1036,24 @@ class WebParagraph implements ui.Paragraph {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       // When the offset is outside of the paragraph's range, we know it doesn't belong to any of
       // the lines.
-      WebParagraphDebug.apiTrace(
-        'getLineNumberAt("$text", $codeUnitOffset): null (out of text range)',
-      );
+      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): null (out of text range)');
       return null;
     }
 
     for (final TextLine line in _layout.lines) {
       if (line.allLineTextRange.isBefore(codeUnitOffset)) {
+        // We haven't reached the offset yet, keep going.
         continue;
       }
       if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
         break;
       }
 
-      WebParagraphDebug.apiTrace('getLineNumberAt("$text", $codeUnitOffset): ${line.lineNumber}');
+      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
       return line.lineNumber;
     }
 
-    assert(
-      false,
-      'getLineNumberAt("$text", $codeUnitOffset): null (out of range, should not happen)',
-    );
+    assert(false, 'getLineNumberAt($codeUnitOffset): null (out of range, should not happen)');
     return null;
   }
 
@@ -1489,7 +1490,7 @@ class ChildStyleNode extends StyleNode {
   // never null on the TextStyle object, so we use `isFontFamilyProvided` to
   // check if font family is defined or not.
   @override
-  String get _fontFamily => style.originalFontFamily ?? parent._fontFamily;
+  String get _fontFamily => style.fontFamily ?? parent._fontFamily;
 }
 
 /// The root style node for the paragraph.
@@ -1527,7 +1528,7 @@ class RootStyleNode extends StyleNode {
   ui.TextBaseline? get _textBaseline => null;
 
   @override
-  String get _fontFamily => style.originalFontFamily ?? StyleManager.defaultFontFamily;
+  String get _fontFamily => style.fontFamily ?? StyleManager.defaultFontFamily;
 
   @override
   List<String>? get _fontFamilyFallback => null;

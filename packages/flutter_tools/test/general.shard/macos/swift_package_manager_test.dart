@@ -69,8 +69,8 @@ void main() {
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
+                ? '.iOS("15.0")'
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -164,8 +164,8 @@ $_doubleIndent
               );
 
               final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                  ? '.iOS("13.0")'
-                  : '.macOS("10.15")';
+                  ? '.iOS("15.0")'
+                  : '.macOS("12.0")';
               expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
               expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -219,8 +219,8 @@ $_doubleIndent
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
+                ? '.iOS("15.0")'
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
               project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
@@ -318,8 +318,8 @@ let package = Package(
             );
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
+                ? '.iOS("15.0")'
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
               project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
@@ -392,7 +392,7 @@ import PackageDescription
 let package = Package(
     name: "valid_plugin_1",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "valid-plugin-1", targets: ["valid-plugin-1"])
@@ -472,8 +472,8 @@ let package = Package(
             );
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
+                ? '.iOS("15.0")'
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(
               project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
@@ -492,7 +492,7 @@ import PackageDescription
 let package = Package(
     name: "valid_plugin_1",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "valid-plugin-1", targets: ["valid-plugin-1"])
@@ -841,9 +841,7 @@ class ErrorInjectingForwardingFileSystem extends ForwardingFileSystem {
 }
 
 class _ErrorInjectingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
-  _ErrorInjectingLink(ErrorInjectingForwardingFileSystem fileSystem, io.Link delegate)
-    : _fileSystem = fileSystem,
-      delegate = delegate;
+  _ErrorInjectingLink(this._fileSystem, this.delegate);
 
   final ErrorInjectingForwardingFileSystem _fileSystem;
 

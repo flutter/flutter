@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'states.dart';
-import 'widgets_app_tester.dart';
 
 class ItemWidget extends StatefulWidget {
   const ItemWidget({super.key, required this.value});
@@ -1451,9 +1450,12 @@ void main() {
     const listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
     Widget buildDivider() {
-      return Padding(
-        padding: const EdgeInsets.all(4),
-        child: Container(color: const Color(0xFF000000), height: 4, width: double.infinity),
+      return const Padding(
+        padding: EdgeInsets.all(4),
+        child: ColoredBox(
+          color: Color(0xFF000000),
+          child: SizedBox(height: 4, width: double.infinity),
+        ),
       );
     }
 

@@ -5,8 +5,10 @@
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 
 #include <memory>
+#include <mutex>
 #include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation_size.h"
@@ -343,34 +345,63 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
             desc.storage_mode, supports_memoryless_textures));
     alloc_nfo.flags = ToVmaAllocationCreateFlags(desc.storage_mode);
 
-    auto create_info_native =
-        static_cast<vk::ImageCreateInfo::NativeType>(image_info);
-
     VkImage vk_image = VK_NULL_HANDLE;
     VmaAllocation allocation = {};
     VmaAllocationInfo allocation_info = {};
-    {
-      auto result = vk::Result{::vmaCreateImage(allocator,            //
-                                                &create_info_native,  //
-                                                &alloc_nfo,           //
-                                                &vk_image,            //
-                                                &allocation,          //
-                                                &allocation_info      //
-                                                )};
-      if (result != vk::Result::eSuccess) {
-        VALIDATION_LOG << "Unable to allocate Vulkan Image: "
-                       << vk::to_string(result)
-                       << " Type: " << TextureTypeToString(desc.type)
-                       << " Mode: " << StorageModeToString(desc.storage_mode)
-                       << " Usage: " << TextureUsageMaskToString(desc.usage)
-                       << " [VK]Flags: " << vk::to_string(image_info.flags)
-                       << " [VK]Format: " << vk::to_string(image_info.format)
-                       << " [VK]Usage: " << vk::to_string(image_info.usage)
-                       << " [VK]Mem. Flags: "
-                       << vk::to_string(vk::MemoryPropertyFlags(
-                              alloc_nfo.preferredFlags));
-        return;
-      }
+
+    // Performs the VMA image allocation using the current create-info chain.
+    // The native create-info is re-derived from the chain on each call, so an
+    // unlink of the compression-control struct between calls is reflected.
+    const auto try_create_image = [&]() -> vk::Result {
+      vk::ImageCreateInfo::NativeType create_info_native =
+          static_cast<vk::ImageCreateInfo::NativeType>(
+              image_info_chain.get<vk::ImageCreateInfo>());
+      return vk::Result{::vmaCreateImage(allocator,            //
+                                         &create_info_native,  //
+                                         &alloc_nfo,           //
+                                         &vk_image,            //
+                                         &allocation,          //
+                                         &allocation_info      //
+                                         )};
+    };
+
+    // Fixed-rate compression was requested iff a rate was selected above.
+    const bool requested_compression = frc_rate.has_value();
+    vk::Result alloc_result = try_create_image();
+
+    // Some drivers (e.g. PowerVR) can return VK_ERROR_COMPRESSION_EXHAUSTED_EXT
+    // when fixed-rate compression resources are depleted. Per the Vulkan spec
+    // this error is only returned for fixed-rate compression requests, so
+    // retrying without compression is a valid recovery. Without it the
+    // allocation fails, the texture is invalid, and the resulting null render
+    // target crashes the raster thread.
+    if (alloc_result == vk::Result::eErrorCompressionExhaustedEXT &&
+        requested_compression) {
+      static std::once_flag warn_once;
+      std::call_once(warn_once, [] {
+        FML_LOG(WARNING)
+            << "Fixed-rate image compression exhausted; falling back to "
+               "uncompressed image allocation. (This message is logged once.)";
+      });
+      // The compression-control struct is only present here because compression
+      // was requested above, so unlinking it once is safe (no double-unlink).
+      image_info_chain.unlink<vk::ImageCompressionControlEXT>();
+      alloc_result = try_create_image();
+    }
+
+    if (alloc_result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Unable to allocate Vulkan Image: "
+                     << vk::to_string(alloc_result)
+                     << " Type: " << TextureTypeToString(desc.type)
+                     << " Mode: " << StorageModeToString(desc.storage_mode)
+                     << " Usage: " << TextureUsageMaskToString(desc.usage)
+                     << " [VK]Flags: " << vk::to_string(image_info.flags)
+                     << " [VK]Format: " << vk::to_string(image_info.format)
+                     << " [VK]Usage: " << vk::to_string(image_info.usage)
+                     << " [VK]Mem. Flags: "
+                     << vk::to_string(
+                            vk::MemoryPropertyFlags(alloc_nfo.preferredFlags));
+      return;
     }
 
     auto image = vk::Image{vk_image};
@@ -398,18 +429,37 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                      << vk::to_string(result);
       return;
     }
-    // Create a specialized view for render target attachments.
+    // Create one 2D attachment view per (mip level, array layer) so a
+    // specific subresource can be rendered into. Render targets are usually a
+    // single 2D mip (one view); cube and mipmapped render targets get the
+    // full set. Non-render-target textures only need the base view.
+    view_info.viewType = vk::ImageViewType::e2D;
     view_info.subresourceRange.levelCount = 1u;
-    auto [rt_result, rt_image_view] = device.createImageViewUnique(view_info);
-    if (rt_result != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Unable to create an image view for allocation: "
-                     << vk::to_string(rt_result);
-      return;
+    view_info.subresourceRange.layerCount = 1u;
+    const bool is_render_target = !!(desc.usage & TextureUsage::kRenderTarget);
+    const uint32_t rt_mip_count = is_render_target ? image_info.mipLevels : 1u;
+    const uint32_t rt_layer_count =
+        is_render_target ? ToArrayLayerCount(desc.type) : 1u;
+    std::vector<vk::UniqueImageView> rt_image_views;
+    rt_image_views.reserve(rt_mip_count * rt_layer_count);
+    for (uint32_t mip = 0; mip < rt_mip_count; mip++) {
+      for (uint32_t layer = 0; layer < rt_layer_count; layer++) {
+        view_info.subresourceRange.baseMipLevel = mip;
+        view_info.subresourceRange.baseArrayLayer = layer;
+        auto [rt_result, rt_image_view] =
+            device.createImageViewUnique(view_info);
+        if (rt_result != vk::Result::eSuccess) {
+          VALIDATION_LOG << "Unable to create a render target image view: "
+                         << vk::to_string(rt_result);
+          return;
+        }
+        rt_image_views.push_back(std::move(rt_image_view));
+      }
     }
 
     resource_.Swap(ImageResource(
         ImageVMA{allocator, allocation, image}, std::move(image_view),
-        std::move(rt_image_view), context.GetResourceAllocator(),
+        std::move(rt_image_views), context.GetResourceAllocator(),
         context.GetDeviceHolder()));
     is_valid_ = true;
   }
@@ -424,8 +474,16 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     return resource_->image_view.get();
   }
 
-  vk::ImageView GetRenderTargetView() const override {
-    return resource_->rt_image_view.get();
+  vk::ImageView GetRenderTargetView(uint32_t mip_level,
+                                    uint32_t array_layer) const override {
+    const auto& views = resource_->rt_image_views;
+    if (views.empty()) {
+      return VK_NULL_HANDLE;
+    }
+    const uint32_t layer_count = ToArrayLayerCount(GetTextureDescriptor().type);
+    const size_t index =
+        static_cast<size_t>(mip_level) * layer_count + array_layer;
+    return index < views.size() ? views[index].get() : views[0].get();
   }
 
   bool IsSwapchainImage() const override { return false; }
@@ -436,20 +494,21 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     std::shared_ptr<Allocator> allocator;
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
-    vk::UniqueImageView rt_image_view;
+    // One attachment view per (mip level, array layer), row-major by mip.
+    std::vector<vk::UniqueImageView> rt_image_views;
 
     ImageResource() = default;
 
     ImageResource(ImageVMA p_image,
                   vk::UniqueImageView p_image_view,
-                  vk::UniqueImageView p_rt_image_view,
+                  std::vector<vk::UniqueImageView> p_rt_image_views,
                   std::shared_ptr<Allocator> allocator,
                   std::shared_ptr<DeviceHolderVK> device_holder)
         : device_holder(std::move(device_holder)),
           allocator(std::move(allocator)),
           image(p_image),
           image_view(std::move(p_image_view)),
-          rt_image_view(std::move(p_rt_image_view)) {}
+          rt_image_views(std::move(p_rt_image_views)) {}
 
     ImageResource(ImageResource&& o) = default;
 
@@ -559,7 +618,7 @@ Bytes AllocatorVK::DebugGetHeapUsage() const {
     const VmaBudget& budget = budgets[i];
     total_usage += budget.usage;
   }
-  return Bytes{static_cast<double>(total_usage)};
+  return Bytes{total_usage};
 }
 
 void AllocatorVK::DebugTraceMemoryStatistics() const {

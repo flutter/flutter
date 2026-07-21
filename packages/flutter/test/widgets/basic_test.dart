@@ -19,7 +19,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   group('RawImage', () {
@@ -960,86 +959,100 @@ void main() {
     });
   });
 
-  test('UnconstrainedBox toString', () {
-    expect(
-      const UnconstrainedBox(constrainedAxis: Axis.vertical).toString(),
-      equals('UnconstrainedBox(alignment: Alignment.center, constrainedAxis: vertical)'),
-    );
-
-    expect(
-      const UnconstrainedBox(
-        constrainedAxis: Axis.horizontal,
-        textDirection: TextDirection.rtl,
-        alignment: Alignment.topRight,
-      ).toString(),
-      equals(
-        'UnconstrainedBox(alignment: Alignment.topRight, constrainedAxis: horizontal, textDirection: rtl)',
-      ),
-    );
-  });
-
-  testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
-    await tester.pumpWidget(const UnconstrainedBox());
-    final RenderConstraintsTransformBox renderObject = tester.allRenderObjects
-        .whereType<RenderConstraintsTransformBox>()
-        .first;
-    expect(renderObject.clipBehavior, equals(Clip.none));
-
-    await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
-    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
-  });
-
-  testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (
-    WidgetTester tester,
-  ) async {
-    for (final clip in <Clip?>[null, ...Clip.values]) {
-      // Clear any render objects that were there before so that we can see more
-      // than one error. Otherwise, it just throws the first one and skips the
-      // rest, since the render objects haven't changed.
-      await tester.pumpWidget(const SizedBox());
-      await tester.pumpWidget(
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
-            child: clip == null
-                ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
-                : UnconstrainedBox(
-                    clipBehavior: clip,
-                    child: const SizedBox(width: 400, height: 400),
-                  ),
-          ),
-        ),
+  group('UnconstrainedBox', () {
+    test('UnconstrainedBox toString', () {
+      expect(
+        const UnconstrainedBox(constrainedAxis: Axis.vertical).toString(),
+        equals('UnconstrainedBox(alignment: Alignment.center, constrainedAxis: vertical)'),
       );
 
+      expect(
+        const UnconstrainedBox(
+          constrainedAxis: Axis.horizontal,
+          textDirection: TextDirection.rtl,
+          alignment: Alignment.topRight,
+        ).toString(),
+        equals(
+          'UnconstrainedBox(alignment: Alignment.topRight, constrainedAxis: horizontal, textDirection: rtl)',
+        ),
+      );
+    });
+
+    testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
+      await tester.pumpWidget(const UnconstrainedBox());
       final RenderConstraintsTransformBox renderObject = tester.allRenderObjects
           .whereType<RenderConstraintsTransformBox>()
           .first;
+      expect(renderObject.clipBehavior, equals(Clip.none));
 
-      // Defaults to Clip.none
-      expect(renderObject.clipBehavior, equals(clip ?? Clip.none), reason: 'for clip = $clip');
+      await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
+      expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+    });
 
-      switch (clip) {
-        case null:
-        case Clip.none:
-          // the UnconstrainedBox overflows.
-          final dynamic exception = tester.takeException();
-          expect(exception, isFlutterError, reason: 'for clip = $clip');
-          expect(
-            exception.diagnostics.first.level, // ignore: avoid_dynamic_calls
-            DiagnosticLevel.summary,
-            reason: 'for clip = $clip',
-          );
-          expect(
-            exception.diagnostics.first.toString(), // ignore: avoid_dynamic_calls
-            startsWith('A RenderConstraintsTransformBox overflowed'),
-            reason: 'for clip = $clip',
-          );
-        case Clip.hardEdge:
-        case Clip.antiAlias:
-        case Clip.antiAliasWithSaveLayer:
-          expect(tester.takeException(), isNull, reason: 'for clip = $clip');
+    testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (
+      WidgetTester tester,
+    ) async {
+      for (final clip in <Clip?>[null, ...Clip.values]) {
+        // Clear any render objects that were there before so that we can see more
+        // than one error. Otherwise, it just throws the first one and skips the
+        // rest, since the render objects haven't changed.
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
+              child: clip == null
+                  ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
+                  : UnconstrainedBox(
+                      clipBehavior: clip,
+                      child: const SizedBox(width: 400, height: 400),
+                    ),
+            ),
+          ),
+        );
+
+        final RenderConstraintsTransformBox renderObject = tester.allRenderObjects
+            .whereType<RenderConstraintsTransformBox>()
+            .first;
+
+        // Defaults to Clip.none
+        expect(renderObject.clipBehavior, equals(clip ?? Clip.none), reason: 'for clip = $clip');
+
+        switch (clip) {
+          case null:
+          case Clip.none:
+            // the UnconstrainedBox overflows.
+            final dynamic exception = tester.takeException();
+            expect(exception, isFlutterError, reason: 'for clip = $clip');
+            expect(
+              exception.diagnostics.first.level, // ignore: avoid_dynamic_calls
+              DiagnosticLevel.summary,
+              reason: 'for clip = $clip',
+            );
+            expect(
+              exception.diagnostics.first.toString(), // ignore: avoid_dynamic_calls
+              startsWith('A RenderConstraintsTransformBox overflowed'),
+              reason: 'for clip = $clip',
+            );
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            expect(tester.takeException(), isNull, reason: 'for clip = $clip');
+        }
       }
-    }
+    });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: UnconstrainedBox(child: Placeholder())),
+        ),
+      );
+      expect(tester.getSize(find.byType(UnconstrainedBox)), Size.zero);
+    });
   });
 
   group('ConstraintsTransformBox', () {
@@ -1062,6 +1075,22 @@ void main() {
           'ConstraintsTransformBox(alignment: Alignment.topRight, textDirection: rtl, constraints transform: width constraints removed)',
         ),
       );
+    });
+
+    testWidgets('ConstraintsTransformBox does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: ConstraintsTransformBox(
+              constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(ConstraintsTransformBox)), Size.zero);
     });
   });
 
@@ -1813,6 +1842,21 @@ void main() {
     expect(bPos.dy, 0.0);
   });
 
+  testWidgets('LimitedBox does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    const key = Key('LimitedBox');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: LimitedBox(key: key, child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(key)), Size.zero);
+  });
+
   testWidgets('Padding does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
@@ -1825,6 +1869,30 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Padding)), Size.zero);
+  });
+
+  testWidgets('Offstage does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Offstage(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Offstage)), Size.zero);
+  });
+
+  testWidgets('IntrinsicHeight does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: IntrinsicHeight(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(IntrinsicHeight)), Size.zero);
   });
 }
 
