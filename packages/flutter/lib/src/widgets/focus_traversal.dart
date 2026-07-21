@@ -1409,7 +1409,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         groupNode,
       );
     }
-  return _onEdgeForDirection(currentNode, focusedChild, groupNode, direction);
+    return _onEdgeForDirection(currentNode, focusedChild, groupNode, direction);
   }
 }
 
