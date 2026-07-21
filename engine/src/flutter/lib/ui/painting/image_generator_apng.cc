@@ -325,23 +325,28 @@ std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
 bool APNGImageGenerator::IsValidChunkHeader(const void* buffer,
                                             size_t size,
                                             const ChunkHeader* chunk) {
-  // Ensure the chunk doesn't start before the beginning of the buffer.
-  if (reinterpret_cast<const uint8_t*>(chunk) <
-      static_cast<const uint8_t*>(buffer)) {
+  // Ensure that the chunk starts within the bounds of the buffer.
+  const uint8_t* chunk_ptr = reinterpret_cast<const uint8_t*>(chunk);
+  const uint8_t* buffer_ptr = static_cast<const uint8_t*>(buffer);
+  if (chunk_ptr < buffer_ptr || chunk_ptr >= buffer_ptr + size) {
     return false;
   }
 
-  // Ensure the buffer is large enough to contain at least the chunk header.
-  if (reinterpret_cast<const uint8_t*>(chunk) + sizeof(ChunkHeader) >
-      static_cast<const uint8_t*>(buffer) + size) {
+  // Ensure that the buffer has enough space for the chunk header before using
+  // any fields in the header.
+  size_t buffer_bytes_remaining = size - (chunk_ptr - buffer_ptr);
+  if (buffer_bytes_remaining < sizeof(ChunkHeader)) {
     return false;
   }
-
-  // Ensure the buffer is large enough to contain the chunk's given data size
-  // and CRC.
-  const uint8_t* chunk_end =
-      reinterpret_cast<const uint8_t*>(chunk) + GetChunkSize(chunk);
-  if (chunk_end > static_cast<const uint8_t*>(buffer) + size) {
+  // Ensure that the buffer has enough space for the chunk data and CRC.
+  // Do not use the chunk data length in pointer arithmetic until it is known to
+  // be valid.
+  size_t data_length = chunk->get_data_length();
+  if (buffer_bytes_remaining - sizeof(ChunkHeader) < data_length) {
+    return false;
+  }
+  if (buffer_bytes_remaining - sizeof(ChunkHeader) - data_length <
+      kChunkCrcSize) {
     return false;
   }
 

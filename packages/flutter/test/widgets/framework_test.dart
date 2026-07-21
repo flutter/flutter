@@ -1222,6 +1222,37 @@ void main() {
     }, throwsFlutterError);
   });
 
+  testWidgets('setState() after dispose() error explains asynchronous causes', (
+    WidgetTester tester,
+  ) async {
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return Container();
+        },
+      ),
+    );
+
+    // Remove the widget from the tree so its State becomes defunct.
+    await tester.pumpWidget(Container());
+
+    // The error should call out asynchronous gaps (the most common cause) and
+    // point at the "mounted" check after an "await".
+    expect(
+      () => setState(() {}),
+      throwsA(
+        isA<FlutterError>().having(
+          (FlutterError error) => error.toString(),
+          'message',
+          allOf(contains('asynchronous'), contains('await')),
+        ),
+      ),
+    );
+  });
+
   testWidgets('State toString', (WidgetTester tester) async {
     final state = TestState();
     expect(state.toString(), contains('no widget'));

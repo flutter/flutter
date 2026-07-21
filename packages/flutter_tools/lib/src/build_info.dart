@@ -620,6 +620,38 @@ bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug;
 }
 
+/// Platform-agnostic CPU architecture type.
+enum CpuArch {
+  /// Unknown architecture. Used when the architecture is not relevant.
+  unknown,
+  armv7,
+  arm64,
+  x86,
+  x86_64,
+  riscv64;
+
+  factory CpuArch.fromName(String name) {
+    return switch (name) {
+      'unknown' => CpuArch.unknown,
+      'armv7' => CpuArch.armv7,
+      'arm64' => CpuArch.arm64,
+      'x86' => CpuArch.x86,
+      'x86_64' => CpuArch.x86_64,
+      'riscv64' => CpuArch.riscv64,
+      _ => throw Exception('Unsupported CPU arch name "$name"'),
+    };
+  }
+
+  /// The [CpuArch] of the given [hostPlatform].
+  factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
+    return switch (hostPlatform) {
+      .darwin_x64 || .linux_x64 || .windows_x64 => CpuArch.x86_64,
+      .darwin_arm64 || .linux_arm64 || .windows_arm64 => CpuArch.arm64,
+      .linux_riscv64 => CpuArch.riscv64,
+    };
+  }
+}
+
 enum TargetPlatform {
   android('android'),
   ios('ios'),
@@ -933,18 +965,29 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
+///
+/// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
+/// different flavors can coexist on disk without overwriting each other.
+String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
       : targetPlatform.simpleName;
-  final subDirs = 'linux/$arch';
+  final String subDirs = (flavor != null && flavor.isNotEmpty)
+      ? globals.fs.path.join('linux', arch, flavor)
+      : globals.fs.path.join('linux', arch);
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Windows build output directory.
-String getWindowsBuildDirectory(TargetPlatform targetPlatform) {
+///
+/// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
+/// different flavors can coexist on disk without overwriting each other.
+String getWindowsBuildDirectory(TargetPlatform targetPlatform, [String? flavor]) {
   final String arch = targetPlatform.simpleName;
-  return globals.fs.path.join(getBuildDirectory(), 'windows', arch);
+  final String subDirs = (flavor != null && flavor.isNotEmpty)
+      ? globals.fs.path.join('windows', arch, flavor)
+      : globals.fs.path.join('windows', arch);
+  return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Fuchsia build output directory.
@@ -1063,6 +1106,14 @@ const kFlavor = 'Flavor';
 /// Environment variable of the flavor to be set in dartDefines to be accessed
 /// by the `appFlavor` service.
 const kAppFlavor = 'FLUTTER_APP_FLAVOR';
+
+/// Environment variable of the build name to be set in dartDefines to be
+/// accessed by the `appBuildName` service.
+const kAppBuildName = 'FLUTTER_BUILD_NAME';
+
+/// Environment variable of the build number to be set in dartDefines to be
+/// accessed by the `appBuildNumber` service.
+const kAppBuildNumber = 'FLUTTER_BUILD_NUMBER';
 
 /// Environment variable of the enabled feature flags to be set in the
 /// dartDefines.

@@ -17,11 +17,8 @@ void main() {
     runWidget(
       RegularWindow(
         controller: RegularWindowController(
-          preferredSize: const Size(800, 600),
-          preferredConstraints: const BoxConstraints(
-            minWidth: 640,
-            minHeight: 480,
-          ),
+          size: const Size(800, 600),
+          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
           title: 'Example Window',
         ),
         child: const MaterialApp(home: MyApp()),

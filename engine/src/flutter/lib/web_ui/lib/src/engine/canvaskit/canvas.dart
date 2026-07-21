@@ -117,14 +117,23 @@ class CkCanvas implements LayerCanvas {
     skPaint.delete();
   }
 
+  SkImage _getSkImage(ui.Image image) {
+    if (image case EngineImage(backendImage: CkImageDelegate(:final skImage))) {
+      return skImage;
+    }
+    throw ArgumentError('The image being drawn must be a CanvasKit image.');
+  }
+
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
     assert(offsetIsValid(offset));
+    final SkImage skImage = _getSkImage(image);
     final ui.FilterQuality filterQuality = paint.filterQuality;
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
+
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageCubic(
-        (image as CkImage).skImage,
+        skImage,
         offset.dx,
         offset.dy,
         _kMitchellNetravali_B,
@@ -133,7 +142,7 @@ class CkCanvas implements LayerCanvas {
       );
     } else {
       skCanvas.drawImageOptions(
-        (image as CkImage).skImage,
+        skImage,
         offset.dx,
         offset.dy,
         toSkFilterMode(filterQuality),
@@ -148,12 +157,14 @@ class CkCanvas implements LayerCanvas {
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
+    final SkImage skImage = _getSkImage(image);
 
     final ui.FilterQuality filterQuality = paint.filterQuality;
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
+
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageRectCubic(
-        (image as CkImage).skImage,
+        skImage,
         toSkRect(src),
         toSkRect(dst),
         _kMitchellNetravali_B,
@@ -162,7 +173,7 @@ class CkCanvas implements LayerCanvas {
       );
     } else {
       skCanvas.drawImageRectOptions(
-        (image as CkImage).skImage,
+        skImage,
         toSkRect(src),
         toSkRect(dst),
         toSkFilterMode(filterQuality),
@@ -177,9 +188,10 @@ class CkCanvas implements LayerCanvas {
   void drawImageNine(ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
     assert(rectIsValid(center));
     assert(rectIsValid(dst));
+    final SkImage skImage = _getSkImage(image);
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
     skCanvas.drawImageNine(
-      (image as CkImage).skImage,
+      skImage,
       toSkRect(center),
       toSkRect(dst),
       toSkFilterMode(paint.filterQuality),
@@ -427,6 +439,7 @@ class CkCanvas implements LayerCanvas {
     ui.Paint paint,
   ) {
     assert(colors == null || colors.isEmpty || blendMode != null);
+    final SkImage skAtlas = _getSkImage(atlas);
 
     final int rectCount = rects.length;
     if (transforms.length != rectCount) {
@@ -465,7 +478,7 @@ class CkCanvas implements LayerCanvas {
 
     _drawAtlas(
       paint as CkPaint,
-      atlas as CkImage,
+      skAtlas,
       rstTransformBuffer,
       rectBuffer,
       colorBuffer,
@@ -484,6 +497,7 @@ class CkCanvas implements LayerCanvas {
     ui.Paint paint,
   ) {
     assert(colors == null || blendMode != null);
+    final SkImage skAtlas = _getSkImage(atlas);
 
     final int rectCount = rects.length;
     if (rstTransforms.length != rectCount) {
@@ -505,7 +519,7 @@ class CkCanvas implements LayerCanvas {
 
     _drawAtlas(
       paint as CkPaint,
-      atlas as CkImage,
+      skAtlas,
       rstTransforms,
       rects,
       unsignedColors,
@@ -513,10 +527,9 @@ class CkCanvas implements LayerCanvas {
     );
   }
 
-  // TODO(flar): CanvasKit does not expose sampling options available on SkCanvas.drawAtlas
   void _drawAtlas(
     CkPaint paint,
-    CkImage atlas,
+    SkImage atlas,
     Float32List rstTransforms,
     Float32List rects,
     Uint32List? colors,
@@ -524,12 +537,13 @@ class CkCanvas implements LayerCanvas {
   ) {
     final SkPaint skPaint = paint.toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
     skCanvas.drawAtlas(
-      atlas.skImage,
+      atlas,
       rects,
       rstTransforms,
       skPaint,
       toSkBlendMode(blendMode),
       colors,
+      toSkFilterOptions(paint.filterQuality),
     );
     skPaint.delete();
   }
