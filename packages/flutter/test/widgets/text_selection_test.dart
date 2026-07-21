@@ -13,7 +13,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
-import 'widgets_app_tester.dart';
 
 const int kSingleTapUpTimeout = 500;
 const Color _white = Color(0xFFFFFFFF);

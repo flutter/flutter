@@ -10,7 +10,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const kOrangeColor = Color(0xFFFF8800);
