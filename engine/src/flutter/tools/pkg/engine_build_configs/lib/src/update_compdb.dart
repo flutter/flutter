@@ -6,6 +6,17 @@ import 'dart:convert' as convert;
 
 import 'package:path/path.dart' as p;
 
+// Matches a compile_commands.json `"command"` entry up to the clang executable.
+//
+// Matches up to `clang`/`clang++` so any wrapper prefix (rewrapper, ccache)
+// before it can be stripped.
+//
+// Group 1 is the leading `"command": "`.
+// Group 2 is the ` <path>clang[++]` executable.
+//
+// For example, given the entry:
+//   "command": "../../buildtools/mac-arm64/reclient/rewrapper ../../buildtools/mac-arm64/clang/bin/clang++ -c foo.cc"
+// group 2 is ` ../../buildtools/mac-arm64/clang/bin/clang++`.
 final RegExp _clangRegexp = RegExp(r'("command"\s*:\s*").*(\s(?:\S*/)?clang(\+\+)?)(?=[\s"])');
 final RegExp _swiftEntryRegexp = RegExp(r'\{[^{}]*swiftc\.py[^{}]*\}');
 final RegExp _shellQuoteRegexp = RegExp(r'[\s"\\$`!#&*|?()<>;~]');
@@ -87,9 +98,9 @@ List<Map<String, Object?>> expandSwiftEntry(Map<String, Object?> entry) {
     return <Map<String, Object?>>[translatedEntry];
   }
 
-  final List<String> absSwiftFiles = translation.swiftFiles
-      .map((String f) => makePathAbsolute(entryDir, f))
-      .toList();
+  final absSwiftFiles = <String>[
+    for (final String f in translation.swiftFiles) makePathAbsolute(entryDir, f),
+  ];
   return _duplicateEntryPerSwiftFile(translatedEntry, absSwiftFiles);
 }
 
@@ -122,7 +133,7 @@ List<Map<String, Object?>> _duplicateEntryPerSwiftFile(
 
 /// Resolves [filePath] against [directory] and returns the normalized absolute path.
 String makePathAbsolute(String directory, String filePath) =>
-    p.isAbsolute(filePath) ? p.normalize(filePath) : p.normalize(p.join(directory, filePath));
+    p.normalize(p.isAbsolute(filePath) ? filePath : p.join(directory, filePath));
 
 /// The `swiftc` arguments and Swift source files extracted from a GN `swiftc.py` command.
 typedef _SwiftcTranslation = ({List<String> args, List<String> swiftFiles});
@@ -155,7 +166,7 @@ bool _isBooleanFlag(String arg) {
 /// Non-path `-Xcc` flag synthesis (such as
 /// preprocessor defines `-D`) is handled here, during syntactic argument
 /// translation.
-/// 
+///
 /// Path-dependent `-Xcc` flag synthesis (such as `-I` or `-F`) is deferred to
 /// [_resolveCommandPaths], where relative filesystem paths are resolved to
 /// absolute paths.
@@ -166,48 +177,45 @@ _SwiftcTranslation _translateSwiftcArgs(List<String> args) {
   var i = 0;
   while (i < args.length) {
     final String arg = args[i];
-    if (arg == '-import-objc-header') {
-      // Extract header argument.
-      if (i + 1 < args.length) {
-        final String val = args[i + 1];
-        if (val.isNotEmpty && val != '""' && val != "''") {
-          newArgs.addAll(<String>['-import-objc-header', val]);
+    switch (arg) {
+      case '-import-objc-header':
+        // Extract header argument.
+        if (i + 1 < args.length) {
+          final String val = args[i + 1];
+          if (val.isNotEmpty && val != '""' && val != "''") {
+            newArgs.addAll(<String>['-import-objc-header', val]);
+          }
         }
-      }
-      i += 2;
-    } else if (arg == '--whole-module-optimization') {
-      newArgs.add('-whole-module-optimization');
-      i += 1;
-    } else if (arg.startsWith('--')) {
-      if (_isBooleanFlag(arg)) {
-        i += 1;
-      } else {
         i += 2;
-      }
-    } else if (arg == '-D') {
-      if (i + 1 < args.length) {
-        final String val = args[i + 1];
-        // Swift's `-D` only supports bare conditional-compilation flags, not
-        // `key=value` defines, so those are only forwarded to clang.
+      case '--whole-module-optimization':
+        newArgs.add('-whole-module-optimization');
+        i += 1;
+      case _ when arg.startsWith('--'):
+        i += _isBooleanFlag(arg) ? 1 : 2;
+      case '-D':
+        if (i + 1 < args.length) {
+          final String val = args[i + 1];
+          // Swift's `-D` only supports bare conditional-compilation flags, not
+          // `key=value` defines, so those are only forwarded to clang.
+          if (!val.contains('=')) {
+            newArgs.addAll(<String>['-D', val]);
+          }
+          newArgs.addAll(<String>['-Xcc', '-D$val']);
+        }
+        i += 2;
+      case _ when arg.startsWith('-D'):
+        final String val = arg.substring(2);
         if (!val.contains('=')) {
-          newArgs.addAll(<String>['-D', val]);
+          newArgs.add(arg);
         }
         newArgs.addAll(<String>['-Xcc', '-D$val']);
-      }
-      i += 2;
-    } else if (arg.startsWith('-D')) {
-      final String val = arg.substring(2);
-      if (!val.contains('=')) {
+        i += 1;
+      case _:
         newArgs.add(arg);
-      }
-      newArgs.addAll(<String>['-Xcc', '-D$val']);
-      i += 1;
-    } else {
-      newArgs.add(arg);
-      if (arg.endsWith('.swift')) {
-        swiftFiles.add(arg);
-      }
-      i += 1;
+        if (arg.endsWith('.swift')) {
+          swiftFiles.add(arg);
+        }
+        i += 1;
     }
   }
 
@@ -242,23 +250,19 @@ String _resolveCommandPaths(String directory, List<String> words) {
     if (!isClangOnly(flag)) {
       newArgs.add(absVal);
     }
-    if (flag == '-I' || flag == '-isystem' || flag == '-F' || flag == '-Fsystem') {
+    if (flag case '-I' || '-isystem' || '-F' || '-Fsystem') {
       newArgs.addAll(<String>['-Xcc', flag, '-Xcc', absVal]);
     }
     return i + 2;
   }
 
   void addAttachedIncludeFlag(String arg) {
-    String prefix;
-    if (arg.startsWith('-isystem')) {
-      prefix = '-isystem';
-    } else if (arg.startsWith('-Fsystem')) {
-      prefix = '-Fsystem';
-    } else if (arg.startsWith('-F')) {
-      prefix = '-F';
-    } else {
-      prefix = '-I';
-    }
+    final String prefix = switch (arg) {
+      _ when arg.startsWith('-isystem') => '-isystem',
+      _ when arg.startsWith('-Fsystem') => '-Fsystem',
+      _ when arg.startsWith('-F') => '-F',
+      _ => '-I',
+    };
 
     // A bare `-I`/`-isystem`/`-F`/`-Fsystem` (no attached value) is caught by
     // the exact-match branch below instead, so `val` is never empty here.
@@ -272,22 +276,18 @@ String _resolveCommandPaths(String directory, List<String> words) {
   var i = 0;
   while (i < words.length) {
     final String arg = words[i];
-    if (arg.endsWith('.swift')) {
-      newArgs.add(makePathAbsolute(directory, arg));
-      i += 1;
-    } else if (arg == '-I' ||
-        arg == '-isystem' ||
-        arg == '-F' ||
-        arg == '-Fsystem' ||
-        arg == '-import-objc-header' ||
-        arg == '-sdk') {
-      i = addSeparatedIncludeFlag(i);
-    } else if (arg.startsWith('-I') || arg.startsWith('-F') || arg.startsWith('-isystem')) {
-      addAttachedIncludeFlag(arg);
-      i += 1;
-    } else {
-      newArgs.add(arg);
-      i += 1;
+    switch (arg) {
+      case _ when arg.endsWith('.swift'):
+        newArgs.add(makePathAbsolute(directory, arg));
+        i += 1;
+      case '-I' || '-isystem' || '-F' || '-Fsystem' || '-import-objc-header' || '-sdk':
+        i = addSeparatedIncludeFlag(i);
+      case _ when arg.startsWith('-I') || arg.startsWith('-F') || arg.startsWith('-isystem'):
+        addAttachedIncludeFlag(arg);
+        i += 1;
+      case _:
+        newArgs.add(arg);
+        i += 1;
     }
   }
   return newArgs.map(quoteShellWord).join(' ');
@@ -308,25 +308,26 @@ List<String> splitShellWords(String cmd) {
 
   for (var i = 0; i < cmd.length; i += 1) {
     final String char = cmd[i];
-    if (escape) {
-      buffer.write(char);
-      escape = false;
-    } else if (char == r'\' && !inSingleQuote) {
-      escape = true;
-    } else if (char == "'" && !inDoubleQuote) {
-      inSingleQuote = !inSingleQuote;
-      quoted = true;
-    } else if (char == '"' && !inSingleQuote) {
-      inDoubleQuote = !inDoubleQuote;
-      quoted = true;
-    } else if ((char == ' ' || char == '\t') && !inSingleQuote && !inDoubleQuote) {
-      if (buffer.isNotEmpty || quoted) {
-        args.add(buffer.toString());
-        buffer.clear();
-        quoted = false;
-      }
-    } else {
-      buffer.write(char);
+    switch (char) {
+      case _ when escape:
+        buffer.write(char);
+        escape = false;
+      case r'\' when !inSingleQuote:
+        escape = true;
+      case "'" when !inDoubleQuote:
+        inSingleQuote = !inSingleQuote;
+        quoted = true;
+      case '"' when !inSingleQuote:
+        inDoubleQuote = !inDoubleQuote;
+        quoted = true;
+      case ' ' || '\t' when !inSingleQuote && !inDoubleQuote:
+        if (buffer.isNotEmpty || quoted) {
+          args.add(buffer.toString());
+          buffer.clear();
+          quoted = false;
+        }
+      case _:
+        buffer.write(char);
     }
   }
   if (buffer.isNotEmpty || quoted) {
