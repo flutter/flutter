@@ -4596,8 +4596,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_1_5
+  - name: Mac tool_integration_tests_1
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4611,10 +4612,9 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: tool_integration_tests
-      subshard: "1_5"
+      subshard: "1_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4623,8 +4623,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_2_5
+  - name: Mac tool_integration_tests_2
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4638,10 +4639,9 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: tool_integration_tests
-      subshard: "2_5"
+      subshard: "2_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4650,8 +4650,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_3_5
+  - name: Mac tool_integration_tests_3
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4665,10 +4666,9 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: tool_integration_tests
-      subshard: "3_5"
+      subshard: "3_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4677,8 +4677,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_4_5
+  - name: Mac tool_integration_tests_4
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4692,10 +4693,9 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: tool_integration_tests
-      subshard: "4_5"
+      subshard: "4_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4704,8 +4704,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac tool_integration_tests_5_5
+  - name: Mac tool_integration_tests_5
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4719,10 +4720,144 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: tool_integration_tests
-      subshard: "5_5"
+      subshard: "5_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac tool_integration_tests_6
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      cpu: arm64
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+      shard: tool_integration_tests
+      subshard: "6_10"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac tool_integration_tests_7
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      cpu: arm64
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+      shard: tool_integration_tests
+      subshard: "7_10"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac tool_integration_tests_8
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      cpu: arm64
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+      shard: tool_integration_tests
+      subshard: "8_10"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac tool_integration_tests_9
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      cpu: arm64
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+      shard: tool_integration_tests
+      subshard: "9_10"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac tool_integration_tests_10
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      cpu: arm64
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+      shard: tool_integration_tests
+      subshard: "10_10"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
       - packages/flutter_tools/**
