@@ -662,12 +662,12 @@ class FlutterFrameworkDependency {
           copiedPath,
         ]);
         if (chmodResult.exitCode != 0) {
-          _utils.logger.printTrace(
-            'Warning: Failed to explicitly make XCFramework writable at $copiedPath: ${chmodResult.stderr}',
+          throwToolExit(
+            'Failed to explicitly make XCFramework writable at $copiedPath: ${chmodResult.stderr}',
           );
         }
       } on ProcessException catch (e) {
-        _utils.logger.printTrace('Warning: Failed to run chmod for $copiedPath: $e');
+        throwToolExit('Failed to run chmod for $copiedPath: $e');
       }
       if (codesignIdentity != null) {
         final Directory copiedXCFramework = xcframeworkOutput.childDirectory(

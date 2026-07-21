@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
@@ -68,12 +69,12 @@ abstract class UnpackDarwin extends Target {
         copiedPath,
       ]);
       if (chmodResult.exitCode != 0) {
-        environment.logger.printTrace(
-          'Warning: Failed to explicitly make framework writable at $copiedPath: ${chmodResult.stderr}',
+        throwToolExit(
+          'Failed to explicitly make framework writable at $copiedPath: ${chmodResult.stderr}',
         );
       }
     } on ProcessException catch (e) {
-      environment.logger.printTrace('Warning: Failed to run chmod for $copiedPath: $e');
+      throwToolExit('Failed to run chmod for $copiedPath: $e');
     }
   }
 
