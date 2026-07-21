@@ -16,7 +16,7 @@ template <typename T, std::size_t N>
 std::string FoldNames(const std::array<T, N>& array) {
   return std::accumulate(array.begin(), array.end(), std::string{},
                          [](const std::string& a, const T& b) {
-                           return a.size() == 0 ? b.name : a + "," + b.name;
+                           return a.empty() ? b.name : a + "," + b.name;
                          });
 }
 
@@ -78,6 +78,7 @@ absl::StatusOr<PlaygroundSwitches> PlaygroundSwitches::FromCommandLine(
     } else if (args.HasOption("enable_playground")) {
       FML_LOG(WARNING) << "The enable_playground flag is deprecated in "
                           "favor of --playground_output=window.";
+      switches.outputs_enabled.Clear();
       switches.outputs_enabled.window = true;
     }
   }
