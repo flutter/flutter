@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui show clampDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 /// Describes how a sliver's clip reacts to the area overlapped by other slivers.
 ///
