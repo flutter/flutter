@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Display;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
@@ -268,7 +269,7 @@ class _MutableRegularWindowController extends RegularWindowController {
 }
 
 void main() {
-  group('Windowing', () {
+  group('Windowing', skip: kIsWeb, () {
     group('isWindowingEnabled is false', () {
       setUp(() {
         isWindowingEnabled = false;
