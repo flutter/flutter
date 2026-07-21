@@ -397,6 +397,32 @@ void main() {
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
     });
 
+    testWidgets('can be disposed while the fade animation is in progress', (
+      WidgetTester tester,
+    ) async {
+      final placeholderProvider = TestImageProvider(placeholderImage);
+      final imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(
+        FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          fadeOutDuration: animationDuration,
+          fadeInDuration: animationDuration,
+          excludeFromSemantics: true,
+        ),
+      );
+
+      placeholderProvider.complete();
+      imageProvider.complete();
+      await tester.pump();
+      // Part way through the animation, remove the widget from the tree.
+      await tester.pump(animationDuration ~/ 2);
+      await tester.pumpWidget(const SizedBox());
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('Image color and colorBlend parameters', (WidgetTester tester) async {
       final placeholderProvider = TestImageProvider(placeholderImage);
       final imageProvider = TestImageProvider(targetImage);
@@ -759,7 +785,6 @@ void main() {
             image: imageProvider,
             fadeInDuration: animationDuration,
             fadeInCurve: Curves.linear,
-            fadeOutDuration: Duration.zero,
             transition: FadeInImageTransition.fadeInOver,
             excludeFromSemantics: true,
           ),
@@ -802,7 +827,6 @@ void main() {
             placeholder: placeholderProvider,
             image: imageProvider,
             fadeInDuration: animationDuration,
-            fadeOutDuration: Duration.zero,
             transition: FadeInImageTransition.fadeInOver,
             excludeFromSemantics: true,
           ),
@@ -830,7 +854,6 @@ void main() {
             image: imageProvider,
             fadeInDuration: animationDuration,
             fadeInCurve: Curves.linear,
-            fadeOutDuration: Duration.zero,
             transition: FadeInImageTransition.fadeInOver,
             excludeFromSemantics: true,
           ),
@@ -865,7 +888,6 @@ void main() {
           FadeInImage(
             placeholder: placeholderProvider,
             image: imageProvider,
-            fadeOutDuration: Duration.zero,
             transition: FadeInImageTransition.fadeInOver,
           ),
         );
@@ -875,15 +897,37 @@ void main() {
         expect(findFadeInImage(tester).target.opacity, 1);
       });
 
-      testWidgets('asserts when fadeOutDuration is not zero', (WidgetTester tester) async {
-        expect(
-          () => FadeInImage(
-            placeholder: TestImageProvider(placeholderImage),
-            image: TestImageProvider(targetImage),
+      testWidgets('ignores a non-zero fadeOutDuration', (WidgetTester tester) async {
+        final placeholderProvider = TestImageProvider(placeholderImage);
+        final imageProvider = TestImageProvider(targetImage);
+
+        await tester.pumpWidget(
+          FadeInImage(
+            placeholder: placeholderProvider,
+            image: imageProvider,
+            // Deliberately non-zero: it must not delay or alter the fade-in.
+            fadeOutDuration: animationDuration * 10,
+            fadeInDuration: animationDuration,
+            fadeInCurve: Curves.linear,
             transition: FadeInImageTransition.fadeInOver,
+            excludeFromSemantics: true,
           ),
-          throwsAssertionError,
         );
+
+        placeholderProvider.complete();
+        imageProvider.complete();
+        await tester.pump();
+
+        // The placeholder stays opaque and the image fades in over
+        // fadeInDuration alone, unaffected by fadeOutDuration.
+        await tester.pump(animationDuration ~/ 2);
+        final ({FadeInImageElements placeholder, FadeInImageElements target}) images =
+            findFadeInOverImages(tester);
+        expect(images.placeholder.opacity, 1);
+        expect(images.target.opacity, moreOrLessEquals(0.5));
+
+        await tester.pump(animationDuration ~/ 2);
+        expect(findFadeInImage(tester).target.opacity, 1);
       });
     });
   });
