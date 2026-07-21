@@ -40,4 +40,63 @@ class FlutterViewManagerProxy {
   JSAny? getInitialData(int viewId) {
     return _viewManager.getOptions(viewId)?.initialData;
   }
+
+  /// Adds a view to the application, embedding it into the host element specified in options.
+  int addView(FlutterViewOptions options) {
+    final FlutterViewConstraints? viewConstraints = options.viewConstraints;
+    return _viewManager
+        .createAndRegisterView(
+          JsFlutterViewOptions(
+            hostElement: options.hostElement as DomElement,
+            viewConstraints: viewConstraints != null
+                ? JsViewConstraints(
+                    minWidth: viewConstraints.minWidth,
+                    maxWidth: viewConstraints.maxWidth,
+                    minHeight: viewConstraints.minHeight,
+                    maxHeight: viewConstraints.maxHeight,
+                  )
+                : null,
+            initialData: options.initialData,
+          ),
+        )
+        .viewId;
+  }
+
+  /// Removes and disposes the view with the given [viewId].
+  void removeView(int viewId) {
+    _viewManager.disposeAndUnregisterView(viewId);
+  }
+}
+
+/// Options for creating a new Flutter view.
+class FlutterViewOptions {
+  FlutterViewOptions({required this.hostElement, this.viewConstraints, this.initialData});
+
+  /// The DOM element into which the Flutter view will be embedded.
+  final JSObject hostElement;
+
+  /// The constraints for the Flutter view.
+  final FlutterViewConstraints? viewConstraints;
+
+  /// Optional initial data to pass to the Flutter view.
+  final Object? initialData;
+}
+
+/// Constraints for the size of a Flutter view.
+///
+/// Attributes are expressed in *logical* pixels.
+class FlutterViewConstraints {
+  FlutterViewConstraints({this.minWidth, this.maxWidth, this.minHeight, this.maxHeight});
+
+  /// The minimum width of the Flutter view.
+  final double? minWidth;
+
+  /// The maximum width of the Flutter view.
+  final double? maxWidth;
+
+  /// The minimum height of the Flutter view.
+  final double? minHeight;
+
+  /// The maximum height of the Flutter view.
+  final double? maxHeight;
 }

@@ -208,6 +208,10 @@ void _setAssetManager(ui_web.AssetManager assetManager) {
   _assetManager = assetManager;
 }
 
+void setAssetManager(ui_web.AssetManager assetManager) {
+  _setAssetManager(assetManager);
+}
+
 Future<void> _downloadAssetFonts() async {
   renderer.fontCollection.clear();
 
