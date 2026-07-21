@@ -560,7 +560,6 @@ class AndroidDevice extends Device {
       case CpuArch.unknown:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
-     }
     }
 
     if (!prebuiltApplication ||

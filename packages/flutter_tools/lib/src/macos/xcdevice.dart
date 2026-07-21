@@ -632,7 +632,7 @@ class XCDevice {
         deviceMap[identifier] = IOSDevice(
           identifier,
           name: name,
-          cpuArchitecture: _cpuArchitecture(device),
+          cpuArch: _cpuArchitecture(device),
           connectionInterface: connectionInterface,
           isConnected: isConnected,
           sdkVersion: sdkVersionString,

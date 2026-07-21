@@ -1983,7 +1983,7 @@ IOSDevice setUpIOSDevice({
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
-    cpuArchitecture: CpuArch.arm64,
+    cpuArch: .arm64,
     connectionInterface: interfaceType,
     isConnected: true,
     isPaired: true,

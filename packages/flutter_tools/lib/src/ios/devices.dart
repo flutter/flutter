@@ -309,7 +309,7 @@ class IOSDevice extends Device {
     super.id, {
     required FileSystem fileSystem,
     required this.name,
-    required this.cpuArchitecture,
+    required CpuArch cpuArch,
     required this.connectionInterface,
     required this.isConnected,
     required this.isPaired,
@@ -325,7 +325,8 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required super.logger,
     required Analytics analytics,
-  }) : _sdkVersion = sdkVersion,
+  }) : _cpuArch = cpuArch,
+       _sdkVersion = sdkVersion,
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
        _coreDeviceControl = coreDeviceControl,
@@ -370,10 +371,10 @@ class IOSDevice extends Device {
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
-  final CpuArch cpuArchitecture;
+  final CpuArch _cpuArch;
 
   @override
-  Future<CpuArch> get cpuArch async => cpuArchitecture;
+  Future<CpuArch> get cpuArch async => _cpuArch;
 
   @override
   /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
@@ -498,7 +499,7 @@ class IOSDevice extends Device {
 
   @override
   // 32-bit devices are not supported.
-  Future<bool> isSupported() async => cpuArchitecture == CpuArch.arm64;
+  Future<bool> isSupported() async => _cpuArch == .arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -531,7 +532,7 @@ class IOSDevice extends Device {
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
-        activeArch: cpuArchitecture,
+        activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
