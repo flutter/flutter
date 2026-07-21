@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
-import 'widgets_app_tester.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);

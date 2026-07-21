@@ -19,7 +19,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   group('RawImage', () {
