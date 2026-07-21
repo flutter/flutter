@@ -373,6 +373,13 @@ class IOSDevice extends Device {
   final DarwinArch cpuArchitecture;
 
   @override
+  Future<CpuArch> get cpuArch async => switch (cpuArchitecture) {
+    .armv7 => CpuArch.armv7,
+    .arm64 => CpuArch.arm64,
+    .x86_64 => CpuArch.x64,
+  };
+
+  @override
   /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
   /// may not be accurate. Sometimes if it doesn't have a long enough time
   /// to connect, wireless devices will have an interface of `usb`/`attached`.

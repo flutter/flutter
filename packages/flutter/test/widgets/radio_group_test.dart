@@ -11,7 +11,6 @@ import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
 import 'radio_group_tester.dart';
 import 'radio_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {

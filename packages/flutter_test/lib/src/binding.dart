@@ -418,7 +418,12 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -555,7 +560,12 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -621,7 +631,12 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -687,7 +702,12 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -796,7 +816,12 @@ class _TestSatelliteWindowController extends SatelliteWindowController
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
