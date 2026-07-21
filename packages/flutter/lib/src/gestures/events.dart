@@ -2354,7 +2354,7 @@ class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent
   late final Offset localPanDelta = PointerEvent.transformDeltaViaPositions(
     transform: transform,
     untransformedDelta: panDelta,
-    untransformedEndPosition: panDelta,
+    untransformedEndPosition: pan,
   );
 
   @override
