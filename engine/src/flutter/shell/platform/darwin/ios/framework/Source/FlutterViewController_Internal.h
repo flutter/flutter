@@ -52,6 +52,8 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
 @property(nonatomic, strong) FlutterAccessibilityFeatures* accessibilityFeatures;
 
+@property(nonatomic, strong) FlutterDisplayLinkManager* displayLinkManager;
+
 - (FlutterRestorationPlugin*)restorationPlugin;
 - (FlutterTextInputPlugin*)textInputPlugin;
 
