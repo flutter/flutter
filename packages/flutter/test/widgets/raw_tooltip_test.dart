@@ -12,7 +12,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const String tooltipText = 'TIP';
 
