@@ -58,7 +58,7 @@ class DefaultAnimationStyle extends StatefulWidget {
   /// This can be useful for responding to animation style updates
   /// without notifying the respective [BuildContext] to rebuild.
   static ValueListenable<AnimationStyle> getNotifier(BuildContext context) {
-    const fallback = AlwaysStoppedAnimation<AnimationStyle>(.new());
+    const fallback = AlwaysStoppedAnimation<AnimationStyle>(AnimationStyle());
     if (!context.mounted) {
       return fallback;
     }
@@ -77,6 +77,13 @@ class DefaultAnimationStyle extends StatefulWidget {
 
   @override
   State<DefaultAnimationStyle> createState() => _DefaultAnimationStyleState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AnimationStyle>('style', style));
+    properties.add(FlagProperty('inherit', value: inherit));
+  }
 }
 
 class _DefaultAnimationStyleState extends State<DefaultAnimationStyle> {
