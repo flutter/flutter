@@ -719,7 +719,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   ///
   /// The `gestureRecognizers` property must not contain more than one factory with the same `Factory type`.
   ///
-  /// Setting a new set of gesture recognizer factories with the same `Factory types` as the current
+  /// Setting a new set of gesture recognizer factories with the same `Factory type` as the current
   /// set has no effect, because the factories' constructors would have already been called with the previous set.
   /// {@endtemplate}
   ///
