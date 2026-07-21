@@ -147,8 +147,10 @@ abstract class BoxBorder extends ShapeBorder {
   /// animation, and then bringing `b`'s lateral edges _from_ [BorderSide.none]
   /// over the second half of the animation.
   ///
-  /// For a more flexible approach, consider [ShapeBorder.lerp], which would
-  /// instead [add] the two sets of sides and interpolate them simultaneously.
+  /// Other [BoxBorder] subclasses can support this method by overriding
+  /// [lerpFrom] or [lerpTo] to return a [BoxBorder]. If neither border can
+  /// interpolate the other, this returns `a` before `t=0.5` and `b` after
+  /// `t=0.5`.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
@@ -203,18 +205,8 @@ abstract class BoxBorder extends ShapeBorder {
         bottom: BorderSide.lerp(a.bottom, b.bottom, t),
       );
     }
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('BoxBorder.lerp can only interpolate Border and BorderDirectional classes.'),
-      ErrorDescription(
-        'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
-        '  $a\n'
-        '  $b\n'
-        'However, only Border and BorderDirectional classes are supported by this method.',
-      ),
-      ErrorHint(
-        'For a more general interpolation method, consider using ShapeBorder.lerp instead.',
-      ),
-    ]);
+    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
+    return result as BoxBorder? ?? (t < 0.5 ? a : b);
   }
 
   @override
