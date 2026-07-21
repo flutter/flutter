@@ -1187,10 +1187,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_android
-      sha256: "5121de08444d00363efdda630a69ad4d27a208a9f7586482d4909a44a1cdbc63"
+      sha256: e229676f8fade3e0124482495aaa2b548872cc4018b6268adfca4868be16aa74
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.0"
+    version: "2.12.0"
   video_player_avfoundation:
     dependency: "direct main"
     description:
