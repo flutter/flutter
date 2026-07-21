@@ -198,6 +198,12 @@ abstract interface class WindowControllerMacOS {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   Pointer<Void> get windowHandle;
+
+  /// Whether or not the underlying native window is destroyed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isDestroyed;
 }
 
 mixin _WindowControllerMixin implements WindowControllerMacOS {
@@ -273,7 +279,9 @@ mixin _WindowControllerMixin implements WindowControllerMacOS {
     _MacOSPlatformInterface.destroyWindow(handle);
   }
 
-  bool get destroyed => _destroyed;
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
 
   bool _destroyed = false;
 
@@ -345,6 +353,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
   @override
   void _handleOnWillClose() {
     super._handleOnWillClose();
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 
@@ -447,6 +456,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   @override
   void _handleOnWillClose() {
     super._handleOnWillClose();
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 
@@ -535,6 +545,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
   @override
   void _handleOnWillClose() {
     super._handleOnWillClose();
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 
@@ -671,6 +682,7 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   @override
   void _handleOnWillClose() {
     super._handleOnWillClose();
+    notifyListeners();
     _delegate.onWindowDestroyed();
   }
 

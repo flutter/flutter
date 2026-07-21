@@ -11,10 +11,27 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 late final RegularWindowController controller;
 final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(null);
+
+/// A generic "secondary" window used by the `isDestroyed` end-to-end tests.
+///
+/// Constructing a controller creates the native window immediately, so these
+/// tests exercise the [BaseWindowController.isDestroyed] lifecycle at the
+/// controller level without mounting the window's widget. The reference is kept
+/// even after the window is destroyed so that its `isDestroyed` flag can still
+/// be queried.
+BaseWindowController? secondaryController;
+
+/// Positioner used when creating child secondary windows (tooltip, popup,
+/// satellite).
+const WindowPositioner _kSecondaryPositioner = WindowPositioner(
+  parentAnchor: WindowPositionerAnchor.right,
+  childAnchor: WindowPositionerAnchor.left,
+);
 
 void main() {
   final Completer<void> windowCreated = Completer();
@@ -152,6 +169,55 @@ void main() {
           return jsonEncode({'result': true});
         } else if (jsonMap['type'] == 'close_dialog') {
           dialogController.value?.destroy();
+          return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'create_window') {
+          // Destroy any lingering live secondary window so tests are isolated.
+          if (secondaryController?.isDestroyed == false) {
+            secondaryController!.destroy();
+          }
+          final windowType = jsonMap['window_type']! as String;
+
+          try {
+            switch (windowType) {
+              case 'regular':
+                secondaryController = RegularWindowController(
+                  size: const Size(200, 200),
+                  title: 'Secondary',
+                );
+              case 'dialog':
+                secondaryController = DialogWindowController(
+                  size: const Size(200, 200),
+                  parent: controller,
+                );
+              case 'tooltip':
+                secondaryController = TooltipWindowController(
+                  parent: controller,
+                  anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+                  positioner: _kSecondaryPositioner,
+                );
+              case 'popup':
+                secondaryController = PopupWindowController(
+                  parent: controller,
+                  anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+                  positioner: _kSecondaryPositioner,
+                );
+              case 'satellite':
+                secondaryController = SatelliteWindowController(
+                  parent: controller,
+                  initialPositioner: _kSecondaryPositioner,
+                  size: const Size(200, 200),
+                );
+              default:
+                throw ArgumentError('Unknown window_type: $windowType');
+            }
+          } on UnsupportedError {
+            return jsonEncode({'result': 'unsupported'});
+          }
+          return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'is_window_destroyed') {
+          return jsonEncode({'isDestroyed': secondaryController?.isDestroyed});
+        } else if (jsonMap['type'] == 'destroy_window') {
+          secondaryController?.destroy();
           return jsonEncode({'result': true});
         } else {
           throw ArgumentError('Unknown message type: ${jsonMap['type']}');
