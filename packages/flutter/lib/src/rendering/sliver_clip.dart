@@ -10,14 +10,14 @@ import 'package:meta/meta.dart';
 
 /// Describes how a sliver's clip reacts to the area overlapped by other slivers.
 ///
-/// Slivers may overlap, for example when a pinned [SliverAppBar] is stacked
-/// on top of other content. This enum defines whether the content underneath
-/// that overlap should be clipped out, and if so, how the shape of the clip
-/// handles the dynamic boundary of the overlapping region.
+/// This enum defines whether the content underneath that overlap should be
+/// clipped out, and if so, how the shape of the clip handles the dynamic
+/// boundary of the overlapping region.
 ///
 /// See also:
 ///
-/// * [SliverClipRRect.clipOverlap], which uses this behavior.
+/// * [SliverClipRect.clipOverlap] and [SliverClipRRect.clipOverlap], which
+///   use this behavior.
 enum ClipOverlapBehavior {
   /// The clip ignores any overlap.
   ///
@@ -417,9 +417,9 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   /// start so it reacts to the region overlapped by other slivers (such as a
   /// pinned header).
   ///
-  /// [insideClipExtent] is the part of the clip allowed to slide under the
+  /// The [insideClipExtent] is the part of the clip allowed to slide under the
   /// overlap before its edge moves: the full extent for
-  /// [ClipOverlapBehavior.followEdge], or the straight middle rect for
+  /// [ClipOverlapBehavior.followEdge], or the middle rect for
   /// [ClipOverlapBehavior.preserveShape]. The result is clamped between the
   /// already-scrolled content and the current overlap.
   @protected

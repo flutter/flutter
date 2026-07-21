@@ -211,7 +211,7 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
 ///    strategies.
 ///  * [CustomClipper], for creating custom clips.
 class SliverClipRRect extends SingleChildRenderObjectWidget {
-  /// Creates a sliver that clips its child using a rounded-rectangle.
+  /// Creates a sliver that clips its child using a rounded rectangle.
   ///
   /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
   /// right-angled corners.

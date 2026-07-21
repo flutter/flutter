@@ -6,8 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 /// Builds a [CustomScrollView] with a pinned 100px header followed by a
 /// [SliverClipRect] and filler content. Suitable for all overlap-clipping tests.
 Widget _buildOverlapScenario({
