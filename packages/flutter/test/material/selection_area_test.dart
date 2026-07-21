@@ -18,6 +18,20 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   return paragraph.localToGlobal(localOffset);
 }
 
+Widget _scrollableSelectionAreaTestApp({required ScrollController controller}) {
+  return MaterialApp(
+    home: SelectionArea(
+      child: ListView.builder(
+        controller: controller,
+        itemCount: 100,
+        itemBuilder: (BuildContext context, int index) {
+          return Text('Item $index');
+        },
+      ),
+    ),
+  );
+}
+
 void main() {
   testWidgets('SelectionArea uses correct selection controls', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: SelectionArea(child: Text('abc'))));
@@ -625,6 +639,178 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
     skip: kIsWeb, // [intended] on web only one selection handle can be dragged at a time.
+  );
+
+  testWidgets(
+    'SelectionArea select to scroll by dragging selection handles forward',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(_scrollableSelectionAreaTestApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      // Long press to bring up the selection handles.
+      final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump(kLongPressTimeout);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+      expect(boxes.length, 1);
+      // Find end handle.
+      final Offset handlePos = paragraph0.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(handlePos);
+
+      expect(controller.offset, 0.0);
+      double previousOffset = controller.offset;
+      // Scrollable only auto scroll if the drag passes the boundary.
+      await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.offset > previousOffset, isTrue);
+      previousOffset = controller.offset;
+
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.offset > previousOffset, isTrue);
+
+      // Scroll to the end.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(controller.offset, 4200.0);
+      final RenderParagraph paragraph99 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 99'), matching: find.byType(RichText)),
+      );
+      final RenderParagraph paragraph98 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 98'), matching: find.byType(RichText)),
+      );
+      final RenderParagraph paragraph97 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 97'), matching: find.byType(RichText)),
+      );
+      final RenderParagraph paragraph96 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 96'), matching: find.byType(RichText)),
+      );
+      expect(paragraph99.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+      expect(paragraph98.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+      expect(paragraph97.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+      expect(paragraph96.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+      // The release path opens the toolbar and is covered by the following tests.
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+    skip: kIsWeb, // [intended] uses the framework-rendered mobile selection handles.
+  );
+
+  testWidgets(
+    'SelectionArea select to scroll by dragging start selection handle stops scroll when released',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(_scrollableSelectionAreaTestApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      // Long press to bring up the selection handles.
+      final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump(kLongPressTimeout);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+      expect(boxes.length, 1);
+      // Find start handle.
+      final Offset handlePos = paragraph0.localToGlobal(boxes[0].toRect().bottomLeft);
+      await gesture.down(handlePos);
+
+      expect(controller.offset, 0.0);
+      double previousOffset = controller.offset;
+      // Scrollable only auto scroll if the drag passes the boundary.
+      await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.offset > previousOffset, isTrue);
+      previousOffset = controller.offset;
+
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.offset > previousOffset, isTrue);
+      previousOffset = controller.offset;
+
+      // Release handle should stop scrolling.
+      await gesture.up();
+      // Last scheduled scroll.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      previousOffset = controller.offset;
+      await tester.pumpAndSettle();
+      expect(controller.offset, previousOffset);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] uses the framework-rendered mobile selection handles.
+  );
+
+  testWidgets(
+    'SelectionArea select to scroll by dragging end selection handle stops scroll when released',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(_scrollableSelectionAreaTestApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      // Long press to bring up the selection handles.
+      final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump(kLongPressTimeout);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+      expect(boxes.length, 1);
+      final Offset handlePos = paragraph0.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(handlePos);
+
+      expect(controller.offset, 0.0);
+      double previousOffset = controller.offset;
+      // Scrollable only auto scroll if the drag passes the boundary.
+      await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.offset > previousOffset, isTrue);
+      previousOffset = controller.offset;
+
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.offset > previousOffset, isTrue);
+      previousOffset = controller.offset;
+
+      // Release handle should stop scrolling.
+      await gesture.up();
+      // Last scheduled scroll.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      previousOffset = controller.offset;
+      await tester.pumpAndSettle();
+      expect(controller.offset, previousOffset);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+    skip: kIsWeb, // [intended] uses the framework-rendered mobile selection handles.
   );
 
   testWidgets('SelectionArea does not crash at zero area', (WidgetTester tester) async {

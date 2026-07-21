@@ -5,9 +5,9 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
@@ -21,8 +21,15 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   return paragraph.localToGlobal(localOffset);
 }
 
-Offset globalize(Offset point, RenderBox box) {
-  return box.localToGlobal(point);
+Widget _selectionTestApp({required Widget child, FocusNode? focusNode}) {
+  return TestWidgetsApp(
+    textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 48.0),
+    home: SelectableRegion(
+      focusNode: focusNode,
+      selectionControls: testTextSelectionHandleControls,
+      child: child,
+    ),
+  );
 }
 
 void main() {
@@ -46,15 +53,12 @@ void main() {
 
   testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -95,16 +99,13 @@ void main() {
 
   testWidgets('mouse can select multiple widgets - horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -139,15 +140,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -196,16 +194,13 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -246,15 +241,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -318,16 +310,13 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -380,16 +369,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -445,21 +431,15 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: Scaffold(
-            body: SizedBox(
-              height: 10,
-              child: ListView.builder(
-                controller: controller,
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text('Item $index');
-                },
-              ),
-            ),
+      _selectionTestApp(
+        child: SizedBox(
+          height: 10,
+          child: ListView.builder(
+            controller: controller,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
       ),
@@ -499,16 +479,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -561,17 +538,14 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            itemCount: 10,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -623,17 +597,14 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            itemCount: 10,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -684,16 +655,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -745,16 +713,13 @@ void main() {
       final node = FocusNode();
       addTearDown(node.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            focusNode: node,
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Item $index');
-              },
-            ),
+        _selectionTestApp(
+          focusNode: node,
+          child: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
       );
@@ -791,16 +756,13 @@ void main() {
       final node = FocusNode();
       addTearDown(node.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            focusNode: node,
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Item $index');
-              },
-            ),
+        _selectionTestApp(
+          focusNode: node,
+          child: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
       );
@@ -826,219 +788,20 @@ void main() {
     }),
   );
 
-  testWidgets('select to scroll by dragging selection handles forward', (
-    WidgetTester tester,
-  ) async {
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    // Long press to bring up the selection handles.
-    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
-    );
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
-    addTearDown(gesture.removePointer);
-    await tester.pump(kLongPressTimeout);
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
-
-    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
-    expect(boxes.length, 1);
-    // Find end handle.
-    final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph0);
-    await gesture.down(handlePos);
-
-    expect(controller.offset, 0.0);
-    double previousOffset = controller.offset;
-    // Scrollable only auto scroll if the drag passes the boundary
-    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(controller.offset > previousOffset, isTrue);
-    previousOffset = controller.offset;
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(controller.offset > previousOffset, isTrue);
-
-    // Scroll to the end.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(controller.offset, 4200.0);
-    final RenderParagraph paragraph99 = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Item 99'), matching: find.byType(RichText)),
-    );
-    final RenderParagraph paragraph98 = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Item 98'), matching: find.byType(RichText)),
-    );
-    final RenderParagraph paragraph97 = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Item 97'), matching: find.byType(RichText)),
-    );
-    final RenderParagraph paragraph96 = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Item 96'), matching: find.byType(RichText)),
-    );
-    expect(paragraph99.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-    expect(paragraph98.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-    expect(paragraph97.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-    expect(paragraph96.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-    await gesture.up();
-  });
-
-  testWidgets('select to scroll by dragging start selection handle stops scroll when released', (
-    WidgetTester tester,
-  ) async {
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    // Long press to bring up the selection handles.
-    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
-    );
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
-    addTearDown(gesture.removePointer);
-    await tester.pump(kLongPressTimeout);
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
-
-    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
-    expect(boxes.length, 1);
-    // Find start handle.
-    final Offset handlePos = globalize(boxes[0].toRect().bottomLeft, paragraph0);
-    await gesture.down(handlePos);
-
-    expect(controller.offset, 0.0);
-    double previousOffset = controller.offset;
-    // Scrollable only auto scroll if the drag passes the boundary.
-    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(controller.offset > previousOffset, isTrue);
-    previousOffset = controller.offset;
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(controller.offset > previousOffset, isTrue);
-    previousOffset = controller.offset;
-
-    // Release handle should stop scrolling.
-    await gesture.up();
-    // Last scheduled scroll.
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    previousOffset = controller.offset;
-    await tester.pumpAndSettle();
-    expect(controller.offset, previousOffset);
-  });
-
-  testWidgets('select to scroll by dragging end selection handle stops scroll when released', (
-    WidgetTester tester,
-  ) async {
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    // Long press to bring up the selection handles.
-    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
-    );
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
-    addTearDown(gesture.removePointer);
-    await tester.pump(kLongPressTimeout);
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
-
-    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
-    expect(boxes.length, 1);
-    final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph0);
-    await gesture.down(handlePos);
-
-    expect(controller.offset, 0.0);
-    double previousOffset = controller.offset;
-    // Scrollable only auto scroll if the drag passes the boundary
-    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(controller.offset > previousOffset, isTrue);
-    previousOffset = controller.offset;
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(controller.offset > previousOffset, isTrue);
-    previousOffset = controller.offset;
-
-    // Release handle should stop scrolling.
-    await gesture.up();
-    // Last scheduled scroll.
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    previousOffset = controller.offset;
-    await tester.pumpAndSettle();
-    expect(controller.offset, previousOffset);
-  });
-
   testWidgets('keyboard selection should auto scroll - vertical', (WidgetTester tester) async {
     final node = FocusNode();
     addTearDown(node.dispose);
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1122,18 +885,15 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            reverse: true,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          reverse: true,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1215,18 +975,15 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1280,19 +1037,16 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            scrollDirection: Axis.horizontal,
-            reverse: true,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1505,25 +1259,22 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: <Widget>[
-                const Text('Item 0'),
-                SizedBox(
-                  height: 400,
-                  child: ListView.builder(
-                    controller: controller,
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text('Inner item $index');
-                    },
-                  ),
+        _selectionTestApp(
+          child: Column(
+            children: <Widget>[
+              const Text('Item 0'),
+              SizedBox(
+                height: 400,
+                child: ListView.builder(
+                  controller: controller,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text('Inner item $index');
+                  },
                 ),
-                const Text('Item 1'),
-              ],
-            ),
+              ),
+              const Text('Item 1'),
+            ],
           ),
         ),
       );
@@ -1563,28 +1314,25 @@ void main() {
       final innerController = ScrollController();
       addTearDown(innerController.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              controller: outerController,
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 2) {
-                  return SizedBox(
-                    height: 700,
-                    child: ListView.builder(
-                      controller: innerController,
-                      itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Text('Iteminner $index');
-                      },
-                    ),
-                  );
-                }
-                return Text('Item $index');
-              },
-            ),
+        _selectionTestApp(
+          child: ListView.builder(
+            controller: outerController,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 2) {
+                return SizedBox(
+                  height: 700,
+                  child: ListView.builder(
+                    controller: innerController,
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Text('Iteminner $index');
+                    },
+                  ),
+                );
+              }
+              return Text('Item $index');
+            },
           ),
         ),
       );
@@ -1657,17 +1405,14 @@ void main() {
         final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: ListView.builder(
-                controller: controller,
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text('Item $index');
-                },
-              ),
+          _selectionTestApp(
+            focusNode: focusNode,
+            child: ListView.builder(
+              controller: controller,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Text('Item $index');
+              },
             ),
           ),
         );
@@ -1725,17 +1470,14 @@ void main() {
         final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: ListView.builder(
-                controller: controller,
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text('Item $index');
-                },
-              ),
+          _selectionTestApp(
+            focusNode: focusNode,
+            child: ListView.builder(
+              controller: controller,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Text('Item $index');
+              },
             ),
           ),
         );
