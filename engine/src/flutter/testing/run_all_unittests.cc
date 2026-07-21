@@ -70,7 +70,10 @@ int main(int argc, char** argv) {
   }
 
 #ifdef IMPELLER_UNITTEST_SUITE
-  impeller::testing::ImpellerUnittestSetup();
+  if (!impeller::testing::ImpellerUnittestSetup()) {
+    FML_LOG(ERROR) << "Impeller unittest setup failure";
+    return -1;
+  }
 #endif  // IMPELLER_UNITTEST_SUITE
 
   auto timeout_listener =

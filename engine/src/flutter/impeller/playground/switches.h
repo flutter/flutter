@@ -10,6 +10,7 @@
 
 #include "flutter/fml/command_line.h"
 #include "impeller/base/flags.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -50,7 +51,7 @@ struct PlaygroundOutputs {
         PlaygroundSwitchOption("golden", golden),
         PlaygroundSwitchOption("window", window),
     }};
-  };
+  }
 
   bool operator==(const PlaygroundOutputs&) const = default;
 };
@@ -79,7 +80,7 @@ struct PlaygroundBackends {
         PlaygroundSwitchOption("OpenGLESSDF", opengles_sdf),
         PlaygroundSwitchOption("Vulkan", vulkan),
     }};
-  };
+  }
 
   bool operator==(const PlaygroundBackends&) const = default;
 };
@@ -119,7 +120,8 @@ struct PlaygroundSwitches {
 
   PlaygroundSwitches();
 
-  explicit PlaygroundSwitches(const fml::CommandLine& args);
+  static absl::StatusOr<PlaygroundSwitches> FromCommandLine(
+      const fml::CommandLine& args);
 
   bool operator==(const PlaygroundSwitches&) const = default;
 };

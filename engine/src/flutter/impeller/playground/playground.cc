@@ -185,8 +185,8 @@ bool Playground::InitializePipelineDescriptorForRendering(
   if (!context) {
     return false;
   }
-  desc.SetSampleCount(GetDefaultSampleCount());
 
+  desc.SetSampleCount(GetDefaultSampleCount());
   auto depth_stencil_format =
       context->GetCapabilities()->GetDefaultDepthStencilFormat();
   if (depth_stencil_format != PixelFormat::kUnknown) {
@@ -194,6 +194,9 @@ bool Playground::InitializePipelineDescriptorForRendering(
     desc.SetStencilPixelFormat(depth_stencil_format);
     desc.SetDepthStencilAttachmentDescriptor(DepthAttachmentDescriptor{});
     desc.SetStencilAttachmentDescriptors(StencilAttachmentDescriptor{});
+  } else {
+    desc.ClearStencilAttachments();
+    desc.ClearDepthAttachment();
   }
   return true;
 }
@@ -682,7 +685,7 @@ bool Playground::OpenPlaygroundHere(const SinglePassCallback& pass_callback) {
             return false;
           }
         } else {
-          if (!context->EnqueueCommandBuffer(buffer)) {
+          if (!context->EnqueueCommandBuffer(std::move(buffer))) {
             return false;
           }
         }

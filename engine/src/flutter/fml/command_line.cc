@@ -82,7 +82,9 @@ std::vector<std::string_view> CommandLine::GetOptionValues(
         if (end == std::string::npos) {
           end = val.size();
         }
-        ret.push_back(val.substr(pos, end - pos));
+        if (pos < end) {
+          ret.push_back(val.substr(pos, end - pos));
+        }
         pos = end + 1;
       }
     }

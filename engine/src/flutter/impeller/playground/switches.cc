@@ -39,9 +39,9 @@ bool ProcessFlagListArg(const fml::CommandLine& args,
                        return s.name == option;
                      });
     if (found_it == switches.end()) {
-      FML_LOG(WARNING) << "Unrecognized value for " << option_name << " ("
-                       << option << ") must be one of [" << FoldNames(switches)
-                       << "].";
+      FML_LOG(WARNING) << "Unrecognized value for " << option_name << " (\""
+                       << option << "\") must be one of ["
+                       << FoldNames(switches) << "].";
       success = false;
     } else {
       found_it->flag = true;
@@ -62,35 +62,45 @@ namespace impeller {
 
 PlaygroundSwitches::PlaygroundSwitches() = default;
 
-PlaygroundSwitches::PlaygroundSwitches(const fml::CommandLine& args) {
+absl::StatusOr<PlaygroundSwitches> PlaygroundSwitches::FromCommandLine(
+    const fml::CommandLine& args) {
+  PlaygroundSwitches switches;
   {
     if (args.HasOption("playground_output")) {
       if (args.HasOption("enable_playground")) {
         FML_LOG(WARNING) << "The enable_playground flag is ignored if "
                             "the playground_output flag is used.";
       }
-      ProcessFlagListArg(args, outputs_enabled, "playground_output");
+      if (!ProcessFlagListArg(args, switches.outputs_enabled,
+                              "playground_output")) {
+        return absl::InvalidArgumentError("Unrecognized Playground output");
+      }
     } else if (args.HasOption("enable_playground")) {
       FML_LOG(WARNING) << "The enable_playground flag is deprecated in "
                           "favor of --playground_output=window.";
-      outputs_enabled.window = true;
+      switches.outputs_enabled.window = true;
     }
   }
-  ProcessFlagListArg(args, backends_enabled, "playground_backend");
+  if (!ProcessFlagListArg(args, switches.backends_enabled,
+                          "playground_backend")) {
+    return absl::InvalidArgumentError("Unrecognized Playground backend");
+  }
   std::string timeout_str;
   if (args.GetOptionValue("playground_timeout_ms", &timeout_str)) {
-    timeout = std::chrono::milliseconds(atoi(timeout_str.c_str()));
+    switches.timeout = std::chrono::milliseconds(atoi(timeout_str.c_str()));
     // Specifying a playground timeout implies you want to enable
     // playground windows.
-    outputs_enabled.window = true;
+    switches.outputs_enabled.window = true;
   }
-  enable_vulkan_validation = args.HasOption("enable_vulkan_validation");
-  use_swiftshader = args.HasOption("use_swiftshader");
-  use_angle = args.HasOption("use_angle");
+  switches.enable_vulkan_validation =
+      args.HasOption("enable_vulkan_validation");
+  switches.use_swiftshader = args.HasOption("use_swiftshader");
+  switches.use_angle = args.HasOption("use_angle");
 #if FML_OS_MACOSX
   // OpenGL on macOS is busted and deprecated. Use Angle there by default.
-  use_angle = true;
+  switches.use_angle = true;
 #endif  // FML_OS_MACOSX
+  return switches;
 }
 
 }  // namespace impeller

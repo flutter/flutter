@@ -18,8 +18,7 @@
 namespace impeller {
 
 PlaygroundTest::PlaygroundTest()
-    : Playground(GetParam(),
-                 PlaygroundSwitches{flutter::testing::GetArgsForProcess()}) {
+    : Playground(GetParam(), kCommandLineSwitches) {
   ImpellerValidationErrorsSetCallback(
       [](const char* message, const char* file, int line) -> bool {
         // GTEST_MESSAGE_AT_ can only be used in a function that returns void.
@@ -35,6 +34,8 @@ PlaygroundTest::PlaygroundTest()
         return true;
       });
 }
+
+PlaygroundSwitches PlaygroundTest::kCommandLineSwitches;
 
 PlaygroundTest::~PlaygroundTest() {
   ImpellerValidationErrorsSetCallback(nullptr);
@@ -140,7 +141,7 @@ std::optional<testing::GoldenDigestManager>
 #undef APPLY_METAL_VALIDATION
 #undef ENABLE_VK_SWIFTSHADER
 
-void PlaygroundTest::SetupTestEnvironment() {
+bool PlaygroundTest::SetupTestEnvironment() {
 #ifdef ENABLE_VK_SWIFTSHADER
   // Make sure environment is set up for VK swiftshader
   std::filesystem::path testing_assets_path =
@@ -169,7 +170,15 @@ void PlaygroundTest::SetupTestEnvironment() {
   setenv("METAL_DEVICE_WRAPPER_TYPE", "1", true);
 #endif
 
+  auto switches_or = PlaygroundSwitches::FromCommandLine(
+      flutter::testing::GetArgsForProcess());
+  if (!switches_or.ok()) {
+    return false;
+  }
+  kCommandLineSwitches = switches_or.value();
+
   ::testing::AddGlobalTestEnvironment(new PlaygroundTestEnvironment());
+  return true;
 }
 
 impeller::testing::GoldenDigestManager* PlaygroundTest::GetGoldenDigestManager()

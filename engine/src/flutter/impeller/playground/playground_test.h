@@ -27,7 +27,7 @@ class PlaygroundTest : public Playground,
 
   virtual ~PlaygroundTest();
 
-  static void SetupTestEnvironment();
+  static bool SetupTestEnvironment();
 
   void SetUp() override;
 
@@ -59,6 +59,9 @@ class PlaygroundTest : public Playground,
   virtual bool IsGoldenTestSuite() const;
 
  private:
+  static PlaygroundSwitches kCommandLineSwitches;
+  friend class ComputePlaygroundTest;
+
   // |Playground|
   bool ShouldKeepRendering() const override;
 
