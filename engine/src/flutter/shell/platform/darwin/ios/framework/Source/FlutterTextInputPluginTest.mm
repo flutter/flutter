@@ -893,7 +893,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
             : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
-        /*worker_task_runner=*/nil,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     platform_view->SetOwnerViewController(mockFlutterViewController);
