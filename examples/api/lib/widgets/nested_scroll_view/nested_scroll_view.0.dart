@@ -65,13 +65,10 @@ class NestedScrollViewExample extends StatelessWidget {
             ];
           },
           body: ScrollConfiguration(
-            // The inner scroll views are coordinated by the NestedScrollView
-            // through a shared ScrollController that can be attached to more than
-            // one ScrollPosition at a time, for example while transitioning
-            // between tabs. A single Scrollbar cannot represent more than one
-            // position, so the default scrollbars are disabled for the body here.
-            // This avoids the multiple-position assertion that would otherwise be
-            // thrown on desktop platforms.
+            // Scrollbars have different default behaviors based on platform
+            // expectations. For the purpose of this sample, which can be run on
+            // any platform, default scrollbars are disabled for the inner
+            // scrollables.
             behavior: ScrollConfiguration.of(
               context,
             ).copyWith(scrollbars: false),
