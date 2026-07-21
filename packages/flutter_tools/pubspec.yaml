@@ -127,4 +127,5 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
+
 # PUBSPEC CHECKSUM: qi12j
