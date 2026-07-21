@@ -2191,6 +2191,14 @@ TEST_P(EntityTest, TiledTextureContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
+TEST_P(EntityTest, TiledTextureContentsIsOpaqueNullTexture) {
+  Matrix matrix;
+  auto geom = Geometry::MakeCover();
+  TiledTextureContents contents(geom.get());
+  contents.SetTexture(nullptr);
+  EXPECT_FALSE(contents.IsOpaque(matrix));
+}
+
 TEST_P(EntityTest, PointFieldGeometryCoverage) {
   std::vector<Point> points = {{10, 20}, {100, 200}};
   PointFieldGeometry geometry(points.data(), 2, 5.0, false);
