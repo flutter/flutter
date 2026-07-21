@@ -365,7 +365,9 @@ typedef struct MouseState {
   _statusBarStyle = UIStatusBarStyleDefault;
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
-  _keyboardInsetManager = [[FlutterKeyboardInsetManager alloc] initWithDelegate:self];
+  _keyboardInsetManager =
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:self
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
