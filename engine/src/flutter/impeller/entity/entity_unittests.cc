@@ -2199,6 +2199,14 @@ TEST_P(EntityTest, TiledTextureContentsIsOpaqueNullTexture) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
+TEST_P(EntityTest, TiledTextureContentsRenderToSnapshotNullTexture) {
+  auto geom = Geometry::MakeCover();
+  TiledTextureContents contents(geom.get());
+  contents.SetTexture(nullptr);
+  auto snapshot = contents.RenderToSnapshot(GetContentContext(), Entity(), {});
+  EXPECT_FALSE(snapshot.has_value());
+}
+
 TEST_P(EntityTest, PointFieldGeometryCoverage) {
   std::vector<Point> points = {{10, 20}, {100, 200}};
   PointFieldGeometry geometry(points.data(), 2, 5.0, false);
