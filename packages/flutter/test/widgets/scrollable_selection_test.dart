@@ -1504,8 +1504,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/149426.
-    // A mouse isn't one of a PageView's default drag devices, so dragging a
-    // selection past its edge shouldn't flip to the next page and snap back.
+    // A paged scrollable snaps to pages, so dragging a selection past its edge
+    // must not flip to the next page and snap back.
     final controller = PageController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -1553,10 +1553,9 @@ void main() {
   testWidgets('mouse selection drag still edge auto-scrolls a non page-snapping scrollable', (
     WidgetTester tester,
   ) async {
-    // The counterpart to the PageView test above: the fix only touches paged
-    // scrollables. A plain ListView still scrolls while you drag-select with a
-    // mouse ("select to scroll"), even though a mouse isn't one of its drag
-    // devices. See https://github.com/flutter/flutter/issues/149426.
+    // Counterpart to the PageView test above: the guard only touches paged
+    // scrollables. A plain ListView still edge scrolls while drag-selecting
+    // ("select to scroll"). See https://github.com/flutter/flutter/issues/149426.
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(

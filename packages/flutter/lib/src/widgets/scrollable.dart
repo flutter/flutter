@@ -28,7 +28,6 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
-import 'page_view.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'scroll_activity.dart';
@@ -1278,7 +1277,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       event = SelectionEdgeUpdateEvent.forEnd(
         globalPosition: endOffset,
         granularity: event.granularity,
-        deviceKind: event.deviceKind,
       );
     } else {
       _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
@@ -1289,7 +1287,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       event = SelectionEdgeUpdateEvent.forStart(
         globalPosition: startOffset,
         granularity: event.granularity,
-        deviceKind: event.deviceKind,
       );
     }
     final SelectionResult result = super.handleSelectionEdgeUpdate(event);
@@ -1302,20 +1299,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return result;
     }
     if (_selectionStartsInScrollable) {
-      // Don't let a selection drag flip a PageView or TabBarView to the next
-      // page when it wouldn't accept a plain drag from this device (a mouse, on
-      // desktop and web). Otherwise the page animates over and snaps back mid
-      // selection. Other scrollables like ListView still auto scroll so mouse
-      // "select to scroll" keeps working. A null device kind means we don't
-      // know, so leave the behavior as it was.
-      //
-      // Note this is a different case from the shouldAcceptUserOffset check in
-      // EdgeDraggingAutoScroller; page physics accept user offset, so that
-      // check never catches this.
-      final PointerDeviceKind? deviceKind = event.deviceKind;
-      if (deviceKind != null &&
-          _scrollableSnapsToPages &&
-          !state._configuration.dragDevices.contains(deviceKind)) {
+      // A paged scrollable (PageView or TabBarView) would flip pages instead of
+      // revealing more content, so never edge scroll it while selecting.
+      if (state.resolvedPhysics?.snapsToPages ?? false) {
         _autoScroller.stopAutoScroll();
         return result;
       }
@@ -1325,21 +1311,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       }
     }
     return result;
-  }
-
-  // Whether this scrollable snaps to pages, like a PageView or TabBarView.
-  // Page physics can be wrapped by other physics, so check the whole chain.
-  bool get _scrollableSnapsToPages {
-    for (
-      ScrollPhysics? physics = state.resolvedPhysics;
-      physics != null;
-      physics = physics.parent
-    ) {
-      if (physics is PageScrollPhysics) {
-        return true;
-      }
-    }
-    return false;
   }
 
   Offset _inferPositionRelatedToOrigin(Offset globalPosition) {
