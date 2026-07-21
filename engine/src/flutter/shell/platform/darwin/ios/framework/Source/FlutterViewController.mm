@@ -23,7 +23,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
@@ -366,7 +365,9 @@ typedef struct MouseState {
   _statusBarStyle = UIStatusBarStyleDefault;
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
-  _keyboardInsetManager = [[FlutterKeyboardInsetManager alloc] initWithDelegate:self];
+  _keyboardInsetManager =
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:self
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
@@ -1312,7 +1313,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  double displayRefreshRate = FlutterDisplayLinkManager.displayRefreshRate;
+  double displayRefreshRate = FlutterDisplayLinkManager.shared.displayRefreshRate;
   const double epsilon = 0.1;
   if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
 
@@ -1328,8 +1329,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       };
   _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:self.engine.platformTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.shared.displayRefreshRate
                           callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
@@ -2316,6 +2317,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (CGFloat)physicalViewInsetBottom {
   return _viewportMetrics.physical_view_inset_bottom;
+}
+
+- (FlutterFMLTaskRunner*)uiTaskRunner {
+  return self.engine.uiTaskRunner;
 }
 
 - (BOOL)isPadInSlideOverOrStageManagerMode {

@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'capture_output.dart';
 
 void main() {
   test('Parses line', () {
@@ -59,14 +63,70 @@ void main() {
   // stack overflow, but the browser cannot - running this test in a browser
   // will cause it to become unresponsive.
 
-  test('Traces from package:stack_trace throw assertion', () {
-    try {
-      StackFrame.fromStackString(mangledStackString);
-      assert(false, 'StackFrame.fromStackString did not throw on a mangled stack trace');
-    } catch (e) {
-      expect(e, isA<AssertionError>());
-      expect('$e', contains('Got a stack frame from package:stack_trace'));
-    }
+  test('Traces from package:stack_trace parse without throwing', () {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    // package:stack_trace emits a literal
+    // '===== asynchronous gap ===========================' line between
+    // chained stacks; this parser used to assert on it. It is now treated as
+    // an asynchronous-suspension marker so callers like [debugPrintStack] do
+    // not crash on stacks that carry that format.
+    final List<StackFrame> frames = StackFrame.fromStackString(mangledStackString);
+    expect(frames, contains(StackFrame.asynchronousSuspension));
+    expect(frames, isNot(isEmpty));
+  });
+
+  test('Async-gap marker parses to asynchronousSuspension', () {
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap ==========================='),
+      StackFrame.asynchronousSuspension,
+    );
+  });
+
+  test('Near-miss async-gap markers are not parsed as asynchronousSuspension', () {
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap =========================='),
+      isNull,
+    );
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap =========================== '),
+      isNull,
+    );
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous frame ==========================='),
+      isNull,
+    );
+  });
+
+  test('debugPrintStack does not throw on a stack carrying an async-gap marker', () {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    final List<String> printed = captureOutput(() {
+      debugPrintStack(
+        label: 'ParallelWaitError-style stack',
+        stackTrace: StackTrace.fromString(mangledStackString),
+      );
+    });
+    expect(printed, isNotEmpty);
+  });
+
+  test('debugPrintStack does not throw on a ParallelWaitError stack', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    StackTrace? parallelWaitStack;
+    final printed = <String>[];
+    await (_function1(), _function2()).wait.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {
+        expect(error, isA<ParallelWaitError<(void, void), (AsyncError?, AsyncError?)>>());
+        parallelWaitStack = stack;
+        expect(stack.toString(), contains('===== asynchronous gap ==========================='));
+        printed.addAll(
+          captureOutput(() {
+            debugPrintStack(label: error.toString(), stackTrace: stack);
+          }),
+        );
+      },
+    );
+    expect(parallelWaitStack, isNotNull);
+    expect(printed, isNotEmpty);
   });
 
   test('Can parse web constructor invocation with unknown class name', () {
@@ -91,6 +151,15 @@ void main() {
   test('Parses to null for wrong format.', () {
     expect(StackFrame.fromStackTraceLine('wrong stack trace format'), null);
   });
+}
+
+Future<void> _function1() async {
+  await Future<void>.delayed(Duration.zero);
+}
+
+Future<void> _function2() async {
+  await Future<void>.delayed(Duration.zero);
+  throw Exception('function2');
 }
 
 const String stackString = '''

@@ -196,13 +196,15 @@ if (is_android) {
     sources = [
       "android/ahb_swapchain_vk_unittests.cc",
       "android/ahb_texture_source_vk_unittests.cc",
+      "android/android_test_utils.cc",
+      "android/android_test_utils.h",
     ]
 
     deps = [
       ":mock_vulkan",
       ":unittests_fixtures",
       ":vulkan",
-      "//flutter/testing",
+      "//flutter/testing:testing_lib",
     ]
 
     defines = [ "TESTING" ]
@@ -215,7 +217,10 @@ if (is_android) {
 
     output_name = "impeller_vulkan_android_unittests"
 
-    deps = [ ":unittests_lib" ]
+    deps = [
+      ":unittests_lib",
+      "//flutter/testing",
+    ]
   }
 
   native_activity_apk("vulkan_android_apk_unittests") {

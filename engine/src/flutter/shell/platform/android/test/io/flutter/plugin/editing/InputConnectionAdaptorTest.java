@@ -239,12 +239,12 @@ public class InputConnectionAdaptorTest {
     verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
     assertEquals("flutter/textinput", channelCaptor.getValue());
 
-    String fakeImageDataIntString = "";
+    StringBuilder fakeImageDataIntString = new StringBuilder();
     for (int i = 0; i < fakeImageDataBytes.length; i++) {
       int byteAsInt = fakeImageDataBytes[i];
-      fakeImageDataIntString += byteAsInt;
+      fakeImageDataIntString.append(byteAsInt);
       if (i < (fakeImageDataBytes.length - 1)) {
-        fakeImageDataIntString += ",";
+        fakeImageDataIntString.append(",");
       }
     }
     verifyMethodCall(

@@ -134,4 +134,17 @@ void main() {
       expect(setContentSensitivityCall, 2);
     },
   );
+
+  testWidgets('SensitiveContent does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SensitiveContent)), Size.zero);
+  });
 }

@@ -1420,6 +1420,7 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
     'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),
+    'cpuArch': (await device.cpuArch).name,
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
     'sdk': await device.sdkNameAndVersion,
