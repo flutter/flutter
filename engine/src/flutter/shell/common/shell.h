@@ -353,6 +353,21 @@ class Shell final : public PlatformView::Delegate,
   fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
 
   //----------------------------------------------------------------------------
+  /// @brief      Unblocks any call to WaitForFirstFrame(), causing it to
+  ///             immediately return 'kAborted' instead of blocking for the
+  ///             full timeout.
+  ///
+  ///             Embedders that pass a reference to the Shell to a thread they
+  ///             do not otherwise synchronize with the shell's destruction
+  ///             must call this, and wait for that thread to finish with the
+  ///             shell, before destroying it. This method only prevents
+  ///             WaitForFirstFrame() from blocking; it does not by itself
+  ///             make it safe to destroy the Shell out from under a caller
+  ///             that has not yet returned from WaitForFirstFrame().
+  ///
+  void CancelWaitForFirstFrame();
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by embedders to reload the system fonts in
   ///             FontCollection.
   ///             It also clears the cached font families and send system
@@ -508,6 +523,7 @@ class Shell final : public PlatformView::Delegate,
 
   bool first_frame_rasterized_ = false;
   std::atomic<bool> waiting_for_first_frame_ = true;
+  std::atomic<bool> wait_for_first_frame_cancelled_ = false;
   std::mutex waiting_for_first_frame_mutex_;
   std::condition_variable waiting_for_first_frame_condition_;
 

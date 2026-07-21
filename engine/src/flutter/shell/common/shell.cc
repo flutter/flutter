@@ -2402,14 +2402,26 @@ fml::Status Shell::WaitForFirstFrame(fml::TimeDelta timeout) {
 
   std::unique_lock<std::mutex> lock(waiting_for_first_frame_mutex_);
   bool success = waiting_for_first_frame_condition_.wait_until(
-      lock, duration, [&waiting_for_first_frame = waiting_for_first_frame_] {
-        return !waiting_for_first_frame.load();
+      lock, duration,
+      [&waiting_for_first_frame = waiting_for_first_frame_,
+       &cancelled = wait_for_first_frame_cancelled_] {
+        return !waiting_for_first_frame.load() || cancelled.load();
       });
-  if (success) {
+  if (wait_for_first_frame_cancelled_.load()) {
+    return fml::Status(fml::StatusCode::kAborted, "Shell is shutting down.");
+  } else if (success) {
     return fml::Status();
   } else {
     return fml::Status(fml::StatusCode::kDeadlineExceeded, "timeout");
   }
+}
+
+void Shell::CancelWaitForFirstFrame() {
+  {
+    std::scoped_lock lock(waiting_for_first_frame_mutex_);
+    wait_for_first_frame_cancelled_.store(true);
+  }
+  waiting_for_first_frame_condition_.notify_all();
 }
 
 bool Shell::ReloadSystemFonts() {
