@@ -5859,21 +5859,23 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Notifies its listeners if the value of [userGestureInProgress] changes.
   final ValueNotifier<bool> userGestureInProgressNotifier = ValueNotifier<bool>(false);
 
-  /// Whether an in-progress user gesture is settling: the finger has lifted but
-  /// the transition is still animating to rest.
+  /// Whether a user-initiated route gesture has been released and the transition
+  /// is animating to its rest position.
   ///
-  /// [userGestureInProgress] stays true throughout, so transitions keep their
-  /// curve across the settle. But routes below stop ignoring pointers, so the
-  /// page below becomes interactive as soon as the finger lifts instead of when
-  /// the settling animation ends.
+  /// When true, active user touch input has ended, allowing underlying routes to
+  /// resume receiving pointer events immediately while the transition completes.
   ///
-  /// Managed by the framework's back-gesture controllers; not for application use.
+  /// Unlike [userGestureInProgress], which remains true throughout both the gesture
+  /// and settling animation to preserve transition curves, [userGestureSettling]
+  /// is true only during the post-release settling phase.
+  ///
+  /// This state is managed internally by back-gesture controllers and is not
+  /// intended for direct use by applications.
   ///
   /// See also:
   ///
   ///  * [userGestureSettlingNotifier], which notifies its listeners when
   ///    [userGestureSettling] changes.
-  ///  * <https://github.com/flutter/flutter/issues/188840>, the issue this resolves.
   bool get userGestureSettling => userGestureSettlingNotifier.value;
   set userGestureSettling(bool value) {
     userGestureSettlingNotifier.value = value;
