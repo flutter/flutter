@@ -29,7 +29,6 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.GradleException
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
@@ -1941,6 +1940,7 @@ class FlutterPluginUtilsTest {
         verify(exactly = 0) { mockCmakeOptions.buildStagingDirectory(any()) }
         verify { mockDefaultConfig wasNot called }
     }
+
     fun `forceNdkDownload installs a missing ndk when tool properties are provided`(
         @TempDir tempDir: Path
     ) {
