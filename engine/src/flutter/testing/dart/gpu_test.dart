@@ -1410,6 +1410,34 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('Shader.getUniformSlot returns the same slot for repeat lookups', () async {
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.UniformSlot first = pipeline.vertexShader.getUniformSlot('VertInfo');
+    final gpu.UniformSlot second = pipeline.vertexShader.getUniformSlot('VertInfo');
+    expect(identical(first, second), isTrue);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.bindUniform throws for an unknown uniform name', () async {
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
+      float32(<double>[1, 2, 3, 4]),
+    );
+    final uniformBufferView = gpu.BufferView(
+      uniformBuffer,
+      offsetInBytes: 0,
+      lengthInBytes: uniformBuffer.sizeInBytes,
+    );
+    final gpu.UniformSlot unknownSlot = pipeline.vertexShader.getUniformSlot('DoesNotExist');
+    try {
+      state.renderPass.bindUniform(unknownSlot, uniformBufferView);
+      fail('Exception not thrown for an unknown uniform name.');
+    } catch (e) {
+      expect(e.toString(), contains('Failed to bind uniform'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Renders a green triangle pointing downwards.
   test('Can render triangle', () async {
     final RenderPassState state = createSimpleRenderPass();
