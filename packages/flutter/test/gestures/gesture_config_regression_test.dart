@@ -7,8 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/widgets_app_tester.dart';
-
 class TestResult {
   bool dragStarted = false;
   bool dragUpdate = false;
