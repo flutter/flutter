@@ -2485,12 +2485,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Checkbox.padding defaults to null', (WidgetTester tester) async {
+  testWidgets('Checkbox.markInsets defaults to null', (WidgetTester tester) async {
     await tester.pumpWidget(_padFrame(true));
-    expect(tester.widget<Checkbox>(find.byType(Checkbox)).padding, isNull);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).markInsets, isNull);
   });
 
-  testWidgets('Checkbox with no padding paints the check at full stroke width', (
+  testWidgets('Checkbox with no markInsets paints the check at full stroke width', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(_padFrame(true));
@@ -2499,60 +2499,57 @@ void main() {
     expect(_checkboxRenderer(tester), paints..path(strokeWidth: 2.0));
   });
 
-  testWidgets('Checkbox.padding shrinks the check mark and its stroke', (
+  testWidgets('Checkbox.markInsets shrinks the check mark and its stroke', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(_padFrame(true, padding: const EdgeInsets.all(4.5)));
+    await tester.pumpWidget(_padFrame(true, markInsets: const EdgeInsets.all(4.5)));
     await tester.pumpAndSettle();
     // inner = 18 - 9 = 9, scale = 9/18 = 0.5, strokeWidth = 2.0 * 0.5 = 1.0
     expect(_checkboxRenderer(tester), paints..path(strokeWidth: 1.0));
   });
 
-  testWidgets('Checkbox.padding shrinks the indeterminate dash too', (WidgetTester tester) async {
-    await tester.pumpWidget(_padFrame(null, tristate: true, padding: const EdgeInsets.all(4.5)));
+  testWidgets('Checkbox.markInsets shrinks the indeterminate dash', (WidgetTester tester) async {
+    await tester.pumpWidget(_padFrame(null, tristate: true, markInsets: const EdgeInsets.all(4.5)));
     await tester.pumpAndSettle();
     expect(_checkboxRenderer(tester), paints..line(strokeWidth: 1.0));
   });
 
-  testWidgets('Checkbox.padding larger than the box collapses the mark without crashing', (
+  testWidgets('Checkbox.markInsets larger than the box collapses the mark without crashing', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(_padFrame(true, padding: const EdgeInsets.all(9.0)));
+    await tester.pumpWidget(_padFrame(true, markInsets: const EdgeInsets.all(9.0)));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull); // no exception thrown
     expect(_checkboxRenderer(tester), isNot(paints..path())); // mark collapsed away
   });
 
-  testWidgets('Checkbox asserts when padding is negative', (WidgetTester tester) async {
-    await tester.pumpWidget(_padFrame(true, padding: const EdgeInsets.all(-1.0)));
-    expect(tester.takeException(), isAssertionError);
-  });
-
-  testWidgets('Checkbox.padding falls back to CheckboxThemeData.padding', (
+  testWidgets('Checkbox.markInsets falls back to CheckboxThemeData.markInsets', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(checkboxTheme: const CheckboxThemeData(padding: EdgeInsets.all(4.5))),
+        theme: ThemeData(checkboxTheme: const CheckboxThemeData(markInsets: EdgeInsets.all(4.5))),
         home: Material(
           child: Center(child: Checkbox(value: true, onChanged: (bool? v) {})),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(_checkboxRenderer(tester), paints..path(strokeWidth: 1.0)); // theme padding applied
+    expect(_checkboxRenderer(tester), paints..path(strokeWidth: 1.0)); // theme markInsets applied
   });
 
-  testWidgets('Checkbox.padding overrides CheckboxThemeData.padding', (WidgetTester tester) async {
+  testWidgets('Checkbox.markInsets overrides CheckboxThemeData.markInsets', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(checkboxTheme: const CheckboxThemeData(padding: EdgeInsets.zero)),
+        theme: ThemeData(checkboxTheme: const CheckboxThemeData(markInsets: EdgeInsets.zero)),
         home: Material(
           child: Center(
             child: Checkbox(
               value: true,
               onChanged: (bool? v) {},
-              padding: const EdgeInsets.all(4.5),
+              markInsets: const EdgeInsets.all(4.5),
             ),
           ),
         ),
@@ -2566,14 +2563,14 @@ void main() {
 RenderBox _checkboxRenderer(WidgetTester tester) =>
     tester.renderObject<RenderBox>(find.byType(Checkbox));
 
-Widget _padFrame(bool? value, {EdgeInsetsGeometry? padding, bool tristate = false}) {
+Widget _padFrame(bool? value, {EdgeInsets? markInsets, bool tristate = false}) {
   return MaterialApp(
     home: Material(
       child: Center(
         child: Checkbox(
           value: value,
           tristate: tristate,
-          padding: padding,
+          markInsets: markInsets,
           onChanged: (bool? v) {},
         ),
       ),

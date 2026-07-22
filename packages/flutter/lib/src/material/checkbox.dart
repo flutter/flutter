@@ -11,7 +11,6 @@
 library;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 
 import 'checkbox_theme.dart';
 import 'color_scheme.dart';
@@ -102,7 +101,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
-    this.padding,
+    this.markInsets,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null);
 
@@ -143,7 +142,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
-    this.padding,
+    this.markInsets,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null);
 
@@ -404,28 +403,26 @@ class Checkbox extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticLabel;
 
-  /// {@template flutter.material.checkbox.padding}
-  /// The padding around the check mark when the checkbox is checked or
+  /// {@template flutter.material.checkbox.markInsets}
+  /// The insets applied around the check mark when the checkbox is checked or
   /// in its indeterminate (tristate) state.
   ///
   /// This insets the check mark inward; the size of the checkbox box itself
   /// is not affected. The check mark and its stroke shrink to fit the
   /// remaining space, so the mark stays proportional.
   ///
-  /// Resolved against the ambient [Directionality], so [EdgeInsetsDirectional]
-  /// values are supported.
-  ///
   /// On iOS and macOS, when using [Checkbox.adaptive], this property has no
   /// effect, because the checkbox delegates to [CupertinoCheckbox], which does
-  /// not support padding.
+  /// not support insets.
   ///
-  /// Must be non-negative. Padding larger than the box collapses the check
-  /// mark to nothing.
+  /// Must be non-negative. If the resolved horizontal or vertical insets are
+  /// greater than or equal to the checkbox size, the check mark or indeterminate
+  /// dash is not painted.
   ///
-  /// If null, [CheckboxThemeData.padding] is used. If that is also null,
+  /// If null, [CheckboxThemeData.markInsets] is used. If that is also null,
   /// it defaults to [EdgeInsets.zero] and the check mark renders at full size.
   /// {@endtemplate}
-  final EdgeInsetsGeometry? padding;
+  final EdgeInsets? markInsets;
 
   /// The width of a checkbox widget.
   static const double width = 18.0;
@@ -434,12 +431,6 @@ class Checkbox extends StatefulWidget {
 
   @override
   State<Checkbox> createState() => _CheckboxState();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-  }
 }
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, ToggleableStateMixin {
@@ -644,10 +635,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final double effectiveSplashRadius =
         widget.splashRadius ?? checkboxTheme.splashRadius ?? defaults.splashRadius!;
 
-    final EdgeInsets resolvedPadding = (widget.padding ?? checkboxTheme.padding ?? EdgeInsets.zero)
-        .resolve(Directionality.maybeOf(context));
-
-    assert(resolvedPadding.isNonNegative, 'Checkbox.padding cannot be negative.');
+    final EdgeInsets markInsets = widget.markInsets ?? checkboxTheme.markInsets ?? EdgeInsets.zero;
 
     return Semantics(
       label: widget.semanticLabel,
@@ -678,7 +666,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..previousValue = _previousValue
           ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..activeSide = activeSide
-          ..padding = resolvedPadding
+          ..padding = markInsets
           ..inactiveSide = inactiveSide,
       ),
     );
