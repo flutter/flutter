@@ -12,7 +12,6 @@ import com.android.build.api.dsl.BuildType as DslBuildType
 import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import com.flutter.gradle.tasks.PrintTask
@@ -470,15 +469,6 @@ object FlutterPluginUtils {
             project.dependencies.add(configuration, dependency, config)
         }
     }
-
-    /**
-     * Returns a Flutter build mode suitable for the specified Android buildType.
-     *
-     * @return "debug", "profile", or "release" (fall-back).
-     */
-    @JvmStatic
-    @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: BuildType): String = buildModeFor(buildType.name, buildType.isDebuggable)
 
     /**
      * Returns a Flutter build mode for a build type identified by [buildTypeName] and its
