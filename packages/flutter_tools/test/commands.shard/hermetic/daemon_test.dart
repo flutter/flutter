@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
@@ -27,7 +28,6 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 
-import '../../integration.shard/test_utils.dart' show platform;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -744,7 +744,7 @@ void main() {
         expect(response.data['result'], isList);
       },
       // TODO(vashworth): https://github.com/flutter/flutter/issues/189876
-      skip: platform.isMacOS,
+      skip: const LocalPlatform().isMacOS,
     );
 
     testUsingContext('daemon can send exposeUrl requests to the client', () async {
