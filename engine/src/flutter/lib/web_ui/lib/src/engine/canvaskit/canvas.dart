@@ -527,7 +527,6 @@ class CkCanvas implements LayerCanvas {
     );
   }
 
-  // TODO(flar): CanvasKit does not expose sampling options available on SkCanvas.drawAtlas
   void _drawAtlas(
     CkPaint paint,
     SkImage atlas,
@@ -537,7 +536,15 @@ class CkCanvas implements LayerCanvas {
     ui.BlendMode blendMode,
   ) {
     final SkPaint skPaint = paint.toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
-    skCanvas.drawAtlas(atlas, rects, rstTransforms, skPaint, toSkBlendMode(blendMode), colors);
+    skCanvas.drawAtlas(
+      atlas,
+      rects,
+      rstTransforms,
+      skPaint,
+      toSkBlendMode(blendMode),
+      colors,
+      toSkFilterOptions(paint.filterQuality),
+    );
     skPaint.delete();
   }
 

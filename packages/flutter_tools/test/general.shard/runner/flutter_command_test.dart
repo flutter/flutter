@@ -1453,6 +1453,152 @@ flutter:
       },
     );
 
+    group('build name and number', () {
+      late FileSystem fileSystem;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+      });
+
+      testUsingContext(
+        'are injected as dart defines from the pubspec version',
+        () async {
+          final File pubspec = fileSystem.file('pubspec.yaml');
+          await pubspec.create();
+          await pubspec.writeAsString('''
+name: test
+version: 1.2.3+45
+        ''');
+
+          final flutterCommand = DummyFlutterCommand();
+          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+          expect(buildInfo.dartDefines, contains('$kAppBuildName=1.2.3'));
+          expect(buildInfo.dartDefines, contains('$kAppBuildNumber=45'));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.empty(),
+        },
+      );
+
+      testUsingContext(
+        'are not injected when the pubspec has no version',
+        () async {
+          final File pubspec = fileSystem.file('pubspec.yaml');
+          await pubspec.create();
+          await pubspec.writeAsString('''
+name: test
+        ''');
+
+          final flutterCommand = DummyFlutterCommand();
+          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+          expect(
+            buildInfo.dartDefines.where(
+              (String define) =>
+                  define.startsWith(kAppBuildName) || define.startsWith(kAppBuildNumber),
+            ),
+            isEmpty,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.empty(),
+        },
+      );
+
+      testUsingContext(
+        "tool exits when $kAppBuildName is already set in user's environment",
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+          expect(
+            runner.run(<String>['run', '--no-pub', '--no-hot']),
+            throwsToolExit(
+              message:
+                  '$kAppBuildName is used by the framework and cannot be set in the environment.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          FileSystem: () {
+            final fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            return fileSystem;
+          },
+          ProcessManager: FakeProcessManager.empty,
+          Platform: () => FakePlatform()..environment = <String, String>{kAppBuildName: '1.0.0'},
+        },
+      );
+
+      testUsingContext(
+        'tool exits when $kAppBuildNumber is set in --dart-define',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+          expect(
+            runner.run(<String>[
+              'run',
+              '--dart-define=$kAppBuildNumber=42',
+              '--no-pub',
+              '--no-hot',
+            ]),
+            throwsToolExit(
+              message:
+                  '$kAppBuildNumber is used by the framework and cannot be set using --dart-define',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          FileSystem: () {
+            final fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            return fileSystem;
+          },
+          ProcessManager: FakeProcessManager.empty,
+        },
+      );
+
+      testUsingContext(
+        'user defines sharing a prefix with a reserved key are allowed',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+          await runner.run(<String>[
+            'run',
+            '--dart-define=${kAppFlavor}_CUSTOM=foo',
+            '--dart-define=${kAppBuildName}SPACE=bar',
+            '--dart-define=${kAppBuildNumber}_OFFSET=7',
+            '--no-pub',
+            '--no-hot',
+          ]);
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          FileSystem: () {
+            final fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            return fileSystem;
+          },
+          ProcessManager: FakeProcessManager.empty,
+        },
+      );
+    });
+
     group('Flutter version', () {
       for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
         testUsingContext(

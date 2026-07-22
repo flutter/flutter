@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -264,6 +265,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -283,6 +285,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -313,6 +316,7 @@ void main() {
             '--input-type=frag',
             '--include=$fragDir',
             '--include=$shaderLibDir',
+            '--depfile=/.tmp_rand0/0.8863148172405516.d',
           ],
           onRun: (_) {
             fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -332,6 +336,7 @@ void main() {
       final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
         fileSystem: fileSystem,
+        logger: logger,
         random: math.Random(0),
       );
 
@@ -362,6 +367,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -381,6 +387,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -411,6 +418,7 @@ void main() {
             '--input-type=frag',
             '--include=$fragDir',
             '--include=$shaderLibDir',
+            '--depfile=/.tmp_rand0/0.8863148172405516.d',
           ],
           onRun: (List<String> args) {
             fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -430,6 +438,7 @@ void main() {
       final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
         fileSystem: fileSystem,
+        logger: logger,
         random: math.Random(0),
       );
 
@@ -460,6 +469,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (List<String> args) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -479,6 +489,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -507,6 +518,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -526,6 +538,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -538,6 +551,235 @@ void main() {
     expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv'), isNot(exists));
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler tracks transitive imports', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+    const helperPath = '/shaders/helper.glsl';
+    fileSystem.file(helperPath).createSync(recursive: true);
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+          fileSystem
+              .file('$tempDir/0.8863148172405516.d')
+              .writeAsStringSync('$tempDir/0.8255140718871702.temp: $fragPath $helperPath');
+        },
+      ),
+    ]);
+
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+
+    fileSystem.file(helperPath).setLastModifiedSync(DateTime.now().add(const Duration(seconds: 1)));
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), true);
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler handles missing depfile gracefully', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+        },
+      ),
+    ]);
+
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler handles malformed depfile gracefully', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+          fileSystem.file('$tempDir/0.8863148172405516.d').writeAsStringSync('malformed content');
+        },
+      ),
+    ]);
+
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+    expect(logger.errorText, contains('Invalid depfile:'));
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler handles non-file content gracefully', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$tempDir/0.424722653321134.temp',
+          '--input-type=frag',
+          '--include=$tempDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+        },
+      ),
+    ]);
+
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSByteContent(Uint8List.fromList(<int>[1, 2, 3, 4]));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+    expect(processManager.hasRemainingExpectations, false);
   });
 
   group('blocked shader compiler', () {

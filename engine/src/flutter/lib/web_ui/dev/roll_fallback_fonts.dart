@@ -71,13 +71,27 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
       throw ToolExit('Could not find license attribution at:\n - ${failedUrls.join('\n - ')}');
     }
 
+    final parentToSlices = <String, List<String>>{};
+    final sliceToParent = <String, String>{};
+
+    for (final (:String family, uri: _) in fallbackFontInfo) {
+      for (final String parent in splitFallbackFonts) {
+        if (family.startsWith('$parent ')) {
+          sliceToParent[family] = parent;
+          parentToSlices.putIfAbsent(parent, () => <String>[]).add(family);
+          break;
+        }
+      }
+    }
+
     final fallbackFontData = <_Font>[];
 
     final charsetForFamily = <String, String>{};
     final io.Directory fontDir = await io.Directory.systemTemp.createTemp('flutter_fallback_fonts');
     print('Downloading fonts into temp directory: ${fontDir.path}');
-    final hashSink = AccumulatorSink<crypto.Digest>();
-    final ByteConversionSink hasher = crypto.sha256.startChunkedConversion(hashSink);
+    final familyToUri = <String, Uri>{for (final (:family, :uri) in fallbackFontInfo) family: uri};
+
+    var printedWoff2Warning = false;
 
     for (final (:family, :uri) in fallbackFontInfo) {
       print('Downloading $family...');
@@ -89,37 +103,136 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
       final fontFile = io.File(path.join(fontDir.path, urlSuffix));
 
       final Uint8List bodyBytes = fontResponse.bodyBytes;
-      hasher.add(utf8.encode(urlSuffix));
-      hasher.add(bodyBytes);
 
       await fontFile.create(recursive: true);
       await fontFile.writeAsBytes(bodyBytes, flush: true);
+
+      String queryPath = fontFile.path;
+      var decompressed = false;
+      if (fontFile.path.endsWith('.woff2')) {
+        try {
+          final io.ProcessResult decompressResult = await io.Process.run(
+            'woff2_decompress',
+            <String>[fontFile.path],
+          );
+          if (decompressResult.exitCode == 0) {
+            queryPath = path.setExtension(fontFile.path, '.ttf');
+            decompressed = true;
+          } else {
+            print(
+              'Warning: woff2_decompress failed with exit code ${decompressResult.exitCode} for ${fontFile.path}.',
+            );
+          }
+        } on io.ProcessException catch (e) {
+          if (!printedWoff2Warning) {
+            print('Warning: Failed to run woff2_decompress: ${e.message}');
+            print(
+              'Please install woff2 (e.g. `brew install woff2` or `apt-get install woff2`) '
+              'for faster and more reliable charset extraction.',
+            );
+            printedWoff2Warning = true;
+          }
+        } catch (e) {
+          print('Warning: Unexpected error running woff2_decompress: $e');
+        }
+      }
+
       final io.ProcessResult fcQueryResult = await io.Process.run('fc-query', <String>[
         '--format=%{charset}',
         '--',
-        fontFile.path,
+        queryPath,
       ]);
+
+      if (decompressed) {
+        await io.File(queryPath).delete();
+      }
+
+      if (fcQueryResult.exitCode != 0) {
+        throw ToolExit(
+          'fc-query failed on $queryPath with exit code ${fcQueryResult.exitCode}:\n'
+          '${fcQueryResult.stderr}',
+        );
+      }
+
       final encodedCharset = fcQueryResult.stdout as String;
+      if (encodedCharset.trim().isEmpty) {
+        throw ToolExit('fc-query returned an empty charset for $family at $queryPath.');
+      }
       charsetForFamily[family] = encodedCharset;
     }
 
-    final sb = StringBuffer();
+    // Parse all charsets into Set<int>
+    final parsedCharsets = <String, Set<int>>{};
+    for (final String family in charsetForFamily.keys) {
+      parsedCharsets[family] = parseCharset(charsetForFamily[family]!);
+    }
 
+    // Subtract split slice charsets from their monolithic parents.
+    // This prunes the monolithic parent's character set so it only covers
+    // characters exclusive to it (such as combining and archaic Jamo).
+    // If a monolithic parent is completely covered by its split slices,
+    // we elide it from the fallback list entirely.
+    final elidedFamilies = <String>{};
+    for (final String parent in parentToSlices.keys) {
+      final Set<int>? parentCharset = parsedCharsets[parent];
+      if (parentCharset == null) {
+        continue;
+      }
+      final originalParentCharset = Set<int>.from(parentCharset);
+      final List<String> slices = parentToSlices[parent]!;
+      for (final slice in slices) {
+        final Set<int>? sliceCharset = parsedCharsets[slice];
+        if (sliceCharset != null) {
+          if (!originalParentCharset.containsAll(sliceCharset)) {
+            final Set<int> difference = sliceCharset.difference(originalParentCharset);
+            throw ToolExit(
+              'Correctness error: CJK split slice "$slice" contains characters not present in its '
+              'full parent font "$parent".\n'
+              'Difference: ${difference.map((c) => "U+${c.toRadixString(16).toUpperCase()}").join(", ")}',
+            );
+          }
+          parentCharset.removeAll(sliceCharset);
+        }
+      }
+      if (parentCharset.isEmpty) {
+        elidedFamilies.add(parent);
+      }
+    }
+
+    // Delete elided monolithic font files from the temp directory so they
+    // are not packaged and uploaded to CIPD.
+    for (final family in elidedFamilies) {
+      final Uri? uri = familyToUri[family];
+      if (uri != null) {
+        final String urlSuffix = getUrlSuffix(uri);
+        final file = io.File(path.join(fontDir.path, urlSuffix));
+        if (file.existsSync()) {
+          print('Deleting elided monolithic font file: ${file.path}');
+          await file.delete();
+        }
+      }
+    }
+
+    // Serialize the fallback font metadata.
+    // For monolithic parents, we only serialize the remaining (exclusive)
+    // character ranges so that the engine naturally prefers split slices
+    // for standard text rendering.
     var index = 0;
     for (final fontInfo in fallbackFontInfo) {
+      final String family = fontInfo.family;
+      if (elidedFamilies.contains(family)) {
+        print('Eliding fully covered monolithic font: $family');
+        continue;
+      }
+
       final starts = <int>[];
       final ends = <int>[];
-      final String charset = charsetForFamily[fontInfo.family]!;
-      for (final String range in charset.split(' ')) {
-        // Range is one hexadecimal number or two, separated by `-`.
-        final List<String> parts = range.split('-');
-        if (parts.length != 1 && parts.length != 2) {
-          throw ToolExit('Malformed charset range "$range"');
-        }
-        final int first = int.parse(parts.first, radix: 16);
-        final int last = int.parse(parts.last, radix: 16);
-        starts.add(first);
-        ends.add(last);
+
+      final Set<int> remainingCharset = parsedCharsets[family]!;
+      final List<(int, int)> ranges = setToRanges(remainingCharset);
+      for (final (int start, int end) in ranges) {
+        starts.add(start);
+        ends.add(end);
       }
 
       fallbackFontData.add(_Font(fontInfo, index++, starts, ends));
@@ -127,6 +240,7 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
 
     final String fontSetsCode = _computeEncodedFontSets(fallbackFontData);
 
+    final sb = StringBuffer();
     sb.writeln('// Copyright 2013 The Flutter Authors. All rights reserved.');
     sb.writeln(
       '// Use of this source code is governed by a BSD-style license '
@@ -140,10 +254,34 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
     sb.writeln();
     sb.writeln('List<NotoFont> getFallbackFontList() => <NotoFont>[');
 
+    final Set<String> activeFamilies = fallbackFontData.map((_Font f) => f.info.family).toSet();
+
     for (final font in fallbackFontData) {
       final String family = font.info.family;
       final String urlSuffix = getUrlSuffix(font.info.uri);
-      sb.writeln(" NotoFont('$family', '$urlSuffix'),");
+
+      final String? parent = sliceToParent[family];
+      final List<String>? slices = parentToSlices[family];
+
+      final indexArg = 'index: ${font.index}';
+      if (parent != null && activeFamilies.contains(parent)) {
+        sb.writeln("  NotoFont('$family', '$urlSuffix', $indexArg, monolithicParent: '$parent'),");
+      } else if (slices != null && slices.isNotEmpty) {
+        final activeSlices = <String>[
+          for (final String s in slices)
+            if (activeFamilies.contains(s)) s,
+        ];
+        if (activeSlices.isNotEmpty) {
+          final String slicesSetLiteral = activeSlices.map((String s) => "'$s'").join(', ');
+          sb.writeln(
+            "  NotoFont('$family', '$urlSuffix', $indexArg, slices: const <String>{$slicesSetLiteral}),",
+          );
+        } else {
+          sb.writeln("  NotoFont('$family', '$urlSuffix', $indexArg),");
+        }
+      } else {
+        sb.writeln("  NotoFont('$family', '$urlSuffix', $indexArg),");
+      }
     }
     sb.writeln('];');
     sb.writeln();
@@ -253,6 +391,22 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     final List<int> licenseData = utf8.encode(licenseString);
     await licenseFile.create(recursive: true);
     await licenseFile.writeAsBytes(licenseData);
+
+    // Initialize the hasher and hash only the files we are keeping in the CIPD package.
+    final hashSink = AccumulatorSink<crypto.Digest>();
+    final ByteConversionSink hasher = crypto.sha256.startChunkedConversion(hashSink);
+
+    for (final font in fallbackFontData) {
+      final String urlSuffix = getUrlSuffix(font.info.uri);
+      final fontFile = io.File(path.join(fontDir.path, urlSuffix));
+      if (!fontFile.existsSync()) {
+        throw ToolExit('Expected font file does not exist: ${fontFile.path}');
+      }
+      final Uint8List bytes = await fontFile.readAsBytes();
+      hasher.add(utf8.encode(urlSuffix));
+      hasher.add(bytes);
+    }
+
     hasher.add(licenseData);
     hasher.close();
 
@@ -275,7 +429,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
 
     print('Setting new fallback fonts deps version to $versionString');
-    final String depFilePath = path.join(environment.engineSrcDir.path, 'flutter', 'DEPS');
+    String depFilePath = path.join(environment.engineSrcDir.path, 'flutter', 'DEPS');
+    if (!io.File(depFilePath).existsSync()) {
+      depFilePath = path.join(environment.flutterRootDir.path, 'DEPS');
+    }
     await runProcess('gclient', <String>[
       'setdep',
       '--revision=src/flutter/third_party/google_fonts_for_unit_tests:$packageName@$versionString',
@@ -445,7 +602,7 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Pahawh Hmong',
   'Noto Sans Palmyrene',
   'Noto Sans Pau Cin Hau',
-  'Noto Sans Phags Pa',
+  'Noto Sans PhagsPa',
   'Noto Sans Phoenician',
   'Noto Sans Psalter Pahlavi',
   'Noto Sans Rejang',
@@ -481,6 +638,11 @@ const List<String> apiFallbackFonts = <String>[
   'Noto Sans Yi',
   'Noto Sans Zanabazar Square',
   'Noto Serif Tibetan',
+  'Noto Sans JP',
+  'Noto Sans KR',
+  'Noto Sans SC',
+  'Noto Sans TC',
+  'Noto Sans HK',
 ];
 
 /// Fonts which are split up into several smaller subfonts. These need special
@@ -908,4 +1070,51 @@ String _computeEncodedFontSets(List<_Font> fonts) {
     ..writeln('    ;');
 
   return declarations.toString();
+}
+
+/// Parses a fontconfig charset string into a set of Unicode code points.
+Set<int> parseCharset(String charset) {
+  final set = <int>{};
+  final String trimmed = charset.trim();
+  if (trimmed.isEmpty) {
+    return set;
+  }
+  for (final String range in trimmed.split(' ')) {
+    if (range.trim().isEmpty) {
+      continue;
+    }
+    final List<String> parts = range.split('-');
+    if (parts.length != 1 && parts.length != 2) {
+      throw ToolExit('Malformed charset range "$range"');
+    }
+    final int first = int.parse(parts.first, radix: 16);
+    final int last = int.parse(parts.last, radix: 16);
+    for (var i = first; i <= last; i++) {
+      set.add(i);
+    }
+  }
+  return set;
+}
+
+/// Converts a set of Unicode code points into a list of contiguous ranges.
+List<(int, int)> setToRanges(Set<int> set) {
+  if (set.isEmpty) {
+    return const [];
+  }
+  final List<int> sorted = set.toList()..sort();
+  final ranges = <(int, int)>[];
+  int start = sorted.first;
+  int end = sorted.first;
+  for (var i = 1; i < sorted.length; i++) {
+    final int val = sorted[i];
+    if (val == end + 1) {
+      end = val;
+    } else {
+      ranges.add((start, end));
+      start = val;
+      end = val;
+    }
+  }
+  ranges.add((start, end));
+  return ranges;
 }
