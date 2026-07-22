@@ -34,7 +34,6 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
-#include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -810,8 +809,7 @@ bool Canvas::AttemptDrawLineSDF(const Point& p0,
                                 const Point& p1,
                                 const Paint& paint,
                                 bool reuse_depth) {
-  if (!(renderer_.GetContext()->GetFlags().use_sdfs ||
-        renderer_.GetContext()->GetFlags().antialiased_lines) ||
+  if (!renderer_.GetContext()->GetFlags().use_sdfs ||
       !IsCompatibleWithSDFRendering(paint)) {
     return false;
   }
@@ -1113,36 +1111,27 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+    Color effective_color = paint.color;
+    Rect bounds = round_rect.GetBounds();
+
     // Expand rrect bounds to 1 pixel minimum dimensions if applicable.
     if (paint.style == Paint::Style::kFill &&
         !GetCurrentTransform().HasPerspective2D()) {
-      Rect rrect_bounds = round_rect.GetBounds();
-      auto [expanded, alpha_scaled_color] =
-          ExpandRectToPixelMinimum(rrect_bounds, paint.color,
-                                   GetCurrentTransform(), /*scale_alpha=*/true);
+      auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
+          bounds, paint.color, GetCurrentTransform(), /*scale_alpha=*/true);
 
       if (expanded.IsEmpty()) {
         // RRect is invisible due to transform scaling or alpha scaling.
         return;
       }
 
-      // Pixel-minimum expansion is applicable if the expanded bounds is
-      // different from the original bounds.
-      if (expanded != rrect_bounds) {
-        // At a 1-pixel size, the rounded corners can be ignored. Draw a regular
-        // rect matching the expanded bounds.
-        auto params = UberSDFParameters::MakeRect(
-            /*color=*/alpha_scaled_color,
-            /*rect=*/expanded,
-            /*stroke=*/std::nullopt);
-        AddRenderSDFEntityToCurrentPass(paint, params);
-        return;
-      }
+      bounds = expanded;
+      effective_color = alpha_scaled_color;
     }
 
     auto params = UberSDFParameters::MakeRoundedRect(
-        /*color=*/paint.color,
-        /*rect=*/round_rect.GetBounds(),
+        /*color=*/effective_color,
+        /*rect=*/bounds,
         /*radii=*/radii,
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)

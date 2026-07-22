@@ -2319,7 +2319,6 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   impeller::Flags impeller_flags;
   impeller_flags.use_sdfs = settings.impeller_use_sdfs;
-  impeller_flags.antialiased_lines = settings.impeller_antialiased_lines;
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
