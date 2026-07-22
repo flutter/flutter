@@ -406,6 +406,30 @@ void main() {
     expect(unimplementedOutputString, contains('subtitle'));
   });
 
+  testWithoutContext('does not include inherited keys in untranslated messages file', () {
+    final String untranslatedMessagesFilePath = fs.path.join(
+      'lib',
+      'l10n',
+      'unimplemented_message_translations.json',
+    );
+    setupLocalizations(<String, String>{
+      'en': twoMessageArbFileString,
+      'en_US': singleMessageArbFileString,
+    }, untranslatedMessagesFile: untranslatedMessagesFilePath);
+    final String unimplementedOutputString = fs
+        .file(untranslatedMessagesFilePath)
+        .readAsStringSync();
+    try {
+      json.decode(unimplementedOutputString);
+    } on Exception {
+      fail('Parsing arb file should not fail');
+    }
+    // en_US misses 'subtitle', but it is present in 'en' (base/template).
+    // So it should NOT be in the untranslated messages file.
+    expect(unimplementedOutputString, isNot(contains('en_US')));
+    expect(unimplementedOutputString, isNot(contains('subtitle')));
+  });
+
   testWithoutContext('correctly creates an untranslated messages file when project directory is '
       'not the current directory', () {
     // Regression test for https://github.com/flutter/flutter/issues/174205

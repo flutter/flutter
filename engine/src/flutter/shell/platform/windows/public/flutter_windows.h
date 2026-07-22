@@ -71,6 +71,16 @@ typedef enum {
   IAccessibleExMode,
 } FlutterDesktopAccessibilityMode;
 
+// Configures the Impeller enablement switch.
+typedef enum {
+  // Use the default Impeller enablement behavior.
+  DefaultImpeller,
+  // Enable Impeller.
+  EnabledImpeller,
+  // Disable Impeller.
+  DisabledImpeller,
+} FlutterDesktopImpellerSwitch;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -105,14 +115,19 @@ typedef struct {
   const char** dart_entrypoint_argv;
 
   // GPU choice preference
+  // If not set defaults to NoPreference;
   FlutterDesktopGpuPreference gpu_preference;
 
   // Policy for the thread that runs UI isolate.
+  // If not set defaults to Default;
   FlutterDesktopUIThreadPolicy ui_thread_policy;
 
   // The accessibility mode.
   // This can be used to enable the experimental IAccessibleEx implementation.
   FlutterDesktopAccessibilityMode accessibility_mode;
+
+  // Policy for enabling the Impeller renderer.
+  FlutterDesktopImpellerSwitch impeller_switch;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
@@ -253,6 +268,25 @@ FlutterDesktopEngineGetTextureRegistrar(FlutterDesktopEngineRef engine);
 FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
     FlutterDesktopEngineRef engine,
     VoidCallback callback,
+    void* user_data);
+
+// Returns true if the current thread is the platform thread.
+// This can be called on any thread.
+FLUTTER_EXPORT bool FlutterDesktopEngineIsPlatformThread(
+    FlutterDesktopEngineRef engine);
+
+// Schedule a callback to be called on the platform thread.
+//
+// This can be called on any thread. The callback is executed only
+// once on the platform thread.
+//
+// If the task is discarded without being executed (e.g. during engine
+// shutdown), |on_cancel| is called on the platform thread so the caller can
+// cleanup allocations. |on_cancel| can be nullptr if no cleanup is needed.
+FLUTTER_EXPORT void FlutterDesktopEnginePostPlatformThreadTask(
+    FlutterDesktopEngineRef engine,
+    VoidCallback callback,
+    VoidCallback on_cancel,
     void* user_data);
 
 // ========== View ==========

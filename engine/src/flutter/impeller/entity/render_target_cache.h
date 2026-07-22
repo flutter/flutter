@@ -12,9 +12,10 @@
 namespace impeller {
 
 /// @brief An implementation of the [RenderTargetAllocator] that caches all
-///        allocated texture data for one frame.
+///        allocated texture data for at least one frame.
 ///
-///        Any textures unused after a frame are immediately discarded.
+///        Any textures unused after [keep_alive_frame_count] frames are
+///        discarded.
 class RenderTargetCache : public RenderTargetAllocator {
  public:
   explicit RenderTargetCache(std::shared_ptr<Allocator> allocator,

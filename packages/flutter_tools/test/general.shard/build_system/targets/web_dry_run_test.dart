@@ -96,6 +96,8 @@ name: my_app
           '-DFLUTTER_WEB_USE_SKWASM=true',
           '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
           '--extra-compiler-option=--depfile=${environment.buildDir.childFile('dart2wasm.d').path}',
+          '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').path}',
+          '--enable-experiment=record-use',
           '-O0',
           '--no-strip-wasm',
           '--no-minify',

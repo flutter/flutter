@@ -6,6 +6,7 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.gradle.internal.utils.getKotlinAndroidPluginVersion
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
@@ -44,9 +45,16 @@ internal object VersionFetcher {
      * Returns the version of the Kotlin Gradle plugin.
      */
     internal fun getKGPVersion(project: Project): Version? {
-        // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
-        //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
-        //                 those.
+        // AGP and Kgp have methods for getting kotlin version.
+        // AGP's method is internal, we try to use it anyway.
+        // KGP's version in org.jetbrains.kotlin.gradle.plugin.DefaultKotlinBasePlugin is not
+        // available when this method is called.
+        // When testing call `setAgpKotlinVersionToNull(project)`.
+        val agpDefinedKgpVersion = getKotlinAndroidPluginVersion(project)
+        if (agpDefinedKgpVersion != null && agpDefinedKgpVersion != "unknown") {
+            return Version.fromString(agpDefinedKgpVersion)
+        }
+
         val kotlinVersionProperty = "kotlin_version"
         val firstKotlinVersionFieldName = "pluginVersion"
         val secondKotlinVersionFieldName = "kotlinPluginVersion"

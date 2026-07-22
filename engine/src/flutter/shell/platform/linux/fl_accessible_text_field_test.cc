@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
@@ -21,11 +22,11 @@ static FlValue* decode_semantic_data(const uint8_t* data, size_t data_length) {
                                          nullptr);
 }
 
+class FlAccessibleTextFieldTest : public flutter::testing::LinuxTest {};
+
 // Tests that semantic node value updates from Flutter emit AtkText::text-insert
 // and AtkText::text-remove signals as expected.
-TEST(FlAccessibleTextFieldTest, SetValue) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, SetValue) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -81,9 +82,7 @@ TEST(FlAccessibleTextFieldTest, SetValue) {
 // Tests that semantic node selection updates from Flutter emit
 // AtkText::text-selection-changed and AtkText::text-caret-moved signals as
 // expected.
-TEST(FlAccessibleTextFieldTest, SetTextSelection) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, SetTextSelection) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -142,16 +141,11 @@ TEST(FlAccessibleTextFieldTest, SetTextSelection) {
 
 // Tests that fl_accessible_text_field_perform_action() passes the required
 // "expandSelection" argument for semantic cursor move actions.
-TEST(FlAccessibleTextFieldTest, PerformAction) {
+TEST_F(FlAccessibleTextFieldTest, PerformAction) {
   g_autoptr(GPtrArray) action_datas = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(fl_value_unref));
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -183,9 +177,7 @@ TEST(FlAccessibleTextFieldTest, PerformAction) {
 }
 
 // Tests AtkText::get_character_count.
-TEST(FlAccessibleTextFieldTest, GetCharacterCount) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, GetCharacterCount) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -197,9 +189,7 @@ TEST(FlAccessibleTextFieldTest, GetCharacterCount) {
 }
 
 // Tests AtkText::get_text.
-TEST(FlAccessibleTextFieldTest, GetText) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, GetText) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -218,10 +208,33 @@ TEST(FlAccessibleTextFieldTest, GetText) {
   EXPECT_STREQ(tt, "tt");
 }
 
+// Tests AtkText::get_text with out-of-bounds offsets.
+TEST_F(FlAccessibleTextFieldTest, GetTextBoundsChecking) {
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
+
+  fl_accessible_node_set_value(node, "Hello");
+
+  // start beyond end of text
+  g_autofree gchar* beyond = atk_text_get_text(ATK_TEXT(node), 100, -1);
+  EXPECT_STREQ(beyond, "");
+
+  // end beyond text length
+  g_autofree gchar* end_beyond = atk_text_get_text(ATK_TEXT(node), 2, 100);
+  EXPECT_STREQ(end_beyond, "llo");
+
+  // both beyond text length
+  g_autofree gchar* both_beyond = atk_text_get_text(ATK_TEXT(node), 50, 100);
+  EXPECT_STREQ(both_beyond, "");
+
+  // empty buffer
+  fl_accessible_node_set_value(node, "");
+  g_autofree gchar* empty_beyond = atk_text_get_text(ATK_TEXT(node), 5, 10);
+  EXPECT_STREQ(empty_beyond, "");
+}
+
 // Tests AtkText::get_caret_offset.
-TEST(FlAccessibleTextFieldTest, GetCaretOffset) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, GetCaretOffset) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -233,16 +246,11 @@ TEST(FlAccessibleTextFieldTest, GetCaretOffset) {
 }
 
 // Tests AtkText::set_caret_offset.
-TEST(FlAccessibleTextFieldTest, SetCaretOffset) {
+TEST_F(FlAccessibleTextFieldTest, SetCaretOffset) {
   int base = -1;
   int extent = -1;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -266,9 +274,7 @@ TEST(FlAccessibleTextFieldTest, SetCaretOffset) {
 }
 
 // Tests AtkText::get_n_selections.
-TEST(FlAccessibleTextFieldTest, GetNSelections) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, GetNSelections) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -280,9 +286,7 @@ TEST(FlAccessibleTextFieldTest, GetNSelections) {
 }
 
 // Tests AtkText::get_selection.
-TEST(FlAccessibleTextFieldTest, GetSelection) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, GetSelection) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -316,16 +320,11 @@ TEST(FlAccessibleTextFieldTest, GetSelection) {
 }
 
 // Tests AtkText::add_selection.
-TEST(FlAccessibleTextFieldTest, AddSelection) {
+TEST_F(FlAccessibleTextFieldTest, AddSelection) {
   int base = -1;
   int extent = -1;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -356,16 +355,11 @@ TEST(FlAccessibleTextFieldTest, AddSelection) {
 }
 
 // Tests AtkText::remove_selection.
-TEST(FlAccessibleTextFieldTest, RemoveSelection) {
+TEST_F(FlAccessibleTextFieldTest, RemoveSelection) {
   int base = -1;
   int extent = -1;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -402,16 +396,11 @@ TEST(FlAccessibleTextFieldTest, RemoveSelection) {
 }
 
 // Tests AtkText::set_selection.
-TEST(FlAccessibleTextFieldTest, SetSelection) {
+TEST_F(FlAccessibleTextFieldTest, SetSelection) {
   int base = -1;
   int extent = -1;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -444,15 +433,10 @@ TEST(FlAccessibleTextFieldTest, SetSelection) {
 }
 
 // Tests AtkEditableText::set_text_contents.
-TEST(FlAccessibleTextFieldTest, SetTextContents) {
+TEST_F(FlAccessibleTextFieldTest, SetTextContents) {
   g_autofree gchar* text = nullptr;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -473,17 +457,12 @@ TEST(FlAccessibleTextFieldTest, SetTextContents) {
 }
 
 // Tests AtkEditableText::insert/delete_text.
-TEST(FlAccessibleTextFieldTest, InsertDeleteText) {
+TEST_F(FlAccessibleTextFieldTest, InsertDeleteText) {
   g_autofree gchar* text = nullptr;
   int base = -1;
   int extent = -1;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -526,17 +505,12 @@ TEST(FlAccessibleTextFieldTest, InsertDeleteText) {
 }
 
 // Tests AtkEditableText::copy/cut/paste_text.
-TEST(FlAccessibleTextFieldTest, CopyCutPasteText) {
+TEST_F(FlAccessibleTextFieldTest, CopyCutPasteText) {
   int base = -1;
   int extent = -1;
   FlutterSemanticsAction act = kFlutterSemanticsActionCustomAction;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+  StartEngine();
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
@@ -577,9 +551,7 @@ TEST(FlAccessibleTextFieldTest, CopyCutPasteText) {
   EXPECT_EQ(act, kFlutterSemanticsActionPaste);
 }
 
-TEST(FlAccessibleTextFieldTest, TextBoundary) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+TEST_F(FlAccessibleTextFieldTest, TextBoundary) {
   g_autoptr(FlAccessibleNode) node =
       fl_accessible_text_field_new(engine, 123, 1);
 
@@ -694,6 +666,149 @@ TEST(FlAccessibleTextFieldTest, TextBoundary) {
   EXPECT_STREQ(felis_paragraph, "\nPraesent et felis dui.");
   EXPECT_EQ(start_offset, 47);
   EXPECT_EQ(end_offset, 70);
+}
+
+// Tests that get_string_at_offset handles offset beyond text length.
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryOffsetBeyondEnd) {
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
+
+  fl_accessible_node_set_value(node, "Hello");
+
+  // Offset well beyond the text length should not crash and should return
+  // a valid result clamped to the text boundaries.
+  gint start_offset = -1, end_offset = -1;
+  g_autofree gchar* char_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 100, ATK_TEXT_GRANULARITY_CHAR, &start_offset,
+      &end_offset);
+  EXPECT_NE(char_result, nullptr);
+  EXPECT_GE(start_offset, 0);
+  EXPECT_LE(end_offset, 5);
+
+  g_autofree gchar* word_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 100, ATK_TEXT_GRANULARITY_WORD, &start_offset,
+      &end_offset);
+  EXPECT_NE(word_result, nullptr);
+  EXPECT_GE(start_offset, 0);
+  EXPECT_LE(end_offset, 5);
+
+  g_autofree gchar* sentence_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 100, ATK_TEXT_GRANULARITY_SENTENCE, &start_offset,
+      &end_offset);
+  EXPECT_NE(sentence_result, nullptr);
+  EXPECT_GE(start_offset, 0);
+  EXPECT_LE(end_offset, 5);
+}
+
+// Tests that get_string_at_offset handles offset at position zero.
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryOffsetAtStart) {
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
+
+  fl_accessible_node_set_value(node, "Hello");
+
+  // Offset at zero should return the first character/word.
+  gint start_offset = -1, end_offset = -1;
+  g_autofree gchar* char_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_CHAR, &start_offset, &end_offset);
+  EXPECT_NE(char_result, nullptr);
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 1);
+  EXPECT_STREQ(char_result, "H");
+
+  g_autofree gchar* word_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_WORD, &start_offset, &end_offset);
+  EXPECT_NE(word_result, nullptr);
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 5);
+  EXPECT_STREQ(word_result, "Hello");
+}
+
+// Tests that get_string_at_offset handles empty text.
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryEmptyText) {
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
+
+  // Empty text - should not crash.
+  gint start_offset = -1, end_offset = -1;
+  g_autofree gchar* char_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_CHAR, &start_offset, &end_offset);
+  EXPECT_NE(char_result, nullptr);
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_STREQ(char_result, "");
+
+  g_autofree gchar* word_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_WORD, &start_offset, &end_offset);
+  EXPECT_NE(word_result, nullptr);
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_STREQ(word_result, "");
+}
+
+// Tests that get_string_at_offset handles offset at exact text length.
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryOffsetAtEnd) {
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
+
+  fl_accessible_node_set_value(node, "Hello world");
+
+  // Offset at exactly the character count (one past last char).
+  gint char_count = atk_text_get_character_count(ATK_TEXT(node));
+  EXPECT_EQ(char_count, 11);
+
+  gint start_offset = -1, end_offset = -1;
+  g_autofree gchar* char_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), char_count, ATK_TEXT_GRANULARITY_CHAR, &start_offset,
+      &end_offset);
+  EXPECT_NE(char_result, nullptr);
+  EXPECT_GE(start_offset, 0);
+  EXPECT_LE(end_offset, char_count);
+
+  g_autofree gchar* word_result = atk_text_get_string_at_offset(
+      ATK_TEXT(node), char_count, ATK_TEXT_GRANULARITY_WORD, &start_offset,
+      &end_offset);
+  EXPECT_NE(word_result, nullptr);
+  EXPECT_GE(start_offset, 0);
+  EXPECT_LE(end_offset, char_count);
+}
+
+// Tests that line and paragraph boundaries are computed in character offsets
+// rather than byte offsets when the text contains multi-byte UTF-8 characters.
+TEST_F(FlAccessibleTextFieldTest, TextBoundaryMultiByte) {
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
+
+  // "Café" is 4 characters but 5 bytes (é is 2 bytes).
+  // "Münch" is 5 characters but 6 bytes (ü is 2 bytes).
+  // Character offsets: C(0) a(1) f(2) é(3) \n(4) M(5) ü(6) n(7) c(8) h(9)
+  fl_accessible_node_set_value(node, "Café\nMünch");
+
+  // The field has 10 characters.
+  EXPECT_EQ(atk_text_get_character_count(ATK_TEXT(node)), 10);
+
+  // First line: "Café" at character offsets [0, 4).
+  gint start_offset = -1, end_offset = -1;
+  g_autofree gchar* line0 = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_LINE, &start_offset, &end_offset);
+  EXPECT_STREQ(line0, "Café");
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 4);
+
+  // Second line: "Münch" at character offsets [5, 10). Query at offset 6
+  // (the 'ü'), which sits in the middle of a multi-byte sequence in byte
+  // space - the buggy byte-based logic would return the wrong substring here.
+  g_autofree gchar* line1 = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 6, ATK_TEXT_GRANULARITY_LINE, &start_offset, &end_offset);
+  EXPECT_STREQ(line1, "Münch");
+  EXPECT_EQ(start_offset, 5);
+  EXPECT_EQ(end_offset, 10);
+
+  // Whole text is a single paragraph spanning both lines.
+  g_autofree gchar* paragraph = atk_text_get_string_at_offset(
+      ATK_TEXT(node), 6, ATK_TEXT_GRANULARITY_PARAGRAPH, &start_offset,
+      &end_offset);
+  EXPECT_STREQ(paragraph, "Café\nMünch");
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 10);
 }
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

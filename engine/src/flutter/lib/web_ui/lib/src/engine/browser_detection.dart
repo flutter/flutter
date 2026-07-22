@@ -140,6 +140,10 @@ bool get _workAroundBug91333 => _isIOS;
 bool get browserSupportsCanvaskitChromium =>
     domIntl.v8BreakIterator != null && domIntl.Segmenter != null && browserSupportsImageDecoder;
 
+/// Whether the current browser supports the WebParagraph implementation.
+bool get browserSupportsWebParagraph =>
+    browserSupportsCanvaskitChromium && browserSupportsTextCluster;
+
 /// Whether the current browser is Safari 17.4 or newer.
 ///
 /// Safari 17.4 introduced support for aria-description.

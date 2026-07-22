@@ -283,6 +283,8 @@ void fl_engine_send_window_metrics_event(FlEngine* engine,
  * @scroll_delta_x: x offset of scroll.
  * @scroll_delta_y: y offset of scroll.
  * @buttons: buttons that are pressed.
+ * @rotation: rotation of the pointer device in degrees.
+ * @pressure: pressure of the pointer device.
  *
  * Sends a mouse pointer event to the engine.
  */
@@ -295,7 +297,9 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         FlutterPointerDeviceKind device_kind,
                                         double scroll_delta_x,
                                         double scroll_delta_y,
-                                        int64_t buttons);
+                                        int64_t buttons,
+                                        double rotation,
+                                        double pressure);
 
 /**
  * fl_engine_send_touch_up_event:

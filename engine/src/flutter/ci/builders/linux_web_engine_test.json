@@ -3,7 +3,7 @@
   "_comment2": "See `generate_builder_json.dart` for the generator code",
   "builds": [
     {
-      "name": "web_tests/test_bundles/dart2js-canvaskit-experimental-webparagraph",
+      "name": "web_tests/test_bundles/dart2js-canvaskit-webparagraph",
       "drone_dimensions": [
         "device_type=none",
         "os=Linux"
@@ -11,11 +11,11 @@
       "generators": {
         "tasks": [
           {
-            "name": "compile bundle dart2js-canvaskit-experimental-webparagraph",
+            "name": "compile bundle dart2js-canvaskit-webparagraph",
             "parameters": [
               "test",
               "--compile",
-              "--bundle=dart2js-canvaskit-experimental-webparagraph"
+              "--bundle=dart2js-canvaskit-webparagraph"
             ],
             "scripts": [
               "flutter/lib/web_ui/dev/felt"
@@ -209,7 +209,7 @@
         "download_jdk": false
       },
       "dependencies": [
-        "web_tests/test_bundles/dart2js-canvaskit-experimental-webparagraph",
+        "web_tests/test_bundles/dart2js-canvaskit-webparagraph",
         "web_tests/test_bundles/dart2wasm-skwasm-ui",
         "web_tests/test_bundles/dart2wasm-skwasm-skwasm",
         "web_tests/test_bundles/dart2js-canvaskit-engine",
@@ -234,7 +234,7 @@
           "parameters": [
             "test",
             "--copy-artifacts",
-            "--suite=chrome-dart2js-experimental-webparagraph-ui",
+            "--suite=chrome-dart2js-webparagraph-ui",
             "--suite=chrome-dart2wasm-wimp-ui",
             "--suite=chrome-dart2wasm-wimp-skwasm",
             "--suite=chrome-dart2js-canvaskit-engine",
@@ -254,11 +254,11 @@
           "script": "flutter/lib/web_ui/dev/felt"
         },
         {
-          "name": "run suite chrome-dart2js-experimental-webparagraph-ui",
+          "name": "run suite chrome-dart2js-webparagraph-ui",
           "parameters": [
             "test",
             "--run",
-            "--suite=chrome-dart2js-experimental-webparagraph-ui"
+            "--suite=chrome-dart2js-webparagraph-ui"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },

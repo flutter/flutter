@@ -97,6 +97,10 @@ class IMockGLESImpl {
   virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
   virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
+  virtual void BufferSubData(GLenum target,
+                             GLintptr offset,
+                             GLsizeiptr size,
+                             const void* data) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
@@ -248,6 +252,11 @@ class MockGLESImpl : public IMockGLESImpl {
               DeleteBuffers,
               (GLsizei n, const GLuint* buffers),
               (override));
+  MOCK_METHOD(
+      void,
+      BufferSubData,
+      (GLenum target, GLintptr offset, GLsizeiptr size, const void* data),
+      (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
   MOCK_METHOD(void,
               DiscardFramebufferEXT,

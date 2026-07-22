@@ -321,6 +321,9 @@ abstract class DesktopDevice extends Device {
       if (debuggingOptions.disableServiceAuthCodes) {
         addFlag('disable-service-auth-codes=true');
       }
+      if (debuggingOptions.disableServiceOriginCheck) {
+        addFlag('disable-service-origin-check=true');
+      }
       final String dartVmFlags = debuggingOptions.dartFlags;
       if (dartVmFlags.isNotEmpty) {
         addFlag('dart-flags=$dartVmFlags');

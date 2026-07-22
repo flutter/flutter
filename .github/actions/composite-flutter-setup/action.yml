@@ -16,28 +16,32 @@ runs:
   steps:
       # Real checkout on github actions for pull requests
       - name: Checkout code (non-act pull_request)
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         if: github.event_name == 'pull_request' && !env.ACT
         with:
           fetch-depth: 0
           fetch-tags: true
           # Checkout the PR; not the merge commit - we need to describe tags
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       # Real checkout on github actions for post submit
       - name: Checkout code (non-act push)
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         if: github.event_name == 'push' && !env.ACT
         with:
           fetch-depth: 0
           fetch-tags: true
           # Checkout the PR; not the merge commit - we need to describe tags
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       # Fake checkout if running locally
       - name: Checkout code (act local)
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         if: env.ACT
+        with:
+          persist-credentials: false
 
       # If this is a branch / pr NOT on fluter/flutter, set the remote upstream
       # so the flutter tool can figure out the version
@@ -68,9 +72,13 @@ runs:
         id: android-sdk-version
         if: env.ACT
         run: |
-          echo "revision=${{inputs.ANDROID_TOOLS_VERSION}};${{inputs.ANDROID_PLATFORM}};build-tools;${{inputs.ANDROID_BUILDTOOLS}}" >> "$GITHUB_OUTPUT"
+          echo "revision=${INPUTS_ANDROID_TOOLS_VERSION};${INPUTS_ANDROID_PLATFORM};build-tools;${INPUTS_ANDROID_BUILDTOOLS}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUTS_ANDROID_TOOLS_VERSION: ${{inputs.ANDROID_TOOLS_VERSION}}
+          INPUTS_ANDROID_PLATFORM: ${{inputs.ANDROID_PLATFORM}}
+          INPUTS_ANDROID_BUILDTOOLS: ${{inputs.ANDROID_BUILDTOOLS}}
       - name: Android SDK Cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: android-sdk-setup
         if: env.ACT
         with:
@@ -83,17 +91,51 @@ runs:
           packages: 'tools platform-tools platforms;${{inputs.ANDROID_PLATFORM}} build-tools;${{inputs.ANDROID_BUILDTOOLS}}'
           log-accepted-android-sdk-licenses: false
           cmdline-tools-version: ${{ inputs.ANDROID_TOOLS_VERSION }}
-      - name: Setup Android SDK (warm cache)
+      - name: Setup Android SDK (warm cache) - Tools
         shell: bash
         if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
+        run: echo "/opt/android/sdk/cmdline-tools/${INPUTS_ANDROID_TOOLS_VERSION}/bin" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
+        env:
+          INPUTS_ANDROID_TOOLS_VERSION: ${{ inputs.ANDROID_TOOLS_VERSION }}
+
+      - name: Setup Android SDK (warm cache) - Platform Tools
+        shell: bash
+        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
+        run: echo "/opt/android/sdk/platform-tools" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
+
+      # ktlint is needed by tree analyze
+      - name: ktlint cache
+        id: ktlint-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          # Cache the ktlint binary in runner.temp to avoid interfering with Flutter's bin folder
+          path: ${{ runner.temp }}/ktlint-bin/ktlint
+          # Hardcode the version in the key since it's hardcoded in the URL
+          key: ${{ runner.os }}-ktlint-1.5.0
+
+      - name: Download and Install ktlint 1.5.0
+        if: steps.ktlint-cache.outputs.cache-hit != 'true'
+        shell: bash
         run: |
-          echo "/opt/android/sdk/cmdline-tools/${{ inputs.ANDROID_TOOLS_VERSION }}/bin" >> "$GITHUB_PATH"
-          echo "/opt/android/sdk/platform-tools" >> "$GITHUB_PATH"
+          mkdir -p ${{ runner.temp }}/ktlint-bin
+
+          # 1. Download directly into the temp directory
+          curl -fsSL -o ${{ runner.temp }}/ktlint-bin/ktlint https://github.com/ktlint/ktlint/releases/download/1.5.0/ktlint
+
+          # 2. Verify the checksum to ensure the binary hasn't been tampered with
+          EXPECTED_SHA="a16be01dcc480aab2f55f444b620142152f66e31564b3b9376506d624c28a2ad"
+          echo "$EXPECTED_SHA  ${{ runner.temp }}/ktlint-bin/ktlint" | sha256sum --check -
+
+          # 3. Make the binary executable
+          chmod a+x ${{ runner.temp }}/ktlint-bin/ktlint
+
+      - name: Add ktlint to PATH
+        shell: bash
+        run: echo "${{ runner.temp }}/ktlint-bin" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
 
       - name: Add `flutter` to the PATH
         shell: bash
-        run: |
-          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+        run: echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
 
       - name: Setup PUB_CACHE environment variable
         shell: bash
@@ -108,7 +150,7 @@ runs:
         run: |
           echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Flutter artifacts cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: flutter-artifacts
         with:
           path: ${{ github.workspace }}/bin/cache
@@ -122,7 +164,7 @@ runs:
           find dev examples packages -name "pubspec.yaml" -print0 | sort -z | xargs -0 cat | sha256sum  >> "$RUNNER_TEMP/pub_deps_sha"
           echo "revision=$(cat "$RUNNER_TEMP/pub_deps_sha")" >> "$GITHUB_OUTPUT"
       - name: pub package cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: pub-cache
         with:
           path: |

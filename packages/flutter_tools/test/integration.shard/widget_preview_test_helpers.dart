@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -159,4 +160,70 @@ Future<DTDResponse> getPreviews(DartToolingDaemon dtdConnection) async {
     await Future<void>.delayed(const Duration(seconds: 2));
   }
   return dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
+}
+
+/// Polls DTD for widget previews until the [predicate] is met, or [timeout] is reached.
+///
+/// If [predicate] is null, it defaults to waiting until the previews list is not empty.
+///
+/// This is useful in integration tests to wait for the background analysis server
+/// to finish analyzing changes and updating the semantic model.
+///
+/// Gracefully ignores all [Object]s (such as DTD connection issues, RPC errors, or
+/// temporary parsing errors) during polling, as these are often temporary while
+/// the server is re-analyzing. Swallowed errors are logged to stdout for diagnostics
+/// in case of timeouts.
+Future<FlutterWidgetPreviews> waitForPreviews(
+  DartToolingDaemon dtdConnection, {
+  bool Function(FlutterWidgetPreviews)? predicate,
+  Duration timeout = const Duration(seconds: 10),
+  Duration pollInterval = const Duration(milliseconds: 200),
+}) async {
+  final stopwatch = Stopwatch()..start();
+  late FlutterWidgetPreviews previews;
+  final bool Function(FlutterWidgetPreviews) actualPredicate =
+      predicate ?? (FlutterWidgetPreviews p) => p.previews.isNotEmpty;
+  while (stopwatch.elapsed < timeout) {
+    try {
+      final DTDResponse result = await dtdConnection.call(
+        'Lsp',
+        'dart/workspace/getFlutterWidgetPreviews',
+      );
+      previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+      if (actualPredicate(previews)) {
+        return previews;
+      }
+    } on Object catch (e) {
+      // During file modification, the background Analysis Server re-analyzes the project.
+      // This transition state can cause DTD to temporarily return RPC errors (e.g., if the
+      // LSP service is temporarily re-registering or busy), socket/connection issues, or
+      // transient JSON parsing errors if we query in the middle of an update.
+      //
+      // We catch and ignore all errors here to allow the polling loop to continue and tolerate
+      // these transient hiccups. Any genuine, non-transient errors will eventually cause a
+      // timeout, at which point we will perform a final query without a try-catch to propagate
+      // the real failure.
+      //
+      // We print the swallowed error so that if the test does time out, the developer can
+      // see the history of transient errors in the test output for diagnostics.
+      // ignore: avoid_print
+      print('waitForPreviews: swallowed transient error during polling: $e');
+    }
+    await Future<void>.delayed(pollInterval);
+  }
+
+  // If we timed out, we perform one last query *without* a try-catch. If the failure is
+  // permanent (e.g., the Analysis Server crashed or the method is genuinely unimplemented),
+  // this call will throw and propagate the real exception/stack trace to fail the test clearly.
+  final DTDResponse result = await dtdConnection.call(
+    'Lsp',
+    'dart/workspace/getFlutterWidgetPreviews',
+  );
+  previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+  if (actualPredicate(previews)) {
+    return previews;
+  }
+  throw StateError(
+    'Timed out waiting for previews condition. Last value had ${previews.previews.length} previews.',
+  );
 }

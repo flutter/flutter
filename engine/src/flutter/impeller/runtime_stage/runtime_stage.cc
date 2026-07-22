@@ -183,6 +183,12 @@ absl::StatusOr<RuntimeStage::Map> RuntimeStage::DecodeRuntimeStages(
         "Payload does not have valid identifier.");
   }
 
+  flatbuffers::Verifier verifier(payload->GetMapping(), payload->GetSize());
+  if (!fb::VerifyRuntimeStagesBuffer(verifier)) {
+    return absl::InvalidArgumentError(
+        "Runtime stages buffer failed verification.");
+  }
+
   auto raw_stages = fb::GetRuntimeStages(payload->GetMapping());
   if (!raw_stages) {
     return absl::InvalidArgumentError("Failed to get runtime stages.");

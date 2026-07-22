@@ -295,4 +295,18 @@ void main() {
       0.0,
     );
   });
+
+  testWidgets('ConstrainedBox does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ConstrainedBox(constraints: const BoxConstraints(minWidth: 200, maxWidth: 400)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ConstrainedBox)), Size.zero);
+  });
 }

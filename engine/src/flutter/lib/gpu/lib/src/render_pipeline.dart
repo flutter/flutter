@@ -42,8 +42,9 @@ base class RenderPipeline extends NativeFieldWrapperClass1 {
   /// Packs a [VertexLayout] into the three ByteData buffers expected by the
   /// C++ side:
   ///
-  /// * `bufferLayouts` (`Int32List`): `[strideInBytes, attributeCount]` per
-  ///   buffer entry. The buffer's binding slot is implicit in its position.
+  /// * `bufferLayouts` (`Int32List`): `[strideInBytes, attributeCount,
+  ///   stepMode]` per buffer entry. The buffer's binding slot is implicit in
+  ///   its position.
   /// * `attributes` (`Int32List`): `[offsetInBytes, formatIndex,
   ///   nameByteLength]` per attribute entry, flattened across buffers in
   ///   buffer-list order. Each buffer's `attributeCount` row tells the C++
@@ -60,11 +61,12 @@ base class RenderPipeline extends NativeFieldWrapperClass1 {
       totalAttributeCount += layout.buffers[i].attributes.length;
     }
 
-    final Int32List buffersData = Int32List(2 * layout.buffers.length);
+    final Int32List buffersData = Int32List(3 * layout.buffers.length);
     for (int i = 0; i < layout.buffers.length; i++) {
       final VertexBuffer buf = layout.buffers[i];
-      buffersData[i * 2 + 0] = buf.strideInBytes;
-      buffersData[i * 2 + 1] = buf.attributes.length;
+      buffersData[i * 3 + 0] = buf.strideInBytes;
+      buffersData[i * 3 + 1] = buf.attributes.length;
+      buffersData[i * 3 + 2] = buf.stepMode.index;
     }
 
     // First pass: encode each name to bytes and compute the total length,

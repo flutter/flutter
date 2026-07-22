@@ -38,6 +38,18 @@ constexpr impeller::StorageMode ToImpellerStorageMode(int value) {
   return ToImpellerStorageMode(static_cast<FlutterGPUStorageMode>(value));
 }
 
+constexpr FlutterGPUStorageMode FromImpellerStorageMode(
+    impeller::StorageMode value) {
+  switch (value) {
+    case impeller::StorageMode::kHostVisible:
+      return FlutterGPUStorageMode::kHostVisible;
+    case impeller::StorageMode::kDevicePrivate:
+      return FlutterGPUStorageMode::kDevicePrivate;
+    case impeller::StorageMode::kDeviceTransient:
+      return FlutterGPUStorageMode::kDeviceTransient;
+  }
+}
+
 enum class FlutterGPUPixelFormat {
   kUnknown,
   kA8UNormInt,
@@ -69,12 +81,16 @@ enum class FlutterGPUPixelFormat {
   kASTC4x4LDRSRGB,
   kASTC8x8LDR,
   kASTC8x8LDRSRGB,
+  // ASTC HDR has no sRGB variant; the data is already linear floating point.
+  kASTC4x4HDR,
+  kASTC8x8HDR,
 };
 
 enum class FlutterGPUTextureCompressionFamily {
   kBC,
   kETC2,
   kASTC,
+  kASTCHDR,
 };
 
 constexpr impeller::CompressedTextureFamily ToImpellerCompressedTextureFamily(
@@ -86,6 +102,8 @@ constexpr impeller::CompressedTextureFamily ToImpellerCompressedTextureFamily(
       return impeller::CompressedTextureFamily::kETC2;
     case FlutterGPUTextureCompressionFamily::kASTC:
       return impeller::CompressedTextureFamily::kASTC;
+    case FlutterGPUTextureCompressionFamily::kASTCHDR:
+      return impeller::CompressedTextureFamily::kASTCHDR;
   }
 }
 
@@ -156,6 +174,10 @@ constexpr impeller::PixelFormat ToImpellerPixelFormat(
       return impeller::PixelFormat::kASTC8x8LDR;
     case FlutterGPUPixelFormat::kASTC8x8LDRSRGB:
       return impeller::PixelFormat::kASTC8x8LDRSRGB;
+    case FlutterGPUPixelFormat::kASTC4x4HDR:
+      return impeller::PixelFormat::kASTC4x4HDR;
+    case FlutterGPUPixelFormat::kASTC8x8HDR:
+      return impeller::PixelFormat::kASTC8x8HDR;
   }
 }
 
@@ -230,31 +252,10 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     case impeller::PixelFormat::kASTC8x8LDRSRGB:
       return FlutterGPUPixelFormat::kASTC8x8LDRSRGB;
     case impeller::PixelFormat::kASTC4x4HDR:
+      return FlutterGPUPixelFormat::kASTC4x4HDR;
     case impeller::PixelFormat::kASTC8x8HDR:
-      // HDR variants are not yet exposed by the Flutter GPU API.
-      return FlutterGPUPixelFormat::kUnknown;
+      return FlutterGPUPixelFormat::kASTC8x8HDR;
   }
-}
-
-enum class FlutterGPUTextureCoordinateSystem {
-  kUploadFromHost,
-  kRenderToTexture,
-};
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    FlutterGPUTextureCoordinateSystem value) {
-  switch (value) {
-    case FlutterGPUTextureCoordinateSystem::kUploadFromHost:
-      return impeller::TextureCoordinateSystem::kUploadFromHost;
-    case FlutterGPUTextureCoordinateSystem::kRenderToTexture:
-      return impeller::TextureCoordinateSystem::kRenderToTexture;
-  }
-}
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    int value) {
-  return ToImpellerTextureCoordinateSystem(
-      static_cast<FlutterGPUTextureCoordinateSystem>(value));
 }
 
 enum class FlutterGPUBlendFactor {

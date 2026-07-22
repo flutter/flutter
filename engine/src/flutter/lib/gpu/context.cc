@@ -140,6 +140,25 @@ extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
   return flutter::gpu::SupportsNormalOffscreenMSAA(wrapper->GetContext());
 }
 
+extern bool InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext()
+      .GetCapabilities()
+      ->SupportsFramebufferRenderMipmap();
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext()
+      .GetCapabilities()
+      ->SupportsManuallyMippedTextures();
+}
+
+extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext().GetCapabilities()->GetMaxSamplerAnisotropy();
+}
+
 extern bool InternalFlutterGpu_Context_SupportsTextureCompression(
     flutter::gpu::Context* wrapper,
     int family) {

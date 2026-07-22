@@ -48,8 +48,6 @@ std::shared_ptr<TextureGLES> CreateTexture(
   tex_desc.size = {10, 10};
   tex_desc.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
   auto texture = std::make_shared<TextureGLES>(reactor, tex_desc);
-  // Avoids the flip which would crash.
-  texture->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
   return texture;
 }
 
@@ -282,8 +280,6 @@ std::shared_ptr<TextureGLES> CreateMipTexture(
   tex_desc.type = type;
   tex_desc.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
   auto texture = std::make_shared<TextureGLES>(reactor, tex_desc);
-  // Avoids the flip which would crash.
-  texture->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
   return texture;
 }
 

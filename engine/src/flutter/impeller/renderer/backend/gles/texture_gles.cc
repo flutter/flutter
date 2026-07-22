@@ -696,8 +696,8 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
   const auto& gl = reactor_->GetProcTable();
   if (mip_level > 0 &&
       !gl.GetCapabilities()->SupportsFramebufferRenderMipmap()) {
-    VALIDATION_LOG << "Attaching a non-zero mip level requires OpenGL ES 3.0 "
-                      "or the GL_OES_fbo_render_mipmap extension.";
+    VALIDATION_LOG << "Rendering into a non-zero mip level is not supported on "
+                      "the GLES backend.";
     return false;
   }
   if (!EnsureSliceMipLevelStorage(slice, mip_level)) {

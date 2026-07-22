@@ -234,4 +234,75 @@ void main() {
       ]),
     );
   });
+
+  testWidgets('RichText propagates devicePixelRatio', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 3.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RichText(text: const TextSpan(text: 'Hello')),
+        ),
+      ),
+    );
+
+    RenderParagraph paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.devicePixelRatio, 3.0);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 4.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RichText(text: const TextSpan(text: 'Hello')),
+        ),
+      ),
+    );
+
+    paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.devicePixelRatio, 4.0);
+  });
+
+  testWidgets('RichText propagates devicePixelRatio from View', (WidgetTester tester) async {
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(text: const TextSpan(text: 'Hello')),
+      ),
+    );
+
+    RenderParagraph paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.devicePixelRatio, 3.0);
+
+    tester.view.devicePixelRatio = 4.0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(text: const TextSpan(text: 'Hello')),
+      ),
+    );
+
+    paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.devicePixelRatio, 4.0);
+  });
+
+  testWidgets('RichText defaults to 1.0 devicePixelRatio when no View or MediaQuery is present', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RawView(
+        view: tester.view,
+        child: LookupBoundary(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: RichText(text: const TextSpan(text: 'Hello')),
+          ),
+        ),
+      ),
+      wrapWithView: false,
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.devicePixelRatio, 1.0);
+  });
 }

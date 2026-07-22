@@ -284,10 +284,11 @@ TaskFunction createFlutterGalleryStartupTest({
   ).run;
 }
 
-TaskFunction createComplexLayoutStartupTest({bool? enableImpeller}) {
+TaskFunction createComplexLayoutStartupTest({bool? enableImpeller, bool forceOpenGLES = false}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
   ).run;
 }
 
@@ -906,6 +907,7 @@ class StartupTest {
     this.enableLazyShaderMode = false,
     this.enableHcpp = false,
     this.enableImpeller,
+    this.forceOpenGLES = false,
   });
 
   final String testDirectory;
@@ -913,6 +915,7 @@ class StartupTest {
   final bool enableLazyShaderMode;
   final bool enableHcpp;
   final bool? enableImpeller;
+  final bool forceOpenGLES;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -928,6 +931,9 @@ class StartupTest {
       }
       if (enableHcpp) {
         _addHcppSupportToManifest(testDirectory);
+      }
+      if ((enableImpeller ?? true) && forceOpenGLES) {
+        _addOpenGLESToManifest(testDirectory);
       }
 
       try {

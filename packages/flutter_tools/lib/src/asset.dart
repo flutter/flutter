@@ -128,8 +128,6 @@ const kMaterialFonts = <Map<String, Object>>[
   },
 ];
 
-const kMaterialShaders = <String>['shaders/ink_sparkle.frag', 'shaders/stretch_effect.frag'];
-
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
@@ -606,14 +604,14 @@ class ManifestAssetBundle implements AssetBundle {
         }
       }
     }
-    final materialAssets = <_Asset>[
+    final materialAndFrameworkAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
       // For all platforms, include the shaders unconditionally. They are
       // small, and whether they're used is determined only by the app source
       // code and not by the Flutter manifest.
-      ..._getMaterialShaders(),
+      ..._getFrameworkShaders(),
     ];
-    for (final asset in materialAssets) {
+    for (final asset in materialAndFrameworkAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
       entries[asset.entryUri.path] ??= AssetBundleEntry(
@@ -783,8 +781,10 @@ class ManifestAssetBundle implements AssetBundle {
     return result;
   }
 
-  List<_Asset> _getMaterialShaders() {
-    final String shaderPath = _fileSystem.path.join(
+  List<_Asset> _getFrameworkShaders() {
+    final result = <_Asset>[];
+
+    final String materialShaderPath = _fileSystem.path.join(
       _flutterRoot,
       'packages',
       'flutter',
@@ -793,21 +793,35 @@ class ManifestAssetBundle implements AssetBundle {
       'material',
       'shaders',
     );
-    // This file will exist in a real invocation unless the git checkout is
-    // corrupted somehow, but unit tests generally don't create this file
-    // in their mock file systems. Leaving it out in those cases is harmless.
-    if (!_fileSystem.directory(shaderPath).existsSync()) {
-      return <_Asset>[];
-    }
-
-    final result = <_Asset>[];
-    for (final String shader in kMaterialShaders) {
-      final Uri entryUri = _fileSystem.path.toUri(shader);
+    if (_fileSystem.directory(materialShaderPath).existsSync()) {
+      // TODO(chunhtai): remove ink_sparkle.frag sideloading.
+      // https://github.com/flutter/flutter/issues/188545.
       result.add(
         _Asset(
-          baseDir: shaderPath,
-          relativeUri: Uri(path: entryUri.pathSegments.last),
-          entryUri: entryUri,
+          baseDir: materialShaderPath,
+          relativeUri: Uri(path: 'ink_sparkle.frag'),
+          entryUri: _fileSystem.path.toUri('shaders/ink_sparkle.frag'),
+          package: null,
+          kind: AssetKind.shader,
+        ),
+      );
+    }
+
+    final String widgetsShaderPath = _fileSystem.path.join(
+      _flutterRoot,
+      'packages',
+      'flutter',
+      'lib',
+      'src',
+      'widgets',
+      'shaders',
+    );
+    if (_fileSystem.directory(widgetsShaderPath).existsSync()) {
+      result.add(
+        _Asset(
+          baseDir: widgetsShaderPath,
+          relativeUri: Uri(path: 'stretch_effect.frag'),
+          entryUri: _fileSystem.path.toUri('shaders/stretch_effect.frag'),
           package: null,
           kind: AssetKind.shader,
         ),
@@ -1165,7 +1179,7 @@ class ManifestAssetBundle implements AssetBundle {
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
-    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri, packageName: packageName);
     directoryPath = _fileSystem.path.join(
       assetBase,
       assetUri.toFilePath(windows: _platform.isWindows),
@@ -1329,7 +1343,11 @@ class ManifestAssetBundle implements AssetBundle {
     throwToolExit(errorMessage.toString());
   }
 
-  void _ensureAssetPathIsValid({required String assetsBaseDir, required Uri assetUri}) {
+  void _ensureAssetPathIsValid({
+    required String assetsBaseDir,
+    required Uri assetUri,
+    String? packageName,
+  }) {
     if (!assetUri.isScheme('file') && assetUri.scheme.isNotEmpty) {
       throwToolExit(
         'Asset path "$assetUri" has scheme "${assetUri.scheme}" and is not a valid file or '
@@ -1348,6 +1366,24 @@ class ManifestAssetBundle implements AssetBundle {
         'in the pubspec.yaml to use a relative path.',
       );
     }
+    // An asset declared by a dependency must stay within that package's own directory. A relative
+    // path that escapes the package (e.g. '../secret') would otherwise make the build read and
+    // bundle files from outside the package on the build machine, which the consuming app never
+    // declared. (The absolute-path check above is preserved for all assets.)
+    if (packageName != null) {
+      final String assetPath = assetUri.toFilePath(windows: _platform.isWindows);
+      final String base = _fileSystem.path.canonicalize(assetsBaseDir);
+      final String resolved = _fileSystem.path.canonicalize(
+        _fileSystem.path.join(assetsBaseDir, assetPath),
+      );
+      if (base != resolved && !_fileSystem.path.isWithin(base, resolved)) {
+        throwToolExit(
+          'Asset path "$assetPath" of package '
+          '"$packageName" resolves to a location outside the package directory. Package asset '
+          'paths must stay within the package.',
+        );
+      }
+    }
   }
 
   _Asset _resolveAsset(
@@ -1362,7 +1398,7 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
-    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri, packageName: packageName);
     if (assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.isFileSync(
           _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),

@@ -15,4 +15,8 @@ copy("frontend_server") {
 
   sources = [ snapshot ]
   outputs = [ "$root_gen_dir/frontend_server_aot.dart.snapshot" ]
+
+  metadata = {
+    without_entitlement_file_path = [ "frontend_server_aot.dart.snapshot" ]
+  }
 }

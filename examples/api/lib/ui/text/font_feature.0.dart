@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for [FontFeature].
 
@@ -11,27 +11,64 @@ void main() => runApp(const ExampleApp());
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
+  static PageRoute<T> _pageRouteBuilder<T>(
+    RouteSettings settings,
+    WidgetBuilder builder,
+  ) {
+    return PageRouteBuilder<T>(
+      settings: settings,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => builder(context),
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) => child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ExampleWidget());
+    return WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      home: const ExampleWidget(),
+      pageRouteBuilder: _pageRouteBuilder,
+    );
   }
 }
 
-final TextStyle titleStyle = TextStyle(
+const TextStyle titleStyle = TextStyle(
   fontSize: 18,
-  fontFeatures: const <FontFeature>[FontFeature.enable('smcp')],
-  color: Colors.blueGrey[600],
+  fontFeatures: <FontFeature>[FontFeature.enable('smcp')],
+  color: Color(0xFF0000FF),
 );
 
 class ExampleWidget extends StatelessWidget {
   const ExampleWidget({super.key});
 
+  Widget buildDivider() {
+    return const Padding(
+      padding: EdgeInsets.all(4),
+      child: ColoredBox(
+        color: Color(0xFF000000),
+        child: SizedBox(height: 4, width: double.infinity),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // The Cardo, Milonga and Raleway Dots fonts can be downloaded from Google
     // Fonts (https://www.google.com/fonts).
-    return Scaffold(
-      body: Center(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
         child: Column(
           mainAxisAlignment: .center,
           children: <Widget>[
@@ -55,7 +92,7 @@ class ExampleWidget extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Divider(),
+            buildDivider(),
             const Spacer(),
             Text(
               'fractions look better with a custom ligature:',
@@ -70,7 +107,7 @@ class ExampleWidget extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Divider(),
+            buildDivider(),
             const Spacer(),
             Text('multiple stylistic sets in one font:', style: titleStyle),
             const Text(

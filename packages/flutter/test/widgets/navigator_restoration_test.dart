@@ -6,8 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
@@ -1102,14 +1100,14 @@ void main() {
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
-  return buildTestPageRoute<void>(const RouteSettings(), (BuildContext context) {
+  return buildTestPageRoute<void>(null, (BuildContext context) {
     return RouteWidget(name: arguments! as String);
   });
 }
 
 @pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
-  return buildTestPageRoute<void>(const RouteSettings(), (BuildContext context) {
+  return buildTestPageRoute<void>(null, (BuildContext context) {
     return const RouteFutureWidget();
   });
 }

@@ -87,6 +87,9 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
+      // Anisotropic filtering with a clamp in the range [1, 16] is supported
+      // on all Metal devices.
+      .SetMaxSamplerAnisotropy(16)
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
       .SetSupportsTextureCompression(CompressedTextureFamily::kBC,
@@ -389,6 +392,16 @@ std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBufferInQueue(
 
 std::shared_ptr<Allocator> ContextMTL::GetResourceAllocator() const {
   return resource_allocator_;
+}
+
+std::shared_ptr<const GpuSubmissionTracker> ContextMTL::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextMTL::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
 }
 
 id<MTLDevice> ContextMTL::GetMTLDevice() const {

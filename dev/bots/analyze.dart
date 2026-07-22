@@ -2771,6 +2771,8 @@ Future<CommandResult> _runFlutterAnalyze(
 const Set<String> kExecutableAllowlist = <String>{
   '.autoroller-preupload.sh',
   '.claude/skills',
+  '.github/scripts/did_engine_change.sh',
+  '.github/scripts/git_files_changed.sh',
   'bin/dart',
   'bin/flutter',
   'bin/flutter-dev',

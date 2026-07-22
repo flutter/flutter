@@ -306,7 +306,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
       .WillRepeatedly([](UINT32 pointer_id, POINTER_PEN_INFO* pen_info) {
         if (pen_info != nullptr) {
           pen_info->pressure = 720;  // Non-zero pressure for contact events
-          pen_info->rotation = 0;
+          pen_info->rotation = 10;
           pen_info->penFlags = 0;
         }
         return TRUE;
@@ -323,7 +323,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 10, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -410,7 +410,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerUp) {
   EXPECT_CALL(delegate,
               OnPointerDown(25, 30, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
   EXPECT_CALL(delegate, OnPointerUp(25, 30, kFlutterPointerDeviceKindStylus,
                                     kDefaultPointerDeviceId, 0))
@@ -570,7 +570,7 @@ TEST_F(FlutterWindowTest, OnStylusHoverAfterPointerUp) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
   EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                                     kDefaultPointerDeviceId, 0))
@@ -622,7 +622,7 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUsesPenFlags) {
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonStylusContact |
                                 kFlutterPointerButtonStylusPrimary,
-                            720, 0))
+                            0, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -663,7 +663,7 @@ TEST_F(FlutterWindowTest, OnStylusEraserButtonUsesPenFlags) {
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonStylusContact |
                                 kFlutterPointerButtonStylusSecondary,
-                            720, 0))
+                            0, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -702,7 +702,7 @@ TEST_F(FlutterWindowTest, OnInvertedStylusPointerDownUsesDeviceKind) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindInvertedStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -749,7 +749,7 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateMovesWithUpdatedButtons) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
@@ -807,7 +807,7 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateMovesWithReleasedButton) {
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonStylusContact |
                                 kFlutterPointerButtonStylusPrimary,
-                            720, 0))
+                            0, 720))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
@@ -831,7 +831,9 @@ TEST_F(FlutterWindowTest, OnMousePointerDown) {
         if (pointer_info != nullptr) {
           pointer_info->pointerType = PT_MOUSE;
           pointer_info->pointerId = pointer_id;
-          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT |
+                                       POINTER_FLAG_FIRSTBUTTON |
+                                       POINTER_FLAG_DOWN;
         }
         return TRUE;
       });
@@ -859,7 +861,9 @@ TEST_F(FlutterWindowTest, OnTouchPointerDown) {
         if (pointer_info != nullptr) {
           pointer_info->pointerType = PT_TOUCH;
           pointer_info->pointerId = pointer_id;
-          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT |
+                                       POINTER_FLAG_FIRSTBUTTON |
+                                       POINTER_FLAG_DOWN;
         }
         return TRUE;
       });
@@ -890,7 +894,9 @@ TEST_F(FlutterWindowTest, PointerMessageScreenCoordinatesAreConvertedToClient) {
         if (pointer_info != nullptr) {
           pointer_info->pointerType = PT_TOUCH;
           pointer_info->pointerId = pointer_id;
-          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT |
+                                       POINTER_FLAG_FIRSTBUTTON |
+                                       POINTER_FLAG_DOWN;
         }
         return TRUE;
       });

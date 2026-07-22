@@ -5,7 +5,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 resolution: workspace
 
 dependencies:
@@ -23,6 +23,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   test: any
+  image: any
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -43,4 +44,4 @@ flutter:
     - test_driver/goldens/
 
 
-# PUBSPEC CHECKSUM: vehlaq
+# PUBSPEC CHECKSUM: tqljka

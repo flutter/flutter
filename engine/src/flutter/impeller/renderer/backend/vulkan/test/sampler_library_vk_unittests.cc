@@ -18,8 +18,8 @@ namespace testing {
 TEST(SamplerLibraryVK, WorkaroundsCanDisableReadingFromMipLevels) {
   auto const context = MockVulkanContextBuilder().Build();
 
-  auto library_vk =
-      std::make_shared<SamplerLibraryVK>(context->GetDeviceHolder());
+  auto library_vk = std::make_shared<SamplerLibraryVK>(
+      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
   std::shared_ptr<SamplerLibrary> library = library_vk;
 
   SamplerDescriptor desc;
@@ -33,6 +33,42 @@ TEST(SamplerLibraryVK, WorkaroundsCanDisableReadingFromMipLevels) {
 
   sampler = library->GetSampler(desc);
   EXPECT_EQ(sampler->GetDescriptor().mip_filter, MipFilter::kBase);
+}
+
+TEST(SamplerLibraryVK, MaxAnisotropyIsClampedToTheDeviceLimit) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  std::shared_ptr<SamplerLibrary> library = std::make_shared<SamplerLibraryVK>(
+      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/4u);
+
+  SamplerDescriptor desc;
+  desc.min_filter = MinMagFilter::kLinear;
+  desc.mag_filter = MinMagFilter::kLinear;
+  desc.mip_filter = MipFilter::kLinear;
+  desc.max_anisotropy = 16;
+
+  auto sampler = library->GetSampler(desc);
+  EXPECT_EQ(sampler->GetDescriptor().max_anisotropy, 4u);
+
+  // Clamped values share a cache entry.
+  desc.max_anisotropy = 8;
+  EXPECT_EQ(library->GetSampler(desc), sampler);
+}
+
+TEST(SamplerLibraryVK, MaxAnisotropyIsDisabledWhenUnsupported) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  std::shared_ptr<SamplerLibrary> library = std::make_shared<SamplerLibraryVK>(
+      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
+
+  SamplerDescriptor desc;
+  desc.min_filter = MinMagFilter::kLinear;
+  desc.mag_filter = MinMagFilter::kLinear;
+  desc.mip_filter = MipFilter::kLinear;
+  desc.max_anisotropy = 16;
+
+  auto sampler = library->GetSampler(desc);
+  EXPECT_EQ(sampler->GetDescriptor().max_anisotropy, 1u);
 }
 
 }  // namespace testing

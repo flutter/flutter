@@ -259,8 +259,7 @@ class WindowsAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      // TODO(simolus3): Respect the mustMatchAppBuild option in cCompilerConfigWindows.
-      cCompilerConfigSync = await cCompilerConfigWindows();
+      cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
@@ -276,12 +275,11 @@ final class LinuxAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    if (cmakeBuildDirectory == null && mustMatchAppBuild) {
-      throw StateError('Missing CMake build directory on LinuxAssetTarget');
-    }
+    final bool isNativeAppBuild = cmakeBuildDirectory != null && cmakeBuildDirectory!.existsSync();
 
     cCompilerConfigSync = await cCompilerConfigLinux(
-      cmakeDirectory: mustMatchAppBuild ? cmakeBuildDirectory! : null,
+      cmakeDirectory: isNativeAppBuild ? cmakeBuildDirectory : null,
+      throwIfNotFound: mustMatchAppBuild,
     );
   }
 

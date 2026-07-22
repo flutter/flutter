@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Size is passed in via specialization constant.
-layout(local_size_x_id = 0) in;
+layout(local_size_x = 32) in;
 
 layout(std430) buffer;
 

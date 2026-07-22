@@ -140,8 +140,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @internal
   @override
   RegularWindowController createRegularWindowController({
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
     required RegularWindowControllerDelegate delegate,
@@ -149,9 +149,10 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return RegularWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
+      resizable: resizable,
     );
   }
 
@@ -159,8 +160,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     BaseWindowController? parent,
     String? title,
@@ -168,10 +169,11 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return DialogWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
       parent: parent,
+      resizable: resizable,
     );
   }
 
@@ -179,7 +181,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -187,7 +189,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return TooltipWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -198,7 +200,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -206,7 +208,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     return PopupWindowControllerWin32(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: preferredConstraints,
+      contentSizeConstraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -220,8 +222,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
@@ -337,9 +339,10 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
   RegularWindowControllerWin32({
     required WindowingOwnerWin32 owner,
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
+    required bool resizable,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
@@ -348,12 +351,15 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
     }
     _handler = _RegularWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
+    final sizedToContent = size == null;
     final int viewId = _Win32PlatformInterface.createRegularWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
-      preferredSize,
-      preferredConstraints,
+      size,
+      constraints,
       title,
+      sizedToContent,
+      resizable,
     );
     if (viewId < 0) {
       throw Exception('Windows failed to create a regular window with a valid view id.');
@@ -369,6 +375,10 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
   final RegularWindowControllerDelegate _delegate;
   late final _RegularWindowMesageHandler _handler;
   bool _destroyed = false;
+
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
 
   @override
   @internal
@@ -499,7 +509,10 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
       return;
     }
     _Win32PlatformInterface.destroyWindow(windowHandle);
-    _destroyed = true;
+    if (!_destroyed) {
+      _destroyed = true;
+      notifyListeners();
+    }
   }
 
   int? _handleWindowsMessage(
@@ -518,7 +531,11 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
       _delegate.onWindowCloseRequested(this);
       return 0;
     } else if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _owner._removeMessageHandler(_handler);
       _delegate.onWindowDestroyed();
       return 0;
@@ -568,10 +585,11 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
   DialogWindowControllerWin32({
     required WindowingOwnerWin32 owner,
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
     BaseWindowController? parent,
+    required bool resizable,
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
@@ -581,11 +599,12 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
     }
     _handler = _DialogWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
+    final sizedToContent = size == null;
     final int viewId = _Win32PlatformInterface.createDialogWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
-      preferredSize,
-      preferredConstraints,
+      size,
+      constraints,
       title,
       parent != null
           ? _Win32PlatformInterface.getWindowHandle(
@@ -593,6 +612,8 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
               parent.rootView.viewId,
             )
           : null,
+      sizedToContent,
+      resizable,
     );
     if (viewId < 0) {
       throw Exception('Windows failed to create a dialog window with a valid view id.');
@@ -609,6 +630,10 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
   final BaseWindowController? _parent;
   late final _DialogWindowMesageHandler _handler;
   bool _destroyed = false;
+
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
 
   @override
   @internal
@@ -732,7 +757,11 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
       _delegate.onWindowCloseRequested(this);
       return 0;
     } else if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _owner._removeMessageHandler(_handler);
       _delegate.onWindowDestroyed();
       return 0;
@@ -814,6 +843,10 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   Rect _anchorRect;
   bool _destroyed = false;
 
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
+
   ffi.Pointer<_Rect> _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
@@ -876,7 +909,10 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       return;
     }
     _Win32PlatformInterface.destroyWindow(windowHandle);
-    _destroyed = true;
+    if (!_destroyed) {
+      _destroyed = true;
+      notifyListeners();
+    }
   }
 
   @override
@@ -922,7 +958,11 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     if (message == _WM_SIZE || message == _WM_ACTIVATE) {
       notifyListeners();
     } else if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _onGetWindowPosition.close();
       _owner._removeMessageHandler(this);
       _delegate.onWindowDestroyed();
@@ -1000,6 +1040,10 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   Rect _anchorRect;
   bool _destroyed = false;
 
+  @override
+  @internal
+  bool get isDestroyed => _destroyed;
+
   ffi.Pointer<_Rect> _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
@@ -1062,7 +1106,10 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       return;
     }
     _Win32PlatformInterface.destroyWindow(getWindowHandle());
-    _destroyed = true;
+    if (!_destroyed) {
+      _destroyed = true;
+      notifyListeners();
+    }
   }
 
   @override
@@ -1113,7 +1160,11 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     // WM_DESTROY is dispatched by the engine after destroyWindow is called.
     // It must be handled even after _destroyed is set by destroy().
     if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
       _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
       _onGetWindowPosition.close();
       _owner._removeMessageHandler(this);
       _delegate.onWindowDestroyed();
@@ -1274,16 +1325,20 @@ class _Win32PlatformInterface {
   static int createRegularWindow(
     ffi.Allocator allocator,
     int engineId,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
+    bool sizedToContent,
+    bool resizable,
   ) {
     final ffi.Pointer<_RegularWindowCreationRequest> request =
         allocator<_RegularWindowCreationRequest>();
     try {
-      request.ref.preferredSize.from(preferredSize);
-      request.ref.preferredConstraints.from(preferredConstraints);
+      request.ref.size.from(size);
+      request.ref.constraints.from(constraints);
       request.ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
+      request.ref.sizedToContent = sizedToContent;
+      request.ref.resizable = resizable;
       return _createRegularWindow(engineId, request);
     } finally {
       allocator.free(request);
@@ -1301,18 +1356,22 @@ class _Win32PlatformInterface {
   static int createDialogWindow(
     ffi.Allocator allocator,
     int engineId,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
     HWND? parent,
+    bool sizedToContent,
+    bool resizable,
   ) {
     final ffi.Pointer<_DialogWindowCreationRequest> request =
         allocator<_DialogWindowCreationRequest>();
     try {
-      request.ref.preferredSize.from(preferredSize);
-      request.ref.preferredConstraints.from(preferredConstraints);
+      request.ref.size.from(size);
+      request.ref.constraints.from(constraints);
       request.ref.title = (title ?? 'Dialog window').toNativeUtf16(allocator: allocator);
       request.ref.parentOrNull = parent ?? ffi.Pointer<ffi.Void>.fromAddress(0);
+      request.ref.sizedToContent = sizedToContent;
+      request.ref.resizable = resizable;
       return _createDialogWindow(engineId, request);
     } finally {
       allocator.free(request);
@@ -1330,7 +1389,7 @@ class _Win32PlatformInterface {
   static int createTooltipWindow(
     ffi.Allocator allocator,
     int engineId,
-    BoxConstraints preferredConstraints,
+    BoxConstraints constraints,
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
@@ -1346,7 +1405,7 @@ class _Win32PlatformInterface {
     final ffi.Pointer<_TooltipWindowCreationRequest> request =
         allocator<_TooltipWindowCreationRequest>();
     try {
-      request.ref.preferredConstraints.from(preferredConstraints);
+      request.ref.constraints.from(constraints);
       request.ref.parent = parent;
       request.ref.onGetWindowPosition = onGetWindowPosition;
       return _createTooltipWindow(engineId, request);
@@ -1366,7 +1425,7 @@ class _Win32PlatformInterface {
   static int createPopupWindow(
     ffi.Allocator allocator,
     int engineId,
-    BoxConstraints preferredConstraints,
+    BoxConstraints constraints,
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
@@ -1382,7 +1441,7 @@ class _Win32PlatformInterface {
     final ffi.Pointer<_PopupWindowCreationRequest> request =
         allocator<_PopupWindowCreationRequest>();
     try {
-      request.ref.preferredConstraints.from(preferredConstraints);
+      request.ref.constraints.from(constraints);
       request.ref.parent = parent;
       request.ref.onGetWindowPosition = onGetWindowPosition;
       return _createPopupWindow(engineId, request);
@@ -1580,21 +1639,33 @@ class _Win32PlatformInterface {
 
 /// Payload for the creation method used by [_Win32PlatformInterface.createRegularWindow].
 final class _RegularWindowCreationRequest extends ffi.Struct {
-  external _WindowSizeRequest preferredSize;
-  external _WindowConstraintsRequest preferredConstraints;
+  external _WindowSizeRequest size;
+  external _WindowConstraintsRequest constraints;
   external ffi.Pointer<_Utf16> title;
+
+  @ffi.Bool()
+  external bool sizedToContent;
+
+  @ffi.Bool()
+  external bool resizable;
 }
 
 /// Payload for the creation method used by [_Win32PlatformInterface.createDialogWindow].
 final class _DialogWindowCreationRequest extends ffi.Struct {
-  external _WindowSizeRequest preferredSize;
-  external _WindowConstraintsRequest preferredConstraints;
+  external _WindowSizeRequest size;
+  external _WindowConstraintsRequest constraints;
   external ffi.Pointer<_Utf16> title;
   external HWND parentOrNull;
+
+  @ffi.Bool()
+  external bool sizedToContent;
+
+  @ffi.Bool()
+  external bool resizable;
 }
 
 final class _TooltipWindowCreationRequest extends ffi.Struct {
-  external _WindowConstraintsRequest preferredConstraints;
+  external _WindowConstraintsRequest constraints;
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
@@ -1609,7 +1680,7 @@ final class _TooltipWindowCreationRequest extends ffi.Struct {
 }
 
 final class _PopupWindowCreationRequest extends ffi.Struct {
-  external _WindowConstraintsRequest preferredConstraints;
+  external _WindowConstraintsRequest constraints;
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<

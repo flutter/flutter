@@ -8,8 +8,10 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
@@ -111,12 +113,14 @@ class AndroidValidator extends DoctorValidator {
     required Platform platform,
     required UserMessages userMessages,
     required ProcessManager processManager,
+    required OperatingSystemUtils osUtils,
   }) : _java = java,
        _androidSdk = androidSdk,
        _logger = logger,
        _platform = platform,
        _userMessages = userMessages,
        _processManager = processManager,
+       _osUtils = osUtils,
        super('Android toolchain - develop for Android devices');
 
   final Java? _java;
@@ -125,6 +129,7 @@ class AndroidValidator extends DoctorValidator {
   final Platform _platform;
   final UserMessages _userMessages;
   final ProcessManager _processManager;
+  final OperatingSystemUtils _osUtils;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -293,6 +298,37 @@ class AndroidValidator extends DoctorValidator {
       );
       messages.add(ValidationMessage(_userMessages.androidSdkInstallHelp(_platform)));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+    }
+
+    _task = 'Checking for multiple ADB binaries';
+    final List<File> adbCandidates = _osUtils.whichAll('adb');
+    final String? sdkAdbPath = androidSdk.adbPath;
+    final uniqueAdbPaths = <String>{};
+
+    void addAdbPath(String path, FileSystem fs) {
+      try {
+        uniqueAdbPaths.add(fs.file(path).resolveSymbolicLinksSync());
+      } on Exception catch (_) {
+        uniqueAdbPaths.add(path);
+      }
+    }
+
+    if (sdkAdbPath != null) {
+      addAdbPath(sdkAdbPath, androidSdk.directory.fileSystem);
+    }
+    for (final adbFile in adbCandidates) {
+      addAdbPath(adbFile.path, adbFile.fileSystem);
+    }
+
+    if (uniqueAdbPaths.length > 1) {
+      final warningMessage = StringBuffer(
+        'Multiple adb binaries found. This can cause conflicts '
+        'and device detection issues:\n',
+      );
+      for (final adbPath in uniqueAdbPaths) {
+        warningMessage.write('  - $adbPath\n');
+      }
+      messages.add(ValidationMessage.hint(warningMessage.toString().trim()));
     }
 
     _task = 'Finding Java binary';

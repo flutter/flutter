@@ -57,6 +57,8 @@ if (enable_unittests) {
 
   impellerc("flutter_gpu_shaders") {
     shaders = [
+      "//flutter/impeller/fixtures/flutter_gpu_instanced.frag",
+      "//flutter/impeller/fixtures/flutter_gpu_instanced.vert",
       "//flutter/impeller/fixtures/flutter_gpu_unlit.frag",
       "//flutter/impeller/fixtures/flutter_gpu_unlit.vert",
       "//flutter/impeller/fixtures/flutter_gpu_unlit_alt_instance.frag",
@@ -65,7 +67,7 @@ if (enable_unittests) {
     ]
 
     fixtures = rebase_path("//flutter/impeller/fixtures")
-    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"UnlitFragmentAltInstance\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_alt_instance.frag\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
+    shader_bundle = "{\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_instanced.frag\"}, \"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_instanced.vert\"}, \"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"UnlitFragmentAltInstance\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_alt_instance.frag\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
     shader_bundle_output = "test.shaderbundle"
   }
 

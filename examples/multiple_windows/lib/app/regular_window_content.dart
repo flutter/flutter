@@ -49,34 +49,48 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
     final double dpr = MediaQuery.of(context).devicePixelRatio;
     final Size windowSize = WindowScope.contentSizeOf(context);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Regular Window')),
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [RotatedWireCube(cubeColor: cubeColor)],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _WindowCreationButtons(regularWindowController: widget.regularWindowController),
-                const SizedBox(height: 20),
-                TooltipButton(parentController: widget.regularWindowController),
-                const SizedBox(height: 20),
-                PopupButton(parentController: widget.regularWindowController),
-                const SizedBox(height: 20),
-                Text(
-                  'View #${widget.regularWindowController.rootView.viewId}\n'
-                  'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
-                  'Device Pixel Ratio: $dpr',
-                  textAlign: TextAlign.center,
+    return Overlay.wrap(
+      alwaysSizeToContent: true,
+      child: IntrinsicWidth(
+        child: Material(
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              AppBar(title: const Text('Regular Window')),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisSize: .min,
+                  children: [
+                    Column(
+                      mainAxisSize: .min,
+                      children: [RotatedWireCube(cubeColor: cubeColor)],
+                    ),
+                    const SizedBox(width: 16),
+                    Column(
+                      mainAxisSize: .min,
+                      children: [
+                        _WindowCreationButtons(
+                          regularWindowController: widget.regularWindowController,
+                        ),
+                        const SizedBox(height: 20),
+                        TooltipButton(parentController: widget.regularWindowController),
+                        const SizedBox(height: 20),
+                        PopupButton(parentController: widget.regularWindowController),
+                        const SizedBox(height: 20),
+                        Text(
+                          'View #${widget.regularWindowController.rootView.viewId}\n'
+                          'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
+                          'Device Pixel Ratio: $dpr',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -97,7 +111,7 @@ class _WindowCreationButtons extends StatelessWidget {
     final WindowRegistry windowRegistry = WindowRegistry.of(context);
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: [
         ElevatedButton(
           onPressed: () {
@@ -107,7 +121,7 @@ class _WindowCreationButtons extends StatelessWidget {
                 onDestroyed: () => windowRegistry.unregister(entry),
               ),
               title: 'Regular',
-              preferredSize: windowSettings.regularSize,
+              size: windowSettings.regularSize,
             );
 
             entry = WindowEntry(
@@ -128,7 +142,7 @@ class _WindowCreationButtons extends StatelessWidget {
                 onDestroyed: () => windowRegistry.unregister(entry),
               ),
               title: 'Modal Dialog',
-              preferredSize: windowSettings.dialogSize,
+              size: windowSettings.dialogSize,
               parent: regularWindowController,
             );
 

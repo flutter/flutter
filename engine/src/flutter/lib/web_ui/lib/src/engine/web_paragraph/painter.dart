@@ -152,6 +152,12 @@ abstract class WebParagraphPainter {
       ui.window.devicePixelRatio,
     );
 
+    const epsilon = 0.001;
+    if (sourceRect.width.abs() < epsilon || sourceRect.height.abs() < epsilon) {
+      // If there is nothing to draw getImageData fails
+      return;
+    }
+
     // Draw background blocks directly on the output canvas
     // so it will be cached together with the text blocks on Canvas2D canvas
     _paintAllBlocks(StyleElements.background, canvas, offset);

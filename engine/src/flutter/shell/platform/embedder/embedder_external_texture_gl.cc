@@ -184,9 +184,6 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
-  image->SetCoordinateSystem(
-      impeller::TextureCoordinateSystem::kUploadFromHost);
-
   scoped_cleanup.Release();
 
   return impeller::DlImageImpeller::Make(image);

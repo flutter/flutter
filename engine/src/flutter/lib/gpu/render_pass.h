@@ -58,8 +58,8 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   /// Append a draw to the underlying render pass. [element_count] is the
   /// vertex count for a non-indexed draw, or the index count when
-  /// [indexed] is true.
-  bool Draw(size_t element_count, bool indexed);
+  /// [indexed] is true. [instance_count] is the number of instances to draw.
+  bool Draw(size_t element_count, size_t instance_count, bool indexed);
 
   struct BufferAndUniformSlot {
     impeller::ShaderUniformSlot slot;
@@ -81,10 +81,9 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   // Vertex buffers indexed by binding slot. Mirrors
   // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
   // bindings at 16 per draw, and index `i` here corresponds to the binding
-  // declared at slot `i` in the active VertexLayout. On the OpenGL ES
-  // backend the per-pipeline limit on the *total attribute count* across
-  // all bound buffers is `GL_MAX_VERTEX_ATTRIBS` (spec minimum 8 on GLES
-  // 2.0, 16 on GLES 3.0+), enforced by the driver.
+  // declared at slot `i` in the active VertexLayout. Devices may impose a
+  // lower per-pipeline limit on the total attribute count across all bound
+  // buffers.
   static constexpr size_t kMaxVertexBufferSlots = 16;
   std::array<impeller::BufferView, kMaxVertexBufferSlots> vertex_buffers;
   // Highest slot index that has been bound on this pass (plus one).
@@ -143,7 +142,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     float clear_color_b,
     float clear_color_a,
     flutter::gpu::Texture* texture,
-    Dart_Handle resolve_texture_wrapper);
+    Dart_Handle resolve_texture_wrapper,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
@@ -154,7 +155,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     int stencil_load_action,
     int stencil_store_action,
     int stencil_clear_value,
-    flutter::gpu::Texture* texture);
+    flutter::gpu::Texture* texture,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_Begin(
@@ -201,7 +204,8 @@ extern bool InternalFlutterGpu_RenderPass_BindTexture(
     int mag_filter,
     int mip_filter,
     int width_address_mode,
-    int height_address_mode);
+    int height_address_mode,
+    int max_anisotropy);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_ClearBindings(
@@ -291,12 +295,14 @@ extern void InternalFlutterGpu_RenderPass_SetPolygonMode(
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_Draw(
     flutter::gpu::RenderPass* wrapper,
-    int vertex_count);
+    int vertex_count,
+    int instance_count);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_DrawIndexed(
     flutter::gpu::RenderPass* wrapper,
-    int index_count);
+    int index_count,
+    int instance_count);
 
 }  // extern "C"
 

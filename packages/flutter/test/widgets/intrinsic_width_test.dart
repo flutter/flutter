@@ -31,4 +31,16 @@ void main() {
       buildFrame(0.0, -1.0);
     }, throwsAssertionError);
   });
+
+  testWidgets('IntrinsicWidth does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: IntrinsicWidth(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(IntrinsicWidth)), Size.zero);
+  });
 }

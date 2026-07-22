@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import static io.flutter.Build.API_LEVELS;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -63,5 +64,54 @@ public class TextInputChannelTest {
     assertEquals(configuration.hintLocales.length, hintLocales.length);
     assertEquals(configuration.hintLocales[0], hintLocales[0]);
     assertEquals(configuration.hintLocales[1], hintLocales[1]);
+  }
+
+  @Test
+  @TargetApi(API_LEVELS.API_26)
+  @Config(sdk = API_LEVELS.API_26)
+  public void configurationFromJsonTranslatesEmailOTPCodeAutofillHint()
+      throws JSONException, NoSuchFieldException {
+    final TextInputChannel.Configuration configuration =
+        TextInputChannel.Configuration.fromJson(
+            createConfigurationJsonWithAutofillHint("emailOTPCode"));
+
+    assertArrayEquals(new String[] {"emailOTPCode"}, configuration.autofill.hints);
+  }
+
+  @Test
+  @TargetApi(API_LEVELS.API_26)
+  @Config(sdk = API_LEVELS.API_26)
+  public void configurationFromJsonTranslatesOneTimeCodeAutofillHint()
+      throws JSONException, NoSuchFieldException {
+    final TextInputChannel.Configuration configuration =
+        TextInputChannel.Configuration.fromJson(
+            createConfigurationJsonWithAutofillHint("oneTimeCode"));
+
+    assertArrayEquals(new String[] {"smsOTPCode"}, configuration.autofill.hints);
+  }
+
+  private JSONObject createConfigurationJsonWithAutofillHint(String hint) throws JSONException {
+    final JSONObject arguments = new JSONObject();
+
+    // Mandatory parameters.
+    arguments.put("inputAction", "TextInputAction.done");
+    arguments.put("textCapitalization", "TextCapitalization.none");
+    final JSONObject inputType = new JSONObject();
+    inputType.put("name", "TextInputType.text");
+    arguments.put("inputType", inputType);
+
+    final JSONObject autofill = new JSONObject();
+    autofill.put("uniqueIdentifier", "id");
+    autofill.put("hints", new JSONArray(new String[] {hint}));
+    final JSONObject editingValue = new JSONObject();
+    editingValue.put("text", "");
+    editingValue.put("selectionBase", 0);
+    editingValue.put("selectionExtent", 0);
+    editingValue.put("composingBase", -1);
+    editingValue.put("composingExtent", -1);
+    autofill.put("editingValue", editingValue);
+    arguments.put("autofill", autofill);
+
+    return arguments;
   }
 }
