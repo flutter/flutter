@@ -177,8 +177,9 @@ Future<void> _assertSplitPerAbiVersionCodes(
     );
 
     final int actual = actualVersionCodes[abi]!;
-    final int expected =
-        (abiIndex * 1000) + ((buildNumber ?? 1) * (usingCustomAppGradleFile ? 10000 : 1));
+    final int expected = usingCustomAppGradleFile
+        ? ((abiIndex * 1000) + (buildNumber ?? 1)) * 10000
+        : (abiIndex * 1000) + (buildNumber ?? 1);
     expect(
       actual,
       expected,

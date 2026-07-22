@@ -4,17 +4,19 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.api.ApkVariant
-import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.CopyFlutterApksTask
 import com.flutter.gradle.tasks.CopyFlutterAssetsTask
 import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
@@ -23,7 +25,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
-import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.os.OperatingSystem
@@ -367,6 +368,72 @@ class FlutterPlugin : Plugin<Project> {
                     copyFlutterAssetsTaskProvider,
                     CopyFlutterAssetsTask::destinationDir
                 )
+
+                // Per-ABI versionCode for --split-per-abi builds: read the merged versionCode
+                // AGP seeded on each variant output and offset it by the ABI constant.
+                // (Read-then-set with a plain get, not a self-referential lazy map.)
+                val appliedAbiVersionCodes = mutableMapOf<String, Int>()
+                if (FlutterPluginUtils.shouldProjectSplitPerAbi(projectToAddTasksTo) &&
+                    !FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(projectToAddTasksTo)
+                ) {
+                    (variant as? ApplicationVariant)?.outputs?.forEach { output ->
+                        val abi: String? =
+                            output.filters
+                                .find { it.filterType == FilterConfiguration.FilterType.ABI }
+                                ?.identifier
+                        val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[abi]
+                        val baseVersionCode: Int? = output.versionCode.orNull
+                        if (abi != null && abiVersionCode != null && baseVersionCode != null) {
+                            val newVersionCode = abiVersionCode * 1000 + baseVersionCode
+                            output.versionCode.set(newVersionCode)
+                            appliedAbiVersionCodes[abi] = newVersionCode
+                        }
+                    }
+                }
+
+                // Copy the output APKs into a known location, so `flutter run` or
+                // `flutter build apk` can discover them. By default, this is
+                // `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`, where the
+                // filename is `app<-abi>?<-flavor-name>?-<build-mode>.apk` (unchanged from
+                // the pre-migration assemble.doLast copy).
+                val variantBuildModeName =
+                    FlutterPluginUtils.buildModeFor(variant.buildType ?: variant.name, variant.debuggable)
+                val flutterApkDir =
+                    projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk")
+                val apkOutputFileNames =
+                    flutterApkOutputFileNames(projectToAddTasksTo, variant.flavorName, variantBuildModeName)
+                val copyFlutterApksTaskProvider: TaskProvider<CopyFlutterApksTask> =
+                    projectToAddTasksTo.tasks.register(
+                        "copyFlutterApks$capitalizeVariantName",
+                        CopyFlutterApksTask::class.java
+                    ) {
+                        apkDirectory.set(variant.artifacts.get(SingleArtifact.APK))
+                        builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
+                        buildModeName.set(variantBuildModeName)
+                        flavorName.set(variant.flavorName ?: "")
+                        destinationDir.set(flutterApkDir)
+                        outputApks.from(apkOutputFileNames.map { name -> flutterApkDir.map { dir -> dir.file(name) } })
+                        expectedVersionCodes.set(appliedAbiVersionCodes)
+                    }
+                // The flutter-apk copy must run whenever the variant is assembled. The
+                // assemble task does not exist yet at variant-API time, so match it by name,
+                // and assert after evaluation that it was found: a silent no-match would mean
+                // `flutter run`/`flutter build apk` no longer find their APKs.
+                val assembleTaskName = "assemble$capitalizeVariantName"
+                projectToAddTasksTo.tasks
+                    .matching { it.name == assembleTaskName }
+                    .configureEach { finalizedBy(copyFlutterApksTaskProvider) }
+                projectToAddTasksTo.gradle.projectsEvaluated {
+                    if (projectToAddTasksTo.tasks.findByName(assembleTaskName) == null) {
+                        throw GradleException(
+                            "Flutter expected the Android Gradle Plugin to create the " +
+                                "'$assembleTaskName' task, but it does not exist, so the " +
+                                "flutter-apk copy for variant '${variant.name}' could not be " +
+                                "attached. Please file an issue at " +
+                                "https://github.com/flutter/flutter/issues."
+                        )
+                    }
+                }
             }
 
             val copyJniLibsTaskProvider: TaskProvider<CopyFlutterJniLibsTask> =
@@ -401,63 +468,6 @@ class FlutterPlugin : Plugin<Project> {
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
             configureAbis(projectToAddTasksTo, appExtension)
-            val android: AbstractAppExtension =
-                projectToAddTasksTo.extensions.findByName("android") as AbstractAppExtension
-            android.applicationVariants.configureEach {
-                val variant = this
-                val assembleTask = variant.assembleProvider.get()
-                if (!FlutterPluginUtils.shouldConfigureFlutterTask(
-                        projectToAddTasksTo,
-                        assembleTask
-                    )
-                ) {
-                    return@configureEach
-                }
-                // Per-ABI versionCode override; migrates to VariantOutput.versionCode.
-                // TODO(gmackall): Migrate to AGPs variant api.
-                //    https://github.com/flutter/flutter/issues/166550
-                configureLegacyAbiVersionCodeOverride(variant, projectToAddTasksTo)
-
-                // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
-                // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
-                //
-                // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
-                // Where:
-                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86_64` only if the flag `split-per-abi` is set.
-                //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
-                //   * `build-mode` can be `release|debug|profile`.
-                variant.outputs.forEach { output ->
-                    assembleTask.doLast {
-                        // TODO(gmackall): Migrate to AGPs variant api.
-                        //    https://github.com/flutter/flutter/issues/166550
-                        @Suppress("DEPRECATION")
-                        output as com.android.build.gradle.api.ApkVariantOutput
-                        val packageApplicationProvider: PackageAndroidArtifact =
-                            variant.packageApplicationProvider.get()
-                        val outputDirectory: Directory =
-                            packageApplicationProvider.outputDirectory.get()
-                        val outputDirectoryStr: String = outputDirectory.toString()
-                        var filename = "app"
-
-                        // TODO(gmackall): Migrate to AGPs variant api.
-                        //    https://github.com/flutter/flutter/issues/166550
-                        @Suppress("DEPRECATION")
-                        val abi = output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
-                        if (abi != null && abi.isNotEmpty()) {
-                            filename += "-$abi"
-                        }
-                        if (variant.flavorName != null && variant.flavorName.isNotEmpty()) {
-                            filename += "-${FlutterPluginUtils.lowercase(variant.flavorName)}"
-                        }
-                        filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
-                        projectToAddTasksTo.copy {
-                            from(File("$outputDirectoryStr/${output.outputFileName}"))
-                            into(projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk"))
-                            rename { "$filename.apk" }
-                        }
-                    }
-                }
-            }
             getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
@@ -578,6 +588,28 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun flutterCompileTaskName(variantName: String): String =
             FlutterPluginUtils.toCamelCase(listOf("compile", FLUTTER_BUILD_PREFIX, variantName))
+
+        /**
+         * The flutter-apk file names a variant build produces, predictable at configuration
+         * time: one per target ABI for `--split-per-abi` builds (universal APKs are disabled
+         * for those, see [configureAbis]), or the single fat-APK name otherwise.
+         */
+        private fun flutterApkOutputFileNames(
+            project: Project,
+            flavorName: String?,
+            buildModeName: String
+        ): List<String> {
+            val flavorPart =
+                if (flavorName.isNullOrEmpty()) "" else "-${FlutterPluginUtils.lowercase(flavorName)}"
+            return if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
+                FlutterPluginUtils.getTargetPlatforms(project).map { platform ->
+                    val abi = FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                    "app-$abi$flavorPart-$buildModeName.apk"
+                }
+            } else {
+                listOf("app$flavorPart-$buildModeName.apk")
+            }
+        }
 
         /**
          * Configures flutter default abi support respecting flutter command line flags.
@@ -720,41 +752,6 @@ class FlutterPlugin : Plugin<Project> {
                 deferredComponents = deferredComponentsValue
                 validateDeferredComponents = validateDeferredComponentsValue
                 flavor = flavorValue
-            }
-        }
-
-        // Per-ABI versionCode override for --split-per-abi builds. Last legacy-variant-API
-        // consumer on the application path besides the flutter-apk copy; both migrate to the
-        // variant API (VariantOutput.versionCode / SingleArtifact.APK) in the next phase.
-        // TODO(gmackall): Migrate to AGPs variant api.
-        //    https://github.com/flutter/flutter/issues/166550
-        private fun configureLegacyAbiVersionCodeOverride(
-            @Suppress("DEPRECATION") variant: com.android.build.gradle.api.BaseVariant,
-            project: Project
-        ) {
-            if (!FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
-                return
-            }
-            variant.outputs.forEach { output ->
-                // need to force this as the API does not return the right thing for our use.
-                // TODO(gmackall): Migrate to AGPs variant api.
-                //    https://github.com/flutter/flutter/issues/166550
-                @Suppress("DEPRECATION")
-                output as com.android.build.gradle.api.ApkVariantOutput
-                val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
-
-                // TODO(gmackall): Migrate to AGPs variant api.
-                //    https://github.com/flutter/flutter/issues/166550
-                @Suppress("DEPRECATION")
-                val filterIdentifier: String? =
-                    output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
-                val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
-                if (abiVersionCode != null && !FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)) {
-                    output.versionCodeOverride = abiVersionCode * 1000 + (
-                        versionCodeIfPresent
-                            ?: variant.mergedFlavor.versionCode as Int
-                    )
-                }
             }
         }
 

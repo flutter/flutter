@@ -76,7 +76,27 @@ projects. That opt-out dies with AGP 10.
    it is seeded with the merged value; set `abiOffset * 1000 + current`,
    avoiding a self-referential `.map`. Fall back to a snapshot only if
    read-then-set is impossible; record the outcome here.
-   - *Spike result:* _pending (P6)_.
+   - *Spike result:* read-then-set implemented in P6 (`VariantOutput.versionCode.orNull`
+     read at onVariants time, then `set(abiOffset * 1000 + base)`); the sandbox could not
+     execute builds, so the split-per-abi × flavor-defined-versionCode apkanalyzer check in
+     CI is the confirming gate. The `finalizeDsl` snapshot fallback remains unimplemented.
+   - *Behavioral shift for custom `onVariants` build scripts:* Under modern AGP 9
+     `androidComponents.onVariants`, plugins applied at line 25 of `build.gradle.kts`
+     execute their callbacks before app-level `onVariants` blocks at line 70 (FIFO
+     callback ordering). Therefore, when building `--split-per-abi`, FGP seeds
+     `output.versionCode` (`abiOffset * 1000 + base`) before app-level callbacks run.
+     Any custom app-level `onVariants` block that reads `output.versionCode.get()` will
+     observe the offset value rather than the base `versionCode`. For standard apps, no
+     change is needed. Even if an app script transforms `versionCode` (e.g. via
+     multiplication or addition), monotonic ABI ordering (`armeabi-v7a` < `arm64-v8a` <
+     `x86_64`) and Google Play Store uniqueness are preserved. If an app requires an exact
+     literal numeric formula on base versionCodes, it can subtract `abiOffset` before its
+     transformation and re-add it afterwards.
+   - *flutter-apk copy outputs:* the copy task declares individual predictable
+     `@OutputFiles` (from target platforms × flavor × build mode) instead of the shared
+     `outputs/flutter-apk` directory, because a shared `@OutputDirectory` would overlap
+     between variants by construction. A runtime warning reports produced names outside
+     the predicted set.
 6. **P3 pre-spike (afterEvaluate DSL mutation under newDsl).** The planned scratch-app
    spike (AGP 9.1 + `newDsl=true` + custom build type, verifying that build-type
    creation from `pluginProject.afterEvaluate` still works) could not run in the
