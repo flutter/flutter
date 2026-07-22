@@ -72,6 +72,9 @@ kotlin {
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:{{kotlinVersion}}")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:{{kotlinVersion}}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:{{junitJupiterEngineVersion}}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:{{junitPlatformLauncherVersion}}")
     testImplementation("org.mockito:mockito-core:5.0.0")
 }

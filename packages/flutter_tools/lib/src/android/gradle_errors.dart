@@ -85,7 +85,7 @@ final gradleErrors = <GradleHandledError>[
   jlinkErrorWithJava21AndSourceCompatibility,
   missingNdkSourcePropertiesFile,
   applyingKotlinAndroidPluginErrorHandler,
-  useNewAgpDslErrorHandler,
+  legacyVariantApiUsageErrorHandler,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
@@ -689,9 +689,11 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
 const String kMigrateToBuiltInKotlinDocsUrl =
     'https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin';
 
-/// The URL for documentation on opting out of the new AGP DSL.
-const String kOptOutOfNewDslDocsUrl =
-    'https://developer.android.com/build/releases/agp-9-0-0-release-notes';
+/// The URL for the breaking-change page covering the Android Gradle Plugin new-DSL
+/// migration (legacy variant API removal), including before/after recipes and the
+/// temporary `android.newDsl=false` escape hatch.
+const String kNewDslBreakingChangeDocsUrl =
+    'https://docs.flutter.dev/release/breaking-changes/android-agp-new-dsl';
 
 /// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
 /// using AGP 9+ because built-in Kotlin has become the default behavior.
@@ -715,29 +717,29 @@ To resolve this, migrate to built-in Kotlin.
   eventLabel: 'applying-kotlin-android-plugin-error',
 );
 
-/// Handler when using the new AGP DSL interfaces. Starting AGP 9+, only the new
-/// DSL interfaces are used. This results in a failure because we still depend
-/// on old DSL types.
+/// Handler for Gradle build scripts that use the removed legacy AGP variant API
+/// (`applicationVariants`, `libraryVariants`, `variantFilter`). Flutter projects build
+/// with the Android Gradle Plugin's new DSL, under which these APIs do not exist.
 @visibleForTesting
-final useNewAgpDslErrorHandler = GradleHandledError(
+final legacyVariantApiUsageErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
-    "> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'",
-    '> java.lang.NullPointerException (no error message)',
+    "Could not get unknown property 'applicationVariants'",
+    "Could not get unknown property 'libraryVariants'",
+    "Could not get unknown property 'testVariants'",
+    "Could not get unknown property 'variantFilter'",
+    'Could not find method applicationVariants(',
+    'Could not find method libraryVariants(',
+    'Could not find method variantFilter(',
   ]),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        final File appGradleFile = project.android.appGradleFile;
-        globals.printBox(
-          '''
-${globals.logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read.
-This results in a build failure when applying the Flutter Gradle plugin at ${appGradleFile.path}.
-\nTo resolve this update flutter or opt out of `android.newDsl`.
-For instructions on how to opt out, see: $kOptOutOfNewDslDocsUrl
-\nIf you are not upgrading to AGP 9+, run `flutter analyze --suggestions` to check for incompatible dependencies.''',
-          title: _boxTitle,
-        );
+        globals.printBox('''
+${globals.logger.terminal.warningMark} A Gradle build script in this project uses the Android Gradle Plugin's legacy variant API (for example `android.applicationVariants`), which does not exist under the new Android Gradle Plugin DSL that Flutter projects now build with.
+\nTo resolve this, migrate the build script to the variant API (`androidComponents.onVariants`).
+For before/after examples of common patterns, see: $kNewDslBreakingChangeDocsUrl
+\nAs a temporary escape hatch, you can add `android.newDsl=false` to android/gradle.properties, but this stops working with Android Gradle Plugin 10, which removes the legacy API entirely.''', title: _boxTitle);
 
         return GradleBuildStatus.exit;
       },
-  eventLabel: 'use-new-agp-dsl-error',
+  eventLabel: 'legacy-variant-api-usage',
 );

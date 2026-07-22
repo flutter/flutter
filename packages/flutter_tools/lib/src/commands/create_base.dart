@@ -393,6 +393,8 @@ mixin CreateBase on FlutterCommand {
       'agpVersion': agpVersion,
       'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
       'kotlinVersion': kotlinVersion,
+      'junitJupiterEngineVersion': gradle.templateJunitJupiterEngineVersion,
+      'junitPlatformLauncherVersion': gradle.templateJunitPlatformLauncherVersion,
       'gradleVersion': gradleVersion,
       'compileSdkVersion': gradle.compileSdkVersion,
       'minSdkVersion': gradle.minSdkVersion,

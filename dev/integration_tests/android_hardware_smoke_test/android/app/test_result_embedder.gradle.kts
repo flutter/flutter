@@ -33,9 +33,23 @@ tasks.register("embedTestResultImages") {
         val packageId = "com.example.android_hardware_smoke_test"
         val discoveredTests = mutableListOf<DiscoveredTest>()
 
-        // Resolve binary safe adb executable from Android Gradle Plugin BaseExtension
-        val android = project.extensions.getByType(com.android.build.gradle.BaseExtension::class.java)
-        val adbPath = android.adbExecutable.absolutePath
+        // Resolve binary-safe adb executable from Android Gradle Plugin (new variant API with BaseExtension fallback)
+        val adbPath =
+            try {
+                val androidComponents =
+                    project.extensions.getByType(
+                        com.android.build.api.variant.ApplicationAndroidComponentsExtension::class.java
+                    )
+                androidComponents.sdkComponents.adb
+                    .get()
+                    .asFile.absolutePath
+            } catch (_: org.gradle.api.UnknownDomainObjectException) {
+                val android = project.extensions.getByType(com.android.build.gradle.BaseExtension::class.java)
+                android.adbExecutable.absolutePath
+            } catch (_: IllegalArgumentException) {
+                val android = project.extensions.getByType(com.android.build.gradle.BaseExtension::class.java)
+                android.adbExecutable.absolutePath
+            }
         println("Resolved binary-safe adb executable from AGP: $adbPath")
 
         // 1. Query the device sandbox to list all files in cache/results/ using ProcessBuilder

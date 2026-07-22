@@ -50,6 +50,8 @@ const templateAndroidGradlePluginVersionForModule = '9.1.0';
 //  * KGP jvm constant in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://kotlinlang.org/docs/releases.html#release-details
 const templateKotlinGradlePluginVersion = '2.4.0';
+const templateJunitJupiterEngineVersion = '5.10.2';
+const templateJunitPlatformLauncherVersion = '1.10.2';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
