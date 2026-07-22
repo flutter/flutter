@@ -989,17 +989,6 @@ class WebParagraph implements ui.Paragraph {
       'longestLine=${longestLine.toStringAsFixed(4)} '
       'maxLineWidthWithTrailingSpaces=${maxLineWidthWithTrailingSpaces.toStringAsFixed(4)} lines=${_layout.lines.length}',
     );
-    /*
-    print('layout(): $numberOfLines');
-    for (final TextLine line in _layout.lines) {
-      print(
-        'line[${line.lineNumber}] text:[${line.allLineTextRange.start}:${line.allLineTextRange.end}) -spaces:${line.whitespacesRange.end} +newline:${line.hardLineBreakRange.end} ${line.hardLineBreakRange.isNotEmpty}',
-      );
-    }
-    */
-    for (int i = text.length; i >= 0; i--) {
-      getLineBoundary(ui.TextPosition(offset: i));
-    }
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
@@ -1055,9 +1044,9 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
+    // This is the algorithm that works in SkParagraph
     var startLine = 0;
     int endLine = _layout.lines.length - 1;
-
     while (endLine > startLine) {
       // startLine + 1 <= endLine, so we have startLine <= midLine <= endLine - 1.
       final int midLine = ((endLine + startLine) / 2).floor();
@@ -1077,26 +1066,6 @@ class WebParagraph implements ui.Paragraph {
     }
     assert(startLine == endLine);
     return startLine;
-
-    /*
-    for (final TextLine line in _layout.lines) {
-      print('line[${line.lineNumber}]: ${line.allLineTextRange}');
-      if (line.allLineTextRange.isBefore(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
-        continue;
-      }
-      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        break;
-      }
-
-      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
-      print('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
-      return line.lineNumber;
-    }
-
-    assert(false, 'getLineNumberAt($codeUnitOffset): null (out of range, should not happen)');
-    return null;
-    */
   }
 
   void clearPaintCache() {

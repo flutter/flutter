@@ -201,6 +201,7 @@ class TextLayout {
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
     paragraph.ideographicBaseline = lines.first.height;
+    // We only know now which line is the last and we need this information for later
     lines.last.lastLine = true;
   }
 
@@ -209,6 +210,7 @@ class TextLayout {
     ClusterRange whitespaceRange,
     ClusterRange hardlineRange,
     double top,
+    // Special case: text ends with \n which creates an empty line at the end
     bool specialCase,
   ) {
     assert(contentRange.end == whitespaceRange.start);
@@ -786,9 +788,6 @@ class TextLayout {
       }
       // We found the line but not the block because the offset is to the right of all blocks in this line.
       // We deal with it the same way as if we didn't find the line (taking the last block of the last line)
-      if (lines.last.visualBlocks.isEmpty) {
-        ui.TextPosition(offset: paragraph.text.length);
-      }
       final LineBlock? lastVisualBlockInParagraph = lines.reversed
           .where((line) => line.visualBlocks.isNotEmpty)
           .firstOrNull
@@ -845,20 +844,21 @@ class TextLayout {
     if (codeUnitOffset >= line.hardLineBreakRange.start &&
         codeUnitOffset < line.hardLineBreakRange.end) {
       final WebCluster cluster = allClusters[line.hardLineBreakRange.start];
-      final LineBlock lastVisualBlock = line.visualBlocks.last;
       // Pretend that the hard line break is placed at the end of the last visual block
+      final LineBlock? lastVisualBlock = line.visualBlocks.lastOrNull;
+      final bool isLtr = lastVisualBlock?.isLtr ?? true;
+      final double x = lastVisualBlock != null
+          ? (isLtr ? lastVisualBlock.advance.right : lastVisualBlock.advance.left)
+          : 0.0;
+      final double top = lastVisualBlock?.advance.top ?? -line.fontBoundingBoxAscent;
+      final double bottom = lastVisualBlock?.advance.bottom ?? line.fontBoundingBoxDescent;
       return ui.GlyphInfo(
-        ui.Rect.fromLTRB(
-          lastVisualBlock.isLtr ? lastVisualBlock.advance.right : lastVisualBlock.advance.left,
-          lastVisualBlock.advance.top,
-          lastVisualBlock.isLtr ? lastVisualBlock.advance.right : lastVisualBlock.advance.left,
-          lastVisualBlock.advance.bottom,
-        ).translate(
+        ui.Rect.fromLTRB(x, top, x, bottom).translate(
           line.advance.left + line.formattingShift,
           line.advance.top + line.fontBoundingBoxAscent,
         ),
         ui.TextRange(start: cluster.start, end: cluster.end),
-        lastVisualBlock.isLtr ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+        isLtr ? ui.TextDirection.ltr : ui.TextDirection.rtl,
       );
     }
     // No cluster found that contains the offset
@@ -888,6 +888,7 @@ class TextLayout {
 
   ui.TextRange getLineBoundary(int codepointPosition) {
     for (final TextLine line in lines) {
+      // This is the condition that SkParagraph is using
       if (line.allLineTextRange.start <= codepointPosition &&
           line.allLineTextRange.end >= codepointPosition) {
         return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
@@ -1348,8 +1349,8 @@ class TextLine {
   }
 
   double get baseline => advance.top + fontBoundingBoxAscent;
-
   double get height => fontBoundingBoxAscent + fontBoundingBoxDescent;
+  bool get hasHardLineBreak => hardLineBreakRange.isNotEmpty || lastLine;
 
   final ClusterRange textClusterRange;
   final ClusterRange whitespacesClusterRange;
@@ -1374,8 +1375,6 @@ class TextLine {
   late final double trailingSpacesWidth;
 
   double get fullWidth => advance.width + formattingShift + trailingSpacesWidth;
-
-  bool get hasHardLineBreak => hardLineBreakRange.isNotEmpty || lastLine;
 
   List<LineBlock> visualBlocks = <LineBlock>[];
 

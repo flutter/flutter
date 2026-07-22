@@ -39,6 +39,7 @@ class TextWrapper {
   }
 
   bool _isHardLineBreak(WebCluster cluster) {
+    // The flag is "Hard line break before the codepoint" so we need to test the end of the cluster
     return _layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
   }
 
