@@ -34,11 +34,11 @@ for details on how to do so.
 
 ### My new test won't run. There's a "ClassNotFoundException".
 
-See [Updating Embedding Dependencies](/tools/cipd/android_embedding_bundle).
+See [Updating Embedding Dependencies](../../../../tools/cipd/android_embedding_bundle).
 
 ### My new test won't compile. It can't find one of my imports.
 
-See [Updating Embedding Dependencies](/tools/cipd/android_embedding_bundle).
+See [Updating Embedding Dependencies](../../../../tools/cipd/android_embedding_bundle).
 
 ### My test does not show log output in the console
 
