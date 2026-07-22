@@ -365,9 +365,10 @@ typedef struct MouseState {
   _statusBarStyle = UIStatusBarStyleDefault;
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
+  _displayLinkManager = FlutterDisplayLinkManager.shared;
   _keyboardInsetManager =
       [[FlutterKeyboardInsetManager alloc] initWithDelegate:self
-                                         displayLinkManager:FlutterDisplayLinkManager.shared];
+                                         displayLinkManager:_displayLinkManager];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
@@ -1313,7 +1314,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  double displayRefreshRate = FlutterDisplayLinkManager.shared.displayRefreshRate;
+  double displayRefreshRate = self.displayLinkManager.displayRefreshRate;
   const double epsilon = 0.1;
   if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
 
@@ -1329,8 +1330,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       };
   _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:self.engine.platformTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.shared.displayRefreshRate
+      isVariableRefreshRateEnabled:self.displayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:self.displayLinkManager.displayRefreshRate
                           callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
