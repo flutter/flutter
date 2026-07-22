@@ -58,8 +58,8 @@ class TableCellParentData extends BoxParentData {
   String toString() =>
       '${super.toString()}; '
       '${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}'
-      '${colSpan <= 1 ? '' : '$colSpan cols'}'
-      '${rowSpan <= 1 ? '' : '$rowSpan rows'}';
+      '${colSpan <= 1 ? '' : '; $colSpan cols'}'
+      '${rowSpan <= 1 ? '' : '; $rowSpan rows'}';
 }
 
 /// Base class to describe how wide a column in a [RenderTable] should be.
@@ -1381,6 +1381,11 @@ class RenderTable extends RenderBox {
         final RenderBox? child = _children[xy];
         if (child != null) {
           final childParentData = child.parentData! as TableCellParentData;
+          // Placeholder cells (TableCell.none) are covered by a spanning cell
+          // and contribute no size of their own, so there is nothing to measure.
+          if (!childParentData._isVisible) {
+            continue;
+          }
           final int colSpan = childParentData.colSpan;
           final int rowSpan = childParentData.rowSpan;
 
