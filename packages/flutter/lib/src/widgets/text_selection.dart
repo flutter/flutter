@@ -563,9 +563,17 @@ class TextSelectionOverlay {
           defaultTargetPlatform == TargetPlatform.iOS;
       final TextDirection startHandleDirection;
       final TextDirection endHandleDirection;
-      // A non-collapsed selection may still yield a single endpoint when
-      // getBoxesForSelection returns no visible boxes (e.g. the selection is
-      // scrolled or clipped out of view). Fall back to the field's textDirection.
+      // A non-collapsed selection might return fewer than two endpoints if the
+      // text layout lacks boxes for the selected range. This typically happens when:
+      //
+      //  * Render lag: The overlay updated with a new editing value before the
+      //    render object laid out the new text (selection offsets are out of bounds).
+      //  * Split graphemes: A selection boundary falls inside a multi-code-unit
+      //    cluster (like an emoji or combining character).
+      //  * Degenerate layout: The layout is temporarily squashed (e.g.,
+      //    preferredLineHeight is 0 during a fold transition).
+      //
+      // In these cases, we fall back to the field's textDirection.
       if (preferRenderObjectDirectionForSelectionHandles || endpoints.length < 2) {
         startHandleDirection = textDirection;
         endHandleDirection = textDirection;
@@ -615,7 +623,7 @@ class TextSelectionOverlay {
   /// See also:
   ///
   ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
-  ///     is visible.
+  ///     specifically is visible.
   bool get toolbarIsVisible => _selectionOverlay.toolbarIsVisible;
 
   /// {@macro flutter.widgets.SelectionOverlay.magnifierIsVisible}

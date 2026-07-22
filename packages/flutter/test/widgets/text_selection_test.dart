@@ -2551,7 +2551,6 @@ class DirectionalitySpyTextSelectionControls extends TextSelectionControls {
     builtHandleTypes.clear();
   }
 
-  // Wrap the handle in a widget with a Key that identifies its type.
   @override
   Widget buildHandle(
     BuildContext context,
@@ -2560,7 +2559,7 @@ class DirectionalitySpyTextSelectionControls extends TextSelectionControls {
     VoidCallback? onTap,
   ]) {
     builtHandleTypes.add(type);
-    return SizedBox.square(key: ValueKey<TextSelectionHandleType>(type), dimension: textLineHeight);
+    return SizedBox.square(dimension: textLineHeight);
   }
 
   @override
