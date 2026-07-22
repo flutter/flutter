@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'button_tester.dart';
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _transparent = Color(0x00000000);
 const Color _green = Color(0xFF00FF00);
