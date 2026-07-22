@@ -795,9 +795,10 @@ object FlutterPluginUtils {
 
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
+        val externalNativeBuild = gradleProjectAndroidExtension.externalNativeBuild
         val forcingNotRequired: Boolean =
-            gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null ||
-                gradleProjectAndroidExtension.externalNativeBuild.ndkBuild.path != null
+            externalNativeBuild?.cmake?.path != null ||
+                externalNativeBuild?.ndkBuild?.path != null
         if (forcingNotRequired) {
             return
         }
