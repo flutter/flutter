@@ -2,21 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/cupertino.dart';
-/// @docImport 'package:flutter/material.dart';
-/// @docImport 'package:flutter_test/flutter_test.dart';
-library;
-
 import 'package:flutter/widgets.dart';
 
 /// A minimal [WidgetsApp] wrapper for use in widget tests.
 ///
 /// This provides a convenient way to wrap test widgets with the necessary
 /// app-level widgets (like [Directionality], [MediaQuery], etc.) that
-/// [WidgetsApp] provides, without the overhead of [MaterialApp] or [CupertinoApp].
+/// [WidgetsApp] provides, without the overhead of `MaterialApp` or `CupertinoApp`.
 ///
 /// The [pageRouteBuilder] creates a [Navigator] which provides an [Overlay],
-/// so widgets that need overlay support (like [Draggable], [Tooltip], etc.)
+/// so widgets that need overlay support (like [Draggable], [RawTooltip], etc.)
 /// will work correctly when placed in [home].
 ///
 /// Example usage:
@@ -58,15 +53,13 @@ import 'package:flutter/widgets.dart';
 ///       onGenerateRoute: (RouteSettings settings) {
 ///         return PageRouteBuilder<void>(
 ///           settings: settings,
-///           pageBuilder: (_, __, ___) => const Text('Generated'),
+///           pageBuilder: (_, _, _) => const Text('Generated'),
 ///         );
 ///       },
 ///     ),
 ///   );
 /// });
 /// ```
-// TODO(rkishan516): Move this to flutter_test package.
-// Tracking issue: https://github.com/flutter/flutter/issues/181283
 class TestWidgetsApp extends StatelessWidget {
   /// Creates a minimal [WidgetsApp] for testing.
   const TestWidgetsApp({
@@ -92,12 +85,21 @@ class TestWidgetsApp extends StatelessWidget {
   /// programmatic navigation without needing to find the [Navigator] widget:
   ///
   /// ```dart
-  /// final navigatorKey = GlobalKey<NavigatorState>();
-  /// await tester.pumpWidget(TestWidgetsApp(
-  ///   navigatorKey: navigatorKey,
-  ///   home: const Text('Home'),
-  /// ));
-  /// navigatorKey.currentState!.pushNamed('/details');
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:flutter_test/flutter_test.dart';
+  ///
+  /// void main() {
+  ///   testWidgets('widgets app can use navigator test', (WidgetTester tester) async {
+  ///     final navigatorKey = GlobalKey<NavigatorState>();
+  ///
+  ///     await tester.pumpWidget(TestWidgetsApp(
+  ///       navigatorKey: navigatorKey,
+  ///       home: const Text('Home'),
+  ///     ));
+  ///
+  ///     navigatorKey.currentState!.pushNamed('/details');
+  ///   });
+  /// }
   /// ```
   ///
   /// See also:
@@ -195,8 +197,8 @@ class TestWidgetsApp extends StatelessWidget {
   ///     return PageRouteBuilder<T>(
   ///       settings: settings,
   ///       transitionDuration: const Duration(milliseconds: 300),
-  ///       pageBuilder: (context, _, __) => builder(context),
-  ///       transitionsBuilder: (_, animation, __, child) {
+  ///       pageBuilder: (context, _, _) => builder(context),
+  ///       transitionsBuilder: (_, animation, _, child) {
   ///         return FadeTransition(opacity: animation, child: child);
   ///       },
   ///     );

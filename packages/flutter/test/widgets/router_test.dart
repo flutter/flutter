@@ -12,7 +12,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'button_tester.dart';
 import 'test_page_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const kWhite = Color(0xFFFFFFFF);
