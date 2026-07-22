@@ -842,7 +842,10 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT_ARGS) && IntentUtils.isIntentSelfSent(this)) {
+      return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    }
+    return null;
   }
 
   /**
@@ -896,7 +899,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    * initial route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   protected String getInitialRoute() {
-    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
+    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE) && IntentUtils.isIntentSelfSent(this)) {
       return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 

@@ -552,7 +552,12 @@ import java.util.Set;
     if (host.shouldHandleDeeplinking()) {
       Uri data = intent.getData();
       if (data != null) {
-        return data.toString();
+        if (host.getActivity() != null && IntentUtils.isIntentSelfSent(host.getActivity())) {
+          return data.toString();
+        }
+        if (host.getActivity() != null && IntentUtils.isIntentValidForDeeplinking(intent, host.getActivity())) {
+          return data.toString();
+        }
       }
     }
     return null;
