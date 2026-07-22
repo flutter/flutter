@@ -210,7 +210,7 @@ void main() {
     // disposed delegate, so this right click reached into its defunct
     // render context and crashed instead of being a no-op.
     web.Event? capturedError;
-    final onWindowError = (web.Event event) {
+    final JSExportedDartFunction onWindowError = (web.Event event) {
       capturedError = event;
     }.toJS;
     web.window.addEventListener('error', onWindowError);
