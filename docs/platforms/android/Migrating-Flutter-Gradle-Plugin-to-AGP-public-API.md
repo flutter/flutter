@@ -85,7 +85,15 @@ projects. That opt-out dies with AGP 10.
      `outputs/flutter-apk` directory, because a shared `@OutputDirectory` would overlap
      between variants by construction. A runtime warning reports produced names outside
      the predicted set.
-6. **P3 pre-spike (afterEvaluate DSL mutation under newDsl).** The planned scratch-app
+6. **Stable-channel add-migrator guard (release management, not in this repo's
+   changes).** The stable channel still carries the old `DisableNewDslMigration`,
+   which ADDS `android.newDsl=false`. Once the P9 removal migrator reaches a
+   channel, switching between that channel and stable would flip-flop
+   gradle.properties. Before P9 is released, cherry-pick a guard onto the
+   stable-side add-migrator (skip adding the opt-out when the project's recorded
+   Flutter/AGP versions indicate the new-DSL-capable plugin) or accept the
+   flip-flop for the overlap window and document it in the release notes.
+7. **P3 pre-spike (afterEvaluate DSL mutation under newDsl).** The planned scratch-app
    spike (AGP 9.1 + `newDsl=true` + custom build type, verifying that build-type
    creation from `pluginProject.afterEvaluate` still works) could not run in the
    implementation sandbox (no AGP artifact access). The `initWith` copy landed on the

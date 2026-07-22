@@ -57,7 +57,7 @@ void main() {
           jlinkErrorWithJava21AndSourceCompatibility,
           missingNdkSourcePropertiesFile,
           applyingKotlinAndroidPluginErrorHandler,
-          useNewAgpDslErrorHandler,
+          legacyVariantApiUsageErrorHandler,
           incompatibleKotlinVersionHandler,
         ]),
       );
@@ -1704,50 +1704,66 @@ An exception occurred applying plugin request [id: 'kotlin-android']
     },
   );
 
-  testUsingContext(
-    'Failure to apply kotlin-android plugin',
-    () async {
-      const useNewAgpDslErrorHandlerExample = r'''
-FAILURE: Build failed with an exception.
-
-* Where:
-Build file '/Users/jesswon/Desktop/fresh_flutter_app/android/app/build.gradle.kts'
-
+  group('legacy variant API usage', () {
+    testWithoutContext('matches the Gradle output of common legacy API usages', () {
+      const errorExamples = <String>[
+        '''
 * What went wrong:
-An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-plugin']
-> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
-   > java.lang.NullPointerException (no error message)
-    ''';
+A problem occurred configuring project ':app'.
+> Could not get unknown property 'applicationVariants' for extension 'android' of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl.
+''',
+        '''
+* What went wrong:
+A problem occurred evaluating project ':some_plugin'.
+> Could not get unknown property 'libraryVariants' for extension 'android' of type com.android.build.gradle.internal.dsl.LibraryExtensionImpl.
+''',
+        r'''
+* What went wrong:
+A problem occurred evaluating project ':app'.
+> Could not find method applicationVariants() for arguments [build_2i3f1jrzcvsfaqonvzchd6n1k$_run_closure2$_closure8@2cff667e] on extension 'android'.
+''',
+        r'''
+* What went wrong:
+A problem occurred evaluating project ':app'.
+> Could not find method variantFilter() for arguments [build_abc$_run_closure1@12345678] on extension 'android'.
+''',
+      ];
+      for (final example in errorExamples) {
+        expect(
+          formatTestErrorMessage(example, legacyVariantApiUsageErrorHandler),
+          isTrue,
+          reason: 'expected handler to match:\n$example',
+        );
+      }
+    });
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      await useNewAgpDslErrorHandler.handler(
-        line: useNewAgpDslErrorHandlerExample,
-        project: project,
-        usesAndroidX: true,
-      );
+    testUsingContext(
+      'suggests migrating to the variant API and mentions the escape hatch',
+      () async {
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        await legacyVariantApiUsageErrorHandler.handler(
+          line: "> Could not get unknown property 'applicationVariants' for extension 'android'.",
+          project: project,
+          usesAndroidX: true,
+        );
 
-      expect(
-        testLogger.statusText,
-        contains('Starting AGP 9+, only the new DSL interface will be read.'),
-      );
-      expect(
-        testLogger.statusText,
-        contains('This results in a build failure when applying the Flutter Gradle plugin'),
-      );
-      expect(testLogger.statusText, contains('For instructions on how to opt out, see:'));
-      expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
-      expect(
-        testLogger.statusText,
-        contains('If you are not upgrading to AGP 9+, run `flutter analyze --suggestions`'),
-      );
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+        // The printBox output wraps lines, so assert on fragments that do not wrap.
+        expect(testLogger.statusText, contains('legacy variant API'));
+        expect(testLogger.statusText, contains('androidComponents.onVariants'));
+        expect(testLogger.statusText, contains(kNewDslBreakingChangeDocsUrl));
+        expect(testLogger.statusText, contains('android.newDsl=false'));
+        expect(testLogger.statusText, contains('Android Gradle Plugin 10'));
+      },
+      overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {

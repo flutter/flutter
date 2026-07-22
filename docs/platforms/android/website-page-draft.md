@@ -3,7 +3,12 @@
 *Draft breaking-change page for `docs.flutter.dev/release/breaking-changes/`.
 This file is the source of truth until the page is published to
 flutter/website; publishing must complete before the newDsl flip reaches the
-beta channel. Contributor-facing details live in
+beta channel. The page MUST be published at
+`https://docs.flutter.dev/release/breaking-changes/android-agp-new-dsl` —
+that URL is hard-coded as `kNewDslBreakingChangeDocsUrl` in
+`packages/flutter_tools/lib/src/android/gradle_errors.dart` and is printed by
+the legacy-variant-API error handler and the opt-out removal migrator.
+Contributor-facing details live in
 [Migrating-Flutter-Gradle-Plugin-to-AGP-public-API.md](Migrating-Flutter-Gradle-Plugin-to-AGP-public-API.md).*
 
 ## Summary
