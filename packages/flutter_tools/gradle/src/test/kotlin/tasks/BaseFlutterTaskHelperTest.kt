@@ -71,6 +71,7 @@ class BaseFlutterTaskHelperTest {
     fun `checkPreConditions throws a GradleException when sourceDir is not a directory`() {
         val baseFlutterTask = mockk<BaseFlutterTask>()
         every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
+        every { baseFlutterTask.sourceDir!!.isDirectory } returns false
 
         val gradleException =
             assertFailsWith<GradleException> { BaseFlutterTaskHelper.checkPreConditions(baseFlutterTask) }
@@ -85,8 +86,12 @@ class BaseFlutterTaskHelperTest {
     fun `checkPreConditions does not throw a GradleException and intermediateDir is valid`() {
         val baseFlutterTask = mockk<BaseFlutterTask>()
 
-        every { baseFlutterTask.sourceDir } returns java.io.File(".")
-        every { baseFlutterTask.intermediateDir } returns java.io.File(".")
+        every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
+        every { baseFlutterTask.sourceDir!!.isDirectory } returns true
+
+        every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
+        // There is already an intermediate directory, so there is no need to create it.
+        every { baseFlutterTask.intermediateDir!!.mkdirs() } returns false
 
         assertDoesNotThrow { BaseFlutterTaskHelper.checkPreConditions(baseFlutterTask) }
     }
@@ -168,6 +173,9 @@ class BaseFlutterTaskHelperTest {
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns BaseFlutterTaskPropertiesTest.flutterExecutableTest
+        every {
+            baseFlutterTask.flutterExecutable!!.absolutePath
+        } returns BaseFlutterTaskPropertiesTest.FLUTTER_EXECUTABLE_ABSOLUTE_PATH_TEST
 
         every { baseFlutterTask.targetPath } returns BaseFlutterTaskPropertiesTest.FLUTTER_TARGET_FILE_PATH
 
@@ -181,6 +189,7 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.buildMode } returns buildModeString
         every { baseFlutterTask.flutterRoot } returns BaseFlutterTaskPropertiesTest.flutterRootTest
+        every { baseFlutterTask.flutterRoot!!.absolutePath } returns BaseFlutterTaskPropertiesTest.FLUTTER_ROOT_ABSOLUTE_PATH_TEST
 
         every { baseFlutterTask.trackWidgetCreation } returns true
         every { baseFlutterTask.splitDebugInfo } returns BaseFlutterTaskPropertiesTest.SPLIT_DEBUG_INFO_TEST
@@ -265,6 +274,9 @@ class BaseFlutterTaskHelperTest {
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns BaseFlutterTaskPropertiesTest.flutterExecutableTest
+        every {
+            baseFlutterTask.flutterExecutable!!.absolutePath
+        } returns BaseFlutterTaskPropertiesTest.FLUTTER_EXECUTABLE_ABSOLUTE_PATH_TEST
 
         every { baseFlutterTask.targetPath } returns BaseFlutterTaskPropertiesTest.FLUTTER_TARGET_FILE_PATH
 
@@ -278,6 +290,7 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.buildMode } returns buildModeString
         every { baseFlutterTask.flutterRoot } returns BaseFlutterTaskPropertiesTest.flutterRootTest
+        every { baseFlutterTask.flutterRoot!!.absolutePath } returns BaseFlutterTaskPropertiesTest.FLUTTER_ROOT_ABSOLUTE_PATH_TEST
 
         every { baseFlutterTask.trackWidgetCreation } returns null
         every { baseFlutterTask.splitDebugInfo } returns null
@@ -335,7 +348,7 @@ class BaseFlutterTaskHelperTest {
     fun `buildBundle calls the correct methods`() {
         val baseFlutterTask = mockk<BaseFlutterTask>()
         val mockLoggingManager = mockk<LoggingManager>()
-        val mockFile = java.io.File(".")
+        val mockFile = mockk<File>()
         // Mocking the serviceOf() extension below requires us to specify this internal type
         // unfortunately.
         val mockProject = mockk<org.gradle.api.internal.project.ProjectInternal>()
@@ -343,6 +356,7 @@ class BaseFlutterTaskHelperTest {
         // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
         // before creating a BaseFlutterTaskHelper object.
         every { baseFlutterTask.sourceDir } returns mockFile
+        every { mockFile.isDirectory } returns true
         every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
         every { baseFlutterTask.logging } returns mockLoggingManager
         every { mockLoggingManager.captureStandardError(any()) } returns mockLoggingManager

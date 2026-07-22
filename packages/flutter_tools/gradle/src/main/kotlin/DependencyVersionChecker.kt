@@ -10,9 +10,9 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.int
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -99,29 +99,34 @@ object DependencyVersionChecker {
     // in packages/flutter_tools/lib/src/android/README.md.
 
     private val supportVersions: JsonObject by lazy {
-        val stream = DependencyVersionChecker::class.java.getResourceAsStream("/android_support_versions.json")
-            ?: throw GradleException("Required resource android_support_versions.json not found")
+        val stream =
+            DependencyVersionChecker::class.java.getResourceAsStream("/android_support_versions.json")
+                ?: throw GradleException("Required resource android_support_versions.json not found")
         val jsonText = stream.bufferedReader().use { it.readText() }
         Json.parseToJsonElement(jsonText).jsonObject
     }
 
-    private fun getVersionString(tool: String, type: String): String {
-        return supportVersions[tool]
+    private fun getVersionString(
+        tool: String,
+        type: String
+    ): String =
+        supportVersions[tool]
             ?.jsonObject
             ?.get(type)
             ?.jsonPrimitive
             ?.content
             ?: throw GradleException("Missing version config for $tool.$type")
-    }
 
-    private fun getIntVersion(tool: String, type: String): Int {
-        return supportVersions[tool]
+    private fun getIntVersion(
+        tool: String,
+        type: String
+    ): Int =
+        supportVersions[tool]
             ?.jsonObject
             ?.get(type)
             ?.jsonPrimitive
             ?.int
             ?: throw GradleException("Missing version config for $tool.$type")
-    }
 
     private fun parseAgpVersion(versionString: String): AndroidPluginVersion {
         val parts = versionString.split(".").map { it.toInt() }
