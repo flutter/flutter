@@ -65,6 +65,7 @@ source_set("InternalFlutterSwift") {
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/DisplayLinkManager.swift",
+    "framework/Source/TranslateController.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
     "framework/Source/UIPressProxy.swift",

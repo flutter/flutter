@@ -33,6 +33,7 @@ FLUTTER_ASSERT_ARC
 - (void)handleSearchWebAction;
 - (void)handleLookUpAction;
 - (void)handleShareAction;
+- (void)handleTranslateAction;
 @end
 
 @interface FlutterTextInputViewSpy : FlutterTextInputView
@@ -3586,10 +3587,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     NSDictionary<NSString*, NSNumber*>* encodedTargetRect =
         @{@"x" : @(100), @"y" : @(200), @"width" : @(300), @"height" : @(400)};
 
-    NSArray<NSDictionary<NSString*, id>*>* encodedItems = @[
+    NSMutableArray<NSDictionary<NSString*, id>*>* encodedItems = [@[
       @{@"type" : @"searchWeb", @"title" : @"Search Web"},
       @{@"type" : @"lookUp", @"title" : @"Look Up"}, @{@"type" : @"share", @"title" : @"Share"}
-    ];
+    ] mutableCopy];
+    if (@available(iOS 17.4, *)) {
+      [encodedItems addObject:@{@"type" : @"translate", @"title" : @"Translate"}];
+    }
 
     BOOL shownEditMenu =
         [myInputPlugin showEditMenu:@{@"targetRect" : encodedTargetRect, @"items" : encodedItems}];
@@ -3603,7 +3607,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     UIMenu* menu = [myInputView editMenuInteraction:mockInteraction
                                menuForConfiguration:OCMClassMock([UIEditMenuConfiguration class])
                                    suggestedActions:suggestedActions];
-    XCTAssert(menu.children.count == 3, @"There must be 3 menu items");
+    if (@available(iOS 17.4, *)) {
+      XCTAssert(menu.children.count == 4, @"There must be 4 menu items");
+    } else {
+      XCTAssert(menu.children.count == 3, @"There must be 3 menu items");
+    }
 
     XCTAssert(((UICommand*)menu.children[0]).action == @selector(handleSearchWebAction),
               @"Must create search web item in the tree.");
@@ -3611,6 +3619,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               @"Must create look up item in the tree.");
     XCTAssert(((UICommand*)menu.children[2]).action == @selector(handleShareAction),
               @"Must create share item in the tree.");
+    if (@available(iOS 17.4, *)) {
+      XCTAssert(((UICommand*)menu.children[3]).action == @selector(handleTranslateAction),
+                @"Must create translate item in the tree.");
+    }
   }
 }
 
