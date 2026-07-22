@@ -163,6 +163,9 @@ enum HostArtifact {
   idevicesyslog('idevicesyslog'),
   iproxy('iproxy'),
 
+  @Deprecated('This artifact is no longer checked or used by Flutter.')
+  idevicescreenshot('idevicescreenshot'),
+
   /// The root of the sky_engine package.
   skyEnginePath('sky_engine'),
 
@@ -387,6 +390,7 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
         return _resolveWebArtifact(artifact, _getFlutterWebSdkPath(), _fileSystem, _platform);
       case HostArtifact.idevicesyslog:
+      case HostArtifact.idevicescreenshot:
         final String artifactFileName = artifact.getFileName(_platform);
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName);
       case HostArtifact.skyEnginePath:
@@ -1043,6 +1047,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
       case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
       case HostArtifact.idevicesyslog:
+      case HostArtifact.idevicescreenshot:
       case HostArtifact.skyEnginePath:
       case HostArtifact.iosDeploy:
       case HostArtifact.iproxy:
@@ -1333,6 +1338,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         return _resolveWebArtifact(artifact, _getFlutterWebSdkPath(), _fileSystem, _platform);
       case HostArtifact.iosDeploy:
       case HostArtifact.idevicesyslog:
+      case HostArtifact.idevicescreenshot:
       case HostArtifact.iproxy:
       case HostArtifact.skyEnginePath:
       case HostArtifact.impellerc:
@@ -1556,6 +1562,7 @@ FileSystemEntity _resolveWebArtifact(
       );
     case HostArtifact.iosDeploy:
     case HostArtifact.idevicesyslog:
+    case HostArtifact.idevicescreenshot:
     case HostArtifact.iproxy:
     case HostArtifact.skyEnginePath:
     case HostArtifact.impellerc:
