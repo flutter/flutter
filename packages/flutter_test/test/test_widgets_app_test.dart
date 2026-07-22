@@ -712,12 +712,22 @@ void main() {
             expect(initialRoute, '/abc');
 
             return <Route<void>>[
-              PageRouteBuilder<void>(pageBuilder: (_, _, _) => const Text('non-regular page one')),
-              PageRouteBuilder<void>(pageBuilder: (_, _, _) => const Text('non-regular page two')),
+              PageRouteBuilder<void>(
+                pageBuilder: (context, animation, secondaryAnimation) {
+                  return const Text('non-regular page one');
+                },
+              ),
+              PageRouteBuilder<void>(
+                pageBuilder: (context, animation, secondaryAnimation) {
+                  return const Text('non-regular page two');
+                },
+              ),
             ];
           },
           onGenerateRoute: (_) {
-            return PageRouteBuilder<void>(pageBuilder: (_, _, _) => const Text('regular page'));
+            return PageRouteBuilder<void>(
+              pageBuilder: (context, animation, secondaryAnimation) => const Text('regular page'),
+            );
           },
           color: const Color(0xFF123456),
         ),

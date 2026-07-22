@@ -1083,7 +1083,9 @@ void main() {
           initialRoute: '/',
           routes: <String, WidgetBuilder>{'/': (BuildContext context) => Container()},
           onGenerateInitialRoutes: (String initialRoute) => <PageRoute<void>>[
-            PageRouteBuilder<void>(pageBuilder: (_, _, _) => Container()),
+            PageRouteBuilder<void>(
+              pageBuilder: (context, animation, secondaryAnimation) => Container(),
+            ),
           ],
         ),
       );
@@ -1100,12 +1102,20 @@ void main() {
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
-  return PageRouteBuilder<void>(pageBuilder: (_, _, _) => RouteWidget(name: arguments! as String));
+  return PageRouteBuilder<void>(
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return RouteWidget(name: arguments! as String);
+    },
+  );
 }
 
 @pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
-  return PageRouteBuilder<void>(pageBuilder: (_, _, _) => const RouteFutureWidget());
+  return PageRouteBuilder<void>(
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return const RouteFutureWidget();
+    },
+  );
 }
 
 class PagedTestWidget extends StatelessWidget {
@@ -1187,7 +1197,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
       onGenerateRoute: (RouteSettings settings) {
         return PageRouteBuilder<int>(
           settings: settings,
-          pageBuilder: (_, _, _) {
+          pageBuilder: (context, animation, secondaryAnimation) {
             return RouteWidget(name: settings.name!, arguments: settings.arguments);
           },
         );
@@ -1217,7 +1227,7 @@ class TestPage extends Page<void> {
   Route<void> createRoute(BuildContext context) {
     return PageRouteBuilder<void>(
       settings: this,
-      pageBuilder: (_, _, _) => RouteWidget(name: name!),
+      pageBuilder: (context, animation, secondaryAnimation) => RouteWidget(name: name!),
     );
   }
 }
@@ -1241,7 +1251,7 @@ class TestWidget extends StatelessWidget {
             onGenerateRoute: (RouteSettings settings) {
               return PageRouteBuilder<int>(
                 settings: settings,
-                pageBuilder: (_, _, _) {
+                pageBuilder: (context, animation, secondaryAnimation) {
                   return RouteWidget(name: settings.name!, arguments: settings.arguments);
                 },
               );
