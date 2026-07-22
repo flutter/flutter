@@ -2798,10 +2798,14 @@ void testMain() {
     expect(packets, isEmpty);
   }, skip: !_canConstructTouchEvents);
 
-  // The synthesized cancel repairs a pointer unrelated to any tap being
-  // debounced, so it must reach the framework even while a click debounce is
-  // active with semantics enabled, when the queue would otherwise be discarded.
-  test('delivers the cancel while a click debounce is active', () {
+  // A semantics-enabled text field is itself a tappable element, so the touch
+  // WebKit abandons is usually the very one being debounced: its `down` is still
+  // queued when the repair runs. Sending the cancel straight through would hand
+  // the framework a cancel for a pointer it has not seen go down, and the `down`
+  // would arrive afterwards with nothing left to close it out. That is the same
+  // stuck state this workaround exists to repair, so the queue has to be flushed
+  // ahead of the cancel.
+  test('flushes the debounce queue before delivering the cancel', () {
     debugEmulateIosSafari = true;
     EngineSemantics.instance.semanticsEnabled = true;
     addTearDown(() {
@@ -2810,37 +2814,39 @@ void testMain() {
     });
 
     final context = _PointerEventContext();
-    final packets = <ui.PointerDataPacket>[];
+    final events = <(ui.PointerChange, int)>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
-      packets.add(packet);
+      for (final ui.PointerData datum in packet.data) {
+        events.add((datum.change, datum.device));
+      }
     };
 
-    // An older touch is abandoned.
-    context
-        .multiTouchDown(const <_TouchDetails>[
-          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
-        ])
-        .forEach(rootElement.dispatchEvent);
-    packets.clear();
-
-    // A fresh tap begins on a tappable element and starts click debouncing.
+    // The touch lands on a tappable element, so it starts click debouncing and
+    // its `down` sits in the queue instead of going to the framework.
     final DomElement tappable = createDomElement('flutter-tappable')
       ..setAttribute('flt-tappable', '');
     rootElement.append(tappable);
     addTearDown(() {
       tappable.remove();
     });
-    tappable.dispatchEvent(context.primaryDown(clientX: 300, clientY: 300));
+    tappable.dispatchEvent(
+      context.multiTouchDown(const <_TouchDetails>[
+        _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+      ]).single,
+    );
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(events, isEmpty, reason: 'the debounced down must still be queued');
 
-    // The abandoned touch is reconciled while debouncing is active. Its cancel
-    // must bypass the queue and reach the framework immediately.
-    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[3], remaining: <int>[300]));
+    // WebKit abandons that same touch: no pointerup or pointercancel arrives,
+    // and the finger is gone from the surface by the time touchend fires.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2]));
 
-    final Iterable<ui.PointerData> cancels = packets
-        .expand((ui.PointerDataPacket p) => p.data)
-        .where((ui.PointerData d) => d.change == ui.PointerChange.cancel && d.device == 2);
-    expect(cancels, isNotEmpty, reason: 'the repair cancel must not be swallowed by debouncing');
+    expect(events, <(ui.PointerChange, int)>[
+      (ui.PointerChange.add, 2),
+      (ui.PointerChange.down, 2),
+      (ui.PointerChange.cancel, 2),
+      (ui.PointerChange.remove, 2),
+    ], reason: 'the queued down must be flushed ahead of the cancel that closes it out');
   }, skip: !_canConstructTouchEvents);
 
   // The abandoned pointer's `down` must already have reached the framework

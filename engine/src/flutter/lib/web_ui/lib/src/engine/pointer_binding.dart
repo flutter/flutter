@@ -482,11 +482,17 @@ class ClickDebouncer {
     EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(packet);
   }
 
-  /// Forwards [data] to the framework immediately, bypassing the debounce queue.
+  /// Flushes any in-progress debounce, then forwards [data] to the framework.
   ///
   /// For synthetic events that must not be queued or dropped by an in-progress
   /// debounce, such as cancels that repair a pointer the browser abandoned.
-  void sendImmediately(List<ui.PointerData> data) {
+  /// Flushing first keeps the stream ordered: a queued `pointerdown` has to
+  /// reach the framework before the cancel that closes it out, otherwise the
+  /// framework is left holding a down it can never match.
+  void flushAndSend(List<ui.PointerData> data) {
+    if (isDebouncing) {
+      _flush();
+    }
     _sendToFramework(null, data);
   }
 
@@ -1040,8 +1046,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   void _removePointerIfUnhoverable(DomPointerEvent event) {
     if (event.pointerType == 'touch') {
-      _sanitizers.remove(event.pointerId);
-      _downTouchDevices.remove(_getPointerId(event));
+      final int device = _getPointerId(event);
+      _sanitizers.remove(device);
+      _downTouchDevices.remove(device);
     }
   }
 
@@ -1231,9 +1238,10 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   /// believes is down, but which the browser does not report as being on the
   /// surface, has been abandoned and must be cancelled.
   ///
-  /// The cancel is sent straight to the framework rather than through the click
-  /// debouncer: it repairs an older, unrelated pointer, and must not be queued
-  /// or dropped by debouncing of a concurrent tap.
+  /// The cancel does not join the click debouncer's queue: it repairs an older
+  /// pointer and must not be dropped by debouncing of a concurrent tap. Any
+  /// queued events are flushed ahead of it, so the framework still sees the
+  /// abandoned pointer's `down` before its `cancel`.
   void _cancelAbandonedTouches(DomTouchEvent event) {
     if (!isIosSafari || _downTouchDevices.isEmpty) {
       return;
@@ -1266,7 +1274,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     }
     _downTouchDevices.removeAll(stale);
 
-    PointerBinding.clickDebouncer.sendImmediately(pointerData);
+    PointerBinding.clickDebouncer.flushAndSend(pointerData);
   }
 
   // For each event that is de-coalesced from `event` and described in
