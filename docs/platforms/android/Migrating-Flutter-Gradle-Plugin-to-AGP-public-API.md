@@ -77,6 +77,14 @@ projects. That opt-out dies with AGP 10.
    avoiding a self-referential `.map`. Fall back to a snapshot only if
    read-then-set is impossible; record the outcome here.
    - *Spike result:* _pending (P6)_.
+6. **P3 pre-spike (afterEvaluate DSL mutation under newDsl).** The planned scratch-app
+   spike (AGP 9.1 + `newDsl=true` + custom build type, verifying that build-type
+   creation from `pluginProject.afterEvaluate` still works) could not run in the
+   implementation sandbox (no AGP artifact access). The `initWith` copy landed on the
+   primary approach; the `android_plugin_example_app_build` integration test and a
+   custom-build-type scratch build must confirm it in CI. Documented fallback if
+   `afterEvaluate` mutation is rejected under newDsl: perform the copy in
+   `androidComponents.finalizeDsl` on the plugin project instead.
 5. **`buildModeFor` semantics.** Every variant-scope call uses the
    `(name, debuggable)` overload with the public `Component.debuggable`.
    Name-based inference is confined to the one DSL-scope case with no public
