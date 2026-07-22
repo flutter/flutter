@@ -376,7 +376,7 @@ class IOSDevice extends Device {
   Future<CpuArch> get cpuArch async => switch (cpuArchitecture) {
     .armv7 => CpuArch.armv7,
     .arm64 => CpuArch.arm64,
-    .x86_64 => CpuArch.x86_64,
+    .x86_64 => CpuArch.x64,
   };
 
   @override

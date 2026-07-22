@@ -6,8 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   Future<void> pumpContainer(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(TestWidgetsApp(home: child));
