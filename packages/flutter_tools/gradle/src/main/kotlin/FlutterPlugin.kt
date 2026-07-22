@@ -246,12 +246,12 @@ class FlutterPlugin : Plugin<Project> {
             }
             localEngineHost = engineHostOut.name
         }
-        FlutterPluginUtils.getLegacyAndroidExtension(project).buildTypes.all {
+        FlutterPluginUtils.getAndroidExtension(project).buildTypes.all {
             addFlutterDependencies(this)
         }
     }
 
-    private fun addFlutterDependencies(buildType: com.android.builder.model.BuildType) {
+    private fun addFlutterDependencies(buildType: BuildType) {
         FlutterPluginUtils.addFlutterDependencies(
             project!!,
             buildType,

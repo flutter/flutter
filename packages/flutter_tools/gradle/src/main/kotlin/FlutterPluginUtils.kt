@@ -6,7 +6,10 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.BuildType as DslBuildType
+import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
@@ -469,13 +472,48 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: BuildType): String {
-        if (buildType.name == "profile") {
+    internal fun buildModeFor(buildType: BuildType): String = buildModeFor(buildType.name, buildType.isDebuggable)
+
+    /**
+     * Returns a Flutter build mode for a build type identified by [buildTypeName] and its
+     * [isDebuggable] flag.
+     *
+     * Variant-scope callers must pass the public `Component.debuggable` flag so that custom
+     * debuggable build types (e.g. a host app's `staging`) map to the debug engine artifacts.
+     *
+     * @return "debug", "profile", or "release" (fall-back).
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(
+        buildTypeName: String,
+        isDebuggable: Boolean
+    ): String {
+        if (buildTypeName == "profile") {
             return "profile"
-        } else if (buildType.isDebuggable) {
+        } else if (isDebuggable) {
             return "debug"
         }
         return "release"
+    }
+
+    /**
+     * Returns a Flutter build mode for a new-DSL [buildType].
+     *
+     * Application and dynamic-feature build types expose a public `isDebuggable` flag.
+     * Library build types do not, so for them the conventional "debug" name is the only
+     * public signal available at DSL scope.
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(buildType: DslBuildType): String {
+        val isDebuggable =
+            when (buildType) {
+                is ApplicationBuildType -> buildType.isDebuggable
+                is DynamicFeatureBuildType -> buildType.isDebuggable
+                else -> buildType.name == "debug"
+            }
+        return buildModeFor(buildType.name, isDebuggable)
     }
 
     /**
@@ -984,7 +1022,7 @@ object FlutterPluginUtils {
     @JvmName("addFlutterDependencies")
     internal fun addFlutterDependencies(
         project: Project,
-        buildType: BuildType,
+        buildType: DslBuildType,
         pluginHandler: PluginHandler,
         engineVersion: String
     ) {
