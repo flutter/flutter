@@ -15,11 +15,11 @@
 namespace impeller {
 
 struct PlaygroundSwitchOption {
-  PlaygroundSwitchOption(std::string name, bool& flag)
-      : name(std::move(name)), flag(flag) {}
+  PlaygroundSwitchOption(std::string name, bool& value)
+      : name(std::move(name)), value(value) {}
 
   std::string name;
-  bool& flag;
+  bool& value;
 };
 
 /// There are 4 different ways that a Playground test can be rendered:
@@ -40,11 +40,7 @@ struct PlaygroundOutputs {
   bool golden = false;
   bool window = false;
 
-  void Clear() { offscreen = onscreen = golden = window = false; }
-
-  bool Any() const { return offscreen || onscreen || golden || window; }
-
-  std::array<PlaygroundSwitchOption, 4> switches() {
+  std::array<PlaygroundSwitchOption, 4> GetOptions() {
     return std::array<PlaygroundSwitchOption, 4>{{
         PlaygroundSwitchOption("offscreen", offscreen),
         PlaygroundSwitchOption("onscreen", onscreen),
@@ -66,13 +62,7 @@ struct PlaygroundBackends {
   bool opengles_sdf = true;
   bool vulkan = true;
 
-  void Clear() { metal = metal_sdf = opengles = opengles_sdf = vulkan = false; }
-
-  bool Any() const {
-    return metal || metal_sdf || opengles || opengles_sdf || vulkan;
-  }
-
-  std::array<PlaygroundSwitchOption, 5> switches() {
+  std::array<PlaygroundSwitchOption, 5> GetOptions() {
     return std::array<PlaygroundSwitchOption, 5>{{
         PlaygroundSwitchOption("Metal", metal),
         PlaygroundSwitchOption("MetalSDF", metal_sdf),

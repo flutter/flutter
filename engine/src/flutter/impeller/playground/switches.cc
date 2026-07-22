@@ -13,11 +13,25 @@
 namespace {
 
 template <typename T, std::size_t N>
-std::string FoldNames(const std::array<T, N>& array) {
-  return std::accumulate(array.begin(), array.end(), std::string{},
+std::string FoldNames(const std::array<T, N>& option_list) {
+  return std::accumulate(option_list.begin(), option_list.end(), std::string{},
                          [](const std::string& a, const T& b) {
-                           return a.empty() ? b.name : a + "," + b.name;
+                           return a.empty() ? b.name : a + ", " + b.name;
                          });
+}
+
+template <typename T, std::size_t N>
+void SetAllFlags(std::array<T, N>& option_list, bool val) {
+  for (T& option : option_list) {
+    option.value = val;
+  }
+}
+
+template <typename T, std::size_t N>
+bool OrAllFlags(std::array<T, N>& option_list) {
+  return std::accumulate(
+      option_list.begin(), option_list.end(), bool{false},
+      [](const bool& a, const T& b) { return a || b.value; });
 }
 
 template <typename T>
@@ -29,30 +43,39 @@ bool ProcessFlagListArg(const fml::CommandLine& args,
   if (options.empty()) {
     return true;
   }
+  auto option_list = flags.GetOptions();
   bool success = true;
-  flags.Clear();
-  auto switches = flags.switches();
+  SetAllFlags(option_list, false);
   for (std::string_view option : options) {
+    bool val = true;
+    if (option.starts_with("-")) {
+      val = false;
+      option = option.substr(1);
+    }
+    if (option == "all") {
+      SetAllFlags(option_list, val);
+      continue;
+    }
     auto found_it =
-        std::find_if(switches.begin(), switches.end(),
+        std::find_if(option_list.begin(), option_list.end(),
                      [&option](const impeller::PlaygroundSwitchOption& s) {
                        return s.name == option;
                      });
-    if (found_it == switches.end()) {
+    if (found_it == option_list.end()) {
       std::cout << std::endl
                 << "Unrecognized value for " << option_name  //
                 << " (\"" << option << "\") must be one of ["
-                << FoldNames(switches) << "]." << std::endl;
+                << FoldNames(option_list) << "]." << std::endl;
       success = false;
     } else {
-      found_it->flag = true;
+      found_it->value = val;
     }
   }
-  if (!flags.Any()) {
+  if (!OrAllFlags(option_list)) {
     std::cout << std::endl
               << "No recognized options specified for " << option_name << "."
               << std::endl
-              << "At least one of [" << FoldNames(switches) << "] "
+              << "At least one of [" << FoldNames(option_list) << "] "
               << "should be specified." << std::endl;
     success = false;
   }
@@ -63,41 +86,70 @@ void print_usage(const std::string& command_name,
                  const std::string& golden_option_name) {
   impeller::PlaygroundOutputs outputs;
   impeller::PlaygroundBackends backends;
+  int command_name_len = command_name.length();
+  std::string indent = std::format("{0:<{1}}", "", command_name_len + 12);
+  std::string formatted_golden_option =
+      std::format("{0:<25}", "--" + golden_option_name + "=<dir>");
   std::cout << std::endl
-            << "usage:    " << command_name << "    --use_swiftshader"
+            << "usage:    " << command_name << "   --use_swiftshader"
             << " --use_angle" << " --enable_vulkan_validation"  //
             << std::endl
-            << "                                 "
-            << " --playground_timeout_ms=<ms>"
+            << indent << " --playground_timeout_ms=<ms>"
             << " --" << golden_option_name << "=<golden_image_dir>"  //
             << std::endl
-            << "                                 "
-            << " --playground_output=[" << FoldNames(outputs.switches()) << "]"
-            << std::endl
-            << "                                 "
-            << " --playground_backend=[" << FoldNames(backends.switches())
-            << "]" << std::endl  //
+            << indent << " --playground_output=<list>"
+            << " --playground_backend=<list>" << std::endl
             << std::endl
             << "Flags:" << std::endl
             << std::endl
             << "        --use_swiftshader              "
             << "use the SwiftShader library for rendering" << std::endl
+            << std::endl
             << "        --use_angle                    "
             << "use the Angle library for GL rendering"
             << " (Required and default for MacOS)" << std::endl
+            << std::endl
             << "        --enable_vulkan_validation     "
             << "enables Vulkan validations" << std::endl
+            << std::endl
             << "        --playground_timeout_ms=<ms>   "
             << "sets the Playground Window timeout and enables playgrounds"
-            << std::endl  //
-            << "        --" << golden_option_name << "=<dir>      "
+            << std::endl
+            << std::endl
+            << "        " << formatted_golden_option << "      "
             << "sets the directory where the golden images will be written"
             << std::endl
-            << "        --playground_output=[...]      "
+            << std::endl
+            << "        --playground_output=<list>     "
             << "sets the list of output types to render each playground test"
+            << std::endl
+            << "                                       "
+            << "the values are a comma separated list of output types"
+            << std::endl
+            << "                                       "
+            << "[" << FoldNames(outputs.GetOptions()) << ", all]"
             << std::endl  //
-            << "        --playground_backend=[...]     "
+            << "                                       "
+            << "each may be preceded by '-' to disable the type and the value"
+            << std::endl
+            << "                                       "
+            << "\"all\" indicates all options should be enabled (or disabled)"
+            << std::endl
+            << std::endl
+            << "        --playground_backend=<list>    "
             << "sets the list of backend types to render each playground test"
+            << std::endl
+            << "                                       "
+            << "the values are a comma separated list of backend types"
+            << std::endl
+            << "                                       "
+            << "[" << FoldNames(backends.GetOptions()) << ", all]"
+            << std::endl  //
+            << "                                       "
+            << "each may be preceded by '-' to disable the type and the value"
+            << std::endl
+            << "                                       "
+            << "\"all\" indicates all options should be enabled (or disabled)"
             << std::endl
             << std::endl
             << std::endl;
@@ -125,6 +177,9 @@ bool PlaygroundSwitches::InitCommandLineSwitches(
   bool success = true;
   PlaygroundSwitches switches;
   {
+    if (args.HasOption("help") || args.HasOption("usage")) {
+      success = false;
+    }
     if (args.HasOption("playground_output")) {
       if (args.HasOption("enable_playground")) {
         FML_LOG(WARNING) << "The enable_playground flag is ignored if "
@@ -137,7 +192,8 @@ bool PlaygroundSwitches::InitCommandLineSwitches(
     } else if (args.HasOption("enable_playground")) {
       FML_LOG(WARNING) << "The enable_playground flag is deprecated in "
                           "favor of --playground_output=window.";
-      switches.outputs_enabled.Clear();
+      auto option_list = switches.outputs_enabled.GetOptions();
+      SetAllFlags(option_list, false);
       switches.outputs_enabled.window = true;
     }
   }
