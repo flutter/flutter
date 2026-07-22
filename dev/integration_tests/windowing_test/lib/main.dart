@@ -180,7 +180,7 @@ void main() {
           try {
             switch (windowType) {
               case 'regular':
-                secondaryController = RegularWindowController(
+                secondaryController = WindowController(
                   size: const Size(200, 200),
                   title: 'Secondary',
                 );
