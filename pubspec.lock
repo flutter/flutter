@@ -238,11 +238,11 @@ packages:
     dependency: transitive
     description:
       path: "tool/dart_skills_lint"
-      ref: e4497873950727ee781fa411c1a2f624b1ec50c6
-      resolved-ref: e4497873950727ee781fa411c1a2f624b1ec50c6
+      ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
+      resolved-ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
       url: "https://github.com/flutter/skills"
     source: git
-    version: "0.3.0"
+    version: "0.4.0"
   dart_style:
     dependency: "direct main"
     description:
@@ -494,10 +494,10 @@ packages:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: cb6ab96514ba9935c280fcacdb4b6e9d613bebf253910fecdc78351abd83dbba
+      sha256: e5af5628be2fbe3bbb195ded03e6c6f739b0c92db43d1e2a95620678fd844458
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.0"
+    version: "1.6.1"
   html:
     dependency: "direct main"
     description:
@@ -1091,10 +1091,10 @@ packages:
     dependency: transitive
     description:
       name: unified_analytics
-      sha256: "0988c50d794f3cd96f6df92b4b35b7c333bbf869df304fc6062a45ebc7eb0776"
+      sha256: "0917e37f5cd9d70dfd23889b6738b160affc6021861403524ceca94ab5fb0e21"
       url: "https://pub.dev"
     source: hosted
-    version: "8.0.15"
+    version: "8.0.16"
   url_launcher:
     dependency: "direct main"
     description:
@@ -1163,10 +1163,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: "1fef9e8e11e2991bb773070d4656b7bd5d850967a2456cfc83cf47925ba79489"
+      sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.3"
+    version: "4.6.0"
   vector_math:
     dependency: "direct main"
     description:
@@ -1187,10 +1187,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_android
-      sha256: "5121de08444d00363efdda630a69ad4d27a208a9f7586482d4909a44a1cdbc63"
+      sha256: e229676f8fade3e0124482495aaa2b548872cc4018b6268adfca4868be16aa74
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.0"
+    version: "2.12.0"
   video_player_avfoundation:
     dependency: "direct main"
     description:

@@ -1382,6 +1382,34 @@ _flutter.loader.load();
     }
   }
 
+  test('Dart2WasmTarget.buildFiles respects compilerConfig.sourceMaps and matches modules', () {
+    final File wasmFile = environment.buildDir.childFile('main.dart.wasm')..createSync();
+    final File mjsFile = environment.buildDir.childFile('main.dart.mjs')..createSync();
+    final File mapFile = environment.buildDir.childFile('main.dart.wasm.map')..createSync();
+
+    final File partWasmFile = environment.buildDir.childFile('main.dart_module1.wasm')
+      ..createSync();
+    final File partMapFile = environment.buildDir.childFile('main.dart_module1.wasm.map')
+      ..createSync();
+
+    final targetWithMaps = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
+    expect(
+      targetWithMaps.buildFiles(environment).map((f) => f.path),
+      containsAll(<File>[wasmFile, mjsFile, mapFile, partWasmFile, partMapFile].map((f) => f.path)),
+    );
+
+    final targetWithoutMaps = Dart2WasmTarget(
+      const WasmCompilerConfig(sourceMaps: false),
+      const NoOpAnalytics(),
+    );
+    expect(
+      targetWithoutMaps.buildFiles(environment).map((f) => f.path),
+      containsAll(<File>[wasmFile, mjsFile, partWasmFile].map((f) => f.path)),
+    );
+    expect(targetWithoutMaps.buildFiles(environment), isNot(contains(mapFile)));
+    expect(targetWithoutMaps.buildFiles(environment), isNot(contains(partMapFile)));
+  });
+
   test('Dart2JSTarget has unique build keys for compiler configurations', () {
     const testConfigs = <JsCompilerConfig>[
       // Default values
