@@ -4,6 +4,7 @@
 
 package com.flutter.gradle.plugins
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.BaseExtension
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
@@ -34,6 +35,17 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PluginHandlerTest {
+    /** Mocks the new-DSL android extension read by [FlutterPluginUtils.getCompileSdkFromProject]. */
+    private fun mockCompileSdk(
+        project: Project,
+        compileSdk: Int
+    ) {
+        val androidExtension = mockk<ApplicationExtension>()
+        every { project.extensions.findByName("android") } returns androidExtension
+        every { androidExtension.compileSdk } returns compileSdk
+        every { androidExtension.compileSdkPreview } returns null
+    }
+
     // getPluginListWithoutDevDependencies
     @Test
     fun `getPluginListWithoutDevDependencies removes dev dependencies from list`() {
@@ -214,8 +226,8 @@ class PluginHandlerTest {
                 mockBuildType
             ).iterator()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
-        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        mockCompileSdk(project, compileSdk = 35)
+        mockCompileSdk(pluginProject, compileSdk = 35)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -310,8 +322,8 @@ class PluginHandlerTest {
                 mockBuildType
             ).iterator()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
-        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        mockCompileSdk(project, compileSdk = 35)
+        mockCompileSdk(pluginProject, compileSdk = 35)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -452,8 +464,8 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
-        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        mockCompileSdk(project, compileSdk = 35)
+        mockCompileSdk(pluginProject, compileSdk = 35)
     }
 
     private fun setupPluginMocks(project: Project) {
