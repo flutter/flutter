@@ -48,7 +48,7 @@ class CheckboxThemeData with Diagnosticable {
     this.visualDensity,
     this.shape,
     this.side,
-    this.padding,
+    this.markInsets,
   });
 
   /// {@macro flutter.material.checkbox.mouseCursor}
@@ -103,8 +103,8 @@ class CheckboxThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Checkbox.side].
   final BorderSide? side;
 
-  /// {@macro flutter.material.checkbox.padding}
-  final EdgeInsetsGeometry? padding;
+  /// {@macro flutter.material.checkbox.markInsets}
+  final EdgeInsets? markInsets;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -118,7 +118,7 @@ class CheckboxThemeData with Diagnosticable {
     VisualDensity? visualDensity,
     OutlinedBorder? shape,
     BorderSide? side,
-    EdgeInsetsGeometry? padding,
+    EdgeInsets? markInsets,
   }) {
     return CheckboxThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -130,7 +130,7 @@ class CheckboxThemeData with Diagnosticable {
       visualDensity: visualDensity ?? this.visualDensity,
       shape: shape ?? this.shape,
       side: side ?? this.side,
-      padding: padding ?? this.padding,
+      markInsets: markInsets ?? this.markInsets,
     );
   }
 
@@ -156,7 +156,7 @@ class CheckboxThemeData with Diagnosticable {
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t) as OutlinedBorder?,
       side: _lerpSides(a?.side, b?.side, t),
-      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
+      markInsets: EdgeInsets.lerp(a?.markInsets, b?.markInsets, t),
     );
   }
 
@@ -171,7 +171,7 @@ class CheckboxThemeData with Diagnosticable {
     visualDensity,
     shape,
     side,
-    padding,
+    markInsets,
   );
 
   @override
@@ -192,7 +192,7 @@ class CheckboxThemeData with Diagnosticable {
         other.visualDensity == visualDensity &&
         other.shape == shape &&
         other.side == side &&
-        other.padding == padding;
+        other.markInsets == markInsets;
   }
 
   @override
@@ -235,7 +235,7 @@ class CheckboxThemeData with Diagnosticable {
     );
     properties.add(DiagnosticsProperty<OutlinedBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsets>('markInsets', markInsets, defaultValue: null));
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
