@@ -11,7 +11,6 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
@@ -536,22 +535,6 @@ object FlutterPluginUtils {
         return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
     }
 
-    /**
-     * Returns BaseExtension for the project. Used for compatibility.
-     *
-     * From BaseExtension docs:
-     * "Don't use this extension directly Instead, use one of the following:
-     *  ApplicationExtension, LibraryExtension, TestExtension, DynamicFeatureExtension"
-     *
-     *  For ApplicationExtension use `getAndroidApplicationExtension`.
-     *  For LibraryExtension use `getAndroidLibraryExtension`.
-     */
-    internal fun getLegacyAndroidExtension(project: Project): BaseExtension {
-        // Common supertype of the android extension types.
-        // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
-        return project.extensions.findByType(BaseExtension::class.java)!!
-    }
-
     internal fun getAndroidExtension(project: Project): AgpCommonExtensionWrapper {
         // Look up by name to completely avoid importing or resolving CommonExtension
         val androidExtension =
@@ -835,11 +818,11 @@ object FlutterPluginUtils {
         }
 
         // If the project is already configuring a native build, we don't need to do anything.
-        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
+        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
         val externalNativeBuild = gradleProjectAndroidExtension.externalNativeBuild
         val forcingNotRequired: Boolean =
-            externalNativeBuild?.cmake?.path != null ||
-                externalNativeBuild?.ndkBuild?.path != null
+            externalNativeBuild.cmake.path != null ||
+                externalNativeBuild.ndkBuild.path != null
         if (forcingNotRequired) {
             return
         }
@@ -963,10 +946,9 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
-        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
-        gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
-            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
-        )
+        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.path =
+            File("$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt")
 
         // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
         // build artifact, so we move it from that directory to within Flutter's build directory
@@ -978,22 +960,22 @@ object FlutterPluginUtils {
         // but as we are not actually building anything (and are instead only tricking AGP into
         // downloading the NDK), it is acceptable for the buildStagingDirectory to be removed
         // and rebuilt when running clean builds.
-        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory =
             gradleProject.layout.buildDirectory
                 .dir("../.cxx")
                 .get()
-                .asFile.path
-        )
+                .asFile
 
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
         gradleProjectAndroidExtension.buildTypes.forEach { buildType ->
-            buildType.externalNativeBuild.cmake.arguments(
-                "-Wno-dev",
-                "--no-warn-unused-cli",
-                "-DCMAKE_BUILD_TYPE=${buildType.name}"
-            )
+            buildType.externalNativeBuild.cmake.arguments +=
+                listOf(
+                    "-Wno-dev",
+                    "--no-warn-unused-cli",
+                    "-DCMAKE_BUILD_TYPE=${buildType.name}"
+                )
         }
     }
 
