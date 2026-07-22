@@ -2518,8 +2518,7 @@ mixin WidgetInspectorService {
   ///
   /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   bool isWidgetCreationTracked() {
-    // ignore: prefer_const_constructors
-    _widgetCreationTracked ??= (developer.CreationLocation.of(_WidgetForTypeTests()) != null);
+    _widgetCreationTracked ??= (developer.CreationLocation.of(const _WidgetForTypeTests()) != null);
     return _widgetCreationTracked!;
   }
 
