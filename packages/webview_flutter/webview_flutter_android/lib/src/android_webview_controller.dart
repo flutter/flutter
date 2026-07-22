@@ -1220,26 +1220,28 @@ class AndroidCustomViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformViewLink(
-      key: key,
-      viewType: 'plugins.flutter.io/webview',
-      surfaceFactory: (BuildContext context, PlatformViewController controller) {
-        return AndroidViewSurface(
-          controller: controller as AndroidViewController,
-          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-        );
-      },
-      onCreatePlatformView: (PlatformViewCreationParams params) {
-        return _initAndroidView(
-            params,
-            displayWithHybridComposition: false,
-            platformViewsServiceProxy: platformViewsServiceProxy,
-            view: customView,
-          )
-          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
-          ..create();
-      },
+    return ClipRect(
+      child: PlatformViewLink(
+        key: key,
+        viewType: 'plugins.flutter.io/webview',
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return AndroidViewSurface(
+            controller: controller as AndroidViewController,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+          );
+        },
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          return _initAndroidView(
+              params,
+              displayWithHybridComposition: false,
+              platformViewsServiceProxy: platformViewsServiceProxy,
+              view: customView,
+            )
+            ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+            ..create();
+        },
+      ),
     );
   }
 }

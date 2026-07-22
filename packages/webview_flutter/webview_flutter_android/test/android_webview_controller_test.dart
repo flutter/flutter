@@ -2237,6 +2237,7 @@ void main() {
         Builder(builder: (BuildContext context) => customViewWidget.build(context)),
       );
 
+      expect(find.byType(ClipRect), findsOneWidget);
       expect(find.byType(PlatformViewLink), findsOneWidget);
       expect(find.byKey(const Key('test_custom_view')), findsOneWidget);
     });
