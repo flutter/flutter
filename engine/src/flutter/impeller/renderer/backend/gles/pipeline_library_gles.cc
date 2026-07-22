@@ -300,8 +300,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
   pipelines_[descriptor] = pipeline_future;
 
-  auto weak_this = weak_from_this();
-  auto reactor = reactor_;
+  std::weak_ptr<PipelineLibrary> weak_this = weak_from_this();
+  std::shared_ptr<ReactorGLES> reactor = reactor_;
   auto generation_task = [promise, weak_this, descriptor, vert_function,
                           frag_function, threadsafe, reactor]() {
     auto thiz = weak_this.lock();
@@ -309,7 +309,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       promise->set_value(nullptr);
       return;
     }
-    const auto result = reactor->AddOperation([promise,        //
+    const bool result = reactor->AddOperation([promise,        //
                                                weak_this,      //
                                                descriptor,     //
                                                vert_function,  //
