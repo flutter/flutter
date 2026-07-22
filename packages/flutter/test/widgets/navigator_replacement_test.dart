@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'observer_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Back during pushReplacement', (WidgetTester tester) async {

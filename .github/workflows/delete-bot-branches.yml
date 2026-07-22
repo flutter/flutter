@@ -5,7 +5,7 @@
 name: Delete Bot Branches
 
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
     branches:
       - master
@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Delete branch
         env:
-          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           REPO_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
           REPO_NAME: ${{ github.event.pull_request.head.repo.name }}
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
