@@ -1111,12 +1111,25 @@ See the link below for more information:
   /// type/flavor overlay manifests or library manifests merged in at build
   /// time. Intended for analytics, not for correctness-sensitive decisions.
   bool computeHcppEnabled({bool ifAbsent = false}) {
-    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', ifAbsent);
+    return explicitHcppFromManifest() ?? ifAbsent;
+  }
+
+  /// The explicit `io.flutter.embedding.android.EnableHcpp` value in the app's
+  /// primary source manifest, or null if the manifest does not set it.
+  ///
+  /// Like [computeHcppEnabled], this reads only the primary source manifest and
+  /// does not observe build type/flavor overlays or merged library manifests.
+  bool? explicitHcppFromManifest() {
+    return _computeManifestMetadataBoolValueOrNull('io.flutter.embedding.android.EnableHcpp');
   }
 
   bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
+    return _computeManifestMetadataBoolValueOrNull(metadataKey) ?? defaultValue;
+  }
+
+  bool? _computeManifestMetadataBoolValueOrNull(String metadataKey) {
     if (!appManifestFile.existsSync()) {
-      return defaultValue;
+      return null;
     }
     final XmlDocument document;
     try {
@@ -1147,7 +1160,7 @@ See the link below for more information:
         }
       }
     }
-    return defaultValue;
+    return null;
   }
 }
 

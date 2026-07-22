@@ -421,6 +421,23 @@ would merge into the host app's manifest, where a conflicting explicit value in 
 host manifest fails the host build in the Android manifest merger rather than taking
 priority.
 
+The precedence also differs by command, because launch commands and build commands
+have different override channels:
+
+- On `flutter run`/`test`/`drive`, an explicit `--[no-]enable-hcpp` is delivered to the
+  engine as a launch argument, which the engine honors over the manifest. So the
+  effective precedence is: explicit flag > manifest entry > feature flag.
+- On `flutter build apk`/`appbundle`, there is no launch-time channel; the packaged
+  manifest is authoritative, and the injection never overwrites an explicit entry. So
+  an explicit `--[no-]enable-hcpp` only chooses the injected default when the manifest
+  is silent: manifest entry > explicit flag > feature flag. To avoid silently ignoring
+  the flag, the build commands warn when an explicit flag conflicts with an explicit
+  manifest entry.
+
+This asymmetry is intentional: a launch-time override is ephemeral and mutates nothing,
+whereas making a transient flag rewrite a committed manifest value in a shipped artifact
+would be surprising.
+
 If an embedder needs feature flags and no such piping exists, you can instead use the project's platform-specific configuration.
 
 On Android, use `AndroidManifest.xml`:

@@ -17,10 +17,12 @@ import org.gradle.api.tasks.TaskAction
  * Adds the `io.flutter.embedding.android.EnableHcpp` meta-data to the merged
  * AndroidManifest, unless the merged manifest already contains it.
  *
- * This task is only registered when the flutter tool passes `-Penable-hcpp=true`, which it
- * does when the `enable-hcpp` feature flag is enabled. Because the injection is skipped when
- * the meta-data is already present, an explicit value from the developer's manifest (or one
- * merged in from a manifest of a dependency) always takes priority over the feature flag.
+ * This task is only registered when the flutter tool passes `-Penable-hcpp=true`. The tool
+ * does that when the `enable-hcpp` feature flag is enabled, or when `--enable-hcpp` is passed
+ * explicitly to the flutter tool (these are not the same thing: an explicit `--enable-hcpp`
+ * sets the property regardless of the feature flag). Because the injection is skipped when the
+ * meta-data is already present, an explicit value from the developer's manifest (or one merged
+ * in from a manifest of a dependency) always takes priority.
  */
 @CacheableTask
 abstract class EnableHcppManifestTask : DefaultTask() {

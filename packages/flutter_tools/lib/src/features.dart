@@ -88,7 +88,7 @@ abstract class FeatureFlags {
   /// Whether to only build for arm64 when targeting macOS.
   bool get isMacOSArm64OnlyEnabled;
 
-  /// Whether HCPP gating is enabled.
+  /// Whether the HCPP platform view rendering mode is enabled.
   bool get isHcppEnabled;
 
   /// Whether a particular feature is enabled for the current channel.
@@ -331,9 +331,9 @@ const macOSArm64Only = Feature(
   stable: FeatureChannelSetting(available: true),
 );
 
-/// Enable Hybrid Composition++ (HCPP) gating.
+/// Enable the use of the HCPP (Hybrid Composition++) platform view rendering mode.
 const hcpp = Feature(
-  name: 'support for Hybrid Composition++ (HCPP)',
+  name: 'the HCPP platform view rendering mode',
   configSetting: 'enable-hcpp',
   environmentOverride: 'FLUTTER_ENABLE_HCPP',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),

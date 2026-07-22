@@ -18,9 +18,11 @@ import '../base/terminal.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build_aar.dart';
@@ -184,4 +186,32 @@ abstract class BuildSubCommand extends FlutterCommand {
 
   /// Whether this command is supported and should be shown.
   bool get supported => true;
+
+  /// Warns when an explicit `--[no-]enable-hcpp` conflicts with an explicit
+  /// `io.flutter.embedding.android.EnableHcpp` value in the app manifest.
+  ///
+  /// Build commands, unlike `flutter run`/`flutter test`, have no launch-time
+  /// override channel: the packaged manifest is authoritative, and the build
+  /// never overwrites an explicit manifest entry. An explicit flag that
+  /// disagrees with an explicit manifest value therefore has no effect on the
+  /// artifact, so surface that instead of silently ignoring the flag.
+  @protected
+  void warnIfHcppFlagConflictsWithManifest(FlutterProject project) {
+    final bool? flag = explicitEnableHcpp;
+    if (flag == null) {
+      return;
+    }
+    final bool? manifestValue = project.android.explicitHcppFromManifest();
+    if (manifestValue == null || manifestValue == flag) {
+      return;
+    }
+    globals.logger.printWarning(
+      'The --${flag ? '' : 'no-'}enable-hcpp flag does not affect this build. '
+      'AndroidManifest.xml explicitly sets io.flutter.embedding.android.EnableHcpp '
+      'to "$manifestValue", which is authoritative for the built artifact; the flag '
+      'only sets the default when the manifest does not. To change the packaged '
+      'value, edit the manifest. ("flutter run" and "flutter test" instead honor the '
+      'flag at launch, overriding the manifest.)',
+    );
+  }
 }
