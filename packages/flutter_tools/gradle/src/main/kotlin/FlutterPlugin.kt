@@ -15,6 +15,7 @@ import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.CopyFlutterAssetsTask
 import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
@@ -331,11 +332,40 @@ class FlutterPlugin : Plugin<Project> {
                     "assemble$capitalizeVariantName"
                 )
             ) {
-                registerFlutterCompileTask(
-                    projectToAddTasksTo,
-                    variant,
-                    flutterPlugin,
-                    targetPlatformsList
+                val compileTaskProvider =
+                    registerFlutterCompileTask(
+                        projectToAddTasksTo,
+                        variant,
+                        flutterPlugin,
+                        targetPlatformsList
+                    )
+                val copyFlutterAssetsTaskProvider: TaskProvider<CopyFlutterAssetsTask> =
+                    projectToAddTasksTo.tasks.register(
+                        "copyFlutterAssets$capitalizeVariantName",
+                        CopyFlutterAssetsTask::class.java
+                    ) {
+                        dependsOn(compileTaskProvider)
+                        intermediateDir.set(
+                            projectToAddTasksTo.layout.dir(
+                                compileTaskProvider.map { requireNotNull(it.outputDirectory) }
+                            )
+                        )
+                    }
+                // Flutter's assets are delivered as a generated assets source directory, so
+                // AGP merges and packages them like any other assets source. The assets
+                // source set is expected to exist for application variants; fail loudly
+                // rather than silently building an APK without Flutter assets.
+                val assetSources =
+                    variant.sources.assets
+                        ?: throw GradleException(
+                            "Flutter could not register its generated assets for variant " +
+                                "'${variant.name}' because the Android Gradle Plugin did not " +
+                                "expose an assets source set for it. Please file an issue at " +
+                                "https://github.com/flutter/flutter/issues."
+                        )
+                assetSources.addGeneratedSourceDirectory(
+                    copyFlutterAssetsTaskProvider,
+                    CopyFlutterAssetsTask::destinationDir
                 )
             }
 
@@ -383,9 +413,10 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     return@configureEach
                 }
-                // Registers the assets copy and hooks it into resource processing
-                // (addFlutterDepsForApp wires processResources itself).
-                addFlutterDepsForApp(variant, flutterPlugin)
+                // Per-ABI versionCode override; migrates to VariantOutput.versionCode.
+                // TODO(gmackall): Migrate to AGPs variant api.
+                //    https://github.com/flutter/flutter/issues/166550
+                configureLegacyAbiVersionCodeOverride(variant, projectToAddTasksTo)
 
                 // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
                 // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
@@ -692,96 +723,39 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
-        // Legacy remainder of the application-project variant wiring. The Flutter compile
-        // task itself is registered from the variant API in registerFlutterCompileTask; the
-        // pieces below (per-ABI versionCode and the assets copy into the merged-assets
-        // directory) migrate in later phases.
+        // Per-ABI versionCode override for --split-per-abi builds. Last legacy-variant-API
+        // consumer on the application path besides the flutter-apk copy; both migrate to the
+        // variant API (VariantOutput.versionCode / SingleArtifact.APK) in the next phase.
         // TODO(gmackall): Migrate to AGPs variant api.
         //    https://github.com/flutter/flutter/issues/166550
-        private fun addFlutterDepsForApp(
+        private fun configureLegacyAbiVersionCodeOverride(
             @Suppress("DEPRECATION") variant: com.android.build.gradle.api.BaseVariant,
-            flutterPlugin: FlutterPlugin
-        ): Task {
-            // Shorthand
-            val project: Project = flutterPlugin.project!!
+            project: Project
+        ) {
+            if (!FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
+                return
+            }
+            variant.outputs.forEach { output ->
+                // need to force this as the API does not return the right thing for our use.
+                // TODO(gmackall): Migrate to AGPs variant api.
+                //    https://github.com/flutter/flutter/issues/166550
+                @Suppress("DEPRECATION")
+                output as com.android.build.gradle.api.ApkVariantOutput
+                val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
 
-            if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
-                variant.outputs.forEach { output ->
-                    // need to force this as the API does not return the right thing for our use.
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    output as com.android.build.gradle.api.ApkVariantOutput
-                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
-
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    val filterIdentifier: String? =
-                        output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
-                    val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
-                    if (abiVersionCode != null && !FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)) {
-                        output.versionCodeOverride = abiVersionCode * 1000 + (
-                            versionCodeIfPresent
-                                ?: variant.mergedFlavor.versionCode as Int
-                        )
-                    }
+                // TODO(gmackall): Migrate to AGPs variant api.
+                //    https://github.com/flutter/flutter/issues/166550
+                @Suppress("DEPRECATION")
+                val filterIdentifier: String? =
+                    output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
+                val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
+                if (abiVersionCode != null && !FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)) {
+                    output.versionCodeOverride = abiVersionCode * 1000 + (
+                        versionCodeIfPresent
+                            ?: variant.mergedFlavor.versionCode as Int
+                    )
                 }
             }
-
-            // The compile task was registered from the variant API (with matching
-            // shouldConfigureFlutterTask gating), so it is expected to exist here.
-            val flutterCompileTask: FlutterTask =
-                project.tasks
-                    .named(flutterCompileTaskName(variant.name), FlutterTask::class.java)
-                    .get()
-            val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
-                project.tasks.register(
-                    "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
-                    Copy::class.java
-                ) {
-                    dependsOn(flutterCompileTask)
-                    with(flutterCompileTask.assets)
-                    filePermissions {
-                        user {
-                            read = true
-                            write = true
-                        }
-                    }
-                    val mergeAssets =
-                        try {
-                            variant.mergeAssetsProvider.get()
-                        } catch (e: IllegalStateException) {
-                            // TODO(gmackall): Migrate to AGPs variant api.
-                            //    https://github.com/flutter/flutter/issues/166550
-                            @Suppress("DEPRECATION")
-                            variant.mergeAssets
-                        }
-                    dependsOn(mergeAssets)
-                    dependsOn("clean${FlutterPluginUtils.capitalize(mergeAssets.name)}")
-                    mergeAssets.mustRunAfter("clean${FlutterPluginUtils.capitalize(mergeAssets.name)}")
-                    into(mergeAssets.outputDir)
-                }
-            val copyFlutterAssetsTask: Task = copyFlutterAssetsTaskProvider.get()
-            // TODO(gmackall): Migrate to AGPs variant api.
-            //    https://github.com/flutter/flutter/issues/166550
-            @Suppress("DEPRECATION")
-            val variantOutput: com.android.build.gradle.api.BaseVariantOutput = variant.outputs.first()
-            val processResources =
-                try {
-                    variantOutput.processResourcesProvider.get()
-                } catch (e: IllegalStateException) {
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    variantOutput.processResources
-                }
-            processResources.dependsOn(copyFlutterAssetsTask)
-            // The following tasks use the output of copyFlutterAssetsTask,
-            // so it's necessary to declare it as an dependency since Gradle 8.
-            // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-            addCopyFlutterAssetsDependency(project, variant.name, copyFlutterAssetsTask)
-            return copyFlutterAssetsTask
         }
 
         // Add-to-app module (library) path. Still entirely on the legacy variant API; the
