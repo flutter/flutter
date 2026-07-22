@@ -30,7 +30,6 @@ import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
 import com.flutter.gradle.DependencyVersionChecker.warnKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnMinSdkVersion
-import com.flutter.gradle.testing.setAgpKotlinVersionToNull
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -499,7 +498,6 @@ private object MockProjectFactory {
             }
             return@answers Unit
         }
-        setAgpKotlinVersionToNull(mockProject)
 
         return mockProject
     }
