@@ -160,8 +160,10 @@ runs:
         shell: bash
         id: pub-deps-hash
         run: |
-          # Generate stable hash of pubspec.yaml files
-          find dev examples packages -name "pubspec.yaml" -print0 | sort -z | xargs -0 cat | sha256sum  >> "$RUNNER_TEMP/pub_deps_sha"
+          # Generate a stable hash for github caching from the pubspec.yaml
+          # files that drive dependency resolution. Includes the root
+          # package.yaml and all package.yaml files from dev/examples/packages.
+          find pubspec.yaml dev examples packages -name "pubspec.yaml" -print0 | sort -z | xargs -0 cat | sha256sum >> "$RUNNER_TEMP/pub_deps_sha"
           echo "revision=$(cat "$RUNNER_TEMP/pub_deps_sha")" >> "$GITHUB_OUTPUT"
       - name: pub package cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
