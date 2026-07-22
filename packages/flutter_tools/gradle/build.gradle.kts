@@ -66,14 +66,18 @@ dependencies {
     // All kotlinx implementation dependencies must work with the oldest kotlin supported versions.
     // Defined in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    // The Flutter Gradle Plugin compiles against AGP's public API artifact only. AGP 10
+    // removes access to AGP internals entirely, so this dependency choice is also the
+    // compile-time proof that no internal API is used (see
+    // docs/platforms/android/Migrating-Flutter-Gradle-Plugin-to-AGP-public-API.md).
     // When bumping the default agpVersion above, also update:
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
-    compileOnly("com.android.tools.build:gradle:$agpVersion")
+    compileOnly("com.android.tools.build:gradle-api:$agpVersion")
 
     testImplementation(kotlin("test"))
-    testImplementation("com.android.tools.build:gradle:$agpVersion")
+    testImplementation("com.android.tools.build:gradle-api:$agpVersion")
     testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("io.mockk:mockk:1.13.16")
 }
