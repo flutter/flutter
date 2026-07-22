@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
 
-#include <atomic>
 #include <memory>
 #include <utility>
 
@@ -88,16 +87,20 @@ bool CommandBufferGLES::OnSubmitCommands(bool block_on_schedule,
     const auto result = reactor_->React();
     if (ContextGLES::IsJobPoolConstrainedDriver()) {
       // Drivers prone to internal job-pool exhaustion crash once too many
-      // submitted jobs are awaiting retirement; this accumulates during long
-      // low-load sessions (small frames and uploads outpace the driver's
-      // retirement cadence). Periodically finish the queue so the pool stays
-      // shallow. See https://github.com/flutter/flutter/issues/189190.
+      // submitted jobs accumulate awaiting retirement; this builds up during
+      // long low-load sessions (small frames and uploads outpace the
+      // driver's retirement cadence). Periodically flushing bounds the
+      // accumulation; validated on-device to be sufficient (a blocking
+      // glFinish is not required). See
+      // https://github.com/flutter/flutter/issues/189190.
+      // The counter is thread-local because a flush only applies to the
+      // current context: a shared counter would let submissions on one
+      // context (e.g. the IO thread's) consume the drain interval of
+      // another.
       constexpr uint64_t kJobPoolDrainInterval = 64;
-      static std::atomic<uint64_t> submission_count = 0;
-      if (submission_count.fetch_add(1, std::memory_order_relaxed) %
-              kJobPoolDrainInterval ==
-          kJobPoolDrainInterval - 1) {
-        reactor_->GetProcTable().Finish();
+      thread_local uint64_t submission_count = 0;
+      if (++submission_count % kJobPoolDrainInterval == 0) {
+        reactor_->GetProcTable().Flush();
       }
     }
     if (tracker) {
