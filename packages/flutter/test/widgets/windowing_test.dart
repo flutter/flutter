@@ -73,7 +73,13 @@ class _StubWindowController extends WindowController {
   void setFullscreen(bool fullscreen, {Display? display}) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 class _StubDialogWindowController extends DialogWindowController {
@@ -112,7 +118,13 @@ class _StubDialogWindowController extends DialogWindowController {
   void setMinimized(bool minimized) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 class _StubTooltipWindowController extends TooltipWindowController {
@@ -135,7 +147,13 @@ class _StubTooltipWindowController extends TooltipWindowController {
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 class _StubPopupWindowController extends PopupWindowController {
@@ -155,7 +173,13 @@ class _StubPopupWindowController extends PopupWindowController {
   void setConstraints(BoxConstraints constraints) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
@@ -199,7 +223,13 @@ class _StubSatelliteWindowController extends SatelliteWindowController {
   void activate() {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
+  void destroy() {
+    _destroyed = true;
+  }
 }
 
 // A controller that mutates its aspect values and notifies listeners, used to
@@ -213,24 +243,43 @@ class _MutableWindowController extends WindowController {
   Size _contentSize = Size.zero;
   bool _activated = false;
   bool _maximized = false;
+  bool _destroyed = false;
 
   @override
-  Size get contentSize => _contentSize;
+  Size get contentSize {
+    _ensureNotDestroyed();
+    return _contentSize;
+  }
 
   @override
-  String get title => 'Mutable Window';
+  String get title {
+    _ensureNotDestroyed();
+    return 'Mutable Window';
+  }
 
   @override
-  bool get isActivated => _activated;
+  bool get isActivated {
+    _ensureNotDestroyed();
+    return _activated;
+  }
 
   @override
-  bool get isMaximized => _maximized;
+  bool get isMaximized {
+    _ensureNotDestroyed();
+    return _maximized;
+  }
 
   @override
-  bool get isMinimized => false;
+  bool get isMinimized {
+    _ensureNotDestroyed();
+    return false;
+  }
 
   @override
-  bool get isFullscreen => false;
+  bool get isFullscreen {
+    _ensureNotDestroyed();
+    return false;
+  }
 
   @override
   void setSize(Size size) {
@@ -263,7 +312,22 @@ class _MutableWindowController extends WindowController {
   void setFullscreen(bool fullscreen, {Display? display}) {}
 
   @override
-  void destroy() {}
+  bool get isDestroyed => _destroyed;
+
+  @override
+  void destroy() {
+    if (_destroyed) {
+      return;
+    }
+    _destroyed = true;
+    notifyListeners();
+  }
+
+  void _ensureNotDestroyed() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+  }
 }
 
 void main() {
@@ -281,10 +345,7 @@ void main() {
       test('default WindowingOwner throws when accessing createWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createWindowController(
-            delegate: WindowControllerDelegate(),
-            resizable: true,
-          ),
+          () => owner.createWindowController(delegate: WindowControllerDelegate(), resizable: true),
           throwsUnsupportedError,
         );
       });
@@ -1874,6 +1935,273 @@ void main() {
         await tester.pump();
 
         expect(observed, <bool>[false, true]);
+      });
+
+      testWidgets('Can access WindowScope.isDestroyedOf for regular windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubWindowController(tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          Window(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.isDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.isDestroyedOf for dialog windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubDialogWindowController(tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          DialogWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.isDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.isDestroyedOf for tooltip windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubTooltipWindowController(tester: tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          TooltipWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.isDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.isDestroyedOf for popup windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubPopupWindowController(tester: tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          PopupWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.isDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.isDestroyedOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.isDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.maybeIsDestroyedOf for regular windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubWindowController(tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          Window(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.maybeIsDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.maybeIsDestroyedOf for dialog windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubDialogWindowController(tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          DialogWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.maybeIsDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.maybeIsDestroyedOf for tooltip windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubTooltipWindowController(tester: tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          TooltipWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.maybeIsDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.maybeIsDestroyedOf for popup windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubPopupWindowController(tester: tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          PopupWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.maybeIsDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('Can access WindowScope.maybeIsDestroyedOf for satellite windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubSatelliteWindowController(tester: tester);
+        bool? isDestroyed;
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          SatelliteWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                isDestroyed = WindowScope.maybeIsDestroyedOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(isDestroyed, equals(false));
+      });
+
+      testWidgets('WindowScope.maybeIsDestroyedOf returns null without a WindowScope ancestor', (
+        WidgetTester tester,
+      ) async {
+        bool? isDestroyed;
+        var builderCalled = false;
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              builderCalled = true;
+              isDestroyed = WindowScope.maybeIsDestroyedOf(context);
+              return const SizedBox.shrink();
+            },
+          ),
+        );
+
+        expect(builderCalled, isTrue);
+        expect(isDestroyed, isNull);
+      });
+
+      testWidgets('Dependent rebuilds when the window is destroyed', (WidgetTester tester) async {
+        final controller = _MutableWindowController(tester);
+        addTearDown(controller.dispose);
+        final observed = <bool>[];
+        await tester.pumpWidget(
+          wrapWithView: false,
+          Window(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                observed.add(WindowScope.isDestroyedOf(context));
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(observed, <bool>[false]);
+
+        // Destroying notifies listeners. The rebuild must not throw even though
+        // the controller's other value getters throw once destroyed.
+        controller.destroy();
+        await tester.pump();
+
+        expect(observed, <bool>[false, true]);
+        expect(tester.takeException(), isNull);
       });
 
       testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {
