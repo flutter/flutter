@@ -4,9 +4,9 @@
 
 package com.flutter.gradle
 
-import kotlin.test.assertFailsWith
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
