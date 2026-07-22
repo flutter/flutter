@@ -76,7 +76,15 @@ projects. That opt-out dies with AGP 10.
    it is seeded with the merged value; set `abiOffset * 1000 + current`,
    avoiding a self-referential `.map`. Fall back to a snapshot only if
    read-then-set is impossible; record the outcome here.
-   - *Spike result:* _pending (P6)_.
+   - *Spike result:* read-then-set implemented in P6 (`VariantOutput.versionCode.orNull`
+     read at onVariants time, then `set(abiOffset * 1000 + base)`); the sandbox could not
+     execute builds, so the split-per-abi × flavor-defined-versionCode apkanalyzer check in
+     CI is the confirming gate. The `finalizeDsl` snapshot fallback remains unimplemented.
+   - *flutter-apk copy outputs:* the copy task declares individual predictable
+     `@OutputFiles` (from target platforms × flavor × build mode) instead of the shared
+     `outputs/flutter-apk` directory, because a shared `@OutputDirectory` would overlap
+     between variants by construction. A runtime warning reports produced names outside
+     the predicted set.
 6. **P3 pre-spike (afterEvaluate DSL mutation under newDsl).** The planned scratch-app
    spike (AGP 9.1 + `newDsl=true` + custom build type, verifying that build-type
    creation from `pluginProject.afterEvaluate` still works) could not run in the
