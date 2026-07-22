@@ -10,7 +10,7 @@ void configureProject(Project project, String outputDir) {
     if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
-    if (!project.android.hasProperty("libraryVariants")) {
+    if (!project.plugins.hasPlugin("com.android.library")) {
         throw new GradleException("Can't generate AAR on a non Android library project.")
     }
 
@@ -117,30 +117,48 @@ allprojects {
 afterProject { project ->
     // Exit early if either:
     // 1. The project doesn't have the Android Gradle plugin applied.
-    // 2. The project has already defined which variants to publish (trying to re-define which
-    //    variants to publish will result in an error).
+    // 2. Flutter already configured publishing for this project (afterProject can fire more
+    //    than once per project in composite settings).
     if (!project.hasProperty("android")) {
         return
     }
-    if (project.android.publishing.singleVariants.size() != 0) {
+    if (project.ext.has("flutterSingleVariantsConfigured")) {
         return
     }
+    project.ext.set("flutterSingleVariantsConfigured", true)
 
-    Closure addSingleVariants = {buildType ->
-        if (!project.android.productFlavors.isEmpty()) {
-            project.android.productFlavors.all{productFlavor ->
-                project.android.publishing.singleVariant(
-                        productFlavor.name + buildType.name.capitalize()
-                ) {
-                    withSourcesJar()
-                    withJavadocJar()
-                }
-            }
-        } else {
-            project.android.publishing.singleVariant(buildType.name) {
+    // Declares AAR publishing for a single variant. If the project's own build file already
+    // declared publishing for that variant, AGP rejects the re-declaration; keep the user's
+    // declaration and explain what happened. (Before this migration, Flutter silently skipped
+    // configuring publishing entirely - for every variant - as soon as the user had declared
+    // any variant themselves, which broke partially-declared projects much later, at
+    // publication time.)
+    Closure addSingleVariant = { String variantName ->
+        try {
+            project.android.publishing.singleVariant(variantName) {
                 withSourcesJar()
                 withJavadocJar()
             }
+        } catch (Exception e) {
+            project.logger.warn(
+                "Warning: Flutter could not configure AAR publishing for variant " +
+                "'$variantName' of project '${project.name}': the project already declares " +
+                "publishing for it (android.publishing.singleVariant/multipleVariants). " +
+                "Flutter will use the project's own declaration. If `flutter build aar` " +
+                "fails afterwards, remove the custom publishing block from the project's " +
+                "build file, or make sure it declares sources and javadoc jars. " +
+                "Cause: ${e.message}"
+            )
+        }
+    }
+
+    Closure addSingleVariants = { buildType ->
+        if (!project.android.productFlavors.isEmpty()) {
+            project.android.productFlavors.all { productFlavor ->
+                addSingleVariant(productFlavor.name + buildType.name.capitalize())
+            }
+        } else {
+            addSingleVariant(buildType.name)
         }
     }
 
@@ -175,16 +193,21 @@ projectsEvaluated {
     // as Maven artifacts.
     modulePlugins.each { pluginProject ->
         configurePlugin(pluginProject, moduleProject.property("output-dir"))
-        moduleProject.android.libraryVariants.all { variant ->
-            // Configure the `assembleAar<variantName>` task for each plugin's projects and make
-            // the module's equivalent task depend on the plugin's task.
-            String variantName = variant.name.capitalize()
+        // Make the module's `assembleAar<variantName>` task depend on the plugin's
+        // equivalent task, for every published variant. The variants are enumerated
+        // through the public software components (one component per published variant,
+        // plus "all"), not the removed legacy `libraryVariants` API.
+        moduleProject.components.forEach { component ->
+            if (component.name == "all") {
+                return
+            }
+            String variantName = component.name.capitalize()
 
-                Task moduleProjectTask = moduleProject.tasks.named("assembleAar$variantName").get()
-                assert(moduleProjectTask != null)
-                Task pluginProjectTask = pluginProject.tasks.named("assembleAar$variantName").get()
-                assert(pluginProjectTask != null)
-                moduleProjectTask.dependsOn(pluginProjectTask)
+            Task moduleProjectTask = moduleProject.tasks.named("assembleAar$variantName").get()
+            assert(moduleProjectTask != null)
+            Task pluginProjectTask = pluginProject.tasks.named("assembleAar$variantName").get()
+            assert(pluginProjectTask != null)
+            moduleProjectTask.dependsOn(pluginProjectTask)
         }
     }
 }
