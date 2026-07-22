@@ -34,7 +34,6 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
-#include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -810,8 +809,7 @@ bool Canvas::AttemptDrawLineSDF(const Point& p0,
                                 const Point& p1,
                                 const Paint& paint,
                                 bool reuse_depth) {
-  if (!(renderer_.GetContext()->GetFlags().use_sdfs ||
-        renderer_.GetContext()->GetFlags().antialiased_lines) ||
+  if (!renderer_.GetContext()->GetFlags().use_sdfs ||
       !IsCompatibleWithSDFRendering(paint)) {
     return false;
   }
