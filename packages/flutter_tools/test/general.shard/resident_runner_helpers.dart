@@ -153,7 +153,7 @@ class FakeDartDevelopmentService extends Fake
   Future<void> handleHotRestart(FlutterDevice? device) async {}
 
   @override
-  void shutdown() {}
+  Future<void> shutdown() async {}
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
@@ -532,4 +532,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

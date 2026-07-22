@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/sampler_gles.h"
 
+#include <algorithm>
+
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
@@ -119,6 +121,19 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
     // Transparent black.
     const GLfloat border_color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     gl.TexParameterfv(*target, IMPELLER_GL_TEXTURE_BORDER_COLOR, border_color);
+  }
+
+  // Anisotropy is a per-texture parameter in GLES, so it must be written on
+  // every configuration (including resetting it back to 1) to prevent a
+  // previously configured value from leaking into this sampler's state. The
+  // parameter only exists when GL_EXT_texture_filter_anisotropic is present;
+  // it is applied with TexParameterfv, which is core ES 2.0.
+  const uint32_t max_anisotropy =
+      gl.GetCapabilities()->GetMaxSamplerAnisotropy();
+  if (max_anisotropy > 1) {
+    const GLfloat anisotropy[1] = {static_cast<GLfloat>(
+        std::clamp<uint32_t>(desc.max_anisotropy, 1u, max_anisotropy))};
+    gl.TexParameterfv(*target, IMPELLER_GL_TEXTURE_MAX_ANISOTROPY, anisotropy);
   }
 
   return true;

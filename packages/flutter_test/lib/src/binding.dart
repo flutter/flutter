@@ -310,12 +310,12 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
     required RegularWindowControllerDelegate delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
   }) : _delegate = delegate,
-       _size = preferredSize ?? const Size(800, 600),
-       _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
+       _size = size ?? const Size(800, 600),
+       _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
@@ -418,7 +418,12 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -465,13 +470,13 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     BaseWindowController? parent,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
   }) : _delegate = delegate,
        _parent = parent,
-       _size = preferredSize ?? const Size(800, 600),
-       _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
+       _size = size ?? const Size(800, 600),
+       _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
@@ -555,7 +560,12 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -568,12 +578,12 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
     required TooltipWindowControllerDelegate delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) : _delegate = delegate,
-       _constraints = preferredConstraints,
+       _constraints = constraints,
        _anchorRect = anchorRect,
        _positioner = positioner,
        _parent = parent,
@@ -621,7 +631,12 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -634,12 +649,12 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
     required PopupWindowControllerDelegate delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) : _delegate = delegate,
-       _constraints = preferredConstraints,
+       _constraints = constraints,
        _anchorRect = anchorRect,
        _positioner = positioner,
        _parent = parent,
@@ -687,7 +702,12 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -707,8 +727,8 @@ class _TestSatelliteWindowController extends SatelliteWindowController
     required BaseWindowController parent,
     ui.Rect? anchorRect,
     required WindowPositioner positioner,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     String? title,
   }) : _delegate = delegate,
        _parent = parent,
@@ -716,8 +736,8 @@ class _TestSatelliteWindowController extends SatelliteWindowController
        _anchorRect = anchorRect,
        // ignore: unused_field
        _positioner = positioner,
-       _size = preferredSize ?? const Size(800, 600),
-       _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
+       _size = size ?? const Size(800, 600),
+       _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
@@ -796,7 +816,12 @@ class _TestSatelliteWindowController extends SatelliteWindowController
   }
 
   @override
+  bool get isDestroyed => _destroyed;
+  bool _destroyed = false;
+
+  @override
   void destroy() {
+    _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
@@ -923,8 +948,8 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
@@ -932,8 +957,8 @@ class _TestWindowingOwner extends WindowingOwner {
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
     );
   }
@@ -942,8 +967,8 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   DialogWindowController createDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     BaseWindowController? parent,
     String? title,
@@ -953,8 +978,8 @@ class _TestWindowingOwner extends WindowingOwner {
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
       parent: parent,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
     );
   }
@@ -962,7 +987,7 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -971,7 +996,7 @@ class _TestWindowingOwner extends WindowingOwner {
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -981,7 +1006,7 @@ class _TestWindowingOwner extends WindowingOwner {
   @override
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
-    required BoxConstraints preferredConstraints,
+    required BoxConstraints constraints,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -990,7 +1015,7 @@ class _TestWindowingOwner extends WindowingOwner {
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
-      preferredConstraints: preferredConstraints,
+      constraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -1004,8 +1029,8 @@ class _TestWindowingOwner extends WindowingOwner {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
+    Size? size,
+    BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
@@ -1016,8 +1041,8 @@ class _TestWindowingOwner extends WindowingOwner {
       parent: parent,
       anchorRect: initialAnchorRect,
       positioner: initialPositioner,
-      preferredSize: preferredSize,
-      preferredConstraints: preferredConstraints,
+      size: size,
+      constraints: constraints,
       title: title,
     );
   }

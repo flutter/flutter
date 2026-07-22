@@ -395,8 +395,8 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  auto sampler_library =
-      std::shared_ptr<SamplerLibraryVK>(new SamplerLibraryVK(device_holder));
+  auto sampler_library = std::shared_ptr<SamplerLibraryVK>(
+      new SamplerLibraryVK(device_holder, caps->GetMaxSamplerAnisotropy()));
 
   auto shader_library = std::shared_ptr<ShaderLibraryVK>(
       new ShaderLibraryVK(device_holder,                   //
@@ -522,6 +522,16 @@ bool ContextVK::IsValid() const {
 
 std::shared_ptr<Allocator> ContextVK::GetResourceAllocator() const {
   return allocator_;
+}
+
+std::shared_ptr<const GpuSubmissionTracker> ContextVK::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextVK::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
 }
 
 std::shared_ptr<ShaderLibrary> ContextVK::GetShaderLibrary() const {

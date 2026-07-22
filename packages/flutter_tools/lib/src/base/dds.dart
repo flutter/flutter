@@ -118,7 +118,9 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     }
   }
 
-  void shutdown() => _ddsInstance?.shutdown();
+  Future<void> shutdown() async {
+    await _ddsInstance?.shutdown();
+  }
 }
 
 /// Contains common functionality that can be used with any implementation of

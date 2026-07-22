@@ -105,7 +105,6 @@ class OnscreenCanvasProvider extends CanvasProvider<DomHTMLCanvasElement> {
     final cssHeight = '${size.height / ratio}px';
     canvas.style
       ..width = cssWidth
-      ..height = cssHeight
-      ..position = 'absolute';
+      ..height = cssHeight;
   }
 }

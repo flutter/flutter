@@ -105,6 +105,16 @@ extern Dart_Handle InternalFlutterGpu_ShaderLibrary_ReinitializeWithAsset(
     Dart_Handle asset_name);
 
 FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_ShaderLibrary_InitializeWithBytes(
+    Dart_Handle wrapper,
+    Dart_Handle byte_data);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_ShaderLibrary_ReinitializeWithBytes(
+    flutter::gpu::ShaderLibrary* wrapper,
+    Dart_Handle byte_data);
+
+FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_ShaderLibrary_GetShader(
     flutter::gpu::ShaderLibrary* wrapper,
     Dart_Handle shader_name,

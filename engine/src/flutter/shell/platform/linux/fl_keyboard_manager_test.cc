@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #define VERIFY_DOWN(OUT_LOGICAL, OUT_CHAR)                                  \
@@ -108,10 +109,28 @@ typedef std::vector<const MockGroupLayoutData*> MockLayoutData;
 extern const MockLayoutData kLayoutRussian;
 extern const MockLayoutData kLayoutFrench;
 
-TEST(FlKeyboardManagerTest, EngineNoResponseChannelHandled) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+class FlKeyboardManagerTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    messenger = fl_mock_binary_messenger_new();
+    g_clear_object(&engine);
+    engine =
+        fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+    manager = fl_keyboard_manager_new(engine);
+    StartEngine();
+  }
 
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ~FlKeyboardManagerTest() {
+    g_clear_object(&manager);
+    g_clear_object(&messenger);
+  }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+  FlKeyboardManager* manager = nullptr;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+};
+
+TEST_F(FlKeyboardManagerTest, EngineNoResponseChannelHandled) {
   // Channel handles all events.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
@@ -123,12 +142,6 @@ TEST(FlKeyboardManagerTest, EngineNoResponseChannelHandled) {
         return fl_value_ref(return_value);
       },
       nullptr);
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
   // Don't handle first event - async call never completes.
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -155,7 +168,6 @@ TEST(FlKeyboardManagerTest, EngineNoResponseChannelHandled) {
       }));
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event2, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -173,17 +185,7 @@ TEST(FlKeyboardManagerTest, EngineNoResponseChannelHandled) {
   // Passes if the cleanup does not crash.
 }
 
-TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineHandledChannelNotHandledSync) {
   // Handle channel and embedder calls synchronously.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
@@ -204,7 +206,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledSync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -218,17 +219,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledSync) {
   g_main_loop_run(loop);
 }
 
-TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineNotHandledChannelHandledSync) {
   // Handle channel and embedder calls synchronously.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
@@ -249,7 +240,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledSync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -263,17 +253,7 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledSync) {
   g_main_loop_run(loop);
 }
 
-TEST(FlKeyboardManagerTest, EngineHandledChannelHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineHandledChannelHandledSync) {
   // Handle channel and embedder calls synchronously.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
@@ -294,7 +274,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledSync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -308,17 +287,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledSync) {
   g_main_loop_run(loop);
 }
 
-TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledSync) {
   // Handle channel and embedder calls synchronously.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
@@ -339,7 +308,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledSync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -361,17 +329,7 @@ static void channel_respond(FlMockBinaryMessenger* messenger,
   fl_mock_binary_messenger_json_message_channel_respond(messenger, task, value);
 }
 
-TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineHandledChannelNotHandledAsync) {
   // Handle channel and embedder calls asynchronously.
   g_autoptr(GPtrArray) channel_calls =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -398,7 +356,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledAsync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -422,17 +379,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledAsync) {
   g_main_loop_run(loop);
 }
 
-TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineNotHandledChannelHandledAsync) {
   // Handle channel and embedder calls asynchronously.
   g_autoptr(GPtrArray) channel_calls =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -459,7 +406,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledAsync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -483,17 +429,7 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledAsync) {
   g_main_loop_run(loop);
 }
 
-TEST(FlKeyboardManagerTest, EngineHandledChannelHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineHandledChannelHandledAsync) {
   // Handle channel and embedder calls asynchronously.
   g_autoptr(GPtrArray) channel_calls =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -520,7 +456,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledAsync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -544,17 +479,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledAsync) {
   g_main_loop_run(loop);
 }
 
-TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledAsync) {
   // Handle channel and embedder calls asynchronously.
   g_autoptr(GPtrArray) channel_calls =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -581,7 +506,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledAsync) {
 
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
@@ -605,15 +529,7 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledAsync) {
   g_main_loop_run(loop);
 }
 
-TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
   g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(call_record_free));
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -624,6 +540,19 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
                         call_record_new(event, callback, user_data));
         return kSuccess;
       }));
+
+  // Respond to the key event channel so its async messages complete instead of
+  // leaking their GTasks.
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        g_autoptr(FlValue) return_value = fl_value_new_map();
+        fl_value_set_string_take(return_value, "handled",
+                                 fl_value_new_bool(FALSE));
+        return fl_value_ref(return_value);
+      },
+      nullptr);
 
   auto sendTap = [&](guint8 keycode, guint keyval, guint8 group) {
     g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
@@ -738,15 +667,7 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
   VERIFY_DOWN(kLogicalBracketLeft, "[");
 }
 
-TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
   g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(call_record_free));
   fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
@@ -800,16 +721,7 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
                               kLogicalShiftLeft);
 }
 
-TEST(FlKeyboardManagerTest, GetPressedState) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
+TEST_F(FlKeyboardManagerTest, GetPressedState) {
   // Dispatch a key event.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
@@ -828,7 +740,6 @@ TEST(FlKeyboardManagerTest, GetPressedState) {
       }));
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {

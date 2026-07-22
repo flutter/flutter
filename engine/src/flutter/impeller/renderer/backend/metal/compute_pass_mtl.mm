@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/metal/compute_pass_mtl.h"
 
 #include <Metal/Metal.h>
+#include <algorithm>
 #include <memory>
 
 #include "flutter/fml/backtrace.h"
@@ -66,6 +67,7 @@ void ComputePassMTL::SetPipeline(
     const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
   pass_bindings_cache_.SetComputePipelineState(
       ComputePipelineMTL::Cast(*pipeline).GetMTLComputePipelineState());
+  workgroup_size_ = pipeline->GetDescriptor().GetWorkgroupSize();
 }
 
 // |ComputePass|
@@ -122,38 +124,51 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
   return true;
 }
 
-fml::Status ComputePassMTL::Compute(const ISize& grid_size) {
-  if (grid_size.IsEmpty()) {
-    return fml::Status(fml::StatusCode::kUnknown,
-                       "Invalid grid size for compute command.");
+fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u) {
+    return fml::Status(fml::StatusCode::kCancelled,
+                       "Invalid workgroup count for compute command.");
   }
 
-  // Threadgroup sizes must be uniform.
-  auto width = grid_size.width;
-  auto height = grid_size.height;
+  const NSUInteger max_total =
+      pass_bindings_cache_.GetPipeline().maxTotalThreadsPerThreadgroup;
 
-  auto max_total_threads_per_threadgroup = static_cast<int64_t>(
-      pass_bindings_cache_.GetPipeline().maxTotalThreadsPerThreadgroup);
-
-  // Special case for linear processing.
-  if (height == 1) {
-    int64_t thread_groups = std::max(
-        static_cast<int64_t>(
-            std::ceil(width * 1.0 / max_total_threads_per_threadgroup * 1.0)),
-        1LL);
-    [encoder_
-         dispatchThreadgroups:MTLSizeMake(thread_groups, 1, 1)
-        threadsPerThreadgroup:MTLSizeMake(max_total_threads_per_threadgroup, 1,
-                                          1)];
+  // Unlike Vulkan and GLES, Metal does not bake the threadgroup size into the
+  // shader; it is supplied here at dispatch. Honor the shader's declared local
+  // size. A dimension of 0 means the shader sized it with a specialization
+  // constant. In that case fill the remaining threadgroup capacity into x while
+  // honoring any literal y and z, keeping the total within the device maximum.
+  MTLSize threads_per_threadgroup;
+  if (workgroup_size_[0] == 0u) {
+    const NSUInteger size_y =
+        workgroup_size_[1] == 0u ? 1u : workgroup_size_[1];
+    const NSUInteger size_z =
+        workgroup_size_[2] == 0u ? 1u : workgroup_size_[2];
+    const NSUInteger size_x =
+        std::max<NSUInteger>(1u, max_total / (size_y * size_z));
+    threads_per_threadgroup = MTLSizeMake(size_x, size_y, size_z);
   } else {
-    while (width * height > max_total_threads_per_threadgroup) {
-      width = std::max(1LL, width / 2);
-      height = std::max(1LL, height / 2);
-    }
-
-    auto size = MTLSizeMake(width, height, 1);
-    [encoder_ dispatchThreadgroups:size threadsPerThreadgroup:size];
+    threads_per_threadgroup = MTLSizeMake(
+        workgroup_size_[0], workgroup_size_[1] == 0u ? 1 : workgroup_size_[1],
+        workgroup_size_[2] == 0u ? 1 : workgroup_size_[2]);
   }
+
+  // Metal aborts at dispatch if the threadgroup size exceeds the device
+  // maximum. Vulkan rejects an oversized local size at pipeline creation, so do
+  // the equivalent here and fail gracefully instead.
+  if (threads_per_threadgroup.width * threads_per_threadgroup.height *
+          threads_per_threadgroup.depth >
+      max_total) {
+    return fml::Status(fml::StatusCode::kCancelled,
+                       "Compute shader workgroup size exceeds the device's "
+                       "maximum threads per threadgroup.");
+  }
+
+  [encoder_
+       dispatchThreadgroups:MTLSizeMake(workgroup_count[0], workgroup_count[1],
+                                        workgroup_count[2])
+      threadsPerThreadgroup:threads_per_threadgroup];
 
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
