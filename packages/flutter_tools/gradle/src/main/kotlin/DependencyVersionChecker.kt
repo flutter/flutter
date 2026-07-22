@@ -106,12 +106,20 @@ object DependencyVersionChecker {
     }
 
     private fun getVersionString(tool: String, type: String): String {
-        return supportVersions[tool]?.jsonObject?.get(type)?.jsonPrimitive?.content
+        return supportVersions[tool]
+            ?.jsonObject
+            ?.get(type)
+            ?.jsonPrimitive
+            ?.content
             ?: throw GradleException("Missing version config for $tool.$type")
     }
 
     private fun getIntVersion(tool: String, type: String): Int {
-        return supportVersions[tool]?.jsonObject?.get(type)?.jsonPrimitive?.int
+        return supportVersions[tool]
+            ?.jsonObject
+            ?.get(type)
+            ?.jsonPrimitive
+            ?.int
             ?: throw GradleException("Missing version config for $tool.$type")
     }
 
