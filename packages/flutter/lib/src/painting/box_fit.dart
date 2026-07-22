@@ -197,15 +197,11 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
     ),
     BoxFit.scaleDown => (
       inputSize,
-      (() {
-        final double aspectRatio = inputSize.width / inputSize.height;
-        final Size temp = inputSize.height > outputSize.height
-            ? Size(outputSize.height * aspectRatio, outputSize.height)
-            : inputSize;
-        return temp.width > outputSize.width
-            ? Size(outputSize.width, outputSize.width / aspectRatio)
-            : temp;
-      })(),
+      inputSize.width > outputSize.width || inputSize.height > outputSize.height
+          ? (outputSize.width / outputSize.height > inputSize.width / inputSize.height
+                ? Size(inputSize.width * outputSize.height / inputSize.height, outputSize.height)
+                : Size(outputSize.width, inputSize.height * outputSize.width / inputSize.width))
+          : inputSize,
     ),
   };
   return FittedSizes(sourceSize, destinationSize);
