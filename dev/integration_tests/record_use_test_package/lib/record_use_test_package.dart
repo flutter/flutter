@@ -19,7 +19,6 @@ Future<Map<String, String>> _getTranslations() async {
   return _cachedTranslations!;
 }
 
-// ignore: experimental_member_use
 @RecordUse()
 Future<String> translate(String key) async {
   final Map<String, String> translations = await _getTranslations();

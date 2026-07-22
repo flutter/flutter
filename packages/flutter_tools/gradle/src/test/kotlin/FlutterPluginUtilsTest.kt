@@ -34,11 +34,16 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
+import org.gradle.process.ExecResult
+import org.gradle.process.ExecSpec
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -681,7 +686,6 @@ class FlutterPluginUtilsTest {
                 every { get() } answers { callable.call() }
             }
         }
-
         every {
             taskContainer.register(
                 "validateCompileSdkVersion",
@@ -1852,6 +1856,16 @@ class FlutterPluginUtilsTest {
         }
     }
 
+    private fun captureFinalizeDslAction(project: Project) =
+        slot<(Any) -> Unit>().also { finalizeDslSlot ->
+            val androidComponents =
+                mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>()
+            every {
+                project.extensions.findByType(AndroidComponentsExtension::class.java)
+            } returns androidComponents as AndroidComponentsExtension<*, *, *>
+            every { androidComponents.finalizeDsl(capture(finalizeDslSlot)) } returns Unit
+        }
+
     // forceNdkDownload
     @Test
     fun `forceNdkDownload skips projects which are already configuring a native build`(
@@ -1862,6 +1876,7 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
@@ -1881,12 +1896,475 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `forceNdkDownload installs a missing ndk when tool properties are provided`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<ProjectInternal>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val execActionSlot = slot<Action<ExecSpec>>()
+        val mockExecSpec = mockk<ExecSpec>()
+        val mockExecResult = mockk<ExecResult>()
+        val mockExecOperations = mockk<ExecOperations>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns tempDir.toString()
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns ""
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.gradle.startParameter.isOffline } returns false
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.serviceOf<ExecOperations>() } returns mockExecOperations
+        every { mockExecOperations.exec(capture(execActionSlot)) } answers {
+            File(tempDir.toFile(), "ndk/29.0.13846066/source.properties").apply {
+                parentFile.mkdirs()
+                createNewFile()
+            }
+            mockExecResult
+        }
+        every { mockExecResult.assertNormalExitValue() } returns mockExecResult
+        every { mockExecSpec.commandLine(any<List<String>>()) } returns mockExecSpec
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        finalizeDslSlot.captured.invoke(Any())
+        execActionSlot.captured.execute(mockExecSpec)
+
+        verify(exactly = 1) { mockExecOperations.exec(any<Action<ExecSpec>>()) }
+        verify {
+            mockExecSpec.commandLine(
+                listOf(
+                    "/sdkmanager",
+                    "--sdk_root=$tempDir",
+                    "--install",
+                    "ndk;29.0.13846066"
+                )
+            )
+        }
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload skips sdkmanager install when the requested ndk is already installed`() {
+        val project = mockk<Project>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns "29.0.13846066"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        finalizeDslSlot.captured.invoke(Any())
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload does not overwrite native build configured before dsl finalization`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockDirectoryProperty = mockk<DirectoryProperty>()
+        val mockDirectory = mockk<Directory>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        var cmakePath: File? = null
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } answers { cmakePath }
+        every { mockCmakeOptions.path(any()) } returns Unit
+        every { mockCmakeOptions.buildStagingDirectory(any()) } returns Unit
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns ""
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.layout.buildDirectory } returns mockDirectoryProperty
+        every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
+        every { mockDirectoryProperty.get() } returns mockDirectory
+        every { mockDirectory.asFile.path } returns "/randomapp/build/app/"
+
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        every { mockBaseExtension.buildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
+        every { mockBuildType.name } returns "Debug"
+        every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        cmakePath = tempDir.resolve("CMakeLists.txt").toFile()
+        finalizeDslSlot.captured.invoke(Any())
+
+        verify(exactly = 0) {
+            mockCmakeOptions.path(
+                "/base/path/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
+            )
+        }
+        verify(exactly = 0) { mockCmakeOptions.buildStagingDirectory(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload waits for finalized ndkVersion before checking installed versions`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<ProjectInternal>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val execActionSlot = slot<Action<ExecSpec>>()
+        val mockExecSpec = mockk<ExecSpec>()
+        val mockExecResult = mockk<ExecResult>()
+        val mockExecOperations = mockk<ExecOperations>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        var configuredNdkVersion = "26.3.11579264"
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } answers { configuredNdkVersion }
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns tempDir.toString()
+        every {
+            project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS)
+        } returns "26.3.11579264"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.gradle.startParameter.isOffline } returns false
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.serviceOf<ExecOperations>() } returns mockExecOperations
+        every { mockExecOperations.exec(capture(execActionSlot)) } answers {
+            File(tempDir.toFile(), "ndk/27.3.13750724/source.properties").apply {
+                parentFile.mkdirs()
+                createNewFile()
+            }
+            mockExecResult
+        }
+        every { mockExecResult.assertNormalExitValue() } returns mockExecResult
+        every { mockExecSpec.commandLine(any<List<String>>()) } returns mockExecSpec
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        configuredNdkVersion = "27.3.13750724"
+        finalizeDslSlot.captured.invoke(Any())
+        execActionSlot.captured.execute(mockExecSpec)
+
+        verify(exactly = 1) { mockExecOperations.exec(any<Action<ExecSpec>>()) }
+        verify {
+            mockExecSpec.commandLine(
+                listOf(
+                    "/sdkmanager",
+                    "--sdk_root=$tempDir",
+                    "--install",
+                    "ndk;27.3.13750724"
+                )
+            )
+        }
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload waits for finalized ApplicationExtension ndkVersion before checking installed versions`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<ProjectInternal>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val execActionSlot = slot<Action<ExecSpec>>()
+        val mockExecSpec = mockk<ExecSpec>()
+        val mockExecResult = mockk<ExecResult>()
+        val mockExecOperations = mockk<ExecOperations>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        val mockApplicationExtension = mockk<ApplicationExtension>()
+        var configuredNdkVersion = "26.3.11579264"
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every {
+            project.extensions.findByType(ApplicationExtension::class.java)
+        } returns mockApplicationExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } answers {
+            throw AssertionError(
+                "legacy ndkVersion should not be read when ApplicationExtension is available"
+            )
+        }
+        every { mockApplicationExtension.ndkVersion } answers { configuredNdkVersion }
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns tempDir.toString()
+        every {
+            project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS)
+        } returns "26.3.11579264"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.gradle.startParameter.isOffline } returns false
+        every { project.serviceOf<ExecOperations>() } returns mockExecOperations
+        every { mockExecOperations.exec(capture(execActionSlot)) } answers {
+            File(tempDir.toFile(), "ndk/27.3.13750724/source.properties").apply {
+                parentFile.mkdirs()
+                createNewFile()
+            }
+            mockExecResult
+        }
+        every { mockExecResult.assertNormalExitValue() } returns mockExecResult
+        every { mockExecSpec.commandLine(any<List<String>>()) } returns mockExecSpec
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        configuredNdkVersion = "27.3.13750724"
+        finalizeDslSlot.captured.invoke(Any())
+        execActionSlot.captured.execute(mockExecSpec)
+
+        verify(exactly = 1) { mockExecOperations.exec(any<Action<ExecSpec>>()) }
+        verify {
+            mockExecSpec.commandLine(
+                listOf(
+                    "/sdkmanager",
+                    "--sdk_root=$tempDir",
+                    "--install",
+                    "ndk;27.3.13750724"
+                )
+            )
+        }
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload skips fallback when sdkmanager is unavailable but the requested ndk is already installed`() {
+        val project = mockk<Project>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns "29.0.13846066"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        finalizeDslSlot.captured.invoke(Any())
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload reads ndkVersion from ApplicationExtension when legacy extension does not expose it`() {
+        val project = mockk<Project>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        val mockApplicationExtension = mockk<ApplicationExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } answers {
+            throw AssertionError("legacy ndkVersion should not be read when ApplicationExtension is available")
+        }
+        every { mockApplicationExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns "29.0.13846066"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        finalizeDslSlot.captured.invoke(Any())
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload throws when sdkmanager install does not produce the requested ndk`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<ProjectInternal>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val mockExecResult = mockk<ExecResult>()
+        val mockExecOperations = mockk<ExecOperations>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns tempDir.toString()
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns ""
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.gradle.startParameter.isOffline } returns false
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.serviceOf<ExecOperations>() } returns mockExecOperations
+        every { mockExecOperations.exec(any<Action<ExecSpec>>()) } returns mockExecResult
+        every { mockExecResult.assertNormalExitValue() } returns mockExecResult
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+
+        assertThrows<GradleException> {
+            finalizeDslSlot.captured.invoke(Any())
+        }
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload skips when invoking the ndk metadata task`() {
+        val project = mockk<Project>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns null
+        every { project.gradle.startParameter.taskNames } returns listOf(FlutterPluginUtils.TASK_PRINT_NDK_VERSION)
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk(relaxed = true)
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload falls back when tool properties are present but sdkmanager is unavailable`() {
+        val project = mockk<Project>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockDirectoryProperty = mockk<DirectoryProperty>()
+        val mockDirectory = mockk<Directory>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { mockCmakeOptions.path(any()) } returns Unit
+        every { mockCmakeOptions.buildStagingDirectory(any()) } returns Unit
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns ""
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.layout.buildDirectory } returns mockDirectoryProperty
+        every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
+        every { mockDirectoryProperty.get() } returns mockDirectory
+        every { mockDirectory.asFile.path } returns "/randomapp/build/app/"
+        val basePath = "/base/path"
+
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        every { mockBaseExtension.buildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
+        every { mockBuildType.name } returns "Debug"
+        every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
+
+        FlutterPluginUtils.forceNdkDownload(project, basePath)
+        finalizeDslSlot.captured.invoke(Any())
+
+        verify(exactly = 1) {
+            mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt")
+        }
+        verify(exactly = 1) { mockCmakeOptions.buildStagingDirectory(any()) }
+        verify(exactly = 1) {
+            mockBuildType.externalNativeBuild.cmake.arguments(
+                "-Wno-dev",
+                "--no-warn-unused-cli",
+                "-DCMAKE_BUILD_TYPE=Debug"
+            )
+        }
+    }
+
+    @Test
+    fun `forceNdkDownload falls back when Gradle is offline`() {
+        val project = mockk<Project>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockDirectoryProperty = mockk<DirectoryProperty>()
+        val mockDirectory = mockk<Directory>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { mockCmakeOptions.path(any()) } returns Unit
+        every { mockCmakeOptions.buildStagingDirectory(any()) } returns Unit
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns ""
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.gradle.startParameter.isOffline } returns true
+        every { project.layout.buildDirectory } returns mockDirectoryProperty
+        every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
+        every { mockDirectoryProperty.get() } returns mockDirectory
+        every { mockDirectory.asFile.path } returns "/randomapp/build/app/"
+        val basePath = "/base/path"
+
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        every { mockBaseExtension.buildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
+        every { mockBuildType.name } returns "Debug"
+        every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
+
+        FlutterPluginUtils.forceNdkDownload(project, basePath)
+        finalizeDslSlot.captured.invoke(Any())
+
+        verify(exactly = 1) {
+            mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt")
+        }
+        verify(exactly = 1) { mockCmakeOptions.buildStagingDirectory(any()) }
+        verify(exactly = 1) {
+            mockBuildType.externalNativeBuild.cmake.arguments(
+                "-Wno-dev",
+                "--no-warn-unused-cli",
+                "-DCMAKE_BUILD_TYPE=Debug"
+            )
+        }
+    }
+
+    @Test
     fun `forceNdkDownload sets externalNativeBuild properties`() {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns null
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
@@ -1927,6 +2405,26 @@ class FlutterPluginUtilsTest {
                 "--no-warn-unused-cli",
                 "-DCMAKE_BUILD_TYPE=Debug"
             )
+        }
+    }
+
+    @Test
+    fun `addTaskForPrintNdkVersion adds task for printing ndk version`() {
+        val project = mockk<Project>(relaxed = true)
+        val androidExtension = mockk<ApplicationExtension>()
+        every { androidExtension.ndkVersion } returns "29.0.13846066"
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns androidExtension
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
+        val captureSlot = slot<Action<PrintTask>>()
+
+        FlutterPluginUtils.addTaskForPrintNdkVersion(project)
+
+        verify { project.tasks.register("printNdkVersion", eq(PrintTask::class.java), capture(captureSlot)) }
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
+        captureSlot.captured.execute(mockPrintTask)
+
+        verify {
+            mockPrintTask.description = "Prints out the configured ndkVersion for this Android project"
         }
     }
 

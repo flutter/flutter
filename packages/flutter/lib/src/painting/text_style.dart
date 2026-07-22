@@ -28,6 +28,8 @@ const String _kColorBackgroundWarning =
     'Cannot provide both a backgroundColor and a background\n'
     'The backgroundColor argument is just a shorthand for "background: Paint()..color = color".';
 
+const _kTextStyleHeightNaNWarning = 'TextStyle.height must not be NaN.';
+
 // Examples can assume:
 // late BuildContext context;
 
@@ -508,7 +510,9 @@ class TextStyle with Diagnosticable {
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
        assert(color == null || foreground == null, _kColorForegroundWarning),
-       assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
+       assert(backgroundColor == null || background == null, _kColorBackgroundWarning),
+       // The equality check rejects NaN while remaining valid in const constructor assertions.
+       assert(height == null || height == height, _kTextStyleHeightNaNWarning);
 
   /// Whether null values in this [TextStyle] can be replaced with their value
   /// in another [TextStyle] using [merge].
@@ -1401,6 +1405,7 @@ class TextStyle with Diagnosticable {
     StrutStyle? strutStyle,
   }) {
     assert(maxLines == null || maxLines > 0);
+    assert(height == null || !height.isNaN, _kTextStyleHeightNaNWarning);
     final TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
     final TextHeightBehavior? effectiveTextHeightBehavior =
         textHeightBehavior ??

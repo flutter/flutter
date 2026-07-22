@@ -97,6 +97,9 @@ class FlutterTesterDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
+
+  @override
   void clearLogs() {}
 
   final _logReader = DesktopLogReader();

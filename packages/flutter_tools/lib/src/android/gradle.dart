@@ -32,6 +32,7 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_builder.dart';
+import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
@@ -57,6 +58,9 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 final _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
 const _kBuildVariantRegexGroupName = 'variant';
 const _kBuildVariantTaskName = 'printBuildVariants';
+const _kSdkManagerPathProperty = 'flutter.sdkManagerPath';
+const _kAndroidSdkRootProperty = 'flutter.androidSdkRoot';
+const _kInstalledNdkVersionsProperty = 'flutter.installedNdkVersions';
 @visibleForTesting
 const failedToStripDebugSymbolsErrorMessage = r'''
 Release app bundle failed to strip debug symbols from native libraries.
@@ -167,6 +171,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required GradleUtils gradleUtils,
     required Platform platform,
     required AndroidStudio? androidStudio,
+    AndroidSdk? androidSdk,
   }) : _java = java,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -174,6 +179,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _analytics = analytics,
        _gradleUtils = gradleUtils,
        _androidStudio = androidStudio,
+       _androidSdk = androidSdk,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -186,6 +192,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
+  final AndroidSdk? _androidSdk;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -275,6 +282,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required List<GradleHandledError> localGradleErrors,
     required String gradleExecutablePath,
+    bool printOutput = true,
     int retry = 0,
     VoidCallback? preRunTask,
     VoidCallback? postRunTask,
@@ -327,7 +335,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         }
       }
       // Pipe stdout/stderr from Gradle.
-      return line;
+      return printOutput ? line : null;
     }
 
     final Status status = _logger.startProgress("Running Gradle task '$taskName'...");
@@ -390,6 +398,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
               postRunTask: postRunTask,
               localGradleErrors: localGradleErrors,
               gradleExecutablePath: gradleExecutablePath,
+              printOutput: printOutput,
               retry: retry,
               project: project,
               maxRetries: maxRetries,
@@ -563,6 +572,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
     }
+
+    options.addAll(_getAndroidNdkProvisioningProperties());
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(
       assembleTask,
@@ -668,19 +679,19 @@ class AndroidGradleBuilder implements AndroidBuilder {
     String aabPath,
     Iterable<AndroidArch> targetArchs,
   ) async {
-    if (globals.androidSdk == null) {
+    if (_androidSdk == null) {
       _logger.printTrace(
         'Failed to find android sdk when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    if (!globals.androidSdk!.cmdlineToolsAvailable) {
+    if (!_androidSdk.cmdlineToolsAvailable) {
       _logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = _androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       _logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
@@ -816,6 +827,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       command.add('-Ptarget=$target');
     }
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+    command.addAll(_getAndroidNdkProvisioningProperties());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
         'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
@@ -989,6 +1001,26 @@ class AndroidGradleBuilder implements AndroidBuilder {
       throwToolExit('Gradle task $taskName failed with exit code $exitCode');
     }
     return outputPath;
+  }
+
+  List<String> _getAndroidNdkProvisioningProperties() {
+    final AndroidSdk? androidSdk = _androidSdk;
+    if (androidSdk == null || !androidSdk.directory.existsSync()) {
+      return const <String>[];
+    }
+
+    final properties = <String>[
+      '-P$_kAndroidSdkRootProperty=${androidSdk.directory.path}',
+      '-P$_kInstalledNdkVersionsProperty=${_getInstalledNdkVersionsForGradle(androidSdk).join(',')}',
+    ];
+
+    final String? sdkManagerPath = androidSdk.sdkManagerPath;
+    if (sdkManagerPath != null &&
+        androidSdk.cmdlineToolsAvailable &&
+        androidSdk.licensesAvailable) {
+      properties.add('-P$_kSdkManagerPathProperty=$sdkManagerPath');
+    }
+    return properties;
   }
 }
 
@@ -1367,4 +1399,24 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
     result = 'android-arm64';
   }
   return result;
+}
+
+List<String> _getInstalledNdkVersionsForGradle(AndroidSdk androidSdk) {
+  final Directory ndkDir = androidSdk.directory.childDirectory('ndk');
+  if (!ndkDir.existsSync()) {
+    return const <String>[];
+  }
+
+  final List<String> installedNdkVersions =
+      ndkDir
+          .listSync()
+          .whereType<Directory>()
+          .map((Directory dir) => dir.basename)
+          .where(
+            (String version) =>
+                ndkDir.childDirectory(version).childFile('source.properties').existsSync(),
+          )
+          .toList()
+        ..sort();
+  return installedNdkVersions;
 }

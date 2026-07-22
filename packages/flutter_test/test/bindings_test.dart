@@ -12,8 +12,8 @@ library;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -71,9 +71,10 @@ void main() {
   testWidgets('timeStamp should be accurate to microsecond precision', (WidgetTester tester) async {
     final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-    await tester.pumpWidget(const CircularProgressIndicator());
+    await tester.pumpWidget(const SizedBox());
 
     final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
+    tester.binding.scheduleFrame();
     await tester.pump(const Duration(microseconds: 12345));
     final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
 

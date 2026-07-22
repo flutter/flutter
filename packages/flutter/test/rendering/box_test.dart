@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
@@ -84,14 +84,23 @@ void main() {
 
   test('should size to render view', () {
     final RenderBox root = RenderDecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFF00FF00),
+      decoration: const BoxDecoration(
+        color: Color(0xFF00FF00),
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
-          colors: <Color>[Colors.yellow[500]!, Colors.blue[500]!],
+          colors: <Color>[Color(0xFFFF00FF), Color(0xFFFFFF00)],
         ),
-        boxShadow: kElevationToShadow[3],
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            offset: Offset(0.0, 3.0),
+            blurRadius: 3.0,
+            spreadRadius: -2.0,
+            color: Color(0x33000000),
+          ),
+          BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 4.0, color: Color(0x24000000)),
+          BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 8.0, color: Color(0x1F000000)),
+        ],
       ),
     );
     layout(root);
