@@ -69,7 +69,7 @@ void main() {
       () async {
         final simulator = IOSSimulator(
           '123',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -101,7 +101,7 @@ void main() {
     () async {
       final simulator = IOSSimulator(
         '123',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'iPhone 11',
         simControl: FakeSimControl(),
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -133,7 +133,7 @@ void main() {
         osx.environment['HOME'] = '/foo/bar';
         final simulator = IOSSimulator(
           '123',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -157,7 +157,7 @@ void main() {
         osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
         final simulator = IOSSimulator(
           '456',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -185,7 +185,7 @@ void main() {
     testWithoutContext('can be parsed from iOS-11-3', () async {
       final device = IOSSimulator(
         'x',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'iPhone SE',
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         simControl: simControl,
@@ -198,7 +198,7 @@ void main() {
     testWithoutContext('can be parsed from iOS 11.2', () async {
       final device = IOSSimulator(
         'x',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -211,7 +211,7 @@ void main() {
     testWithoutContext('Has a simulator category', () async {
       final device = IOSSimulator(
         'x',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -234,7 +234,7 @@ void main() {
       () async {
         final simulator = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'Apple TV',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
@@ -255,7 +255,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'Apple Watch',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
@@ -277,7 +277,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPad 2',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -299,7 +299,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPad Retina',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -321,7 +321,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 5',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -343,7 +343,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 5s',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -365,7 +365,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone SE',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -387,7 +387,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 7 Plus',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -409,7 +409,7 @@ void main() {
         expect(
           await IOSSimulator(
             'x',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone X',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -445,7 +445,7 @@ void main() {
       // Doesn't matter what the device is.
       final deviceUnderTest = IOSSimulator(
         'x',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'iPhone SE',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -472,7 +472,7 @@ void main() {
       () async {
         final device = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 9.3',
           simControl: simControl,
@@ -499,7 +499,7 @@ void main() {
       () async {
         final device = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
@@ -546,7 +546,7 @@ void main() {
       () async {
         final device = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
@@ -627,7 +627,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.0',
             simControl: simControl,
@@ -672,7 +672,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
@@ -730,7 +730,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
@@ -815,7 +815,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -877,7 +877,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -944,7 +944,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final device = IOSSimulator(
             '123456',
-            cpuArch: CpuArch.x86_64,
+            cpuArch: CpuArch.x64,
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -1197,7 +1197,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
       final iosSimulatorA = IOSSimulator(
         'x',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
@@ -1267,7 +1267,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testWithoutContext('simulator stopApp handles null app package', () async {
       final iosSimulator = IOSSimulator(
         'x',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
@@ -1466,7 +1466,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1506,7 +1506,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1555,7 +1555,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1640,7 +1640,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       () async {
         final device = IOSSimulator(
           'x',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1707,7 +1707,7 @@ flutter:
 
         final simulator = IOSSimulator(
           'test',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -1733,7 +1733,7 @@ flutter:
 
         final simulator = IOSSimulator(
           'test',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -1758,7 +1758,7 @@ flutter:
 
         final simulator = IOSSimulator(
           'test',
-          cpuArch: CpuArch.x86_64,
+          cpuArch: CpuArch.x64,
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -1776,7 +1776,7 @@ flutter:
     testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
       final simulator = IOSSimulator(
         'test',
-        cpuArch: CpuArch.x86_64,
+        cpuArch: CpuArch.x64,
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
