@@ -54,7 +54,8 @@ void main() {
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
     expect(testEnv.processHistory.length, greaterThanOrEqualTo(2));
-    expect(testEnv.processHistory[1].command[0], contains('ninja'));
+    final ninja = testEnv.processHistory.firstWhere((p) => p.command.contains('-C'));
+    expect(ninja.command[0], contains('ninja'));
   });
 
   test('build command invokes generator', () async {
@@ -127,7 +128,10 @@ void main() {
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final [ExecutedProcess gnCall, ExecutedProcess reclientCall, ..._] = testEnv.processHistory;
+    final gnCall = testEnv.processHistory.firstWhere((p) => p.command.first.endsWith('tools/gn'));
+    final reclientCall = testEnv.processHistory.firstWhere(
+      (p) => p.command.first.endsWith('reclient/bootstrap'),
+    );
     expect(gnCall.command, containsAllInOrder([endsWith('tools/gn'), contains('--rbe')]));
     expect(reclientCall.command, containsAllInOrder([endsWith('reclient/bootstrap')]));
   });
@@ -154,8 +158,7 @@ void main() {
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    print(testEnv.processHistory);
-    final [_, ExecutedProcess ninja, ..._] = testEnv.processHistory;
+    final ninja = testEnv.processHistory.firstWhere((p) => p.command.contains('-C'));
     expect(ninja.command, containsAllInOrder([endsWith('ninja/ninja'), '-j', '500']));
   });
 
@@ -268,8 +271,9 @@ void main() {
     );
     final int result = await runner.run(['build', '--config', 'host_debug']);
     expect(result, equals(0));
-    expect(testEnv.processHistory[1].command[0], contains(path.join('ninja', 'ninja')));
-    expect(testEnv.processHistory[1].command[2], contains('local_host_debug'));
+    final ninja = testEnv.processHistory.firstWhere((p) => p.command.contains('-C'));
+    expect(ninja.command[0], contains(path.join('ninja', 'ninja')));
+    expect(ninja.command[2], contains('local_host_debug'));
   });
 
   test('ci config name on the command line is correctly translated', () async {
@@ -297,8 +301,9 @@ void main() {
     );
     final int result = await runner.run(['build', '--config', 'ci/host_debug']);
     expect(result, equals(0));
-    expect(testEnv.processHistory[1].command[0], contains(path.join('ninja', 'ninja')));
-    expect(testEnv.processHistory[1].command[2], contains('ci/host_debug'));
+    final ninja = testEnv.processHistory.firstWhere((p) => p.command.contains('-C'));
+    expect(ninja.command[0], contains(path.join('ninja', 'ninja')));
+    expect(ninja.command[2], contains('ci/host_debug'));
   });
 
   test('build command invokes ninja with the specified target', () async {
@@ -340,7 +345,7 @@ void main() {
     expect(result, equals(0));
 
     final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere(
-      (p) => p.command.first.endsWith('ninja'),
+      (p) => p.command.first.endsWith('ninja') && p.command.contains('-C'),
     );
     expect(ninjaCmd.command, containsAllInOrder([endsWith('ninja'), '-C', endsWith('host_debug')]));
     expect(ninjaCmd.command, contains(contains('flutter/fml:fml_unittests')));
@@ -389,7 +394,7 @@ void main() {
     expect(result, equals(0));
 
     final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere(
-      (p) => p.command.first.endsWith('ninja'),
+      (p) => p.command.first.endsWith('ninja') && p.command.contains('-C'),
     );
     expect(ninjaCmd.command, containsAllInOrder([endsWith('ninja'), '-C', endsWith('host_debug')]));
 
