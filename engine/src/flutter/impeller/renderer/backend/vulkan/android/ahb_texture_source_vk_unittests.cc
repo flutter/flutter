@@ -8,12 +8,17 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
+#include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "impeller/toolkit/android/hardware_buffer.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 
 namespace impeller::android::testing {
+
+using impeller::testing::GetMockVulkanFunctions;
+using impeller::testing::MockVulkanContextBuilder;
 
 struct UniqueAHardwareBufferTraits {
   static AHardwareBuffer* InvalidValue() { return nullptr; }
@@ -150,6 +155,42 @@ TEST(AndroidVulkanTest, CreateImageViewForOpaqueAlpha) {
   EXPECT_EQ(image_info.get().components.a, vk::ComponentSwizzle::eOne);
 
   context_vk->Shutdown();
+}
+
+TEST(AndroidVulkanTest, TextureSourceDeleteAfterContextDelete) {
+  AHardwareBuffer_Desc desc;
+  desc.width = 16;
+  desc.height = 16;
+  desc.format = AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM;
+  desc.stride = 0;
+  desc.layers = 1;
+  desc.rfu0 = 0;
+  desc.rfu1 = 0;
+  desc.usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+               AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK |
+               AHARDWAREBUFFER_USAGE_CPU_READ_MASK;
+
+  EXPECT_EQ(AHardwareBuffer_isSupported(&desc), 1);
+
+  UniqueAHardwareBuffer buffer = AllocateAHardwareBuffer(desc);
+  ASSERT_TRUE(buffer.is_valid());
+
+  auto context = MockVulkanContextBuilder()
+                     .SetDeviceExtensions(kAndroidDeviceExtensions)
+                     .Build();
+
+  ASSERT_TRUE(context);
+
+  auto texture =
+      std::make_shared<AHBTextureSourceVK>(context, buffer.get(), desc);
+  ASSERT_TRUE(texture->IsValid());
+
+  // Delete the context and its VkDevice.
+  context.reset();
+
+  // Delete the AHBTextureSourceVK and verify that the destructor does not call
+  // Vulkan APIs on a VkDevice that is no longer valid.
+  texture.reset();
 }
 
 }  // namespace impeller::android::testing

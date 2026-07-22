@@ -15,8 +15,10 @@ const static double kRefreshRateDiffToIgnore = 0.1;
 
 namespace flutter {
 
-VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
-    : VsyncWaiter(task_runners) {
+VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
+                               FlutterDisplayLinkManager* display_link_manager)
+    : VsyncWaiter(task_runners), display_link_manager_(display_link_manager) {
+  FML_DCHECK(display_link_manager);
   auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
     // Compute delay using the same CACurrentMediaTime() clock.
     CFTimeInterval delay = CACurrentMediaTime() - startTime;
@@ -39,10 +41,10 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
   client_ = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:uiTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+      isVariableRefreshRateEnabled:display_link_manager_.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:display_link_manager_.displayRefreshRate
                           callback:vsyncCallback];
-  max_refresh_rate_ = FlutterDisplayLinkManager.displayRefreshRate;
+  max_refresh_rate_ = display_link_manager_.displayRefreshRate;
 }
 
 VsyncWaiterIOS::~VsyncWaiterIOS() {
@@ -52,7 +54,7 @@ VsyncWaiterIOS::~VsyncWaiterIOS() {
 }
 
 void VsyncWaiterIOS::AwaitVSync() {
-  double new_max_refresh_rate = FlutterDisplayLinkManager.displayRefreshRate;
+  double new_max_refresh_rate = display_link_manager_.displayRefreshRate;
   if (fabs(new_max_refresh_rate - max_refresh_rate_) > kRefreshRateDiffToIgnore) {
     max_refresh_rate_ = new_max_refresh_rate;
     [client_ setMaxRefreshRate:max_refresh_rate_];

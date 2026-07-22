@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_page_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('TapRegionSurface detects outside tap down events', (WidgetTester tester) async {

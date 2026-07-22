@@ -539,7 +539,10 @@ window.\$dartLoader.loader.nextAttempt();
     final File canvasKitFile = _canvasKitFile(relativePath);
     return shelf.Response.ok(
       canvasKitFile.openRead(),
-      headers: <String, Object>{HttpHeaders.contentTypeHeader: contentType},
+      headers: <String, Object>{
+        HttpHeaders.contentTypeHeader: contentType,
+        HttpHeaders.cacheControlHeader: 'public, max-age=3600',
+      },
     );
   }
 

@@ -8,8 +8,6 @@ import 'package:flutter/src/foundation/_features.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 class AccessibilityEvaluationTestBinding extends AutomatedTestWidgetsFlutterBinding {
   static AccessibilityEvaluationTestBinding? _instance;
 
