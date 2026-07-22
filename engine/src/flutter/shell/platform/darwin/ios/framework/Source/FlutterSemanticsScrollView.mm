@@ -30,11 +30,12 @@ FLUTTER_ASSERT_ARC
 // UIScrollView class, the base class.
 
 - (BOOL)isAccessibilityElement {
-  if (![self.semanticsObject isAccessibilityBridgeAlive]) {
+  flutter::AccessibilityBridgeIos* bridge = self.semanticsObject.bridge;
+  if (!bridge) {
     return NO;
   }
 
-  if ([self.semanticsObject bridge]->isVoiceOverRunning()) {
+  if (bridge->isVoiceOverRunning()) {
     return self.semanticsObject.accessibilityLabel.length > 0;
   }
 

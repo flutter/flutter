@@ -191,8 +191,7 @@ static void PrintWideGamutWarningOnce() {
 }
 
 + (Class)layerClass {
-  return flutter::GetCoreAnimationLayerClassForRenderingAPI(
-      flutter::GetRenderingAPIForProcess(/*force_software=*/false));
+  return flutter::GetCoreAnimationLayerClassForRenderingAPI(flutter::GetRenderingAPIForProcess());
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {
