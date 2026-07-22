@@ -34,10 +34,11 @@ public class IntentUtilsTest {
     mockActivity = mock(Activity.class);
     mockPackageManager = mock(PackageManager.class);
     mockActivityInfo = new ActivityInfo();
-    
+
     when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
     when(mockActivity.getComponentName()).thenReturn(new ComponentName("com.test", "TestActivity"));
-    when(mockPackageManager.getActivityInfo(any(ComponentName.class), anyInt())).thenReturn(mockActivityInfo);
+    when(mockPackageManager.getActivityInfo(any(ComponentName.class), anyInt()))
+        .thenReturn(mockActivityInfo);
     when(mockActivity.getPackageName()).thenReturn("com.test");
   }
 
@@ -63,56 +64,61 @@ public class IntentUtilsTest {
   @Test
   public void testIsIntentValidForDeeplinking_returnsTrueWhenMatchesManifest() {
     Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://test.com"));
-    
+
     ResolveInfo mockResolveInfo = new ResolveInfo();
     mockResolveInfo.activityInfo = new ActivityInfo();
     mockResolveInfo.activityInfo.name = mockActivity.getClass().getName();
-    
+
     List<ResolveInfo> resolveInfos = new ArrayList<>();
     resolveInfos.add(mockResolveInfo);
-    
-    when(mockPackageManager.queryIntentActivities(any(Intent.class), anyInt())).thenReturn(resolveInfos);
-    
+
+    when(mockPackageManager.queryIntentActivities(any(Intent.class), anyInt()))
+        .thenReturn(resolveInfos);
+
     assertTrue(IntentUtils.isIntentValidForDeeplinking(intent, mockActivity));
   }
 
   @Test
   public void testIsIntentValidForDeeplinking_returnsTrueForActivityAlias() {
     Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://test.com"));
-    
+
     ResolveInfo mockResolveInfo = new ResolveInfo();
     mockResolveInfo.activityInfo = new ActivityInfo();
     mockResolveInfo.activityInfo.name = "com.test.SomeAlias";
     mockResolveInfo.activityInfo.targetActivity = mockActivity.getClass().getName();
-    
+
     List<ResolveInfo> resolveInfos = new ArrayList<>();
     resolveInfos.add(mockResolveInfo);
-    
-    when(mockPackageManager.queryIntentActivities(any(Intent.class), anyInt())).thenReturn(resolveInfos);
-    
+
+    when(mockPackageManager.queryIntentActivities(any(Intent.class), anyInt()))
+        .thenReturn(resolveInfos);
+
     assertTrue(IntentUtils.isIntentValidForDeeplinking(intent, mockActivity));
   }
 
   @Test
   public void testIsIntentValidForDeeplinking_handlesType() {
-    Intent intent = new Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse("content://test"), "text/plain");
-    
+    Intent intent =
+        new Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse("content://test"), "text/plain");
+
     ResolveInfo mockResolveInfo = new ResolveInfo();
     mockResolveInfo.activityInfo = new ActivityInfo();
     mockResolveInfo.activityInfo.name = mockActivity.getClass().getName();
-    
+
     List<ResolveInfo> resolveInfos = new ArrayList<>();
     resolveInfos.add(mockResolveInfo);
-    
+
     // queryIntentActivities should be called with an intent that has the type
-    when(mockPackageManager.queryIntentActivities(any(Intent.class), anyInt())).thenAnswer(invocation -> {
-        Intent argIntent = invocation.getArgument(0);
-        if ("text/plain".equals(argIntent.getType())) {
-            return resolveInfos;
-        }
-        return new ArrayList<ResolveInfo>();
-    });
-    
+    when(mockPackageManager.queryIntentActivities(any(Intent.class), anyInt()))
+        .thenAnswer(
+            invocation -> {
+              Intent argIntent = invocation.getArgument(0);
+              if ("text/plain".equals(argIntent.getType())) {
+                return resolveInfos;
+              }
+              return new ArrayList<ResolveInfo>();
+            });
+
     assertTrue(IntentUtils.isIntentValidForDeeplinking(intent, mockActivity));
   }
 }

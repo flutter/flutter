@@ -555,7 +555,8 @@ import java.util.Set;
         if (host.getActivity() != null && IntentUtils.isIntentSelfSent(host.getActivity())) {
           return data.toString();
         }
-        if (host.getActivity() != null && IntentUtils.isIntentValidForDeeplinking(intent, host.getActivity())) {
+        if (host.getActivity() != null
+            && IntentUtils.isIntentValidForDeeplinking(intent, host.getActivity())) {
           return data.toString();
         }
       }
