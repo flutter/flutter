@@ -421,6 +421,10 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
     environment.logger,
     runPackageName,
     includeDevDependencies: includeDevDependencies,
+    flutterExtension: createFlutterExtension(
+      artifacts: environment.artifacts,
+      engineVersion: environment.engineVersion,
+    ),
     pubspecPath,
   );
 }

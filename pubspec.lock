@@ -363,6 +363,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  flutter_hook_config:
+    dependency: transitive
+    description:
+      name: flutter_hook_config
+      sha256: af801f91e3e433a939551e601c386ee59683d045ae6148896983c75655ec79e5
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   flutter_lints:
     dependency: "direct main"
     description:
