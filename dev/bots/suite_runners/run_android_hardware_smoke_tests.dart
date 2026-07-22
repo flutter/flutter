@@ -45,7 +45,7 @@ Future<void> runAndroidHardwareSmokeTests({
 }) async {
   printProgress('Running Android Hardware Smoke Tests Shard (backend=${backend.name})');
 
-  final String testDir = path.join('dev', 'integration_tests', 'android_hardware_smoke_test');
+  final String testDir = path.join('dev', 'integration_tests', 'androidhardwaresmoketest');
 
   // Regenerate standard Android Gradle wrappers
   await runCommand('flutter', <String>[
@@ -65,7 +65,7 @@ Future<void> runAndroidHardwareSmokeTests({
     path.join(testDir, 'test_driver', 'goldens'),
   );
   final Directory sourceDir = const LocalFileSystem().directory(
-    path.join(testDir, 'android_hardware_smoke_test.${backend.name}.goldens'),
+    path.join(testDir, 'androidhardwaresmoketest.${backend.name}.goldens'),
   );
 
   try {
@@ -107,7 +107,7 @@ Future<void> runAndroidHardwareSmokeTests({
       // 3. Build and run the instrumented tests.
       await runCommand(gradle, <String>[
         ':app:connectedDebugAndroidTest',
-        '-Pandroid.testInstrumentationRunnerArguments.class=com.example.android_hardware_smoke_test.FlutterActivityTest',
+        '-Pandroid.testInstrumentationRunnerArguments.class=com.example.androidhardwaresmoketest.FlutterActivityTest',
         '-s',
       ], workingDirectory: androidDir);
     }
