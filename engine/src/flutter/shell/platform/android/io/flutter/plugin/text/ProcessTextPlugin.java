@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -32,9 +34,14 @@ public class ProcessTextPlugin
 
   @NonNull private final ProcessTextChannel processTextChannel;
   @NonNull private final PackageManager packageManager;
-  @Nullable private ActivityPluginBinding activityBinding;
+  @NonNull private final Handler mainThreadHandler;
+  @Nullable private volatile ActivityPluginBinding activityBinding;
+  // The use of a Map for this variable assumes that it is only accessed
+  // serially on the background task queue.
   private Map<String, ResolveInfo> resolveInfosById;
 
+  // The use of a Map for this variable assumes that it is only accessed
+  // serially on the main thread.
   @NonNull
   private Map<Integer, MethodChannel.Result> requestsByCode =
       new HashMap<Integer, MethodChannel.Result>();
@@ -42,6 +49,7 @@ public class ProcessTextPlugin
   public ProcessTextPlugin(@NonNull ProcessTextChannel processTextChannel) {
     this.processTextChannel = processTextChannel;
     this.packageManager = processTextChannel.packageManager;
+    this.mainThreadHandler = new Handler(Looper.getMainLooper());
 
     processTextChannel.setMethodHandler(this);
   }
@@ -81,20 +89,32 @@ public class ProcessTextPlugin
       return;
     }
 
-    Integer requestCode = result.hashCode();
-    requestsByCode.put(requestCode, result);
+    mainThreadHandler.post(
+        new Runnable() {
+          @Override
+          public void run() {
+            if (activityBinding == null) {
+              result.error("error", "Plugin not bound to an Activity", null);
+              return;
+            }
 
-    Intent intent = new Intent();
-    intent.setClassName(info.activityInfo.packageName, info.activityInfo.name);
-    intent.setAction(Intent.ACTION_PROCESS_TEXT);
-    intent.setType("text/plain");
-    intent.putExtra(Intent.EXTRA_PROCESS_TEXT, text);
-    intent.putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, readOnly);
+            final Integer requestCode = result.hashCode();
+            requestsByCode.put(requestCode, result);
 
-    // Start the text processing activity. When the activity completes, the onActivityResult
-    // callback
-    // is called.
-    activityBinding.getActivity().startActivityForResult(intent, requestCode);
+            Intent intent = new Intent();
+            intent.setClassName(info.activityInfo.packageName, info.activityInfo.name);
+            intent.setAction(Intent.ACTION_PROCESS_TEXT);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_PROCESS_TEXT, text);
+            intent.putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, readOnly);
+
+            // Start the text processing activity. When the activity completes, the
+            // onActivityResult
+            // callback
+            // is called.
+            activityBinding.getActivity().startActivityForResult(intent, requestCode);
+          }
+        });
   }
 
   private void cacheResolveInfos() {

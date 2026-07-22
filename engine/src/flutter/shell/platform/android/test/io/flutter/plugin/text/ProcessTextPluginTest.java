@@ -34,6 +34,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24)
@@ -130,10 +131,11 @@ public class ProcessTextPluginTest {
     when(mockActivityPluginBinding.getActivity()).thenReturn(mockActivity);
     processTextPlugin.onAttachedToActivity(mockActivityPluginBinding);
 
-    // Execute th first action.
+    // Execute the first action.
     String textToBeProcessed = "Flutter!";
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     processTextPlugin.processTextAction(action1Id, textToBeProcessed, false, result);
+    ShadowLooper.runUiThreadTasks();
 
     // Activity.startActivityForResult should have been called.
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -183,6 +185,7 @@ public class ProcessTextPluginTest {
     String textToBeProcessed = "Flutter!";
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     processTextPlugin.processTextAction(action1Id, textToBeProcessed, false, result);
+    ShadowLooper.runUiThreadTasks();
 
     // Activity.startActivityForResult should have been called.
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -234,6 +237,7 @@ public class ProcessTextPluginTest {
     String textToBeProcessed = "Flutter!";
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     processTextPlugin.processTextAction(action1Id, textToBeProcessed, false, result);
+    ShadowLooper.runUiThreadTasks();
 
     // Activity.startActivityForResult should have been called.
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
