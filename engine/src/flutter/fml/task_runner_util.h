@@ -47,7 +47,7 @@ class ConditionalBasicTaskRunner : public BasicTaskRunner {
 
  private:
   fml::RefPtr<fml::TaskRunner> task_runner_;
-  const std::function<bool()> is_usable_;
+  const std::shared_ptr<std::function<bool()>> is_usable_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ConditionalBasicTaskRunner);
 };

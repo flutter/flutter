@@ -35,23 +35,23 @@ TEST(TaskRunnerUtilTests, ConditionalBasicTaskRunnerPostTask) {
   fml::AutoResetWaitableEvent latch;
   std::atomic_bool task1_called = false;
   runner.PostTask([&]() {
-    task1_called = true;
+    task1_called.store(true);
     latch.Signal();
   });
   latch.Wait();
 
-  active = false;
+  active.store(false);
 
   std::atomic_bool task2_called = false;
-  runner.PostTask([&]() { task2_called = true; });
+  runner.PostTask([&]() { task2_called.store(true); });
 
   thread.GetTaskRunner()->PostTask([&]() { latch.Signal(); });
   latch.Wait();
 
   thread.Join();
 
-  EXPECT_TRUE(task1_called);
-  EXPECT_FALSE(task2_called);
+  EXPECT_TRUE(task1_called.load());
+  EXPECT_FALSE(task2_called.load());
 }
 
 }  // namespace testing
