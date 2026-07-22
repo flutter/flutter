@@ -28,7 +28,7 @@
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		{{#withSwiftPackageManager}}
-		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		78A318202AECB46A00862997 /* {{pluginSwiftPackageName}} in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* {{pluginSwiftPackageName}} */; };
 		{{/withSwiftPackageManager}}
 /* End PBXBuildFile section */
 
@@ -80,7 +80,7 @@
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
 		{{#withSwiftPackageManager}}
-		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
+		78E0A7A72DC9AD7400C4905E /* {{pluginSwiftPackageName}} */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = {{pluginSwiftPackageName}}; path = ephemeral/Packages/{{pluginSwiftPackageName}}; sourceTree = "<group>"; };
 		{{#withPlatformChannelPluginHook}}
 		784666492D4C4C64000A1A5F /* FlutterFramework */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterFramework; path = ephemeral/Packages/.packages/FlutterFramework; sourceTree = "<group>"; };
 		78DABEA22ED26510000E7860 /* {{pluginProjectName}} */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = {{pluginProjectName}}; path = ../../../macos/{{pluginProjectName}}; sourceTree = "<group>"; };
@@ -103,7 +103,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				{{#withSwiftPackageManager}}
-				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
+				78A318202AECB46A00862997 /* {{pluginSwiftPackageName}} in Frameworks */,
 				{{/withSwiftPackageManager}}
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -169,7 +169,7 @@
 				78DABEA22ED26510000E7860 /* {{pluginProjectName}} */,
 				784666492D4C4C64000A1A5F /* FlutterFramework */,
 				{{/withPlatformChannelPluginHook}}
-				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,
+				78E0A7A72DC9AD7400C4905E /* {{pluginSwiftPackageName}} */,
 				{{/withSwiftPackageManager}}
 				335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */,
 				33CEB47222A05771004F2AC0 /* Flutter-Debug.xcconfig */,
@@ -238,7 +238,7 @@
 			name = Runner;
 			{{#withSwiftPackageManager}}
 			packageProductDependencies = (
-				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,
+				78A3181F2AECB46A00862997 /* {{pluginSwiftPackageName}} */,
 			);
 			{{/withSwiftPackageManager}}
 			productName = Runner;
@@ -287,7 +287,7 @@
 			mainGroup = 33CC10E42044A3C60003C045;
 			{{#withSwiftPackageManager}}
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/{{pluginSwiftPackageName}}" */,
 			);
 			{{/withSwiftPackageManager}}
 			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
@@ -733,16 +733,16 @@
 {{#withSwiftPackageManager}}
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/{{pluginSwiftPackageName}}" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
+			relativePath = Flutter/ephemeral/Packages/{{pluginSwiftPackageName}};
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */ = {
+		78A3181F2AECB46A00862997 /* {{pluginSwiftPackageName}} */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = FlutterGeneratedPluginSwiftPackage;
+			productName = {{pluginSwiftPackageName}};
 		};
 /* End XCSwiftPackageProductDependency section */
 {{/withSwiftPackageManager}}

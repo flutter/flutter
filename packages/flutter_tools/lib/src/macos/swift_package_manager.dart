@@ -53,15 +53,18 @@ class SwiftPackageManager {
   final ProcessUtils _processUtils;
   final Config _config;
 
-  /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
-  /// has dependencies on Flutter plugins that are compatible with Swift
-  /// Package Manager.
+  /// Creates a Swift Package that has dependencies on Flutter plugins that are
+  /// compatible with Swift Package Manager.
+  ///
+  /// The package name is derived from the project's app name to ensure
+  /// uniqueness when multiple Flutter apps share a single Xcode project.
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
     FlutterDarwinPlatform platform,
     XcodeBasedProject project, {
     bool flutterAsADependency = true,
   }) async {
+    final String packageName = project.flutterPluginSwiftPackageName;
     final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
     ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
     symlinkDirectory.createSync(recursive: true);
@@ -99,22 +102,22 @@ class SwiftPackageManager {
       targetDependencies.add(flutterFrameworkTargetDependency);
     }
 
-    // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
+    // The generated plugin package must be statically linked to ensure
     // any dynamic dependencies are linked to Runner and prevent undefined symbols.
     final generatedProduct = SwiftPackageProduct.library(
-      name: kFlutterGeneratedPluginSwiftPackageName,
-      targets: <String>[kFlutterGeneratedPluginSwiftPackageName],
+      name: packageName,
+      targets: <String>[packageName],
       libraryType: SwiftPackageLibraryType.static,
     );
 
     final generatedTarget = SwiftPackageTarget.defaultTarget(
-      name: kFlutterGeneratedPluginSwiftPackageName,
+      name: packageName,
       dependencies: targetDependencies,
     );
 
     final pluginsPackage = SwiftPackage(
       manifest: project.flutterPluginSwiftPackageManifest,
-      name: kFlutterGeneratedPluginSwiftPackageName,
+      name: packageName,
       platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
       products: <SwiftPackageProduct>[generatedProduct],
       dependencies: packageDependencies,
@@ -122,6 +125,24 @@ class SwiftPackageManager {
       templateRenderer: _templateRenderer,
     );
     pluginsPackage.createSwiftPackage();
+
+    // If the project was previously using the legacy hardcoded package name,
+    // rename all references in the pbxproj to the new project-specific name.
+    // This must happen at pub-get time (not just build time) so that Xcode can
+    // resolve the package immediately.
+    // See https://github.com/flutter/flutter/issues/189585.
+    if (packageName != kFlutterGeneratedPluginSwiftPackageName) {
+      final File pbxproj = project.xcodeProjectInfoFile;
+      if (pbxproj.existsSync()) {
+        final String contents = pbxproj.readAsStringSync();
+        if (contents.contains(kFlutterGeneratedPluginSwiftPackageName) &&
+            !contents.contains(packageName)) {
+          pbxproj.writeAsStringSync(
+            contents.replaceAll(kFlutterGeneratedPluginSwiftPackageName, packageName),
+          );
+        }
+      }
+    }
   }
 
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>)

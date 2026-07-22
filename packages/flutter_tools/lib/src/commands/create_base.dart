@@ -340,6 +340,12 @@ mixin CreateBase on FlutterCommand {
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String pluginClassLowerCamelCase =
         pluginClass[0].toLowerCase() + pluginClass.substring(1);
+    final String pluginSwiftPackageName =
+        projectName
+            .split('_')
+            .map((s) => s.isEmpty ? '' : '${s[0].toUpperCase()}${s.substring(1)}')
+            .join() +
+        'FlutterPlugins';
     final String appleIdentifier = createUTIIdentifier(organization, projectName);
     final String androidIdentifier = createAndroidIdentifier(organization, projectName);
     final String windowsIdentifier = createWindowsIdentifier(organization, projectName);
@@ -367,6 +373,7 @@ mixin CreateBase on FlutterCommand {
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
       'pluginProjectUUID': const Uuid().v4().toUpperCase(),
+      'pluginSwiftPackageName': pluginSwiftPackageName,
       'withFfi': withFfiPluginHook || withFfiPackage,
       'withFfiPackage': withFfiPackage,
       'withFfiPluginHook': withFfiPluginHook,

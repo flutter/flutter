@@ -456,6 +456,8 @@ class XcodeProjectInterpreter {
     Directory buildDirectory,
   ) async {
     final ignoredSchemes = <String>{
+      xcodeProject.flutterPluginSwiftPackageName,
+      // Also ignore the legacy name for backward compatibility.
       kFlutterGeneratedPluginSwiftPackageName,
       kFlutterGeneratedFrameworkSwiftPackageTargetName,
       ..._swiftPackageCheckoutSchemes(buildDirectory),
