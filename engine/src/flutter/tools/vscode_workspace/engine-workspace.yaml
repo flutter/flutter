@@ -122,6 +122,7 @@ settings:
     print: cpp
     source_location: cpp
     syncstream: cpp
+    'unicode.h': c
   C_Cpp.default.includePath:
     - ${default}
     - ${workspaceFolder}/..
