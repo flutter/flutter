@@ -1,13 +1,16 @@
 ---
 name: engine-whats-new
-description: Generates the "what's new" release summary and diff file for changes in the Flutter engine (//engine/src/flutter) between two releases (e.g., 3.47 vs 3.44). Use when asked to generate what's new in the engine, diff engine releases, or summarize engine changes for a Flutter release.
+description: >
+  Generates the "what's new" release summary and diff file for changes in the Flutter engine (//engine/src/flutter) between two releases (e.g., 3.47 vs 3.44).
+
+  When to use:
+  - Only activate when explicitly asked by the user to generate what's new in the engine, diff Flutter engine releases, or produce an engine release summary.
+
+  When not to use:
+  - Do not use for general questions about commits, individual file history, or codebase searches unless explicitly requested to generate the engine release diff or summary.
 ---
 
 # Flutter Engine What's New & Diff Skill
-
-This skill generates a complete diff and structured "What's New" release summary for changes made in the Flutter engine directory (//engine/src/flutter) between a target Flutter release and its predecessor release (e.g., comparing 3.47 to 3.44).
-
-It uses the [generate_engine_whats_new.dart](scripts/generate_engine_whats_new.dart) script to automate git reference resolution, diff generation, commit categorization, and Markdown summary generation. For more information on the tool options, see the [README.md](scripts/README.md).
 
 ## Workflow
 
