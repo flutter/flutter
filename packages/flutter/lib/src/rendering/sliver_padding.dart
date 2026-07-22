@@ -340,7 +340,7 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   EdgeInsetsGeometry get padding => _padding;
   EdgeInsetsGeometry _padding;
   set padding(EdgeInsetsGeometry value) {
-    assert(padding.isNonNegative);
+    assert(value.isNonNegative);
     if (_padding == value) {
       return;
     }

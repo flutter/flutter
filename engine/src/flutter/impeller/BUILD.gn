@@ -49,12 +49,27 @@ group("impeller") {
   }
 }
 
+source_set("impeller_unittesting") {
+  testonly = true
+
+  # Informs run_all_unittests to perform impeller specific initialization
+  defines = [ "IMPELLER_UNITTEST_SUITE=1" ]
+
+  sources = [ "../testing/run_all_unittests.cc" ]
+
+  deps = [
+    "testing:impeller_unittest_suite",
+    "//flutter/testing:testing_lib",
+  ]
+}
+
 impeller_component("impeller_unittests") {
   target_type = "executable"
 
   testonly = true
 
   deps = [
+    ":impeller_unittesting",
     "base:base_unittests",
     "compiler:compiler_unittests",
     "core:allocator_unittests",
@@ -63,6 +78,7 @@ impeller_component("impeller_unittests") {
     "runtime_stage:runtime_stage_unittests",
     "shader_archive:shader_archive_unittests",
     "tessellator:tessellator_unittests",
+    "testing:impeller_unittest_suite",
     "toolkit/interop:interop_unittests",
   ]
 
@@ -107,6 +123,9 @@ if (impeller_supports_rendering) {
 
     testonly = true
 
-    deps = [ "renderer:renderer_dart_unittests" ]
+    deps = [
+      "renderer:renderer_dart_unittests",
+      "//flutter/testing",
+    ]
   }
 }

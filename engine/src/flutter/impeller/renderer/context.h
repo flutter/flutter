@@ -14,6 +14,7 @@
 #include "impeller/base/thread_safety.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/gpu_submission_tracker.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/sampler_library.h"
@@ -248,6 +249,15 @@ class Context {
   virtual bool AddTrackingFence(const std::shared_ptr<Texture>& texture) const;
 
   virtual std::shared_ptr<const IdleWaiter> GetIdleWaiter() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief Returns the tracker recording GPU completion of command buffer
+  ///        submissions, or nullptr if the backend does not provide one.
+  ///
+  /// Used by per-frame transient allocators to avoid reusing memory the GPU
+  /// is still reading.
+  virtual std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
+      const;
 
   //----------------------------------------------------------------------------
   /// Resets any thread local state that may interfere with embedders.

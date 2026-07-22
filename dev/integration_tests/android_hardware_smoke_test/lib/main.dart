@@ -35,7 +35,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
@@ -54,12 +56,17 @@ class MyWidget extends StatefulWidget {
 
 class _MyState extends State<MyWidget> {
   static const _nativeChannel = MethodChannel(nativeSupportChannelName);
-  static const _testChannel = BasicMessageChannel<Object?>(testChannelName, JSONMessageCodec());
+  static const _testChannel = BasicMessageChannel<Object?>(
+    testChannelName,
+    JSONMessageCodec(),
+  );
 
   String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
   ui.Image? _loadedImage;
-  Completer<void>? _platformViewCreatedCompleter;
+
+  // Completes when the native platform view has been drawn.
+  Completer<void>? _platformViewDrawnCompleter;
 
   Future<ui.Image> _loadImage() async {
     return widget.imageLoader();
@@ -83,7 +90,9 @@ class _MyState extends State<MyWidget> {
         goldenVariantValue,
       );
 
-      return <String, Object?>{keyMessage: failureMessage ?? 'Comparison Success'};
+      return <String, Object?>{
+        keyMessage: failureMessage ?? 'Comparison Success',
+      };
     }
 
     final testName = messageMap?[keyTestName] as String?;
@@ -93,7 +102,8 @@ class _MyState extends State<MyWidget> {
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot = messageMap?[keyCaptureScreenshot] as bool? ?? true;
+    final bool captureScreenshot =
+        messageMap?[keyCaptureScreenshot] as bool? ?? true;
 
     if (testName == kPlatformViewHybridCompositionPlusPlusTest) {
       final bool isHcpp = await HybridAndroidViewController.checkIfSupported();
@@ -125,17 +135,20 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{keyMessage: 'Failed to load image asset: $e\n$stackTrace'};
+        return <String, Object?>{
+          keyMessage: 'Failed to load image asset: $e\n$stackTrace',
+        };
       }
     }
 
     final completer = Completer<Map<String, Object?>>();
 
-    final bool isPlatformView = testName?.startsWith(platformViewPrefix) ?? false;
+    final bool isPlatformView =
+        testName?.startsWith(platformViewPrefix) ?? false;
     if (isPlatformView) {
-      _platformViewCreatedCompleter = Completer<void>();
+      _platformViewDrawnCompleter = Completer<void>();
     } else {
-      _platformViewCreatedCompleter = null;
+      _platformViewDrawnCompleter = null;
     }
 
     setState(() {
@@ -150,7 +163,7 @@ class _MyState extends State<MyWidget> {
           performAppSideGoldenCompare,
           targetKey,
           _goldenVariantFuture,
-          settleFuture: _platformViewCreatedCompleter?.future,
+          settleFuture: _platformViewDrawnCompleter?.future,
         );
       } else {
         completer.complete(<String, Object?>{
@@ -167,38 +180,39 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(methodImpellerBackend);
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
+      methodImpellerBackend,
+    );
+    _nativeChannel.setMethodCallHandler((MethodCall call) async {
+      if (call.method == 'onDraw') {
+        if (_platformViewDrawnCompleter?.isCompleted == false) {
+          _platformViewDrawnCompleter?.complete();
+        }
+      }
+    });
     _testChannel.setMessageHandler(_handler);
   }
 
   @override
   void dispose() {
     _loadedImage?.dispose();
+    _nativeChannel.setMethodCallHandler(null);
     _testChannel.setMessageHandler(null);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    void onPlatformViewCreated() {
-      if (_platformViewCreatedCompleter?.isCompleted == false) {
-        _platformViewCreatedCompleter?.complete();
-      }
-    }
-
     final Widget testContent = switch (_message) {
       kBackdropFilterBlurTest => const BackdropFilterBlur(),
-      kPlatformViewTextureLayerTest => AndroidPlatformView(
+      kPlatformViewTextureLayerTest => const AndroidPlatformView(
         mode: PlatformViewMode.textureLayer,
-        onCreated: onPlatformViewCreated,
       ),
-      kPlatformViewHybridCompositionTest => AndroidPlatformView(
+      kPlatformViewHybridCompositionTest => const AndroidPlatformView(
         mode: PlatformViewMode.hybridComposition,
-        onCreated: onPlatformViewCreated,
       ),
-      kPlatformViewHybridCompositionPlusPlusTest => AndroidPlatformView(
+      kPlatformViewHybridCompositionPlusPlusTest => const AndroidPlatformView(
         mode: PlatformViewMode.hybridCompositionPlusPlus,
-        onCreated: onPlatformViewCreated,
       ),
       kTextTest => const TextDrawingCanvas(),
       kImageTest => ImageDrawingCanvas(image: _loadedImage),

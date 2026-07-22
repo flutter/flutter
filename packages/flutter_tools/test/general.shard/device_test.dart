@@ -308,48 +308,36 @@ void main() {
       expect(ephemeralDevice, ephemeralOne);
     }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testUsingContext(
-      'returns null when multiple non ephemeral devices are found',
-      () async {
-        final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext('returns null when multiple non ephemeral devices are found', () async {
+      final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
 
-        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
-        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-        expect(ephemeralDevice, isNull);
-      },
-      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
-    );
+      expect(ephemeralDevice, isNull);
+    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testUsingContext(
-      'return null when hasSpecifiedDeviceId is true',
-      () async {
-        final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext('return null when hasSpecifiedDeviceId is true', () async {
+      final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
 
-        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-        deviceManager.specifiedDeviceId = 'device';
+      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      deviceManager.specifiedDeviceId = 'device';
 
-        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-        expect(ephemeralDevice, isNull);
-      },
-      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
-    );
+      expect(ephemeralDevice, isNull);
+    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testUsingContext(
-      'returns null when no ephemeral devices are found',
-      () async {
-        final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext('returns null when no ephemeral devices are found', () async {
+      final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
 
-        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
-        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-        expect(ephemeralDevice, isNull);
-      },
-      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
-    );
+      expect(ephemeralDevice, isNull);
+    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
     testWithoutContext('Unsupported devices listed in all devices', () async {
       final devices = <Device>[unsupported, unsupportedForProject];
@@ -678,6 +666,7 @@ void main() {
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
         enableDds: false,
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
@@ -692,6 +681,7 @@ void main() {
       final DebuggingOptions deserialized = DebuggingOptions.fromJson(decoded, BuildInfo.debug);
       expect(deserialized.startPaused, original.startPaused);
       expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
+      expect(deserialized.disableServiceOriginCheck, original.disableServiceOriginCheck);
       expect(deserialized.enableDds, original.enableDds);
       expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
       expect(deserialized.dartFlags, original.dartFlags);
@@ -711,6 +701,7 @@ void main() {
           BuildInfo.debug,
           startPaused: true,
           disableServiceAuthCodes: true,
+          disableServiceOriginCheck: true,
           disablePortPublication: true,
           dartFlags: '--foo',
           useTestFonts: true,
@@ -743,6 +734,7 @@ void main() {
             '--enable-dart-profiling',
             '--profile-startup',
             '--disable-service-auth-codes',
+            '--disable-service-origin-check',
             '--disable-vm-service-publication',
             '--start-paused',
             '--dart-flags="--foo"',

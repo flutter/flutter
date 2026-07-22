@@ -20,7 +20,11 @@ impeller_component("playground") {
   ]
 
   deps = [
+    "../entity",
     "../renderer/backend",
+    "//flutter/impeller/testing:golden_digest_manager",
+    "//flutter/impeller/testing:screenshot",
+    "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/testing:test_swiftshader_utils",
   ]
 
@@ -70,6 +74,8 @@ impeller_component("playground") {
       "AppKit.framework",
       "QuartzCore.framework",
     ]
+
+    deps += [ "//flutter/impeller/testing:metal_screenshot" ]
   }
 }
 
@@ -85,6 +91,7 @@ impeller_component("playground_test") {
 
   public_deps = [
     ":playground",
+    "//flutter/impeller/testing:golden_digest_manager",
     "//flutter/testing:testing_lib",
   ]
 }

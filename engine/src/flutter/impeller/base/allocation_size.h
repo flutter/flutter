@@ -126,7 +126,19 @@ class AllocationSize {
   uint64_t bytes_ = {};
 };
 
-using Bytes = AllocationSize<1u>;
+class Bytes : public AllocationSize<1u> {
+ public:
+  constexpr Bytes() = default;
+
+  // Do not do arithmetic when constructing Bytes in order to avoid overflow
+  // or precision loss.
+  explicit constexpr Bytes(uint64_t size)
+      : AllocationSize(size, FromBytesTag::kFromBytes) {}
+
+  // Allow implicit conversion from the base class to support arithmetic
+  // operations.
+  explicit constexpr Bytes(AllocationSize<1u> size) : AllocationSize(size) {}
+};
 
 using KiloBytes = AllocationSize<1'000u>;
 using MegaBytes = AllocationSize<1'000u * 1'000u>;

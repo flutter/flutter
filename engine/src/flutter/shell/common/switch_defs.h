@@ -126,6 +126,9 @@ DEF_SWITCH(DisableServiceAuthCodes,
            "disable-service-auth-codes",
            "Disable the requirement for authentication codes for communicating"
            " with the VM service.")
+DEF_SWITCH(DisableServiceOriginCheck,
+           "disable-service-origin-check",
+           "Disable the WebSocket origin check for the VM service.")
 DEF_SWITCH(EnableServicePortFallback,
            "enable-service-port-fallback",
            "Allow the VM service to fallback to automatic port selection if"
@@ -295,9 +298,6 @@ DEF_SWITCH(ImpellerLazyShaderMode,
            "impeller-lazy-shader-mode",
            "Whether to defer initialization of all required PSOs for the "
            "Impeller backend. Defaults to false.")
-DEF_SWITCH(ImpellerAntialiasLines,
-           "impeller-antialias-lines",
-           "Experimental flag to test drawing lines with antialiasing.")
 DEF_SWITCH(ImpellerUseSDFs,
            "impeller-use-sdfs",
            "Whether to use SDFs for rendering in Impeller.")

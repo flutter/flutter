@@ -1166,7 +1166,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
             'This error happens if you call setState() on a State object for a widget that '
             'no longer appears in the widget tree (e.g., whose parent widget no longer '
             'includes the widget in its build). This error can occur when code calls '
-            'setState() from a timer or an animation callback.',
+            'setState() from a timer, from an animation callback, or after an '
+            'asynchronous operation (such as an awaited network request or other '
+            'Future) completes after the widget has been removed from the tree.',
           ),
           ErrorHint(
             'The preferred solution is '

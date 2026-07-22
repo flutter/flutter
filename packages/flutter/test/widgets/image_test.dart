@@ -3124,6 +3124,29 @@ void main() {
     // Also check takeException as a standard backup.
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('RawImage forwards default blendMode to RenderImage', (WidgetTester tester) async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    addTearDown(image.dispose);
+
+    await tester.pumpWidget(RawImage(image: image));
+
+    final RenderImage renderImage = tester.renderObject(find.byType(RawImage));
+    expect(renderImage.blendMode, BlendMode.srcOver);
+  });
+
+  testWidgets('RawImage forwards custom blendMode to RenderImage', (WidgetTester tester) async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    addTearDown(image.dispose);
+
+    await tester.pumpWidget(RawImage(image: image, blendMode: BlendMode.plus));
+
+    final RenderImage renderImage = tester.renderObject(find.byType(RawImage));
+    expect(renderImage.blendMode, BlendMode.plus);
+
+    await tester.pumpWidget(RawImage(image: image, blendMode: BlendMode.multiply));
+    expect(renderImage.blendMode, BlendMode.multiply);
+  });
 }
 
 @immutable
