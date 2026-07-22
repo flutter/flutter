@@ -17,6 +17,28 @@ import 'android_webkit_constants.dart';
 import 'platform_views_service_proxy.dart';
 import 'weak_reference_utils.dart';
 
+/// Default callback for showing custom widgets (fullscreen videos, etc.)
+class _DefaultShowCustomWidgetCallback {
+  _DefaultShowCustomWidgetCallback(this.context);
+  final BuildContext context;
+
+  void call(Widget widget, OnHideCustomWidgetCallback onCustomWidgetHidden) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (BuildContext context) => widget, fullscreenDialog: true),
+    );
+  }
+}
+
+/// Default callback for hiding custom widgets
+class _DefaultHideCustomWidgetCallback {
+  _DefaultHideCustomWidgetCallback(this.context);
+  final BuildContext context;
+
+  void call() {
+    Navigator.of(context).pop();
+  }
+}
+
 /// Defines different types of sources causing window insets.
 ///
 /// See https://developer.android.com/reference/androidx/core/view/WindowInsetsCompat.Type
@@ -1156,24 +1178,23 @@ class AndroidWebViewWidget extends PlatformWebViewWidget {
     );
   }
 
-  // Attempt to handle custom views with a default implementation if it has not
-  // been set.
   void _trySetDefaultOnShowCustomWidgetCallbacks(BuildContext context) {
     final controller = _androidParams.controller as AndroidWebViewController;
 
-    if (controller._onShowCustomWidgetCallback == null) {
+    // Check if we need to set default callbacks
+    // Only set if no custom callbacks are set, or if the current ones are our defaults
+    final bool hasDefaultShow =
+        controller._onShowCustomWidgetCallback is _DefaultShowCustomWidgetCallback;
+    final bool hasDefaultHide =
+        controller._onHideCustomWidgetCallback is _DefaultHideCustomWidgetCallback;
+
+    if (controller._onShowCustomWidgetCallback == null ||
+        controller._onHideCustomWidgetCallback == null ||
+        hasDefaultShow ||
+        hasDefaultHide) {
       controller.setCustomWidgetCallbacks(
-        onShowCustomWidget: (Widget widget, OnHideCustomWidgetCallback callback) {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => widget,
-              fullscreenDialog: true,
-            ),
-          );
-        },
-        onHideCustomWidget: () {
-          Navigator.of(context).pop();
-        },
+        onShowCustomWidget: _DefaultShowCustomWidgetCallback(context),
+        onHideCustomWidget: _DefaultHideCustomWidgetCallback(context),
       );
     }
   }

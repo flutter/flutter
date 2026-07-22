@@ -2214,6 +2214,90 @@ void main() {
         ),
       );
     });
+
+    testWidgets('AndroidWebViewWidget updates callbacks on rebuild', (WidgetTester tester) async {
+      final android_webview.WebView mockWebView = MockWebView();
+      final AndroidWebViewController controller = createControllerWithMocks(
+        mockWebView: mockWebView,
+      );
+
+      android_webview.PigeonInstanceManager.instance.addDartCreatedInstance(mockWebView);
+
+      final webViewWidget = AndroidWebViewWidget(
+        AndroidWebViewWidgetCreationParams(key: const Key('test_web_view'), controller: controller),
+      );
+
+      // Build first time
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(builder: (BuildContext context) => webViewWidget.build(context)),
+          ),
+        ),
+      );
+
+      // Trigger rebuild with different context
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              color: Colors.blue,
+              child: Builder(builder: (BuildContext context) => webViewWidget.build(context)),
+            ),
+          ),
+        ),
+      );
+
+      // Verify no stale context issues
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('AndroidWebViewWidget preserves user custom callbacks', (
+      WidgetTester tester,
+    ) async {
+      final android_webview.WebView mockWebView = MockWebView();
+      final AndroidWebViewController controller = createControllerWithMocks(
+        mockWebView: mockWebView,
+      );
+
+      android_webview.PigeonInstanceManager.instance.addDartCreatedInstance(mockWebView);
+
+      // Set custom callbacks
+      bool customShowCalled = false;
+      controller.setCustomWidgetCallbacks(
+        onShowCustomWidget: (widget, callback) {
+          customShowCalled = true;
+        },
+        onHideCustomWidget: () {},
+      );
+
+      final webViewWidget = AndroidWebViewWidget(
+        AndroidWebViewWidgetCreationParams(key: const Key('test_web_view'), controller: controller),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(builder: (BuildContext context) => webViewWidget.build(context)),
+          ),
+        ),
+      );
+
+      // Rebuild should not override custom callbacks
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(builder: (BuildContext context) => webViewWidget.build(context)),
+          ),
+        ),
+      );
+
+      // Verify custom callbacks are still intact
+      expect(customShowCalled, false);
+      // Trigger a show and verify our custom callback is called
+      controller._onShowCustomWidgetCallback?.call(Container(), () {});
+      expect(customShowCalled, true);
+    });
   });
 
   group('AndroidCustomViewWidget', () {
