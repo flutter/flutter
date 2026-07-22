@@ -4,6 +4,7 @@
 
 package com.flutter.gradle.plugins
 
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.BuildType
 import com.flutter.gradle.CompileSdkVersion
 import com.flutter.gradle.FlutterExtension
@@ -12,15 +13,11 @@ import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
 import com.flutter.gradle.FlutterPluginUtils.buildModeFor
 import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
-import com.flutter.gradle.FlutterPluginUtils.getLegacyAndroidExtension
-import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import com.android.build.gradle.internal.dsl.BuildType as dslBuildType
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
@@ -159,22 +156,19 @@ class PluginHandler(
                 return
             }
 
-            // Copy build types from the app to the plugin.
-            // This allows to build apps with plugins and custom build types or flavors.
-            // However, only copy if the plugin is also an app project, since library projects
-            // cannot have applicationIdSuffix and other app-specific properties.
-            if (isBuiltAsApp(pluginProject)) {
-                (getLegacyAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
-                    .addAll(getLegacyAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
-            } else {
-                // For library projects, create compatible build types without app-specific properties
-                getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->
-                    if (getLegacyAndroidExtension(pluginProject).buildTypes.findByName(appBuildType.name) == null) {
-                        getLegacyAndroidExtension(pluginProject).buildTypes.create(appBuildType.name) {
-                            // Copy library-compatible properties only
+            // Copy the app project's build types onto the plugin project so that its variants
+            // resolve. These are `initWith` copies, not live aliases: `initWith` copies the
+            // properties both build types understand (matchingFallbacks included), and
+            // app-specific properties are additionally copied when both sides are application
+            // build types. Library build types cannot receive app-specific properties (such
+            // as isDebuggable) through the public DSL.
+            val pluginProjectBuildTypes = getAndroidExtension(pluginProject).buildTypes
+            getAndroidExtension(project).buildTypes.forEach { appBuildType ->
+                if (pluginProjectBuildTypes.findByName(appBuildType.name) == null) {
+                    pluginProjectBuildTypes.create(appBuildType.name) {
+                        initWith(appBuildType)
+                        if (this is ApplicationBuildType && appBuildType is ApplicationBuildType) {
                             isDebuggable = appBuildType.isDebuggable
-                            isMinifyEnabled = appBuildType.isMinifyEnabled
-                            // Note: applicationIdSuffix and other app-specific properties are intentionally not copied
                         }
                     }
                 }
