@@ -19,7 +19,14 @@ import '../ios/plist_parser.dart';
 
 @visibleForTesting
 const String kSpotlightMdfindCommand =
-    'mdfind \'kMDItemCFBundleIdentifier="com.google.android.studio*"\' & pid=\$!; (sleep 3; kill -9 \$pid 2>/dev/null) & killer=\$!; wait \$pid 2>/dev/null; status=\$?; kill \$killer 2>/dev/null; exit \$status';
+    r'( '
+    r'  for ((i = 0; i < 30; i++)); do '
+    r'    sleep .1; '
+    r'    kill -0 $$ || exit 0; '
+    r'  done; '
+    r'  kill -9 $$; '
+    r') 2>/dev/null & '
+    r'exec mdfind kMDItemCFBundleIdentifier="com.google.android.studio*"';
 
 const _androidStudioTitle = 'Android Studio';
 const _androidStudioId = 'AndroidStudio';
