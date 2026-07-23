@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'dart:collection';
 import 'dart:math' as math show pi;
 import 'dart:ui' as ui;
@@ -97,20 +94,31 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     this.toolbarBuilder = _defaultToolbarBuilder,
   }) : assert(children.length > 0);
 
-  /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
+  /// The focal point above which the toolbar attempts to position itself.
+  ///
+  /// If there is not enough room above before reaching the top of the screen,
+  /// then the toolbar will position itself below [anchorBelow].
   final Offset anchorAbove;
 
-  /// {@macro flutter.material.TextSelectionToolbar.anchorBelow}
+  /// The focal point below which the toolbar attempts to position itself, if it
+  /// doesn't fit above [anchorAbove].
   final Offset anchorBelow;
 
-  /// {@macro flutter.material.TextSelectionToolbar.children}
+  /// The children that will be displayed in the text selection toolbar.
+  ///
+  /// Typically these are buttons.
+  ///
+  /// Must not be empty.
   ///
   /// See also:
   ///   * [CupertinoTextSelectionToolbarButton], which builds a default
   ///     Cupertino-style text selection toolbar text button.
   final List<Widget> children;
 
-  /// {@macro flutter.material.TextSelectionToolbar.toolbarBuilder}
+  /// Builds the toolbar container.
+  ///
+  /// Useful for customizing the high-level background of the toolbar. The given
+  /// child Widget will contain all of the [children].
   ///
   /// The given anchor and isAbove can be used to position an arrow, as in the
   /// default Cupertino toolbar.

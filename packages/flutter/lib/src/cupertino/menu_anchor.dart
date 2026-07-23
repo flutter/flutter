@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -1782,7 +1779,10 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// pointer event, which is always between frames.
   final ValueChanged<bool>? onHover;
 
-  /// {@macro flutter.material.inkwell.onFocusChange}
+  /// Handler called when the focus changes.
+  ///
+  /// Called with true if this widget's node gains focus, and false if it loses
+  /// focus.
   final ValueChanged<bool>? onFocusChange;
 
   /// Whether hovering should request focus for this widget.

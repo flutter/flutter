@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'button.dart';
 /// @docImport 'route.dart';
 library;
@@ -283,10 +281,16 @@ class CupertinoAlertDialog extends StatefulWidget {
   ///    section when it is long.
   final ScrollController? actionScrollController;
 
-  /// {@macro flutter.material.dialog.insetAnimationDuration}
+  /// The duration of the animation to show when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to 100 milliseconds.
   final Duration insetAnimationDuration;
 
-  /// {@macro flutter.material.dialog.insetAnimationCurve}
+  /// The curve to use for the animation shown when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to [Curves.decelerate].
   final Curve insetAnimationCurve;
 
   @override
