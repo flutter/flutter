@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'runner.dart' as runner;
+import 'src/android/android_project_validator.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -56,6 +57,7 @@ import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
+
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/web_runner.dart';
@@ -169,6 +171,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         // new ProjectValidators should be added here for the --suggestions to run
         allProjectValidators: <ProjectValidator>[
           GeneralInfoProjectValidator(),
+          const AndroidManifestProjectValidator(),
           VariableDumpMachineProjectValidator(
             logger: globals.logger,
             fileSystem: globals.fs,
