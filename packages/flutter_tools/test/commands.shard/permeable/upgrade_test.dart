@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(team-tools): Remove when the execution order dependency is resolved.
+// See https://github.com/flutter/flutter/issues/189919
+@Tags(<String>['no-shuffle'])
+library;
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
