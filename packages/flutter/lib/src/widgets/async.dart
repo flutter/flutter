@@ -397,6 +397,16 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// ** See code in examples/api/lib/widgets/async/stream_builder.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows how to switch between two streams with a [StreamBuilder].
+/// Without a [Key], changing the [stream] keeps the previous stream's snapshot
+/// until the new stream emits. Keying the builder on the current stream (here
+/// with an [ObjectKey]) recreates its state so the UI resets to a waiting
+/// state immediately when switching.
+///
+/// ** See code in examples/api/lib/widgets/async/stream_builder.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ValueListenableBuilder], which wraps a [ValueListenable] instead of a
