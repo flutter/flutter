@@ -113,7 +113,6 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorKGPVersion: Version get() = supportVersions.errorKGPVersion
 
-    // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
     // A warning is logged if the project's minSdkVersion is strictly less than this value.
     @VisibleForTesting
     internal val warnMinSdkVersion: Int get() = supportVersions.minSdkVersion.warn
