@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_opengl_frame.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
 
@@ -29,6 +30,9 @@ struct _FlViewRendererOpenGL {
   // Combines layers into frame.
   FlCompositorOpenGL* compositor;
 
+  // Manages the framebuffer the current frame is composited into.
+  FlOpenGLFrame* frame;
+
   // Task runner to wait for frames on.
   FlTaskRunner* task_runner;
 
@@ -39,6 +43,19 @@ struct _FlViewRendererOpenGL {
 G_DEFINE_TYPE(FlViewRendererOpenGL,
               fl_view_renderer_opengl,
               fl_view_renderer_get_type())
+
+// Get the size of the current frame in pixels. The size is zero if there is no
+// frame yet. Must be called with the frame mutex held.
+static void get_frame_size(FlViewRendererOpenGL* self,
+                           size_t* width,
+                           size_t* height) {
+  if (self->frame != nullptr) {
+    fl_opengl_frame_get_size(self->frame, width, height);
+  } else {
+    *width = 0;
+    *height = 0;
+  }
+}
 
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
@@ -51,33 +68,19 @@ static gboolean redraw_cb(gpointer user_data) {
   fl_view_renderer_notify_frame(FL_VIEW_RENDERER(self));
 
   // If Flutter is controlling the window size, then resize the view if
-  // necessary.
-  GtkWidget* render_widget = GTK_WIDGET(self);
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(render_widget, &allocation);
-  gint scale_factor = gtk_widget_get_scale_factor(render_widget);
-  size_t width = allocation.width * scale_factor;
-  size_t height = allocation.height * scale_factor;
-  size_t frame_width, frame_height;
-  {
-    g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-    fl_compositor_opengl_get_frame_size(self->compositor, &frame_width,
-                                        &frame_height);
-  }
-  gboolean frame_size_matches = width == frame_width && height == frame_height;
-  if (self->sized_to_content && !frame_size_matches) {
-    gtk_widget_set_size_request(render_widget, frame_width / scale_factor,
-                                frame_height / scale_factor);
-    GtkWidget* toplevel = gtk_widget_get_toplevel(render_widget);
-    if (GTK_IS_WINDOW(toplevel)) {
-      // Resize to smallest size, so that the window will shrink to fit the new
-      // size of the render area.
-      gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
+  // necessary. The redraw happens once the resized frame arrives.
+  if (self->sized_to_content) {
+    size_t frame_width, frame_height;
+    g_mutex_lock(&self->frame_mutex);
+    get_frame_size(self, &frame_width, &frame_height);
+    g_mutex_unlock(&self->frame_mutex);
+    if (fl_view_renderer_resize_to_frame(FL_VIEW_RENDERER(self), frame_width,
+                                         frame_height)) {
+      return G_SOURCE_REMOVE;
     }
-    return G_SOURCE_REMOVE;
   }
 
-  gtk_widget_queue_draw(render_widget);
+  gtk_widget_queue_draw(GTK_WIDGET(self));
 
   return G_SOURCE_REMOVE;
 }
@@ -93,8 +96,7 @@ static void wait_for_frame(FlViewRendererOpenGL* self,
     size_t width = gdk_window_get_width(window) * scale_factor;
     size_t height = gdk_window_get_height(window) * scale_factor;
     size_t frame_width, frame_height;
-    fl_compositor_opengl_get_frame_size(self->compositor, &frame_width,
-                                        &frame_height);
+    get_frame_size(self, &frame_width, &frame_height);
     if (frame_width == width && frame_height == height) {
       break;
     }
@@ -138,10 +140,11 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
   // then we have to copy the texture via the CPU.
   gboolean shareable =
       GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
+  self->frame = fl_opengl_frame_new(shareable);
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
-  self->compositor = fl_compositor_opengl_new(
-      fl_engine_get_opengl_manager(self->engine), shareable);
+  self->compositor =
+      fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
 }
 
 // Implements GtkWidget::draw.
@@ -170,7 +173,13 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
     gdk_gl_context_make_current(self->render_context);
   }
 
-  gboolean result = fl_compositor_opengl_render(self->compositor, cr, window);
+  gboolean result = FALSE;
+  if (self->frame != nullptr) {
+    size_t width = gdk_window_get_width(window) * scale_factor;
+    size_t height = gdk_window_get_height(window) * scale_factor;
+    result = fl_opengl_frame_draw(self->frame, cr, window, scale_factor, width,
+                                  height);
+  }
 
   if (self->render_context != nullptr) {
     gdk_gl_context_clear_current();
@@ -194,7 +203,8 @@ static void fl_view_renderer_opengl_present_layers(FlViewRenderer* renderer,
   }
 
   g_mutex_lock(&self->frame_mutex);
-  fl_compositor_opengl_composite_layers(self->compositor, layers, layers_count);
+  fl_opengl_frame_composite(self->frame, self->compositor, layers,
+                            layers_count);
   g_mutex_unlock(&self->frame_mutex);
 
   // Wake up the GTK thread if it is waiting for this frame.
@@ -224,6 +234,7 @@ static void fl_view_renderer_opengl_finalize(GObject* object) {
   // holds a strong reference on the view (and thus this renderer) while
   // presenting.
   g_clear_object(&self->compositor);
+  g_clear_object(&self->frame);
 
   G_OBJECT_CLASS(fl_view_renderer_opengl_parent_class)->finalize(object);
 }
