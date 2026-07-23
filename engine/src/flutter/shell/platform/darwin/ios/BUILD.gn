@@ -69,6 +69,7 @@ source_set("InternalFlutterSwift") {
     "framework/Source/KeyboardInsetManager.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
+    "framework/Source/TranslateController.swift",
     "framework/Source/UIPressProxy.swift",
     "framework/Source/VSyncClient.swift",
   ]
