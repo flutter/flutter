@@ -735,14 +735,11 @@ FlutterWindow::HandleMessage(UINT const message,
         break;
       }
 
-      if (message == WM_LBUTTONDOWN) {
-        // Capture the pointer in case the user drags outside the client area.
-        // In this case, the "mouse leave" event is delayed until the user
-        // releases the button. It's only activated on left click given that
-        // it's more common for apps to handle dragging with only the left
-        // button.
-        SetCapture(window_handle_);
-      }
+      // Capture the pointer in case the user drags outside the client area.
+      // In this case, the "mouse leave" event is delayed until the user
+      // releases the button.
+      SetCapture(window_handle_);
+
       button_pressed = message;
       if (message == WM_XBUTTONDOWN) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
@@ -764,9 +761,6 @@ FlutterWindow::HandleMessage(UINT const message,
         break;
       }
 
-      if (message == WM_LBUTTONUP) {
-        ReleaseCapture();
-      }
       button_pressed = message;
       if (message == WM_XBUTTONUP) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
@@ -774,6 +768,17 @@ FlutterWindow::HandleMessage(UINT const message,
       x_pos = GET_X_LPARAM(lparam);
       y_pos = GET_Y_LPARAM(lparam);
       flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
+
+      // WM_*BUTTONUP messages use wparam to report which buttons remain
+      // pressed after this event; release capture only after the last mouse
+      // button is released. WM_*BUTTONDOWN messages already identify the newly
+      // pressed button via the message itself.
+      // See:
+      // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup
+      if ((wparam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON | MK_XBUTTON1 |
+                     MK_XBUTTON2)) == 0) {
+        ReleaseCapture();
+      }
 
       OnPointerUp(static_cast<double>(x_pos), static_cast<double>(y_pos),
                   device_kind, kDefaultPointerDeviceId, flutter_button);
