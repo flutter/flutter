@@ -79,7 +79,18 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
+  private static class PendingSurfaceClip {
+    final float opacity;
+    final Rect screenRect;
+
+    PendingSurfaceClip(float opacity, Rect screenRect) {
+      this.opacity = opacity;
+      this.screenRect = screenRect;
+    }
+  }
+
   private final HashSet<Integer> viewsWithPendingSurfaceCallback = new HashSet<>();
+  private final SparseArray<PendingSurfaceClip> pendingSurfaceClips = new SparseArray<>();
 
   public PlatformViewsController2() {
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
@@ -590,14 +601,17 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     // So apply via a SurfaceHolder.Callback(). Otherwise, apply via standard
     // transaction apis.
     float opacity = mutatorsStack.getFinalOpacity();
+    if (viewsWithPendingSurfaceCallback.contains(viewId)) {
+      pendingSurfaceClips.put(viewId, new PendingSurfaceClip(opacity, screenRect));
+    }
     SurfaceControl sc = surfaceView.getSurfaceControl();
     if (sc == null) {
+      pendingSurfaceClips.put(viewId, new PendingSurfaceClip(opacity, screenRect));
       if (viewsWithPendingSurfaceCallback.contains(viewId)) {
         return;
       }
       viewsWithPendingSurfaceCallback.add(viewId);
-      SurfaceHolder.Callback cb =
-          createSurfaceClipCallback(surfaceView, opacity, screenRect, viewId);
+      SurfaceHolder.Callback cb = createSurfaceClipCallback(surfaceView, viewId);
       surfaceView.getHolder().addCallback(cb);
       return;
     }
@@ -615,19 +629,17 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   @RequiresApi(API_LEVELS.API_34)
   private SurfaceHolder.Callback createSurfaceClipCallback(
-      @NonNull final SurfaceView surfaceView,
-      final float opacity,
-      @NonNull final Rect screenRect,
-      final int viewId) {
+      @NonNull final SurfaceView surfaceView, final int viewId) {
     return new SurfaceHolder.Callback() {
       @Override
       public void surfaceCreated(@NonNull SurfaceHolder holder) {
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
-        if (surfaceControl != null && surfaceControl.isValid()) {
+        PendingSurfaceClip clip = pendingSurfaceClips.get(viewId);
+        if (surfaceControl != null && surfaceControl.isValid() && clip != null) {
           SurfaceControl.Transaction tx =
               createTransaction()
-                  .setAlpha(surfaceControl, opacity)
-                  .setCrop(surfaceControl, screenRect);
+                  .setAlpha(surfaceControl, clip.opacity)
+                  .setCrop(surfaceControl, clip.screenRect);
         } else {
           Log.i(
               TAG,
@@ -640,6 +652,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         // layout). So we schedule one to ensure the crop is rendered properly.
         // See https://github.com/flutter/flutter/issues/175546.
         flutterJNI.scheduleFrame();
+        pendingSurfaceClips.remove(viewId);
         viewsWithPendingSurfaceCallback.remove(viewId);
         surfaceView.getHolder().removeCallback(this);
       }
@@ -650,6 +663,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
       @Override
       public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+        pendingSurfaceClips.remove(viewId);
         viewsWithPendingSurfaceCallback.remove(viewId);
         surfaceView.getHolder().removeCallback(this);
       }
@@ -769,6 +783,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         @Override
         public void dispose(int viewId) {
           viewsWithPendingSurfaceCallback.remove(viewId);
+          pendingSurfaceClips.remove(viewId);
           final PlatformView platformView = platformViews.get(viewId);
           if (platformView == null) {
             Log.e(TAG, "Disposing unknown platform view with id: " + viewId);
