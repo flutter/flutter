@@ -389,6 +389,12 @@ class Plugin {
       final dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
       final String dartFileName =
           (platformsYaml[platformKey] as YamlMap)[kDartFileName] as String? ?? '$pluginName.dart';
+      if (!isValidPluginDartFileName(dartFileName)) {
+        throwToolExit(
+          'The plugin `$pluginName` has an invalid `dartFileName` for platform `$platformKey` '
+          'in pubspec.yaml.',
+        );
+      }
       return (dartClass: dartClass, dartFileName: dartFileName);
     }
     return null;
