@@ -83,12 +83,16 @@ class AndroidSdk {
   static AndroidSdk? locateAndroidSdk() {
     String? findAndroidHomeDir() {
       String? androidHomeDir;
+      var isExplicit = false;
       if (globals.config.containsKey('android-sdk')) {
         androidHomeDir = globals.config.getValue('android-sdk') as String?;
+        isExplicit = true;
       } else if (globals.platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = globals.platform.environment[kAndroidHome];
+        isExplicit = true;
       } else if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {
         androidHomeDir = globals.platform.environment[kAndroidSdkRoot];
+        isExplicit = true;
       } else if (globals.platform.isLinux) {
         if (globals.fsUtils.homeDirPath != null) {
           androidHomeDir = globals.fs.path.join(globals.fsUtils.homeDirPath!, 'Android', 'Sdk');
@@ -114,12 +118,23 @@ class AndroidSdk {
         }
       }
 
+      isExplicit = isExplicit && androidHomeDir != null && androidHomeDir.isNotEmpty;
+
       if (androidHomeDir != null) {
         if (validSdkDirectory(androidHomeDir)) {
           return androidHomeDir;
         }
         if (validSdkDirectory(globals.fs.path.join(androidHomeDir, 'sdk'))) {
           return globals.fs.path.join(androidHomeDir, 'sdk');
+        }
+        if (isExplicit) {
+          if (globals.fs.isDirectorySync(androidHomeDir)) {
+            return androidHomeDir;
+          }
+          final String nestedSdk = globals.fs.path.join(androidHomeDir, 'sdk');
+          if (globals.fs.isDirectorySync(nestedSdk)) {
+            return nestedSdk;
+          }
         }
       }
 
