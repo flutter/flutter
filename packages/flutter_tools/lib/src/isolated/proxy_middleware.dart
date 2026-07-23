@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:http_parser/http_parser.dart' show CaseInsensitiveMap;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart';
 
@@ -12,13 +13,30 @@ const _kLogEntryPrefix = '[proxyMiddleware]';
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
 ///
-/// The new request will have the same method, headers, body, and context as the
-/// [originalRequest], but its URL will be set to [finalTargetUrl].
-shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
+/// The new request will have the same method, body, and context as the
+/// [originalRequest], but its URL will be set to [finalTargetUrl]. The
+/// original headers are kept; any entries in [extraHeaders] are merged on
+/// top, overriding the original on key collisions.
+///
+/// Header keys are merged case-insensitively (e.g. an extra header named
+/// `authorization` will replace an original `Authorization`), matching how
+/// HTTP/1.1 header names are defined as case-insensitive.
+shelf.Request proxyRequest(
+  shelf.Request originalRequest,
+  Uri finalTargetUrl, {
+  Map<String, String> extraHeaders = const <String, String>{},
+}) {
+  final Map<String, String> mergedHeaders;
+  if (extraHeaders.isEmpty) {
+    mergedHeaders = originalRequest.headers;
+  } else {
+    mergedHeaders = CaseInsensitiveMap<String>.from(originalRequest.headers);
+    mergedHeaders.addAll(extraHeaders);
+  }
   return shelf.Request(
     originalRequest.method,
     finalTargetUrl,
-    headers: originalRequest.headers,
+    headers: mergedHeaders,
     body: originalRequest.read(),
     context: originalRequest.context,
   );
@@ -43,7 +61,11 @@ Future<shelf.Response> _applyProxyRules(
     final shelf.Handler handler = proxyHandler(rule.targetUri, proxyName: 'flutter_tools');
     final Uri finalTargetUrl = rule.finalTargetUri(request.requestedUri);
     try {
-      final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
+      final shelf.Request proxyBackendRequest = proxyRequest(
+        request,
+        finalTargetUrl,
+        extraHeaders: rule.headers,
+      );
       final shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
