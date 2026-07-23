@@ -32,6 +32,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.44 Changes
 
+### [3.44.8](https://github.com/flutter/flutter/releases/tag/3.44.8)
+- [flutter/188346] When building on macOS or iOS using the Xcode 27 toolchain, the build will fail due to a lipo verification error.
+- [flutter/184286] On some devices with vendor-modified Android 11 ROMs, `AccessibilityBridge.java` field fails to resolve.
+
 ### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)
 - [flutter/188161](https://github.com/flutter/flutter/issues/188161) Fixes a resource leak that sometimes caused crashes when using external textures on some GPUs (such as Arm Mali).
 
