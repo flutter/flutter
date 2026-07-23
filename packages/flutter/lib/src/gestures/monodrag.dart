@@ -1063,8 +1063,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
-    return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity &&
-        estimate.offset.distanceSquared > minDistance * minDistance;
+    return estimate.pixelsPerSecond.distanceExceeds(minVelocity) &&
+        estimate.offset.distanceExceeds(minDistance);
   }
 
   @override

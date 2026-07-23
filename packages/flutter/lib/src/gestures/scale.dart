@@ -306,8 +306,7 @@ typedef GestureScaleUpdateCallback = void Function(ScaleUpdateDetails details);
 typedef GestureScaleEndCallback = void Function(ScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
-  final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
-  return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
+  return velocity.pixelsPerSecond.distanceExceeds(kMinFlingVelocity);
 }
 
 /// Defines a line between two pointers on screen.
@@ -696,7 +695,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         Velocity velocity = tracker.getVelocity();
         if (_isFlingGesture(velocity)) {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
-          if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity) {
+          if (pixelsPerSecond.distanceExceeds(kMaxFlingVelocity)) {
             velocity = Velocity(
               pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity,
             );

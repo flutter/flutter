@@ -72,6 +72,24 @@ void main() {
     expect(computePanSlop(PointerDeviceKind.unknown, settings), 2);
   });
 
+  test('OffsetDistanceComparison matches Offset.distance comparisons', () {
+    const anOffset = Offset(3.0, 4.0); // distance == 5.0
+
+    expect(anOffset.distanceExceeds(4.9), isTrue);
+    expect(anOffset.distanceExceeds(5.0), isFalse);
+    expect(anOffset.distanceExceeds(5.1), isFalse);
+
+    expect(anOffset.distanceIsWithin(4.9), isFalse);
+    expect(anOffset.distanceIsWithin(5.0), isTrue);
+    expect(anOffset.distanceIsWithin(5.1), isTrue);
+
+    expect(Offset.zero.distanceExceeds(0.0), isFalse);
+    expect(Offset.zero.distanceIsWithin(0.0), isTrue);
+
+    expect(() => anOffset.distanceExceeds(-1.0), throwsAssertionError);
+    expect(() => anOffset.distanceIsWithin(-1.0), throwsAssertionError);
+  });
+
   group('fromMouseEvent', () {
     const PointerEvent hover = PointerHoverEvent(
       timeStamp: Duration(days: 1),
