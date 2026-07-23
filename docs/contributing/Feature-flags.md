@@ -403,13 +403,11 @@ test('sensitive content should fail if the flag is disabled', () {
 Note that feature flag usage in the framework runtime is very new, and is likely
 to evolve over time.
 
-## Engine and Embedder Configuration
+# Limitations
 
-The Flutter engine and embedders cannot query Flutter's feature flags directly at runtime.
+The Flutter engine and embedders cannot use Flutter's feature flags directly at runtime. However, if a flag can be consumed in the `flutter` tool and piped into the build or engine (for example, by injecting manifest metadata or passing launch arguments), feature flags can still be used for engine/embedder features.
 
-However, because the `flutter` tool runs upstream of platform builds, it can query a feature flag and pipe the value into the build system (for example, via Gradle build properties or launch arguments). The build system can then bake the setting into platform-specific configurations (such as `AndroidManifest.xml` or `Info.plist`) or pass it as a launch-time engine argument.
-
-If no tool-side piping exists for a feature flag, embedders can fall back to using project-level platform configurations directly.
+If an embedder needs feature flags and no such piping exists, you can instead use the project's platform-specific configuration.
 
 On Android, use `AndroidManifest.xml`:
 
@@ -426,6 +424,7 @@ On Android, use `AndroidManifest.xml`:
 On iOS and macOS, use `Info.plist`:
 
 ```xml
+...
 <plist version="1.0">
 <dict>
   <key>FLTEnableUnicornEmojis</key>
@@ -434,5 +433,8 @@ On iOS and macOS, use `Info.plist`:
 </plist>
 ```
 
+See Impeller and UI thread merging for prior art.
+
 > [!IMPORTANT]
-> If possible, prefer using Flutter feature flags in the tool instead of requiring developers to manually edit platform-specific configuration files.
+> If possible, prefer to use Flutter feature flags instead of platform-specific configuration files.
+> Flutter feature flags are easier for Flutter app developers.
