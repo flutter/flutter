@@ -309,6 +309,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 @immutable
+@pragma('track-creation-locations')
 abstract class Widget extends DiagnosticableTree {
   /// Initializes [key] for subclasses.
   const Widget({this.key});

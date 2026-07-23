@@ -47,7 +47,7 @@ void main() {
     '-Ddart.vm.profile=false',
     '-Ddart.vm.product=false',
     '--enable-asserts',
-    '--track-widget-creation',
+    '--track-creation-locations',
   ];
 
   setUp(() {
