@@ -19,9 +19,8 @@ class DialogWindowContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return Overlay.wrap(
-      alwaysSizeToContent: true,
-      child: FocusScope(
+    return MaterialApp(
+      home: FocusScope(
         autofocus: true,
         child: IntrinsicWidth(
           child: Material(
