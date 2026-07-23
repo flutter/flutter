@@ -755,6 +755,27 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
   EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
 }
 
+TEST_F(FlutterEngineTest, RegistrarCanReadValuePublishedByAnotherPlugin) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingPathComponent:@"icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:project
+                                       allowHeadlessExecution:YES];
+  NSString* publisherPluginName = @"PublisherPlugin";
+  NSString* readerPluginName = @"ReaderPlugin";
+  id<FlutterPluginRegistrar> publisher = [engine registrarForPlugin:publisherPluginName];
+  id<FlutterPluginRegistrar> reader = [engine registrarForPlugin:readerPluginName];
+
+  NSString* publishedValue = @"A published value";
+  [publisher publish:publishedValue];
+
+  EXPECT_EQ([reader valuePublishedByPlugin:publisherPluginName], publishedValue);
+  EXPECT_EQ([reader valuePublishedByPlugin:@"NoSuchPlugin"], nil);
+  EXPECT_EQ([reader valuePublishedByPlugin:readerPluginName], [NSNull null]);
+}
+
 TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
   NSString* fixtures = @(flutter::testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
