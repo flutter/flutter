@@ -91,6 +91,7 @@ unlinked_spec.ds
 *.jks
 local.properties
 **/.cxx/
+examples/personal_training_app/android/app/google-services.json
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -121,6 +122,7 @@ local.properties
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+examples/personal_training_app/ios/Runner/GoogleService-Info.plist
 
 # macOS
 **/Flutter/ephemeral/

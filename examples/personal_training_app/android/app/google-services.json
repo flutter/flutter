@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1050830167472",
+    "firebase_url": "https://sim-training-55d86-default-rtdb.firebaseio.com",
+    "project_id": "sim-training-55d86",
+    "storage_bucket": "sim-training-55d86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1050830167472:android:1796a2942aba0a3c318a75",
+        "android_client_info": {
+          "package_name": "com.simtraining.personaltrainingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJMyeC3fNuvO1RUY-4dgXAmbTN52Feaco"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
