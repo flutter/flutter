@@ -653,6 +653,22 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void ReportTimings(std::vector<int64_t> timings);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that a texture has a new frame
+  ///             available.
+  ///
+  ///             This is called when the platform marks a texture as having new
+  ///             content via `MarkTextureFrameAvailable`. The framework uses
+  ///             this to mark the corresponding texture render object as
+  ///             needing paint, ensuring the view containing the texture is
+  ///             recomposited even if no other render objects are dirty.
+  ///
+  /// @param[in]  texture_id  The ID of the texture that has a new frame.
+  ///
+  /// @note       Must be called on the UI task runner.
+  ///
+  void NotifyTextureFrameAvailable(int64_t texture_id);
+
+  //----------------------------------------------------------------------------
   /// @brief      Gets the main port of the root isolate. Since the isolate is
   ///             created immediately in the constructor of the engine, it is
   ///             possible to get its main port immediately (even before a call
@@ -884,6 +900,15 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   /// @param[in]  flags  The features to enable in the accessibility tree.
   ///
   void SetAccessibilityFeatures(int32_t flags);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that all views should be marked dirty.
+  ///
+  ///             This is called when the engine needs to force full repaint of
+  ///             all views on the next frame, for example during lifecycle
+  ///             events.
+  ///
+  void MarkAllViewsNeedRender();
 
   // |RuntimeDelegate|
   void ScheduleFrame(bool regenerate_layer_trees) override;

@@ -264,6 +264,22 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Matrix4? _rootTransform;
 
+  /// Whether this view must be composited on the next frame.
+  ///
+  /// This flag is cleared once the view gets successfully composited.
+  bool get needsCompositeFrame => _needsCompositeFrame;
+  bool _needsCompositeFrame = false;
+
+  /// Marks this view required to be composited on the next frame.
+  ///
+  /// This happens by the [PipelineOwner] during [PipelineOwner.flushPaint] if
+  /// there are any render objects that need to be painted. It is also set for
+  /// warmup frame or any frame requested by the engine (i.e. during return from
+  /// background).
+  void markNeedsCompositeFrame() {
+    _needsCompositeFrame = true;
+  }
+
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
     assert(hasConfiguration);
     _rootTransform = configuration.toMatrix();
@@ -372,6 +388,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
+      _needsCompositeFrame = false;
     }
   }
 
