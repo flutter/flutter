@@ -121,9 +121,16 @@ std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
       for (const std::shared_ptr<flutter::DlColorSource>& sampler :
            runtime_filter->samplers()) {
         if (index == 0 && sampler == nullptr) {
-          // Insert placeholder for filter.
+          // Insert placeholder for filter. The filter input is sampled at
+          // arbitrary, shader-computed coordinates, so it must use linear
+          // filtering. Nearest-neighbor sampling would snap every sampled
+          // point to a whole input texel, which makes the output jump in
+          // discrete steps as the shader's uniforms animate (for example,
+          // glyphs jittering during the Android stretch overscroll effect).
+          // See https://github.com/flutter/flutter/issues/167795.
           texture_inputs.push_back(
-              {.sampler_descriptor = skia_conversions::ToSamplerDescriptor({}),
+              {.sampler_descriptor = skia_conversions::ToSamplerDescriptor(
+                   flutter::DlImageSampling::kLinear),
                .texture = nullptr});
           continue;
         }
