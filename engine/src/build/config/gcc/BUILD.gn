@@ -52,33 +52,7 @@ config("no_exceptions") {
 }
 
 config("relative_paths") {
-  # Make builds independent of absolute file path.  The file names
-  # embedded in debugging information will be expressed as relative to
-  # the build directory, e.g. "../.." for an "out/subdir" under //.
-  # This is consistent with the file names in __FILE__ expansions
-  # (e.g. in assertion messages), which the compiler doesn't provide a
-  # way to remap.  That way source file names in logging and
-  # symbolization can all be treated the same way.  This won't go well
-  # if root_build_dir is not a subdirectory //, but there isn't a better
-  # option to keep all source file name references uniformly relative to
-  # a single root.
-  cflags = []
-  cflags_objcc = []
-  absolute_path = rebase_path("//")
-  relative_path = ""
-  if (use_rbe) {
-    # objc builds are always local even when rbe is enabled.
-    cflags_objcc += [
-      # This makes sure that the DW_AT_comp_dir string (the current
-      # directory while running the compiler, which is the basis for all
-      # relative source file names in the DWARF info) is represented as
-      # relative to //.
-      "-fdebug-prefix-map=$absolute_path=$relative_path",
-    ]
-  } else {
-    cflags += [ "-fdebug-prefix-map=$absolute_path=$relative_path" ]
-  }
-  cflags += [
+  cflags = [
     # This makes sure that include directories in the toolchain are
     # represented as relative to the build directory (because that's how
     # we invoke the compiler), rather than absolute.  This can affect
@@ -90,4 +64,18 @@ config("relative_paths") {
     # superfluous for purposes of the debugging information.
     "-no-canonical-prefixes",
   ]
+  ldflags = [ "-no-canonical-prefixes" ]
+
+  # Remove absolute paths from the debug information.
+  if (is_clang) {
+    cflags += [ "-ffile-compilation-dir=." ]
+    asmflags = [ "-Wa,-fdebug-compilation-dir,." ]
+  } else {
+    absolute_path = rebase_path("//")
+    relative_path = rebase_path("//", root_build_dir)
+    cflags += [ "-fdebug-prefix-map=$absolute_path=$relative_path" ]
+  }
+  if (is_mac) {
+    ldflags += [ "-Wl,-oso_prefix,." ]
+  }
 }
