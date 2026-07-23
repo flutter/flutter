@@ -3651,14 +3651,13 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/188837.
     // A themed indicator supplies the decoration, so indicatorWeight: 0 must not
-    // trip the default-underline assertion.
+    // throw the default-underline assertion.
     const indicatorColor = Color(0xFF00FF00);
     const Decoration indicator = BoxDecoration(color: indicatorColor);
     const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
 
     Widget buildFrame({required bool secondary}) {
       return boilerplate(
-        useMaterial3: false,
         tabBarTheme: const TabBarThemeData(
           indicator: indicator,
           indicatorSize: TabBarIndicatorSize.tab,
@@ -3700,7 +3699,6 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        useMaterial3: false,
         child: DefaultTabController(
           length: tabs.length,
           child: const TabBar(indicator: indicator, indicatorWeight: 0.0, tabs: tabs),
@@ -3725,7 +3723,6 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        useMaterial3: false,
         child: DefaultTabController(
           length: tabs.length,
           child: const TabBar(indicatorWeight: 0.0, tabs: tabs),
@@ -3736,7 +3733,6 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        useMaterial3: false,
         child: DefaultTabController(
           length: tabs.length,
           child: const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs),
