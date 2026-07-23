@@ -161,8 +161,10 @@ enum HostArtifact {
 
   iosDeploy('ios-deploy'),
   idevicesyslog('idevicesyslog'),
-  idevicescreenshot('idevicescreenshot'),
   iproxy('iproxy'),
+
+  @Deprecated('This artifact is no longer checked or used by Flutter.')
+  idevicescreenshot('idevicescreenshot'),
 
   /// The root of the sky_engine package.
   skyEnginePath('sky_engine'),

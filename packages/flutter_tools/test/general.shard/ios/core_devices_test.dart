@@ -953,6 +953,16 @@ void main() {
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(status, isFalse);
       });
+
+      testWithoutContext('fails to take screenshot', () async {
+        final bool status = await deviceControl.takeScreenshot(
+          deviceId: 'device-id',
+          destination: '/path/to/screenshot.png',
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('devicectl is not installed.'));
+        expect(status, isFalse);
+      });
     });
   });
 
@@ -3887,6 +3897,116 @@ invalid JSON
         expect(logger.traceText, contains('Error reading output file'));
       });
     });
+
+    group('take screenshot', () {
+      const deviceId = 'device-id';
+      const destination = '/path/to/screenshot.png';
+
+      testWithoutContext('Successful screenshot', () async {
+        const deviceControlOutput =
+            '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "capture",
+      "screenshot",
+      "--device",
+      "$deviceId",
+      "--destination",
+      "$destination"
+    ],
+    "outcome" : "success"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('screenshot_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screenshot',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool success = await deviceControl.takeScreenshot(
+          deviceId: deviceId,
+          destination: destination,
+        );
+        expect(success, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+      });
+
+      testWithoutContext('failed screenshot', () async {
+        const deviceControlOutput =
+            '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "capture",
+      "screenshot",
+      "--device",
+      "$deviceId",
+      "--destination",
+      "$destination"
+    ],
+    "outcome" : "failure"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('screenshot_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screenshot',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool success = await deviceControl.takeScreenshot(
+          deviceId: deviceId,
+          destination: destination,
+        );
+        expect(success, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
+      });
+    });
   });
 }
 
@@ -3898,6 +4018,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     this.launchResult,
     this.terminateSuccess = true,
     this.runningProcesses = const <IOSCoreDeviceRunningProcess>[],
+    this.takeScreenshotSuccess = true,
   });
 
   bool installSuccess;
@@ -3908,6 +4029,12 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   int? processTerminated;
   List<IOSCoreDeviceRunningProcess> runningProcesses;
   bool get terminateProcessCalled => processTerminated != null;
+  bool takeScreenshotSuccess;
+
+  @override
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    return takeScreenshotSuccess;
+  }
 
   @override
   Future<List<IOSCoreDevice>> getCoreDevices({

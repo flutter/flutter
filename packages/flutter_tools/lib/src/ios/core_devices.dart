@@ -991,6 +991,60 @@ class IOSCoreDeviceControl {
           IOSCoreDeviceRunningProcess.fromJson(processObject),
     ];
   }
+
+  /// Captures a screenshot from the device and saves it to the destination.
+  ///
+  /// Returns true if successfully able to take screenshot.
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    if (!_xcode.isDevicectlInstalled) {
+      _logger.printError('devicectl is not installed.');
+      return false;
+    }
+
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File output = tempDirectory.childFile('screenshot_results.json');
+    output.createSync();
+
+    final command = <String>[
+      ..._xcode.xcrunCommand(),
+      'devicectl',
+      'device',
+      'capture',
+      'screenshot',
+      '--device',
+      deviceId,
+      '--destination',
+      destination,
+      '--json-output',
+      output.path,
+    ];
+
+    try {
+      await _processUtils.run(command, throwOnError: true);
+      final String stringOutput = output.readAsStringSync();
+
+      try {
+        final Object? decoded = json.decode(stringOutput);
+        if (decoded is Map<String, Object?>) {
+          final Object? decodeResult = decoded['info'];
+          if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
+            return true;
+          }
+        }
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+        return false;
+      } on FormatException {
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        return false;
+      }
+    } finally {
+      try {
+        tempDirectory.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Ignore.
+      }
+    }
+  }
 }
 
 class IOSCoreDevice {

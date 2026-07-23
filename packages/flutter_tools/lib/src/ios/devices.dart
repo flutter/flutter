@@ -1076,8 +1076,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
@@ -1326,17 +1325,42 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    if (isCoreDevice) {
-      // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
-      // (https://github.com/flutter/flutter/issues/128598).
-      return false;
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      return globals.xcode!.isDevicectlInstalled;
     }
-    return _iMobileDevice.isInstalled;
+    return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      var success = false;
+      try {
+        success = await _coreDeviceControl.takeScreenshot(
+          deviceId: id,
+          destination: outputFile.path,
+        );
+      } on Exception catch (error) {
+        final errorMessage = error.toString();
+        if (errorMessage.contains('CoreDeviceError error 4000') ||
+            errorMessage.contains('CoreDeviceError error 4016') ||
+            errorMessage.contains('RemotePairingError error 2') ||
+            errorMessage.contains('Connection was invalidated')) {
+          throwToolExit(
+            'Failed to establish a connection to the device. '
+            'Please make sure the device is available and try again.',
+          );
+        }
+        throwToolExit('Failed to take screenshot with devicectl: $error');
+      }
+      if (success) {
+        return;
+      }
+      throwToolExit('Failed to take screenshot with devicectl.');
+    }
+    throwToolExit('flutter screenshot requires Xcode 27 or higher.');
   }
 
   @override
