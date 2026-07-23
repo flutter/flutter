@@ -175,8 +175,8 @@ void main() {
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        buildTestApp(
-          child: _boilerplate(
+        TestWidgetsApp(
+          home: _boilerplate(
             EditableText(
               controller: controller,
               focusNode: focusNode,
@@ -835,8 +835,8 @@ void main() {
       (WidgetTester tester) async {
         var tapCount = 0;
         await tester.pumpWidget(
-          buildTestApp(
-            child: ListView(
+          TestWidgetsApp(
+            home: ListView(
               children: <Widget>[
                 const SizedBox(height: 2000), // Push the target off-screen
                 GestureDetector(
@@ -864,8 +864,8 @@ void main() {
     testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
       var sliverToBoxAdapterTapped = 0;
       await tester.pumpWidget(
-        buildTestApp(
-          child: SafeArea(
+        TestWidgetsApp(
+          home: SafeArea(
             child: CustomScrollView(
               slivers: <Widget>[
                 SliverToBoxAdapter(
@@ -904,8 +904,8 @@ void main() {
     ) async {
       var sliverToBoxAdapterTapped = 0;
       await tester.pumpWidget(
-        buildTestApp(
-          child: SafeArea(
+        TestWidgetsApp(
+          home: SafeArea(
             child: CustomScrollView(
               slivers: <Widget>[
                 SliverToBoxAdapter(
@@ -1772,8 +1772,8 @@ void main() {
         final controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          buildTestApp(
-            child: SingleChildScrollView(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
               controller: controller,
               child: const SizedBox(width: 100, height: 1000),
             ),
@@ -1790,8 +1790,8 @@ void main() {
         final controller = ScrollController(initialScrollOffset: 400);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          buildTestApp(
-            child: SingleChildScrollView(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
               controller: controller,
               child: const SizedBox(width: 100, height: 1000),
             ),
@@ -1808,8 +1808,8 @@ void main() {
         final controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          buildTestApp(
-            child: SingleChildScrollView(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               controller: controller,
               child: const SizedBox(width: 1000, height: 100),
@@ -1827,8 +1827,8 @@ void main() {
         final controller = ScrollController(initialScrollOffset: 200);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          buildTestApp(
-            child: SingleChildScrollView(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               controller: controller,
               child: const SizedBox(width: 1000, height: 100),
@@ -1846,8 +1846,8 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          buildTestApp(
-            child: const Column(
+          const TestWidgetsApp(
+            home: Column(
               children: <Widget>[
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -1864,8 +1864,8 @@ void main() {
 
       testWidgets('can exclusively find node that scrolls vertically', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildTestApp(
-            child: const Column(
+          const TestWidgetsApp(
+            home: Column(
               children: <Widget>[
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -2119,30 +2119,6 @@ Widget _deepWidgetTree({required int depth, required Widget child}) {
     tree = SizedBox(child: tree);
   }
   return tree;
-}
-
-PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
-  return PageRouteBuilder<T>(
-    settings: settings,
-    pageBuilder:
-        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
-            builder(context),
-    transitionsBuilder:
-        (
-          BuildContext context,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
-          Widget child,
-        ) => child,
-  );
-}
-
-Widget buildTestApp({required Widget child}) {
-  return WidgetsApp(
-    color: const Color(0xFFFFFFFF),
-    pageRouteBuilder: defaultPageRouteBuilder,
-    home: SizedBox.expand(child: Center(child: child)),
-  );
 }
 
 class TestRoute<T> extends PageRoute<T> {
