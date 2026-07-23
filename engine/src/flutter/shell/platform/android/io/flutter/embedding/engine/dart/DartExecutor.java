@@ -19,6 +19,7 @@ import io.flutter.util.TraceSection;
 import io.flutter.view.FlutterCallbackInformation;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Configures, bootstraps, and starts executing Dart code.
@@ -152,8 +153,17 @@ public class DartExecutor implements BinaryMessenger {
 
     try (TraceSection e = TraceSection.scoped("DartExecutor#executeDartEntrypoint")) {
       Log.v(TAG, "Executing Dart entrypoint: " + dartEntrypoint);
+      String pathToBundle = dartEntrypoint.pathToBundle;
+      if (pathToBundle == null) {
+        FlutterLoader flutterLoader = FlutterInjector.instance().flutterLoader();
+        if (!flutterLoader.initialized()) {
+          throw new AssertionError(
+              "DartEntrypoints can only be run once a FlutterEngine is created or the FlutterLoader is initialized.");
+        }
+        pathToBundle = flutterLoader.findAppBundlePath();
+      }
       flutterJNI.runBundleAndSnapshotFromLibrary(
-          dartEntrypoint.pathToBundle,
+          pathToBundle,
           dartEntrypoint.dartEntrypointFunctionName,
           dartEntrypoint.dartEntrypointLibrary,
           assetManager,
@@ -344,7 +354,7 @@ public class DartExecutor implements BinaryMessenger {
     }
 
     /** The path within the AssetManager where the app will look for assets. */
-    @NonNull public final String pathToBundle;
+    @Nullable public final String pathToBundle;
 
     /** The library or file location that contains the Dart entrypoint function. */
     @Nullable public final String dartEntrypointLibrary;
@@ -352,16 +362,22 @@ public class DartExecutor implements BinaryMessenger {
     /** The name of a Dart function to execute. */
     @NonNull public final String dartEntrypointFunctionName;
 
+    public DartEntrypoint(@NonNull String dartEntrypointFunctionName) {
+      this.pathToBundle = null;
+      this.dartEntrypointLibrary = null;
+      this.dartEntrypointFunctionName = dartEntrypointFunctionName;
+    }
+
     public DartEntrypoint(
-        @NonNull String pathToBundle, @NonNull String dartEntrypointFunctionName) {
+        @Nullable String pathToBundle, @NonNull String dartEntrypointFunctionName) {
       this.pathToBundle = pathToBundle;
       dartEntrypointLibrary = null;
       this.dartEntrypointFunctionName = dartEntrypointFunctionName;
     }
 
     public DartEntrypoint(
-        @NonNull String pathToBundle,
-        @NonNull String dartEntrypointLibrary,
+        @Nullable String pathToBundle,
+        @Nullable String dartEntrypointLibrary,
         @NonNull String dartEntrypointFunctionName) {
       this.pathToBundle = pathToBundle;
       this.dartEntrypointLibrary = dartEntrypointLibrary;
@@ -385,13 +401,13 @@ public class DartExecutor implements BinaryMessenger {
 
       DartEntrypoint that = (DartEntrypoint) o;
 
-      if (!pathToBundle.equals(that.pathToBundle)) return false;
+      if (!Objects.equals(pathToBundle, that.pathToBundle)) return false;
       return dartEntrypointFunctionName.equals(that.dartEntrypointFunctionName);
     }
 
     @Override
     public int hashCode() {
-      int result = pathToBundle.hashCode();
+      int result = pathToBundle != null ? pathToBundle.hashCode() : 0;
       result = 31 * result + dartEntrypointFunctionName.hashCode();
       return result;
     }
