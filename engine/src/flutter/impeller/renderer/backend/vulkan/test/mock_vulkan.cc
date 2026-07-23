@@ -267,6 +267,15 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
 
 void vkGetPhysicalDeviceFeatures2(VkPhysicalDevice physicalDevice,
                                   VkPhysicalDeviceFeatures2* pFeatures) {
+  // Advertise the core block-compressed texture features so tests can exercise
+  // the GetEnabledDeviceFeatures -> SetPhysicalDevice plumbing that gates
+  // CapabilitiesVK::SupportsTextureCompression. Without this the mock reports
+  // these core Vulkan 1.0 features as VK_FALSE and the capability is always
+  // false regardless of the enable path.
+  pFeatures->features.textureCompressionETC2 = VK_TRUE;
+  pFeatures->features.textureCompressionASTC_LDR = VK_TRUE;
+  pFeatures->features.textureCompressionBC = VK_TRUE;
+
   // Advertise the features the mock supports by walking the pNext chain.
   auto* next = reinterpret_cast<VkBaseOutStructure*>(pFeatures->pNext);
   while (next != nullptr) {
