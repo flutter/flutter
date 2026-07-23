@@ -129,6 +129,8 @@ settings:
     - ${workspaceFolder}
   dotnet.defaultSolution: disable
   dart.showTodos: false
+  swift.sourcekit-lsp.supported-languages:
+    - swift
   testMate.cpp.test.advancedExecutables:
     - name: impeller_unittests_arm64
       pattern: ../out/host_debug_unopt_arm64/impeller_unittests
