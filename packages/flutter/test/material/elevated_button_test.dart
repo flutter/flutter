@@ -2692,4 +2692,31 @@ void main() {
     // The button should still be focused.
     expect(getButtonFocusNode().hasFocus, true);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/138981
+  testWidgets('Disabled ElevatedButton does not let taps pass through to parent GestureDetector', (
+    WidgetTester tester,
+  ) async {
+    var parentTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: GestureDetector(
+            onTap: () {
+              parentTapCount++;
+            },
+            child: const Center(child: ElevatedButton(onPressed: null, child: Text('Disabled'))),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the disabled button.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    // The parent GestureDetector should NOT have received the tap.
+    expect(parentTapCount, 0);
+  });
 }
