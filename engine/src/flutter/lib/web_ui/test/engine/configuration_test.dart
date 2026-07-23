@@ -85,6 +85,10 @@ void testMain() {
     test('multiViewEnabled', () {
       expect(defaultConfig.multiViewEnabled, isFalse);
     });
+
+    test('skwasmForceMultiSurfaceRasterizer', () {
+      expect(defaultConfig.skwasmForceMultiSurfaceRasterizer, isFalse);
+    });
   });
 
   group('setUserConfiguration (values)', () {
@@ -130,6 +134,15 @@ void testMain() {
         <String, Object?>{'multiViewEnabled': true}.jsify()! as JsFlutterConfiguration,
       );
       expect(config.multiViewEnabled, isTrue);
+    });
+
+    test('skwasmForceMultiSurfaceRasterizer', () {
+      final config = FlutterConfiguration();
+      config.setUserConfiguration(
+        <String, Object?>{'skwasmForceMultiSurfaceRasterizer': true}.jsify()!
+            as JsFlutterConfiguration,
+      );
+      expect(config.skwasmForceMultiSurfaceRasterizer, isTrue);
     });
   });
 }
