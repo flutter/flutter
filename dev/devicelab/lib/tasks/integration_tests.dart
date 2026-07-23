@@ -22,21 +22,30 @@ TaskFunction createPlatformInteractionTest() {
   ).call;
 }
 
-TaskFunction createFlavorsTest({Map<String, String>? environment, List<String>? extraOptions}) {
+TaskFunction createFlavorsTest({
+  Map<String, String>? environment,
+  List<String>? extraOptions,
+  String? deviceIdOverride,
+}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
     extraOptions: extraOptions ?? <String>['--flavor', 'paid'],
     environment: environment,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}) {
+TaskFunction createIntegrationTestFlavorsTest({
+  Map<String, String>? environment,
+  String? deviceIdOverride,
+}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'integration_test/integration_test.dart',
     extraOptions: <String>['--flavor', 'paid'],
     environment: environment,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -325,6 +334,7 @@ class IntegrationTest {
     this.environment,
     this.setup,
     this.tearDown,
+    this.deviceIdOverride,
   });
 
   final String testDirectory;
@@ -333,6 +343,7 @@ class IntegrationTest {
   final List<String> createPlatforms;
   final bool withTalkBack;
   final Map<String, String>? environment;
+  final String? deviceIdOverride;
 
   /// Run before flutter drive with the result from devices.workingDevice.
   final Future<void> Function(Device device)? setup;
@@ -342,9 +353,15 @@ class IntegrationTest {
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
+      String deviceId;
+      Device? selectedDevice;
+      if (deviceIdOverride != null) {
+        deviceId = deviceIdOverride!;
+      } else {
+        selectedDevice = await devices.workingDevice;
+        await selectedDevice.unlock();
+        deviceId = selectedDevice.deviceId;
+      }
       await flutter('packages', options: <String>['get']);
       await setup?.call(await devices.workingDevice);
 
@@ -356,7 +373,7 @@ class IntegrationTest {
       }
 
       if (withTalkBack) {
-        if (device is! AndroidDevice) {
+        if (selectedDevice is! AndroidDevice) {
           return TaskResult.failure(
             'A test that enables TalkBack can only be run on Android devices',
           );
