@@ -13,7 +13,10 @@ class VersionThresholds {
   const VersionThresholds({required this.warn, required this.error});
 
   factory VersionThresholds.fromJson(Map<String, dynamic> json) {
-    return VersionThresholds(warn: json['warn'] as String, error: json['error'] as String);
+    if (json case {'warn': final String warn, 'error': final String error}) {
+      return VersionThresholds(warn: warn, error: error);
+    }
+    throw FormatException('Invalid VersionThresholds JSON: $json');
   }
 
   final String warn;
@@ -35,7 +38,10 @@ class MinSdkThresholds {
   const MinSdkThresholds({required this.warn, required this.error});
 
   factory MinSdkThresholds.fromJson(Map<String, dynamic> json) {
-    return MinSdkThresholds(warn: json['warn'] as int, error: json['error'] as int);
+    if (json case {'warn': final int warn, 'error': final int error}) {
+      return MinSdkThresholds(warn: warn, error: error);
+    }
+    throw FormatException('Invalid MinSdkThresholds JSON: $json');
   }
 
   final int warn;
@@ -62,12 +68,15 @@ class MaxKnownVersions {
   });
 
   factory MaxKnownVersions.fromJson(Map<String, dynamic> json) {
-    return MaxKnownVersions(
-      gradle: json['gradle'] as String,
-      kgp: json['kgp'] as String,
-      agp: json['agp'] as String,
-      agpWithKotlin: json['agp_with_kotlin'] as String,
-    );
+    if (json case {
+      'gradle': final String gradle,
+      'kgp': final String kgp,
+      'agp': final String agp,
+      'agp_with_kotlin': final String agpWithKotlin,
+    }) {
+      return MaxKnownVersions(gradle: gradle, kgp: kgp, agp: agp, agpWithKotlin: agpWithKotlin);
+    }
+    throw FormatException('Invalid MaxKnownVersions JSON: $json');
   }
 
   final String gradle;
@@ -103,14 +112,24 @@ class OldestConsideredVersions {
   });
 
   factory OldestConsideredVersions.fromJson(Map<String, dynamic> json) {
-    return OldestConsideredVersions(
-      gradle: json['gradle'] as String,
-      agp: json['agp'] as String,
-      kgp: json['kgp'] as String,
-      javaAgp: json['java_agp'] as String,
-      java: json['java'] as String,
-      javaGradle: json['java_gradle'] as String,
-    );
+    if (json case {
+      'gradle': final String gradle,
+      'agp': final String agp,
+      'kgp': final String kgp,
+      'java_agp': final String javaAgp,
+      'java': final String java,
+      'java_gradle': final String javaGradle,
+    }) {
+      return OldestConsideredVersions(
+        gradle: gradle,
+        agp: agp,
+        kgp: kgp,
+        javaAgp: javaAgp,
+        java: java,
+        javaGradle: javaGradle,
+      );
+    }
+    throw FormatException('Invalid OldestConsideredVersions JSON: $json');
   }
 
   final String gradle;
@@ -148,12 +167,19 @@ class GradleAgpCompat {
   });
 
   factory GradleAgpCompat.fromJson(Map<String, dynamic> json) {
-    return GradleAgpCompat(
-      agpMin: json['agpMin'] as String,
-      agpMax: json['agpMax'] as String,
-      gradleMin: json['gradleMin'] as String,
-      inclusiveMaxAgp: json['inclusiveMaxAgp'] as bool? ?? true,
-    );
+    if (json case {
+      'agpMin': final String agpMin,
+      'agpMax': final String agpMax,
+      'gradleMin': final String gradleMin,
+    }) {
+      return GradleAgpCompat(
+        agpMin: agpMin,
+        agpMax: agpMax,
+        gradleMin: gradleMin,
+        inclusiveMaxAgp: json['inclusiveMaxAgp'] as bool? ?? true,
+      );
+    }
+    throw FormatException('Invalid GradleAgpCompat JSON: $json');
   }
 
   final String agpMin;
@@ -186,11 +212,18 @@ class GradleVersionForAgp {
   });
 
   factory GradleVersionForAgp.fromJson(Map<String, dynamic> json) {
-    return GradleVersionForAgp(
-      agpMin: json['agpMin'] as String,
-      agpMax: json['agpMax'] as String,
-      minRequiredGradle: json['minRequiredGradle'] as String,
-    );
+    if (json case {
+      'agpMin': final String agpMin,
+      'agpMax': final String agpMax,
+      'minRequiredGradle': final String minRequiredGradle,
+    }) {
+      return GradleVersionForAgp(
+        agpMin: agpMin,
+        agpMax: agpMax,
+        minRequiredGradle: minRequiredGradle,
+      );
+    }
+    throw FormatException('Invalid GradleVersionForAgp JSON: $json');
   }
 
   final String agpMin;
@@ -222,12 +255,19 @@ class JavaGradleCompat {
   });
 
   factory JavaGradleCompat.fromJson(Map<String, dynamic> json) {
-    return JavaGradleCompat(
-      javaMin: json['javaMin'] as String,
-      javaMax: json['javaMax'] as String,
-      gradleMin: json['gradleMin'] as String,
-      gradleMax: json['gradleMax'] as String?,
-    );
+    if (json case {
+      'javaMin': final String javaMin,
+      'javaMax': final String javaMax,
+      'gradleMin': final String gradleMin,
+    }) {
+      return JavaGradleCompat(
+        javaMin: javaMin,
+        javaMax: javaMax,
+        gradleMin: gradleMin,
+        gradleMax: json['gradleMax'] as String?,
+      );
+    }
+    throw FormatException('Invalid JavaGradleCompat JSON: $json');
   }
 
   final String javaMin;
@@ -261,12 +301,20 @@ class JavaAgpCompat {
   });
 
   factory JavaAgpCompat.fromJson(Map<String, dynamic> json) {
-    return JavaAgpCompat(
-      javaMin: json['javaMin'] as String,
-      javaDefault: json['javaDefault'] as String,
-      agpMin: json['agpMin'] as String,
-      agpMax: json['agpMax'] as String,
-    );
+    if (json case {
+      'javaMin': final String javaMin,
+      'javaDefault': final String javaDefault,
+      'agpMin': final String agpMin,
+      'agpMax': final String agpMax,
+    }) {
+      return JavaAgpCompat(
+        javaMin: javaMin,
+        javaDefault: javaDefault,
+        agpMin: agpMin,
+        agpMax: agpMax,
+      );
+    }
+    throw FormatException('Invalid JavaAgpCompat JSON: $json');
   }
 
   final String javaMin;
@@ -302,14 +350,22 @@ class KgpGradleCompat {
   });
 
   factory KgpGradleCompat.fromJson(Map<String, dynamic> json) {
-    return KgpGradleCompat(
-      kgpMin: json['kgpMin'] as String,
-      kgpMax: json['kgpMax'] as String,
-      gradleMin: json['gradleMin'] as String,
-      gradleMax: json['gradleMax'] as String,
-      inclusiveMaxKgp: json['inclusiveMaxKgp'] as bool? ?? true,
-      inclusiveMaxGradle: json['inclusiveMaxGradle'] as bool? ?? true,
-    );
+    if (json case {
+      'kgpMin': final String kgpMin,
+      'kgpMax': final String kgpMax,
+      'gradleMin': final String gradleMin,
+      'gradleMax': final String gradleMax,
+    }) {
+      return KgpGradleCompat(
+        kgpMin: kgpMin,
+        kgpMax: kgpMax,
+        gradleMin: gradleMin,
+        gradleMax: gradleMax,
+        inclusiveMaxKgp: json['inclusiveMaxKgp'] as bool? ?? true,
+        inclusiveMaxGradle: json['inclusiveMaxGradle'] as bool? ?? true,
+      );
+    }
+    throw FormatException('Invalid KgpGradleCompat JSON: $json');
   }
 
   final String kgpMin;
@@ -350,14 +406,22 @@ class AgpKgpCompat {
   });
 
   factory AgpKgpCompat.fromJson(Map<String, dynamic> json) {
-    return AgpKgpCompat(
-      kgpMin: json['kgpMin'] as String,
-      kgpMax: json['kgpMax'] as String,
-      agpMin: json['agpMin'] as String,
-      agpMax: json['agpMax'] as String,
-      inclusiveMaxKgp: json['inclusiveMaxKgp'] as bool? ?? true,
-      inclusiveMaxAgp: json['inclusiveMaxAgp'] as bool? ?? true,
-    );
+    if (json case {
+      'kgpMin': final String kgpMin,
+      'kgpMax': final String kgpMax,
+      'agpMin': final String agpMin,
+      'agpMax': final String agpMax,
+    }) {
+      return AgpKgpCompat(
+        kgpMin: kgpMin,
+        kgpMax: kgpMax,
+        agpMin: agpMin,
+        agpMax: agpMax,
+        inclusiveMaxKgp: json['inclusiveMaxKgp'] as bool? ?? true,
+        inclusiveMaxAgp: json['inclusiveMaxAgp'] as bool? ?? true,
+      );
+    }
+    throw FormatException('Invalid AgpKgpCompat JSON: $json');
   }
 
   final String kgpMin;
@@ -404,37 +468,52 @@ class AndroidSupportVersions {
   });
 
   factory AndroidSupportVersions.fromJson(Map<String, dynamic> json) {
-    return AndroidSupportVersions(
-      gradle: VersionThresholds.fromJson(json['gradle'] as Map<String, dynamic>),
-      // ignore: avoid_redundant_argument_values
-      java: VersionThresholds.fromJson(json['java'] as Map<String, dynamic>),
-      agp: VersionThresholds.fromJson(json['agp'] as Map<String, dynamic>),
-      kgp: VersionThresholds.fromJson(json['kgp'] as Map<String, dynamic>),
-      minSdkVersion: MinSdkThresholds.fromJson(json['minSdkVersion'] as Map<String, dynamic>),
-      maxKnownVersions: MaxKnownVersions.fromJson(json['maxKnownVersions'] as Map<String, dynamic>),
-      oldestConsideredVersions: OldestConsideredVersions.fromJson(
-        json['oldestConsideredVersions'] as Map<String, dynamic>,
-      ),
-      oneMajorVersionHigherJavaVersion: json['oneMajorVersionHigherJavaVersion'] as String,
-      gradleAgpCompat: (json['gradle_agp_compat'] as List<dynamic>)
-          .map((e) => GradleAgpCompat.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      javaGradleCompat: (json['java_gradle_compat'] as List<dynamic>)
-          .map((e) => JavaGradleCompat.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      javaAgpCompat: (json['java_agp_compat'] as List<dynamic>)
-          .map((e) => JavaAgpCompat.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      kgpGradleCompat: (json['kgp_gradle_compat'] as List<dynamic>)
-          .map((e) => KgpGradleCompat.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      agpKgpCompat: (json['agp_kgp_compat'] as List<dynamic>)
-          .map((e) => AgpKgpCompat.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      gradleVersionForAgp: (json['gradle_version_for_agp'] as List<dynamic>)
-          .map((e) => GradleVersionForAgp.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
+    if (json case {
+      'gradle': final Map<String, dynamic> gradle,
+      'java': final Map<String, dynamic> java,
+      'agp': final Map<String, dynamic> agp,
+      'kgp': final Map<String, dynamic> kgp,
+      'minSdkVersion': final Map<String, dynamic> minSdkVersion,
+      'maxKnownVersions': final Map<String, dynamic> maxKnownVersions,
+      'oldestConsideredVersions': final Map<String, dynamic> oldestConsideredVersions,
+      'oneMajorVersionHigherJavaVersion': final String oneMajorVersionHigherJavaVersion,
+      'gradle_agp_compat': final List<dynamic> gradleAgpCompat,
+      'java_gradle_compat': final List<dynamic> javaGradleCompat,
+      'java_agp_compat': final List<dynamic> javaAgpCompat,
+      'kgp_gradle_compat': final List<dynamic> kgpGradleCompat,
+      'agp_kgp_compat': final List<dynamic> agpKgpCompat,
+      'gradle_version_for_agp': final List<dynamic> gradleVersionForAgp,
+    }) {
+      return AndroidSupportVersions(
+        gradle: VersionThresholds.fromJson(gradle),
+        java: VersionThresholds.fromJson(java),
+        agp: VersionThresholds.fromJson(agp),
+        kgp: VersionThresholds.fromJson(kgp),
+        minSdkVersion: MinSdkThresholds.fromJson(minSdkVersion),
+        maxKnownVersions: MaxKnownVersions.fromJson(maxKnownVersions),
+        oldestConsideredVersions: OldestConsideredVersions.fromJson(oldestConsideredVersions),
+        oneMajorVersionHigherJavaVersion: oneMajorVersionHigherJavaVersion,
+        gradleAgpCompat: gradleAgpCompat
+            .map((e) => GradleAgpCompat.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        javaGradleCompat: javaGradleCompat
+            .map((e) => JavaGradleCompat.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        javaAgpCompat: javaAgpCompat
+            .map((e) => JavaAgpCompat.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        kgpGradleCompat: kgpGradleCompat
+            .map((e) => KgpGradleCompat.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        agpKgpCompat: agpKgpCompat
+            .map((e) => AgpKgpCompat.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        gradleVersionForAgp: gradleVersionForAgp
+            .map((e) => GradleVersionForAgp.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+    throw const FormatException('Invalid AndroidSupportVersions JSON');
   }
 
   factory AndroidSupportVersions.load(FileSystem fileSystem, String path) {

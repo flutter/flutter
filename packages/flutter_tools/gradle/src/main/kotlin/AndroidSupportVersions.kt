@@ -4,10 +4,12 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.gradle.api.GradleException
 
 // Co-evolve with packages/flutter_tools/lib/src/android/android_support_versions.dart
 
@@ -119,6 +121,11 @@ internal data class AndroidSupportVersions(
     val gradleVersionForAgp: List<GradleVersionForAgp>
 ) {
     companion object {
+        private const val AGP_MAJOR_VERSION_INDEX = 0
+        private const val AGP_MINOR_VERSION_INDEX = 1
+        private const val AGP_PATCH_VERSION_INDEX = 2
+        private const val AGP_DEFAULT_VERSION_COMPONENT = 0
+
         private val json =
             Json {
                 ignoreUnknownKeys = true
@@ -126,5 +133,21 @@ internal data class AndroidSupportVersions(
             }
 
         fun fromJson(jsonText: String): AndroidSupportVersions = json.decodeFromString(jsonText)
+
+        fun load(): AndroidSupportVersions {
+            val stream =
+                AndroidSupportVersions::class.java.getResourceAsStream("/android_support_versions.json")
+                    ?: throw GradleException("Required resource android_support_versions.json not found")
+            val jsonText = stream.bufferedReader().use { it.readText() }
+            return fromJson(jsonText)
+        }
+
+        fun parseAgpVersion(versionString: String): AndroidPluginVersion {
+            val parts = versionString.split(".").map { it.toInt() }
+            val major = parts.getOrElse(AGP_MAJOR_VERSION_INDEX) { AGP_DEFAULT_VERSION_COMPONENT }
+            val minor = parts.getOrElse(AGP_MINOR_VERSION_INDEX) { AGP_DEFAULT_VERSION_COMPONENT }
+            val patch = parts.getOrElse(AGP_PATCH_VERSION_INDEX) { AGP_DEFAULT_VERSION_COMPONENT }
+            return AndroidPluginVersion(major, minor, patch)
+        }
     }
 }
