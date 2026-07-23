@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Valitse kaikki",
   "searchResultsFound": "Hakutuloksia löytyi",
   "noResultsFound": "Ei tuloksia",
-  "radioButtonUnselectedLabel": "Ei valittu"
+  "radioButtonUnselectedLabel": "Ei valittu",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

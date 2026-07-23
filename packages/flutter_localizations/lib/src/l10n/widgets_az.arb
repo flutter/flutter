@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Hamısını seçin",
   "searchResultsFound": "Axtarış nəticələri tapıldı",
   "noResultsFound": "Nəticə tapılmadı",
-  "radioButtonUnselectedLabel": "Seçilmədi"
+  "radioButtonUnselectedLabel": "Seçilmədi",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

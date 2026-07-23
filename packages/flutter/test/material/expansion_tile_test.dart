@@ -9,7 +9,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -911,6 +910,7 @@ void main() {
         isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
+        hasExpandedState: true,
         hasEnabledState: true,
         hasSelectedState: true,
         isEnabled: true,
@@ -928,6 +928,8 @@ void main() {
         isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
+        hasExpandedState: true,
+        isExpanded: true,
         hasEnabledState: true,
         hasSelectedState: true,
         isEnabled: true,
@@ -938,162 +940,6 @@ void main() {
     );
     handle.dispose();
   });
-
-  testWidgets(
-    'ExpansionTile Semantics announcement',
-    (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      const localizations = DefaultMaterialLocalizations();
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: ExpansionTile(
-              title: Text('Title'),
-              children: <Widget>[SizedBox(height: 100, width: 100)],
-            ),
-          ),
-        ),
-      );
-
-      // There is no semantics announcement without tap action.
-      expect(tester.takeAnnouncements(), isEmpty);
-
-      // Tap the title to expand ExpansionTile.
-      await tester.tap(find.text('Title'));
-      await tester.pumpAndSettle();
-
-      // The announcement should be the opposite of the current state.
-      // The ExpansionTile is expanded, so the announcement should be
-      // "Expanded".
-      expect(
-        tester.takeAnnouncements().first,
-        isAccessibilityAnnouncement(localizations.collapsedHint),
-      );
-
-      // Tap the title to collapse ExpansionTile.
-      await tester.tap(find.text('Title'));
-      await tester.pumpAndSettle();
-
-      // The announcement should be the opposite of the current state.
-      // The ExpansionTile is collapsed, so the announcement should be
-      // "Collapsed".
-      expect(
-        tester.takeAnnouncements().first,
-        isAccessibilityAnnouncement(localizations.expandedHint),
-      );
-      handle.dispose();
-    },
-    // [intended] iOS: https://github.com/flutter/flutter/issues/122101.
-    // android: https://github.com/flutter/flutter/issues/165510
-    skip:
-        defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.android,
-  );
-
-  testWidgets('ExpansionTile reports error when SemanticsService.sendAnnouncement fails', (
-    WidgetTester tester,
-  ) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-    try {
-      final errors = <FlutterErrorDetails>[];
-      final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        final String contextStr = details.context?.toString() ?? '';
-        if (contextStr.contains('while sending semantics announcement')) {
-          errors.add(details);
-          return;
-        }
-        originalOnError?.call(details);
-      };
-      addTearDown(() {
-        FlutterError.onError = originalOnError;
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-          SystemChannels.accessibility.name,
-          null,
-        );
-      });
-
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-        SystemChannels.accessibility.name,
-        (ByteData? message) async {
-          const codec = StandardMessageCodec();
-          final Object? decoded = codec.decodeMessage(message);
-          if (decoded is Map && decoded['type'] == 'announce') {
-            final data = ByteData(1);
-            data.setUint8(0, 255); // Invalid type byte
-            return data;
-          }
-          return null; // Success for other events
-        },
-      );
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: ExpansionTile(
-              title: Text('Title'),
-              children: <Widget>[SizedBox(height: 100, width: 100)],
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Title'));
-      await tester.pump();
-
-      expect(errors, isNotEmpty);
-      final bool hasAnnouncementError = errors.any(
-        (e) =>
-            e.exception.toString().contains('FormatException') &&
-            e.context.toString().contains('while sending semantics announcement'),
-      );
-      expect(hasAnnouncementError, isTrue);
-    } finally {
-      debugDefaultTargetPlatformOverride = null;
-    }
-  });
-
-  // This is a regression test for https://github.com/flutter/flutter/issues/132264.
-  testWidgets(
-    'ExpansionTile Semantics announcement is delayed on iOS',
-    (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      const localizations = DefaultMaterialLocalizations();
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: ExpansionTile(
-              title: Text('Title'),
-              children: <Widget>[SizedBox(height: 100, width: 100)],
-            ),
-          ),
-        ),
-      );
-
-      // There is no semantics announcement without tap action.
-      expect(tester.takeAnnouncements(), isEmpty);
-
-      // Tap the title to expand ExpansionTile.
-      await tester.tap(find.text('Title'));
-      await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
-
-      expect(
-        tester.takeAnnouncements().first,
-        isAccessibilityAnnouncement(localizations.collapsedHint),
-      );
-
-      // Tap the title to collapse ExpansionTile.
-      await tester.tap(find.text('Title'));
-      await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
-
-      expect(
-        tester.takeAnnouncements().first,
-        isAccessibilityAnnouncement(localizations.expandedHint),
-      );
-      handle.dispose();
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
 
   testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (
     WidgetTester tester,
@@ -1139,52 +985,6 @@ void main() {
     expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileExpandedTapHint);
     handle.dispose();
   });
-
-  testWidgets(
-    'Semantics hint for iOS and macOS',
-    (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      const localizations = DefaultMaterialLocalizations();
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                ExpansionTile(title: Text('First Expansion Tile')),
-                ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      SemanticsNode semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      expect(
-        semantics.hint,
-        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
-      );
-
-      semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      expect(
-        semantics.hint,
-        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
-      );
-      handle.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
 
   testWidgets('Collapsed ExpansionTile properties can be updated with setState', (
     WidgetTester tester,
@@ -2137,161 +1937,6 @@ void main() {
       TargetPlatform.macOS,
     }),
   );
-
-  // Regression test for https://github.com/flutter/flutter/issues/173060
-  group('Semantics tests for non-iOS/macOS/android platforms', () {
-    testWidgets(
-      'Semantics hint should show current state',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: Column(
-                children: <Widget>[
-                  ExpansionTile(title: Text('First Expansion Tile')),
-                  ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
-                ],
-              ),
-            ),
-          ),
-        );
-
-        // Test collapsed tile - should show "Collapsed" hint.
-        SemanticsNode semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
-        );
-        expect(semantics, isNotNull);
-        expect(semantics.hint, localizations.expandedHint);
-
-        // Test expanded tile - should show "Expanded" hint.
-        semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
-        );
-        expect(semantics, isNotNull);
-        expect(semantics.hint, localizations.collapsedHint);
-
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.android,
-        TargetPlatform.fuchsia,
-        TargetPlatform.linux,
-        TargetPlatform.windows,
-      }),
-    );
-
-    testWidgets(
-      'Semantics hint updates when expansion state changes',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
-            ),
-          ),
-        );
-
-        // Initially collapsed - should show "Collapsed".
-        SemanticsNode semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
-        );
-        expect(semantics.hint, localizations.expandedHint);
-
-        // Tap to expand.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Now expanded - should show "Expanded".
-        semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
-        );
-        expect(semantics.hint, localizations.collapsedHint);
-
-        // Tap to collapse.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Back to collapsed - should show "Collapsed" again.
-        semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
-        );
-        expect(semantics.hint, localizations.expandedHint);
-
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.android,
-        TargetPlatform.fuchsia,
-        TargetPlatform.linux,
-        TargetPlatform.windows,
-      }),
-    );
-  });
-  group('Semantics tests for android platform', () {
-    testWidgets(
-      'Semantics liveregion updates when expansion state changes',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
-            ),
-          ),
-        );
-
-        // Initially collapsed - live region label is "Collapsed".
-
-        SemanticsNode liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
-          ),
-        );
-        expect(liveRegionSemantics.label, localizations.expandedHint);
-
-        // Tap to expand.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Now expanded - should show "Expanded".
-        liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
-          ),
-        );
-        expect(liveRegionSemantics.label, localizations.collapsedHint);
-
-        // Tap to collapse.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Back to collapsed - should show "Collapsed" again.
-        liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
-          ),
-        );
-        expect(liveRegionSemantics.label, localizations.expandedHint);
-
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-    );
-  });
 
   testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
     final controller = WidgetStatesController();

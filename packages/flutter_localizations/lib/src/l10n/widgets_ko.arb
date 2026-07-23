@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "전체 선택",
   "searchResultsFound": "검색 결과 찾음",
   "noResultsFound": "검색 결과 없음",
-  "radioButtonUnselectedLabel": "선택되지 않음"
+  "radioButtonUnselectedLabel": "선택되지 않음",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
