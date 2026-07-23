@@ -58,9 +58,6 @@ private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(9
 private const val SUPPORTED_KGP_VERSION: String = "2.3.20"
 private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
-private const val TEST_WARN_MIN_SDK_VERSION = 21
-private const val TEST_ERROR_MIN_SDK_VERSION = 19
-
 class DependencyVersionCheckerTest {
     @Test
     fun `Template versions are considered supported`() {
