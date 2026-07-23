@@ -1038,8 +1038,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.tabAlignment,
     this.textScaler,
     this.indicatorAnimation,
-  }) : _isPrimary = true,
-       assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = true;
 
   /// Creates a Material Design secondary tab bar.
   ///
@@ -1094,8 +1093,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.tabAlignment,
     this.textScaler,
     this.indicatorAnimation,
-  }) : _isPrimary = false,
-       assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = false;
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -1151,7 +1149,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [ThemeData.useMaterial3] is false, the default value is 2.0.
   ///
   /// If [indicator] is specified or provided from [TabBarThemeData],
-  /// this property is ignored.
+  /// this property is ignored. Otherwise, when drawing the default underline
+  /// indicator, the value of this parameter must be greater than zero.
   final double indicatorWeight;
 
   /// The padding for the indicator.
@@ -1592,6 +1591,24 @@ class _TabBarState extends State<TabBar> {
     if (tabBarTheme.indicator != null) {
       return tabBarTheme.indicator!;
     }
+    assert(() {
+      if (widget.indicatorWeight <= 0.0) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Invalid indicatorWeight for TabBar.'),
+          ErrorDescription(
+            'The indicatorWeight must be greater than zero when the TabBar '
+            'draws its default underline indicator, that is when no indicator '
+            'is provided by the TabBar or the TabBarTheme.',
+          ),
+          ErrorHint(
+            'To fix this, set indicatorWeight to a value greater than zero, '
+            'or provide an indicator with the TabBar.indicator or '
+            'TabBarThemeData.indicator property.',
+          ),
+        ]);
+      }
+      return true;
+    }());
 
     Color color = widget.indicatorColor ?? tabBarTheme.indicatorColor ?? _defaults.indicatorColor!;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
