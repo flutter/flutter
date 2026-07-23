@@ -719,6 +719,13 @@ struct TRect {
       return std::nullopt;
     }
     Size current_size = GetSize();
+
+    if (current_size.width >= min_local_size.width &&
+        current_size.height >= min_local_size.height) {
+      // No expansion needed.
+      return *this;
+    }
+
     Size expanded_size = current_size.Max(min_local_size);
     return MakeEllipseBounds(GetCenter(), Point(expanded_size.width * 0.5f,
                                                 expanded_size.height * 0.5f));
