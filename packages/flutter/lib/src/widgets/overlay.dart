@@ -27,6 +27,7 @@ import 'framework.dart';
 import 'layout_builder.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
+import 'selection_container.dart';
 import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
@@ -419,12 +420,15 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   Widget build(BuildContext context) {
     return TickerMode(
       enabled: widget.tickerEnabled,
-      child: _RenderTheaterMarker(
-        theater: _theater,
-        overlayEntryWidgetState: this,
-        // Use a Builder so that the `widget.entry.builder` can have access to
-        // _RenderTheaterMarker.of
-        child: Builder(builder: widget.entry.builder),
+      child: SelectionRegistrarScope(
+        registrar: widget.tickerEnabled ? SelectionContainer.maybeOf(context) : null,
+        child: _RenderTheaterMarker(
+          theater: _theater,
+          overlayEntryWidgetState: this,
+          // Use a Builder so that the `widget.entry.builder` can have access to
+          // _RenderTheaterMarker.of
+          child: Builder(builder: widget.entry.builder),
+        ),
       ),
     );
   }
