@@ -45,6 +45,8 @@ void main() {
         await inTempDir((Directory tempDirectory) async {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
+          await addCodeAssetOpenHelper(packageName, packageDirectory);
+          await addCodeAssetCallToExampleApp(packageName, packageDirectory);
 
           final ProcessTestResult result = await runFlutter(
             <String>['run', '-d$device', '--$buildMode'],

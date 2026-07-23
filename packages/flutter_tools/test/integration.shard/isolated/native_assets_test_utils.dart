@@ -138,6 +138,117 @@ import '${packageName}_bindings_generated.dart' as bindings;
   await dartFile.writeAsString(dartFileNew2);
 }
 
+Future<void> addCodeAssetOpenHelper(
+  String packageName,
+  Directory packageDirectory,
+) async {
+  final File dartFile = packageDirectory.childDirectory('lib').childFile('$packageName.dart');
+  final String dartFileOld = await dartFile.readAsString();
+  final String lineEnding = dartFileOld.contains('\r\n') ? '\r\n' : '\n';
+  final String dartFileWithFfiImport = dartFileOld.replaceFirst(
+    "import 'dart:async';",
+    "import 'dart:async';${lineEnding}import 'dart:ffi';",
+  );
+  expect(dartFileWithFfiImport, isNot(dartFileOld));
+
+  const String generatedSumDeclaration = 'int sum(int a, int b) => bindings.sum(a, b);';
+  const String linkedSumDeclaration =
+      'int sum(int a, int b) => bindings.sum(a, b) + l.difference(2, 1) - 1;';
+  final String sumDeclaration = dartFileWithFfiImport.contains(linkedSumDeclaration)
+      ? linkedSumDeclaration
+      : generatedSumDeclaration;
+  final String dartFileNew = dartFileWithFfiImport.replaceFirst(
+    sumDeclaration,
+    '''
+$sumDeclaration
+
+/// Invokes `sum` by explicitly opening the generated code asset.
+int sumWithCodeAsset(int a, int b) {
+  final DynamicLibrary library = DynamicLibrary.codeAsset(
+    'package:$packageName/${packageName}_bindings_generated.dart',
+  );
+  try {
+    final int Function(int, int) sum = library.lookupFunction<
+        IntPtr Function(IntPtr, IntPtr), int Function(int, int)>('sum');
+    return sum(a, b);
+  } finally {
+    library.close();
+  }
+}
+''',
+  );
+  expect(dartFileNew, isNot(dartFileWithFfiImport));
+  await dartFile.writeAsString(dartFileNew);
+}
+
+Future<void> addCodeAssetCallToExampleApp(
+  String packageName,
+  Directory packageDirectory,
+) async {
+  final File dartFile = packageDirectory
+      .childDirectory('example')
+      .childDirectory('lib')
+      .childFile('main.dart');
+  final String dartFileOld = (await dartFile.readAsString()).replaceAll('\r\n', '\n');
+  final String dartFileWithResultField = dartFileOld.replaceFirst(
+    '''
+  late int sumResult;
+  late Future<int> sumAsyncResult;
+''',
+    '''
+  late int sumResult;
+  late int sumWithCodeAssetResult;
+  late Future<int> sumAsyncResult;
+''',
+  );
+  expect(dartFileWithResultField, isNot(dartFileOld));
+
+  final String dartFileWithCodeAssetCall = dartFileWithResultField.replaceFirst(
+    '''
+    sumResult = $packageName.sum(1, 2);
+    sumAsyncResult = $packageName.sumAsync(3, 4);
+''',
+    '''
+    sumResult = $packageName.sum(1, 2);
+    sumWithCodeAssetResult = $packageName.sumWithCodeAsset(2, 3);
+    if (sumWithCodeAssetResult != 5) {
+      throw StateError(
+        'Expected sumWithCodeAsset(2, 3) to be 5, got \$sumWithCodeAssetResult',
+      );
+    }
+    sumAsyncResult = $packageName.sumAsync(3, 4);
+''',
+  );
+  expect(dartFileWithCodeAssetCall, isNot(dartFileWithResultField));
+
+  final String dartFileNew = dartFileWithCodeAssetCall.replaceFirst(
+    '''
+                Text(
+                  'sum(1, 2) = \$sumResult',
+                  style: textStyle,
+                  textAlign: .center,
+                ),
+                spacerSmall,
+''',
+    '''
+                Text(
+                  'sum(1, 2) = \$sumResult',
+                  style: textStyle,
+                  textAlign: .center,
+                ),
+                spacerSmall,
+                Text(
+                  'sumWithCodeAsset(2, 3) = \$sumWithCodeAssetResult',
+                  style: textStyle,
+                  textAlign: .center,
+                ),
+                spacerSmall,
+''',
+  );
+  expect(dartFileNew, isNot(dartFileWithCodeAssetCall));
+  await dartFile.writeAsString(dartFileNew);
+}
+
 /// Adds a user-define to the pubspec of the package and the example project.
 ///
 /// The build hook will fail if the user-define is not set. So, we don't have to

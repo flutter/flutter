@@ -181,7 +181,8 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await _pinDependencies(File(path.join(packageDirectory.path, 'pubspec.yaml')));
   await _pinDependencies(File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')));
 
-  await _addIntegrationTest(packageDirectory.uri.resolve('example/'), _packageName);
+  await _addCodeAssetOpenHelper(packageDirectory, packageName);
+  await _addIntegrationTest(packageDirectory.uri.resolve('example/'), packageName);
 
   await exec(_flutterBin, <String>['pub', 'get'], workingDirectory: packageDirectory.path);
 
@@ -192,6 +193,43 @@ Future<void> _pinDependencies(File pubspecFile) async {
   final String oldPubspec = await pubspecFile.readAsString();
   final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
   await pubspecFile.writeAsString(newPubspec);
+}
+
+Future<void> _addCodeAssetOpenHelper(Directory packageDirectory, String packageName) async {
+  final dartFile = File(path.join(packageDirectory.path, 'lib', '$packageName.dart'));
+  final String oldDartFile = await dartFile.readAsString();
+  final String lineEnding = oldDartFile.contains('\r\n') ? '\r\n' : '\n';
+  final String withFfiImport = oldDartFile.replaceFirst(
+    "import 'dart:async';",
+    "import 'dart:async';${lineEnding}import 'dart:ffi';",
+  );
+  if (withFfiImport == oldDartFile) {
+    throw StateError('Failed to add dart:ffi import to ${dartFile.path}');
+  }
+  final String newDartFile = withFfiImport.replaceFirst(
+    'int sum(int a, int b) => bindings.sum(a, b);',
+    '''
+int sum(int a, int b) => bindings.sum(a, b);
+
+/// Invokes `sum` by explicitly opening the generated code asset.
+int sumWithCodeAsset(int a, int b) {
+  final DynamicLibrary library = DynamicLibrary.codeAsset(
+    'package:$packageName/${packageName}_bindings_generated.dart',
+  );
+  try {
+    final int Function(int, int) sum = library.lookupFunction<
+        IntPtr Function(IntPtr, IntPtr), int Function(int, int)>('sum');
+    return sum(a, b);
+  } finally {
+    library.close();
+  }
+}
+''',
+  );
+  if (newDartFile == withFfiImport) {
+    throw StateError('Failed to add sumWithCodeAsset to ${dartFile.path}');
+  }
+  await dartFile.writeAsString(newDartFile);
 }
 
 Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
@@ -222,6 +260,7 @@ Future<void> _addIntegrationTest(Uri exampleDirectory, String packageName) async
     ..createSync(recursive: true)
     ..writeAsStringSync('''
 import 'package:flutter_test/flutter_test.dart';
+import 'package:$packageName/$packageName.dart' as native_assets;
 import 'package:${packageName}_example/main.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -235,6 +274,7 @@ void main() {
 
       // Verify the native function was called.
       expect(find.text('sum(1, 2) = 3'), findsOneWidget);
+      expect(native_assets.sumWithCodeAsset(2, 3), 5);
     });
   });
 }
