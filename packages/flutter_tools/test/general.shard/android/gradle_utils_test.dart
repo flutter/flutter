@@ -8,16 +8,25 @@ import 'package:flutter_tools/src/base/common.dart' show ToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/base/version_range.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
+const String maxGradleVersionForJavaPre17 = '8.14.100';
+
 void main() {
+  Cache.flutterRoot = Cache.defaultFlutterRoot(
+    platform: globals.platform,
+    fileSystem: globals.fs,
+    userMessages: UserMessages(),
+  );
   group('injectGradleWrapperIfNeeded', () {
     late FileSystem fileSystem;
     late Directory gradleWrapperDirectory;
@@ -247,7 +256,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
 ''');
 
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.empty()),
         expectedVersion,
       );
     });
@@ -269,7 +278,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
 ''');
 
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.empty()),
         expectedVersion,
       );
     });
@@ -291,7 +300,7 @@ zipStorePath=wrapper/dists
 ''');
 
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.empty()),
         expectedVersion,
       );
     });
@@ -312,7 +321,7 @@ zipStorePath=wrapper/dists
       // FakeProcessManager.any is used here and not in other getGradleVersion
       // tests because this test does not care about process fallback logic.
       expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), FakeProcessManager.any()),
+        await gradleUtils.getGradleVersion(androidDirectory, FakeProcessManager.any()),
         isNull,
       );
     });
@@ -341,10 +350,7 @@ OS:           Mac OS X 13.2.1 aarch64
           const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
         );
 
-      expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
-        expectedVersion,
-      );
+      expect(await gradleUtils.getGradleVersion(androidDirectory, processManager), expectedVersion);
     });
 
     testWithoutContext('returns the installed gradle with whitespace formatting', () async {
@@ -356,10 +362,7 @@ OS:           Mac OS X 13.2.1 aarch64
           const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
         );
 
-      expect(
-        await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
-        expectedVersion,
-      );
+      expect(await gradleUtils.getGradleVersion(androidDirectory, processManager), expectedVersion);
     });
 
     testWithoutContext(
@@ -969,8 +972,8 @@ pluginManagement {
         GradleKgpTestData(false, kgpVersion: '1.8.20', gradleVersion: '7.7'),
         GradleKgpTestData(false, kgpVersion: '1.8.0', gradleVersion: '7.4'),
         GradleKgpTestData(false, kgpVersion: '1.7.20', gradleVersion: '7.2'),
-        GradleKgpTestData(false, kgpVersion: '1.7.0', gradleVersion: '7.0.3'),
-        GradleKgpTestData(false, kgpVersion: '1.6.20', gradleVersion: '7.0.3'),
+        GradleKgpTestData(false, kgpVersion: '1.7.0', gradleVersion: '7.1'),
+        GradleKgpTestData(false, kgpVersion: '1.6.20', gradleVersion: '7.1'),
         // Kotlin older than oldest supported.
         GradleKgpTestData(false, kgpVersion: '1.6.19', gradleVersion: '7.0.3'),
         // Gradle older than oldest supported.
@@ -1131,8 +1134,9 @@ pluginManagement {
         // max supported java and max known gradle versions are updated:
         // Newer tools version does not even meet current gradle version requirements.
         JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
-        // Newer tools version requires newer gradle version.
-        JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.1'),
+        // Java 20 requires Gradle 8.3+ (https://docs.gradle.org/current/userguide/compatibility.html#java)
+        JavaGradleTestData(false, javaVersion: '20', gradleVersion: '8.1'),
+        JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.3'),
         // Max known unsupported Java version.
         JavaGradleTestData(
           true,
@@ -1304,7 +1308,7 @@ allprojects {
 
       expect(
         getGradleVersionForAndroidPlugin(androidDirectory, testLogger),
-        '6.7', // as per compatibility matrix in gradle_utils.dart
+        '6.7', // as per compatibility matrix in android_support_versions.json
       );
     });
   });
@@ -1529,7 +1533,7 @@ allprojects {
             isNull,
           ),
         );
-        // Known supported Java versions.
+        // Known supported Java versions. See https://docs.gradle.org/current/userguide/compatibility.html#java
         expect(
           getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25'),
           allOf(
@@ -1555,21 +1559,21 @@ allprojects {
           getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '22'),
           allOf(
             equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '22.0.2')),
-            equals(const JavaGradleCompat(javaMin: '22', javaMax: '23', gradleMin: '8.7')),
+            equals(const JavaGradleCompat(javaMin: '22', javaMax: '23', gradleMin: '8.8')),
           ),
         );
         expect(
           getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '21'),
           allOf(
             equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '21.0.2')),
-            equals(const JavaGradleCompat(javaMin: '21', javaMax: '22', gradleMin: '8.4')),
+            equals(const JavaGradleCompat(javaMin: '21', javaMax: '22', gradleMin: '8.5')),
           ),
         );
         expect(
           getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20'),
           allOf(
             equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20.0.2')),
-            equals(const JavaGradleCompat(javaMin: '20', javaMax: '21', gradleMin: '8.1')),
+            equals(const JavaGradleCompat(javaMin: '20', javaMax: '21', gradleMin: '8.3')),
           ),
         );
         expect(
@@ -1740,7 +1744,7 @@ allprojects {
         expect(
           getMinimumAgpVersionForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion),
           equals(
-            const JavaAgpCompat(
+            JavaAgpCompat(
               javaMin: '17',
               javaDefault: '17',
               agpMin: '8.0',
@@ -1754,7 +1758,7 @@ allprojects {
           allOf(
             equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17.0.2')),
             equals(
-              const JavaAgpCompat(
+              JavaAgpCompat(
                 javaMin: '17',
                 javaDefault: '17',
                 agpMin: '8.0',
@@ -1837,10 +1841,13 @@ allprojects {
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
       expect(
         getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '10.0'),
-        equals(const VersionRange(null, oneMajorVersionHigherJavaVersion)),
+        equals(VersionRange(null, oneMajorVersionHigherJavaVersion)),
       );
     });
     // Tests with a known compatible Gradle/AGP version pair.
+    // Expected Java ranges are determined by the intersection of compatible Java versions
+    // for the given AGP version (see Java-AGP matrix: https://developer.android.com/studio/releases/gradle-plugin#compatibility)
+    // and the given Gradle version (see Java-Gradle matrix: https://docs.gradle.org/current/userguide/compatibility.html#java).
     final List<({String agpV, String gradleV, VersionRange expected})> agpGradleData = [
       (agpV: '4.2.0', gradleV: '6.7.1', expected: const VersionRange('1.8', '16')),
       (agpV: '4.2.0', gradleV: '7.0', expected: const VersionRange('1.8', '17')),
@@ -1855,25 +1862,25 @@ allprojects {
       (agpV: '7.4', gradleV: '7.1', expected: const VersionRange('11', '17')),
       (agpV: '7.4', gradleV: '7.5', expected: const VersionRange('11', '19')),
       (agpV: '7.4', gradleV: '8.0', expected: const VersionRange('11', '20')),
-      (agpV: '7.4', gradleV: '8.4', expected: const VersionRange('11', '22')),
+      (agpV: '7.4', gradleV: '8.4', expected: const VersionRange('11', '21')),
       (agpV: '7.4', gradleV: '8.9.1', expected: const VersionRange('11', '23')),
       (agpV: '7.4', gradleV: '8.10', expected: const VersionRange('11', '24')),
       (agpV: '7.4', gradleV: '8.12', expected: const VersionRange('11', '24')),
       (agpV: '7.4', gradleV: '8.14', expected: const VersionRange('11', '25')),
       (agpV: '8.0', gradleV: '8.0', expected: const VersionRange('17', '20')),
-      (agpV: '8.0', gradleV: '8.4', expected: const VersionRange('17', '22')),
+      (agpV: '8.0', gradleV: '8.4', expected: const VersionRange('17', '21')),
       (agpV: '8.0', gradleV: '8.9.1', expected: const VersionRange('17', '23')),
       (agpV: '8.0', gradleV: '8.10', expected: const VersionRange('17', '24')),
       (agpV: '8.0', gradleV: '8.12', expected: const VersionRange('17', '24')),
       (agpV: '8.0', gradleV: '8.14', expected: const VersionRange('17', '25')),
-      (agpV: '8.1', gradleV: '8.4', expected: const VersionRange('17', '22')),
-      (agpV: '8.1', gradleV: '8.7', expected: const VersionRange('17', '23')),
+      (agpV: '8.1', gradleV: '8.4', expected: const VersionRange('17', '21')),
+      (agpV: '8.1', gradleV: '8.7', expected: const VersionRange('17', '22')),
       (agpV: '8.9.1', gradleV: '8.11.1', expected: const VersionRange('17', '24')),
       (agpV: '8.9.1', gradleV: '8.12', expected: const VersionRange('17', '24')),
       (agpV: '8.9.1', gradleV: '8.13', expected: const VersionRange('17', '24')),
       (agpV: '9.0', gradleV: '9.0', expected: const VersionRange('17', '25')),
       // Granular versions.
-      (agpV: '8.0.1', gradleV: '8.1.1', expected: const VersionRange('17', '21')),
+      (agpV: '8.0.1', gradleV: '8.1.1', expected: const VersionRange('17', '20')),
       (agpV: '7.2', gradleV: '7.2.2', expected: const VersionRange('11', '17')),
     ];
     for (final data in agpGradleData) {
@@ -1898,6 +1905,37 @@ allprojects {
         ).versionMin,
         '17',
       );
+    });
+  });
+
+  // See compatibility matrices:
+  // - Kotlin-Gradle: https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+  // - AGP-Kotlin: https://kotlinlang.org/docs/multiplatform-compatibility-guide.html
+  group('Gradle / KGP / AGP compatibility suggestion helpers', () {
+    testWithoutContext('getCompatibleGradleRangeForKgp', () {
+      expect(getCompatibleGradleRangeForKgp('2.1.10'), '>= 7.6.3 and < 8.11');
+      expect(getCompatibleGradleRangeForKgp('2.0.20'), '>= 6.8.3 and < 8.9');
+      expect(getCompatibleGradleRangeForKgp('0.1.0'), isNull);
+      expect(getCompatibleGradleRangeForKgp('3.0.0'), isNull);
+    });
+
+    testWithoutContext('getCompatibleKgpRangeForGradle', () {
+      expect(getCompatibleKgpRangeForGradle('8.11'), '>= 2.1.20 and <= 2.4.29');
+      expect(getCompatibleKgpRangeForGradle('8.4'), '>= 2.0.0 and <= 2.4.29');
+      expect(getCompatibleKgpRangeForGradle('4.0'), isNull);
+      expect(getCompatibleKgpRangeForGradle('10.0'), isNull);
+    });
+
+    testWithoutContext('getCompatibleAgpRangeForKgp', () {
+      expect(getCompatibleAgpRangeForKgp('2.1.10'), '>= 7.3.1 and <= 8.7.2');
+      expect(getCompatibleAgpRangeForKgp('2.0.20'), '>= 7.1.3 and < 8.6');
+      expect(getCompatibleAgpRangeForKgp('1.0.0'), isNull);
+    });
+
+    testWithoutContext('getCompatibleKgpRangeForAgp', () {
+      expect(getCompatibleKgpRangeForAgp('8.7.2'), '>= 2.1.0 and <= 2.4.29');
+      expect(getCompatibleKgpRangeForAgp('8.5'), '>= 2.0.20 and <= 2.4.29');
+      expect(getCompatibleKgpRangeForAgp('3.0.0'), isNull);
     });
   });
 }

@@ -25,6 +25,7 @@ import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -484,6 +485,53 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // All automatically created files should exist.
     if (configOnly) {
       return;
+    }
+
+    // Validate Java and Gradle compatibility before invoking Gradle.
+    // This pre-flight check is done in Dart because:
+    // 1. If Java and Gradle are incompatible, Gradle can crash during build script
+    //    compilation (e.g. Kotlin DSL compilation failing on newer JDKs) before
+    //    the Flutter Gradle Plugin (DependencyVersionChecker) is even applied.
+    //    See https://github.com/flutter/flutter/issues/121501 for context on
+    //    how JDK upgrades lead to cryptic Gradle compilation crashes.
+    // 2. Reading the wrapper properties file is fast, avoiding a slow process spawn.
+    // 3. It reuses the compatibility matrix defined in
+    //    packages/flutter_tools/gradle/src/main/resources/android_support_versions.json
+    //    (loaded via gradle_utils.dart), which aligns with the supported versions
+    //    loaded in DependencyVersionChecker.kt.
+    // This also helps address https://github.com/flutter/flutter/issues/167931
+    // by providing actionable version recommendations directly in the error.
+    if (!androidBuildInfo.buildInfo.androidSkipBuildDependencyValidation) {
+      final Version? javaVersionObj = _java?.version;
+      final String? javaVersion = javaVersionObj != null
+          ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
+          : null;
+      final String? gradleVersion = await _gradleUtils.getGradleVersion(
+        project.android.hostAppGradleRoot,
+        globals.processManager,
+      );
+      if (javaVersion != null && gradleVersion != null) {
+        if (!gradle.validateJavaAndGradle(
+          _logger,
+          javaVersion: javaVersion,
+          gradleVersion: gradleVersion,
+        )) {
+          final JavaGradleCompat? compat = gradle.getValidGradleVersionRangeForJavaVersion(
+            _logger,
+            javaV: javaVersion,
+          );
+          final gradleRangeInfo = compat != null
+              ? 'compatible Gradle versions for Java $javaVersion are ${compat.gradleMin} to ${compat.gradleMax ?? 'newer'}'
+              : 'compatible Gradle version for Java $javaVersion is unknown';
+          throwToolExit("""
+Gradle build failed due to Java/Gradle incompatibility.
+The Java version used for the build is $javaVersion, which is incompatible with Gradle $gradleVersion.
+To fix this, you can either:
+  1. Upgrade your project's Gradle version (typically in gradle-wrapper.properties to a version matching the range: $gradleRangeInfo).
+  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.
+Alternatively, you can bypass this check using "--android-skip-build-dependency-validation".""");
+        }
+      }
     }
 
     // Assembly work starts here.
