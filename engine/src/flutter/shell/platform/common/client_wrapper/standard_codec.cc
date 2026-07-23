@@ -25,6 +25,22 @@ namespace flutter {
 
 namespace {
 
+// Maximum nesting depth for ReadValue deserialization. Prevents stack
+// overflow from deeply nested or crafted messages received over platform
+// channels. 128 levels is far beyond any legitimate message depth while
+// staying well within typical stack limits.
+constexpr int kMaxReadDepth = 128;
+
+thread_local int g_read_depth = 0;
+
+// RAII guard that increments g_read_depth on construction and decrements
+// on destruction, ensuring correct bookkeeping even if an exception or
+// early return interrupts deserialization.
+struct ReadDepthGuard {
+  ReadDepthGuard() { ++g_read_depth; }
+  ~ReadDepthGuard() { --g_read_depth; }
+};
+
 // The order/values here must match the constants in message_codecs.dart.
 enum class EncodedType {
   kNull = 0,
@@ -91,6 +107,11 @@ const StandardCodecSerializer& StandardCodecSerializer::GetInstance() {
 
 EncodableValue StandardCodecSerializer::ReadValue(
     ByteStreamReader* stream) const {
+  ReadDepthGuard depth_guard;
+  if (g_read_depth > kMaxReadDepth) {
+    std::cerr << "StandardCodecSerializer: maximum nesting depth exceeded\n";
+    return EncodableValue();
+  }
   uint8_t type = stream->ReadByte();
   return ReadValueOfType(type, stream);
 }
