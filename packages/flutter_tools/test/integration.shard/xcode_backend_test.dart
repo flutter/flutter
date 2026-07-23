@@ -15,11 +15,20 @@ const xcodeBackendPath = 'bin/xcode_backend.sh';
 const xcodeBackendErrorHeader =
     '========================================================================';
 
+// Settings normally supplied by the Generated Flutter xcconfig
+const generatedBuildSettings = <String, String>{
+  'FLUTTER_ROOT': '../..',
+  'FLUTTER_BUILD_DIR': 'build',
+  'FLUTTER_BUILD_NAME': '1.0.0',
+  'FLUTTER_BUILD_NUMBER': '1',
+};
+
 // Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
-const unknownConfiguration = <String, String>{'CONFIGURATION': 'Custom'};
+const unknownConfiguration = <String, String>{...generatedBuildSettings, 'CONFIGURATION': 'Custom'};
 
 // $FLUTTER_BUILD_MODE will override $CONFIGURATION
 const unknownFlutterBuildMode = <String, String>{
+  ...generatedBuildSettings,
   'FLUTTER_BUILD_MODE': 'Custom',
   'CONFIGURATION': 'Debug',
 };

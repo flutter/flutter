@@ -1,0 +1,34 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Delete Bot Branches
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - master
+      - 'flutter-*-candidate*'
+
+permissions:
+  contents: write
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo != null &&
+      github.event.pull_request.head.repo.owner.login == 'flutteractionsbot' &&
+      github.event.pull_request.head.ref != 'master' &&
+      github.event.pull_request.head.ref != 'main'
+    steps:
+      - name: Delete branch
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          REPO_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
+          REPO_NAME: ${{ github.event.pull_request.head.repo.name }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+        run: |
+          echo "Deleting branch $BRANCH_NAME from $REPO_OWNER/$REPO_NAME..."
+          gh api -X DELETE "/repos/$REPO_OWNER/$REPO_NAME/git/refs/heads/$BRANCH_NAME"

@@ -470,6 +470,9 @@ class FakeDesktopDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
+
+  @override
   Future<bool> isSupported() async => true;
 
   @override

@@ -549,6 +549,64 @@ device4       unknown usb:3-7
       expect(diagnostics[1], contains('device2 is offline'));
     },
   );
+
+  // Related to https://github.com/flutter/flutter/issues/189274
+  testWithoutContext(
+    'AndroidDevices can parse output with extra non-key-value attributes without mis-matching device ID',
+    () async {
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+ABCDEFG           device 20-30 product:mokey model:mokey device:mokey transport_id:1
+''',
+          ),
+        ]),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      final List<Device> devices = await androidDevices.pollingGetDevices();
+
+      expect(devices, hasLength(1));
+      expect(devices.first.id, 'ABCDEFG');
+      expect(devices.first.name, 'mokey');
+    },
+  );
+
+  testWithoutContext(
+    'AndroidDevices handles serial containing spaces and state keywords correctly',
+    () async {
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+my device (2)          device product:model
+''',
+          ),
+        ]),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      final List<Device> devices = await androidDevices.pollingGetDevices();
+
+      expect(devices, hasLength(1));
+      expect(devices.first.id, 'my device (2)');
+    },
+  );
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
