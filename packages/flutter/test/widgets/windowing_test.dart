@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Display;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show
@@ -331,7 +333,7 @@ class _MutableRegularWindowController extends RegularWindowController {
 }
 
 void main() {
-  group('Windowing', () {
+  group('Windowing', skip: kIsWeb, () {
     group('isWindowingEnabled is false', () {
       setUp(() {
         isWindowingEnabled = false;
@@ -434,6 +436,70 @@ void main() {
           DialogWindow(controller: controller, child: Container()),
         );
       });
+
+      testWidgets(
+        'secondary windows support Ctrl+A and backspace in editable text',
+        (WidgetTester tester) async {
+          final windows = <Widget Function(Widget)>[
+            (Widget child) {
+              final controller = _StubDialogWindowController(tester);
+              addTearDown(controller.dispose);
+              return DialogWindow(controller: controller, child: child);
+            },
+            (Widget child) {
+              final controller = _StubTooltipWindowController(tester: tester);
+              addTearDown(controller.dispose);
+              return TooltipWindow(controller: controller, child: child);
+            },
+            (Widget child) {
+              final controller = _StubPopupWindowController(tester: tester);
+              addTearDown(controller.dispose);
+              return PopupWindow(controller: controller, child: child);
+            },
+            (Widget child) {
+              final controller = _StubSatelliteWindowController(tester: tester);
+              addTearDown(controller.dispose);
+              return SatelliteWindow(controller: controller, child: child);
+            },
+          ];
+
+          for (final window in windows) {
+            final textController = TextEditingController(text: 'Flutter');
+            final focusNode = FocusNode();
+            addTearDown(textController.dispose);
+            addTearDown(focusNode.dispose);
+            await tester.pumpWidget(
+              wrapWithView: false,
+              window(
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: EditableText(
+                    controller: textController,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    style: const TextStyle(color: Color(0xFF000000)),
+                    cursorColor: const Color(0xFF000000),
+                    backgroundCursorColor: const Color(0xFF000000),
+                  ),
+                ),
+              ),
+            );
+
+            await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+            await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+            await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+            await tester.pump();
+            expect(textController.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
+
+            await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+            await tester.pump();
+            expect(textController.text, isEmpty);
+          }
+        },
+        variant: TargetPlatformVariant.all(
+          excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS},
+        ),
+      );
 
       testWidgets('Can access WindowScope.of for regular windows', (WidgetTester tester) async {
         final controller = _StubRegularWindowController(tester);
