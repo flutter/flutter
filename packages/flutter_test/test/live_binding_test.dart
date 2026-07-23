@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../flutter/test/widgets/widgets_app_tester.dart';
+
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
   PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
@@ -96,6 +98,58 @@ void main() {
     await tester.tap(find.byType(Text));
     await tester.pump();
     expect(invocations, 3);
+  });
+
+  testWidgets('long press can reopen a dialog route after dismissing it', (
+    WidgetTester tester,
+  ) async {
+    var longPresses = 0;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onLongPress: () {
+                longPresses++;
+                Navigator.of(context).push<void>(
+                  PageRouteBuilder<void>(
+                    transitionDuration: Duration.zero,
+                    pageBuilder:
+                        (
+                          BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                        ) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Center(child: Text('Popup')),
+                          );
+                        },
+                  ),
+                );
+              },
+              child: const Center(child: Text('Show dialog')),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.longPress(find.text('Show dialog'));
+    await tester.pumpAndSettle();
+    expect(longPresses, 1);
+    expect(find.text('Popup'), findsOneWidget);
+
+    await tester.tap(find.text('Popup'));
+    await tester.pumpAndSettle();
+    expect(find.text('Popup'), findsNothing);
+
+    await tester.longPress(find.text('Show dialog'));
+    await tester.pumpAndSettle();
+    expect(longPresses, 2);
+    expect(find.text('Popup'), findsOneWidget);
   });
 
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
