@@ -229,6 +229,15 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
+  config("concurrency_test_config") {
+    configs = [ "//flutter/shell/platform/darwin/common:test_config" ]
+
+    swiftflags = [
+      "-strict-concurrency=complete",
+      "-warnings-as-errors",
+    ]
+  }
+
   source_set("flutter_engine_bindings_test_helpers") {
     testonly = true
     visibility = [ ":*" ]
@@ -263,14 +272,28 @@ if (enable_ios_unittests) {
       "framework/Source/TaskRunnerTests.swift",
       "framework/Source/VSyncClientTest.swift",
     ]
-    frameworks = [ "Testing.framework" ]
+    frameworks = [
+      "Testing.framework",
+      "XCTest.framework",
+    ]
     deps = [
       ":InternalFlutterSwift",
       ":flutter_engine_bindings",
       ":flutter_engine_bindings_test_helpers",
       ":flutter_framework_source",
+      ":ios_swift_strict_concurrency_test",
       "//flutter/fml",
     ]
+  }
+
+  source_set("ios_swift_strict_concurrency_test") {
+    testonly = true
+
+    visibility = [ ":*" ]
+    configs += [ ":concurrency_test_config" ]
+    sources = [ "framework/Source/SwiftStrictConcurrencyTest.swift" ]
+
+    deps = [ ":flutter_framework_source" ]
   }
 
   # The tests here are run in a host application on an iOS simulator thus

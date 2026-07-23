@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Options that control how a FlutterEngine should be created. */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_NONSENDABLE
 @interface FlutterEngineGroupOptions : NSObject
 
 /**
@@ -53,6 +54,7 @@ FLUTTER_DARWIN_EXPORT
  * @see https://github.com/flutter/flutter/issues/72009
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_UI_ACTOR
 @interface FlutterEngineGroup : NSObject
 - (instancetype)init NS_UNAVAILABLE;
 
