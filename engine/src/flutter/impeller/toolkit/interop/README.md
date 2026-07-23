@@ -32,12 +32,12 @@ https://storage.googleapis.com/flutter_infra_release/flutter/$FLUTTER_SHA/$PLATF
 
 The `$FLUTTER_SHA` is the Git hash in the [Flutter repository](https://github.com/flutter/flutter). The `$PLATFORM_ARCH` can be determined from the table below.
 
-|       | macOS        | Linux       | Android        | Windows       |
-|:-----:|:------------:|:-----------:|:--------------:|:-------------:|
-| armv7 |              |             | android-arm    |               |
-| arm64 | darwin-arm64 | linux-arm64 | android-arm64  | windows-arm64 |
-| x86   |              |             | android-x86    |               |
-| x64   | darwin-x64   | linux-x64   | android-x64    | windows-x64   |
+|       | macOS        | Linux       | Android        | Windows       | iOS       | iOS Simulator |
+|:-----:|:------------:|:-----------:|:--------------:|:-------------:|:---------:|:-------------:|
+| armv7 |              |             | android-arm    |               |           |               |
+| arm64 | darwin-arm64 | linux-arm64 | android-arm64  | windows-arm64 | ios-arm64 | ios-sim-arm64 |
+| x86   |              |             | android-x86    |               |           |               |
+| x64   | darwin-x64   | linux-x64   | android-x64    | windows-x64   |           | ios-sim-x64   |
 
 
 _For example, the SDK for `Linux x64` at Flutter SHA `cda35151265f00fab84d8128b086d5534f690c1b` would be [this link](https://storage.googleapis.com/flutter_infra_release/flutter/cda35151265f00fab84d8128b086d5534f690c1b/linux-x64/impeller_sdk.zip)_

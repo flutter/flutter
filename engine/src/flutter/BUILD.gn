@@ -169,7 +169,7 @@ group("flutter") {
   }
 
   # Build the standalone Impeller library.
-  if (is_mac || is_linux || is_win || is_android || is_qnx) {
+  if (is_mac || is_ios || is_linux || is_win || is_android || is_qnx) {
     public_deps += [ "//flutter/impeller/toolkit/interop:sdk" ]
   }
 
