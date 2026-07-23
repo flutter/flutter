@@ -26,7 +26,7 @@ const String kSpotlightMdfindCommand =
     r'  done; '
     r'  kill -9 $$; '
     r') 2>/dev/null & '
-    r'exec mdfind kMDItemCFBundleIdentifier="com.google.android.studio*"';
+    'exec mdfind \'kMDItemCFBundleIdentifier="com.google.android.studio*"\'';
 
 const _androidStudioTitle = 'Android Studio';
 const _androidStudioId = 'AndroidStudio';
