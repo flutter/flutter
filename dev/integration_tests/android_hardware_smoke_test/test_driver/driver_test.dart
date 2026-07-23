@@ -35,7 +35,10 @@ void main() async {
     activeGoldenVariant = (replyVariant != null && replyVariant.isNotEmpty) ? '.$replyVariant' : '';
 
     if (isLuci) {
-      await enableSkiaGoldComparator(namePrefix: 'android_hardware_smoke_test$activeGoldenVariant');
+      await enableSkiaGoldComparator(
+        namePrefix: 'android_hardware_smoke_test$activeGoldenVariant',
+        localOutputDir: 'test_driver/goldens',
+      );
     }
   });
 
