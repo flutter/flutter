@@ -18,4 +18,38 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('$TabController exposes the selected index change timing.', (
+    WidgetTester widgetTester,
+  ) async {
+    const animationDuration = Duration(milliseconds: 100);
+    const customDuration = Duration(seconds: 2);
+    final controller = TabController(
+      length: 3,
+      animationDuration: animationDuration,
+      vsync: widgetTester,
+    );
+
+    expect(controller.indexChangeDuration, animationDuration);
+    expect(controller.indexChangeCurve, Curves.ease);
+
+    controller.animateTo(1, duration: customDuration, curve: Curves.linear);
+
+    expect(controller.indexChangeDuration, customDuration);
+    expect(controller.indexChangeCurve, Curves.linear);
+    await widgetTester.pump(customDuration);
+
+    controller.animateTo(2);
+
+    expect(controller.indexChangeDuration, animationDuration);
+    expect(controller.indexChangeCurve, Curves.ease);
+    await widgetTester.pump(animationDuration);
+
+    controller.index = 0;
+
+    expect(controller.indexChangeDuration, animationDuration);
+    expect(controller.indexChangeCurve, Curves.ease);
+
+    controller.dispose();
+  });
 }
