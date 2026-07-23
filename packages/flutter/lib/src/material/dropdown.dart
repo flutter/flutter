@@ -15,6 +15,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1572,8 +1573,23 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final Orientation newOrientation = _getOrientation(context);
     _lastOrientation ??= newOrientation;
     if (newOrientation != _lastOrientation) {
-      _removeDropdownRoute();
       _lastOrientation = newOrientation;
+      // The open menu's layout is computed for the previous orientation, so it
+      // must be dismissed. Removing the route mutates the Navigator, which is
+      // not allowed during build, so defer the dismissal until after the
+      // current frame when we are in the persistent callbacks phase.
+      // See https://github.com/flutter/flutter/issues/171011
+      if (_dropdownRoute != null) {
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+          WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+            if (mounted) {
+              _removeDropdownRoute();
+            }
+          }, debugLabel: 'DropdownButton.dismissOnOrientationChange');
+        } else {
+          _removeDropdownRoute();
+        }
+      }
     }
 
     // The width of the button and the menu are defined by the widest
