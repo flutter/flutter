@@ -124,7 +124,7 @@ class BuildApkCommand extends BuildSubCommand {
     final androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
-      targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
+      targetArchs: _targetArchs.map<CpuArch>(getCpuArchForName),
     );
     validateBuild(androidBuildInfo);
     globals.terminal.usesTerminalUi = true;
