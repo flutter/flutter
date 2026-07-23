@@ -341,14 +341,14 @@ class SimpleListTableView extends TwoDimensionalScrollView {
     super.mainAxis = Axis.vertical,
     super.verticalDetails = const ScrollableDetails.vertical(),
     super.horizontalDetails = const ScrollableDetails.horizontal(),
-    required TwoDimensionalChildListDelegate delegate,
+    required super.delegate,
     super.cacheExtent,
     super.cacheExtentStyle,
     super.diagonalDragBehavior = DiagonalDragBehavior.none,
     super.dragStartBehavior = DragStartBehavior.start,
     super.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     super.clipBehavior = Clip.hardEdge,
-  }) : super(delegate: delegate);
+  });
 
   @override
   Widget buildViewport(
