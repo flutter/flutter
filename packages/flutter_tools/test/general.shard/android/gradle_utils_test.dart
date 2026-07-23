@@ -1134,7 +1134,7 @@ pluginManagement {
         // max supported java and max known gradle versions are updated:
         // Newer tools version does not even meet current gradle version requirements.
         JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
-        // Newer tools version requires newer gradle version.
+        // Java 20 requires Gradle 8.3+ (https://docs.gradle.org/current/userguide/compatibility.html#java)
         JavaGradleTestData(false, javaVersion: '20', gradleVersion: '8.1'),
         JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.3'),
         // Max known unsupported Java version.
@@ -1533,7 +1533,7 @@ allprojects {
             isNull,
           ),
         );
-        // Known supported Java versions.
+        // Known supported Java versions. See https://docs.gradle.org/current/userguide/compatibility.html#java
         expect(
           getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25'),
           allOf(
@@ -1845,6 +1845,9 @@ allprojects {
       );
     });
     // Tests with a known compatible Gradle/AGP version pair.
+    // Expected Java ranges are determined by the intersection of compatible Java versions
+    // for the given AGP version (see Java-AGP matrix: https://developer.android.com/studio/releases/gradle-plugin#compatibility)
+    // and the given Gradle version (see Java-Gradle matrix: https://docs.gradle.org/current/userguide/compatibility.html#java).
     final List<({String agpV, String gradleV, VersionRange expected})> agpGradleData = [
       (agpV: '4.2.0', gradleV: '6.7.1', expected: const VersionRange('1.8', '16')),
       (agpV: '4.2.0', gradleV: '7.0', expected: const VersionRange('1.8', '17')),
@@ -1905,6 +1908,9 @@ allprojects {
     });
   });
 
+  // See compatibility matrices:
+  // - Kotlin-Gradle: https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+  // - AGP-Kotlin: https://kotlinlang.org/docs/multiplatform-compatibility-guide.html
   group('Gradle / KGP / AGP compatibility suggestion helpers', () {
     testWithoutContext('getCompatibleGradleRangeForKgp', () {
       expect(getCompatibleGradleRangeForKgp('2.1.10'), '>= 7.6.3 and < 8.11');
