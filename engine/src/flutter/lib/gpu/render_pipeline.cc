@@ -11,6 +11,7 @@
 #include <string_view>
 
 #include "flutter/lib/gpu/shader.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/vertex_descriptor.h"
@@ -43,16 +44,46 @@ RenderPipeline::RenderPipeline(
       fragment_shader_->GetDescriptorSetLayouts().size());
 }
 
-void RenderPipeline::BindToPipelineDescriptor(
+bool RenderPipeline::BindToPipelineDescriptor(
     impeller::ShaderLibrary& library,
     impeller::PipelineDescriptor& desc) {
-  desc.SetVertexDescriptor(vertex_descriptor_);
+  // A failed lookup previously flowed into `AddStageEntrypoint`, which
+  // dereferences its argument, crashing with no signal about which shader
+  // was at fault.
+  auto vertex_function = vertex_shader_->GetFunctionFromLibrary(library);
+  if (!vertex_function) {
+    VALIDATION_LOG << "Unable to resolve the vertex shader function '"
+                   << vertex_shader_->GetEntrypoint()
+                   << "' from the shader library.";
+    return false;
+  }
+  auto fragment_function = fragment_shader_->GetFunctionFromLibrary(library);
+  if (!fragment_function) {
+    VALIDATION_LOG << "Unable to resolve the fragment shader function '"
+                   << fragment_shader_->GetEntrypoint()
+                   << "' from the shader library.";
+    return false;
+  }
 
-  desc.AddStageEntrypoint(vertex_shader_->GetFunctionFromLibrary(library));
-  desc.AddStageEntrypoint(fragment_shader_->GetFunctionFromLibrary(library));
+  desc.SetVertexDescriptor(vertex_descriptor_);
+  desc.AddStageEntrypoint(std::move(vertex_function));
+  desc.AddStageEntrypoint(std::move(fragment_function));
+  return true;
 }
 
 RenderPipeline::~RenderPipeline() = default;
+
+const char* ValidateRenderPipelineShaderStages(const Shader& vertex_shader,
+                                               const Shader& fragment_shader) {
+  if (vertex_shader.GetShaderStage() != impeller::ShaderStage::kVertex) {
+    return "The shader given for the vertex stage is not a vertex shader.";
+  }
+  if (fragment_shader.GetShaderStage() != impeller::ShaderStage::kFragment) {
+    return "The shader given for the fragment stage is not a fragment "
+           "shader.";
+  }
+  return nullptr;
+}
 
 namespace {
 
@@ -297,6 +328,14 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     Dart_Handle buffer_layouts_handle,
     Dart_Handle attributes_handle,
     Dart_Handle attribute_names_handle) {
+  // Swapped or mismatched stages would otherwise only fail at first draw,
+  // deep inside backend pipeline compilation.
+  if (const char* stage_error =
+          flutter::gpu::ValidateRenderPipelineShaderStages(*vertex_shader,
+                                                           *fragment_shader)) {
+    return tonic::ToDart(stage_error);
+  }
+
   // Lazily register the shaders synchronously if they haven't been already.
   vertex_shader->RegisterSync(*gpu_context);
   fragment_shader->RegisterSync(*gpu_context);
