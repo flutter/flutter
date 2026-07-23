@@ -18,7 +18,10 @@ const _swiftPackageTemplate = '''
 
 import PackageDescription
 
-{{#hasSwiftCodeBefore}}\n{{swiftCodeBefore}}\n\n{{/hasSwiftCodeBefore}}
+{{#hasSwiftCodeBefore}}
+{{swiftCodeBefore}}
+
+{{/hasSwiftCodeBefore}}
 let package = Package(
     name: "{{packageName}}",
     {{#platforms}}
@@ -120,11 +123,15 @@ class SwiftPackage {
       final Directory targetDirectory = _manifest.parent
           .childDirectory('Sources')
           .childDirectory(target.name);
-      if (generateEmptySources &&
-          (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty)) {
+      if (generateEmptySources) {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
-        requiredSwiftFile.createSync(recursive: true);
-        requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+        final bool hasSources =
+            requiredSwiftFile.existsSync() ||
+            (targetDirectory.existsSync() && targetDirectory.listSync().isNotEmpty);
+        if (!hasSources) {
+          requiredSwiftFile.createSync(recursive: true);
+          requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+        }
       }
     }
 
@@ -132,8 +139,20 @@ class SwiftPackage {
       _swiftPackageTemplate,
       _templateContext,
     );
-    _manifest.createSync(recursive: true);
-    _manifest.writeAsStringSync(renderedTemplate);
+
+    var shouldWrite = true;
+    try {
+      if (_manifest.existsSync() && _manifest.readAsStringSync() == renderedTemplate) {
+        shouldWrite = false;
+      }
+    } on FileSystemException {
+      // If reading fails, write it anyway.
+    }
+
+    if (shouldWrite) {
+      _manifest.createSync(recursive: true);
+      _manifest.writeAsStringSync(renderedTemplate);
+    }
   }
 
   String? _formatPlatforms() {
