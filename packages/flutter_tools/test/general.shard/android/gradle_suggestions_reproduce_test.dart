@@ -18,7 +18,7 @@ import 'package:meta/meta.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/package_config.dart';
+
 import '../../src/throwing_pub.dart';
 
 void main() {
@@ -36,7 +36,7 @@ flutter:
 
     Future<FlutterProject> someProject() async {
       final Directory directory = globals.fs.directory('some_project');
-      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'hello');
+
       directory.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(validPubspec);
@@ -79,18 +79,6 @@ distributionUrl=https://services.gradle.org/distributions/gradle-$gradleV-all.zi
       return project;
     }
 
-    void insertFakeGradleArtifactDir(FileSystem fs, {required Directory flutterRoot}) {
-      final Directory artifactDir = flutterRoot
-          .childDirectory('bin')
-          .childDirectory('cache')
-          .childDirectory('artifacts')
-          .childDirectory('gradle_wrapper');
-      artifactDir
-        ..childFile('gradlew').createSync(recursive: true)
-        ..childFile('gradlew.bat').createSync(recursive: true)
-        ..childDirectory('wrapper').childFile('gradle-wrapper.jar').createSync(recursive: true);
-    }
-
     @isTest
     void testInMemory(
       String description,
@@ -99,9 +87,6 @@ distributionUrl=https://services.gradle.org/distributions/gradle-$gradleV-all.zi
       required ProcessManager processManager,
     }) {
       final FileSystem testFileSystem = MemoryFileSystem.test();
-      final String flutterRoot = getFlutterRoot();
-      final Directory fakeFlutterRoot = testFileSystem.directory(flutterRoot);
-      insertFakeGradleArtifactDir(testFileSystem, flutterRoot: fakeFlutterRoot);
 
       testUsingContext(
         description,

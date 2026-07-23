@@ -495,7 +495,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     //    See https://github.com/flutter/flutter/issues/121501 for context on
     //    how JDK upgrades lead to cryptic Gradle compilation crashes.
     // 2. Reading the wrapper properties file is fast, avoiding a slow process spawn.
-    // 3. It reuses the existing compatibility matrix defined in gradle_utils.dart.
+    // 3. It reuses the existing compatibility matrix defined in gradle_utils.dart,
+    //    which aligns with the supported versions in DependencyVersionChecker.kt.
     // This also helps address https://github.com/flutter/flutter/issues/167931
     // by providing actionable version recommendations directly in the error.
     if (!androidBuildInfo.buildInfo.androidSkipBuildDependencyValidation) {

@@ -8,16 +8,25 @@ import 'package:flutter_tools/src/base/common.dart' show ToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/base/version_range.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
+const String maxGradleVersionForJavaPre17 = '8.14.100';
+
 void main() {
+  Cache.flutterRoot = Cache.defaultFlutterRoot(
+    platform: globals.platform,
+    fileSystem: globals.fs,
+    userMessages: UserMessages(),
+  );
   group('injectGradleWrapperIfNeeded', () {
     late FileSystem fileSystem;
     late Directory gradleWrapperDirectory;
@@ -1734,7 +1743,7 @@ allprojects {
         expect(
           getMinimumAgpVersionForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion),
           equals(
-            const JavaAgpCompat(
+            JavaAgpCompat(
               javaMin: '17',
               javaDefault: '17',
               agpMin: '8.0',
@@ -1748,7 +1757,7 @@ allprojects {
           allOf(
             equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17.0.2')),
             equals(
-              const JavaAgpCompat(
+              JavaAgpCompat(
                 javaMin: '17',
                 javaDefault: '17',
                 agpMin: '8.0',
@@ -1831,7 +1840,7 @@ allprojects {
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
       expect(
         getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '10.0'),
-        equals(const VersionRange(null, oneMajorVersionHigherJavaVersion)),
+        equals(VersionRange(null, oneMajorVersionHigherJavaVersion)),
       );
     });
     // Tests with a known compatible Gradle/AGP version pair.

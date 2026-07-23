@@ -8,11 +8,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -48,6 +43,11 @@ object DependencyVersionChecker {
 
     // The task postfix to use when checking the minimum SDK version for each flavor.
     internal const val MIN_SDK_CHECK_TASK_POSTFIX = "MinSdkCheck"
+
+    private const val AGP_MAJOR_VERSION_INDEX = 0
+    private const val AGP_MINOR_VERSION_INDEX = 1
+    private const val AGP_PATCH_VERSION_INDEX = 2
+    private const val AGP_DEFAULT_VERSION_COMPONENT = 0
 
     // The following messages represent best effort guesses at where a Flutter developer should
     // look to upgrade a dependency that is below the corresponding threshold. Developers can
@@ -98,69 +98,47 @@ object DependencyVersionChecker {
     // Advice for maintainers for other areas of code that are impacted are documented
     // in packages/flutter_tools/lib/src/android/README.md.
 
-    private val supportVersions: JsonObject by lazy {
+    private val supportVersions: AndroidSupportVersions by lazy {
         val stream =
             DependencyVersionChecker::class.java.getResourceAsStream("/android_support_versions.json")
                 ?: throw GradleException("Required resource android_support_versions.json not found")
         val jsonText = stream.bufferedReader().use { it.readText() }
-        Json.parseToJsonElement(jsonText).jsonObject
+        AndroidSupportVersions.fromJson(jsonText)
     }
-
-    private fun getVersionString(
-        tool: String,
-        type: String
-    ): String =
-        supportVersions[tool]
-            ?.jsonObject
-            ?.get(type)
-            ?.jsonPrimitive
-            ?.content
-            ?: throw GradleException("Missing version config for $tool.$type")
-
-    private fun getIntVersion(
-        tool: String,
-        type: String
-    ): Int =
-        supportVersions[tool]
-            ?.jsonObject
-            ?.get(type)
-            ?.jsonPrimitive
-            ?.int
-            ?: throw GradleException("Missing version config for $tool.$type")
 
     private fun parseAgpVersion(versionString: String): AndroidPluginVersion {
         val parts = versionString.split(".").map { it.toInt() }
-        return AndroidPluginVersion(
-            parts.getOrElse(0) { 0 },
-            parts.getOrElse(1) { 0 },
-            parts.getOrElse(2) { 0 }
-        )
+        val major = parts.getOrElse(AGP_MAJOR_VERSION_INDEX) { AGP_DEFAULT_VERSION_COMPONENT }
+        val minor = parts.getOrElse(AGP_MINOR_VERSION_INDEX) { AGP_DEFAULT_VERSION_COMPONENT }
+        val patch = parts.getOrElse(AGP_PATCH_VERSION_INDEX) { AGP_DEFAULT_VERSION_COMPONENT }
+        return AndroidPluginVersion(major, minor, patch)
     }
 
-    @VisibleForTesting internal val warnGradleVersion: Version by lazy { Version.fromString(getVersionString("gradle", "warn")) }
+    @VisibleForTesting internal val warnGradleVersion: Version by lazy { Version.fromString(supportVersions.gradle.warn) }
 
-    @VisibleForTesting internal val errorGradleVersion: Version by lazy { Version.fromString(getVersionString("gradle", "error")) }
+    @VisibleForTesting internal val errorGradleVersion: Version by lazy { Version.fromString(supportVersions.gradle.error) }
 
     // Java error and warn should align with packages/flutter_tools/lib/src/android/gradle_utils.dart.
-    @VisibleForTesting internal val warnJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(getVersionString("java", "warn")) }
+    @VisibleForTesting internal val warnJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(supportVersions.java.warn) }
 
-    @VisibleForTesting internal val errorJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(getVersionString("java", "error")) }
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(supportVersions.java.error) }
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(getVersionString("agp", "warn")) }
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(supportVersions.agp.warn) }
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(getVersionString("agp", "error")) }
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(supportVersions.agp.error) }
 
-    @VisibleForTesting internal val warnKGPVersion: Version by lazy { Version.fromString(getVersionString("kgp", "warn")) }
+    @VisibleForTesting internal val warnKGPVersion: Version by lazy { Version.fromString(supportVersions.kgp.warn) }
 
-    @VisibleForTesting internal val errorKGPVersion: Version by lazy { Version.fromString(getVersionString("kgp", "error")) }
+    @VisibleForTesting internal val errorKGPVersion: Version by lazy { Version.fromString(supportVersions.kgp.error) }
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
-    // Non inclusive.
+    // A warning is logged if the project's minSdkVersion is strictly less than this value.
     @VisibleForTesting
-    internal val warnMinSdkVersion: Int by lazy { getIntVersion("minSdkVersion", "warn") }
+    internal val warnMinSdkVersion: Int by lazy { supportVersions.minSdkVersion.warn }
 
+    // An error is thrown if the project's minSdkVersion is strictly less than this value.
     @VisibleForTesting
-    internal val errorMinSdkVersion: Int by lazy { getIntVersion("minSdkVersion", "error") }
+    internal val errorMinSdkVersion: Int by lazy { supportVersions.minSdkVersion.error }
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective
