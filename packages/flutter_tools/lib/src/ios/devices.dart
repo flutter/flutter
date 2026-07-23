@@ -1326,7 +1326,7 @@ class IOSDevice extends Device {
   @override
   bool get supportsScreenshot {
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    if (xcodeVersion != null && xcodeVersion.major >= 27) {
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
       return globals.xcode!.isDevicectlInstalled;
     }
     return false;
@@ -1335,7 +1335,7 @@ class IOSDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    if (xcodeVersion != null && xcodeVersion.major >= 27) {
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
       var success = false;
       try {
         success = await _coreDeviceControl.takeScreenshot(
