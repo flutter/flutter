@@ -548,22 +548,58 @@ class TextSelectionOverlay {
   }
 
   void _updateSelectionOverlay() {
+    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    assert(endpoints.isNotEmpty);
+
+    final TextSelectionHandleType startHandleType;
+    final TextSelectionHandleType endHandleType;
+    if (_selection.isCollapsed) {
+      startHandleType = TextSelectionHandleType.collapsed;
+      endHandleType = TextSelectionHandleType.collapsed;
+    } else {
+      final TextDirection textDirection = renderObject.textDirection;
+      // UIKit keeps selection handles aligned with the field direction.
+      final preferRenderObjectDirectionForSelectionHandles =
+          defaultTargetPlatform == TargetPlatform.iOS;
+      final TextDirection startHandleDirection;
+      final TextDirection endHandleDirection;
+      // A non-collapsed selection might return fewer than two endpoints if the
+      // text layout lacks boxes for the selected range. This typically happens when:
+      //
+      //  * Render lag: The overlay updated with a new editing value before the
+      //    render object laid out the new text (selection offsets are out of bounds).
+      //  * Split graphemes: A selection boundary falls inside a multi-code-unit
+      //    cluster (like an emoji or combining character).
+      //  * Degenerate layout: The layout is temporarily squashed (e.g.,
+      //    preferredLineHeight is 0 during a fold transition).
+      //
+      // In these cases, we fall back to the field's textDirection.
+      if (preferRenderObjectDirectionForSelectionHandles || endpoints.length < 2) {
+        startHandleDirection = textDirection;
+        endHandleDirection = textDirection;
+      } else {
+        startHandleDirection = endpoints.first.direction ?? textDirection;
+        endHandleDirection = endpoints.last.direction ?? textDirection;
+      }
+
+      startHandleType = switch (startHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.left,
+        TextDirection.rtl => TextSelectionHandleType.right,
+      };
+      endHandleType = switch (endHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.right,
+        TextDirection.rtl => TextSelectionHandleType.left,
+      };
+    }
+
     _selectionOverlay
       // Update selection handle metrics.
-      ..startHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.left,
-        TextSelectionHandleType.right,
-      )
+      ..startHandleType = startHandleType
       ..lineHeightAtStart = _getStartGlyphHeight()
-      ..endHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.right,
-        TextSelectionHandleType.left,
-      )
+      ..endHandleType = endHandleType
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
-      ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
+      ..selectionEndpoints = endpoints
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
@@ -1045,21 +1081,6 @@ class TextSelectionOverlay {
       _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
-  }
-
-  TextSelectionHandleType _chooseType(
-    TextDirection textDirection,
-    TextSelectionHandleType ltrType,
-    TextSelectionHandleType rtlType,
-  ) {
-    if (_selection.isCollapsed) {
-      return TextSelectionHandleType.collapsed;
-    }
-
-    return switch (textDirection) {
-      TextDirection.ltr => ltrType,
-      TextDirection.rtl => rtlType,
-    };
   }
 }
 

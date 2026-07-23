@@ -2087,6 +2087,179 @@ void main() {
     await tester.pump();
     expect(find.byType(Placeholder), findsOneWidget);
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
+
+  const androidDirectionalityTestCases = <_DirectionalityTestCase>[
+    _DirectionalityTestCase(
+      description: 'ambient LTR, English text',
+      ambientDirection: TextDirection.ltr,
+      text: 'Hello World',
+      selectionBase: 0,
+      selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.ltr,
+      expectedEndEndpointDirection: TextDirection.ltr,
+      expectedStartHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.right,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient RTL, English text',
+      ambientDirection: TextDirection.rtl,
+      text: 'Hello World',
+      selectionBase: 0,
+      selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.ltr,
+      expectedEndEndpointDirection: TextDirection.ltr,
+      expectedStartHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.right,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient RTL, Arabic text',
+      ambientDirection: TextDirection.rtl,
+      text: 'مرحبا بالعالم',
+      selectionBase: 0,
+      selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.rtl,
+      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedStartHandleType: TextSelectionHandleType.right,
+      expectedEndHandleType: TextSelectionHandleType.left,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient LTR, Arabic text',
+      ambientDirection: TextDirection.ltr,
+      text: 'مرحبا بالعالم',
+      selectionBase: 0,
+      selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.rtl,
+      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedStartHandleType: TextSelectionHandleType.right,
+      expectedEndHandleType: TextSelectionHandleType.left,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient LTR, English then Arabic text',
+      ambientDirection: TextDirection.ltr,
+      text: 'abc مرحبا',
+      selectionBase: 0,
+      selectionExtent: 9,
+      expectedStartEndpointDirection: TextDirection.ltr,
+      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedStartHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.left,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient RTL, English then Arabic text',
+      ambientDirection: TextDirection.rtl,
+      text: 'abc مرحبا',
+      selectionBase: 0,
+      selectionExtent: 9,
+      expectedStartEndpointDirection: TextDirection.rtl,
+      expectedEndEndpointDirection: TextDirection.ltr,
+      expectedStartHandleType: TextSelectionHandleType.right,
+      expectedEndHandleType: TextSelectionHandleType.right,
+    ),
+  ];
+
+  for (final testCase in androidDirectionalityTestCases) {
+    testWidgets(
+      'Android selection handles match endpoint direction: ${testCase.description}',
+      (WidgetTester tester) async {
+        final customControls = DirectionalitySpyTextSelectionControls();
+        final controller = TextEditingController(text: testCase.text);
+        final focusNode = FocusNode();
+        addTearDown(controller.dispose);
+        addTearDown(focusNode.dispose);
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Directionality(
+              textDirection: testCase.ambientDirection,
+              child: TestTextField(
+                controller: controller,
+                focusNode: focusNode,
+                selectionControls: customControls,
+                // On the web selectAllOnFocus defaults to true, interfering with
+                // this test's programmatic selection.
+                selectAllOnFocus: false,
+              ),
+            ),
+          ),
+        );
+
+        final RenderEditable renderEditable = tester.allRenderObjects
+            .whereType<RenderEditable>()
+            .first;
+        expect(renderEditable.textDirection, testCase.ambientDirection);
+
+        focusNode.requestFocus();
+        await tester.pump();
+
+        customControls.clearBuiltHandleTypes();
+        controller.selection = TextSelection(
+          baseOffset: testCase.selectionBase,
+          extentOffset: testCase.selectionExtent,
+        );
+        await tester.pumpAndSettle();
+
+        final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+          controller.selection,
+        );
+        expect(endpoints, hasLength(2));
+        expect(endpoints.first.direction, testCase.expectedStartEndpointDirection);
+        expect(endpoints.last.direction, testCase.expectedEndEndpointDirection);
+        expect(customControls.builtHandleTypes, hasLength(2));
+        expect(customControls.builtHandleTypes.first, testCase.expectedStartHandleType);
+        expect(customControls.builtHandleTypes.last, testCase.expectedEndHandleType);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  }
+
+  testWidgets(
+    'selection handles use text direction for mixed-directionality text on iOS',
+    (WidgetTester tester) async {
+      final customControls = DirectionalitySpyTextSelectionControls();
+      final controller = TextEditingController(text: 'abc مرحبا');
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TestTextField(
+              controller: controller,
+              focusNode: focusNode,
+              selectionControls: customControls,
+              // On the web selectAllOnFocus defaults to true, interfering with
+              // this test's programmatic selection.
+              selectAllOnFocus: false,
+            ),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      customControls.clearBuiltHandleTypes();
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+
+      expect(endpoints, hasLength(2));
+      expect(endpoints.first.direction, TextDirection.ltr);
+      expect(endpoints.last.direction, TextDirection.rtl);
+      expect(customControls.builtHandleTypes, hasLength(2));
+      expect(customControls.builtHandleTypes.first, TextSelectionHandleType.left);
+      expect(customControls.builtHandleTypes.last, TextSelectionHandleType.right);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
@@ -2368,4 +2541,71 @@ class _MockTextSelectionHandleControls extends TextSelectionControls
       ),
     );
   }
+}
+
+class DirectionalitySpyTextSelectionControls extends TextSelectionControls {
+  final List<TextSelectionHandleType> builtHandleTypes = <TextSelectionHandleType>[];
+
+  void clearBuiltHandleTypes() {
+    builtHandleTypes.clear();
+  }
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    builtHandleTypes.add(type);
+    return SizedBox.square(dimension: textLineHeight);
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.square(textLineHeight);
+  }
+}
+
+class _DirectionalityTestCase {
+  const _DirectionalityTestCase({
+    required this.description,
+    required this.ambientDirection,
+    required this.text,
+    required this.selectionBase,
+    required this.selectionExtent,
+    required this.expectedStartEndpointDirection,
+    required this.expectedEndEndpointDirection,
+    required this.expectedStartHandleType,
+    required this.expectedEndHandleType,
+  });
+
+  final String description;
+  final TextDirection ambientDirection;
+  final String text;
+  final int selectionBase;
+  final int selectionExtent;
+  final TextDirection expectedStartEndpointDirection;
+  final TextDirection expectedEndEndpointDirection;
+  final TextSelectionHandleType expectedStartHandleType;
+  final TextSelectionHandleType expectedEndHandleType;
 }
