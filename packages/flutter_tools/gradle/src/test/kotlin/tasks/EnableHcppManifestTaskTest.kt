@@ -7,12 +7,12 @@ package com.flutter.gradle.tasks
 import groovy.util.Node
 import io.mockk.mockk
 import io.mockk.verify
+import org.gradle.api.logging.Logger
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.gradle.api.logging.Logger
 
 /**
  * Tests for [EnableHcppManifestTaskHelper].
@@ -145,7 +145,7 @@ class EnableHcppManifestTaskTest {
             updatedManifest = updatedManifest,
             requestedEnableHcpp = true,
             explicitEnableHcpp = true,
-            logger = logger,
+            logger = logger
         )
 
         verify(exactly = 1) {
@@ -180,7 +180,7 @@ class EnableHcppManifestTaskTest {
             updatedManifest = updatedManifest,
             requestedEnableHcpp = false,
             explicitEnableHcpp = false,
-            logger = logger,
+            logger = logger
         )
 
         verify(exactly = 1) {
@@ -215,7 +215,7 @@ class EnableHcppManifestTaskTest {
             updatedManifest = updatedManifest,
             requestedEnableHcpp = true,
             explicitEnableHcpp = true,
-            logger = logger,
+            logger = logger
         )
 
         verify(exactly = 0) { logger.warn(any()) }
@@ -243,7 +243,7 @@ class EnableHcppManifestTaskTest {
             updatedManifest = updatedManifest,
             requestedEnableHcpp = true,
             explicitEnableHcpp = true,
-            logger = logger,
+            logger = logger
         )
 
         verify(exactly = 1) {

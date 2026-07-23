@@ -9,7 +9,6 @@ import groovy.xml.XmlNodePrinter
 import groovy.xml.XmlParser
 import java.io.File
 import java.io.PrintWriter
-
 import org.gradle.api.logging.Logger
 
 /**
@@ -34,7 +33,7 @@ object EnableHcppManifestTaskHelper {
         updatedManifest: File,
         requestedEnableHcpp: Boolean = true,
         explicitEnableHcpp: Boolean? = null,
-        logger: Logger? = null,
+        logger: Logger? = null
     ) {
         val manifest: Node =
             XmlParser(false, false)
@@ -87,12 +86,12 @@ object EnableHcppManifestTaskHelper {
      */
     fun addEnableHcppMetadataIfAbsent(
         manifestFile: File,
-        updatedManifest: File,
+        updatedManifest: File
     ) {
         processHcppManifest(
             manifestFile = manifestFile,
             updatedManifest = updatedManifest,
-            requestedEnableHcpp = true,
+            requestedEnableHcpp = true
         )
     }
 }

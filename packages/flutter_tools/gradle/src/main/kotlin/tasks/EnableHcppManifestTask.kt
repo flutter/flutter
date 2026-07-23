@@ -6,8 +6,8 @@ package com.flutter.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
@@ -48,7 +48,7 @@ abstract class EnableHcppManifestTask : DefaultTask() {
             updatedManifest = updatedManifest.get().asFile,
             requestedEnableHcpp = requestedEnableHcpp.getOrElse(true),
             explicitEnableHcpp = explicitEnableHcpp.orNull,
-            logger = logger,
+            logger = logger
         )
     }
 }
