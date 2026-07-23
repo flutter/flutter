@@ -56,7 +56,7 @@ class _DropdownMenuEntryLabelWidgetExampleState
           initialSelection: ColorItem.green,
           label: const Text('Color'),
           onSelected: (ColorItem? color) {
-            print('Selected $color');
+            debugPrint('Selected $color');
           },
           dropdownMenuEntries: ColorItem.values
               .map<DropdownMenuEntry<ColorItem>>((ColorItem item) {

@@ -116,7 +116,7 @@ class _MyAppState extends State<MyApp> {
                                 style: const TextStyle(color: Colors.blue),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    print('Learn more');
+                                    debugPrint('Learn more');
                                   },
                               ),
                             ],
@@ -144,7 +144,7 @@ class _MyAppState extends State<MyApp> {
                                 style: const TextStyle(color: Colors.blue),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    print('Learn more');
+                                    debugPrint('Learn more');
                                   },
                               ),
                             ],
