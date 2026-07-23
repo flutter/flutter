@@ -17,6 +17,10 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
 #endif
 
+#ifdef SHELL_ENABLE_VULKAN
+#include "flutter/shell/platform/embedder/embedder_external_texture_vulkan.h"
+#endif
+
 namespace flutter {
 class EmbedderExternalTextureResolver {
  public:
@@ -34,6 +38,11 @@ class EmbedderExternalTextureResolver {
       EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback);
 #endif
 
+#ifdef SHELL_ENABLE_VULKAN
+  explicit EmbedderExternalTextureResolver(
+      EmbedderExternalTextureVulkan::ExternalTextureCallback vulkan_callback);
+#endif
+
   std::unique_ptr<Texture> ResolveExternalTexture(int64_t texture_id);
 
   bool SupportsExternalTextures();
@@ -47,6 +56,9 @@ class EmbedderExternalTextureResolver {
   EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback_;
 #endif
 
+#ifdef SHELL_ENABLE_VULKAN
+  EmbedderExternalTextureVulkan::ExternalTextureCallback vulkan_callback_;
+#endif
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureResolver);
 };
 }  // namespace flutter
