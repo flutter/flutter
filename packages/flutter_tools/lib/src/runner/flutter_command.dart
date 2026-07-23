@@ -1325,7 +1325,7 @@ abstract class FlutterCommand extends Command<void> {
           'AndroidManifest.xml metadata at launch. On build commands there is no launch-time '
           'override, so an explicit value only selects the default that is baked into the '
           'manifest when the manifest does not already set '
-          'io.flutter.embedding.android.EnableHcpp; an explicit manifest entry always wins for '
+          'EnableHcpp; an explicit manifest entry always wins for '
           'the built artifact.',
     );
   }
