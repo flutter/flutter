@@ -403,42 +403,13 @@ test('sensitive content should fail if the flag is disabled', () {
 Note that feature flag usage in the framework runtime is very new, and is likely
 to evolve over time.
 
-# Limitations
+## Engine and Embedder Configuration
 
 The Flutter engine and embedders cannot query Flutter's feature flags directly at runtime.
 
-However, the flutter tool runs upstream of the platform builds, so it can query a
-feature flag and pipe the value into the build, where it can be baked into the
-platform-specific configuration that the engine or embedder reads. For example, the
-`enable-hcpp` flag is passed to Gradle as `-Penable-hcpp`, and the Flutter Gradle
-Plugin injects the corresponding `io.flutter.embedding.android.EnableHcpp` manifest
-metadata into the merged manifest, unless the developer set it explicitly.
+However, because the `flutter` tool runs upstream of platform builds, it can query a feature flag and pipe the value into the build system (for example, via Gradle build properties or launch arguments). The build system can then bake the setting into platform-specific configurations (such as `AndroidManifest.xml` or `Info.plist`) or pass it as a launch-time engine argument.
 
-Note that this technique only works where the injected configuration cannot conflict
-with configuration the developer owns. For example, the `EnableHcpp` injection is
-limited to application projects: injecting into an add-to-app module (aar) manifest
-would merge into the host app's manifest, where a conflicting explicit value in the
-host manifest fails the host build in the Android manifest merger rather than taking
-priority.
-
-The precedence also differs by command, because launch commands and build commands
-have different override channels:
-
-- On `flutter run`/`test`/`drive`, an explicit `--[no-]enable-hcpp` is delivered to the
-  engine as a launch argument, which the engine honors over the manifest. So the
-  effective precedence is: explicit flag > manifest entry > feature flag.
-- On `flutter build apk`/`appbundle`, there is no launch-time channel; the packaged
-  manifest is authoritative, and the injection never overwrites an explicit entry. So
-  an explicit `--[no-]enable-hcpp` only chooses the injected default when the manifest
-  is silent: manifest entry > explicit flag > feature flag. To avoid silently ignoring
-  the flag, the build commands warn when an explicit flag conflicts with an explicit
-  manifest entry.
-
-This asymmetry is intentional: a launch-time override is ephemeral and mutates nothing,
-whereas making a transient flag rewrite a committed manifest value in a shipped artifact
-would be surprising.
-
-If an embedder needs feature flags and no such piping exists, you can instead use the project's platform-specific configuration.
+If no tool-side piping exists for a feature flag, embedders can fall back to using project-level platform configurations directly.
 
 On Android, use `AndroidManifest.xml`:
 
@@ -455,7 +426,6 @@ On Android, use `AndroidManifest.xml`:
 On iOS and macOS, use `Info.plist`:
 
 ```xml
-...
 <plist version="1.0">
 <dict>
   <key>FLTEnableUnicornEmojis</key>
@@ -464,8 +434,5 @@ On iOS and macOS, use `Info.plist`:
 </plist>
 ```
 
-See Impeller and UI thread merging for prior art.
-
 > [!IMPORTANT]
-> If possible, prefer to use Flutter feature flags instead of platform-specific configuration files.
-> Flutter feature flags are easier for Flutter app developers.
+> If possible, prefer using Flutter feature flags in the tool instead of requiring developers to manually edit platform-specific configuration files.
