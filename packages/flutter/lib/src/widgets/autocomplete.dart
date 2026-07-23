@@ -221,12 +221,18 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// FocusNode and TextEditingController can be passed both to that text field
   /// and to RawAutocomplete.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This examples shows how to create an autocomplete widget with the text
   /// field in the AppBar and the results in the main body of the app.
   ///
-  /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// {@macro flutter.dartpad_guide}
+  ///
+  /// {@example /examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart#body}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   ///
   /// If this parameter is not null, then [textEditingController] must also be
