@@ -76,11 +76,8 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
             PredictiveBackEvent? startBackEvent,
             PredictiveBackEvent? currentBackEvent,
           ) {
-            // Only do a predictive back transition when the user is performing a
-            // pop gesture. Otherwise, for things like button presses or other
-            // programmatic navigation, fall back to
-            // FadeForwardsPageTransitionsBuilder.
-            if (route.popGestureInProgress) {
+            // Only use the predictive back transition during an active back gesture.
+            if (phase != _PredictiveBackPhase.idle) {
               return _PredictiveBackSharedElementPageTransition(
                 isDelegatedTransition: true,
                 animation: animation,
@@ -156,10 +153,8 @@ class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuil
             PredictiveBackEvent? startBackEvent,
             PredictiveBackEvent? currentBackEvent,
           ) {
-            // Only do a predictive back transition when the user is performing a
-            // pop gesture. Otherwise, for things like button presses or other
-            // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
-            if (route.popGestureInProgress) {
+            // Only use the predictive back transition during an active back gesture.
+            if (phase != _PredictiveBackPhase.idle) {
               return _PredictiveBackFullscreenPageTransition(
                 animation: animation,
                 secondaryAnimation: secondaryAnimation,
