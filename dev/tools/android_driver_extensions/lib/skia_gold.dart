@@ -35,6 +35,10 @@ const String _kGoldctlPresubmitKey = 'GOLD_TRYJOB';
 /// for more information.
 ///
 /// May optionally provide a [namePrefix] to be used when uploading images.
+///
+/// If [localOutputDir] is provided, local screenshots downloaded from Skia Gold
+/// will be stored in this directory relative to the script execution path
+/// (e.g. `test_driver/localOutputDir`).
 Future<void> enableSkiaGoldComparator({String? namePrefix, String? localOutputDir}) async {
   assert(
     goldenFileComparator is NaiveLocalFileComparator,
@@ -80,6 +84,9 @@ Future<void> enableSkiaGoldComparator({String? namePrefix, String? localOutputDi
 }
 
 /// Configures [goldenFileComparator] to use Skia Gold (for unit testing).
+///
+/// If [localOutputDir] is provided, local screenshots downloaded from Skia Gold
+/// will be stored in this directory relative to the script execution path.
 @visibleForTesting
 Future<void> enableSkiaGoldComparatorForTesting(
   SkiaGoldClient skiaGoldClient, {
@@ -159,8 +166,9 @@ final class _SkiaGoldComparator extends GoldenFileComparator {
 
   io.File _getGoldenFile(Uri uri) {
     if (localOutputDir != null) {
-      final String fileName = path.basename(uri.path);
-      return io.File.fromUri(baseDir.resolve('$localOutputDir/$fileName'));
+      final String fileName = uri.pathSegments.last;
+      final String normalizedOutputDir = localOutputDir!.replaceAll(r'\', '/');
+      return io.File.fromUri(baseDir.resolve('$normalizedOutputDir/$fileName'));
     }
     return io.File.fromUri(baseDir.resolveUri(uri));
   }
