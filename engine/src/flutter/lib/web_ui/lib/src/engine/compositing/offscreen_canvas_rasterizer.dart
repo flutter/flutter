@@ -23,10 +23,6 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   @visibleForTesting
   SurfaceProvider get surfaceProvider => _surfaceProvider;
 
-  /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
-  /// used to render to many RenderCanvases to produce the rendered scene.
-  late final OffscreenSurface offscreenSurface = _surfaceProvider.createSurface();
-
   @override
   OffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
     return _viewRasterizers.putIfAbsent(view, () => OffscreenCanvasViewRasterizer(view, this));
@@ -59,6 +55,9 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
 
   final OffscreenCanvasRasterizer rasterizer;
 
+  /// This is an SkSurface backed by an OffScreenCanvas.
+  late final OffscreenSurface offscreenSurface = rasterizer._surfaceProvider.createSurface();
+
   @override
   final DisplayCanvasFactory<RenderCanvas> displayFactory = DisplayCanvasFactory<RenderCanvas>(
     createCanvas: () => RenderCanvas(),
@@ -66,7 +65,7 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> prepareToDraw() async {
-    await rasterizer.offscreenSurface.setSize(currentFrameSize);
+    await offscreenSurface.setSize(currentFrameSize);
   }
 
   @override
@@ -80,16 +79,16 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     }
     recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
-      final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
+      final List<DomImageBitmap> bitmaps = await offscreenSurface
           .rasterizeToImageBitmaps(pictures);
       for (var i = 0; i < displayCanvases.length; i++) {
         (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
       }
     } else {
       for (var i = 0; i < displayCanvases.length; i++) {
-        await rasterizer.offscreenSurface.rasterizeToCanvas(pictures[i]);
+        await offscreenSurface.rasterizeToCanvas(pictures[i]);
         (displayCanvases[i] as RenderCanvas).renderWithNoBitmapSupport(
-          rasterizer.offscreenSurface.canvasImageSource,
+          offscreenSurface.canvasImageSource,
           currentFrameSize.height,
           currentFrameSize,
         );
