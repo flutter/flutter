@@ -8,28 +8,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-void showRegularWindowEditDialog({
+void showWindowEditDialog({
   required BuildContext context,
-  required RegularWindowController controller,
+  required WindowController controller,
 }) {
   showDialog<void>(
     context: context,
     builder: (context) =>
-        _RegularWindowEditDialog(controller: controller, onClose: () => Navigator.pop(context)),
+        _WindowEditDialog(controller: controller, onClose: () => Navigator.pop(context)),
   );
 }
 
-class _RegularWindowEditDialog extends StatefulWidget {
-  const _RegularWindowEditDialog({required this.controller, required this.onClose});
+class _WindowEditDialog extends StatefulWidget {
+  const _WindowEditDialog({required this.controller, required this.onClose});
 
-  final RegularWindowController controller;
+  final WindowController controller;
   final VoidCallback onClose;
 
   @override
-  State<StatefulWidget> createState() => _RegularWindowEditDialogState();
+  State<StatefulWidget> createState() => _WindowEditDialogState();
 }
 
-class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
+class _WindowEditDialogState extends State<_WindowEditDialog> {
   late Size initialSize;
   late String initialTitle;
   late bool initialFullscreen;
@@ -67,7 +67,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
   }
 
   @override
-  void didUpdateWidget(covariant _RegularWindowEditDialog oldWidget) {
+  void didUpdateWidget(covariant _WindowEditDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_onNotification);

@@ -96,14 +96,14 @@ class WindowingOwnerLinux extends WindowingOwner {
 
   @internal
   @override
-  RegularWindowController createRegularWindowController({
+  WindowController createWindowController({
     Size? size,
     BoxConstraints? constraints,
     required bool resizable,
     String? title,
-    required RegularWindowControllerDelegate delegate,
+    required WindowControllerDelegate delegate,
   }) {
-    final controller = RegularWindowControllerLinux(
+    final controller = WindowControllerLinux(
       owner: this,
       delegate: delegate,
       size: size,
@@ -269,7 +269,7 @@ class LinuxWindowRegistrar {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract interface class WindowControllerLinux {
+abstract interface class BaseWindowControllerLinux {
   /// Returns pointer to the underlying [GtkWindow](https://docs.gtk.org/gtk3/class.Window.html).
   ///
   /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
@@ -294,15 +294,15 @@ abstract interface class WindowControllerLinux {
   ffi.Pointer<ffi.Void> get flutterViewHandle;
 }
 
-/// Implementation of [RegularWindowController] for the Linux platform.
+/// Implementation of [WindowController] for the Linux platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
 /// See also:
 ///
-///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerLinux extends RegularWindowController
-    implements WindowControllerLinux {
+///  * [WindowController], the base class for regular windows.
+class WindowControllerLinux extends WindowController
+    implements BaseWindowControllerLinux {
   /// Creates a new regular window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -312,11 +312,11 @@ class RegularWindowControllerLinux extends RegularWindowController
   ///
   /// See also:
   ///
-  ///  * [RegularWindowController], the base class for regular windows.
+  ///  * [WindowController], the base class for regular windows.
   @internal
-  RegularWindowControllerLinux({
+  WindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required RegularWindowControllerDelegate delegate,
+    required WindowControllerDelegate delegate,
     Size? size,
     BoxConstraints? constraints,
     String? title,
@@ -370,7 +370,7 @@ class RegularWindowControllerLinux extends RegularWindowController
   }
 
   final WindowingOwnerLinux _owner;
-  final RegularWindowControllerDelegate _delegate;
+  final WindowControllerDelegate _delegate;
   final _GtkWindow _window;
   late final _FlView _view;
   late final _FlViewMonitor _viewMonitor;
@@ -509,7 +509,7 @@ class RegularWindowControllerLinux extends RegularWindowController
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerLinux extends DialogWindowController implements WindowControllerLinux {
+class DialogWindowControllerLinux extends DialogWindowController implements BaseWindowControllerLinux {
   /// Creates a new dialog window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -700,7 +700,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
 ///
 ///  * [TooltipWindowController], the base class for tooltip windows.
 class TooltipWindowControllerLinux extends TooltipWindowController
-    implements WindowControllerLinux {
+    implements BaseWindowControllerLinux {
   /// Creates a new tooltip window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -895,7 +895,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 /// See also:
 ///
 ///  * [PopupWindowController], the base class for popup windows.
-class PopupWindowControllerLinux extends PopupWindowController implements WindowControllerLinux {
+class PopupWindowControllerLinux extends PopupWindowController implements BaseWindowControllerLinux {
   /// Creates a new popup window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
