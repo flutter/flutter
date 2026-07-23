@@ -18,6 +18,7 @@ namespace flutter {
 namespace testing {
 
 using ::testing::_;
+using ::testing::ElementsAre;
 using ::testing::Return;
 using ::testing::ReturnArg;
 
@@ -171,6 +172,39 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        reinterpret_cast<jlong>(holder.get()), 1.0f, 100, 100, 0,
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, bounds, type, state,
                        0, 0, 0, 0, 0, 0, 0, 0);
+}
+
+// The load order is exercised with an injected loader rather than real dlopen():
+// the property under test is purely the ordering (first-to-last, stop at the
+// first that loads), and a fake loader makes that deterministic and free of any
+// platform- or system-library-specific behavior. Whether a given path format is
+// actually loadable is covered end-to-end by the deferred_components_test.
+TEST(FindFirstLoadableLibraryTest, TriesInOrderAndStopsAtFirstSuccess) {
+  std::vector<std::string> attempted;
+  void* const kHandle = reinterpret_cast<void*>(0x1234);
+  auto opener = [&](const std::string& path) -> void* {
+    attempted.push_back(path);
+    return path == "b" ? kHandle : nullptr;
+  };
+  EXPECT_EQ(FindFirstLoadableLibrary({"a", "b", "c"}, opener), kHandle);
+  // "c" is never attempted because "b" already loaded.
+  EXPECT_THAT(attempted, ElementsAre("a", "b"));
+}
+
+TEST(FindFirstLoadableLibraryTest, TriesAllAndReturnsNullWhenNoneLoad) {
+  std::vector<std::string> attempted;
+  auto opener = [&](const std::string& path) -> void* {
+    attempted.push_back(path);
+    return nullptr;
+  };
+  EXPECT_EQ(FindFirstLoadableLibrary({"a", "b"}, opener), nullptr);
+  EXPECT_THAT(attempted, ElementsAre("a", "b"));
+}
+
+TEST(FindFirstLoadableLibraryTest, EmptyReturnsNull) {
+  EXPECT_EQ(FindFirstLoadableLibrary(
+                {}, [](const std::string&) -> void* { return nullptr; }),
+            nullptr);
 }
 
 }  // namespace testing
