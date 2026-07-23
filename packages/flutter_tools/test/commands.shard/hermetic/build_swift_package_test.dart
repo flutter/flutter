@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -2148,6 +2149,7 @@ let package = Package(
               'FlutterFramework',
             ],
           ),
+          const FakeCommand(command: ['swift', 'package', 'dump-package']),
         ]);
 
         final testUtils = BuildSwiftPackageUtils(
@@ -2326,6 +2328,7 @@ let package = Package(
               'FlutterFramework',
             ],
           ),
+          const FakeCommand(command: ['swift', 'package', 'dump-package']),
         ]);
 
         final testUtils = BuildSwiftPackageUtils(
@@ -2437,6 +2440,7 @@ let package = Package(
               'FlutterFramework',
             ],
           ),
+          const FakeCommand(command: ['swift', 'package', 'dump-package']),
           const FakeCommand(
             command: ['swift', 'package', 'dump-package'],
             stdout:
@@ -2463,6 +2467,7 @@ let package = Package(
               'FlutterFramework',
             ],
           ),
+          const FakeCommand(command: ['swift', 'package', 'dump-package']),
         ]);
 
         final testUtils = BuildSwiftPackageUtils(
@@ -2572,6 +2577,7 @@ let package = Package(
                 'FlutterFramework',
               ],
             ),
+            const FakeCommand(command: ['swift', 'package', 'dump-package']),
           ]);
 
           final testUtils = BuildSwiftPackageUtils(
@@ -2700,6 +2706,137 @@ let package = Package(
             cacheDirectory: cacheDir,
             plugins: [pluginA],
             pluginsDirectory: pluginsDir,
+          );
+
+          expect(processManager, hasNoRemainingExpectations);
+        },
+      );
+
+      testWithoutContext(
+        'processPlugins logs error and continues if injecting Flutter dependency fails',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          const FlutterDarwinPlatform targetPlatform = .ios;
+
+          final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
+
+          final Directory appDirectory = fs.directory('/path/to/my_flutter_app')
+            ..createSync(recursive: true);
+          fs.currentDirectory = appDirectory;
+
+          fs.file(commandFilePath).createSync(recursive: true);
+          fs
+              .directory(pluginA.path)
+              .childDirectory('ios')
+              .childDirectory('PluginA')
+              .childFile('Package.swift')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(_pluginManifest(pluginName: 'PluginA'));
+
+          final processManager = FakeProcessManager.list([
+            const FakeCommand(
+              command: ['swift', 'package', 'dump-package'],
+              stdout: '''
+{
+  "platforms": [
+    {
+      "platformName": "ios",
+      "version": "13.0"
+    }
+  ],
+  "targets": [
+    {
+      "name": "PluginA",
+      "type": "regular"
+    }
+  ],
+  "dependencies": []
+}
+''',
+            ),
+            const FakeCommand(
+              command: [
+                'swift',
+                'package',
+                'add-dependency',
+                '../FlutterFramework',
+                '--type',
+                'path',
+              ],
+            ),
+            const FakeCommand(
+              command: [
+                'swift',
+                'package',
+                'add-target-dependency',
+                'FlutterFramework',
+                'PluginA',
+                '--package',
+                'FlutterFramework',
+              ],
+            ),
+            const FakeCommand(
+              command: ['swift', 'package', 'dump-package'],
+              exitCode: 1,
+              stderr: 'Failed to parse.',
+            ),
+          ]);
+
+          final testUtils = BuildSwiftPackageUtils(
+            analytics: FakeAnalytics(),
+            artifacts: FakeArtifacts(
+              '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
+            ),
+            buildSystem: FakeBuildSystem(),
+            cache: FakeCache(fs, '/path/to/flutter'),
+            fileSystem: fs,
+            flutterRoot: '/path/to/flutter',
+            flutterVersion: FakeFlutterVersion(),
+            logger: logger,
+            platform: FakePlatform(),
+            processManager: processManager,
+            project: FakeFlutterProject(directory: appDirectory),
+            templateRenderer: const MustacheTemplateRenderer(),
+            xcode: FakeXcode(),
+          );
+
+          final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
+            targetPlatform: targetPlatform,
+            utils: testUtils,
+          );
+
+          final Directory cacheDir = fs.directory('output/.cache')..createSync(recursive: true);
+          final Directory pluginsDir = appDirectory.childDirectory(
+            'output/FlutterPluginRegistrant/Plugins',
+          )..createSync(recursive: true);
+
+          await expectLater(
+            pluginSwiftDependencies.processPlugins(
+              cacheDirectory: cacheDir,
+              plugins: [pluginA],
+              pluginsDirectory: pluginsDir,
+            ),
+            throwsA(
+              isA<ToolExit>()
+                  .having(
+                    (ToolExit e) => e.message,
+                    'message',
+                    contains('Failed to parse modified package. Failed to parse.'),
+                  )
+                  .having(
+                    (ToolExit e) => e.message,
+                    'message',
+                    contains(
+                      'Failed to add FlutterFramework to package PluginA. Please file an issue',
+                    ),
+                  )
+                  .having(
+                    (ToolExit e) => e.message,
+                    'message',
+                    contains('Please also contact the plugin maintainer'),
+                  ),
+            ),
           );
 
           expect(processManager, hasNoRemainingExpectations);
