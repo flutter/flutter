@@ -330,7 +330,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 
   PointerEvent? _lastPointerDownEvent;
 
-  _UiKitViewGestureRecognizer? _gestureRecognizer;
+  _DarwinViewGestureRecognizer<T>? _gestureRecognizer;
 
   @override
   @protected
@@ -448,7 +448,11 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController>
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _UiKitViewGestureRecognizer(viewController, gestureRecognizers);
+    _gestureRecognizer = _DarwinViewGestureRecognizer(
+      viewController,
+      gestureRecognizers,
+      debugDescription: 'UIKit view',
+    );
   }
 
   @override
@@ -482,22 +486,61 @@ class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
     required super.gestureRecognizers,
   });
 
-  // TODO(schectman): Add gesture functionality to macOS platform view when implemented.
-  // https://github.com/flutter/flutter/issues/128519
-  // This method will need to behave the same as the same-named method for RenderUiKitView,
-  // but use a _AppKitViewGestureRecognizer or equivalent, whose constructor shall accept an
-  // AppKitViewController.
   @override
-  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {}
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+    assert(
+      _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+      'There were multiple gesture recognizer factories for the same type, there must only be a single '
+      'gesture recognizer factory for each gesture recognizer type.',
+    );
+    if (_factoryTypesSetEquals(
+      gestureRecognizers,
+      _gestureRecognizer?.gestureRecognizerFactories,
+    )) {
+      return;
+    }
+    _gestureRecognizer?.dispose();
+    _gestureRecognizer = _DarwinViewGestureRecognizer(
+      viewController,
+      gestureRecognizers,
+      debugDescription: 'AppKit view',
+    );
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (event is! PointerDownEvent) {
+      return;
+    }
+    _gestureRecognizer!.addPointer(event);
+    _lastPointerDownEvent = event.original ?? event;
+  }
+
+  @override
+  void detach() {
+    _gestureRecognizer!.reset();
+    super.detach();
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
+  }
 }
 
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
-// it was give, adds all of them to a gesture arena team with the _UiKitViewGestureRecognizer
+// it was give, adds all of them to a gesture arena team with the _DarwinViewGestureRecognizer
 // as the team captain.
 // When the team wins a gesture the recognizer notifies the engine that it should release
-// the touch sequence to the embedded UIView.
-class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories) {
+// the touch sequence to the embedded UIView or NSView.
+class _DarwinViewGestureRecognizer<T extends DarwinPlatformViewController>
+    extends OneSequenceGestureRecognizer {
+  _DarwinViewGestureRecognizer(
+    this.controller,
+    this.gestureRecognizerFactories, {
+    required String debugDescription,
+  }) : _debugDescription = debugDescription {
     team = GestureArenaTeam()..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map((
       Factory<OneSequenceGestureRecognizer> recognizerFactory,
@@ -524,7 +567,8 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizerFactories;
   late Set<OneSequenceGestureRecognizer> _gestureRecognizers;
 
-  final UiKitViewController controller;
+  final T controller;
+  final String _debugDescription;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -535,7 +579,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  String get debugDescription => 'UIKit view';
+  String get debugDescription => _debugDescription;
 
   @override
   void didStopTrackingLastPointer(int pointer) {}
