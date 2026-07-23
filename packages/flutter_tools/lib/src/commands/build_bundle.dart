@@ -45,6 +45,7 @@ class BuildBundleCommand extends BuildSubCommand {
           'ios',
           'darwin',
           'linux-x64',
+          'linux-arm',
           'linux-arm64',
           'linux-riscv64',
           'windows-x64',
@@ -122,6 +123,7 @@ class BuildBundleCommand extends BuildSubCommand {
           throwToolExit('Windows is not a supported target platform.');
         }
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
         if (!featureFlags.isLinuxEnabled) {

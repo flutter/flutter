@@ -256,6 +256,54 @@ void main() {
   );
 
   testUsingContext(
+    'bundle accepts linux-arm as a target platform (embedded armv7)',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/187018:
+      // `--target-platform linux-arm` must be an accepted option value so that
+      // armv7 embedded (Yocto/meta-flutter) cross-builds get past argument
+      // parsing. Before linux-arm was added to the allowed list, this failed
+      // with "linux-arm" is not an allowed value for option "--target-platform".
+      // With the Linux feature disabled it now reaches the feature gate rather
+      // than being rejected at parse time.
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      globals.fs.file('pubspec.yaml').createSync();
+      final CommandRunner<void> runner = createTestCommandRunner(
+        BuildBundleCommand(logger: BufferLogger.test()),
+      );
+
+      expect(
+        () => runner.run(<String>['bundle', '--no-pub', '--target-platform=linux-arm']),
+        throwsToolExit(message: 'Linux is not a supported target platform.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+      FileSystem: fsFactory,
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(),
+    },
+  );
+
+  testUsingContext(
+    'bundle can build for linux-arm (embedded armv7) if feature is enabled',
+    () async {
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      globals.fs.file('pubspec.yaml').createSync();
+      final CommandRunner<void> runner = createTestCommandRunner(
+        BuildBundleCommand(logger: BufferLogger.test()),
+      );
+
+      await runner.run(<String>['bundle', '--no-pub', '--target-platform=linux-arm']);
+    },
+    overrides: <Type, Generator>{
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+      FileSystem: fsFactory,
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    },
+  );
+
+  testUsingContext(
     'bundle can build for macOS if feature is enabled',
     () async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
