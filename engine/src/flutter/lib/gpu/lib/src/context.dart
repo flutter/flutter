@@ -70,10 +70,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
   /// Whether a texture whose mip levels were uploaded by hand with
   /// [Texture.overwrite] (rather than generated with
   /// [CommandBuffer.generateMipmap]) samples with correct per-level selection.
-  /// True on Metal and Vulkan; on OpenGL ES 2.0 devices without the
-  /// GL_APPLE_texture_max_level extension this is false, and sampling such a
-  /// texture reads as black. Check this before relying on hand-built mip
-  /// chains (for example, prefiltered environment maps).
+  /// True on Metal, and on Vulkan except devices whose driver workarounds
+  /// disable mip sampling (currently Adreno GPUs). On OpenGL ES 2.0 devices
+  /// without the GL_APPLE_texture_max_level extension this is false, and
+  /// sampling such a texture reads as black. Check this before relying on
+  /// hand-built mip chains (for example, prefiltered environment maps).
   bool get doesSupportManuallyMippedTextures {
     return _getSupportsManuallyMippedTextures();
   }

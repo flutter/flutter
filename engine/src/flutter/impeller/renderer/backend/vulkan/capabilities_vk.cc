@@ -546,7 +546,7 @@ bool CapabilitiesVK::Supports32BitPrimitiveIndices() const {
 }
 
 bool CapabilitiesVK::SupportsManuallyMippedTextures() const {
-  return true;
+  return has_manual_mips_;
 }
 
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
@@ -893,6 +893,10 @@ uint32_t CapabilitiesVK::GetMaxSamplerAnisotropy() const {
 void CapabilitiesVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
   has_primitive_restart_ = !workarounds.slow_primitive_restart_performance;
   has_framebuffer_fetch_ = !workarounds.input_attachment_self_dependency_broken;
+  // The mipmap workaround rewrites every sampler to base-mip-only (see
+  // SamplerLibraryVK::ApplyWorkarounds), so hand-written mip chains cannot be
+  // sampled either.
+  has_manual_mips_ = !workarounds.broken_mipmap_generation;
 }
 
 bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {

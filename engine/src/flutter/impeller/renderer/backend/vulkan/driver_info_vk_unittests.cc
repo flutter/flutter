@@ -152,6 +152,35 @@ TEST(DriverInfoVKTest, CanGenerateMipMaps) {
   EXPECT_TRUE(CanUseMipgeneration("Mali-G51", false));
 }
 
+bool CanSampleManuallyWrittenMips(std::string_view driver_name,
+                                  bool qc = true) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [&driver_name, qc](VkPhysicalDevice device,
+                                 VkPhysicalDeviceProperties* prop) {
+                if (qc) {
+                  prop->vendorID = 0x168C;  // Qualcomm
+                } else {
+                  prop->vendorID = 0x13B5;  // ARM
+                }
+                driver_name.copy(prop->deviceName, driver_name.size());
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+              })
+          .Build();
+  return context->GetCapabilities()->SupportsManuallyMippedTextures();
+}
+
+TEST(DriverInfoVKTest, ManuallyMippedTexturesDisabledWithMipWorkaround) {
+  // The mipmap workaround rewrites every sampler to base-mip-only, so the
+  // capability must not advertise hand-written mip chains on these devices.
+  EXPECT_FALSE(CanSampleManuallyWrittenMips("Adreno (TM) 540", true));
+  EXPECT_FALSE(CanSampleManuallyWrittenMips("Adreno (TM) 750", true));
+
+  // Mali A-OK
+  EXPECT_TRUE(CanSampleManuallyWrittenMips("Mali-G51", false));
+}
+
 TEST(DriverInfoVKTest, DriverParsingMali) {
   EXPECT_EQ(GetMaliVersion("Mali-G51-MORE STUFF"), MaliGPU::kG51);
   EXPECT_EQ(GetMaliVersion("Mali-G51"), MaliGPU::kG51);
