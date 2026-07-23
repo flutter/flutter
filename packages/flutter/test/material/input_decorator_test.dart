@@ -1789,6 +1789,47 @@ void main() {
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
+    testWidgets('OutlineInputBorder with floating label draws rounded corners during animation', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for OutlineInputBorder appearing straight instead of
+      // rounded during the floating label animation.
+      const borderRadius = 20.0;
+      const labelText = 'Label';
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFF00FF00),
+            labelText: labelText,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(borderRadius)),
+          ),
+        ),
+      );
+
+      expect(find.text(labelText), findsOneWidget);
+      expect(findBorderPainter(), findsOneWidget);
+      // Verify fill via paintInterior (drawRRect), then stroke path (outline with label gap).
+      const inputDecoratorWidth = 800.0;
+      const inputDecoratorHeight = 56.0;
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..rrect(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            rrect: BorderRadius.circular(
+              borderRadius,
+            ).toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
+          )
+          ..path(style: PaintingStyle.stroke)
+          ..restore(),
+      );
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+
     testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (
       WidgetTester tester,
     ) async {
@@ -2094,6 +2135,22 @@ void main() {
           p2: Offset(100, canvasRect.height - borderWidth / 2),
           strokeWidth: borderWidth,
         ),
+      );
+    });
+
+    test('OutlineInputBorder paint with gap draws path with stroke', () {
+      const canvasRect = Rect.fromLTWH(0, 0, 200, 56);
+      const border = OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20.0)));
+      expect(
+        (Canvas canvas) => border.paint(
+          canvas,
+          canvasRect,
+          gapStart: 100.0,
+          gapExtent: 50.0,
+          gapPercentage: 1.0,
+          textDirection: TextDirection.ltr,
+        ),
+        paints..path(style: PaintingStyle.stroke),
       );
     });
 
