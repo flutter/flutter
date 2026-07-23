@@ -72,14 +72,8 @@ class TextLayout {
     wrapText(width);
     formatLines(width);
 
-    if (paragraph.text.isNotEmpty) {
-      // When the paragraph is empty, instead of setting the bounds to a zero rect, we let it unset.
-      // This will make it easy to detect when there's a bug in our painting pipeline that's trying
-      // to paint an empty paragraph.
-
-      // Calculate the actual paint bounds of the paragraph.
-      _calculatePaintBounds();
-    }
+    // We cannot calculate here the paintBounds because they must be snapped to integers
+    // and that depends on the device pixel Ratio at the moment of paint
 
     // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
     // clear the paint cache.
@@ -201,6 +195,9 @@ class TextLayout {
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
     paragraph.ideographicBaseline = lines.first.height;
+    // Flutter wants a hard line break at the end of the last line
+    // SkParagraph does that and WebParagraph has to do the same
+    lines.last.hardLineBreak = true;
   }
 
   double addLine(
@@ -236,7 +233,21 @@ class TextLayout {
 
     // Arrange line vertically, calculate metrics and bounds
     final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
-    final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
+    ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
+    if (hardLineBreak && false) {
+      // (This is how SkParagraph works and we need to keep it the same for compatibility)
+      assert(whitespaceRange.size > 0); // There is at least hard line break
+      if (contentRange.isEmpty && whitespaceRange.size == 1) {
+        // This is a special case when we have a last line after a hard line break and it has no text or whitespaces
+        // In this case we keep \n as a part of the text
+      } else {
+        // In this case we need to remove \n from whitespace range
+        whitespaceTextRange = ui.TextRange(
+          start: whitespaceTextRange.start,
+          end: whitespaceTextRange.end - 1,
+        );
+      }
+    }
     final allTextRange = ui.TextRange(start: contentTextRange.start, end: whitespaceTextRange.end);
     assert(contentTextRange.end == whitespaceTextRange.start);
 
@@ -300,9 +311,12 @@ class TextLayout {
 
       assert(() {
         final ClusterRange whitespaceIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
-        // One of the intersections must be non-empty, or we have a special case when there is \n at the end of the paragraph
+        // One of the intersections must be non-empty, or we have an empty line with hard line break or
+        // we have a special case when there is \n at the end of the paragraph
         // and this is the line AFTER that last \n.
-        return (textIntersection.isNotEmpty || whitespaceIntersection.isNotEmpty) ||
+        return (textIntersection.isNotEmpty ||
+                whitespaceIntersection.isNotEmpty ||
+                hardLineBreak) ||
             ((contentRange.start == allClusters.length - 1) &&
                 (whitespaceRange.start == allClusters.length - 1));
       }());
@@ -426,6 +440,19 @@ class TextLayout {
       line.updateBoundingBox(block);
     }
 
+    if (line.visualBlocks.isEmpty && lines.isNotEmpty) {
+      // This is a special case when we have a last line after a hard line break and it has no text or whitespaces
+      // This line didn't get any metrics from the blocks so we need to update it with the metrics from the last block of the previous line
+      // The previous block garanteed to have metrics because it could not be empty
+      final TextLine previousLineWithBlocks = lines.reversed.firstWhere(
+        (l) => l.visualBlocks.isNotEmpty,
+        orElse: () => lines.last,
+      );
+      if (previousLineWithBlocks.visualBlocks.isNotEmpty) {
+        line.updateBoundingBox(previousLineWithBlocks.visualBlocks.last);
+      }
+    }
+
     line.advance = ui.Rect.fromLTWH(
       0,
       top,
@@ -488,7 +515,7 @@ class TextLayout {
     }
   }
 
-  void _calculatePaintBounds() {
+  void calculatePaintBounds(double devicePixelRatio) {
     double left = double.infinity;
     double top = double.infinity;
     double right = double.negativeInfinity;
@@ -501,7 +528,14 @@ class TextLayout {
       bottom = math.max(bottom, line.baseline + line.paintBoundsDescent);
     }
 
-    paragraph.paintBounds = ui.Rect.fromLTRB(left, top, right, bottom);
+    final rawBounds = ui.Rect.fromLTRB(left, top, right, bottom);
+
+    paragraph.paintBounds = ui.Rect.fromLTRB(
+      (rawBounds.left * devicePixelRatio).floorToDouble() / devicePixelRatio,
+      (rawBounds.top * devicePixelRatio).floorToDouble() / devicePixelRatio,
+      (rawBounds.right * devicePixelRatio).ceilToDouble() / devicePixelRatio,
+      (rawBounds.bottom * devicePixelRatio).ceilToDouble() / devicePixelRatio,
+    );
   }
 
   List<ui.TextBox> getBoxesForRange(
@@ -521,7 +555,7 @@ class TextLayout {
         );
       }
       // We take whitespaces in account
-      if (!line.allLineTextRange.overlapsWith(start, end)) {
+      if (!line.correctedAllLineTextRange.overlapsWith(start, end)) {
         continue;
       }
 
@@ -771,14 +805,19 @@ class TextLayout {
         assert(false);
       }
       // We found the line but not the block because the offset is to the right of all blocks in this line.
-      // We deal with it the same way as if we didn't find the line (taking the last block of the last line)
-      final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
-      return lastVisualBlockInLine.isLtr
-          ? ui.TextPosition(
-              offset: lastVisualBlockInLine.textRange.end,
-              affinity: ui.TextAffinity.upstream,
-            )
-          : ui.TextPosition(offset: lastVisualBlockInLine.textRange.start);
+      // We deal with it the same way as if we didn't find the line (taking the last block of the last line if it exists)
+      if (lines.last.visualBlocks.isEmpty) {
+        // This is a special case when the last line is empty (it has no visual blocks)
+        return ui.TextPosition(offset: line.textRange.end);
+      } else {
+        final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
+        return lastVisualBlockInLine.isLtr
+            ? ui.TextPosition(
+                offset: lastVisualBlockInLine.textRange.end,
+                affinity: ui.TextAffinity.upstream,
+              )
+            : ui.TextPosition(offset: lastVisualBlockInLine.textRange.start);
+      }
     }
 
     // This is the default result for any position outside of the paragraph width and height
@@ -845,11 +884,23 @@ class TextLayout {
 
   ui.TextRange getLineBoundary(int codepointPosition) {
     for (final TextLine line in lines) {
-      if (line.allLineTextRange.start <= codepointPosition &&
-          line.allLineTextRange.end > codepointPosition) {
-        return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
+      if (codepointPosition >= line.correctedAllLineTextRange.start &&
+          codepointPosition <= line.correctedAllLineTextRange.end) {
+        print(
+          'getLineBoundary($codepointPosition) [${line.correctedAllLineTextRange.start}:${line.correctedAllLineTextRange.end}) isHardBreak=${line.hardLineBreak}\n'
+          'endText=${line.whitespacesRange.end} '
+          'endIncludingNewline=${line.correctedAllLineTextRange.end} '
+          'endAllText=${line.allLineTextRange.end} '
+          'endExcludingWhitespaces=${line.textRange.end} '
+          'correctedTextEnd=${line.correctedAllLineTextRange.end}',
+        );
+        return ui.TextRange(
+          start: line.correctedAllLineTextRange.start,
+          end: line.correctedAllLineTextRange.end,
+        );
       }
     }
+    print('getLineBoundary($codepointPosition): empty');
     return ui.TextRange.empty;
   }
 }
@@ -1007,6 +1058,15 @@ class TextCluster extends WebCluster {
   @override
   String toString() {
     return 'TextCluster [$start:$end) ${end - start}';
+  }
+
+  void printDiff(double physicalLeft, double physicalTop) {
+    final double dpr = ui.window.devicePixelRatio;
+    final double physicalX = (_cluster.x * dpr) - physicalLeft;
+    final double physicalY = (_cluster.y * dpr) - physicalTop;
+
+    print('Block Layout x: ${_cluster.x}, Physical Buffer X: $physicalX');
+    print('Block Layout y: ${_cluster.y}, Physical Buffer Y: $physicalY');
   }
 }
 
@@ -1309,11 +1369,17 @@ class TextLine {
 
   final ClusterRange textClusterRange;
   final ClusterRange whitespacesClusterRange;
-  final ui.TextRange textRange;
-  final ui.TextRange whitespacesRange;
-  final ui.TextRange allLineTextRange;
-  final bool hardLineBreak;
+  ui.TextRange textRange;
+  ui.TextRange whitespacesRange;
+  ui.TextRange allLineTextRange;
+  bool hardLineBreak;
   final int lineNumber;
+
+  // Since SkParagraph treats differently text with hard line breaks we need to do the same
+  ui.TextRange get correctedAllLineTextRange => ui.TextRange(
+    start: allLineTextRange.start,
+    end: allLineTextRange.end, // + (hardLineBreak ? 1 : 0),
+  );
 
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
@@ -1346,6 +1412,13 @@ class TextLine {
       paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
       paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
       paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
+      /*
+      print(
+        'updateBoundingBox: '
+        '${block.paintBounds.left}:${block.paintBounds.right} * ${block.paintBoundsAscent}:${block.paintBoundsDescent} '
+        '$paintBoundsLeft:$paintBoundsRight * $fontBoundingBoxAscent:$fontBoundingBoxDescent',
+      );
+      */
     } else if (block is PlaceholderBlock) {
       fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, block.ascent);
       fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, block.descent);

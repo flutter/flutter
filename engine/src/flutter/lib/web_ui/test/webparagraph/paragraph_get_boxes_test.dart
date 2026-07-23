@@ -303,8 +303,8 @@ Future<void> testMain() async {
       boxHeightStyle: ui.BoxHeightStyle.strut,
     );
 
-    expect(boxes1.isNotEmpty && boxes1.length == 1, true);
-    expect(boxes2.isNotEmpty && boxes2.length == 1, true);
+    expect(boxes1, hasLength(1));
+    expect(boxes2, hasLength(1));
     expect(boxes1.first.toRect().bottom, boxes2.first.toRect().top);
   });
 }

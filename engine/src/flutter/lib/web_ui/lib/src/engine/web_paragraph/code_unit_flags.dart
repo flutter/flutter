@@ -143,10 +143,10 @@ class AllCodeUnitFlags {
     for (var i = 0; i < result.breaks.length; i += 2) {
       final int index = result.breaks[i];
       final int type = result.breaks[i + 1];
-
       if (type == kSoftLineBreak) {
         _allFlags[index] |= CodeUnitFlag.softLineBreak._bitmask;
       } else {
+        print('=hard line break: $index');
         _allFlags[index] |= CodeUnitFlag.hardLineBreak._bitmask;
       }
     }

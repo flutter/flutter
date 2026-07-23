@@ -119,10 +119,11 @@ Future<void> testMain() async {
     expect(lines.length, 15);
     var length = 0;
     for (var i = 0; i < 15; i++) {
-      expect(lines[i].whitespacesRange.size, i != 14 ? 1 : 0);
+      expect(lines[i].whitespacesRange.size, 0);
       expect(lines[i].hardLineBreak, i != 14);
       length += lines[i].textRange.size;
       length += lines[i].whitespacesRange.size;
+      length += lines[i].hardLineBreak ? 1 : 0;
     }
     expect(length, paragraph.text.length);
   });
@@ -136,7 +137,7 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 2);
-    expect(lines[0].whitespacesRange.size, 3 + 1);
+    expect(lines[0].whitespacesRange.size, 3);
     expect(lines[0].hardLineBreak, true);
     expect(lines[1].whitespacesRange.size, 0);
     expect(lines[1].hardLineBreak, false);
@@ -152,7 +153,7 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
     for (var i = 0; i < lines.length; i++) {
-      expect(lines[i].whitespacesRange.size, i != lines.length - 1 ? 1 : 0);
+      expect(lines[i].whitespacesRange.size, 1); // Empty line with \n counts /n as a whitespace
       expect(lines[i].textRange.size, 0);
       expect(lines[i].hardLineBreak, i != lines.length - 1);
     }

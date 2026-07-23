@@ -1306,4 +1306,36 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph.fallback_fonts.png', region: region);
   });
+  test('Draw WebParagraph 1 234', () async {
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    final paraStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      height: 1.5,
+      color: const Color(0xFF000000),
+    );
+    final textStyle = WebTextStyle(letterSpacing: 0.5, color: const Color(0xFF000000));
+
+    {
+      final builder = WebParagraphBuilder(paraStyle);
+      builder.pushStyle(textStyle);
+      builder.addText('1 234');
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 500));
+      paragraph.paint(canvas, const Offset(0, 10));
+    }
+    {
+      final builder = WebParagraphBuilder(paraStyle);
+      builder.pushStyle(textStyle);
+      builder.addText('1 23');
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 500));
+      paragraph.paint(canvas, const Offset(0, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.1234.png', region: region);
+  }, solo: true);
 }
