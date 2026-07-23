@@ -1616,7 +1616,6 @@ TEST_P(RendererTest, BindingNullTexturesDoesNotCrash) {
   EXPECT_FALSE(FS::BindContents2(*pass, nullptr, sampler));
 }
 
-// Clears a single cube map face by attaching it as a render target slice.
 // Creating and uploading per-layer contents of a 2D array texture. The GLES
 // path requires ES 3.0 and is covered separately in the GLES texture unit
 // tests, so this skips the GLES backends to avoid an ES 2.0 failure.
@@ -1650,6 +1649,7 @@ TEST_P(RendererTest, CanCreateAndUpload2DArrayTexture) {
   }
 }
 
+// Clears a single cube map face by attaching it as a render target slice.
 // Rendering to cube faces is portable down to OpenGL ES 2.0, so this runs on
 // every backend.
 TEST_P(RendererTest, CanRenderToTextureSlice) {
