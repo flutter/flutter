@@ -21,11 +21,13 @@
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/compositor_opengl.h"
 #include "flutter/shell/platform/windows/compositor_software.h"
+#include "flutter/shell/platform/windows/compositor_vulkan.h"
 #include "flutter/shell/platform/windows/display_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
+#include "flutter/shell/platform/windows/vulkan_manager.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
 #include "shell/platform/windows/flutter_project_bundle.h"
@@ -98,6 +100,52 @@ FlutterRendererConfig GetOpenGLRendererConfig() {
     }
     return host->texture_registrar()->PopulateTexture(texture_id, width, height,
                                                       texture);
+  };
+  return config;
+}
+
+// Creates and returns a FlutterRendererConfig for Impeller's Vulkan backend.
+// The user_data received by the render callbacks refers to the
+// FlutterWindowsEngine. Rendering targets and presentation are handled by
+// the compositor (CompositorVulkan), so the image callbacks are never
+// invoked; they exist to satisfy the renderer config validation.
+FlutterRendererConfig GetVulkanRendererConfig(VulkanManager* vulkan_manager) {
+  FlutterRendererConfig config = {};
+  config.type = kVulkan;
+  config.vulkan.struct_size = sizeof(config.vulkan);
+  config.vulkan.version = vulkan_manager->GetVulkanVersion();
+  config.vulkan.instance = vulkan_manager->GetInstance();
+  config.vulkan.physical_device = vulkan_manager->GetPhysicalDevice();
+  config.vulkan.device = vulkan_manager->GetDevice();
+  config.vulkan.queue_family_index = vulkan_manager->GetQueueFamilyIndex();
+  config.vulkan.queue = vulkan_manager->GetQueue();
+  config.vulkan.enabled_instance_extensions =
+      vulkan_manager->GetEnabledInstanceExtensions(
+          &config.vulkan.enabled_instance_extension_count);
+  config.vulkan.enabled_device_extensions =
+      vulkan_manager->GetEnabledDeviceExtensions(
+          &config.vulkan.enabled_device_extension_count);
+  config.vulkan.get_instance_proc_address_callback =
+      [](void* user_data, FlutterVulkanInstanceHandle instance,
+         const char* name) -> void* {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    return host->vulkan_manager()->GetInstanceProcAddress(
+        reinterpret_cast<VkInstance>(instance), name);
+  };
+  // The image callbacks are only used when the engine renders to the root
+  // surface. The Windows embedder always supplies a compositor, which makes
+  // the root surface a no-op; content is rendered into backing stores
+  // instead. This matches GetOpenGLRendererConfig.
+  config.vulkan.get_next_image_callback =
+      [](void* user_data,
+         const FlutterFrameInfo* frame_info) -> FlutterVulkanImage {
+    FML_UNREACHABLE();
+    return {};
+  };
+  config.vulkan.present_image_callback =
+      [](void* user_data, const FlutterVulkanImage* image) -> bool {
+    FML_UNREACHABLE();
+    return false;
   };
   return config;
 }
@@ -210,8 +258,26 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   }
   enable_impeller_ = enable_impeller;
 
-  egl_manager_ = egl::Manager::Create(
-      static_cast<egl::GpuPreference>(project_->gpu_preference()));
+  // Check for an explicit Impeller backend request. The Vulkan backend is
+  // used when it is requested, Impeller is enabled, and a device capable of
+  // Direct3D 11 interop exists; VulkanManager::Create() otherwise returns
+  // null and the existing ANGLE and software paths are used.
+  bool vulkan_requested = false;
+  for (const auto& env_switch : switches) {
+    if (env_switch == "--impeller-backend=vulkan") {
+      vulkan_requested = true;
+    }
+  }
+  if (enable_impeller_ && vulkan_requested) {
+    vulkan_manager_ = VulkanManager::Create();
+  }
+
+  // The Vulkan backend renders and presents without ANGLE; do not
+  // initialize EGL when it is active.
+  if (!vulkan_manager_) {
+    egl_manager_ = egl::Manager::Create(
+        static_cast<egl::GpuPreference>(project_->gpu_preference()));
+  }
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_manager_ = std::make_shared<DisplayManagerWin32>(this);
@@ -304,7 +370,11 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
   if (enable_impeller_) {
-    if (std::find(switches.begin(), switches.end(),
+    // SDF rendering is enabled by default for the ANGLE/OpenGL Impeller
+    // backend. The Vulkan backend does not use it, so only apply the default
+    // when Vulkan is not active. Respect an explicit request either way.
+    if (!vulkan_manager_ &&
+        std::find(switches.begin(), switches.end(),
                   "--impeller-use-sdfs=true") == switches.end() &&
         std::find(switches.begin(), switches.end(),
                   "--impeller-use-sdfs=false") == switches.end()) {
@@ -463,7 +533,9 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     platform_view_plugin_ = std::make_unique<PlatformViewPlugin>(
         messenger_wrapper_.get(), task_runner_.get());
   }
-  if (egl_manager_) {
+  if (vulkan_manager_) {
+    compositor_ = std::make_unique<CompositorVulkan>(this);
+  } else if (egl_manager_) {
     auto resolver = [](const char* name) -> void* {
       return reinterpret_cast<void*>(::eglGetProcAddress(name));
     };
@@ -512,7 +584,9 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
   FlutterRendererConfig renderer_config;
 
-  if (enable_impeller_) {
+  if (vulkan_manager_) {
+    renderer_config = GetVulkanRendererConfig(vulkan_manager_.get());
+  } else if (enable_impeller_) {
     // Impeller does not support a Software backend. Avoid falling back and
     // confusing the engine on which renderer is selected.
     if (!egl_manager_) {

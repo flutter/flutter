@@ -30,11 +30,13 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
     VkQueue queue,
     const VulkanDispatchTable& vulkan_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+    bool render_to_surface,
     impeller::Flags impeller_flags)
     : vk_(fml::MakeRefCounted<vulkan::VulkanProcTable>(
           vulkan_dispatch_table.get_instance_proc_address)),
       vulkan_dispatch_table_(vulkan_dispatch_table),
-      external_view_embedder_(std::move(external_view_embedder)) {
+      external_view_embedder_(std::move(external_view_embedder)),
+      render_to_surface_(render_to_surface) {
   // Make sure all required members of the dispatch table are checked.
   if (!vulkan_dispatch_table_.get_instance_proc_address ||
       !vulkan_dispatch_table_.get_next_image ||
@@ -118,7 +120,8 @@ bool EmbedderSurfaceVulkanImpeller::IsValid() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceVulkanImpeller::CreateGPUSurface() {
-  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_);
+  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_,
+                                                    render_to_surface_);
 }
 
 // |EmbedderSurface|

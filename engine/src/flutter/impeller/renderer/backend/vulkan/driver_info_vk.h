@@ -234,6 +234,18 @@ class DriverInfoVK {
   const std::string& GetDriverName() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Get the Vulkan driver ID reported via
+  ///             VkPhysicalDeviceDriverProperties (Vulkan 1.2+).
+  ///
+  ///             Returns a default-initialized (zero) vk::DriverId if the
+  ///             driver properties could not be queried (pre-1.2 without
+  ///             VK_KHR_driver_properties).
+  ///
+  /// @return     The driver ID.
+  ///
+  vk::DriverId GetDriverID() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Dumps the current driver info to the log.
   ///
   void DumpToLog() const;
@@ -290,6 +302,7 @@ class DriverInfoVK {
   std::optional<MaliGPU> mali_gpu_ = std::nullopt;
   std::optional<PowerVRGPU> powervr_gpu_ = std::nullopt;
   std::string driver_name_;
+  vk::DriverId driver_id_ = {};
 };
 
 }  // namespace impeller

@@ -57,6 +57,7 @@ constexpr FlutterViewId kImplicitViewId = 0;
 
 class FlutterWindowsView;
 class DisplayManagerWin32;
+class VulkanManager;
 
 // Update the thread priority for the Windows engine.
 static void WindowsPlatformThreadPrioritySetter(
@@ -181,6 +182,12 @@ class FlutterWindowsEngine {
   // The EGL manager object. If this is nullptr, then we are
   // rendering using software instead of OpenGL.
   egl::Manager* egl_manager() const { return egl_manager_.get(); }
+
+  // The Vulkan manager object. Non-null only when the Vulkan Impeller
+  // backend was requested through --impeller-backend=vulkan and a capable
+  // device exists; rendering then uses Impeller's Vulkan backend presented
+  // through DirectComposition instead of ANGLE.
+  VulkanManager* vulkan_manager() const { return vulkan_manager_.get(); }
 
   WindowProcDelegateManager* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
@@ -526,6 +533,10 @@ class FlutterWindowsEngine {
   std::shared_ptr<WindowsProcTable> windows_proc_table_;
 
   std::shared_ptr<egl::ProcTable> gl_;
+
+  // Non-null only when the Vulkan Impeller backend is active. See
+  // |vulkan_manager()|.
+  std::unique_ptr<VulkanManager> vulkan_manager_;
 
   std::unique_ptr<PlatformViewPlugin> platform_view_plugin_;
 

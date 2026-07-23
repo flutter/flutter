@@ -133,6 +133,9 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     );
   }
 
+  builder.SetFramebufferFetchEnabled(
+      context.GetCapabilities()->SupportsFramebufferFetch());
+
   auto pass = builder.Build(context.GetDevice());
 
   if (!pass) {
