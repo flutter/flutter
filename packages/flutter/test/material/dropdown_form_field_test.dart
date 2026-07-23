@@ -36,6 +36,7 @@ Widget buildFormFrame({
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
   AlignmentGeometry buttonAlignment = AlignmentDirectional.centerStart,
+  bool enabled = true,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -66,6 +67,7 @@ Widget buildFormFrame({
               );
             }).toList(),
             alignment: buttonAlignment,
+            enabled: enabled,
           ),
         ),
       ),
@@ -188,7 +190,7 @@ void main() {
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
             initialValue: value,
-            onChanged: null, // this disables the menu and shows the disabledHint.
+            enabled: false,
             disabledHint: const Text('disabledHint'),
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(value: 1, child: Text('One')),
@@ -320,7 +322,6 @@ void main() {
             decoration: const InputDecoration(labelText: 'labelText'),
             initialValue: value,
             hint: const Text('hint'),
-            onChanged: null, // disabled
             disabledHint: const Text('disabledHint'),
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(value: 1, child: Text('One')),
@@ -755,6 +756,7 @@ void main() {
         onChanged: onChanged,
         hint: const Text('enabled'),
         disabledHint: const Text('disabled'),
+        enabled: false,
       );
     }
 
@@ -1183,7 +1185,6 @@ void main() {
               ) {
                 return DropdownMenuItem<String>(value: value, child: Text(value));
               }).toList(),
-              onChanged: null,
             ),
           ),
         ),
@@ -1315,7 +1316,6 @@ void main() {
                         items: menuItems.map((String value) {
                           return DropdownMenuItem<String>(value: value, child: Text(value));
                         }).toList(),
-                        onChanged: null,
                         autovalidateMode: AutovalidateMode.disabled,
                       ),
                       DropdownButtonFormField<String>(
@@ -1364,7 +1364,6 @@ void main() {
                     }).toList(),
                     decoration: const InputDecoration(errorText: decorationErrorText),
                     forceErrorText: forceErrorText,
-                    onChanged: null,
                   ),
                 ),
               ),
