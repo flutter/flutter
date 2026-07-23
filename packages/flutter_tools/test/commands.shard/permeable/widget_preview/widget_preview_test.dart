@@ -278,13 +278,7 @@ void main() {
       '--verbose',
       ?rootProject?.path,
     ], analysisServerFactoryOverride: analysisServerFactoryOverride);
-    // Don't perform analysis on Windows since `dart pub add` will use '\' for
-    // path dependencies and cause analysis to fail.
-    // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
-    // is resolved.
-    if (!platform.isWindows) {
-      await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
-    }
+    await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
     fs.currentDirectory = current;
   }
 

@@ -373,14 +373,6 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enables expression evaluation in the debugger.',
       hide: !verboseHelp,
     );
-    argParser.addFlag(
-      FlutterOptions.kWebExperimentalHotReload,
-      help:
-          '(deprecated; will be removed in a future release) '
-          'Enables new module format that supports hot reload.',
-      defaultsTo: true,
-      hide: !verboseHelp,
-    );
     argParser.addOption(
       'web-launch-url',
       help:
@@ -1408,13 +1400,6 @@ abstract class FlutterCommand extends Command<void> {
         extraGenSnapshotOptions.add(flag);
       }
     }
-
-    // TODO(natebiggs): Delete this when new DDC module system is the default.
-    final bool webEnableHotReload =
-        forcedWebEnableHotReload ??
-        (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-            boolArg(FlutterOptions.kWebExperimentalHotReload));
-
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
         boolArg(FlutterOptions.kAnalyzeSize)) {
@@ -1549,7 +1534,7 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
-      webEnableHotReload: webEnableHotReload,
+      webEnableHotReload: true,
     );
   }
 
