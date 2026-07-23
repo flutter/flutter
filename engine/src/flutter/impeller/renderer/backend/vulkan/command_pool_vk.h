@@ -61,6 +61,16 @@ class CommandPoolVK final {
   /// @see        |GarbageCollectBuffersIfAble|
   void CollectCommandBuffer(vk::UniqueCommandBuffer&& buffer);
 
+  /// @brief      Discard all Vulkan handles WITHOUT invoking any Vulkan
+  ///             destroy/free calls.
+  ///
+  /// Use this only after a failed vkQueueSubmit has left the driver in a
+  /// state where the pool and its buffer handles are already invalid (e.g.
+  /// the non-conformant out-of-memory behavior observed on AMD drivers).
+  /// Calling vkDestroyCommandPool or vkFreeCommandBuffers on such handles
+  /// causes validation errors and crashes inside the driver.
+  void AbandonForDriverCrash();
+
  private:
   friend CommandPoolRecyclerVK;
 
@@ -73,7 +83,8 @@ class CommandPoolVK final {
 
   Mutex pool_mutex_;
   vk::UniqueCommandPool pool_ IPLR_GUARDED_BY(pool_mutex_);
-  std::vector<vk::UniqueCommandBuffer> unused_command_buffers_;
+  std::vector<vk::UniqueCommandBuffer> unused_command_buffers_
+      IPLR_GUARDED_BY(pool_mutex_);
   std::weak_ptr<ContextVK> context_;
   std::weak_ptr<DeviceHolderVK> device_holder_;
 
