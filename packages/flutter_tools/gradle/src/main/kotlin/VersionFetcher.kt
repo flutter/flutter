@@ -6,7 +6,6 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.gradle.internal.utils.getKotlinAndroidPluginVersion
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
@@ -42,19 +41,16 @@ internal object VersionFetcher {
     }
 
     /**
-     * Returns the version of the Kotlin Gradle plugin.
+     * Returns the version of the Kotlin Gradle plugin, or null if it cannot be determined.
+     *
+     * Null is an expected result when the Kotlin Gradle plugin has not been applied to the
+     * project — most notably under AGP's built-in Kotlin support (`android.builtInKotlin`),
+     * where there is no standalone KGP. Callers must treat null as "unknown/not applied",
+     * not as an error.
      */
     internal fun getKGPVersion(project: Project): Version? {
-        // AGP and Kgp have methods for getting kotlin version.
-        // AGP's method is internal, we try to use it anyway.
         // KGP's version in org.jetbrains.kotlin.gradle.plugin.DefaultKotlinBasePlugin is not
         // available when this method is called.
-        // When testing call `setAgpKotlinVersionToNull(project)`.
-        val agpDefinedKgpVersion = getKotlinAndroidPluginVersion(project)
-        if (agpDefinedKgpVersion != null && agpDefinedKgpVersion != "unknown") {
-            return Version.fromString(agpDefinedKgpVersion)
-        }
-
         val kotlinVersionProperty = "kotlin_version"
         val firstKotlinVersionFieldName = "pluginVersion"
         val secondKotlinVersionFieldName = "kotlinPluginVersion"
@@ -126,4 +122,36 @@ internal class Version(
     override fun hashCode(): Int = major.hashCode() or minor.hashCode() or patch.hashCode()
 
     override fun toString(): String = "$major.$minor.$patch"
+}
+
+/**
+ * The compile SDK configured on a project's Android extension: either a numeric API level
+ * (`compileSdk = 36`) or a preview codename (`compileSdkPreview = "Baklava"`). Both are null
+ * when the DSL has not been configured (yet).
+ */
+internal data class CompileSdkVersion(
+    val apiLevel: Int?,
+    val previewCodename: String?
+) {
+    /**
+     * Whether this compile SDK is known to be higher than [other].
+     *
+     * - numeric vs numeric: numeric comparison.
+     * - preview vs numeric: a preview codename targets an unreleased SDK, so it is
+     *   considered higher than any numeric API level.
+     * - preview vs preview: codenames stopped being alphabetically ordered when the
+     *   alphabet reset at "Baklava", so distinct codenames are incomparable and this
+     *   returns false rather than guessing.
+     * - if either side is unset, returns false.
+     */
+    fun isHigherThan(other: CompileSdkVersion): Boolean =
+        when {
+            previewCodename != null && other.previewCodename != null -> false
+            previewCodename != null && other.apiLevel != null -> true
+            apiLevel != null && other.apiLevel != null -> apiLevel > other.apiLevel
+            else -> false
+        }
+
+    /** The human-readable form used in log messages, e.g. "35" or "Baklava". */
+    override fun toString(): String = previewCodename ?: apiLevel?.toString() ?: "unknown"
 }
