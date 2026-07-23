@@ -94,7 +94,7 @@ class _WindowsTable extends StatelessWidget {
   }
 
   List<DataRow> _buildRows(WindowRegistry windowRegistry, BuildContext context) {
-    final List<DataRow> rows = [_buildRow(mainWindow, context)];
+    final List<DataRow> rows = [];
     for (final WindowEntry entry in windowRegistry.windows) {
       final BaseWindowController controller = entry.controller;
       rows.add(_buildRow(controller, context));

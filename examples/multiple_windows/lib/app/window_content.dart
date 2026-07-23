@@ -49,9 +49,8 @@ class _WindowContentState extends State<WindowContent> {
     final double dpr = MediaQuery.of(context).devicePixelRatio;
     final Size windowSize = WindowScope.contentSizeOf(context);
 
-    return Overlay.wrap(
-      alwaysSizeToContent: true,
-      child: IntrinsicWidth(
+    return MaterialApp(
+      home: IntrinsicWidth(
         child: Material(
           child: Column(
             mainAxisSize: .min,
