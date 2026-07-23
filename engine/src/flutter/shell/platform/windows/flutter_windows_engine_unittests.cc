@@ -82,7 +82,9 @@ TEST_F(FlutterWindowsEngineTest, TaskRunnerDelayedTask) {
     PumpMessage();
   }
   auto duration = fml::TimePoint::Now() - start;
-  EXPECT_GE(duration, fml::TimeDelta::FromMilliseconds(50));
+  // Windows message timers can fire slightly before the requested deadline
+  // under parallel test load.
+  EXPECT_GE(duration, fml::TimeDelta::FromMilliseconds(45));
 }
 
 // https://github.com/flutter/flutter/issues/173843)

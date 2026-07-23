@@ -3,10 +3,42 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
+
+#include <filesystem>
+#include <fstream>
+
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/string_conversion.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
+namespace {
+
+FlutterEngineAOTDataSourceType g_last_aot_source_type =
+    kFlutterEngineAOTDataSourceTypeElfPath;
+std::string g_last_aot_path;
+
+FlutterEngineResult FakeCreateAOTData(const FlutterEngineAOTDataSource* source,
+                                      FlutterEngineAOTData* data_out) {
+  g_last_aot_source_type = source->type;
+  switch (source->type) {
+    case kFlutterEngineAOTDataSourceTypeElfPath:
+      g_last_aot_path = source->elf_path;
+      break;
+    case kFlutterEngineAOTDataSourceTypeDllPath:
+      g_last_aot_path = source->dll_path;
+      break;
+  }
+  *data_out = reinterpret_cast<FlutterEngineAOTData>(0x1);
+  return kSuccess;
+}
+
+FlutterEngineResult FakeCollectAOTData(FlutterEngineAOTData data) {
+  return kSuccess;
+}
+
+}  // namespace
 
 TEST(FlutterProjectBundle, BasicPropertiesAbsolutePaths) {
   FlutterDesktopEngineProperties properties = {};
@@ -63,6 +95,39 @@ TEST(FlutterProjectBundle, DartEntrypointArguments) {
   EXPECT_EQ(retrieved_arguments.size(), 2U);
   EXPECT_EQ(retrieved_arguments[0], "arg1");
   EXPECT_EQ(retrieved_arguments[1], "arg2");
+}
+
+TEST(FlutterProjectBundle, LoadAotDataUsesExpectedSourceType) {
+  auto temp_path = std::filesystem::temp_directory_path() /
+                   "flutter_project_bundle_aot_test.so";
+  {
+    std::ofstream temp_file(temp_path, std::ios::binary);
+    temp_file << '\0';
+  }
+
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = L"C:\\foo\\flutter_assets";
+  properties.icu_data_path = L"C:\\foo\\icudtl.dat";
+  auto temp_path_wstring = temp_path.wstring();
+  properties.aot_library_path = temp_path_wstring.c_str();
+
+  FlutterProjectBundle project(properties);
+
+  FlutterEngineProcTable procs = {};
+  procs.CreateAOTData = FakeCreateAOTData;
+  procs.CollectAOTData = FakeCollectAOTData;
+
+  auto aot_data = project.LoadAotData(procs);
+  EXPECT_NE(aot_data.get(), nullptr);
+#if FML_ARCH_CPU_X86_64
+  EXPECT_EQ(g_last_aot_source_type, kFlutterEngineAOTDataSourceTypeDllPath);
+#else
+  EXPECT_EQ(g_last_aot_source_type, kFlutterEngineAOTDataSourceTypeElfPath);
+#endif
+  EXPECT_EQ(g_last_aot_path, fml::PathToUtf8(temp_path));
+
+  aot_data.reset();
+  std::filesystem::remove(temp_path);
 }
 
 #ifndef FLUTTER_RELEASE
