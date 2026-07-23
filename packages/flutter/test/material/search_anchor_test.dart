@@ -3786,6 +3786,137 @@ void main() {
       );
     });
 
+    testWidgets('SearchBar uses ThemeData.textSelectionTheme contextMenuBuilder', (
+      WidgetTester tester,
+    ) async {
+      Widget themeDataContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Icon(Icons.search);
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: TextSelectionThemeData(
+              contextMenuBuilder: themeDataContextMenuBuilder,
+            ),
+          ),
+          home: const Material(child: SearchBar()),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+      final BuildContext searchBarContext = tester.element(find.byType(SearchBar));
+      final Widget contextMenu = editableTextState.widget.contextMenuBuilder!(
+        searchBarContext,
+        editableTextState,
+      );
+
+      expect(contextMenu, isA<Icon>());
+    });
+
+    testWidgets('SearchBar prefers local TextSelectionTheme contextMenuBuilder', (
+      WidgetTester tester,
+    ) async {
+      Widget themeDataContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Icon(Icons.search);
+      }
+
+      Widget localTextSelectionThemeContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Placeholder();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: TextSelectionThemeData(
+              contextMenuBuilder: themeDataContextMenuBuilder,
+            ),
+          ),
+          home: Material(
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                contextMenuBuilder: localTextSelectionThemeContextMenuBuilder,
+              ),
+              child: const SearchBar(),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+      final BuildContext searchBarContext = tester.element(find.byType(SearchBar));
+      final Widget contextMenu = editableTextState.widget.contextMenuBuilder!(
+        searchBarContext,
+        editableTextState,
+      );
+
+      expect(contextMenu, isA<Placeholder>());
+      expect(contextMenu, isNot(isA<Icon>()));
+    });
+
+    testWidgets('SearchBar.contextMenuBuilder overrides TextSelectionTheme and ThemeData', (
+      WidgetTester tester,
+    ) async {
+      Widget themeDataContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Icon(Icons.search);
+      }
+
+      Widget localTextSelectionThemeContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Placeholder();
+      }
+
+      Widget searchBarContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const SizedBox();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: TextSelectionThemeData(
+              contextMenuBuilder: themeDataContextMenuBuilder,
+            ),
+          ),
+          home: Material(
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                contextMenuBuilder: localTextSelectionThemeContextMenuBuilder,
+              ),
+              child: SearchBar(contextMenuBuilder: searchBarContextMenuBuilder),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+      final BuildContext searchBarContext = tester.element(find.byType(SearchBar));
+      final Widget contextMenu = editableTextState.widget.contextMenuBuilder!(
+        searchBarContext,
+        editableTextState,
+      );
+
+      expect(contextMenu, isA<SizedBox>());
+      expect(contextMenu, isNot(isA<Placeholder>()));
+      expect(contextMenu, isNot(isA<Icon>()));
+    });
+
     testWidgets('SearchAnchor.bar.contextMenuBuilder is passed through to EditableText', (
       WidgetTester tester,
     ) async {
