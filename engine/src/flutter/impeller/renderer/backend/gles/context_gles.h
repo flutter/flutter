@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CONTEXT_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CONTEXT_GLES_H_
 
+#include <string_view>
+
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/gles/allocator_gles.h"
@@ -44,6 +46,23 @@ class ContextGLES final : public Context,
   bool RemoveReactorWorker(ReactorGLES::WorkerID id);
 
   std::shared_ptr<GPUTracerGLES> GetGPUTracer() const { return gpu_tracer_; }
+
+  /// Returns true for platform strings (`ro.board.platform` or
+  /// `ro.vendor.mediatek.platform`) of MediaTek SoCs whose PowerVR GL driver
+  /// crashes with a null-pointer dereference inside glClear once the
+  /// driver's internal job pool is exhausted. Currently only the MT6779 has
+  /// confirmed reports. Exposed for testing.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/189190
+  static bool IsJobPoolConstrainedPlatform(std::string_view platform);
+
+  /// Whether the device's GL driver is prone to internal job-pool exhaustion
+  /// under many small command submissions. When true, the backend disables
+  /// per-upload tracking fences and periodically drains the command queue to
+  /// keep the driver's job pool shallow.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/189190
+  static bool IsJobPoolConstrainedDriver();
 
   // Mutable tracker for command buffer submission bookkeeping.
   const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
