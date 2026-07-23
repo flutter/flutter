@@ -669,6 +669,7 @@ target-device-5 (wireless) (mobile) • xxx • android • Android 10
 
 [1]: target-device-1 (xxx)
 [2]: target-device-5 (wireless) (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[wirelessAndroidDevice1]);
@@ -719,12 +720,29 @@ target-device-1 (mobile) • xxx • android • Android 10
 target-device-2 (mobile) • xxx • android • Android 10
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[attachedAndroidDevice1]);
             expect(deviceManager.androidDiscoverer.devicesCalled, 2);
             expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
             expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
+          }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+          testUsingContext('tells user how to skip the prompt after choosing a device', () async {
+            deviceManager.androidDiscoverer.deviceList = <Device>[
+              attachedAndroidDevice1,
+              attachedAndroidDevice2,
+            ];
+            terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '1');
+
+            final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+            expect(devices, <Device>[attachedAndroidDevice1]);
+            expect(
+              logger.statusText,
+              contains('To skip this prompt next time, specify the device with "-d xxx".'),
+            );
           }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
 
           testUsingContext('can select the eleventh attached device', () async {
@@ -768,6 +786,7 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[wirelessAndroidDevice1]);
@@ -904,6 +923,7 @@ target-device-8 (wireless) (mobile) • xxx • android • Android 10
 [2]: target-device-4 (xxx)
 [3]: target-device-5 (wireless) (xxx)
 [4]: target-device-8 (wireless) (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[attachedUnsupportedForProjectAndroidDevice]);
@@ -929,6 +949,7 @@ target-device-1 (mobile) • xxx • android • Android 10
 target-device-2 (mobile) • xxx • android • Android 10
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[attachedAndroidDevice1]);
@@ -957,6 +978,7 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[wirelessAndroidDevice1]);
@@ -1761,7 +1783,8 @@ target-device-9 (mobile) • xxx • ios • iOS 16
 No wireless devices were found.
 
 [1]: target-device-9 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
             );
             expect(devices, <Device>[nonEphemeralDevice]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
@@ -1807,7 +1830,8 @@ target-device-9 (mobile) • xxx • ios • iOS 16
 No wireless devices were found.
 
 [1]: target-device-9 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
             );
             expect(devices, <Device>[nonEphemeralDevice]);
           }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
@@ -2158,7 +2182,8 @@ target-device-5 (wireless) (mobile) • xxx • ios • iOS 16
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
 [3]: target-device-5 (wireless) (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
@@ -2198,7 +2223,8 @@ No wireless devices were found.
 
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
             );
             expect(devices, <Device>[attachedIOSDevice2]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
@@ -2235,6 +2261,7 @@ target-device-6 (wireless) (mobile) • xxx • ios • iOS 16
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);
@@ -2283,6 +2310,7 @@ target-device-5 (wireless) (mobile) • xxx • ios • iOS 16
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
 [3]: target-device-5 (wireless) (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
               );
               expect(devices, <Device>[attachedIOSDevice1]);
@@ -2340,7 +2368,8 @@ target-device-2 (mobile) • xxx • ios • iOS 16
 
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
               );
 
               expect(devices, <Device>[attachedIOSDevice2]);
@@ -2396,7 +2425,8 @@ target-device-5 (wireless) (mobile) • xxx • ios • iOS 16
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
 [3]: target-device-5 (wireless) (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
               );
 
               expect(devices, <Device>[attachedIOSDevice2]);
@@ -2585,7 +2615,8 @@ target-device-8 (wireless) (mobile) • xxx • ios • iOS 16
 [2]: target-device-4 (xxx)
 [3]: target-device-5 (wireless) (xxx)
 [4]: target-device-8 (wireless) (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 3);
@@ -2625,7 +2656,8 @@ No wireless devices were found.
 
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt next time, specify the device with "-d xxx".
+'''),
             );
             expect(devices, <Device>[attachedIOSDevice2]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 3);
@@ -2660,6 +2692,7 @@ target-device-6 (wireless) (mobile) • xxx • ios • iOS 16
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt next time, specify the device with "-d xxx".
 '''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);
