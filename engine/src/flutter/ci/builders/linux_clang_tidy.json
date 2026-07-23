@@ -61,8 +61,7 @@
                 "cores=32"
             ],
             "gclient_variables": {
-                "download_android_deps": false,
-                "download_jdk": false
+                "download_android_deps": false
             },
             "dependencies": [
                 "ci/host_debug_clang_tidy"
@@ -91,8 +90,7 @@
                 "cores=32"
             ],
             "gclient_variables": {
-                "download_android_deps": false,
-                "download_jdk": false
+                "download_android_deps": false
             },
             "dependencies": [
                 "ci/host_debug_clang_tidy"
@@ -121,8 +119,7 @@
                 "cores=32"
             ],
             "gclient_variables": {
-                "download_android_deps": false,
-                "download_jdk": false
+                "download_android_deps": false
             },
             "dependencies": [
                 "ci/host_debug_clang_tidy"
@@ -151,8 +148,7 @@
                 "cores=32"
             ],
             "gclient_variables": {
-                "download_android_deps": false,
-                "download_jdk": false
+                "download_android_deps": false
             },
             "dependencies": [
                 "ci/host_debug_clang_tidy"
