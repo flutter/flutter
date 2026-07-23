@@ -1157,6 +1157,7 @@ TEST(AndroidExternalViewEmbedder2,
   embedder->PrerollCompositeEmbeddedView(
       view_id,
       std::make_unique<EmbeddedViewParams>(matrix, DlSize(50, 50), mutators));
+  embedder->CompositeEmbeddedView(view_id);
 
   {
     ::testing::InSequence sequence;
@@ -1174,14 +1175,13 @@ TEST(AndroidExternalViewEmbedder2,
       [](const SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/frame_size);
 
+  fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(task_runners.GetRasterTaskRunner(), [&]() {
     embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                 std::move(surface_frame));
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetPlatformTaskRunner(),
+                                      [&latch]() { latch.Signal(); });
   });
-
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(task_runners.GetPlatformTaskRunner(),
-                                    [&latch]() { latch.Signal(); });
   latch.Wait();
 
   embedder->Teardown();
