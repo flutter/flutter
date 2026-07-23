@@ -695,7 +695,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -717,7 +716,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -739,7 +737,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -896,94 +893,66 @@ void main() {
         terminal = FakeTerminal();
       });
 
-      testUsingContext(
-        'defaults to prompting when machine mode is false',
-        () async {
-          testDeviceManager.addAttachedDevice(device1);
-          testDeviceManager.addAttachedDevice(device2);
+      testUsingContext('defaults to prompting when machine mode is false', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
 
-          final flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+        final flutterCommand = DummyFlutterCommand();
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices();
 
-          // Should prompt the user and print prompt options (so status contains "Connected devices")
-          expect(testLogger.statusText, contains('Connected devices:'));
-          expect(devices, <Device>[device1]);
-        },
-        overrides: <Type, Generator>{
-          AnsiTerminal: () => terminal,
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
-        },
-      );
+        // Should prompt the user and print prompt options (so status contains "Connected devices")
+        expect(testLogger.statusText, contains('Connected devices:'));
+        expect(devices, <Device>[device1]);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
 
-      testUsingContext(
-        'defaults to not prompting when machine mode is true',
-        () async {
-          testDeviceManager.addAttachedDevice(device1);
-          testDeviceManager.addAttachedDevice(device2);
+      testUsingContext('defaults to not prompting when machine mode is true', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
 
-          final flutterCommand = DummyMachineFlutterCommand();
-          final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
-          await runner.run(<String>['dummy', '--machine']);
+        final flutterCommand = DummyMachineFlutterCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--machine']);
 
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices();
 
-          // Should NOT prompt, should print specify device help, and return null
-          expect(
-            testLogger.statusText,
-            contains('More than one device connected; please specify a device'),
-          );
-          expect(devices, isNull);
-        },
-        overrides: <Type, Generator>{
-          AnsiTerminal: () => terminal,
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
-        },
-      );
+        // Should NOT prompt, should print specify device help, and return null
+        expect(
+          testLogger.statusText,
+          contains('More than one device connected; please specify a device'),
+        );
+        expect(devices, isNull);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
 
-      testUsingContext(
-        'can override default canPrompt when machine mode is true',
-        () async {
-          testDeviceManager.addAttachedDevice(device1);
-          testDeviceManager.addAttachedDevice(device2);
+      testUsingContext('can override default canPrompt when machine mode is true', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
 
-          final flutterCommand = DummyMachineFlutterCommand();
-          final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
-          await runner.run(<String>['dummy', '--machine']);
+        final flutterCommand = DummyMachineFlutterCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--machine']);
 
-          // Explicitly set canPrompt to true, overriding outputMachineFormat default of false.
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: true);
+        // Explicitly set canPrompt to true, overriding outputMachineFormat default of false.
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: true);
 
-          // Should prompt the user even in machine mode.
-          expect(testLogger.statusText, contains('Connected devices:'));
-          expect(devices, <Device>[device1]);
-        },
-        overrides: <Type, Generator>{
-          AnsiTerminal: () => terminal,
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
-        },
-      );
+        // Should prompt the user even in machine mode.
+        expect(testLogger.statusText, contains('Connected devices:'));
+        expect(devices, <Device>[device1]);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
 
-      testUsingContext(
-        'can override default canPrompt when machine mode is false',
-        () async {
-          testDeviceManager.addAttachedDevice(device1);
-          testDeviceManager.addAttachedDevice(device2);
+      testUsingContext('can override default canPrompt when machine mode is false', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
 
-          final flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
+        final flutterCommand = DummyFlutterCommand();
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
 
-          // Should NOT prompt the user even if machine mode is false.
-          expect(
-            testLogger.statusText,
-            contains('More than one device connected; please specify a device'),
-          );
-          expect(devices, isNull);
-        },
-        overrides: <Type, Generator>{
-          AnsiTerminal: () => terminal,
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
-        },
-      );
+        // Should NOT prompt the user even if machine mode is false.
+        expect(
+          testLogger.statusText,
+          contains('More than one device connected; please specify a device'),
+        );
+        expect(devices, isNull);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
     });
 
     group('--dart-define-from-file', () {
@@ -1726,7 +1695,6 @@ name: test
             );
           },
           overrides: <Type, Generator>{
-            FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
             DeviceManager: () =>
                 FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
             Platform: () => FakePlatform(),
@@ -1758,7 +1726,6 @@ name: test
           await expectReturnsNormallyLater(runner.run(<String>['run', '--no-pub', '--no-hot']));
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
           DeviceManager: () =>
               FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
           Platform: () => FakePlatform()
@@ -1788,7 +1755,6 @@ name: test
           expect(buildInfo.dartDefines, contains('FLUTTER_VERSION=0.0.0'));
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         },
@@ -1805,7 +1771,6 @@ name: test
           expect(buildInfo.dartDefines, contains('FLUTTER_CHANNEL=master'));
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         },
@@ -1825,7 +1790,6 @@ name: test
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         },
@@ -1842,7 +1806,6 @@ name: test
           expect(buildInfo.dartDefines, contains('FLUTTER_FRAMEWORK_REVISION=11111'));
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         },
@@ -1859,7 +1822,6 @@ name: test
           expect(buildInfo.dartDefines, contains('FLUTTER_ENGINE_REVISION=abcde'));
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         },
@@ -1876,7 +1838,6 @@ name: test
           expect(buildInfo.dartDefines, contains('FLUTTER_DART_VERSION=12'));
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
         },

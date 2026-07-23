@@ -77,7 +77,7 @@ void main() {
     );
 
     testUsingContext(
-      'reports hcpp analytics from the enable-hcpp feature flag when not in the manifest',
+      'reports hcpp analytics default false when not in the manifest and no explicit flag is passed',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -94,7 +94,7 @@ void main() {
               commandHasTerminal: false,
               buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildAppBundleBuildMode: 'release',
-              buildBundleEnableHcpp: true,
+              buildBundleEnableHcpp: false,
             ),
           ),
         );
@@ -102,13 +102,12 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
-        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
     testUsingContext(
-      'reports hcpp analytics from an explicit --no-enable-hcpp over the enable-hcpp feature flag',
+      'reports hcpp analytics from an explicit --no-enable-hcpp flag',
       () async {
         final String projectPath = await createProject(
           tempDir,

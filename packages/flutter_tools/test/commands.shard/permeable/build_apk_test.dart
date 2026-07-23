@@ -141,7 +141,7 @@ void main() {
     );
 
     testUsingContext(
-      'reports hcpp analytics from the enable-hcpp feature flag when not in the manifest',
+      'reports hcpp analytics default false when not in the manifest and no explicit flag is passed',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -158,7 +158,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
-              buildApkEnableHcpp: true,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -166,13 +166,12 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
-        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
     testUsingContext(
-      'reports hcpp analytics from an explicit --no-enable-hcpp over the enable-hcpp feature flag',
+      'reports hcpp analytics from an explicit --no-enable-hcpp flag',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -203,7 +202,7 @@ void main() {
     );
 
     testUsingContext(
-      'reports hcpp analytics from an explicit manifest value over the feature flag and --enable-hcpp',
+      'reports hcpp analytics from an explicit manifest value over the default and --enable-hcpp',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -224,7 +223,7 @@ void main() {
         // An explicit manifest value also wins over an explicit --enable-hcpp
         // on build commands: unlike run/test, builds have no runtime override
         // channel, and the manifest injection never replaces an existing
-        // entry. The build flag only overrides the feature-flag default.
+        // entry. The build flag only overrides the tool's default.
         await runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']);
         expect(
           fakeAnalytics.sentEvents,
@@ -645,7 +644,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
-              '-Penable-hcpp=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -696,7 +695,7 @@ void main() {
               '-Psplit-debug-info=${tempDir.path}',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
-              '-Penable-hcpp=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -750,7 +749,7 @@ void main() {
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
-              '-Penable-hcpp=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -803,7 +802,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
-              '-Penable-hcpp=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -859,7 +858,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
-              '-Penable-hcpp=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
           ),
@@ -920,7 +919,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
-              '-Penable-hcpp=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
           ),

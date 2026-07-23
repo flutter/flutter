@@ -205,8 +205,8 @@ class BuildInfo {
   /// dependencies.
   final bool androidSkipBuildDependencyValidation;
 
-  /// The requested `enable-hcpp` default value (explicit CLI flag, or the feature
-  /// flag), passed to Gradle so the Flutter Gradle Plugin can inject the
+  /// The requested `enable-hcpp` default value (explicit CLI flag, or false
+  /// if not provided), passed to Gradle so the Flutter Gradle Plugin can inject the
   /// corresponding manifest metadata if absent.
   ///
   /// The injection only happens for application projects, and only when the
