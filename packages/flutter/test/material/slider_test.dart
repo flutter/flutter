@@ -5679,6 +5679,414 @@ void main() {
     );
     expect(tester.getSize(find.byType(Slider)), Size.zero);
   });
+  group('ScrollIntent support - Production Quality Tests', () {
+    const discreteSliderDivisions = 10;
+    const double discreteSliderLineIncrement = 1.0 / discreteSliderDivisions;
+    const pageIncrementMultiplier = 5.0;
+
+    Widget buildTestSlider({
+      required double initialValue,
+      required ValueChanged<double> onChanged,
+      int? divisions,
+      SliderScrollIncrementCalculator? scrollIncrementCalculator,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: initialValue,
+              divisions: divisions,
+              scrollIncrementCalculator: scrollIncrementCalculator,
+              onChanged: onChanged,
+              autofocus: true,
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('Calculator is invoked when ScrollIntent is received', (WidgetTester tester) async {
+      var calculatorInvokeCount = 0;
+      var value = 0.5;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          divisions: discreteSliderDivisions,
+          scrollIncrementCalculator: (SliderScrollIncrementDetails details) {
+            calculatorInvokeCount++;
+            return details.semanticActionUnit;
+          },
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        calculatorInvokeCount,
+        equals(0),
+        reason: 'Calculator should not be called during build',
+      );
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull, reason: 'Slider should have focus');
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        calculatorInvokeCount,
+        equals(1),
+        reason: 'Calculator should be invoked once per ScrollIntent',
+      );
+    });
+
+    testWidgets('Calculator receives correct increment type (line vs page)', (
+      WidgetTester tester,
+    ) async {
+      final receivedTypes = <SliderScrollIncrementType>[];
+      var value = 0.5;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          divisions: discreteSliderDivisions,
+          scrollIncrementCalculator: (SliderScrollIncrementDetails details) {
+            receivedTypes.add(details.type);
+            return details.semanticActionUnit;
+          },
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        receivedTypes.last,
+        SliderScrollIncrementType.line,
+        reason: 'Calculator should receive line type when ScrollIncrementType.line is used',
+      );
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode.context!,
+        const ScrollIntent(direction: AxisDirection.right, type: ScrollIncrementType.page),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        receivedTypes.last,
+        SliderScrollIncrementType.page,
+        reason: 'Calculator should receive page type when ScrollIncrementType.page is used',
+      );
+    });
+
+    testWidgets('Calculator receives semanticActionUnit based on slider configuration', (
+      WidgetTester tester,
+    ) async {
+      final receivedUnits = <double>[];
+      var value = 0.0;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          divisions: discreteSliderDivisions,
+          scrollIncrementCalculator: (SliderScrollIncrementDetails details) {
+            receivedUnits.add(details.semanticActionUnit);
+            return details.semanticActionUnit;
+          },
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        receivedUnits.last,
+        moreOrLessEquals(discreteSliderLineIncrement, epsilon: 0.001),
+        reason: 'semanticActionUnit should be 1.0 / divisions for discrete slider',
+      );
+    });
+
+    testWidgets('Slider value changes by the amount returned by calculator', (
+      WidgetTester tester,
+    ) async {
+      const customLineIncrement = 0.15;
+      var value = 0.0;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          scrollIncrementCalculator: (SliderScrollIncrementDetails details) {
+            return customLineIncrement;
+          },
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final initialValue = value;
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        value,
+        moreOrLessEquals(initialValue + customLineIncrement, epsilon: 0.001),
+        reason: 'Slider value should increase by calculator return value ($customLineIncrement)',
+      );
+    });
+
+    testWidgets('Default calculator applies 5x multiplier for page increments', (
+      WidgetTester tester,
+    ) async {
+      var value = 0.0;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          divisions: discreteSliderDivisions,
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+      final afterLineIncrement = value;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          divisions: discreteSliderDivisions,
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode.context!,
+        const ScrollIntent(direction: AxisDirection.right, type: ScrollIncrementType.page),
+      );
+      await tester.pumpAndSettle();
+
+      final double pageIncrement = value - afterLineIncrement;
+      final lineIncrement = afterLineIncrement;
+
+      expect(
+        pageIncrement,
+        moreOrLessEquals(lineIncrement * pageIncrementMultiplier, epsilon: 0.001),
+        reason:
+            'Default calculator should apply ${pageIncrementMultiplier}x multiplier for page increments',
+      );
+    });
+
+    testWidgets('ScrollIntent respects text direction (RTL)', (WidgetTester tester) async {
+      var value = 0.5;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: Center(
+                child: Slider(
+                  value: value,
+                  divisions: discreteSliderDivisions,
+                  onChanged: (double newValue) {
+                    value = newValue;
+                  },
+                  autofocus: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+
+      expect(value, lessThan(0.5), reason: 'In RTL layout, right direction should decrease value');
+    });
+
+    testWidgets('All scroll directions are handled correctly', (WidgetTester tester) async {
+      final List<(AxisDirection, bool, String)> directions = [
+        (AxisDirection.right, true, 'right should increase'),
+        (AxisDirection.left, false, 'left should decrease'),
+        (AxisDirection.up, true, 'up should increase'),
+        (AxisDirection.down, false, 'down should decrease'),
+      ];
+
+      for (final (direction, shouldIncrease, description) in directions) {
+        var value = 0.5;
+
+        await tester.pumpWidget(
+          buildTestSlider(
+            initialValue: value,
+            divisions: discreteSliderDivisions,
+            onChanged: (double newValue) {
+              value = newValue;
+            },
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+        expect(focusNode?.context, isNotNull);
+
+        Actions.maybeInvoke<ScrollIntent>(focusNode!.context!, ScrollIntent(direction: direction));
+        await tester.pumpAndSettle();
+
+        if (shouldIncrease) {
+          expect(value, greaterThan(0.5), reason: description);
+        } else {
+          expect(value, lessThan(0.5), reason: description);
+        }
+      }
+    });
+
+    testWidgets('Continuous slider works with ScrollIntent', (WidgetTester tester) async {
+      var value = 0.0;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+
+      expect(value, greaterThan(0.0), reason: 'Continuous slider should update');
+    });
+
+    testWidgets('ScrollIntent respects min/max boundaries', (WidgetTester tester) async {
+      var value = 0.95;
+
+      await tester.pumpWidget(
+        buildTestSlider(
+          initialValue: value,
+          divisions: discreteSliderDivisions,
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right, type: ScrollIncrementType.page),
+      );
+      await tester.pumpAndSettle();
+
+      expect(value, lessThanOrEqualTo(1.0), reason: 'Should not exceed max value');
+    });
+
+    testWidgets('ScrollIntent triggers onChangeStart and onChangeEnd', (WidgetTester tester) async {
+      var startCalled = false;
+      var endCalled = false;
+      var value = 0.5;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Slider(
+                value: value,
+                divisions: discreteSliderDivisions,
+                onChangeStart: (double newValue) {
+                  startCalled = true;
+                },
+                onChangeEnd: (double newValue) {
+                  endCalled = true;
+                },
+                onChanged: (double newValue) {
+                  value = newValue;
+                },
+                autofocus: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final FocusNode? focusNode = FocusManager.instance.primaryFocus;
+      expect(focusNode?.context, isNotNull);
+
+      Actions.maybeInvoke<ScrollIntent>(
+        focusNode!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+      await tester.pumpAndSettle();
+
+      expect(startCalled, isTrue, reason: 'onChangeStart should be called');
+      expect(endCalled, isTrue, reason: 'onChangeEnd should be called');
+    });
+  });
 }
 
 // A slider value indicator that's a circle with a fixed size and

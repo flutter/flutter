@@ -40,6 +40,38 @@ import 'theme.dart';
 /// value indicator in a [RenderBox] that appears in the [Overlay].
 typedef PaintValueIndicator = void Function(PaintingContext context, Offset offset);
 
+/// Signature for a function that calculates the increment for scroll inputs.
+typedef SliderScrollIncrementCalculator = double Function(SliderScrollIncrementDetails details);
+
+/// Details passed to [SliderScrollIncrementCalculator].
+class SliderScrollIncrementDetails {
+  /// Creates a [SliderScrollIncrementDetails].
+  const SliderScrollIncrementDetails({required this.type, required this.semanticActionUnit});
+
+  /// The type of scroll increment (line or page) of the [ScrollIntent].
+  final SliderScrollIncrementType type;
+
+  /// The amount by which the slider value changes during a semantic adjustment.
+  ///
+  /// This value represents the standard increment or decrement applied to the
+  /// slider when an accessibility service (like TalkBack or VoiceOver) requests
+  /// a change. It serves as a baseline configuration or reference point that
+  /// custom calculators can use to determine final scroll increments.
+  ///
+  /// For discrete sliders, this is calculated as `1.0 / divisions`.
+  /// For continuous sliders, it defaults to a platform-dependent value: 0.1 for iOS or macOS, and 0.05 otherwise.
+  final double semanticActionUnit;
+}
+
+/// Types of scroll increments.
+enum SliderScrollIncrementType {
+  /// Small increment (e.g., mouse wheel scroll).
+  line,
+
+  /// Large increment (e.g., Page Up/Down).
+  page,
+}
+
 enum _SliderType { material, adaptive }
 
 /// Possible ways for a user to interact with a [Slider].
@@ -190,6 +222,7 @@ class Slider extends StatefulWidget {
     this.allowedInteraction,
     this.padding,
     this.showValueIndicator,
+    this.scrollIncrementCalculator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -242,6 +275,7 @@ class Slider extends StatefulWidget {
     this.autofocus = false,
     this.allowedInteraction,
     this.showValueIndicator,
+    this.scrollIncrementCalculator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -577,6 +611,46 @@ class Slider extends StatefulWidget {
   /// null, defaults to [ShowValueIndicator.onlyForDiscrete].
   final ShowValueIndicator? showValueIndicator;
 
+  /// Calculates the increment amount for scroll inputs.
+  ///
+  /// If null, a default calculator is used that handles both
+  /// [SliderScrollIncrementType.line] and [SliderScrollIncrementType.page].
+  ///
+  /// The calculator receives a [SliderScrollIncrementDetails] object containing:
+  /// - [SliderScrollIncrementDetails.type]: Whether this is a line or page scroll
+  /// - [SliderScrollIncrementDetails.semanticActionUnit]: The base increment unit
+  ///
+  /// This calculator determines how much the slider value changes when a
+  /// [ScrollIntent] is received.
+  ///
+  /// This property triggers exclusively when the widget intercepts a [ScrollIntent]
+  /// (such as from mouse wheel scrolls or gamepad axis movements). It does not
+  /// apply to traditional directional navigation, regular touch drags, or direct
+  /// track clicks.
+  ///
+  /// The function receives a [SliderScrollIncrementDetails] object. The
+  /// returned [double] value represents the actual change applied to the slider
+  /// value, which ranges from 0.0 to 1.0.
+  ///
+  /// If this property is null, a default calculator is used. The default
+  /// behavior returns `semanticActionUnit` for line scrolls and
+  /// `semanticActionUnit * 5` for page scrolls. The 5x multiplier is a
+  /// heuristic to make page jumps significantly larger than line scrolls
+  /// on the slider track.
+  ///
+  /// For example, to use 10x the increment for page scrolls:
+  /// ```dart
+  /// Slider(
+  ///   scrollIncrementCalculator: (details) {
+  ///     if (details.type == SliderScrollIncrementType.page) {
+  ///       return details.semanticActionUnit * 10;
+  ///     }
+  ///     return details.semanticActionUnit;
+  ///   },
+  /// )
+  /// ```
+  final SliderScrollIncrementCalculator? scrollIncrementCalculator;
+
   /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
   /// Defaults to true.
   ///
@@ -621,6 +695,12 @@ class Slider extends StatefulWidget {
     );
     properties.add(ObjectFlagProperty<FocusNode>.has('focusNode', focusNode));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'));
+    properties.add(
+      ObjectFlagProperty<SliderScrollIncrementCalculator>.has(
+        'scrollIncrementCalculator',
+        scrollIncrementCalculator,
+      ),
+    );
   }
 }
 
@@ -695,7 +775,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _convert(widget.value);
     _actionMap = <Type, Action<Intent>>{
-      _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(onInvoke: _actionHandler),
+      _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(onInvoke: _handleAdjustSliderIntent),
+      ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _handleScrollIntent),
     };
     if (widget.focusNode == null) {
       // Only create a new node if the widget doesn't have one.
@@ -740,18 +821,99 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     widget.onChangeEnd?.call(_lerp(value));
   }
 
-  void _actionHandler(_AdjustSliderIntent intent) {
-    final TextDirection directionality = Directionality.of(_renderObjectKey.currentContext!);
-    final bool shouldIncrease = switch (intent.type) {
-      _SliderAdjustmentType.up => true,
-      _SliderAdjustmentType.down => false,
-      _SliderAdjustmentType.left => directionality == TextDirection.rtl,
-      _SliderAdjustmentType.right => directionality == TextDirection.ltr,
+  Object _handleAdjustSliderIntent(_AdjustSliderIntent intent) {
+    _handleDirectionalInput(
+      shouldIncrease: switch (intent.type) {
+        _SliderAdjustmentType.up => true,
+        _SliderAdjustmentType.down => false,
+        _SliderAdjustmentType.left => _isRtl,
+        _SliderAdjustmentType.right => !_isRtl,
+      },
+    );
+    return true;
+  }
+
+  Object _handleScrollIntent(ScrollIntent intent) {
+    final double increment = _calculateScrollIncrement(intent.type);
+
+    if (increment == 0) {
+      return false;
+    }
+
+    _handleDirectionalInputWithIncrement(
+      shouldIncrease: switch (intent.direction) {
+        AxisDirection.right => !_isRtl,
+        AxisDirection.left => _isRtl,
+        AxisDirection.up => true,
+        AxisDirection.down => false,
+      },
+      increment: increment,
+    );
+
+    return true;
+  }
+
+  double _calculateScrollIncrement(ScrollIncrementType scrollIncrementType) {
+    final SliderScrollIncrementCalculator calculator =
+        widget.scrollIncrementCalculator ?? _defaultScrollIncrementCalculator;
+
+    return calculator(
+      SliderScrollIncrementDetails(
+        type: switch (scrollIncrementType) {
+          ScrollIncrementType.line => SliderScrollIncrementType.line,
+          ScrollIncrementType.page => SliderScrollIncrementType.page,
+        },
+        semanticActionUnit: _semanticActionUnit,
+      ),
+    );
+  }
+
+  // The default page multiplier of 5 is a heuristic: page scrolls should be
+  // noticeably larger than line scrolls on the slider track.
+  static double _defaultScrollIncrementCalculator(SliderScrollIncrementDetails details) {
+    return switch (details.type) {
+      SliderScrollIncrementType.line => details.semanticActionUnit,
+      SliderScrollIncrementType.page => details.semanticActionUnit * 5,
     };
+  }
+
+  void _handleDirectionalInput({required bool shouldIncrease}) {
+    if (!_enabled) {
+      return;
+    }
+    final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
+    if (shouldIncrease) {
+      slider.increaseAction();
+    } else {
+      slider.decreaseAction();
+    }
+  }
+
+  void _handleDirectionalInputWithIncrement({
+    required bool shouldIncrease,
+    required double increment,
+  }) {
+    if (!_enabled) {
+      return;
+    }
 
     final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
-    return shouldIncrease ? slider.increaseAction() : slider.decreaseAction();
+
+    double newValue = shouldIncrease ? slider.value + increment : slider.value - increment;
+    newValue = clampDouble(newValue, 0.0, 1.0);
+
+    if (slider.isDiscrete) {
+      newValue = (newValue * slider.divisions!).round() / slider.divisions!;
+    }
+
+    if (slider.onChanged != null) {
+      slider.onChangeStart?.call(_lerp(slider.value));
+      slider.onChanged!(newValue);
+      slider.onChangeEnd?.call(_lerp(newValue));
+    }
   }
+
+  bool get _isRtl => Directionality.of(_renderObjectKey.currentContext!) == TextDirection.rtl;
 
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
@@ -800,6 +962,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(value <= widget.max);
     assert(value >= widget.min);
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
+  }
+
+  double get _semanticActionUnit {
+    final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
+    return slider._semanticActionUnit;
   }
 
   @override
