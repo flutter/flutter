@@ -25,6 +25,11 @@ class ShaderBundleData {
     size_t element_size_in_bytes = 0u;
     size_t total_size_in_bytes = 0u;
     std::optional<size_t> array_elements = std::nullopt;
+    // Component count of a single column. For non-matrix types this is the
+    // vector length; for matrices this is the row count.
+    size_t vec_size = 0u;
+    // The number of columns. 1 for scalars and vectors; N for an NxN matrix.
+    size_t columns = 0u;
   };
 
   struct ShaderUniformStruct {

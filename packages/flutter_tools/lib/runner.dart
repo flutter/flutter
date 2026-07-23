@@ -243,6 +243,8 @@ Future<int> _handleToolErrorImpl(
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
+    // Flutter tool crash analytics benefits from the concrete Dart error type.
+    // The tool is not obfuscated, and collapsing unknown types to Object loses useful signal.
     // ignore: avoid_type_to_string
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
 

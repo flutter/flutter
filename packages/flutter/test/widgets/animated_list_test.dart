@@ -1204,6 +1204,81 @@ void main() {
     expect(itemsSeparatorsTexts[2].data, 'item 1');
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/186361
+  testWidgets(
+    'AnimatedList.separated can remove the last item while another item is still animating out',
+    (WidgetTester tester) async {
+      Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+      }
+
+      Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 10.0, child: Center(child: Text('separator $index')));
+      }
+
+      Widget removedSeparatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 10.0, child: Center(child: Text('removing separator $index')));
+      }
+
+      AnimatedRemovedItemBuilder removedItemBuilder(int index) {
+        return (BuildContext context, Animation<double> animation) {
+          return SizedBox(height: 100.0, child: Center(child: Text('removing item $index')));
+        };
+      }
+
+      final listKey = GlobalKey<AnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedList.separated(
+            key: listKey,
+            initialItemCount: 3,
+            itemBuilder: itemBuilder,
+            separatorBuilder: separatorBuilder,
+            removedSeparatorBuilder: removedSeparatorBuilder,
+          ),
+        ),
+      );
+
+      // Start removing a non-last item (index 0) with a long animation.
+      listKey.currentState!.removeItem(
+        0,
+        removedItemBuilder(0),
+        duration: const Duration(seconds: 10),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // While the first removal is still animating, remove the new last item.
+      // Before the fix this triggered an "itemIndex >= 0 && itemIndex < _itemsCount"
+      // assertion inside _SliverAnimatedMultiBoxAdaptorState.removeItem.
+      listKey.currentState!.removeItem(
+        1,
+        removedItemBuilder(2),
+        duration: const Duration(milliseconds: 100),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('removing item 0'), findsOneWidget);
+      expect(find.text('removing item 2'), findsOneWidget);
+      // The surviving item is the originally-middle item. The itemBuilder
+      // rebuilds with its current user-facing index, which is 0 now.
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsNothing);
+      expect(find.text('item 2'), findsNothing);
+
+      await tester.pumpAndSettle();
+
+      // All removal animations finished and the surviving item is alone.
+      expect(find.text('removing item 0'), findsNothing);
+      expect(find.text('removing item 2'), findsNothing);
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsNothing);
+      expect(find.text('item 2'), findsNothing);
+    },
+  );
+
   testWidgets('AnimatedList does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final controller = ScrollController();

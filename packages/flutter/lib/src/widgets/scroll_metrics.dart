@@ -89,6 +89,10 @@ mixin ScrollMetrics {
   ///
   /// This value is typically greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
+  ///
+  /// For scrollables that lazily construct their contents, such as
+  /// [ListView.builder], this value can be an estimate that changes as more
+  /// children are laid out.
   double get maxScrollExtent;
 
   /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.

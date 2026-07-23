@@ -65,6 +65,7 @@ body:
         - two_dimensional_scrollables
         - url_launcher
         - vector_graphics
+        - vector_math
         - video_player
         - web_benchmarks
         - webview_flutter

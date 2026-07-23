@@ -31,11 +31,10 @@ LazyGlyphAtlas::LazyGlyphAtlas(
 
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
-void LazyGlyphAtlas::AddTextFrame(
-    const std::shared_ptr<TextFrame>& frame,
-    Point position,
-    const Matrix& transform,
-    const std::optional<GlyphProperties>& properties) {
+void LazyGlyphAtlas::AddTextFrame(const std::shared_ptr<TextFrame>& frame,
+                                  Point position,
+                                  const Matrix& transform,
+                                  const GlyphProperties& properties) {
   FML_DCHECK(alpha_data_.atlas == nullptr && color_data_.atlas == nullptr);
   AtlasData& data = GetData(frame->GetAtlasType());
   data.renderable_frames.emplace_back(

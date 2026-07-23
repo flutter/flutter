@@ -9,7 +9,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:stack_trace/stack_trace.dart';
@@ -64,16 +64,7 @@ abstract interface class CliEnum implements Enum {
 }
 
 /// Converts `fooBar` to `FooBar`.
-///
-/// This uses [toBeginningOfSentenceCase](https://pub.dev/documentation/intl/latest/intl/toBeginningOfSentenceCase.html),
-/// with the input and return value of non-nullable.
-String sentenceCase(String str, [String? locale]) {
-  if (str.isEmpty) {
-    return str;
-  }
-  // TODO(christopherfujino): Remove this check after the next release of intl
-  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
-}
+String sentenceCase(String str) => str.isEmpty ? str : '${str[0].toUpperCase()}${str.substring(1)}';
 
 /// Converts `foo_bar` to `Foo Bar`.
 String snakeCaseToTitleCase(String snakeCaseString) {
@@ -88,8 +79,8 @@ String toPrettyJson(Object jsonable) {
   return '$value\n';
 }
 
-final _singleDigitPrecision = NumberFormat('0.0');
-final _decimalPattern = NumberFormat.decimalPattern();
+final _singleDigitPrecision = intl.NumberFormat('0.0');
+final _decimalPattern = intl.NumberFormat.decimalPattern();
 
 String getElapsedAsMinutesOrSeconds(Duration duration) {
   if (duration.inMinutes < 1) {
@@ -610,6 +601,16 @@ extension StackTraceTransform<T> on Stream<T> {
 
 final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
   (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
+);
+
+/// A line decoder that permits malformed UTF-8 bytes.
+///
+/// Used for displaying tool output (compiler, tests, debuggers) where invalid
+/// UTF-8 is expected from external sources. Invalid UTF-8 sequences are decoded
+/// to replacement characters (U+FFFD) without warnings.
+final utf8AllowMalformedLineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) =>
+      stream.transformWithCallSite(utf8AllowMalformed.decoder).transform(const LineSplitter()),
 );
 
 /// Formats a list of rows into a table with aligned columns.

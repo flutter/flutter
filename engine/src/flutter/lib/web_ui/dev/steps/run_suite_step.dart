@@ -201,12 +201,14 @@ class RunSuiteStep implements PipelineStep {
         rendererName = singleThreaded ? 'skwasm_st' : 'skwasm';
       }
     }
+    final bool isWebParagraph = suite.runConfig.enableWebParagraph;
 
     final dimensions = <String, String>{
       'Browser': suite.runConfig.browser.name,
       if (isWasm) 'Wasm': 'true',
       'Renderer': rendererName,
       'CanvasKitVariant': ?variant?.name,
+      if (isWebParagraph) 'WebParagraph': 'true',
     };
     final skiaClient = SkiaGoldClient(workDirectory, dimensions: dimensions);
 

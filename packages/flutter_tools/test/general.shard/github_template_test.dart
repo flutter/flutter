@@ -167,6 +167,10 @@ void main() {
           '_Exception',
         );
       });
+
+      testWithoutContext('custom Exception', () {
+        expect(GitHubTemplateCreator.sanitizedCrashException(FakeException()), 'FakeException');
+      });
     });
 
     group('new issue template URL', () {
@@ -299,6 +303,11 @@ class FakeError extends Error {
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
 
+  @override
+  String toString() => 'PII to ignore';
+}
+
+class FakeException implements Exception {
   @override
   String toString() => 'PII to ignore';
 }

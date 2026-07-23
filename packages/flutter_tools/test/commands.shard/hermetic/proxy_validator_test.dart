@@ -20,8 +20,8 @@ void main() {
       InternetAddressType type = InternetAddressType.any,
     }) async {
       final interfaces = <FakeNetworkInterface>[
-        FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('127.0.0.1')]),
-        FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('::1')]),
+        FakeNetworkInterface(<FakeInterfaceAddress>[const FakeInterfaceAddress('127.0.0.1')]),
+        FakeNetworkInterface(<FakeInterfaceAddress>[const FakeInterfaceAddress('::1')]),
       ];
 
       return Future<List<NetworkInterface>>.value(interfaces);
@@ -225,7 +225,7 @@ void main() {
 }
 
 class FakeNetworkInterface extends NetworkInterface {
-  FakeNetworkInterface(List<FakeInternetAddress> addresses)
+  FakeNetworkInterface(List<FakeInterfaceAddress> addresses)
     : super(FakeNetworkInterfaceDelegate(addresses));
 
   @override
@@ -235,10 +235,10 @@ class FakeNetworkInterface extends NetworkInterface {
 class FakeNetworkInterfaceDelegate implements io.NetworkInterface {
   FakeNetworkInterfaceDelegate(this._fakeAddresses);
 
-  final List<FakeInternetAddress> _fakeAddresses;
+  final List<FakeInterfaceAddress> _fakeAddresses;
 
   @override
-  List<io.InternetAddress> get addresses => _fakeAddresses;
+  List<io.InterfaceAddress> get addresses => _fakeAddresses;
 
   @override
   int get index => addresses.length;
@@ -247,8 +247,8 @@ class FakeNetworkInterfaceDelegate implements io.NetworkInterface {
   String get name => 'FakeNetworkInterfaceDelegate$index';
 }
 
-class FakeInternetAddress implements io.InternetAddress {
-  const FakeInternetAddress(this._fakeAddress);
+class FakeInterfaceAddress implements io.InterfaceAddress {
+  const FakeInterfaceAddress(this._fakeAddress);
 
   final String _fakeAddress;
 
@@ -275,4 +275,10 @@ class FakeInternetAddress implements io.InternetAddress {
 
   @override
   io.InternetAddressType get type => throw UnimplementedError();
+
+  @override
+  int get prefixLength => 24;
+
+  @override
+  InternetAddress? get broadcast => null;
 }

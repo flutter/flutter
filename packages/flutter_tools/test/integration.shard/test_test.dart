@@ -495,7 +495,7 @@ void main() {
       final HttpClientRequest request = await client.getUrl(devToolsUri);
       final HttpClientResponse response = await request.close();
       final String content = await response.transform(utf8.decoder).join();
-      expect(content, contains('DevTools'));
+      expect(content, contains('The Flutter Authors'));
     } finally {
       await sub?.cancel();
       process?.kill();

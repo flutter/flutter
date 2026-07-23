@@ -50,6 +50,17 @@ class RuntimeStage {
 
   void SetClean();
 
+  /// Stable per-source identifier used to namespace this stage's entrypoint
+  /// in the shared shader registry, so that user-supplied runtime shaders
+  /// cannot collide with engine-internal shaders or with shaders from other
+  /// asset paths. Defaults to a process-unique fallback assigned at decode
+  /// time. Should be overwritten with a stable id (typically the asset path
+  /// the stage was loaded from) so that hot reload of the same asset
+  /// continues to evict and replace the same registry slot.
+  void SetLibraryId(std::string library_id);
+
+  const std::string& GetLibraryId() const;
+
  private:
   explicit RuntimeStage(std::shared_ptr<fml::Mapping> payload);
 
@@ -59,6 +70,7 @@ class RuntimeStage {
   std::shared_ptr<fml::Mapping> code_mapping_;
   std::vector<RuntimeUniformDescription> uniforms_;
   std::vector<DescriptorSetLayout> descriptor_set_layouts_;
+  std::string library_id_;
   bool is_dirty_ = true;
 
   RuntimeStage(const RuntimeStage&) = delete;

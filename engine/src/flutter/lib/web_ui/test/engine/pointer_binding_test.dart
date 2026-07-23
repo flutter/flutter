@@ -3042,51 +3042,47 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, isEmpty);
   });
 
-  testWithSemantics(
-    'Dedupes click if pointer down/up flushed recently',
-    () async {
-      expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-      expect(PointerBinding.clickDebouncer.isDebouncing, false);
+  testWithSemantics('Dedupes click if pointer down/up flushed recently', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
-      final DomElement testElement = createDomElement('flt-semantics');
-      testElement.setAttribute('flt-tappable', '');
-      view.dom.semanticsHost.appendChild(testElement);
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
 
-      testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(context.primaryDown());
 
-      // Simulate the user holding the pointer down for some time before releasing,
-      // such that the pointerup event happens close to timer expiration. This
-      // will create the situation that the click event arrives just after the
-      // pointerup is flushed. Forwarding the click to the framework would look
-      // like a double-click, so the click event is deduped.
-      await Future<void>.delayed(const Duration(milliseconds: 190));
+    // Simulate the user holding the pointer down for some time before releasing,
+    // such that the pointerup event happens close to timer expiration. This
+    // will create the situation that the click event arrives just after the
+    // pointerup is flushed. Forwarding the click to the framework would look
+    // like a double-click, so the click event is deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 190));
 
-      testElement.dispatchEvent(context.primaryUp());
-      expect(PointerBinding.clickDebouncer.isDebouncing, true);
-      expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
+    testElement.dispatchEvent(context.primaryUp());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+    expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
 
-      // Wait for the timer to expire to make sure pointer events are flushed.
-      await Future<void>.delayed(const Duration(milliseconds: 20));
+    // Wait for the timer to expire to make sure pointer events are flushed.
+    await Future<void>.delayed(const Duration(milliseconds: 20));
 
-      expect(
-        reason:
-            'Queued up events should be flushed to the framework because the '
-            'time expired before the click event arrived.',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
-      );
+    expect(
+      reason:
+          'Queued up events should be flushed to the framework because the '
+          'time expired before the click event arrived.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
+    );
 
-      final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
-        'clientX': testElement.getBoundingClientRect().x,
-        'clientY': testElement.getBoundingClientRect().y,
-      });
-      PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
-      expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
-    },
-    skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows,
-  );
+    expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   // Regression test for https://github.com/flutter/flutter/issues/147050
   //
@@ -3098,53 +3094,49 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   // followed by a "click". Since we sent the "pointerdown" and "pointerup" to
   // the framework already, the framework registered a tap. Forwarding the
   // "click" would lead to a double-tap. This was the bug.
-  testWithSemantics(
-    'Dedupes click if pointer up happened recently without debouncing',
-    () async {
-      expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-      expect(PointerBinding.clickDebouncer.isDebouncing, false);
+  testWithSemantics('Dedupes click if pointer up happened recently without debouncing', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
-      final DomElement testElement = createDomElement('flt-semantics');
-      testElement.setAttribute('flt-tappable', '');
-      view.dom.semanticsHost.appendChild(testElement);
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
 
-      // Begin a long-press with a "pointerdown".
-      testElement.dispatchEvent(context.primaryDown());
+    // Begin a long-press with a "pointerdown".
+    testElement.dispatchEvent(context.primaryDown());
 
-      // Expire the timer causing the debouncer to reset itself.
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-      expect(
-        reason: '"pointerdown" should be flushed when the timer expires.',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down],
-      );
-      pointerPackets.clear();
+    // Expire the timer causing the debouncer to reset itself.
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    expect(
+      reason: '"pointerdown" should be flushed when the timer expires.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down],
+    );
+    pointerPackets.clear();
 
-      // Send a "pointerup" while the debouncer is not debouncing anything.
-      testElement.dispatchEvent(context.primaryUp());
+    // Send a "pointerup" while the debouncer is not debouncing anything.
+    testElement.dispatchEvent(context.primaryUp());
 
-      // A standalone "pointerup" should not start debouncing anything.
-      expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
-      expect(
-        reason: 'The "pointerup" should be forwarded to the framework immediately',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.up],
-      );
+    // A standalone "pointerup" should not start debouncing anything.
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(
+      reason: 'The "pointerup" should be forwarded to the framework immediately',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.up],
+    );
 
-      // Use a delay that's short enough for the click to be deduped.
-      await Future<void>.delayed(const Duration(milliseconds: 10));
+    // Use a delay that's short enough for the click to be deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 10));
 
-      final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
-        'clientX': testElement.getBoundingClientRect().x,
-        'clientY': testElement.getBoundingClientRect().y,
-      });
-      PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
-      expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
-    },
-    skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows,
-  );
+    expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   testWithSemantics(
     'Forwards click if enough time passed after the last flushed pointerup',

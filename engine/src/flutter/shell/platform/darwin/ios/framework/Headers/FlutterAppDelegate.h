@@ -30,16 +30,22 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, strong, nullable) UIWindow* window;
 
 /**
- * The `FlutterPluginRegistrant` that will be used when FlutterViewControllers
- * are instantiated from nibs.
+ * A user-assignable `FlutterPluginRegistrant` for deferred plugin registration.
  *
- * The `FlutterAppDelegate` itself can be passed in without creating a retain
- * cycle.
+ * For applications adopting the `UISceneDelegate` lifecycle, the recommended approach is to update
+ * the application's `UIApplicationDelegate` to conform to `FlutterImplicitEngineDelegate` and
+ * perform plugin registration via the generated plugin registrant in the
+ * `didInitializeImplicitFlutterEngine` callback.
  *
- * This was introduced to help users migrate code from the FlutterAppDelegate
- * when UISceneDelegate was adopted. Using
- * FlutterViewController.pluginRegistrant should be preferred since it doesn't
- * rely on the FlutterAppDelegate.
+ * Alternatively, assigning a `FlutterPluginRegistrant` to this property allows Flutter to
+ * automatically handle plugin registration when a `FlutterEngine` becomes available, avoiding
+ * the need to implement delegate callbacks.
+ *
+ * The `FlutterAppDelegate` itself can be assigned to this property without creating a
+ * retain cycle (e.g., `self.pluginRegistrant = self;`).
+ *
+ * @see |FlutterImplicitEngineDelegate|
+ * @see https://docs.flutter.dev/release/breaking-changes/uiscenedelegate
  */
 @property(nonatomic, strong, nullable) NSObject<FlutterPluginRegistrant>* pluginRegistrant;
 

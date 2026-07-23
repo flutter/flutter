@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/process_text_utils.dart';
+import 'process_text_utils.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);

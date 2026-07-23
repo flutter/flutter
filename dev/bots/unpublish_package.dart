@@ -30,7 +30,7 @@ const String baseUrl = 'https://storage.googleapis.com/flutter_infra_release';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
-class UnpublishException implements Exception {
+final class UnpublishException implements Exception {
   UnpublishException(this.message, [this.result]);
 
   final String message;
@@ -39,9 +39,7 @@ class UnpublishException implements Exception {
 
   @override
   String toString() {
-    // ignore: avoid_type_to_string
-    var output = runtimeType.toString();
-    output += ': $message';
+    var output = '$UnpublishException: $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';

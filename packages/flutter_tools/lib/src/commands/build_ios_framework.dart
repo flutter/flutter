@@ -798,7 +798,7 @@ end
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+            kTargetPlatform: TargetPlatform.ios.getName(),
             kIosArchs: defaultIOSArchsForEnvironment(
               sdkType,
               globals.artifacts!,

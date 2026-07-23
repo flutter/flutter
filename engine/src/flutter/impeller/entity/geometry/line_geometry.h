@@ -18,7 +18,7 @@ class LineGeometry final : public Geometry {
   static Scalar ComputePixelHalfWidth(const Matrix& transform, Scalar width);
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;

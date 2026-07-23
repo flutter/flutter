@@ -40,6 +40,11 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   final TextEditingController _offsetDxController = TextEditingController();
   final TextEditingController _offsetDyController = TextEditingController();
 
+  late bool _regularSizedToContent;
+  late bool _regularResizable;
+  late bool _dialogSizedToContent;
+  late bool _dialogResizable;
+
   late bool _flipX;
   late bool _flipY;
   late bool _slideX;
@@ -62,6 +67,10 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _dialogHeightController.addListener(_updateDialogSize);
     _dialogWidthController.text = widget.settings.dialogSize.width.toString();
     _dialogHeightController.text = widget.settings.dialogSize.height.toString();
+    _regularSizedToContent = widget.settings.regularSizedToContent;
+    _regularResizable = widget.settings.regularResizable;
+    _dialogSizedToContent = widget.settings.dialogSizedToContent;
+    _dialogResizable = widget.settings.dialogResizable;
     _offsetDxController.text = widget.settings.positioner.offset.dx.toString();
     _offsetDyController.text = widget.settings.positioner.offset.dy.toString();
     _flipX = widget.settings.positioner.constraintAdjustment.flipX;
@@ -91,9 +100,9 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 child: ListView(
                   children: [
                     _buildRegularEditor(),
-                    const Divider(),
+                    _buildDivider(),
                     _buildDialogEditor(),
-                    const Divider(),
+                    _buildDivider(),
                     _buildTooltipEditor(),
                   ],
                 ),
@@ -109,33 +118,41 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   Widget _buildRegularEditor() {
     return ListTile(
       title: const Text('Regular'),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: .start,
         children: [
-          Expanded(
-            child: TextFormField(
-              controller: _regularWidthController,
-              decoration: const InputDecoration(labelText: 'Initial width'),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: TextFormField(
-              controller: _regularHeightController,
-              decoration: const InputDecoration(labelText: 'Initial height'),
-            ),
-          ),
-          const SizedBox(height: 20),
           Row(
             children: [
-              const Text('Decorations'),
-              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _regularWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                  enabled: !_regularSizedToContent,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _regularHeightController,
+                  decoration: const InputDecoration(labelText: 'Initial height'),
+                  enabled: !_regularSizedToContent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const SizedBox(width: 100, child: Text('Sized to content')),
               Switch(
-                value: widget.settings.regularDecorated,
-                onChanged: (bool value) {
-                  setState(() {
-                    widget.settings.regularDecorated = value;
-                  });
-                },
+                value: _regularSizedToContent,
+                onChanged: (bool value) => setState(() => _regularSizedToContent = value),
+              ),
+              const SizedBox(width: 24),
+              const SizedBox(width: 70, child: Text('Resizable')),
+              Switch(
+                value: _regularResizable,
+                onChanged: (bool value) => setState(() => _regularResizable = value),
               ),
             ],
           ),
@@ -147,33 +164,41 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   Widget _buildDialogEditor() {
     return ListTile(
       title: const Text('Dialog'),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: .start,
         children: [
-          Expanded(
-            child: TextFormField(
-              controller: _dialogWidthController,
-              decoration: const InputDecoration(labelText: 'Initial width'),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: TextFormField(
-              controller: _dialogHeightController,
-              decoration: const InputDecoration(labelText: 'Initial height'),
-            ),
-          ),
-          const SizedBox(height: 20),
           Row(
             children: [
-              const Text('Decorations'),
-              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                  enabled: !_dialogSizedToContent,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogHeightController,
+                  decoration: const InputDecoration(labelText: 'Initial height'),
+                  enabled: !_dialogSizedToContent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const SizedBox(width: 100, child: Text('Sized to content')),
               Switch(
-                value: widget.settings.dialogDecorated,
-                onChanged: (bool value) {
-                  setState(() {
-                    widget.settings.dialogDecorated = value;
-                  });
-                },
+                value: _dialogSizedToContent,
+                onChanged: (bool value) => setState(() => _dialogSizedToContent = value),
+              ),
+              const SizedBox(width: 24),
+              const SizedBox(width: 70, child: Text('Resizable')),
+              Switch(
+                value: _dialogResizable,
+                onChanged: (bool value) => setState(() => _dialogResizable = value),
               ),
             ],
           ),
@@ -358,10 +383,14 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 double.tryParse(_regularHeightController.text) ??
                     widget.settings.regularSize.height,
               );
+              widget.settings.regularSizedToContent = _regularSizedToContent;
+              widget.settings.regularResizable = _regularResizable;
               widget.settings.dialogSize = Size(
                 double.tryParse(_dialogWidthController.text) ?? widget.settings.dialogSize.width,
                 double.tryParse(_dialogHeightController.text) ?? widget.settings.dialogSize.height,
               );
+              widget.settings.dialogSizedToContent = _dialogSizedToContent;
+              widget.settings.dialogResizable = _dialogResizable;
 
               widget.settings.positioner = widget.settings.positioner.copyWith(
                 parentAnchor: _parentAnchor,
@@ -385,6 +414,16 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             child: const Text('Apply'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Padding(
+      padding: EdgeInsets.all(4),
+      child: ColoredBox(
+        color: Color(0xFF000000),
+        child: SizedBox(height: 4, width: double.infinity),
       ),
     );
   }

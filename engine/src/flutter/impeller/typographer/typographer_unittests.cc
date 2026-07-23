@@ -40,6 +40,7 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
   RenderableText render_frame{
       .text_frame = frame,
       .origin_transform = transform,
+      .properties = GlyphProperties{},
   };
   return typographer_context->CreateGlyphAtlas(context, type, data_host_buffer,
                                                atlas_context, {render_frame});
@@ -53,7 +54,7 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const Matrix& transform,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const std::vector<std::shared_ptr<TextFrame>>& frames,
-    const std::vector<std::optional<GlyphProperties>>& properties) {
+    const std::vector<GlyphProperties>& properties) {
   size_t offset = 0;
   std::vector<RenderableText> render_frames;
   render_frames.reserve(frames.size());
@@ -327,9 +328,9 @@ TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {
       SkTextBlob::MakeFromString("😂", emoji_font));
   auto frame_2 = MakeTextFrameFromTextBlobSkia(
       SkTextBlob::MakeFromString("😂", emoji_font));
-  std::vector<std::optional<GlyphProperties>> properties = {
-      GlyphProperties{.color = Color::Red()},
-      GlyphProperties{.color = Color::Blue()},
+  std::vector<GlyphProperties> properties = {
+      GlyphProperties{.tone_or_color = Color::Red()},
+      GlyphProperties{.tone_or_color = Color::Blue()},
   };
 
   auto next_atlas =
@@ -359,7 +360,7 @@ TEST_P(TypographerTest, GlyphColorIsIgnoredForNonEmojiFonts) {
       MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
   auto frame_2 =
       MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
-  std::vector<std::optional<GlyphProperties>> properties = {
+  std::vector<GlyphProperties> properties = {
       GlyphProperties{},
       GlyphProperties{},
   };
@@ -370,6 +371,42 @@ TEST_P(TypographerTest, GlyphColorIsIgnoredForNonEmojiFonts) {
                        {frame, frame_2}, properties);
 
   EXPECT_EQ(next_atlas->GetGlyphCount(), 1u);
+}
+
+TEST_P(TypographerTest, GlyphIsLightIsPartOfCacheKey) {
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob1 = SkTextBlob::MakeFromString("A", sk_font);
+  auto blob2 = SkTextBlob::MakeFromString("A", sk_font);
+  auto frame1 = MakeTextFrameFromTextBlobSkia(blob1);
+  auto frame2 = MakeTextFrameFromTextBlobSkia(blob2);
+
+  std::vector<GlyphProperties> properties = {
+      GlyphProperties{},
+      GlyphProperties{},
+  };
+  // One light color, one dark color
+  properties[0].tone_or_color = GlyphProperties::ComputeTone(Color::Beige());
+  properties[1].tone_or_color = GlyphProperties::ComputeTone(Color::Crimson());
+
+  auto next_atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       {frame1, frame2}, properties);
+
+#if defined(FML_OS_MACOSX)
+  // On Apple platforms, they should be separated into 2 entries
+  EXPECT_EQ(next_atlas->GetGlyphCount(), 2u);
+#else
+  // On other platforms, both are classified as "dark" (false) and share 1 entry
+  EXPECT_EQ(next_atlas->GetGlyphCount(), 1u);
+#endif
 }
 
 TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
@@ -438,7 +475,8 @@ TEST(TypographerTest, RectanglePackerFillsRows) {
 }
 
 TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Atlas growth isn't supported for OpenGLES currently.";
   }
 
@@ -456,29 +494,11 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
                        MakeTextFrameFromTextBlobSkia(blob));
-  // Continually append new glyphs until the glyph size grows to the maximum.
-  // Note that the sizes here are more or less experimentally determined, but
-  // the important expectation is that the atlas size will shrink again after
-  // growing to the maximum size.
-  constexpr ISize expected_sizes[13] = {
-      {4096, 4096},   //
-      {4096, 4096},   //
-      {4096, 8192},   //
-      {4096, 8192},   //
-      {4096, 8192},   //
-      {4096, 8192},   //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 16384},  //
-      {4096, 4096}    // Shrinks!
-  };
 
   SkFont sk_font_small = flutter::testing::CreateTestFontOfSize(10);
 
-  for (int i = 0; i < 13; i++) {
+  ISize prev_atlas_size;
+  for (int i = 0; i < 100; i++) {
     SkTextBlobBuilder builder;
 
     auto add_char = [&](const SkFont& sk_font, char c) {
@@ -501,14 +521,23 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
                          GlyphAtlas::Type::kAlphaBitmap, transform,
                          atlas_context, MakeTextFrameFromTextBlobSkia(blob));
     ASSERT_TRUE(!!atlas);
-    EXPECT_EQ(atlas->GetTexture()->GetTextureDescriptor().size,
-              expected_sizes[i]);
+    ISize atlas_size = atlas->GetTexture()->GetTextureDescriptor().size;
+    if (atlas_size.width < prev_atlas_size.width ||
+        atlas_size.height < prev_atlas_size.height) {
+      // We've triggered an atlas flush and recreate. We're done.
+
+      // The final atlas should contain both the "A" glyph (which was not
+      // present in the previous atlas) and the "B" glyph (which existed
+      // in the previous atlas).
+      ASSERT_EQ(atlas->GetGlyphCount(), 2u);
+      return;
+    }
+    prev_atlas_size = atlas_size;
   }
 
-  // The final atlas should contain both the "A" glyph (which was not present
-  // in the previous atlas) and the "B" glyph (which existed in the previous
-  // atlas).
-  ASSERT_EQ(atlas->GetGlyphCount(), 2u);
+  // We never triggered the atlas recreate after 100 text calls.
+  // Either something is wrong with the atlas code or we need to fix this test.
+  GTEST_FAIL() << "Test did not encounter an atlas growth situation";
 }
 
 TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
@@ -540,6 +569,69 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
                            Matrix(), second_atlas_context, frame);
 
   EXPECT_TRUE(second_atlas_context->GetGlyphAtlas()->IsValid());
+}
+
+TEST_P(TypographerTest, ColorBitmapAtlasSkiaBitmapIsRGBA8888) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kColorBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("A", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kColorBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(blob));
+
+  SkImageInfo image_info = TypographerContextSkia::GetImageInfo(
+      *atlas, Size{100, 100}, /*support_light_glyphs=*/false);
+  EXPECT_EQ(image_info.colorType(), kRGBA_8888_SkColorType);
+}
+
+TEST_P(TypographerTest, AlphaBitmapAtlasSkiaBitmapIsA8) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("A", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(blob));
+
+  SkImageInfo image_info = TypographerContextSkia::GetImageInfo(
+      *atlas, Size{100, 100}, /*support_light_glyphs=*/false);
+  EXPECT_EQ(image_info.colorType(), kAlpha_8_SkColorType);
+}
+
+TEST_P(TypographerTest, AlphaBitmapAtlasWithLightGlyphsSkiaBitmapIsRGBA8888) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("A", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(blob));
+
+  SkImageInfo image_info = TypographerContextSkia::GetImageInfo(
+      *atlas, Size{100, 100}, /*support_light_glyphs=*/true);
+  EXPECT_EQ(image_info.colorType(), kRGBA_8888_SkColorType);
 }
 
 }  // namespace testing

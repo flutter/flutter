@@ -21,6 +21,8 @@ impeller_component("android") {
     "proc_table.h",
     "surface_control.cc",
     "surface_control.h",
+    "surface_control_impl.cc",
+    "surface_control_impl.h",
     "surface_transaction.cc",
     "surface_transaction.h",
     "surface_transaction_stats.cc",

@@ -116,7 +116,7 @@ void main() {
           Multiple(
             <Pattern>[
               RegExp(
-                r'^Reloaded 0 libraries in [0-9]+ms \(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.$',
+                r'^Reloaded 0 libraries in [\d,]+ms \(compile: [\d,]+ ms, reload: [\d,]+ ms, reassemble: [\d,]+ ms\)\.$',
               ),
               'called reassemble',
               'called paint',
@@ -308,7 +308,7 @@ void main() {
           ),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
           Barrier(
-            RegExp(r'^Reloaded 0 libraries in [0-9]+ms.'),
+            RegExp(r'^Reloaded 0 libraries in [\d,]+ms.'),
             handler: (String line) {
               return 'q';
             },

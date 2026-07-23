@@ -80,7 +80,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        _tester.start();
+        unawaited(_tester.start());
         registerDidStop(_tester.stop);
       });
     }

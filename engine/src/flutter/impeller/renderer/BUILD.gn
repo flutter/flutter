@@ -20,6 +20,7 @@ if (impeller_enable_compute) {
     }
 
     shaders = [
+      "compute_3d_test.comp",
       "prefix_sum_test.comp",
       "threadgroup_sizing_test.comp",
     ]
@@ -95,7 +96,10 @@ impeller_component("renderer") {
     public_deps += [ ":compute_shaders" ]
   }
 
-  deps = [ "//flutter/fml" ]
+  deps = [
+    "//flutter/fml",
+    "//third_party/abseil-cpp/absl/strings",
+  ]
 }
 
 template("renderer_unittests_component") {
@@ -107,6 +111,7 @@ template("renderer_unittests_component") {
     "pipeline_descriptor_unittests.cc",
     "pipeline_library_unittests.cc",
     "pool_unittests.cc",
+    "renderer_golden_unittests.cc",
     "renderer_unittests.cc",
   ]
   if (impeller_enable_compute) {
@@ -132,6 +137,7 @@ template("renderer_unittests_component") {
       "../tessellator:tessellator_libtess",
       "testing:mocks",
       "//flutter/impeller/display_list",
+      "//flutter/impeller/golden_tests:golden_playground_test",
       "//flutter/testing:testing_lib",
     ]
     if (defined(invoker.public_configs)) {
@@ -167,7 +173,7 @@ impeller_component("renderer_dart_unittests") {
     "//flutter/lib/gpu",
     "//flutter/lib/snapshot",
     "//flutter/runtime",
-    "//flutter/testing",
     "//flutter/testing:fixture_test",
+    "//flutter/testing:testing_lib",
   ]
 }

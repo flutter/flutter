@@ -426,4 +426,71 @@ void main() {
       expect(deeplinks.length, 0);
     },
   );
+
+  testWithoutContext(
+    'gradle task outputs<mode>AppLinkSettings is resolved FROM-CACHE after clean build if manifest does not change with build caching enabled',
+    () async {
+      // Create a new flutter project.
+      ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        'create',
+        tempDir.path,
+        '--project-name=testapp',
+      ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      // Ensure that gradle files exists from templates.
+      result = await processManager.run(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--config-only',
+      ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      // Enable Gradle build caching.
+      final gradleProperties = io.File(
+        fileSystem.path.join(tempDir.path, 'android', 'gradle.properties'),
+      );
+      gradleProperties.writeAsStringSync('\norg.gradle.caching=true\n', mode: io.FileMode.append);
+
+      final Directory androidApp = tempDir.childDirectory('android');
+      final io.File fileDump = tempDir
+          .childDirectory('build')
+          .childDirectory('app')
+          .childFile('app-link-settings-debug.json');
+
+      // Run the task the first time to populate outputs and build cache.
+      result = await processManager.run(<String>[
+        '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+        ...getLocalEngineArguments(),
+        '-PoutputPath=${fileDump.path}',
+        'outputDebugAppLinkSettings',
+      ], workingDirectory: androidApp.path);
+      expect(result, const ProcessResultMatcher());
+
+      // Run the clean task to delete the local build folder (destroy local incremental UP-TO-DATE state).
+      result = await processManager.run(<String>[
+        '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+        ...getLocalEngineArguments(),
+        'clean',
+      ], workingDirectory: androidApp.path);
+      expect(result, const ProcessResultMatcher());
+
+      // Run the task a second time.
+      result = await processManager.run(<String>[
+        '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+        ...getLocalEngineArguments(),
+        '-PoutputPath=${fileDump.path}',
+        'outputDebugAppLinkSettings',
+      ], workingDirectory: androidApp.path);
+      expect(result, const ProcessResultMatcher());
+
+      // Verify custom tasks are successfully resolved FROM-CACHE.
+      final stdout = result.stdout as String;
+      expect(stdout.contains('extractDeepLinksDebug FROM-CACHE'), isTrue);
+      expect(stdout.contains('processDebugMainManifest FROM-CACHE'), isTrue);
+      expect(stdout.contains('outputDebugAppLinkSettings FROM-CACHE'), isTrue);
+    },
+  );
 }

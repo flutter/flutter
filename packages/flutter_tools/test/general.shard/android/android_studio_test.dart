@@ -478,10 +478,7 @@ void main() {
         // Spotlight finds the one known and two random installations.
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: const <String>[
-              'mdfind',
-              'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-            ],
+            command: const <String>['sh', '-c', kSpotlightMdfindCommand],
             stdout: '$randomLocation1\n$randomLocation2\n$studioInApplication',
           ),
           FakeCommand(
@@ -514,6 +511,25 @@ void main() {
         ProcessManager: () => processManager,
         // Custom home paths are not supported on macOS nor Windows yet,
         // so we force the platform to fake Linux here.
+        Platform: () => platform,
+        PlistParser: () => plistUtils,
+      },
+    );
+
+    testUsingContext(
+      'installation detection on MacOS gracefully handles unresponsive Spotlight query (issue #189177)',
+      () {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(command: <String>['sh', '-c', kSpotlightMdfindCommand], exitCode: 137),
+        ]);
+
+        expect(AndroidStudio.allInstalled(), isEmpty);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        FileSystemUtils: () => fsUtils,
+        ProcessManager: () => processManager,
         Platform: () => platform,
         PlistParser: () => plistUtils,
       },
@@ -828,10 +844,7 @@ void main() {
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: const <String>[
-              'mdfind',
-              'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-            ],
+            command: const <String>['sh', '-c', kSpotlightMdfindCommand],
             stdout: extractedDownloadZip,
           ),
           FakeCommand(command: <String>[studioInApplicationJavaBinary, '-version']),

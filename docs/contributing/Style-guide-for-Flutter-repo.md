@@ -1575,7 +1575,7 @@ for consistency and readability reasons.
 We use `dart format` to auto-format all Dart code. This is enforced by our CI.
 
 Beyond whitespace formatting handled by the formatter, this section discusses
-additional guidelines for code structure to ensure consistency and readibility.
+additional guidelines for code structure to ensure consistency and readability.
 
 
 ### Constructors come first in a class

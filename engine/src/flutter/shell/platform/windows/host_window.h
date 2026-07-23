@@ -45,7 +45,9 @@ class HostWindow {
       FlutterWindowsEngine* engine,
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
-      LPCWSTR title);
+      LPCWSTR title,
+      bool sized_to_content,
+      bool resizable);
 
   // Creates a dialog Win32 window with a child view confined to its client
   // area. |window_manager| is a pointer to the window manager that manages the
@@ -64,7 +66,9 @@ class HostWindow {
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
       LPCWSTR title,
-      HWND parent);
+      HWND parent,
+      bool sized_to_content,
+      bool resizable);
 
   // Creates a tooltip Win32 window with a child view confined to its client
   // area. |window_manager| is a pointer to the window manager that manages the
@@ -210,6 +214,14 @@ class HostWindow {
 
   // Sets the focus to the child view window of |window|.
   static void FocusRootViewOf(HostWindow* window);
+
+  // Handles a WM_ACTIVATE message for |hwnd| with the given |wparam|. When the
+  // window is being activated, focus its view; if the window is disabled
+  // (e.g. it owns a modal dialog), activation is instead redirected to the
+  // first enabled descendant. Does nothing when the window is being
+  // deactivated, so that a deactivated window does not reactivate itself and
+  // jump back to the top of the z-order.
+  void HandleWindowActivation(HWND hwnd, WPARAM wparam);
 
   // Enables or disables mouse and keyboard input to this window and all its
   // descendants.

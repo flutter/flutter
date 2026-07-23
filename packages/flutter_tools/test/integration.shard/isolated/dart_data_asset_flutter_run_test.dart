@@ -20,13 +20,8 @@ void main() {
   group('dart data assets', () {
     // NOTE: flutter-tester doesn't support profile/release mode.
     // NOTE: flutter web doesn't allow cpaturing print()s in profile/release
-    // NOTE: flutter web doesn't allow adding assets on hot-restart
     final devices = <String>[hostOs, 'chrome', 'flutter-tester'];
     final modes = <String>['debug', 'release'];
-
-    // NOTE: devFS doesn't see the Dart file updates on Windows in the temp
-    // directory in some cases. https://github.com/flutter/flutter/issues/184505
-    final bool checkDartCodeUpdates = !platform.isWindows;
 
     for (final mode in modes) {
       for (final device in devices) {
@@ -104,15 +99,9 @@ void main() {
                   <Pattern>[
                     // Once the app runs it will print whether it found assets.
                     // We expect it to having found the new `id2.txt` now.
-                    if (checkDartCodeUpdates) ...['VERSION: afterRestart'],
+                    'VERSION: afterRestart',
                     'FOUND "packages/data_asset_app/data/id1.txt": "content1".',
-
-                    // Flutter web doesn't support new assets on hot-restart atm
-                    // -> See https://github.com/flutter/flutter/issues/137265
-                    if (isWeb)
-                      'NOT_FOUND "packages/data_asset_app/data/id2.txt".'
-                    else
-                      'FOUND "packages/data_asset_app/data/id2.txt": "content2".',
+                    'FOUND "packages/data_asset_app/data/id2.txt": "content2".',
                     'DEPENDENCY_ASSET: package_content1',
                     if (isWeb) 'Successful hot restart' else 'Hot restart performed',
                   ],
@@ -139,17 +128,10 @@ void main() {
                 Multiple.contains(
                   <Pattern>[
                     // Once the app runs it will print whether it found assets.
-                    if (checkDartCodeUpdates) ...['VERSION: afterReload'],
+                    'VERSION: afterReload',
                     'FOUND "packages/data_asset_app/data/id1.txt": "content1".',
-                    // Flutter web doesn't support new assets on hot-reload atm
-                    // -> See https://github.com/flutter/flutter/issues/137265
-                    if (isWeb) ...<Pattern>[
-                      'NOT_FOUND "packages/data_asset_app/data/id2.txt".',
-                      'NOT_FOUND "packages/data_asset_app/data/id3.txt".',
-                    ] else ...<Pattern>[
-                      'FOUND "packages/data_asset_app/data/id2.txt": "content2".',
-                      'FOUND "packages/data_asset_app/data/id3.txt": "content3".',
-                    ],
+                    'FOUND "packages/data_asset_app/data/id2.txt": "content2".',
+                    'FOUND "packages/data_asset_app/data/id3.txt": "content3".',
                     'NOT_FOUND "packages/data_asset_app/data/id4.txt".',
                     'DEPENDENCY_ASSET: package_content1',
                     if (isWeb) 'Successful hot reload' else 'Hot reload performed',

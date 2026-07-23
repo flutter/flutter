@@ -12,8 +12,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  hooks: ^1.0.2
-  data_assets: ^0.19.6
+  hooks: ^2.1.0
+  data_assets: ^0.20.0
   data_asset_package:
     path: ../data_asset_package
 
@@ -24,4 +24,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: jl85h
+# PUBSPEC CHECKSUM: qa7aie

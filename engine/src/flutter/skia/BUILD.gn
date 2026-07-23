@@ -144,9 +144,9 @@ template("opts") {
 
 is_x86 = current_cpu == "x64" || current_cpu == "x86"
 
-opts("hsw") {
+opts("ml3") {
   enabled = is_x86
-  sources = skia_opts.hsw_sources
+  sources = skia_opts.ml3_sources
   if (is_win) {
     cflags = [ "/arch:AVX2" ]
   } else {
@@ -649,8 +649,8 @@ skia_component("skia") {
   ]
 
   deps = [
-    ":hsw",
     ":jpeg_decode",
+    ":ml3",
     ":ndk_images",
     ":png_decode_libpng",
     ":webp_decode",

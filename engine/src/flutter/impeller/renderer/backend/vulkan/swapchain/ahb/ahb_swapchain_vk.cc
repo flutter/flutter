@@ -17,14 +17,14 @@ bool AHBSwapchainVK::IsAvailableOnPlatform() {
          android::HardwareBuffer::IsAvailableOnPlatform();
 }
 
-AHBSwapchainVK::AHBSwapchainVK(const std::shared_ptr<Context>& context,
-                               ANativeWindow* window,
-                               const CreateTransactionCB& cb,
-                               const ISize& size,
-                               bool enable_msaa)
+AHBSwapchainVK::AHBSwapchainVK(
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<android::SurfaceControl>& surface_control,
+    const CreateTransactionCB& cb,
+    const ISize& size,
+    bool enable_msaa)
     : context_(context),
-      surface_control_(
-          std::make_shared<android::SurfaceControl>(window, "ImpellerSurface")),
+      surface_control_(surface_control),
       enable_msaa_(enable_msaa),
       cb_(cb) {
   UpdateSurfaceSize(size);

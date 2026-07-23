@@ -29,6 +29,15 @@ final class RunCommand extends CommandBase {
     @visibleForTesting FlutterTool? flutterTool,
   }) {
     builds = BuildPlan.configureArgParser(argParser, environment, configs: configs, help: help);
+    argParser.addMultiOption(
+      'flutter-flags',
+      help:
+          'Arguments to pass to the "flutter run" command. '
+          'This can be specified multiple times. For multiple flags, '
+          'separate them by spaces, e.g. '
+          '--flutter-flags="--profile --verbose".',
+      splitCommas: false,
+    );
     _flutterTool = flutterTool ?? FlutterTool.fromEnvironment(environment);
   }
 
@@ -169,8 +178,15 @@ See `flutter run --help` for a listing
       mangledBuildName,
       '--local-engine-host',
       mangledHostBuildName,
-      ...argResults!.rest,
     ];
+
+    // Add flags passed to --flutter-flags.
+    final flutterFlags = argResults!['flutter-flags'] as List<String>;
+    for (final flagGroup in flutterFlags) {
+      command.addAll(flagGroup.split(' ').where((String s) => s.isNotEmpty));
+    }
+
+    command.addAll(argResults!.rest);
 
     // TODO(johnmccutchan): Be smart and if the user requested a profile
     // config, add the '--profile' flag when invoking flutter run.

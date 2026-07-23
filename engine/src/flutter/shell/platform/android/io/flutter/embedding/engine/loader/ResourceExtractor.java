@@ -23,8 +23,6 @@ import java.util.concurrent.*;
 class ResourceExtractor {
   private static final String TAG = "ResourceExtractor";
   private static final String TIMESTAMP_PREFIX = "res_timestamp-";
-  private static final String[] SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
-
   private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
   static long getVersionCode(@NonNull PackageInfo packageInfo) {

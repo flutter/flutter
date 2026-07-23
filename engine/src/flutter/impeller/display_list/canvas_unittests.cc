@@ -70,7 +70,7 @@ std::unique_ptr<Canvas> CreateTestCanvas(
 }
 
 TEST_P(AiksTest, TransformMultipliesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_MATRIX_NEAR(canvas->GetCurrentTransform(), Matrix());
@@ -111,7 +111,7 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 }
 
 TEST_P(AiksTest, CanvasCanPushPopCTM) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_EQ(canvas->GetSaveCount(), 1u);
@@ -129,7 +129,7 @@ TEST_P(AiksTest, CanvasCanPushPopCTM) {
 }
 
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   Matrix identity;
@@ -140,7 +140,7 @@ TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
 }
 
 TEST_P(AiksTest, BackdropCountDownNormal) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -175,7 +175,7 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -215,7 +215,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -252,7 +252,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
 // filters in the root pass. If we reach a count of 0 while in a nested
 // saveLayer, we should not restore to the onscreen.
 TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -285,7 +285,7 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
 TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -341,7 +341,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       runtime_effect, {}, uniform_data);
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -377,7 +377,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
 }
 
 TEST_P(AiksTest, SupportsBlitToOnscreen) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
@@ -410,7 +410,7 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
   }
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
     // Somehow there's a scaling factor between PlaygroundPoint and Canvas.
     Matrix ctm = Matrix::MakeScale(Vector2(1, 1) * 0.5);
@@ -420,12 +420,12 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
     static Scalar radius = 200;
 
     // Define the ImGui
-    ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 100);
       ImGui::SliderFloat("Radius", &radius, 0, 1000);
+      ImGui::End();
     }
-    ImGui::End();
 
     static PlaygroundPoint right_reference_var(
         ctm * (right_center + default_size / 2), 30, Color::White());
@@ -459,11 +459,12 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
 }
 
 TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
 
   TextureDescriptor desc;
   desc.size = {100, 100};
   desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  desc.usage = TextureUsage::kRenderTarget;
   auto texture =
       context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
 
@@ -488,6 +489,72 @@ TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
   ASSERT_EQ(cached_tex5, nullptr);
 
   context.SetTextureCachingEnabled(false);
+}
+
+/// Verifies blend mode compatibility with SDF rendering.
+///
+/// The compatibility condition is:
+/// `mix(blend(src, dst), dst, 1 - sdf_alpha) == blend(src * sdf_alpha, dst)`
+TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
+  std::vector<Color> colors = {
+      Color::BlackTransparent(),
+      Color::Black(),
+      Color::White(),
+      Color::LimeGreen(),
+      Color::CornflowerBlue(),
+      Color::LimeGreen().WithAlpha(0.8),
+      Color::CornflowerBlue().WithAlpha(0.7),
+  };
+
+  for (int i = 0; i <= static_cast<int>(BlendMode::kLastMode); i++) {
+    BlendMode blend_mode = static_cast<BlendMode>(i);
+    bool blend_mode_is_compatible = true;
+
+    for (const auto& src : colors) {
+      for (const auto& dst : colors) {
+        for (Scalar sdf_alpha = 0.0; sdf_alpha < 1.01; sdf_alpha += 0.2) {
+          // `mix(blend(src, dst), dst, 1 - sdf_alpha)`:
+          // 1. Blend src onto dst.
+          Color blended = dst.Blend(src, blend_mode);
+          // 2. Mix with dst using sdf_alpha. Mix by lerping using
+          // pre-multiplied colors.
+          Color blended_then_sdf_alpha_applied =
+              Color::Lerp(blended.Premultiply(), dst.Premultiply(),
+                          1.0 - sdf_alpha)
+                  .Unpremultiply();
+
+          // `blend(src * sdf_alpha, dst)`:
+          // 1. Apply sdf_alpha to src's alpha.
+          Color sdf_alpha_applied = src.WithAlpha(src.alpha * sdf_alpha);
+          // 2. Blend onto dst.
+          Color sdf_alpha_applied_then_blended =
+              dst.Blend(sdf_alpha_applied, blend_mode);
+
+          // Compare results.
+          if (blended_then_sdf_alpha_applied !=
+              sdf_alpha_applied_then_blended) {
+            blend_mode_is_compatible = false;
+          }
+        }
+      }
+    }
+
+    Paint paint = {.blend_mode = blend_mode};
+    EXPECT_EQ(blend_mode_is_compatible,
+              Canvas::IsCompatibleWithSDFRendering(paint))
+        << "Failure for BlendMode: " << BlendModeToString(blend_mode);
+  }
+}
+
+TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
+  Paint paint;
+  paint.anti_alias = false;
+  EXPECT_FALSE(Canvas::IsCompatibleWithSDFRendering(paint));
+}
+
+TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
+  Paint paint;
+  EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
 }
 
 }  // namespace testing

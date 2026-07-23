@@ -69,7 +69,7 @@ abstract class AotAssemblyBase extends Target {
       kExtraGenSnapshotOptions,
     );
     final buildMode = BuildMode.fromCliName(environmentBuildMode);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
+    final targetPlatform = TargetPlatform.fromName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> darwinArchs =

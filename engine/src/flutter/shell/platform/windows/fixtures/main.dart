@@ -421,11 +421,10 @@ Future<void> sendSemanticsTreeInfo() async {
 
   final Iterable<ui.FlutterView> views = ui.PlatformDispatcher.instance.views;
   final ui.FlutterView view1 = views.firstWhere(
-    (final ui.FlutterView view) => view != ui.PlatformDispatcher.instance.implicitView,
+    (ui.FlutterView view) => view != ui.PlatformDispatcher.instance.implicitView,
   );
   final ui.FlutterView view2 = views.firstWhere(
-    (final ui.FlutterView view) =>
-        view != view1 && view != ui.PlatformDispatcher.instance.implicitView,
+    (ui.FlutterView view) => view != view1 && view != ui.PlatformDispatcher.instance.implicitView,
   );
 
   ui.SemanticsUpdate createSemanticsUpdate(int nodeId) {

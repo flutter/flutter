@@ -8,16 +8,13 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-/// A [DisposablePath] implementation backed by CanvasKit's [SkPath].
-class CkPath implements DisposablePath {
+/// A [BackendPath] implementation backed by CanvasKit's [SkPath].
+class CkPath implements BackendPath {
   CkPath(this.skiaObject);
 
   final SkPath skiaObject;
 
-  @override
   ui.PathFillType get fillType => fromSkFillType(skiaObject.getFillType());
-
-  @override
   bool contains(ui.Offset point) => skiaObject.contains(point.dx, point.dy);
 
   @override
@@ -31,7 +28,7 @@ class CkPath implements DisposablePath {
   bool get isEmpty => skiaObject.isEmpty();
 
   @override
-  DisposablePathMetricIterator getMetricsIterator({bool forceClosed = false}) {
+  BackendPathMetricIterator computeMetrics({bool forceClosed = false}) {
     // The [isEmpty] case is special-cased to avoid booting the WASM machinery just to find out
     // there are no contours.
     return isEmpty ? const CkPathMetricIteratorEmpty() : CkContourMeasureIter(this, forceClosed);
@@ -44,7 +41,7 @@ class CkPath implements DisposablePath {
 }
 
 /// A PathBuilder backed by CanvasKit's [SkPathBuilder].
-class CkPathBuilder implements DisposablePathBuilder {
+class CkPathBuilder implements BackendPathBuilder {
   factory CkPathBuilder() {
     final skPathBuilder = SkPathBuilder();
     skPathBuilder.setFillType(toSkFillType(ui.PathFillType.nonZero));
@@ -97,7 +94,7 @@ class CkPathBuilder implements DisposablePathBuilder {
   }
 
   @override
-  void addPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void addPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     List<double> skMatrix;
     if (matrix4 == null) {
       skMatrix = toSkMatrixFromFloat32(
@@ -138,7 +135,7 @@ class CkPathBuilder implements DisposablePathBuilder {
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
-    addPath((path as LazyPath).builtPath, offset);
+    addPath((path as EnginePath).backendPath, offset);
   }
 
   @override
@@ -197,7 +194,7 @@ class CkPathBuilder implements DisposablePathBuilder {
   }
 
   @override
-  void extendWithPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void extendWithPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     List<double> skMatrix;
     if (matrix4 == null) {
       skMatrix = toSkMatrixFromFloat32(
@@ -322,20 +319,16 @@ class CkPathBuilder implements DisposablePathBuilder {
   }
 }
 
-class CkPathConstructors implements DisposablePathConstructors {
+class CkPathConstructors implements BackendPathConstructors {
   @override
   CkPathBuilder createNew() => CkPathBuilder();
 
   @override
-  DisposablePathBuilder fromPath(DisposablePath path) =>
+  BackendPathBuilder fromPath(BackendPath path) =>
       CkPathBuilder.fromSkPath((path as CkPath).skiaObject, path.fillType);
 
   @override
-  CkPathBuilder combinePaths(
-    ui.PathOperation operation,
-    DisposablePath path1,
-    DisposablePath path2,
-  ) {
+  CkPathBuilder combinePaths(ui.PathOperation operation, BackendPath path1, BackendPath path2) {
     return CkPathBuilder.combine(operation, path1 as CkPath, path2 as CkPath);
   }
 }

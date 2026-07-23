@@ -54,4 +54,24 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('FadeTransition does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: FadeTransition(opacity: controller, child: const Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FadeTransition)), Size.zero);
+  });
 }

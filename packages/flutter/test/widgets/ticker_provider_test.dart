@@ -8,8 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
     const Widget widget = TickerMode(enabled: false, child: _TickerWidget());
@@ -246,6 +244,24 @@ void main() {
       0,
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/185247.
+  testWidgets('SingleTickerProviderStateMixin does not throw error for late controller member', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const _LateDisposeSingle());
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/185247.
+  testWidgets('TickerProviderStateMixin does not throw error for late controller member', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const _LateDispose());
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class BoringTickerTest extends StatefulWidget {
@@ -359,6 +375,51 @@ class _TickerWidgetState extends State<_TickerWidget> with SingleTickerProviderS
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
   }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class _LateDispose extends StatefulWidget {
+  const _LateDispose();
+
+  @override
+  State<_LateDispose> createState() => _LateDisposeState();
+}
+
+class _LateDisposeState extends State<_LateDispose> with TickerProviderStateMixin {
+  late final _controller = AnimationController(vsync: this);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class _LateDisposeSingle extends StatefulWidget {
+  const _LateDisposeSingle();
+
+  @override
+  State<_LateDisposeSingle> createState() => _LateDisposeSingleState();
+}
+
+class _LateDisposeSingleState extends State<_LateDisposeSingle>
+    with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(vsync: this);
 
   @override
   void dispose() {

@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -105,6 +106,44 @@ void main() {
               'description',
               contains('analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
             ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'Analysis server premature exit with 255 throws ToolExit',
+      () async {
+        const stderr = 'Fatal error in analyzer';
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: stderr,
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze']),
+          throwsA(
+            isA<ToolExit>()
+                .having(
+                  (ToolExit e) => e.message,
+                  'message',
+                  contains('analysis server exited with code 255 and output:\n[stderr] $stderr'),
+                )
+                .having((ToolExit e) => e.exitCode, 'exitCode', equals(255)),
           ),
         );
       },

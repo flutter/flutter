@@ -4,7 +4,7 @@ This guide describes how to write and run various types of tests in the engine.
 
 ## C++ - core engine
 
-If you edit `.cc` files in [`engine`](../../),
+If you edit `.cc` files in [`engine`](/engine),
 you're working on the core, portable Flutter engine.
 
 ### Unit tests (C++)
@@ -100,7 +100,7 @@ To reproduce test flakes, you can run a test multiple times:
 
 ## Java - Android embedding
 
-If you edit `.java` files in the [`shell/platform/android`](../../shell/platform/android/)
+If you edit `.java` files in the [`shell/platform/android`](/engine/src/flutter/shell/platform/android/)
 directory, you're working on the Android embedding which connects the core C++
 engine to the Android SDK APIs and runtime.
 
@@ -108,9 +108,9 @@ engine to the Android SDK APIs and runtime.
 
 For testing logic within a class at a unit level, create or add to a JUnit test.
 
-Existing Java unit tests are located at [`shell/platform/android/test`](../../shell/platform/android/test)
-and follow the Java package directory structure. Files in the [`shell/platform/android/io/flutter/`](../../shell/platform/android/io/flutter/)
-package tree can have a parallel file in the [`shell/platform/android/test/io/flutter/`](../../shell/platform/android/test/io/flutter/)
+Existing Java unit tests are located at [`shell/platform/android/test`](/engine/src/flutter/shell/platform/android/test)
+and follow the Java package directory structure. Files in the [`shell/platform/android/io/flutter/`](/engine/src/flutter/shell/platform/android/io/flutter/)
+package tree can have a parallel file in the [`shell/platform/android/test/io/flutter/`](/engine/src/flutter/shell/platform/android/test/io/flutter/)
 package tree. Files in matching directories are considered [package visible](https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html)
 as is the case in standard Java.
 
@@ -118,7 +118,7 @@ When editing production files in `shell/platform/android/io/flutter/`,
 the easiest step to add tests is to look for a matching `...Test.java` file in
 `shell/platform/android/test/io/flutter/`.
 
-See the [Java unit test README](../../shell/platform/android/test/README.md)
+See the [Java unit test README](/engine/src/flutter/shell/platform/android/test/README.md)
 for details.
 
 The engine repo has a unified build system to build C, C++, Objective-C,
@@ -198,11 +198,11 @@ submitting PRs to the `flutter/engine` repository.
 
 End-to-end tests for the Android embedder exist as part of the test suites
 in the root of the monorepo. See
-[`dev/integration_tests`](../../../../../dev/integration_tests/).
+[`dev/integration_tests`](/dev/integration_tests/).
 
 ## Objective-C - iOS embedding
 
-If you edit `.h` or `.mm` files in the [`shell/platform/darwin/ios`](../../shell/platform/darwin/ios)
+If you edit `.h` or `.mm` files in the [`shell/platform/darwin/ios`](/engine/src/flutter/shell/platform/darwin/ios)
 directory, you're working on the iOS embedding which connects the core C++
 engine to the iOS SDK APIs and runtime.
 
@@ -211,18 +211,18 @@ engine to the iOS SDK APIs and runtime.
 For testing logic within a class in isolation, create or add to a XCTestCase.
 
 The iOS unit testing infrastructure is split in 2 different locations. The
-`...Test.mm` files in [`shell/platform/darwin/ios`](../../shell/platform/darwin/ios)
-contain the unit tests themselves. The [`testing/ios/IosUnitTests`](../../testing/ios/IosUnitTests/)
+`...Test.mm` files in [`shell/platform/darwin/ios`](/engine/src/flutter/shell/platform/darwin/ios)
+contain the unit tests themselves. The [`testing/ios/IosUnitTests`](/engine/src/flutter/testing/ios/IosUnitTests/)
 directory contains an Xcode container project to execute the test.
 
-See [`testing/ios/IosUnitTests/README.md`](../../testing/ios/IosUnitTests/README.md)
+See [`testing/ios/IosUnitTests/README.md`](/engine/src/flutter/testing/ios/IosUnitTests/README.md)
 for details on adding new test files.
 
 The engine repo has a unified build system to build C, C++, Objective-C,
 Objective-C++, and Java files using [GN](https://gn.googlesource.com/gn/) and
 [Ninja](https://ninja-build.org/). Since GN and Ninja has to build the C++
 dependencies that the Objective-C classes reference, the tests aren't built by
-the Xcode project in [`testing/ios/IosUnitTests`](../../testing/ios/IosUnitTests/).
+the Xcode project in [`testing/ios/IosUnitTests`](/engine/src/flutter/testing/ios/IosUnitTests/).
 
 Instead, the engine provides the script:
 
@@ -280,7 +280,7 @@ End-to-end tests exercise the entire iOS embedding with the C++ engine on
 a headless iOS simulator. It's an integration test ensuring that
 the engine as a whole on iOS is functioning correctly.
 
-The project containing the iOS end-to-end engine test is at [`testing/ios_scenario_app/ios`](../../testing/ios_scenario_app/ios/).
+The project containing the iOS end-to-end engine test is at [`testing/ios_scenario_app/ios`](/engine/src/flutter/testing/ios_scenario_app/ios/).
 
 This test project is build similarly to a normal debug Flutter app. The Dart
 code is bundled in JIT mode and is brought into Xcode with a `.framework`
@@ -288,7 +288,7 @@ dependency on the prebuilt local engine. It's then installed and executed on a
 simulator via Xcode.
 
 Unlike a normal Flutter app, the Flutter framework on the Dart side is a
-lightweight fake at [`testing/ios_scenario_app/lib`](../../testing/ios_scenario_app/lib/).
+lightweight fake at [`testing/ios_scenario_app/lib`](/engine/src/flutter/testing/ios_scenario_app/lib/).
 that implements some of the basic functionalities of `dart:ui` Window rather
 than using the real Flutter framework at `flutter/flutter`.
 
@@ -298,11 +298,11 @@ The end-to-end test can be executed by running:
 testing/ios_scenario_app/run_ios_tests.sh
 ```
 
-Additional end-to-end instrumented tests can be added to [`testing/ios_scenario_app/ios/Scenarios/ScenariosTests`](../../testing/ios_scenario_app/ios/Scenarios/ScenariosTests/).
+Additional end-to-end instrumented tests can be added to [`testing/ios_scenario_app/ios/Scenarios/ScenariosTests`](/engine/src/flutter/testing/ios_scenario_app/ios/Scenarios/ScenariosTests/).
 
 If supporting logic is needed for the test case, it can be added to the
-Android app under-test in [`testing/ios_scenario_app/ios/Scenarios/Scenarios`](../../testing/ios_scenario_app/ios/Scenarios/Scenarios/).
-or to the fake Flutter framework under-test in [`testing/ios_scenario_app/lib`](../../testing/ios_scenario_app/lib/).
+Android app under-test in [`testing/ios_scenario_app/ios/Scenarios/Scenarios`](/engine/src/flutter/testing/ios_scenario_app/ios/Scenarios/Scenarios/).
+or to the fake Flutter framework under-test in [`testing/ios_scenario_app/lib`](/engine/src/flutter/testing/ios_scenario_app/lib/).
 
 As best practice, favor adding unit tests if possible since end-to-end tests
 are, by nature, non-hermetic, slow and flaky.
@@ -312,14 +312,14 @@ submitting PRs.
 
 ## Dart - dart:ui
 
-If you edit `.dart` files in [`lib/ui`](../../lib/ui/) you're working on the
+If you edit `.dart` files in [`lib/ui`](/engine/src/flutter/lib/ui/) you're working on the
 `dart:ui` package which is the interface between the C++ engine and the Dart
 Flutter framework.
 
 ### Unit tests (Dart)
 
-Dart classes in [`lib/ui`](../../lib/ui/) have matching unit tests at
-[`testing/dart`](../../testing/dart/).
+Dart classes in [`lib/ui`](/engine/src/flutter/lib/ui/) have matching unit tests at
+[`testing/dart`](/engine/src/flutter/testing/dart/).
 
 When editing production files in the 'dart:ui' package, add to or create a
 test file in `testing/dart`.
@@ -359,4 +359,4 @@ Assuming your `flutter` and `engine` working directories are siblings, you can r
 
 ## Web engine
 
-Web tests are run via the `felt` command. More details can be found in [lib/web_ui/README.md](../../lib/web_ui/README.md).
+Web tests are run via the `felt` command. More details can be found in [lib/web_ui/README.md](/engine/src/flutter/lib/web_ui/README.md).

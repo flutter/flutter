@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const kRed = Color(0xFFFF0000);
+
   testWidgets('gets local coordinates', (WidgetTester tester) async {
     var tapCount = 0;
     var tapCancelCount = 0;
@@ -29,7 +31,7 @@ void main() {
           onTapUp: (TapUpDetails details) {
             upDetails.add(details);
           },
-          child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+          child: Container(key: redContainer, width: 100, height: 150, color: kRed),
         ),
       ),
     );
@@ -69,7 +71,7 @@ void main() {
             onTapUp: (TapUpDetails details) {
               upDetails.add(details);
             },
-            child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+            child: Container(key: redContainer, width: 100, height: 150, color: kRed),
           ),
         ),
       ),
@@ -129,7 +131,7 @@ void main() {
             onTapUp: (TapUpDetails details) {
               upDetails.add(details);
             },
-            child: Container(key: redContainer, width: 100, height: 150, color: Colors.red),
+            child: Container(key: redContainer, width: 100, height: 150, color: kRed),
           ),
         ),
       ),

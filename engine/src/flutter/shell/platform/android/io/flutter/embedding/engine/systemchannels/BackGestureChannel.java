@@ -93,7 +93,7 @@ public class BackGestureChannel {
   /**
    * Cancels the back gesture event.
    *
-   * <p>This method should be called when a back gesture is cancelled or the back button is pressed.
+   * <p>This method should be called when a back gesture is canceled or the back button is pressed.
    */
   @RequiresApi(API_LEVELS.API_34)
   public void cancelBackGesture() {

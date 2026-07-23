@@ -45,11 +45,19 @@ struct TextureDescriptor {
   SampleCount sample_count = SampleCount::kCount1;
   CompressionType compression_type = CompressionType::kLossless;
 
+  /// @brief The number of bytes required to store an image of the given texel
+  ///        dimensions in this format. Block-compressed formats round the
+  ///        dimensions up to whole blocks.
+  constexpr size_t GetByteSizeForDimensions(int64_t width,
+                                            int64_t height) const {
+    return BytesForTextureRegion(format, width, height);
+  }
+
   constexpr size_t GetByteSizeOfBaseMipLevel() const {
     if (!IsValid()) {
       return 0u;
     }
-    return size.Area() * BytesPerPixelForPixelFormat(format);
+    return GetByteSizeForDimensions(size.width, size.height);
   }
 
   constexpr size_t GetByteSizeOfAllMipLevels() const {
@@ -60,8 +68,7 @@ struct TextureDescriptor {
     int64_t width = size.width;
     int64_t height = size.height;
     for (auto i = 0u; i < mip_count; i++) {
-      result +=
-          ISize(width, height).Area() * BytesPerPixelForPixelFormat(format);
+      result += GetByteSizeForDimensions(width, height);
       width /= 2;
       height /= 2;
     }
@@ -72,7 +79,7 @@ struct TextureDescriptor {
     if (!IsValid()) {
       return 0u;
     }
-    return size.width * BytesPerPixelForPixelFormat(format);
+    return BytesPerRowForTextureWidth(format, size.width);
   }
 
   constexpr bool SamplingOptionsAreValid() const {

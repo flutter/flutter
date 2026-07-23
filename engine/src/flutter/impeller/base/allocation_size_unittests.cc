@@ -109,16 +109,16 @@ TEST(AllocationSizeTest, CanPerformSimpleArithmetic) {
 
 TEST(AllocationSizeTest, CanConstructWithArith) {
   {
-    Bytes a(1u);
-    ASSERT_EQ(a.GetByteSize(), 1u);
+    KiloBytes a(1u);
+    ASSERT_EQ(a.GetByteSize(), 1000u);
   }
   {
-    Bytes a(1.5);
-    ASSERT_EQ(a.GetByteSize(), 2u);
+    KiloBytes a(1.5);
+    ASSERT_EQ(a.GetByteSize(), 2000u);
   }
   {
-    Bytes a(1.5f);
-    ASSERT_EQ(a.GetByteSize(), 2u);
+    KiloBytes a(1.5f);
+    ASSERT_EQ(a.GetByteSize(), 2000u);
   }
 }
 

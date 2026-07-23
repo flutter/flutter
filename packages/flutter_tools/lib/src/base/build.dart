@@ -123,7 +123,7 @@ class AOTSnapshotter {
     assert(platform != TargetPlatform.ios || darwinArch != null);
 
     if (!_isValidAotPlatform(platform, buildMode)) {
-      _logger.printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
+      _logger.printError('${platform.getName()} does not support AOT compilation.');
       return 1;
     }
 
@@ -226,7 +226,7 @@ class AOTSnapshotter {
     // The name of the debug file must contain additional information about
     // the architecture, since a single build command may produce
     // multiple debug files.
-    final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
+    final String archName = platform.getName(darwinArch: darwinArch);
     final debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     if (shouldSplitDebugInfo) {

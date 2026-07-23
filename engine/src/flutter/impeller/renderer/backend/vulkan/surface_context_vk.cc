@@ -136,6 +136,11 @@ bool SurfaceContextVK::FlushCommandBuffers() {
   return parent_->FlushCommandBuffers();
 }
 
+bool SurfaceContextVK::FinishQueue() {
+  GetIdleWaiter()->WaitIdle();
+  return true;
+}
+
 bool SurfaceContextVK::SubmitOnscreen(
     std::shared_ptr<CommandBuffer> cmd_buffer) {
   swapchain_->AddFinalCommandBuffer(std::move(cmd_buffer));

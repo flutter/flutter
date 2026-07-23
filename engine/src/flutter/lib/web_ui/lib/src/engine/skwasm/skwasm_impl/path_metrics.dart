@@ -8,7 +8,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmPathMetricIterator implements DisposablePathMetricIterator {
+class SkwasmPathMetricIterator implements BackendPathMetricIterator {
   SkwasmPathMetricIterator(SkwasmPath path, bool forceClosed)
     : handle = contourMeasureIterCreate(path.handle, forceClosed, 1.0);
 
@@ -25,7 +25,7 @@ class SkwasmPathMetricIterator implements DisposablePathMetricIterator {
   SkwasmPathMetric? _current;
 
   @override
-  DisposablePathMetric get current {
+  BackendPathMetric get current {
     if (_current == null) {
       throw RangeError(
         'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
@@ -49,7 +49,7 @@ class SkwasmPathMetricIterator implements DisposablePathMetricIterator {
   }
 }
 
-class SkwasmPathMetric implements DisposablePathMetric {
+class SkwasmPathMetric implements BackendPathMetric {
   SkwasmPathMetric(this.handle);
 
   final Pointer<RawContourMeasure> handle;
@@ -63,7 +63,7 @@ class SkwasmPathMetric implements DisposablePathMetric {
   }
 
   @override
-  DisposablePathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
+  BackendPathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
     return SkwasmPath.fromHandle(contourMeasureGetSegment(handle, start, end, startWithMoveTo));
   }
 

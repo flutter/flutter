@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -184,6 +185,14 @@ TEST_F(FlutterEngineTest, Switches) {
   unsetenv("FLUTTER_ENGINE_SWITCH_2");
 }
 #endif  // !FLUTTER_RELEASE
+
+TEST_F(FlutterEngineTest, EnableSDFsAlwaysReturnsYes) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  EXPECT_TRUE([project enableSDFs]);
+}
 
 TEST_F(FlutterEngineTest, MessengerSend) {
   FlutterEngine* engine = GetFlutterEngine();
@@ -744,6 +753,27 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
 
   [registrar publish:secondValue];
   EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
+}
+
+TEST_F(FlutterEngineTest, RegistrarCanReadValuePublishedByAnotherPlugin) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingPathComponent:@"icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:project
+                                       allowHeadlessExecution:YES];
+  NSString* publisherPluginName = @"PublisherPlugin";
+  NSString* readerPluginName = @"ReaderPlugin";
+  id<FlutterPluginRegistrar> publisher = [engine registrarForPlugin:publisherPluginName];
+  id<FlutterPluginRegistrar> reader = [engine registrarForPlugin:readerPluginName];
+
+  NSString* publishedValue = @"A published value";
+  [publisher publish:publishedValue];
+
+  EXPECT_EQ([reader valuePublishedByPlugin:publisherPluginName], publishedValue);
+  EXPECT_EQ([reader valuePublishedByPlugin:@"NoSuchPlugin"], nil);
+  EXPECT_EQ([reader valuePublishedByPlugin:readerPluginName], [NSNull null]);
 }
 
 TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {

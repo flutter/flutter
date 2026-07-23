@@ -33,7 +33,7 @@ void configureProject(Project project, String outputDir) {
     project.publishing {
         repositories {
             maven {
-                url = uri("file://${outputDir}/outputs/repo")
+                url = project.file("${outputDir}/outputs/repo").toURI()
             }
         }
     }

@@ -47,7 +47,8 @@ TEST_P(InteropPlaygroundTest, CanCreateDisplayListBuilder) {
 }
 
 TEST_P(InteropPlaygroundTest, CanCreateSurface) {
-  if (GetBackend() != PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() != PlaygroundBackend::kOpenGLES &&
+      GetBackend() != PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP()
         << "This test checks wrapping FBOs which is an OpenGL ES only call.";
     return;
@@ -658,6 +659,11 @@ TEST_P(InteropPlaygroundTest, CanControlEllipses) {
 }
 
 TEST_P(InteropPlaygroundTest, CanCreateFragmentProgramColorFilters) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "See: https://github.com/flutter/flutter/issues/188882";
+  }
+
   auto iplr = OpenAssetAsHPPMapping("interop_runtime_stage_cs.frag.iplr");
   ASSERT_TRUE(!!iplr);
   auto program = hpp::FragmentProgram::WithData(std::move(iplr));

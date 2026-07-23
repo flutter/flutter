@@ -936,6 +936,23 @@ Rasterizer::ScreenshotFormat ToScreenshotFormat(impeller::PixelFormat format) {
     case impeller::PixelFormat::kB10G10R10XR:
     case impeller::PixelFormat::kB10G10R10A10XR:
     case impeller::PixelFormat::kR32Float:
+    case impeller::PixelFormat::kBC1RGBAUNormInt:
+    case impeller::PixelFormat::kBC1RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kBC3RGBAUNormInt:
+    case impeller::PixelFormat::kBC3RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kBC5RGUNormInt:
+    case impeller::PixelFormat::kBC7RGBAUNormInt:
+    case impeller::PixelFormat::kBC7RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kETC2RGB8UNormInt:
+    case impeller::PixelFormat::kETC2RGB8UNormIntSRGB:
+    case impeller::PixelFormat::kETC2RGBA8UNormInt:
+    case impeller::PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case impeller::PixelFormat::kASTC4x4LDR:
+    case impeller::PixelFormat::kASTC4x4LDRSRGB:
+    case impeller::PixelFormat::kASTC8x8LDR:
+    case impeller::PixelFormat::kASTC8x8LDRSRGB:
+    case impeller::PixelFormat::kASTC4x4HDR:
+    case impeller::PixelFormat::kASTC8x8HDR:
       FML_DCHECK(false);
       return Rasterizer::ScreenshotFormat::kUnknown;
     case impeller::PixelFormat::kR8G8B8A8UNormInt:

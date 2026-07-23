@@ -8,6 +8,7 @@ library skwasm_impl;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
@@ -26,7 +27,42 @@ external StackPointer stackSave();
 @Native<Void Function(StackPointer)>(symbol: '_emscripten_stack_restore', isLeaf: true)
 external void stackRestore(StackPointer pointer);
 
+@Native<Size Function()>(symbol: 'emscripten_stack_get_free', isLeaf: true)
+external int stackGetFree();
+
+@Native<Pointer<Void> Function(Size)>(symbol: 'emscripten_builtin_malloc', isLeaf: true)
+external Pointer<Void> heapAlloc(int length);
+
+@Native<Void Function(Pointer<Void>)>(symbol: 'emscripten_builtin_free', isLeaf: true)
+external void heapFree(Pointer<Void> ptr);
+
 class StackScope {
+  List<Pointer<Void>>? _heapPointers;
+
+  Pointer<Void> _allocate(int length) {
+    // Use heap allocation for buffers that would consume too much stack space.
+    final int heapThreshold = math.min(4096, stackGetFree() ~/ 2);
+    if (length > heapThreshold) {
+      final Pointer<Void> ptr = heapAlloc(length);
+      _heapPointers ??= <Pointer<Void>>[];
+      _heapPointers!.add(ptr);
+      return ptr;
+    }
+    return stackAlloc(length).cast<Void>();
+  }
+
+  void _freeHeap() {
+    if (_heapPointers != null) {
+      // Iterable.forEach is not usable here because tear-offs are disallowed
+      // for external functions like heapFree.
+      // ignore: prefer_foreach
+      for (final Pointer<Void> ptr in _heapPointers!) {
+        heapFree(ptr);
+      }
+      _heapPointers = null;
+    }
+  }
+
   Pointer<Int8> convertStringToNative(String string) {
     final Uint8List encoded = utf8.encode(string);
     final Pointer<Int8> pointer = allocInt8Array(encoded.length + 1);
@@ -195,43 +231,49 @@ class StackScope {
 
   Pointer<Bool> allocBoolArray(int count) {
     final int length = count * sizeOf<Bool>();
-    return stackAlloc(length).cast<Bool>();
+    return _allocate(length).cast<Bool>();
   }
 
   Pointer<Int8> allocInt8Array(int count) {
     final int length = count * sizeOf<Int8>();
-    return stackAlloc(length).cast<Int8>();
+    return _allocate(length).cast<Int8>();
   }
 
   Pointer<Uint16> allocUint16Array(int count) {
     final int length = count * sizeOf<Uint16>();
-    return stackAlloc(length).cast<Uint16>();
+    return _allocate(length).cast<Uint16>();
   }
 
   Pointer<Int32> allocInt32Array(int count) {
     final int length = count * sizeOf<Int32>();
-    return stackAlloc(length).cast<Int32>();
+    return _allocate(length).cast<Int32>();
   }
 
   Pointer<Uint32> allocUint32Array(int count) {
     final int length = count * sizeOf<Uint32>();
-    return stackAlloc(length).cast<Uint32>();
+    return _allocate(length).cast<Uint32>();
   }
 
   Pointer<Float> allocFloatArray(int count) {
     final int length = count * sizeOf<Float>();
-    return stackAlloc(length).cast<Float>();
+    return _allocate(length).cast<Float>();
   }
 
   Pointer<Pointer<Void>> allocPointerArray(int count) {
     final int length = count * sizeOf<Pointer<Void>>();
-    return stackAlloc(length).cast<Pointer<Void>>();
+    return _allocate(length).cast<Pointer<Void>>();
   }
 }
 
 T withStackScope<T>(T Function(StackScope scope) f) {
   final StackPointer stack = stackSave();
-  final T result = f(StackScope());
+  final scope = StackScope();
+  late final T result;
+  try {
+    result = f(scope);
+  } finally {
+    scope._freeHeap();
+  }
   assert(
     result is! Future,
     'withStackScope() closure returned a Future. '

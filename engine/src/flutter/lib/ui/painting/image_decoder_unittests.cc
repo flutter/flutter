@@ -82,6 +82,10 @@ class TestImpellerContext : public impeller::Context {
     return nullptr;
   }
 
+  // A stub returning false is allowed from implementations that are not
+  // planned to be used in benchmarking situations.
+  bool FinishQueue() override { return false; }
+
   void StoreTaskForGPU(const std::function<void()>& task,
                        const std::function<void()>& failure) override {
     tasks_.push_back(PendingTask{task, failure});

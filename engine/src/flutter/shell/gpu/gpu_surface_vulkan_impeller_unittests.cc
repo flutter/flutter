@@ -34,15 +34,21 @@ class TestGPUSurfaceVulkanDelegate : public GPUSurfaceVulkanDelegate {
   TestGPUSurfaceVulkanDelegate()
       : vk_(fml::MakeRefCounted<vulkan::VulkanProcTable>(
             vkGetInstanceProcAddr)),
-        test_context_(fml::MakeRefCounted<TestVulkanContext>()),
-        test_surface_(TestVulkanSurface::Create(*test_context_, {100, 100})) {}
+        test_context_(fml::MakeRefCounted<TestVulkanContext>()) {}
 
   const vulkan::VulkanProcTable& vk() override { return *vk_; }
 
   FlutterVulkanImage AcquireImage(const DlISize& size) override {
+    if (!test_surface_ || surface_size_ != size) {
+      test_surface_ = TestVulkanSurface::Create(*test_context_, size);
+      surface_size_ = size;
+    }
+
     return {
         .struct_size = sizeof(FlutterVulkanImage),
-        .image = reinterpret_cast<uint64_t>(test_surface_->GetImage()),
+        .image = test_surface_
+                     ? reinterpret_cast<uint64_t>(test_surface_->GetImage())
+                     : 0u,
         .format = VK_FORMAT_R8G8B8A8_UNORM,
     };
   }
@@ -53,6 +59,7 @@ class TestGPUSurfaceVulkanDelegate : public GPUSurfaceVulkanDelegate {
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   fml::RefPtr<TestVulkanContext> test_context_;
   std::unique_ptr<TestVulkanSurface> test_surface_;
+  DlISize surface_size_ = {};
 };
 
 TEST(GPUSurfaceVulkanImpeller, DisposesThreadLocalResources) {
@@ -74,6 +81,33 @@ TEST(GPUSurfaceVulkanImpeller, DisposesThreadLocalResources) {
   // the pool from the global map.
   auto frame = surface->AcquireFrame(DlISize(100, 100));
   EXPECT_EQ(impeller::CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
+}
+
+TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  auto context = impeller::ContextVK::Create(std::move(context_settings));
+
+  TestGPUSurfaceVulkanDelegate delegate;
+
+  auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(&delegate, context);
+
+  auto frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  auto transients = surface->transients_;
+  ASSERT_NE(transients, nullptr);
+  EXPECT_EQ(surface->transients_size_, impeller::ISize(100, 100));
+
+  frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  EXPECT_EQ(surface->transients_, transients);
+  EXPECT_EQ(surface->transients_size_, impeller::ISize(100, 100));
+
+  frame = surface->AcquireFrame(DlISize(200, 100));
+  ASSERT_NE(frame, nullptr);
+  EXPECT_NE(surface->transients_, transients);
+  EXPECT_EQ(surface->transients_size_, impeller::ISize(200, 100));
 }
 
 }  // namespace testing

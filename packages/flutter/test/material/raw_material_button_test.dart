@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('RawMaterialButton responds when tapped', (WidgetTester tester) async {
@@ -136,7 +135,7 @@ void main() {
   });
 
   testWidgets('materialTapTargetSize.padded expands semantics area', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -152,31 +151,21 @@ void main() {
     );
 
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isButton,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocusable,
-              ],
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              label: '+',
-              textDirection: TextDirection.ltr,
-              rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-              children: <TestSemantics>[],
-            ),
-          ],
-        ),
-        ignoreTransform: true,
+      tester.getSemantics(find.byType(RawMaterialButton)),
+      matchesSemantics(
+        hasEnabledState: true,
+        isButton: true,
+        isEnabled: true,
+        isFocusable: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+        label: '+',
+        textDirection: TextDirection.ltr,
+        size: const Size(48.0, 48.0),
       ),
     );
 
-    semantics.dispose();
+    handle.dispose();
   });
 
   testWidgets('Ink splash from center tap originates in correct location', (

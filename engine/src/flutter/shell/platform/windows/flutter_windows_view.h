@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -150,6 +151,20 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // |WindowBindingHandlerDelegate|
   bool OnWindowSizeChanged(size_t width, size_t height) override;
 
+  // Enables or disables content-based sizing for this view.
+  //
+  // When enabled, the view ignores externally-driven resizes and instead
+  // sizes itself to the rendered content after each frame. When disabled,
+  // the view follows the normal platform-driven resize flow.
+  //
+  // This may be called on any thread.
+  void SetSizedToContent(bool sized_to_content);
+
+  // Returns true if the view is currently sized to its rendered content.
+  //
+  // This may be called from the platform or raster threads.
+  bool IsSizedToContent() const;
+
   // |WindowBindingHandlerDelegate|
   void OnWindowRepaint() override;
 
@@ -158,6 +173,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
+                     uint64_t buttons,
                      uint32_t rotation,
                      uint32_t pressure,
                      int modifiers_state) override;
@@ -167,7 +183,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
-                     FlutterPointerMouseButtons button,
+                     uint64_t buttons,
                      uint32_t rotation,
                      uint32_t pressure) override;
 
@@ -176,7 +192,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                    double y,
                    FlutterPointerDeviceKind device_kind,
                    int32_t device_id,
-                   FlutterPointerMouseButtons button) override;
+                   uint64_t buttons) override;
 
   // |WindowBindingHandlerDelegate|
   void OnPointerLeave(double x,
@@ -449,12 +465,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // to prevent screen tearing.
   bool NeedsVsync() const;
 
-  // If true, the view is sized to its content via a sizing delegate.
-  // If false, the view is sized by its parent HWND or by the user.
-  //
-  // This method can be called from the platform or raster threads.
-  bool IsSizedToContent() const;
-
   // Gets the constraints for this view.
   BoxConstraints GetConstraints() const;
 
@@ -502,7 +512,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // If `true`, the view is sized to its content via a sizing delegate.
   // If `false`, the view is sized by its parent HWND.
-  bool is_sized_to_content_ = false;
+  std::atomic<bool> is_sized_to_content_{false};
 
   // The constraints for this view.
   BoxConstraints box_constraints_;

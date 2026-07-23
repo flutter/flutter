@@ -312,6 +312,7 @@ class ClickDebouncer {
       // The semantic node is not listening to taps. Flush the pointer events
       // for the framework to figure out what to do with them. It's possible
       // the framework is interested in gestures other than taps.
+      click.stopPropagation();
       _flush();
     }
   }

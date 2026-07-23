@@ -130,7 +130,6 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   }
 
   VS::FrameInfo frame_info;
-  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frame_info.uv_transform =
       Rect::MakeSize(texture_size).GetNormalizingTransform() *
       GetInverseEffectTransform();

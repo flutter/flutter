@@ -39,9 +39,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
     return <String>[
       for (final AndroidAotDeferredComponentsBundle target in deferredComponentsDependencies)
         if (deferredComponentsTargets.contains(target.name))
-          getAndroidArchForName(
-            getNameForTargetPlatform(target.dependency.targetPlatform),
-          ).archName,
+          getAndroidArchForName(target.dependency.targetPlatform.getName()).archName,
     ];
   }
 

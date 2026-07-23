@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../lazy_path.dart';
+import '../primitives/path.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'layer.dart';
@@ -130,7 +130,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
   }) {
-    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as LazyPath, clipBehavior));
+    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as EnginePath, clipBehavior));
   }
 
   @override

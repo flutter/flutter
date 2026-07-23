@@ -707,9 +707,11 @@ abstract class Device {
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 
+  /// The CPU architecture of the device.
+  Future<CpuArch> get cpuArch;
+
   /// Platform name for display only.
-  Future<String> get targetPlatformDisplayName async =>
-      getNameForTargetPlatform(await targetPlatform);
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   Future<String> get sdkNameAndVersion;
 
@@ -883,7 +885,8 @@ abstract class Device {
       'name': name,
       'id': id,
       'isSupported': await isSupported(),
-      'targetPlatform': getNameForTargetPlatform(await targetPlatform),
+      'targetPlatform': (await targetPlatform).getName(),
+      'cpuArch': (await cpuArch).name,
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
       'capabilities': <String, Object>{
@@ -943,6 +946,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
+    this.disableServiceOriginCheck = false,
     this.enableDds = true,
     this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
@@ -995,6 +999,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.iosProfileDebugger,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1027,18 +1032,20 @@ class DebuggingOptions {
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.iosProfileDebugger,
+    this.traceSystrace = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
        dartFlags = '',
        disableServiceAuthCodes = false,
+       disableServiceOriginCheck = false,
        enableDds = false,
        cacheStartupProfile = false,
        enableSoftwareRendering = false,
        skiaDeterministicRendering = false,
        traceSkia = false,
        traceSkiaAllowlist = null,
-       traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
        profileMicrotasks = false,
@@ -1066,6 +1073,7 @@ class DebuggingOptions {
     required this.dartFlags,
     required this.dartEntrypointArgs,
     required this.disableServiceAuthCodes,
+    required this.disableServiceOriginCheck,
     required this.enableDds,
     required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
@@ -1115,6 +1123,7 @@ class DebuggingOptions {
     required this.google3WorkspaceRoot,
     required this.printDtd,
     this.webDevServerConfig,
+    this.iosProfileDebugger,
   }) : testFlag = false;
 
   final bool debuggingEnabled;
@@ -1124,6 +1133,7 @@ class DebuggingOptions {
   final String dartFlags;
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
+  final bool disableServiceOriginCheck;
   final bool enableDds;
   final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
@@ -1162,6 +1172,9 @@ class DebuggingOptions {
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
   final bool testFlag;
+
+  /// Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.
+  final bool? iosProfileDebugger;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1222,6 +1235,7 @@ class DebuggingOptions {
       if (enableDartProfiling) '--enable-dart-profiling',
       if (profileStartup) '--profile-startup',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (disableServiceOriginCheck) '--disable-service-origin-check',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
@@ -1262,10 +1276,12 @@ class DebuggingOptions {
 
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
+    'iosProfileDebugger': iosProfileDebugger,
     'startPaused': startPaused,
     'dartFlags': dartFlags,
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
+    'disableServiceOriginCheck': disableServiceOriginCheck,
     'enableDds': enableDds,
     'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
@@ -1334,10 +1350,12 @@ class DebuggingOptions {
       DebuggingOptions._(
         buildInfo: buildInfo,
         debuggingEnabled: json['debuggingEnabled']! as bool,
+        iosProfileDebugger: json['iosProfileDebugger'] as bool?,
         startPaused: json['startPaused']! as bool,
         dartFlags: json['dartFlags']! as String,
         dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
         disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+        disableServiceOriginCheck: json['disableServiceOriginCheck'] as bool? ?? false,
         enableDds: json['enableDds']! as bool,
         cacheStartupProfile: json['cacheStartupProfile']! as bool,
         enableSoftwareRendering: json['enableSoftwareRendering']! as bool,

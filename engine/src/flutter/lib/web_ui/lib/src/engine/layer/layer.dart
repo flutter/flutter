@@ -85,7 +85,7 @@ class ClipPathEngineLayer extends ContainerLayer implements ui.ClipPathEngineLay
   ClipPathEngineLayer(this.clipPath, this.clipBehavior) : assert(clipBehavior != ui.Clip.none);
 
   /// The path used to clip child layers.
-  final LazyPath clipPath;
+  final EnginePath clipPath;
   final ui.Clip clipBehavior;
 
   @override

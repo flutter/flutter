@@ -8,8 +8,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 FLUTTER_ASSERT_ARC

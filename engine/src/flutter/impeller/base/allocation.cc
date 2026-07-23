@@ -34,11 +34,15 @@ bool Allocation::Truncate(Bytes length, bool npot) {
   if (!reserved) {
     return false;
   }
+  FML_CHECK(reserved_ >= length);
   length_ = length;
   return true;
 }
 
-uint32_t Allocation::NextPowerOfTwoSize(uint32_t x) {
+absl::StatusOr<uint64_t> Allocation::NextPowerOfTwoSize(uint64_t x) {
+  if (x > (static_cast<uint64_t>(1) << 63)) {
+    return absl::InvalidArgumentError("Out of range");
+  }
   if (x == 0) {
     return 1;
   }
@@ -50,6 +54,7 @@ uint32_t Allocation::NextPowerOfTwoSize(uint32_t x) {
   x |= x >> 4;
   x |= x >> 8;
   x |= x >> 16;
+  x |= x >> 32;
 
   return x + 1;
 }
@@ -57,7 +62,12 @@ uint32_t Allocation::NextPowerOfTwoSize(uint32_t x) {
 bool Allocation::ReserveNPOT(Bytes reserved) {
   // Reserve at least one page of data.
   reserved = std::max(Bytes{4096u}, reserved);
-  return Reserve(Bytes{NextPowerOfTwoSize(reserved.GetByteSize())});
+  absl::StatusOr<uint64_t> npot_size =
+      NextPowerOfTwoSize(reserved.GetByteSize());
+  if (!npot_size.ok()) {
+    return false;
+  }
+  return Reserve(Bytes{*npot_size});
 }
 
 bool Allocation::Reserve(Bytes reserved) {

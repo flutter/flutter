@@ -215,6 +215,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
+  @awaitNotRequired
   Future<void> animateTo(double to, {required Duration duration, required Curve curve});
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -224,6 +225,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// [clamp] parameter is ignored by this stub implementation but subclasses
   /// like [ScrollPosition] handle it by adjusting [to] to prevent over or
   /// underscroll.
+  @awaitNotRequired
   Future<void> moveTo(double to, {Duration? duration, Curve? curve, bool? clamp}) {
     if (duration == null || duration == Duration.zero) {
       jumpTo(to);

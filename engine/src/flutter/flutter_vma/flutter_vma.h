@@ -5,6 +5,10 @@
 #ifndef FLUTTER_FLUTTER_VMA_FLUTTER_VMA_H_
 #define FLUTTER_FLUTTER_VMA_FLUTTER_VMA_H_
 
+#include "flutter/vulkan/procs/vulkan_interface.h"  // IWYU pragma: keep
+
+// vk_mem_alloc.h includes Vulkan headers, so it needs to come after
+// vulkan_interface.h.
 #include "vk_mem_alloc.h"
 
 #endif  // FLUTTER_FLUTTER_VMA_FLUTTER_VMA_H_

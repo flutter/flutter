@@ -94,7 +94,7 @@ class _WindowsTable extends StatelessWidget {
   }
 
   List<DataRow> _buildRows(WindowRegistry windowRegistry, BuildContext context) {
-    final List<DataRow> rows = [_buildRow(mainWindow, context)];
+    final List<DataRow> rows = [];
     for (final WindowEntry entry in windowRegistry.windows) {
       final BaseWindowController controller = entry.controller;
       rows.add(_buildRow(controller, context));
@@ -187,13 +187,24 @@ class _WindowCreatorCard extends StatelessWidget {
                     OutlinedButton(
                       onPressed: () {
                         late final WindowEntry entry;
-                        final controller = RegularWindowController(
-                          delegate: CallbackRegularWindowControllerDelegate(
-                            onDestroyed: () => windowRegistry.unregister(entry),
-                          ),
-                          title: 'Regular',
-                          preferredSize: windowSettings.regularSize,
-                        );
+                        final RegularWindowController controller;
+                        if (windowSettings.regularSizedToContent) {
+                          controller = RegularWindowController.sizedToContent(
+                            resizable: windowSettings.regularResizable,
+                            delegate: CallbackRegularWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Regular',
+                          );
+                        } else {
+                          controller = RegularWindowController(
+                            delegate: CallbackRegularWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Regular',
+                            size: windowSettings.regularSize,
+                          );
+                        }
 
                         entry = WindowEntry(
                           controller: controller,
@@ -210,14 +221,24 @@ class _WindowCreatorCard extends StatelessWidget {
                     OutlinedButton(
                       onPressed: () {
                         late final WindowEntry entry;
-                        final controller = DialogWindowController(
-                          delegate: CallbackDialogWindowControllerDelegate(
-                            onDestroyed: () => windowRegistry.unregister(entry),
-                          ),
-                          title: 'Modeless Dialog',
-                          preferredSize: windowSettings.dialogSize,
-                          decorated: windowSettings.dialogDecorated,
-                        );
+                        final DialogWindowController controller;
+                        if (windowSettings.dialogSizedToContent) {
+                          controller = DialogWindowController.sizedToContent(
+                            resizable: windowSettings.dialogResizable,
+                            delegate: CallbackDialogWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Modeless Dialog',
+                          );
+                        } else {
+                          controller = DialogWindowController(
+                            delegate: CallbackDialogWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Modeless Dialog',
+                            size: windowSettings.dialogSize,
+                          );
+                        }
 
                         entry = WindowEntry(
                           controller: controller,
@@ -232,15 +253,26 @@ class _WindowCreatorCard extends StatelessWidget {
                     OutlinedButton(
                       onPressed: () {
                         late final WindowEntry entry;
-                        final controller = DialogWindowController(
-                          delegate: CallbackDialogWindowControllerDelegate(
-                            onDestroyed: () => windowRegistry.unregister(entry),
-                          ),
-                          title: 'Modal Dialog',
-                          preferredSize: windowSettings.dialogSize,
-                          parent: windowController,
-                          decorated: windowSettings.dialogDecorated,
-                        );
+                        final DialogWindowController controller;
+                        if (windowSettings.dialogSizedToContent) {
+                          controller = DialogWindowController.sizedToContent(
+                            resizable: windowSettings.dialogResizable,
+                            delegate: CallbackDialogWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Modal Dialog',
+                            parent: windowController,
+                          );
+                        } else {
+                          controller = DialogWindowController(
+                            delegate: CallbackDialogWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Modal Dialog',
+                            size: windowSettings.dialogSize,
+                            parent: windowController,
+                          );
+                        }
 
                         entry = WindowEntry(
                           controller: controller,

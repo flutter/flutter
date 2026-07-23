@@ -30,6 +30,8 @@ void main() {
   late StdoutHandler generatorWithSchemeStdoutHandler;
   late FakeProcessManager fakeProcessManager;
 
+  const expectedCachePath = 'build/98469b79d3a7ca103e61af5819c93b8c.cache.dill.track.dill';
+
   const frontendServerCommand = <String>[
     'Artifact.engineDartAotRuntime',
     'Artifact.frontendServerSnapshotForEngineDartSdk',
@@ -107,7 +109,7 @@ void main() {
         command: const <String>[
           ...frontendServerCommand,
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
@@ -139,7 +141,7 @@ void main() {
           '--filesystem-scheme',
           'scheme',
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
@@ -167,7 +169,7 @@ void main() {
         command: const <String>[
           ...frontendServerCommand,
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdin: frontendServerStdIn,
@@ -198,7 +200,7 @@ void main() {
           command: const <String>[
             ...frontendServerCommand,
             '--initialize-from-dill',
-            'build/cache.dill.track.dill',
+            expectedCachePath,
             '--verbosity=error',
           ],
           stdin: frontendServerStdIn,
@@ -230,7 +232,7 @@ void main() {
         command: const <String>[
           ...frontendServerCommand,
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
@@ -301,7 +303,7 @@ void main() {
           '--filesystem-scheme',
           'scheme',
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
@@ -388,7 +390,7 @@ void main() {
             '--filesystem-scheme',
             'scheme',
             '--initialize-from-dill',
-            'build/cache.dill.track.dill',
+            expectedCachePath,
             '--verbosity=error',
           ],
           stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
@@ -469,7 +471,7 @@ void main() {
         command: const <String>[
           ...frontendServerCommand,
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
@@ -520,7 +522,7 @@ void main() {
         command: const <String>[
           ...frontendServerCommand,
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--verbosity=error',
         ],
         stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
@@ -573,7 +575,7 @@ void main() {
           '--filesystem-scheme',
           'scheme',
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--source',
           'some/dir/plugin_registrant.dart',
           '--source',
@@ -611,7 +613,7 @@ void main() {
         command: const <String>[
           ...frontendServerCommand,
           '--initialize-from-dill',
-          'build/cache.dill.track.dill',
+          expectedCachePath,
           '--platform',
           '/foo/platform.dill',
           '--verbosity=error',

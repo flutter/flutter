@@ -150,11 +150,11 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 10000));
 
     final List<TextLine> lines = paragraph.lines;
-    expect(lines.length, 3);
-    for (var i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.size, 1);
+    expect(lines.length, 4);
+    for (var i = 0; i < lines.length; i++) {
+      expect(lines[i].whitespacesRange.size, i != lines.length - 1 ? 1 : 0);
       expect(lines[i].textRange.size, 0);
-      expect(lines[i].hardLineBreak, i != 3);
+      expect(lines[i].hardLineBreak, i != lines.length - 1);
     }
   });
 }

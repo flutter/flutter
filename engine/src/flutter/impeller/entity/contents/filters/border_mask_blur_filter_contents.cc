@@ -106,8 +106,6 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = entity.GetShaderTransform(pass);
-    frame_info.texture_sampler_y_coord_scale =
-        input_snapshot->texture->GetYCoordScale();
 
     FS::FragInfo frag_info;
     frag_info.sigma_uv = sigma.Abs() / input_snapshot->texture->GetSize();

@@ -50,7 +50,7 @@ void main() {
       isDark: false,
       contrastLevel: 1.0,
     );
-    final ColorScheme appScheme = app.theme!.colorScheme;
+    final ColorScheme appScheme = app.highContrastTheme!.colorScheme;
 
     expect(appScheme.primary.value, MaterialDynamicColors.primary.getArgb(highContrastScheme));
     expect(appScheme.onPrimary.value, MaterialDynamicColors.onPrimary.getArgb(highContrastScheme));

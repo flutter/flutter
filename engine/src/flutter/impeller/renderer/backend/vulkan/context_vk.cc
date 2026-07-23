@@ -395,8 +395,8 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  auto sampler_library =
-      std::shared_ptr<SamplerLibraryVK>(new SamplerLibraryVK(device_holder));
+  auto sampler_library = std::shared_ptr<SamplerLibraryVK>(
+      new SamplerLibraryVK(device_holder, caps->GetMaxSamplerAnisotropy()));
 
   auto shader_library = std::shared_ptr<ShaderLibraryVK>(
       new ShaderLibraryVK(device_holder,                   //
@@ -524,6 +524,16 @@ std::shared_ptr<Allocator> ContextVK::GetResourceAllocator() const {
   return allocator_;
 }
 
+std::shared_ptr<const GpuSubmissionTracker> ContextVK::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextVK::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
+}
+
 std::shared_ptr<ShaderLibrary> ContextVK::GetShaderLibrary() const {
   return shader_library_;
 }
@@ -580,7 +590,6 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
 
   return std::shared_ptr<CommandBufferVK>(new CommandBufferVK(
       shared_from_this(),         //
-      GetDeviceHolder(),          //
       std::move(tracked_objects)  //
       ));
 }
@@ -674,6 +683,11 @@ bool ContextVK::FlushCommandBuffers() {
   } else {
     return true;
   }
+}
+
+bool ContextVK::FinishQueue() {
+  GetIdleWaiter()->WaitIdle();
+  return true;
 }
 
 // Creating a render pass is observed to take an additional 6ms on a Pixel 7

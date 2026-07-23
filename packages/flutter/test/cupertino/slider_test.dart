@@ -10,8 +10,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
-
 const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
   color: Color.fromARGB(51, 120, 120, 128),
   darkColor: Color.fromARGB(91, 120, 120, 128),
@@ -434,7 +432,7 @@ void main() {
   });
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
       MediaQuery(
@@ -447,23 +445,15 @@ void main() {
     );
 
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              id: 1,
-              value: '50%',
-              increasedValue: '60%',
-              decreasedValue: '40%',
-              textDirection: TextDirection.ltr,
-              flags: <SemanticsFlag>[SemanticsFlag.isSlider],
-              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      tester.getSemantics(find.byType(CupertinoSlider)),
+      matchesSemantics(
+        isSlider: true,
+        hasIncreaseAction: true,
+        hasDecreaseAction: true,
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        textDirection: TextDirection.ltr,
       ),
     );
 
@@ -478,20 +468,9 @@ void main() {
       ),
     );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(id: 1, flags: <SemanticsFlag>[SemanticsFlag.isSlider]),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+    expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(isSlider: true));
 
-    semantics.dispose();
+    handle.dispose();
   });
 
   testWidgets('Slider Semantics can be updated', (WidgetTester tester) async {

@@ -113,7 +113,7 @@ While it's important to have a good test suite, consider:
 - Is there an existing test target that I can add my test to that is not close
   to the timeout limit?
 
-Consider consulting with the infrastruture team (`team-infra`) before adding a
+Consider consulting with the infrastructure team (`team-infra`) before adding a
 large number of new test targets, or to get advice on how to best create new
 test targets.
 

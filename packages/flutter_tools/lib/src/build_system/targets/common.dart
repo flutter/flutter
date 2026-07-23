@@ -205,7 +205,7 @@ class KernelSnapshot extends Target {
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
 
     // This configuration is all optional.
     final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];
@@ -386,7 +386,7 @@ abstract class AotElfBase extends Target {
       kExtraGenSnapshotOptions,
     );
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];

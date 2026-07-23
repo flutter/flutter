@@ -428,6 +428,32 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
     });
 
+    test('does not detect override when initialized with browser zoom', () {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+
+      // Simulate a browser zoom of 1.25x (20px / 16px) by forcing a global font-size.
+      style.text = '*{ font-size: 20px !important; }';
+      root.append(style);
+
+      try {
+        // Create a new dispatcher while the zoom is active.
+        final testDispatcher = EnginePlatformDispatcher();
+
+        // It should have textScaleFactor of 1.25.
+        expect(testDispatcher.textScaleFactor, 1.25);
+
+        // It should NOT have a line-height override because we measured the
+        // baseline while the zoom was already active.
+        expect(testDispatcher.lineHeightScaleFactorOverride, null);
+
+        // Clean up the test dispatcher to stop its observer and remove its element.
+        testDispatcher.dispose();
+      } finally {
+        style.remove();
+      }
+    });
+
     test('disposes all its views', () {
       final view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
       final view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());

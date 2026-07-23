@@ -51,7 +51,7 @@ The `felt test` command compiles and runs web engine unit tests.
 *   `--start-paused`: Pauses tests before starting to allow setting breakpoints.
 *   `--browser`: Filters tests by browser (e.g., `chrome`, `firefox`, `safari`).
 *   `--compiler`: Filters tests by compiler (e.g., `dart2js`, `dart2wasm`).
-*   `--renderer`: Filters tests by renderer (e.g., `html`, `canvaskit`, `skwasm`).
+*   `--renderer`: Filters tests by renderer (e.g., `canvaskit`, `skwasm`).
 
 **Examples:**
 

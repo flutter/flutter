@@ -16,8 +16,9 @@ constexpr uint32_t kWindowFrameBufferId = 0;
 
 // The metadata for an OpenGL framebuffer backing store.
 struct FramebufferBackingStore {
-  uint32_t framebuffer_id;
-  uint32_t texture_id;
+  uint32_t framebuffer_id = 0;
+  uint32_t texture_id = 0;
+  uint32_t depth_stencil_id = 0;
 };
 
 typedef const impeller::GLProc<decltype(glBlitFramebuffer)> BlitFramebufferProc;
@@ -66,28 +67,31 @@ bool CompositorOpenGL::CreateBackingStore(
   gl_->BindTexture(GL_TEXTURE_2D, 0);
 
   if (enable_impeller_) {
-    // Impeller requries that its onscreen surface is Multisampled and already
-    // has depth/stencil attached in order for anti-aliasing to work.
-    gl_->FramebufferTexture2DMultisampleEXT(GL_FRAMEBUFFER,
-                                            GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                            store->texture_id, 0, 4);
+    if (supports_implicit_msaa_) {
+      // MSAA color attachment
+      gl_->FramebufferTexture2DMultisampleEXT(
+          GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+          store->texture_id, 0, 4);
+    } else {
+      gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                GL_TEXTURE_2D, store->texture_id, 0);
+    }
 
-    // Set up depth/stencil attachment for impeller renderer.
-    GLuint depth_stencil;
-    gl_->GenRenderbuffers(1, &depth_stencil);
-    gl_->BindRenderbuffer(GL_RENDERBUFFER, depth_stencil);
-    gl_->RenderbufferStorageMultisampleEXT(
-        GL_RENDERBUFFER,      // target
-        4,                    // samples
-        GL_DEPTH24_STENCIL8,  // internal format
-        config.size.width,    // width
-        config.size.height    // height
-    );
+    // Impeller always requires depth/stencil attachment.
+    gl_->GenRenderbuffers(1, &store->depth_stencil_id);
+    gl_->BindRenderbuffer(GL_RENDERBUFFER, store->depth_stencil_id);
+    if (supports_implicit_msaa_) {
+      gl_->RenderbufferStorageMultisampleEXT(
+          GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, config.size.width,
+          config.size.height);
+    } else {
+      gl_->RenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+                               config.size.width, config.size.height);
+    }
     gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                 GL_RENDERBUFFER, depth_stencil);
+                                 GL_RENDERBUFFER, store->depth_stencil_id);
     gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                 GL_RENDERBUFFER, depth_stencil);
-
+                                 GL_RENDERBUFFER, store->depth_stencil_id);
   } else {
     gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                               GL_TEXTURE_2D, store->texture_id, 0);
@@ -115,6 +119,10 @@ bool CompositorOpenGL::CollectBackingStore(const FlutterBackingStore* store) {
 
   gl_->DeleteFramebuffers(1, &user_data->framebuffer_id);
   gl_->DeleteTextures(1, &user_data->texture_id);
+
+  if (user_data->depth_stencil_id != 0) {
+    gl_->DeleteRenderbuffers(1, &user_data->depth_stencil_id);
+  }
 
   delete user_data;
   return true;
@@ -226,6 +234,9 @@ bool CompositorOpenGL::Initialize() {
     FML_LOG(ERROR) << "Unable to find OpenGL blit framebuffer procedure.";
     return false;
   }
+
+  supports_implicit_msaa_ =
+      gl_->GetCapabilities()->SupportsImplicitResolvingMSAA();
 
   is_initialized_ = true;
   return true;

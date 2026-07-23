@@ -32,12 +32,13 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
       processManager: FakeProcessManager.any(),
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
       platform: FakePlatform(),
       defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
     );
@@ -60,7 +61,6 @@ flutter:
     - assets/foo/bar.png
     - assets/wildcard/
 ''');
-    logger = BufferLogger.test();
   });
 
   testUsingContext(
@@ -166,6 +166,18 @@ flutter:
             ),
             isNot(exists),
           );
+          expect(
+            logger.traceText,
+            contains('Skipping assets entry "assets/vanilla/ice-cream.png"'),
+          );
+          expect(
+            logger.traceText,
+            contains('Skipping assets entry "assets/strawberry/ice-cream.png"'),
+          );
+          expect(
+            logger.traceText,
+            isNot(contains('Skipping assets entry "assets/common/image.png"')),
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -214,6 +226,14 @@ flutter:
               '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png',
             ),
             exists,
+          );
+          expect(
+            logger.traceText,
+            contains('Skipping assets entry "assets/vanilla/ice-cream.png"'),
+          );
+          expect(
+            logger.traceText,
+            isNot(contains('Skipping assets entry "assets/strawberry/ice-cream.png"')),
           );
         },
         overrides: <Type, Generator>{
@@ -834,6 +854,7 @@ flutter:
               isFalse,
               reason: 'Expected asset for $platform to be skipped when target is $targetPlatform',
             );
+            expect(logger.traceText, contains('Skipping assets entry "assets/test-$platform.txt"'));
           },
           overrides: <Type, Generator>{
             FileSystem: () => fileSystem,
@@ -957,11 +978,12 @@ flutter:
         userMessages: UserMessages(),
       );
 
+      final processManager = FakeProcessManager.list(
+        List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
+      );
       final environment = Environment.test(
         fileSystem.currentDirectory,
-        processManager: FakeProcessManager.list(
-          List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
-        ),
+        processManager: processManager,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
@@ -1002,8 +1024,9 @@ flutter:
       markTransformDone.complete();
       await waitFor;
 
-      expect(inputFilePaths.toSet(), hasLength(4));
-      expect(outputFilePaths.toSet(), hasLength(4));
+      expect(inputFilePaths, hasLength(5));
+      expect(outputFilePaths, hasLength(5));
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       Platform: () => FakePlatform(numberOfProcessors: 4),

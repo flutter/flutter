@@ -282,4 +282,55 @@ void main() async {
       );
     });
   });
+
+  group('verifyFatBinaries', () {
+    test('succeeds if every binary is fat', () async {
+      final commandList = <FakeCommand>[];
+      final List<String> fatBinaries =
+          presignedBinariesWithEntitlements(flutterRoot) +
+          presignedBinariesWithoutEntitlements(flutterRoot);
+
+      for (final binaryPath in fatBinaries) {
+        commandList.add(
+          FakeCommand(
+            command: <String>['file', binaryPath],
+            stdout:
+                'Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]',
+          ),
+        );
+      }
+      final ProcessManager processManager = FakeProcessManager.list(commandList);
+      await expectLater(verifyFatBinaries(flutterRoot, processManager: processManager), completes);
+    });
+
+    test('fails if a binary is not fat', () async {
+      final commandList = <FakeCommand>[];
+      final List<String> fatBinaries =
+          presignedBinariesWithEntitlements(flutterRoot) +
+          presignedBinariesWithoutEntitlements(flutterRoot);
+
+      if (fatBinaries.isNotEmpty) {
+        commandList.add(
+          FakeCommand(
+            command: <String>['file', fatBinaries.first],
+            stdout: 'Mach-O 64-bit executable x86_64',
+          ),
+        );
+        for (final String binaryPath in fatBinaries.skip(1)) {
+          commandList.add(
+            FakeCommand(
+              command: <String>['file', binaryPath],
+              stdout:
+                  'Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]',
+            ),
+          );
+        }
+      }
+      final ProcessManager processManager = FakeProcessManager.list(commandList);
+      expect(
+        () async => verifyFatBinaries(flutterRoot, processManager: processManager),
+        throwsExceptionWith('Failed fat binary verification for:'),
+      );
+    });
+  });
 }

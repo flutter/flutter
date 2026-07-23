@@ -15,15 +15,18 @@ import 'rasterizer.dart';
 
 /// A class which provides and manages [Surface] objects.
 abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
-  SurfaceProvider(this._canvasProvider, this._surfaceCreateFn);
+  SurfaceProvider(this._canvasProvider, this.surfaceCreateFn);
 
   final D _canvasProvider;
-  final C Function(D) _surfaceCreateFn;
+
+  /// A function that creates a new surface of type [C] using a [CanvasProvider] of type [D].
+  @visibleForTesting
+  final C Function(D) surfaceCreateFn;
 
   final List<C> _createdSurfaces = <C>[];
 
   C createSurface() {
-    final C surface = _surfaceCreateFn(_canvasProvider);
+    final C surface = surfaceCreateFn(_canvasProvider);
     if (_resourceCacheMaxBytes != null) {
       surface.setSkiaResourceCacheMaxBytes(_resourceCacheMaxBytes!);
     }
@@ -65,6 +68,9 @@ abstract class Surface {
 
   /// Converts a `ui.Image` into a `ByteData` object in the specified format.
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format);
+
+  /// Whether this surface supports rasterizing an image directly into PNG format.
+  bool get supportsPngEncoding;
 
   /// Sets the maximum number of bytes for the GPU resource cache.
   void setSkiaResourceCacheMaxBytes(int bytes);

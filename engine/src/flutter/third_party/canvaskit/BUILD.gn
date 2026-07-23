@@ -42,12 +42,9 @@ wasm_toolchain("canvaskit_chromium") {
     skia_use_client_icu = true
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
 
-    # TODO(mdebbar): Set these to false once all image decoding can be done
-    # using the browser's built-in codecs.
-    # https://github.com/flutter/flutter/issues/122331
-    skia_use_libjpeg_turbo_decode = true
-    skia_use_libpng_decode = true
-    skia_use_libwebp_decode = true
+    skia_use_libjpeg_turbo_decode = false
+    skia_use_libpng_decode = false
+    skia_use_libwebp_decode = false
 
     # Disable LTO.
     enable_lto = false
@@ -68,8 +65,8 @@ copy("canvaskit_chromium_group") {
   ]
 }
 
-# This toolchain is only to be used by canvaskit_experimental_webparagraph_group below.
-wasm_toolchain("canvaskit_experimental_webparagraph") {
+# This toolchain is only to be used by canvaskit_webparagraph_group below.
+wasm_toolchain("canvaskit_webparagraph") {
   extra_toolchain_args = {
     # In Chromium browsers, we can use the browser's APIs to get the necessary
     # ICU data.
@@ -93,30 +90,25 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
     skia_canvaskit_enable_font = false
     skia_canvaskit_enable_alias_font = false
 
-    # TODO(mdebbar): Set these to false once all image decoding can be done
-    # using the browser's built-in codecs.
-    # https://github.com/flutter/flutter/issues/122331
-    skia_use_libjpeg_turbo_decode = true
-    skia_use_libpng_decode = true
-    skia_use_libwebp_decode = true
+    skia_use_libjpeg_turbo_decode = false
+    skia_use_libpng_decode = false
+    skia_use_libwebp_decode = false
 
     # Disable LTO.
     enable_lto = false
   }
 }
 
-copy("canvaskit_experimental_webparagraph_group") {
+copy("canvaskit_webparagraph_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [
-    "//flutter/skia/modules/canvaskit(:canvaskit_experimental_webparagraph)",
-  ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_webparagraph)" ]
 
   sources = [
-    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js",
-    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js.symbols",
-    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.wasm",
+    "$root_out_dir/canvaskit_webparagraph/canvaskit.js",
+    "$root_out_dir/canvaskit_webparagraph/canvaskit.js.symbols",
+    "$root_out_dir/canvaskit_webparagraph/canvaskit.wasm",
   ]
-  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/{{source_file_part}}" ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/{{source_file_part}}" ]
 }
 
 # This toolchain is only to be used by skwasm_group below.

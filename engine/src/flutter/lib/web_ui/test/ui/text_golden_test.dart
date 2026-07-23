@@ -187,7 +187,7 @@ Future<void> testMain() async {
       '/assets/fonts/RobotoSlab-VariableFont_wght.ttf',
     );
     expect(
-      await collection.loadFontFromList(robotoSlabData.asUint8List(), fontFamily: 'Roboto Slab'),
+      await collection.loadFontFromBytes(robotoSlabData.asUint8List(), fontFamily: 'Roboto Slab'),
       true,
     );
     await testTextStyle('after font load', fontFamily: 'Roboto Slab');
@@ -764,7 +764,7 @@ Future<void> testTextStyle(
 
   // Render once to trigger font downloads.
   renderPicture();
-  await renderer.fontCollection.fontFallbackManager?.debugWhenIdle();
+  await FallbackFontService.instance.waitForIdle();
   final ui.Picture picture = renderPicture();
   await drawPictureUsingCurrentRenderer(picture);
 
@@ -792,7 +792,7 @@ Future<void> testSampleText(
 
   // Render once to trigger font downloads.
   renderPicture();
-  await renderer.fontCollection.fontFallbackManager?.debugWhenIdle();
+  await FallbackFontService.instance.waitForIdle();
   final ui.Picture picture = renderPicture();
   await drawPictureUsingCurrentRenderer(picture);
   await matchGoldenFile(

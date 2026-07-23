@@ -17,6 +17,7 @@ void main(List<String> args) async {
             file: input.packageRoot.resolve('data/$id'),
           ),
         );
+        output.dependencies.add(input.packageRoot.resolve('data/$id'));
       }
     }
   });

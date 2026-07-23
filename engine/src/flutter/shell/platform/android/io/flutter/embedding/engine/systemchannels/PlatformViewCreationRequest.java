@@ -61,8 +61,7 @@ public class PlatformViewCreationRequest {
   /** Custom parameters that are unique to the desired platform view. */
   @Nullable public final ByteBuffer params;
 
-  // TODO(gmackall): we can give each of these static constructors a corresponding private
-  // constructor.
+  // Restrict primary constructor to private to enforce static factory usage.
   public static PlatformViewCreationRequest createHCPPRequest(
       int viewId, String viewType, int direction, ByteBuffer params) {
     return new PlatformViewCreationRequest(viewId, viewType, 0, 0, 0, 0, direction, null, params);
@@ -128,7 +127,7 @@ public class PlatformViewCreationRequest {
    * Creates a request to construct a platform view with the given display mode. Prefer use of the
    * mode-specific named constructors above where possible.
    */
-  public PlatformViewCreationRequest(
+  private PlatformViewCreationRequest(
       int viewId,
       @NonNull String viewType,
       double logicalTop,

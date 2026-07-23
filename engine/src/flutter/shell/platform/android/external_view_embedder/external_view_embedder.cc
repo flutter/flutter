@@ -86,7 +86,8 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
       SliceViews(frame->Canvas(),     //
                  composition_order_,  //
                  slices_,             //
-                 view_rects           //
+                 view_rects,          //
+                 {}                   //
       );
 
   // Submit the background canvas frame before switching the GL context to

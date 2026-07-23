@@ -31,27 +31,14 @@ Classes that wrap CanvasKit classes should replace the `Sk` class prefix with
 `Ck` (which stands for "CanvasKit"), e.g. `CkPaint` wraps `SkPaint`, `CkImage`
 wraps `SkImage`.
 
-## HTML Renderer
-
-All code specific to the HTML renderer lives in `lib/src/engine/html`.
-
-In documentation (doc comments, flutter.dev website, markdown files,
-blog posts, etc) refer to Flutter's HTML implementation as "HTML renderer". We
-include SVG, CSS, and Canvas 2D under the "HTML" umbrella.
-
-The implementation of the layer system uses the term "surface" to refer to
-layers. We rely on persisting the DOM information across frames to gain
-efficiency. Each concrete implementation of the `Surface` class should start
-with the prefix `Persisted`, e.g. `PersistedOpacity`, `PersistedPicture`.
-
 ## Semantics
 
-The semantics (accessibility) code is shared between CanvasKit and HTML. All
+The semantics (accessibility) code is shared between CanvasKit and Skwasm. All
 semantics code lives in `lib/src/engine/semantics`.
 
 ## Text editing
 
-Text editing code is shared between CanvasKit and HTML, and it lives in
+Text editing code is shared between CanvasKit and Skwasm, and it lives in
 `lib/src/engine/text_editing`.
 
 ## Common utilities

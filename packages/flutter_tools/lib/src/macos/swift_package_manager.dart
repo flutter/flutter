@@ -173,8 +173,8 @@ class SwiftPackageManager {
       }
 
       final Link pluginSymlink = symlinkDirectory.childLink(basename);
-      ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
-      pluginSymlink.createSync(packagePath);
+      _createPluginSymlink(pluginSymlink: pluginSymlink, packagePath: packagePath);
+
       final String packageRelativePath = _fileSystem.path.relative(
         pluginSymlink.path,
         from: pathRelativeTo,
@@ -196,6 +196,57 @@ class SwiftPackageManager {
       );
     }
     return (packageDependencies, targetDependencies);
+  }
+
+  /// Safely creates a symlink at [pluginSymlink] pointing to [packagePath].
+  ///
+  /// If a symlink already exists and points to the correct target, creation is skipped
+  /// to avoid potential Xcode parallel target build race conditions.
+  /// If creation fails due to sharing violations or locks (e.g., when Xcode is open),
+  /// throws a descriptive [ToolExit] advising the user to close Xcode and run "flutter clean".
+  void _createPluginSymlink({required Link pluginSymlink, required String packagePath}) {
+    final FileSystemEntityType type = _fileSystem.typeSync(pluginSymlink.path, followLinks: false);
+    var skipCreation = false;
+    if (type == FileSystemEntityType.link) {
+      try {
+        if (pluginSymlink.targetSync() == packagePath) {
+          skipCreation = true;
+        }
+      } on FileSystemException catch (_) {
+        // If targetSync fails (e.g. broken link), proceed to delete.
+      }
+    }
+
+    if (skipCreation) {
+      return;
+    }
+
+    ErrorHandlingFileSystem.deleteIfExists(pluginSymlink, recursive: true);
+
+    try {
+      pluginSymlink.createSync(packagePath);
+    } on FileSystemException catch (e) {
+      if (e.osError?.errorCode == 17) {
+        // OS Error: File exists, errno = 17
+        final FileSystemEntityType postCrashType = _fileSystem.typeSync(
+          pluginSymlink.path,
+          followLinks: false,
+        );
+        if (postCrashType == FileSystemEntityType.link) {
+          try {
+            if (pluginSymlink.targetSync() == packagePath) {
+              // Concurrently created by another parallel target build, and points to the correct target.
+              return;
+            }
+          } on FileSystemException catch (_) {}
+        }
+      }
+      throwToolExit(
+        'Failed to create Swift Package plugin symlink at "${pluginSymlink.path}" to "$packagePath":\n'
+        '$e\n'
+        'If Xcode is currently open, please close Xcode, run "flutter clean", and try building again.',
+      );
+    }
   }
 
   /// Checks if the plugin has a dependency on another Flutter plugin and returns a list of paths

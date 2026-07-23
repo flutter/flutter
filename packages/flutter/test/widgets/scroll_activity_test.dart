@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'button_tester.dart';
-import 'widgets_app_tester.dart';
 
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {

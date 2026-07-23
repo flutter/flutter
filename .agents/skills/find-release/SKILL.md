@@ -10,7 +10,7 @@ description: A skill to find the lowest Dart and Flutter release containing a gi
     - Identify the target channel (one of: `stable`, `beta`, `dev`). If not specified, try each.
 
 2.  **Execute Search:**
-    - Ensure the `find_release.dart` tool is available. The tool is typically located at `engine/src/flutter/third_party/dart/tools/find_release.dart` relative to the Flutter workspace root. If the workspace root is not the default, set the environment variable `FIND_RELEASE_TOOL_PATH` to the absolute path of the tool.
+    - Ensure the `find_release.dart` tool is available. The tool is typically located at [find_release.dart](../../../engine/src/flutter/third_party/dart/tools/find_release.dart) relative to the Flutter workspace root. If the workspace root is not the default, set the environment variable `FIND_RELEASE_TOOL_PATH` to the absolute path of the tool.
     - Run the tool using the path to ensure it works from any directory within the workspace.
     - Command: `dart run ${FIND_RELEASE_TOOL_PATH:-engine/src/flutter/third_party/dart/tools/find_release.dart} --commit=<SHA> --channel=<CHANNEL>`
 

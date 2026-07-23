@@ -4,10 +4,10 @@
 
 import 'dart:math' show max;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart'
     show ContentSensitivity, PlatformException, SensitiveContentService;
 
-import '../foundation/assertions.dart' show FlutterErrorDetails;
 import 'async.dart' show AsyncSnapshot, ConnectionState, FutureBuilder;
 import 'basic.dart' show SizedBox;
 import 'framework.dart';

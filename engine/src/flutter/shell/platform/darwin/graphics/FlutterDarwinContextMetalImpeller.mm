@@ -39,6 +39,11 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext(
   if (self != nil) {
     _context = CreateImpellerContext(flags, is_gpu_disabled_sync_switch);
     FML_CHECK(_context) << "Could not create Metal Impeller Context.";
+    if (flags.use_sdfs) {
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (MetalSDF).";
+    } else {
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Metal).";
+    }
     id<MTLDevice> device = _context->GetMTLDevice();
     FML_CHECK(device) << "Could not acquire Metal device.";
 

@@ -518,7 +518,7 @@ enum SemanticsRole {
 
   /// A supporting section that relates to the main content.
   ///
-  /// The compelementary role is one of landmark roles. This role can be used to
+  /// The complementary role is one of landmark roles. This role can be used to
   /// describe sidebars, or call-out boxes.
   ///
   /// For more information, see: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/complementary_role
@@ -546,7 +546,7 @@ enum SemanticsRole {
   /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/navigation_role
   navigation,
 
-  /// A section of content sufficiently important but cannot be descrived by one
+  /// A section of content sufficiently important but cannot be described by one
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   ///
@@ -1097,7 +1097,7 @@ enum CheckedState {
   /// If two semantics nodes both have check state, they have conflict and can't be merged.
   bool hasConflict(CheckedState other) => this != CheckedState.none && other != CheckedState.none;
 
-  /// Semanitcs nodes  will only be merged when they are not in conflict.
+  /// Semantics nodes will only be merged when they are not in conflict.
   CheckedState merge(CheckedState other) {
     if (this == CheckedState.mixed || other == CheckedState.mixed) {
       return CheckedState.mixed;
@@ -1132,7 +1132,7 @@ enum Tristate {
   /// If two semantics nodes both have this property, they have conflict and can't be merged.
   bool hasConflict(Tristate other) => this != Tristate.none && other != Tristate.none;
 
-  /// Semanitcs nodes  will only be merged when they are not in conflict.
+  /// Semantics nodes will only be merged when they are not in conflict.
   Tristate merge(Tristate other) {
     if (this == Tristate.isTrue || other == Tristate.isTrue) {
       return Tristate.isTrue;

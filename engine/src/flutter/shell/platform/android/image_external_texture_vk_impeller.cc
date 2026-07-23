@@ -43,6 +43,9 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
     return;
   }
   JavaLocalRef hardware_buffer = HardwareBufferFor(image);
+  if (hardware_buffer.is_null()) {
+    return;
+  }
   AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
 
   auto hb_desc =

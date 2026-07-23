@@ -69,17 +69,23 @@ class CkAnimatedImage implements ui.Codec {
     int? targetHeight,
   ) {
     final SkImage image = animatedImage.makeImageAtCurrentFrame();
-    final CkImage ckImage = scaleImage(image, targetWidth, targetHeight);
-    final Uint8List? resizedBytes = ckImage.skImage.encodeToBytes();
-
-    if (resizedBytes == null) {
-      throw ImageCodecException('Failed to re-size image');
+    final EngineImage ckImage = scaleImage(image, targetWidth, targetHeight);
+    try {
+      if (ckImage.backendImage case CkImageDelegate(:final skImage)) {
+        final Uint8List? resizedBytes = skImage.encodeToBytes();
+        if (resizedBytes == null) {
+          throw ImageCodecException('Failed to re-size image');
+        }
+        final SkAnimatedImage? resizedAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(
+          resizedBytes,
+        );
+        return resizedAnimatedImage;
+      } else {
+        throw StateError('The resized image must be a CanvasKit image.');
+      }
+    } finally {
+      ckImage.dispose();
     }
-
-    final SkAnimatedImage? resizedAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(
-      resizedBytes,
-    );
-    return resizedAnimatedImage;
   }
 
   bool _disposed = false;
@@ -122,12 +128,17 @@ class CkAnimatedImage implements ui.Codec {
     // `getNextFrame` returns the first frame. Therefore, we have to read the
     // current Skia frame, then advance SkAnimatedImage to the next frame, and
     // return the current frame.
+
+    final int frameDurationMs = animatedImage.currentFrameDuration().toInt();
+    final SkImage skImage = animatedImage.makeImageAtCurrentFrame();
+
     final ui.FrameInfo currentFrame = AnimatedImageFrameInfo(
-      Duration(milliseconds: animatedImage.currentFrameDuration().toInt()),
-      CkImage(animatedImage.makeImageAtCurrentFrame()),
+      Duration(milliseconds: frameDurationMs),
+      EngineImage(CkImageDelegate(skImage), skImage.width().toInt(), skImage.height().toInt()),
     );
 
     animatedImage.decodeNextFrame();
+
     return Future<ui.FrameInfo>.value(currentFrame);
   }
 }

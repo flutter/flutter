@@ -57,6 +57,23 @@ GLenum MockGetError() {
   return GL_NO_ERROR;
 }
 
+void MockGetIntegervWithMSAA(GLenum name, int* value) {
+  if (name == GL_NUM_EXTENSIONS) {
+    *value = 2;
+  } else {
+    *value = 0;
+  }
+}
+
+const unsigned char* MockGetStringiWithMSAA(GLenum name, int index) {
+  static constexpr const char* extensions[] = {
+      "GL_ANGLE_framebuffer_blit", "GL_EXT_multisampled_render_to_texture"};
+  if (name == GL_EXTENSIONS && index < 2) {
+    return reinterpret_cast<const unsigned char*>(extensions[index]);
+  }
+  return reinterpret_cast<const unsigned char*>("");
+}
+
 void DoNothing() {}
 
 const impeller::ProcTableGLES::Resolver kMockResolver = [](const char* name) {
@@ -74,6 +91,18 @@ const impeller::ProcTableGLES::Resolver kMockResolver = [](const char* name) {
     return reinterpret_cast<void*>(&DoNothing);
   }
 };
+
+const impeller::ProcTableGLES::Resolver kMockResolverWithMSAA =
+    [](const char* name) {
+      std::string_view function_name{name};
+
+      if (function_name == "glGetStringi") {
+        return reinterpret_cast<void*>(&MockGetStringiWithMSAA);
+      } else if (function_name == "glGetIntegerv") {
+        return reinterpret_cast<void*>(&MockGetIntegervWithMSAA);
+      }
+      return kMockResolver(name);
+    };
 
 class CompositorOpenGLTest : public WindowsTest {
  public:
@@ -151,17 +180,77 @@ TEST_F(CompositorOpenGLTest, CreateBackingStore) {
   ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
 }
 
-TEST_F(CompositorOpenGLTest, CreateBackingStoreImpeller) {
+TEST_F(CompositorOpenGLTest, CreateBackingStoreImpellerNoMSAA) {
   UseHeadlessEngine();
 
-  auto compositor =
-      CompositorOpenGL{engine(), kMockResolver, /*enable_impeller=*/true};
+  static int framebuffer_texture2d_calls = 0;
+  static int framebuffer_texture2d_multisample_calls = 0;
+  framebuffer_texture2d_calls = 0;
+  framebuffer_texture2d_multisample_calls = 0;
 
+  const impeller::ProcTableGLES::Resolver resolver =
+      [](const char* name) -> void* {
+    std::string_view function_name{name};
+    if (function_name == "glFramebufferTexture2D") {
+      return reinterpret_cast<void*>(
+          +[](GLenum, GLenum, GLenum, GLuint, GLint) {
+            framebuffer_texture2d_calls++;
+          });
+    } else if (function_name == "glFramebufferTexture2DMultisampleEXT") {
+      return reinterpret_cast<void*>(
+          +[](GLenum, GLenum, GLenum, GLuint, GLint, GLsizei) {
+            framebuffer_texture2d_multisample_calls++;
+          });
+    }
+    return kMockResolver(name);
+  };
+
+  auto compositor =
+      CompositorOpenGL{engine(), resolver, /*enable_impeller=*/true};
   FlutterBackingStoreConfig config = {};
   FlutterBackingStore backing_store = {};
 
   EXPECT_CALL(*render_context(), MakeCurrent).WillOnce(Return(true));
   ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
+  EXPECT_EQ(framebuffer_texture2d_calls, 1);
+  EXPECT_EQ(framebuffer_texture2d_multisample_calls, 0);
+  ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
+}
+
+TEST_F(CompositorOpenGLTest, CreateBackingStoreImpellerMSAA) {
+  UseHeadlessEngine();
+
+  static int framebuffer_texture2d_calls = 0;
+  static int framebuffer_texture2d_multisample_calls = 0;
+  framebuffer_texture2d_calls = 0;
+  framebuffer_texture2d_multisample_calls = 0;
+
+  const impeller::ProcTableGLES::Resolver resolver =
+      [](const char* name) -> void* {
+    std::string_view function_name{name};
+    if (function_name == "glFramebufferTexture2D") {
+      return reinterpret_cast<void*>(
+          +[](GLenum, GLenum, GLenum, GLuint, GLint) {
+            framebuffer_texture2d_calls++;
+          });
+    } else if (function_name == "glFramebufferTexture2DMultisampleEXT") {
+      return reinterpret_cast<void*>(
+          +[](GLenum, GLenum, GLenum, GLuint, GLint, GLsizei) {
+            framebuffer_texture2d_multisample_calls++;
+          });
+    }
+    return kMockResolverWithMSAA(name);
+  };
+
+  auto compositor =
+      CompositorOpenGL{engine(), resolver, /*enable_impeller=*/true};
+  FlutterBackingStoreConfig config = {};
+  FlutterBackingStore backing_store = {};
+
+  EXPECT_CALL(*render_context(), MakeCurrent).WillOnce(Return(true));
+  ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
+  EXPECT_EQ(framebuffer_texture2d_calls, 0);
+  EXPECT_EQ(framebuffer_texture2d_multisample_calls, 1);
   ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
 }
 

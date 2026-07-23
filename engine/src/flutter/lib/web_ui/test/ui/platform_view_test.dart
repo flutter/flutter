@@ -857,49 +857,45 @@ Future<void> testMain() async {
     expect(platformViewsHost.querySelectorAll('flt-platform-view'), hasLength(2));
   });
 
-  test(
-    'does not crash when resizing the window after textures have been registered',
-    () async {
-      ui_web.platformViewRegistry.registerViewFactory(
-        'test-platform-view',
-        (int viewId) => createDomHTMLDivElement()..id = 'view-0',
-      );
-      await createPlatformView(0, 'test-platform-view');
+  test('does not crash when resizing the window after textures have been registered', () async {
+    ui_web.platformViewRegistry.registerViewFactory(
+      'test-platform-view',
+      (int viewId) => createDomHTMLDivElement()..id = 'view-0',
+    );
+    await createPlatformView(0, 'test-platform-view');
 
-      final ui.Codec codec = await renderer.instantiateImageCodec(kAnimatedGif);
+    final ui.Codec codec = await renderer.instantiateImageCodec(kAnimatedGif);
 
-      final ui.FrameInfo frame = await codec.getNextFrame();
-      final ui.Image ckImage = frame.image;
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    final ui.Image ckImage = frame.image;
 
-      ui.Scene testScene() {
-        final sb = LayerSceneBuilder();
-        sb.pushOffset(0, 0);
-        final recorder = ui.PictureRecorder();
-        final canvas = ui.Canvas(recorder, ui.Rect.largest);
-        canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
-        final ui.Picture picture = recorder.endRecording();
-        sb.addPicture(ui.Offset.zero, picture);
-        sb.addPlatformView(0, width: 10, height: 10);
-        return sb.build();
-      }
+    ui.Scene testScene() {
+      final sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, ui.Rect.largest);
+      canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
+      final ui.Picture picture = recorder.endRecording();
+      sb.addPicture(ui.Offset.zero, picture);
+      sb.addPlatformView(0, width: 10, height: 10);
+      return sb.build();
+    }
 
-      implicitView.debugPhysicalSizeOverride = const ui.Size(100, 100);
-      implicitView.debugForceResize();
-      await renderScene(testScene());
-      _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
+    implicitView.debugPhysicalSizeOverride = const ui.Size(100, 100);
+    implicitView.debugForceResize();
+    await renderScene(testScene());
+    _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
 
-      implicitView.debugPhysicalSizeOverride = const ui.Size(200, 200);
-      implicitView.debugForceResize();
-      await renderScene(testScene());
-      _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
+    implicitView.debugPhysicalSizeOverride = const ui.Size(200, 200);
+    implicitView.debugForceResize();
+    await renderScene(testScene());
+    _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
 
-      implicitView.debugPhysicalSizeOverride = null;
-      implicitView.debugForceResize();
+    implicitView.debugPhysicalSizeOverride = null;
+    implicitView.debugForceResize();
 
-      // ImageDecoder is not supported in Safari or Firefox.
-    },
-    skip: isSafari || isFirefox,
-  );
+    // ImageDecoder is not supported in Safari or Firefox.
+  }, skip: isSafari || isFirefox);
 
   test('does not crash when a prerolled platform view is not composited', () async {
     await createPlatformView(1, platformViewType);

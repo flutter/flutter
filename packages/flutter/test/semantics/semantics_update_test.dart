@@ -5,9 +5,11 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/button_tester.dart';
 
 typedef SemanticsNodeUpdateObservation = ({
   String label,
@@ -17,6 +19,7 @@ typedef SemanticsNodeUpdateObservation = ({
   String hint,
   List<StringAttribute>? hintAttributes,
   Int32List childrenInTraversalOrder,
+  Int32List childrenInHitTestOrder,
   Float64List transform,
 });
 
@@ -208,20 +211,20 @@ void main() {
       builder: (BuildContext context) {
         return OverlayPortal(
           controller: controller1,
-          child: TextButton(onPressed: () {}, child: const Text('a')),
+          child: TestButton(onPressed: () {}, child: const Text('a')),
           overlayChildBuilder: (BuildContext context) {
             return Positioned(
               left: 10,
               top: 11,
               child: OverlayPortal(
                 controller: controller2,
-                child: TextButton(onPressed: () {}, child: const Text('b')),
+                child: TestButton(onPressed: () {}, child: const Text('b')),
                 overlayChildBuilder: (BuildContext context) {
                   // (100, 200) in 'b's coordinates.
                   return Positioned(
                     left: 110,
                     top: 211,
-                    child: TextButton(onPressed: () {}, child: const Text('c')),
+                    child: TestButton(onPressed: () {}, child: const Text('c')),
                   );
                 },
               ),
@@ -264,6 +267,119 @@ void main() {
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   }, skip: kIsWeb); // intended: the web engine handles the transform calculation itself.
+
+  testWidgets(
+    'Semantics update does not leak nodes to hit-test order when traversal parent is missing',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      // Pumps a placeholder to trigger the warm up frame.
+      await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+      SemanticsUpdateBuilderSpy.observations.clear();
+
+      const identifier = '111';
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                traversalChildIdentifier: identifier,
+                child: const SizedBox.square(dimension: 10),
+              ),
+              const SizedBox.square(dimension: 10),
+            ],
+          ),
+        ),
+      );
+
+      // SemanticsNode#0 (root) should have 0 children in both traversal order and hit-test order.
+      final SemanticsNodeUpdateObservation? rootObservation =
+          SemanticsUpdateBuilderSpy.observations[0];
+      expect(rootObservation, isNotNull);
+      expect(rootObservation!.childrenInTraversalOrder, isEmpty);
+      expect(rootObservation.childrenInHitTestOrder, isEmpty);
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      handle.dispose();
+    },
+    skip: kIsWeb, // [intended] the web engine handles the tree grafting itself.
+  );
+
+  testWidgets('Semantics update removes detached OverlayPortal traversal child', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+    SemanticsUpdateBuilderSpy.observations.clear();
+
+    final controller = OverlayPortalController()..show();
+    final entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return OverlayPortal(
+          controller: controller,
+          child: TestButton(onPressed: () {}, child: const Text('anchor')),
+          overlayChildBuilder: (BuildContext context) {
+            return TestButton(onPressed: () {}, child: const Text('menu item'));
+          },
+        );
+      },
+    );
+    addTearDown(() {
+      entry
+        ..remove()
+        ..dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[entry]),
+      ),
+    );
+
+    final int anchorId = SemanticsUpdateBuilderSpy.observations.entries.singleWhere((
+      MapEntry<int, SemanticsNodeUpdateObservation> entry,
+    ) {
+      return entry.value.label == 'anchor';
+    }).key;
+    final int menuItemId = SemanticsUpdateBuilderSpy.observations.entries.singleWhere((
+      MapEntry<int, SemanticsNodeUpdateObservation> entry,
+    ) {
+      return entry.value.label == 'menu item';
+    }).key;
+    expect(
+      SemanticsUpdateBuilderSpy.observations.values.any((
+        SemanticsNodeUpdateObservation observation,
+      ) {
+        return observation.childrenInTraversalOrder.contains(menuItemId);
+      }),
+      isTrue,
+    );
+
+    SemanticsUpdateBuilderSpy.observations.clear();
+    controller.hide();
+    await tester.pump();
+
+    expect(SemanticsUpdateBuilderSpy.observations.containsKey(menuItemId), isFalse);
+    expect(
+      SemanticsUpdateBuilderSpy.observations.values.any((
+        SemanticsNodeUpdateObservation observation,
+      ) {
+        return listEquals(observation.childrenInTraversalOrder, <int>[anchorId]);
+      }),
+      isTrue,
+    );
+    expect(
+      SemanticsUpdateBuilderSpy.observations.values.any((
+        SemanticsNodeUpdateObservation observation,
+      ) {
+        return observation.childrenInTraversalOrder.contains(menuItemId);
+      }),
+      isFalse,
+    );
+    SemanticsUpdateBuilderSpy.observations.clear();
+    handle.dispose();
+  }, skip: kIsWeb); // intended: the web engine handles the traversal order itself.
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
@@ -335,6 +451,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
       value: value,
       valueAttributes: valueAttributes,
       childrenInTraversalOrder: childrenInTraversalOrder,
+      childrenInHitTestOrder: childrenInHitTestOrder,
       transform: transform,
     );
   }

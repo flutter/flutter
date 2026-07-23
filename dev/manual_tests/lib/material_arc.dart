@@ -40,9 +40,7 @@ class _DragHandler extends Drag {
 class _IgnoreDrag extends Drag {}
 
 class _PointDemoPainter extends CustomPainter {
-  _PointDemoPainter({Animation<double>? repaint, required this.arc})
-    : _repaint = repaint,
-      super(repaint: repaint);
+  _PointDemoPainter({Animation<double>? super.repaint, required this.arc}) : _repaint = repaint;
 
   final MaterialPointArcTween arc;
   final Animation<double>? _repaint;
@@ -217,9 +215,8 @@ class _PointDemoState extends State<_PointDemo> {
 }
 
 class _RectangleDemoPainter extends CustomPainter {
-  _RectangleDemoPainter({required Animation<double> repaint, required this.arc})
-    : _repaint = repaint,
-      super(repaint: repaint);
+  _RectangleDemoPainter({required Animation<double> super.repaint, required this.arc})
+    : _repaint = repaint;
 
   final MaterialRectArcTween arc;
   final Animation<double> _repaint;

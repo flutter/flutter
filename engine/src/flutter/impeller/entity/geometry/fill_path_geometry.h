@@ -21,7 +21,7 @@ class FillPathSourceGeometry : public Geometry {
   ~FillPathSourceGeometry() override;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
  protected:
   explicit FillPathSourceGeometry(std::optional<Rect> inner_rect);

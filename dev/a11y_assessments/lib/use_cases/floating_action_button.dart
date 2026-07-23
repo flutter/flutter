@@ -36,11 +36,10 @@ class MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
+      body: Center(
+        child: Semantics(container: true, liveRegion: true, child: Text('Tap count: $_tapCount')),
       ),
-      body: Center(child: Text('Tap count: $_tapCount')),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {

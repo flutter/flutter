@@ -23,6 +23,8 @@ G_DECLARE_FINAL_TYPE(FlWindowMonitor,
  * @on_state_changed: the function to call when the window state changes.
  * @on_is_active_notify: the function to call when the is-active property
  * changes.
+ * @on_moved_to_rect: the function to call when a popup window is moved to a new
+ * position.
  * @on_close: the function to call when the user requests the window to be
  * closed.
  * @on_destroy: the function to call when the window is destroyed.
@@ -32,13 +34,15 @@ G_DECLARE_FINAL_TYPE(FlWindowMonitor,
  *
  * Returns: a new #FlWindowMonitor.
  */
-FlWindowMonitor* fl_window_monitor_new(GtkWindow* window,
-                                       void (*on_configure)(void),
-                                       void (*on_state_changed)(void),
-                                       void (*on_is_active_notify)(void),
-                                       void (*on_title_notify)(void),
-                                       void (*on_close)(void),
-                                       void (*on_destroy)(void));
+FlWindowMonitor* fl_window_monitor_new(
+    GtkWindow* window,
+    void (*on_configure)(void),
+    void (*on_state_changed)(void),
+    void (*on_is_active_notify)(void),
+    void (*on_title_notify)(void),
+    void (*on_moved_to_rect)(int, int, int, int),
+    void (*on_close)(void),
+    void (*on_destroy)(void));
 
 G_END_DECLS
 

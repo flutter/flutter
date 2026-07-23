@@ -17,7 +17,7 @@ void main() {
       final Finder textfield = find.byKey(const ValueKey<String>('basic-textfield'));
       await controller.tap(textfield);
       // Caret should be cached, so repeated blinking should not require recompute.
-      await Future<void>.delayed(const Duration(milliseconds: 5000));
+      await Future<void>.delayed(const Duration(seconds: 10));
     },
   );
 }

@@ -9,9 +9,11 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fs_safety.dart';
 import '../../src/io.dart';
 
 void main() {
@@ -115,6 +117,62 @@ void main() {
     expect(await PosixProcessSignal(fakeSignalA, platform: windows).watch().isEmpty, true);
     expect(await PosixProcessSignal(fakeSignalB, platform: linux).watch().first, isNotNull);
   });
+
+  testWithoutContext(
+    'FSGuardIOOverrides isolates filesystem modifications to system temp directory',
+    () {
+      io.IOOverrides.runWithIOOverrides(() {
+        final tempFile = io.File(path.join(io.Directory.systemTemp.path, 'fs_guard_test_safe.txt'));
+        addTearDown(() {
+          if (tempFile.existsSync()) {
+            tempFile.deleteSync();
+          }
+        });
+        // Writing under system temp should succeed
+        tempFile.writeAsStringSync('safe-content');
+        expect(tempFile.readAsStringSync(), 'safe-content');
+
+        // Modifying outside system temp should fail and throw our guarded exception
+        final String root = path.rootPrefix(io.Directory.current.absolute.path);
+        final unsafeFile = io.File(path.join(root, 'tmp_unsafe_outside_temp.txt'));
+        expect(unsafeFile.existsSync(), false);
+        expect(
+          () => unsafeFile.writeAsStringSync('unsafe-content'),
+          throwsA(
+            isA<io.FileSystemException>().having(
+              (e) => e.message,
+              'message',
+              contains('Test attempted to modify file outside of temp directory'),
+            ),
+          ),
+        );
+      }, FSGuardIOOverrides());
+    },
+  );
+
+  testWithoutContext('FSGuardIOOverrides resolves symlinks for temp directory', () {
+    final io.Directory baseDir = io.Directory.systemTemp.createTempSync('fs_guard_symlink_test_');
+    addTearDown(() => baseDir.deleteSync(recursive: true));
+
+    final io.Directory targetDir = baseDir.createTempSync('target_');
+    final link = io.Link(path.join(baseDir.path, 'link_to_target'));
+    link.createSync(targetDir.path);
+
+    final mockTemp = io.Directory(link.path);
+    final mockOverrides = MockSystemTempOverrides(mockTemp);
+
+    io.IOOverrides.runWithIOOverrides(() {
+      io.IOOverrides.runWithIOOverrides(() {
+        final resolvedFile = io.File(path.join(targetDir.path, 'test.txt'));
+
+        // This should NOT throw if the guard resolves symlinks.
+        resolvedFile.writeAsStringSync('hello');
+        expect(resolvedFile.readAsStringSync(), 'hello');
+
+        resolvedFile.deleteSync();
+      }, FSGuardIOOverrides());
+    }, mockOverrides);
+  });
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
@@ -122,4 +180,11 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
+}
+
+final class MockSystemTempOverrides extends io.IOOverrides {
+  MockSystemTempOverrides(this.mockTemp);
+  final io.Directory mockTemp;
+  @override
+  io.Directory getSystemTempDirectory() => mockTemp;
 }

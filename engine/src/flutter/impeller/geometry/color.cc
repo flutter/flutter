@@ -6,9 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <format>
 #include <functional>
-#include <sstream>
 #include <type_traits>
 
 #include "impeller/geometry/constants.h"
@@ -328,11 +326,6 @@ Color Color::SRGBToLinear() const {
   };
 
   return Color(conversion(red), conversion(green), conversion(blue), alpha);
-}
-
-std::string ColorToString(const Color& color) {
-  return std::format("R={:.1f},G={:.1f},B={:.1f},A={:.1f}", color.red,
-                     color.green, color.blue, color.alpha);
 }
 
 }  // namespace impeller

@@ -131,6 +131,7 @@ class WebTestCompiler {
     final String cachedKernelPath = getDefaultCachedKernelPath(
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       dartDefines: buildInfo.dartDefines,
+      targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       fileSystem: _fileSystem,
       config: _config,

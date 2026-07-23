@@ -46,7 +46,10 @@ vk::ImageView KHRSwapchainImageVK::GetImageView() const {
 }
 
 // |TextureSourceVK|
-vk::ImageView KHRSwapchainImageVK::GetRenderTargetView() const {
+vk::ImageView KHRSwapchainImageVK::GetRenderTargetView(
+    uint32_t mip_level,
+    uint32_t array_layer) const {
+  // Swapchain images are always a single 2D mip and layer.
   return image_view_.get();
 }
 

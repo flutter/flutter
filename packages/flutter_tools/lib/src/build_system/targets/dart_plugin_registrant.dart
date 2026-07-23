@@ -38,11 +38,8 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFilePath =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
-    final Uri mainFileUri = mainFile.absolute.uri;
-    final String mainFileUriString =
-        packageConfig.toPackageUri(mainFileUri)?.toString() ?? mainFileUri.toString();
 
-    await generateMainDartWithPluginRegistrant(project, packageConfig, mainFileUriString, mainFile);
+    await generateMainDartWithPluginRegistrant(project, packageConfig, mainFile);
   }
 
   @override
@@ -53,7 +50,7 @@ class DartPluginRegistrantTarget extends Target {
     final String? platformName = environment.defines[kTargetPlatform];
     final TargetPlatform? targetPlatform = platformName == null
         ? null
-        : getTargetPlatformForName(platformName);
+        : TargetPlatform.fromName(platformName);
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
     // source generation step shouldn't be platform dependent, and the generated
     // code should just do the right thing on every platform.

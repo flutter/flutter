@@ -4,10 +4,12 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
 import 'gesture_utils.dart';
@@ -1731,6 +1733,29 @@ void main() {
       expect(
         transformationController.value.getMaxScaleOnAxis(),
         moreOrLessEquals(1.9984509673751225),
+      );
+    });
+
+    testWidgets('does not accumulate listeners', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        InteractiveViewer(
+          transformationController: transformationController,
+          child: const SizedBox(width: 2000.0, height: 2000.0),
+        ),
+      );
+
+      final List<ObjectEvent> events = await memoryEvents(() async {
+        for (var i = 0; i < 10; ++i) {
+          await tester.fling(find.byType(InteractiveViewer), const Offset(0, -100), 3000);
+          await tester.pump();
+        }
+      }, CurvedAnimation);
+      expect(
+        events,
+        hasLength(lessThanOrEqualTo(2)),
+        reason: 'CurvedAnimation must not be repeatedly created without disposal.',
+        // This test will no longer be necessary after
+        // https://github.com/flutter/flutter/issues/185468
       );
     });
   });

@@ -37,10 +37,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Column(
         children: <Widget>[
           const ExpansionTile(

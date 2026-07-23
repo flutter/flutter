@@ -27,16 +27,44 @@ interface class Git {
   /// Automatically injects the arguments `-c log.showSignature=false` in order
   /// to ignore user settings that will break the expected output for this call;
   /// otherwise this call is identical to using [Git.runSync] directly.
-  RunResult logSync(List<String> arguments, {String? workingDirectory}) {
+  RunResult logSync(
+    List<String> arguments, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+  }) {
     assert(arguments.isEmpty || arguments.first != 'log');
-    return runSync([
-      ..._ignoreLogShowSignature,
-      'log',
-      ...arguments,
-    ], workingDirectory: workingDirectory);
+    return runSync(
+      [..._ignoreLogShowSignature, 'log', ...arguments],
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
   }
 
   static const _ignoreLogShowSignature = ['-c', 'log.showSignature=false'];
+
+  /// Environment variables that can interfere with git commands when targeting
+  /// the Flutter SDK.
+  static const Set<String> _kGitEnvironmentVariables = <String>{
+    'GIT_DIR',
+    'GIT_INDEX_FILE',
+    'GIT_WORK_TREE',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_QUARANTINE_PATH',
+    'GIT_COMMON_DIR',
+  };
+
+  Map<String, String> _filterEnvironment(Map<String, String>? environment) {
+    final result = Map<String, String>.from(environment ?? _platform.environment);
+    result.removeWhere(
+      // Doing toUpperCase because windows environment vars are case-insensitive
+      (String key, String value) => _kGitEnvironmentVariables.contains(key.toUpperCase()),
+    );
+    if (_platform.isWindows) {
+      result.addAll(_useNoGlobCygwinGit);
+    }
+    return result;
+  }
 
   /// Spawns a child process to run `git`.
   ///
@@ -60,7 +88,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _filterEnvironment(environment),
       timeout: timeout,
       timeoutRetries: timeoutRetries,
     );
@@ -90,7 +118,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       hideStdout: hideStdout,
       workingDirectory: workingDirectory,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _filterEnvironment(environment),
       allowReentrantFlutter: allowReentrantFlutter,
       encoding: encoding,
     );
@@ -123,7 +151,7 @@ interface class Git {
       filter: filter,
       stdoutErrorMatcher: stdoutErrorMatcher,
       mapFunction: mapFunction,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _filterEnvironment(environment),
     );
   }
 

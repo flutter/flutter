@@ -327,7 +327,7 @@ class SemanticsNodeUpdate {
     required this.increasedValueAttributes,
     required this.decreasedValue,
     required this.decreasedValueAttributes,
-    this.tooltip,
+    required this.tooltip,
     this.textDirection,
     required this.transform,
     required this.hitTestTransform,
@@ -377,7 +377,7 @@ class SemanticsNodeUpdate {
   final int scrollIndex;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final int? traversalParent;
+  final int traversalParent;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -425,7 +425,7 @@ class SemanticsNodeUpdate {
   final List<ui.StringAttribute> decreasedValueAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final String? tooltip;
+  final String tooltip;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.TextDirection? textDirection;
@@ -584,7 +584,7 @@ enum EngineSemanticsRole {
   /// A graphic object that spins to indicate the application is busy.
   loadingSpinner,
 
-  /// A role used when a more specific role cannot be assigend to
+  /// A role used when a more specific role cannot be assigned to
   /// a [SemanticsObject].
   ///
   /// Provides a label or a value.
@@ -618,7 +618,7 @@ enum EngineSemanticsRole {
   /// A region of a web page that contains navigation links.
   navigation,
 
-  /// A section of content sufficiently important but cannot be descrived by one
+  /// A section of content sufficiently important but cannot be described by one
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   region,
@@ -654,7 +654,7 @@ abstract class SemanticRole {
   ///
   /// Use this constructor for highly specialized cases where
   /// [SemanticRole.withBasics] does not work, for example when the default focus
-  /// management intereferes with the widget's functionality.
+  /// management interferes with the widget's functionality.
   SemanticRole.blank(this.kind, this.semanticsObject) {
     element = _initElement(createElement(), semanticsObject);
   }
@@ -963,7 +963,7 @@ abstract class SemanticRole {
     // Set up aria-owns relationship for traversal order.
     if (semanticsObject.traversalParent != -1) {
       final SemanticsObject? parent =
-          semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalParent];
       if (parent != null && parent.semanticRole != null) {
         final List<String> children = parent.element.getAttribute('aria-owns')?.split(' ') ?? [];
         children.add(getIdAttribute(semanticsObject.id));
@@ -971,10 +971,9 @@ abstract class SemanticRole {
       }
     }
     // Clean up aria-owns relationship.
-    else if (semanticsObject._previousTraversalParent != null &&
-        semanticsObject._previousTraversalParent != -1) {
+    else if (semanticsObject._previousTraversalParent != -1) {
       final SemanticsObject? parent =
-          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent!];
+          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent];
       if (parent != null) {
         final List<String>? children = parent.element.getAttribute('aria-owns')?.split(' ');
         if (children != null) {
@@ -1028,7 +1027,7 @@ abstract class SemanticRole {
   ///
   /// This method is expected to remove role-specific functionality from the
   /// DOM. In particular, this method is the appropriate place to call
-  /// [EngineSemanticsOwner.removeGestureModeListener] if this role reponds to
+  /// [EngineSemanticsOwner.removeGestureModeListener] if this role responds to
   /// gesture mode changes.
   @mustCallSuper
   void dispose() {
@@ -1181,7 +1180,7 @@ abstract class SemanticBehavior {
   ///
   /// This method is expected to remove role-specific functionality from the
   /// DOM. In particular, this method is the appropriate place to call
-  /// [EngineSemanticsOwner.removeGestureModeListener] if this role reponds to
+  /// [EngineSemanticsOwner.removeGestureModeListener] if this role responds to
   /// gesture mode changes.
   @mustCallSuper
   void dispose() {
@@ -1692,9 +1691,9 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  int? get traversalParent => _traversalParent;
-  int? _traversalParent;
-  int? _previousTraversalParent;
+  int get traversalParent => _traversalParent;
+  int _traversalParent = -1;
+  int _previousTraversalParent = -1;
 
   static const int _traversalParentIndex = 1 << 29;
 
@@ -2443,7 +2442,7 @@ class SemanticsObject {
   /// mapped onto the [Selectable] behavior.
   ///
   /// [Selectable] and [SemanticCheckable] are not used together on the same
-  /// node. [SemanticCheckable] has precendence over [Selectable].
+  /// node. [SemanticCheckable] has precedence over [Selectable].
   ///
   /// See also:
   ///

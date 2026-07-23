@@ -97,7 +97,9 @@ class PrecacheCommand extends FlutterCommand {
   final description =
       "Populate the Flutter tool's cache of binary artifacts.\n\n"
       'If no explicit platform flags are provided, this command will download the artifacts '
-      'for all currently enabled platforms';
+      'for every platform enabled by the current host and Flutter configuration. '
+      'Use "flutter config --list" to see explicit platform settings; "(Not set)" uses the '
+      'default for the current host.';
 
   @override
   final String category = FlutterCommandCategory.sdk;

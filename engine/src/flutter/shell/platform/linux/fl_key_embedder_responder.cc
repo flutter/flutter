@@ -8,8 +8,7 @@
 #include <cinttypes>
 
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/linux/fl_key_embedder_responder_private.h"
-#include "flutter/shell/platform/linux/key_mapping.h"
+#include "flutter/shell/platform/linux/fl_key_mapping.h"
 
 constexpr uint64_t kMicrosecondsPerMillisecond = 1000;
 

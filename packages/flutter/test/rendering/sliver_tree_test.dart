@@ -3,9 +3,30 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// Wraps the [child] in a [Directionality] and [DefaultTextStyle] to provide
+/// the necessary context for rendering tests.
+Widget _buildTestWidget(Widget child) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: DefaultTextStyle(
+      style: const TextStyle(
+        color: Color(0xFF000000),
+        fontFamily: 'monospace',
+        fontSize: 48.0,
+        fontWeight: FontWeight.w900,
+        decoration: TextDecoration.underline,
+        decorationColor: Color(0xFFFFFF00),
+        decorationStyle: TextDecorationStyle.double,
+        debugLabel: 'fallback style',
+      ),
+      child: child,
+    ),
+  );
+}
 
 List<TreeSliverNode<String>> _setUpNodes() {
   return <TreeSliverNode<String>>[
@@ -52,11 +73,8 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
-          reverse: true,
-          slivers: <Widget>[TreeSliver<String>(tree: treeNodes)],
-        ),
+      _buildTestWidget(
+        CustomScrollView(reverse: true, slivers: <Widget>[TreeSliver<String>(tree: treeNodes)]),
       ),
     );
 
@@ -74,8 +92,8 @@ void main() {
     };
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      _buildTestWidget(
+        CustomScrollView(
           scrollDirection: Axis.horizontal,
           reverse: true,
           slivers: <Widget>[TreeSliver<String>(tree: treeNodes)],
@@ -97,8 +115,8 @@ void main() {
     };
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      _buildTestWidget(
+        CustomScrollView(
           scrollDirection: Axis.horizontal,
           slivers: <Widget>[TreeSliver<String>(tree: treeNodes)],
         ),
@@ -117,7 +135,7 @@ void main() {
     treeNodes = _setUpNodes();
     // Default layout, custom indentation values, row extents.
     var treeSliver = TreeSliver<String>(tree: treeNodes);
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -148,7 +166,7 @@ void main() {
     expect(tester.getRect(find.text('Fourth')), const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0));
 
     treeSliver = TreeSliver<String>(tree: treeNodes, indentation: TreeSliverIndentationType.none);
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -182,7 +200,7 @@ void main() {
       tree: treeNodes,
       indentation: TreeSliverIndentationType.custom(50.0),
     );
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -213,7 +231,7 @@ void main() {
     expect(tester.getRect(find.text('Fourth')), const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0));
 
     treeSliver = TreeSliver<String>(tree: treeNodes, treeRowExtentBuilder: (_, _) => 100);
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -245,7 +263,7 @@ void main() {
   testWidgets('Animating node segment', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
     var treeSliver = TreeSliver<String>(tree: treeNodes);
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -343,7 +361,7 @@ void main() {
         curve: Curves.bounceIn,
       ),
     );
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -405,7 +423,7 @@ void main() {
       tree: treeNodes,
       toggleAnimationStyle: AnimationStyle.noAnimation,
     );
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -454,7 +472,7 @@ void main() {
   testWidgets('Multiple animating node segments', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
     final treeSliver = TreeSliver<String>(tree: treeNodes);
-    await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
+    await tester.pumpWidget(_buildTestWidget(CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
       find.byType(TreeSliver<String>),
@@ -600,8 +618,8 @@ void main() {
     treeNodes = _setUpNodes();
     final treeSliver = TreeSliver<String>(treeRowExtentBuilder: (_, _) => 200, tree: treeNodes);
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(controller: scrollController, slivers: <Widget>[treeSliver]),
+      _buildTestWidget(
+        CustomScrollView(controller: scrollController, slivers: <Widget>[treeSliver]),
       ),
     );
     await tester.pump();

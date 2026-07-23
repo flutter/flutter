@@ -108,16 +108,12 @@ class PreviewManifest {
         );
     final Map<String, String> pubspecHashes = (manifest[kPubspecHashes]! as Map<String, Object?>)
         .cast<String, String>();
-    // If the project isn't found, the pubspec is not actually part of the workspace and can be
-    // ignored.
-    if (project != null) {
-      if (fs.file(updatedPubspecPath).existsSync()) {
-        // Update the hash for the pubspec, as long as it exists.
-        pubspecHashes[updatedPubspecPath] = project.computeManifestMD5Hash(logger: logger, fs: fs);
-      } else {
-        // The pubspec has been deleted, so it shouldn't continue to be tracked.
-        pubspecHashes.remove(updatedPubspecPath);
-      }
+    if (project != null && fs.file(updatedPubspecPath).existsSync()) {
+      // Update the hash for the pubspec, as long as it exists.
+      pubspecHashes[updatedPubspecPath] = project.computeManifestMD5Hash(logger: logger, fs: fs);
+    } else {
+      // The pubspec was not part of the workspace or was deleted, so it shouldn't continue to be tracked.
+      pubspecHashes.remove(updatedPubspecPath);
     }
     return pubspecHashes;
   }

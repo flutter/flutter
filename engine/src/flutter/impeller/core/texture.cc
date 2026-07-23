@@ -23,7 +23,6 @@ bool Texture::SetContents(const uint8_t* contents,
   if (!OnSetContents(contents, length, slice)) {
     return false;
   }
-  coordinate_system_ = TextureCoordinateSystem::kUploadFromHost;
   is_opaque_ = is_opaque;
   return true;
 }
@@ -41,7 +40,6 @@ bool Texture::SetContents(std::shared_ptr<const fml::Mapping> mapping,
   if (!OnSetContents(std::move(mapping), slice)) {
     return false;
   }
-  coordinate_system_ = TextureCoordinateSystem::kUploadFromHost;
   is_opaque_ = is_opaque;
   return true;
 }
@@ -68,18 +66,6 @@ bool Texture::IsSliceValid(size_t slice) const {
       return slice <= 5;
   }
   FML_UNREACHABLE();
-}
-
-void Texture::SetCoordinateSystem(TextureCoordinateSystem coordinate_system) {
-  coordinate_system_ = coordinate_system;
-}
-
-TextureCoordinateSystem Texture::GetCoordinateSystem() const {
-  return coordinate_system_;
-}
-
-Scalar Texture::GetYCoordScale() const {
-  return 1.0;
 }
 
 bool Texture::NeedsMipmapGeneration() const {

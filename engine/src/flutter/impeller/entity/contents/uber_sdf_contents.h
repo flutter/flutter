@@ -36,6 +36,9 @@ class UberSDFContents : public ColorSourceContents {
 
   const Geometry* GetGeometry() const override;
 
+  std::optional<Color> AsBackgroundColor(const Entity& entity,
+                                         ISize target_size) const override;
+
  private:
   explicit UberSDFContents(const UberSDFParameters& params,
                            std::unique_ptr<Geometry> geometry);

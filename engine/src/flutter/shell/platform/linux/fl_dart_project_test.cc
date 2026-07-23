@@ -8,10 +8,12 @@
 
 #include <cstdlib>
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-TEST(FlDartProjectTest, GetPaths) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
+class FlDartProjectTest : public flutter::testing::LinuxTest {};
+
+TEST_F(FlDartProjectTest, GetPaths) {
   g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", nullptr);
   ASSERT_TRUE(exe_path != nullptr);
   g_autofree gchar* dir = g_path_get_dirname(exe_path);
@@ -28,33 +30,25 @@ TEST(FlDartProjectTest, GetPaths) {
                expected_icu_data_path);
 }
 
-TEST(FlDartProjectTest, OverrideAotLibraryPath) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
+TEST_F(FlDartProjectTest, OverrideAotLibraryPath) {
   char aot_library_path[] = "/normal/tuesday/night/for/shia/labeouf";
   fl_dart_project_set_aot_library_path(project, aot_library_path);
   EXPECT_STREQ(fl_dart_project_get_aot_library_path(project), aot_library_path);
 }
 
-TEST(FlDartProjectTest, OverrideAssetsPath) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
+TEST_F(FlDartProjectTest, OverrideAssetsPath) {
   char assets_path[] = "/normal/tuesday/night/for/shia/labeouf";
   fl_dart_project_set_assets_path(project, assets_path);
   EXPECT_STREQ(fl_dart_project_get_assets_path(project), assets_path);
 }
 
-TEST(FlDartProjectTest, OverrideIcuDataPath) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
+TEST_F(FlDartProjectTest, OverrideIcuDataPath) {
   char icu_data_path[] = "/living/in/the/woods/icudtl.dat";
   fl_dart_project_set_icu_data_path(project, icu_data_path);
   EXPECT_STREQ(fl_dart_project_get_icu_data_path(project), icu_data_path);
 }
 
-TEST(FlDartProjectTest, DartEntrypointArgs) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-
+TEST_F(FlDartProjectTest, DartEntrypointArgs) {
   char** retrieved_args =
       fl_dart_project_get_dart_entrypoint_arguments(project);
 
@@ -75,4 +69,14 @@ TEST(FlDartProjectTest, DartEntrypointArgs) {
   EXPECT_NE(retrieved_args, args);
 
   EXPECT_EQ(g_strv_length(retrieved_args), 3U);
+}
+
+TEST_F(FlDartProjectTest, EnableImpeller) {
+  EXPECT_TRUE(fl_dart_project_get_enable_impeller(project));
+
+  fl_dart_project_set_enable_impeller(project, FALSE);
+  EXPECT_FALSE(fl_dart_project_get_enable_impeller(project));
+
+  fl_dart_project_set_enable_impeller(project, TRUE);
+  EXPECT_TRUE(fl_dart_project_get_enable_impeller(project));
 }

@@ -175,7 +175,7 @@ Future<void> _validateEngineRevision() async {
   }
   final String actualVersion;
   try {
-    actualVersion = result.flattenedStderr!.split('\n').firstWhere((final String line) {
+    actualVersion = result.flattenedStderr!.split('\n').firstWhere((String line) {
       return line.startsWith('Flutter Engine Version:');
     });
   } on StateError {
