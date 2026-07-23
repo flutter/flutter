@@ -421,6 +421,33 @@ void main() {
     expect(dropdownMenu.enableSearch, enableSearch);
   });
 
+  testWidgets('Passes scrollPadding to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.scrollPadding, const EdgeInsets.all(20.0));
+
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            scrollPadding: scrollPadding,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.scrollPadding, scrollPadding);
+  });
+
   testWidgets('Passes keyboardType to underlying DropdownMenu', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
