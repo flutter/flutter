@@ -76,6 +76,8 @@ source_set("ui") {
     "painting/image_encoding_skia.h",
     "painting/image_filter.cc",
     "painting/image_filter.h",
+    "painting/image_from_texture.cc",
+    "painting/image_from_texture.h",
     "painting/image_generator.cc",
     "painting/image_generator.h",
     "painting/image_generator_apng.cc",
