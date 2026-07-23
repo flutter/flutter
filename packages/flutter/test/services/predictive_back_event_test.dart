@@ -55,15 +55,24 @@ void main() {
     );
   });
 
-  test('fromMap throws when given invalid swipeEdge', () async {
-    expect(
-      () => PredictiveBackEvent.fromMap(const <String?, Object?>{
-        'touchOffset': <double>[0.0, 100.0],
-        'progress': 0.0,
-        'swipeEdge': 2,
-      }),
-      throwsRangeError,
-    );
+  test('fromMap handles invalid swipeEdge by defaulting to SwipeEdge.left', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 2,
+    });
+    expect(event.swipeEdge, SwipeEdge.left);
+  });
+
+  test('fromMap handles missing or null fields gracefully', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[],
+      'progress': null,
+      'swipeEdge': null,
+    });
+    expect(event.touchOffset, isNull);
+    expect(event.progress, 0.0);
+    expect(event.swipeEdge, SwipeEdge.left);
   });
 
   test('equality when created with the same parameters', () async {
