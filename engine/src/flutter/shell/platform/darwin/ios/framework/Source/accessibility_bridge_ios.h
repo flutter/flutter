@@ -21,6 +21,12 @@ class AccessibilityBridgeIos {
  public:
   virtual ~AccessibilityBridgeIos() = default;
   virtual UIView* view() const = 0;
+  // Returns the current Flutter view without forcing the owner view controller to load its view.
+  virtual UIView* ViewIfLoaded() const = 0;
+  // Returns a nonnull container used only to initialize UIAccessibilityElements without loading
+  // the owner view controller's view. SemanticsObject overrides accessibilityContainer, so this
+  // view is never exposed as the semantics tree's actual container.
+  virtual UIView* AccessibilityElementInitializationContainer() const = 0;
   virtual bool isVoiceOverRunning() const = 0;
   virtual UIView<UITextInput>* textInputView() = 0;
   virtual void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) = 0;

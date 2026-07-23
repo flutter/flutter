@@ -151,6 +151,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 @interface FlutterScrollableSemanticsObject ()
 @property(nonatomic) FlutterSemanticsScrollView* scrollView;
+- (UIView*)reattachScrollViewToCurrentBridgeView;
+- (void)updateScrollViewForCurrentBridgeView;
+- (void)updateScrollViewGeometry;
 @end
 
 @implementation FlutterScrollableSemanticsObject
@@ -164,10 +167,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     [_scrollView setShowsVerticalScrollIndicator:NO];
     [_scrollView setContentInset:UIEdgeInsetsZero];
     [_scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
-    UIView* containerView = self.bridgeView;
-    if (containerView) {
-      [containerView addSubview:_scrollView];
-    }
+    [self reattachScrollViewToCurrentBridgeView];
   }
   return self;
 }
@@ -177,6 +177,36 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (void)accessibilityBridgeDidFinishUpdate {
+  [self updateScrollViewForCurrentBridgeView];
+}
+
+- (void)accessibilityBridgeDidChangeView {
+  [self updateScrollViewForCurrentBridgeView];
+}
+
+- (id)nativeAccessibility {
+  return _scrollView;
+}
+
+// private methods
+
+- (UIView*)reattachScrollViewToCurrentBridgeView {
+  UIView* view = self.bridgeView;
+  if (_scrollView.superview != view) {
+    [_scrollView removeFromSuperview];
+    [view addSubview:_scrollView];
+  }
+  return view;
+}
+
+- (void)updateScrollViewForCurrentBridgeView {
+  UIView* view = [self reattachScrollViewToCurrentBridgeView];
+  if (view) {
+    [self updateScrollViewGeometry];
+  }
+}
+
+- (void)updateScrollViewGeometry {
   // In order to make iOS think this UIScrollView is scrollable, the following
   // requirements must be true.
   // 1. contentSize must be bigger than the frame size.
@@ -185,19 +215,13 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // Once the requirements are met, the iOS uses contentOffset to determine
   // what scroll actions are available. e.g. If the view scrolls vertically and
   // contentOffset is 0.0, only the scroll down action is available.
-  self.scrollView.frame = self.accessibilityFrame;
-  self.scrollView.contentSize = [self contentSizeInternal];
+  _scrollView.frame = self.accessibilityFrame;
+  _scrollView.contentSize = [self contentSizeInternal];
   // See the documentation on `isDoingSystemScrolling`.
-  if (!self.scrollView.isDoingSystemScrolling) {
-    [self.scrollView setContentOffset:self.contentOffsetInternal animated:NO];
+  if (!_scrollView.isDoingSystemScrolling) {
+    [_scrollView setContentOffset:self.contentOffsetInternal animated:NO];
   }
 }
-
-- (id)nativeAccessibility {
-  return self.scrollView;
-}
-
-// private methods
 
 - (float)scrollExtentMax {
   if (!self.bridge) {
@@ -240,7 +264,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (CGPoint)contentOffsetInternal {
   CGPoint result;
-  CGPoint origin = self.scrollView.frame.origin;
+  CGPoint origin = _scrollView.frame.origin;
   const SkRect& rect = self.node.rect;
   if (self.node.actions & flutter::kVerticalScrollSemanticsActions) {
     result = ConvertPointToGlobal(self, CGPointMake(rect.x(), rect.y() + [self scrollPosition]));
@@ -278,11 +302,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
                            uid:(int32_t)uid {
   FML_DCHECK(bridge) << "bridge must be set";
   FML_DCHECK(uid >= kRootNodeId);
+  flutter::AccessibilityBridgeIos* accessibility_bridge = bridge.get();
+  if (!accessibility_bridge) {
+    return nil;
+  }
   // Initialize with the UIView as the container.
   // The UIView will not necessarily be accessibility parent for this object.
   // The bridge informs the OS of the actual structure via
   // `accessibilityContainer` and `accessibilityElementAtIndex`.
-  self = [super initWithAccessibilityContainer:bridge ? bridge->view() : nil];
+  UIView* accessibilityContainer =
+      accessibility_bridge->AccessibilityElementInitializationContainer();
+  self = [super initWithAccessibilityContainer:accessibilityContainer];
 
   if (self) {
     _weakBridge = bridge;
@@ -348,7 +378,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (UIView*)bridgeView {
   flutter::AccessibilityBridgeIos* bridge = [self bridge];
-  return bridge ? bridge->view() : nil;
+  return bridge ? bridge->ViewIfLoaded() : nil;
 }
 
 - (void)setSemanticsNode:(const flutter::SemanticsNode*)node {
@@ -356,6 +386,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (void)accessibilityBridgeDidFinishUpdate { /* Do nothing by default */
+}
+
+- (void)accessibilityBridgeDidChangeView { /* Do nothing by default */
 }
 
 /**
@@ -927,11 +960,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject {
   FML_DCHECK(semanticsObject) << "semanticsObject must be set";
+  flutter::AccessibilityBridgeIos* accessibility_bridge = semanticsObject.bridge;
+  if (!accessibility_bridge) {
+    return nil;
+  }
   // Initialize with the UIView as the container.
   // The UIView will not necessarily be accessibility parent for this object.
   // The bridge informs the OS of the actual structure via
   // `accessibilityContainer` and `accessibilityElementAtIndex`.
-  self = [super initWithAccessibilityContainer:semanticsObject.bridgeView];
+  UIView* accessibilityContainer =
+      accessibility_bridge->AccessibilityElementInitializationContainer();
+  self = [super initWithAccessibilityContainer:accessibilityContainer];
 
   if (self) {
     _semanticsObject = semanticsObject;

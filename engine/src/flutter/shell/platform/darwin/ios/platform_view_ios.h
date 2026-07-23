@@ -72,8 +72,10 @@ class PlatformViewIOS final : public PlatformView {
    *
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
+   *
+   * The `previousView` is the Flutter view that was attached before this one, if any.
    */
-  void attachView();
+  void attachView(FlutterView* previousView = nil);
 
   /**
    * Called through when an external texture such as video or camera is
@@ -135,6 +137,9 @@ class PlatformViewIOS final : public PlatformView {
 
  private:
   void ApplyLocaleToOwnerController();
+  void EnsureAccessibilityBridge();
+  void PostSemanticsUpdateNotification();
+
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.
   class ScopedObserver {
@@ -158,6 +163,7 @@ class PlatformViewIOS final : public PlatformView {
   std::shared_ptr<IOSContext> ios_context_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+  bool semantics_tree_enabled_ = false;
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
