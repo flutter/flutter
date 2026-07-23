@@ -54,6 +54,8 @@ class ContextMenuController {
     required BuildContext context,
     required WidgetBuilder contextMenuBuilder,
     Widget? debugRequiredFor,
+    bool rootOverlay = true,
+    OverlayEntry? insertBelow,
   }) {
     if (isShown) {
       // Update the currently-shown menu in-place by swapping the builder
@@ -66,8 +68,12 @@ class ContextMenuController {
     removeAny();
     final OverlayState overlayState = Overlay.of(
       context,
-      rootOverlay: true,
+      rootOverlay: rootOverlay,
       debugRequiredFor: debugRequiredFor,
+    );
+    final CapturedThemes capturedThemes = InheritedTheme.capture(
+      from: context,
+      to: Navigator.maybeOf(context, rootNavigator: rootOverlay)?.context,
     );
     _contextMenuBuilder = contextMenuBuilder;
 
@@ -80,6 +86,7 @@ class ContextMenuController {
         return capturedThemes.wrap(_contextMenuBuilder!(context));
       },
     );
+    overlayState.insert(_menuOverlayEntry!, below: insertBelow);
     _shownInstance = this;
     overlayState.insert(_menuOverlayEntry!);
   }

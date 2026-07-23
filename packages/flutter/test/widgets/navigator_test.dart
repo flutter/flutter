@@ -6344,6 +6344,55 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
+  group('NavigatorState.getOverlayEntryBelowRoutesStackedAbove', () {
+    testWidgets('returns null when subordinateRoute is not in this navigator', (
+      WidgetTester tester,
+    ) async {
+      final navKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navKey, home: const Scaffold(body: Text('home'))),
+      );
+
+      final strangerRoute = MaterialPageRoute<void>(
+        builder: (BuildContext context) => const SizedBox.shrink(),
+      );
+
+      expect(navKey.currentState!.getOverlayEntryBelowRoutesStackedAbove(strangerRoute), isNull);
+    });
+
+    testWidgets('returns null when subordinateRoute is the topmost route', (
+      WidgetTester tester,
+    ) async {
+      final navKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navKey, home: const Scaffold(body: Text('home'))),
+      );
+
+      final Route<dynamic> homeRoute = ModalRoute.of(tester.element(find.text('home')))!;
+      expect(navKey.currentState!.getOverlayEntryBelowRoutesStackedAbove(homeRoute), isNull);
+    });
+
+    testWidgets('returns first overlay entry of the shallowest route stacked above', (
+      WidgetTester tester,
+    ) async {
+      final navKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navKey, home: const Scaffold(body: Text('home'))),
+      );
+
+      final Route<dynamic> homeRoute = ModalRoute.of(tester.element(find.text('home')))!;
+
+      final pushed = MaterialPageRoute<void>(
+        builder: (BuildContext context) => const Scaffold(body: Text('pushed')),
+      );
+      navKey.currentState!.push<void>(pushed);
+      await tester.pumpAndSettle();
+
+      final OverlayEntry? insertBelow = navKey.currentState!
+          .getOverlayEntryBelowRoutesStackedAbove(homeRoute);
+      expect(insertBelow, isNotNull);
+      expect(insertBelow, same(pushed.overlayEntries.first));
+    });
   testWidgets('Navigator.pop throws FlutterError when popped with mismatched type', (
     WidgetTester tester,
   ) async {
