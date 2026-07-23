@@ -168,10 +168,12 @@ enum WrapCrossAlignment {
 }
 
 class _RunMetrics {
-  _RunMetrics(this.leadingChild, this.axisSize);
+  _RunMetrics(this.leadingChild, this.axisSize)
+    : visibleChildCount = axisSize.mainAxisExtent > 0.0 ? 1 : 0;
 
   _AxisSize axisSize;
   int childCount = 1;
+  int visibleChildCount;
   RenderBox leadingChild;
 
   // Look ahead, creates a new run if incorporating the child would exceed the allowed line width.
@@ -190,6 +192,9 @@ class _RunMetrics {
     } else {
       axisSize += childSize + _AxisSize(mainAxisExtent: spacing, crossAxisExtent: 0.0);
       childCount += 1;
+      if (childSize.mainAxisExtent > 0.0) {
+        visibleChildCount += 1;
+      }
       if (flipMainAxis) {
         leadingChild = child;
       }
@@ -234,6 +239,7 @@ class RenderWrap extends RenderBox
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     Clip clipBehavior = Clip.none,
+    bool ignoreZeroSizeChildrenForSpacing = false,
   }) : _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
@@ -242,7 +248,8 @@ class RenderWrap extends RenderBox
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _ignoreZeroSizeChildrenForSpacing = ignoreZeroSizeChildrenForSpacing {
     addAll(children);
   }
 
@@ -303,6 +310,32 @@ class RenderWrap extends RenderBox
       return;
     }
     _spacing = value;
+    markNeedsLayout();
+  }
+
+  /// {@template flutter.rendering.RenderWrap.ignoreZeroSizeChildrenForSpacing}
+  /// Whether children that lay out to a zero main-axis extent are excluded when
+  /// [spacing] is applied within a run.
+  ///
+  /// When false (the default), [spacing] is placed between every adjacent pair
+  /// of children in a run regardless of their size, so a child that occupies no
+  /// space on the main axis still introduces a gap on each of its sides and
+  /// still counts towards the run's main-axis extent.
+  ///
+  /// When true, a child whose main-axis extent is zero is treated as if it were
+  /// not present when [spacing] is applied and when a run's free space is
+  /// distributed by [alignment]. This does not affect [runSpacing], which is
+  /// still placed between every run.
+  ///
+  /// Defaults to false.
+  /// {@endtemplate}
+  bool get ignoreZeroSizeChildrenForSpacing => _ignoreZeroSizeChildrenForSpacing;
+  bool _ignoreZeroSizeChildrenForSpacing;
+  set ignoreZeroSizeChildrenForSpacing(bool value) {
+    if (_ignoreZeroSizeChildrenForSpacing == value) {
+      return;
+    }
+    _ignoreZeroSizeChildrenForSpacing = value;
     markNeedsLayout();
   }
 
@@ -662,28 +695,40 @@ class RenderWrap extends RenderBox
       Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
     };
 
+    final bool ignoreZeroSizeChildrenForSpacing = this.ignoreZeroSizeChildrenForSpacing;
     var mainAxisExtent = 0.0;
     var crossAxisExtent = 0.0;
     var runMainAxisExtent = 0.0;
     var runCrossAxisExtent = 0.0;
     var childCount = 0;
+    var runVisibleChildCount = 0;
     RenderBox? child = firstChild;
     while (child != null) {
       final Size childSize = layoutChild(child, childConstraints);
       final double childMainAxisExtent = _getMainAxisExtent(childSize);
       final double childCrossAxisExtent = _getCrossAxisExtent(childSize);
+      final double effectiveSpacing =
+          ignoreZeroSizeChildrenForSpacing &&
+              (childMainAxisExtent == 0.0 || runVisibleChildCount == 0)
+          ? 0.0
+          : spacing;
       // There must be at least one child before we move on to the next run.
-      if (childCount > 0 && runMainAxisExtent + childMainAxisExtent + spacing > mainAxisLimit) {
+      if (childCount > 0 &&
+          runMainAxisExtent + childMainAxisExtent + effectiveSpacing > mainAxisLimit) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent + runSpacing;
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
         childCount = 0;
+        runVisibleChildCount = 0;
       }
       runMainAxisExtent += childMainAxisExtent;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       if (childCount > 0) {
-        runMainAxisExtent += spacing;
+        runMainAxisExtent += effectiveSpacing;
+      }
+      if (childMainAxisExtent > 0.0) {
+        runVisibleChildCount += 1;
       }
       childCount += 1;
       child = childAfter(child);
@@ -752,9 +797,20 @@ class RenderWrap extends RenderBox
         size: layoutChild(child, childConstraints),
         direction: direction,
       );
+      final effectiveSpacing =
+          ignoreZeroSizeChildrenForSpacing &&
+              (childSize.mainAxisExtent == 0.0 || (currentRun?.visibleChildCount ?? 0) == 0)
+          ? 0.0
+          : spacing;
       final _RunMetrics? newRun = currentRun == null
           ? _RunMetrics(child, childSize)
-          : currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
+          : currentRun.tryAddingNewChild(
+              child,
+              childSize,
+              flipMainAxis,
+              effectiveSpacing,
+              mainAxisLimit,
+            );
       if (newRun != null) {
         runMetrics.add(newRun);
         childrenAxisSize += currentRun?.axisSize.flipped ?? _AxisSize.empty;
@@ -779,6 +835,7 @@ class RenderWrap extends RenderBox
     assert(runMetrics.isNotEmpty);
 
     final double spacing = this.spacing;
+    final bool ignoreZeroSizeChildrenForSpacing = this.ignoreZeroSizeChildrenForSpacing;
 
     final double crossAxisFreeSpace = math.max(0.0, freeAxisSize.crossAxisExtent);
 
@@ -807,11 +864,12 @@ class RenderWrap extends RenderBox
       final (double childLeadingSpace, double childBetweenSpace) = alignment._distributeSpace(
         mainAxisFreeSpace,
         spacing,
-        childCount,
+        ignoreZeroSizeChildrenForSpacing ? math.max(1, run.visibleChildCount) : childCount,
         flipMainAxis,
       );
 
       var childMainAxisOffset = childLeadingSpace;
+      var hasSpacedChild = false;
 
       int remainingChildCount = run.childCount;
       for (
@@ -828,11 +886,16 @@ class RenderWrap extends RenderBox
         );
         final double childCrossAxisOffset =
             effectiveCrossAlignment._alignment * (runCrossAxisExtent - childCrossAxisExtent);
+        final bool spaced = !ignoreZeroSizeChildrenForSpacing || childMainAxisExtent > 0.0;
+        if (spaced && hasSpacedChild) {
+          childMainAxisOffset += childBetweenSpace;
+        }
         positionChild(
           _getOffset(childMainAxisOffset, runCrossAxisOffset + childCrossAxisOffset),
           child,
         );
-        childMainAxisOffset += childMainAxisExtent + childBetweenSpace;
+        childMainAxisOffset += childMainAxisExtent;
+        hasSpacedChild = hasSpacedChild || spaced;
       }
       runCrossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
@@ -876,6 +939,14 @@ class RenderWrap extends RenderBox
     properties.add(EnumProperty<Axis>('direction', direction));
     properties.add(EnumProperty<WrapAlignment>('alignment', alignment));
     properties.add(DoubleProperty('spacing', spacing));
+    properties.add(
+      FlagProperty(
+        'ignoreZeroSizeChildrenForSpacing',
+        value: ignoreZeroSizeChildrenForSpacing,
+        ifTrue: 'ignoring zero-size children for spacing',
+        defaultValue: false,
+      ),
+    );
     properties.add(EnumProperty<WrapAlignment>('runAlignment', runAlignment));
     properties.add(DoubleProperty('runSpacing', runSpacing));
     properties.add(DoubleProperty('crossAxisAlignment', runSpacing));
