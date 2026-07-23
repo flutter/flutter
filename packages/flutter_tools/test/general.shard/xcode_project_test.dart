@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -91,6 +92,37 @@ void main() {
         project.flutterPluginSwiftPackageDirectory.path,
         'app_name/.ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
       );
+    });
+
+    testWithoutContext('deploymentTargetFromPbxproj returns iOS target', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      project.xcodeProjectInfoFile.createSync(recursive: true);
+      project.xcodeProjectInfoFile.writeAsStringSync('''
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+''');
+      expect(project.deploymentTargetFromPbxproj(FlutterDarwinPlatform.ios), '17.0');
+    });
+
+    testWithoutContext(
+      'deploymentTargetFromPbxproj returns highest target across configurations',
+      () {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProjectInfoFile.createSync(recursive: true);
+        project.xcodeProjectInfoFile.writeAsStringSync('''
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+''');
+        expect(project.deploymentTargetFromPbxproj(FlutterDarwinPlatform.ios), '17.0');
+      },
+    );
+
+    testWithoutContext('deploymentTargetFromPbxproj returns null when file missing', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(project.deploymentTargetFromPbxproj(FlutterDarwinPlatform.ios), isNull);
     });
 
     testWithoutContext('xcodeConfigFor', () {
