@@ -1224,7 +1224,6 @@ class RenderBoxWithTestConstraints extends RenderProxyBox {
   }
 }
 
-
 class _RenderNoBaseline extends RenderBox {
   @override
   void performLayout() {
