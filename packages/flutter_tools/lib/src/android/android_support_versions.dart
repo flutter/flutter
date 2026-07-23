@@ -72,9 +72,14 @@ class MaxKnownVersions {
       'gradle': final String gradle,
       'kgp': final String kgp,
       'agp': final String agp,
-      'agp_with_kotlin': final String agpWithKotlin,
+      'agpWithKotlin': final String agpWithKotlin,
     }) {
-      return MaxKnownVersions(gradle: gradle, kgp: kgp, agp: agp, agpWithKotlin: agpWithKotlin);
+      return MaxKnownVersions(
+        gradle: gradle,
+        kgp: kgp,
+        agp: agp,
+        agpWithKotlin: agpWithKotlin,
+      );
     }
     throw FormatException('Invalid MaxKnownVersions JSON: $json');
   }
@@ -116,9 +121,9 @@ class OldestConsideredVersions {
       'gradle': final String gradle,
       'agp': final String agp,
       'kgp': final String kgp,
-      'java_agp': final String javaAgp,
+      'javaAgp': final String javaAgp,
       'java': final String java,
-      'java_gradle': final String javaGradle,
+      'javaGradle': final String javaGradle,
     }) {
       return OldestConsideredVersions(
         gradle: gradle,
@@ -477,12 +482,12 @@ class AndroidSupportVersions {
       'maxKnownVersions': final Map<String, dynamic> maxKnownVersions,
       'oldestConsideredVersions': final Map<String, dynamic> oldestConsideredVersions,
       'oneMajorVersionHigherJavaVersion': final String oneMajorVersionHigherJavaVersion,
-      'gradle_agp_compat': final List<dynamic> gradleAgpCompat,
-      'java_gradle_compat': final List<dynamic> javaGradleCompat,
-      'java_agp_compat': final List<dynamic> javaAgpCompat,
-      'kgp_gradle_compat': final List<dynamic> kgpGradleCompat,
-      'agp_kgp_compat': final List<dynamic> agpKgpCompat,
-      'gradle_version_for_agp': final List<dynamic> gradleVersionForAgp,
+      'gradleAgpCompat': final List<dynamic> gradleAgpCompat,
+      'javaGradleCompat': final List<dynamic> javaGradleCompat,
+      'javaAgpCompat': final List<dynamic> javaAgpCompat,
+      'kgpGradleCompat': final List<dynamic> kgpGradleCompat,
+      'agpKgpCompat': final List<dynamic> agpKgpCompat,
+      'gradleVersionForAgp': final List<dynamic> gradleVersionForAgp,
     }) {
       return AndroidSupportVersions(
         gradle: VersionThresholds.fromJson(gradle),
@@ -493,24 +498,12 @@ class AndroidSupportVersions {
         maxKnownVersions: MaxKnownVersions.fromJson(maxKnownVersions),
         oldestConsideredVersions: OldestConsideredVersions.fromJson(oldestConsideredVersions),
         oneMajorVersionHigherJavaVersion: oneMajorVersionHigherJavaVersion,
-        gradleAgpCompat: gradleAgpCompat
-            .map((e) => GradleAgpCompat.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        javaGradleCompat: javaGradleCompat
-            .map((e) => JavaGradleCompat.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        javaAgpCompat: javaAgpCompat
-            .map((e) => JavaAgpCompat.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        kgpGradleCompat: kgpGradleCompat
-            .map((e) => KgpGradleCompat.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        agpKgpCompat: agpKgpCompat
-            .map((e) => AgpKgpCompat.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        gradleVersionForAgp: gradleVersionForAgp
-            .map((e) => GradleVersionForAgp.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        gradleAgpCompat: gradleAgpCompat.map((e) => GradleAgpCompat.fromJson(e as Map<String, dynamic>)).toList(),
+        javaGradleCompat: javaGradleCompat.map((e) => JavaGradleCompat.fromJson(e as Map<String, dynamic>)).toList(),
+        javaAgpCompat: javaAgpCompat.map((e) => JavaAgpCompat.fromJson(e as Map<String, dynamic>)).toList(),
+        kgpGradleCompat: kgpGradleCompat.map((e) => KgpGradleCompat.fromJson(e as Map<String, dynamic>)).toList(),
+        agpKgpCompat: agpKgpCompat.map((e) => AgpKgpCompat.fromJson(e as Map<String, dynamic>)).toList(),
+        gradleVersionForAgp: gradleVersionForAgp.map((e) => GradleVersionForAgp.fromJson(e as Map<String, dynamic>)).toList(),
       );
     }
     throw const FormatException('Invalid AndroidSupportVersions JSON');

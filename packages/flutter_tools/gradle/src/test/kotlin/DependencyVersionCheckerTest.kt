@@ -440,33 +440,33 @@ class DependencyVersionCheckerTest {
                 "gradle": "9.3.1",
                 "kgp": "2.4.0",
                 "agp": "9.2",
-                "agp_with_kotlin": "9.1.0"
+                "agpWithKotlin": "9.1.0"
               },
               "oldestConsideredVersions": {
                 "gradle": "4.10.1",
                 "agp": "3.3.0",
                 "kgp": "1.6.20",
-                "java_agp": "4.2",
+                "javaAgp": "4.2",
                 "java": "1.8",
-                "java_gradle": "2.0"
+                "javaGradle": "2.0"
               },
               "oneMajorVersionHigherJavaVersion": "26",
-              "gradle_agp_compat": [
+              "gradleAgpCompat": [
                 { "agpMin": "9.1.0", "agpMax": "9.1.99", "gradleMin": "9.3.1", "inclusiveMaxAgp": true }
               ],
-              "java_gradle_compat": [
+              "javaGradleCompat": [
                 { "javaMin": "25", "javaMax": "26", "gradleMin": "9.1.0", "gradleMax": "9.2.0" }
               ],
-              "java_agp_compat": [
+              "javaAgpCompat": [
                 { "javaMin": "17", "javaDefault": "17", "agpMin": "8.0", "agpMax": "9.2" }
               ],
-              "kgp_gradle_compat": [
+              "kgpGradleCompat": [
                 { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "8.5", "gradleMax": "9.5.99", "inclusiveMaxKgp": false, "inclusiveMaxGradle": false }
               ],
-              "agp_kgp_compat": [
+              "agpKgpCompat": [
                 { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxKgp": false, "inclusiveMaxAgp": false }
               ],
-              "gradle_version_for_agp": [
+              "gradleVersionForAgp": [
                 { "agpMin": "1.0.0", "agpMax": "1.1.3", "minRequiredGradle": "2.3" }
               ]
             }

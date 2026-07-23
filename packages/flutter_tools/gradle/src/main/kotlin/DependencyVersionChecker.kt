@@ -96,35 +96,31 @@ object DependencyVersionChecker {
         AndroidSupportVersions.load()
     }
 
-    @VisibleForTesting internal val warnGradleVersion: Version by lazy { Version.fromString(supportVersions.gradle.warn) }
+    @VisibleForTesting internal val warnGradleVersion: Version get() = supportVersions.warnGradleVersion
 
-    @VisibleForTesting internal val errorGradleVersion: Version by lazy { Version.fromString(supportVersions.gradle.error) }
+    @VisibleForTesting internal val errorGradleVersion: Version get() = supportVersions.errorGradleVersion
 
     // Java error and warn should align with packages/flutter_tools/lib/src/android/gradle_utils.dart.
-    @VisibleForTesting internal val warnJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(supportVersions.java.warn) }
+    @VisibleForTesting internal val warnJavaVersion: JavaVersion get() = supportVersions.warnJavaVersion
 
-    @VisibleForTesting internal val errorJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(supportVersions.java.error) }
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion get() = supportVersions.errorJavaVersion
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion by lazy {
-        AndroidSupportVersions.parseAgpVersion(supportVersions.agp.warn)
-    }
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion get() = supportVersions.warnAGPVersion
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion by lazy {
-        AndroidSupportVersions.parseAgpVersion(supportVersions.agp.error)
-    }
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion get() = supportVersions.errorAGPVersion
 
-    @VisibleForTesting internal val warnKGPVersion: Version by lazy { Version.fromString(supportVersions.kgp.warn) }
+    @VisibleForTesting internal val warnKGPVersion: Version get() = supportVersions.warnKGPVersion
 
-    @VisibleForTesting internal val errorKGPVersion: Version by lazy { Version.fromString(supportVersions.kgp.error) }
+    @VisibleForTesting internal val errorKGPVersion: Version get() = supportVersions.errorKGPVersion
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
     // A warning is logged if the project's minSdkVersion is strictly less than this value.
     @VisibleForTesting
-    internal val warnMinSdkVersion: Int by lazy { supportVersions.minSdkVersion.warn }
+    internal val warnMinSdkVersion: Int get() = supportVersions.minSdkVersion.warn
 
     // An error is thrown if the project's minSdkVersion is strictly less than this value.
     @VisibleForTesting
-    internal val errorMinSdkVersion: Int by lazy { supportVersions.minSdkVersion.error }
+    internal val errorMinSdkVersion: Int get() = supportVersions.minSdkVersion.error
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective

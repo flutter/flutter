@@ -24,19 +24,19 @@
     "gradle": "9.3.1",
     "kgp": "2.4.0",
     "agp": "9.2",
-    "agp_with_kotlin": "9.1.0"
+    "agpWithKotlin": "9.1.0"
   },
   "oldestConsideredVersions": {
     "gradle": "4.10.1",
     "agp": "3.3.0",
     "kgp": "1.6.20",
-    "java_agp": "4.2",
+    "javaAgp": "4.2",
     "java": "1.8",
-    "java_gradle": "2.0"
+    "javaGradle": "2.0"
   },
   "oneMajorVersionHigherJavaVersion": "26",
-  "_source_url_gradle_agp_compat": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
-  "gradle_agp_compat": [
+  "_sourceUrlGradleAgpCompat": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
+  "gradleAgpCompat": [
     { "agpMin": "9.1.0", "agpMax": "9.1.99", "gradleMin": "9.3.1" },
     { "agpMin": "9.0.0", "agpMax": "9.0.99", "gradleMin": "9.0" },
     { "agpMin": "8.13.0", "agpMax": "8.13.99", "gradleMin": "8.13" },
@@ -65,8 +65,8 @@
     { "agpMin": "3.4.0", "agpMax": "3.4.3", "gradleMin": "5.1.1" },
     { "agpMin": "3.3.0", "agpMax": "3.3.3", "gradleMin": "4.10.1" }
   ],
-  "_source_url_java_gradle_compat": "https://docs.gradle.org/current/userguide/compatibility.html#java",
-  "java_gradle_compat": [
+  "_sourceUrlJavaGradleCompat": "https://docs.gradle.org/current/userguide/compatibility.html#java",
+  "javaGradleCompat": [
     { "javaMin": "25", "javaMax": "26", "gradleMin": "9.1.0" },
     { "javaMin": "24", "javaMax": "25", "gradleMin": "8.14" },
     { "javaMin": "23", "javaMax": "24", "gradleMin": "8.10" },
@@ -86,14 +86,14 @@
     { "javaMin": "1.9", "javaMax": "1.10", "gradleMin": "4.3", "gradleMax": "8.14.100" },
     { "javaMin": "1.8", "javaMax": "1.9", "gradleMin": "2.0", "gradleMax": "8.14.100" }
   ],
-  "_source_url_java_agp_compat": "https://developer.android.com/studio/releases/gradle-plugin#compatibility",
-  "java_agp_compat": [
+  "_sourceUrlJavaAgpCompat": "https://developer.android.com/studio/releases/gradle-plugin#compatibility",
+  "javaAgpCompat": [
     { "javaMin": "17", "javaDefault": "17", "agpMin": "8.0", "agpMax": "9.2" },
     { "javaMin": "11", "javaDefault": "11", "agpMin": "7.0", "agpMax": "7.4" },
     { "javaMin": "1.8", "javaDefault": "1.8", "agpMin": "4.2", "agpMax": "4.2" }
   ],
-  "_source_url_kgp_gradle_compat": "https://kotlinlang.org/docs/gradle.html#compatibility",
-  "kgp_gradle_compat": [
+  "_sourceUrlKgpGradleCompat": "https://kotlinlang.org/docs/gradle.html#compatibility",
+  "kgpGradleCompat": [
     { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "8.5", "gradleMax": "9.5.99", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.4.0, using 2.4.29 covers patch versions." },
     { "kgpMin": "2.3.0", "kgpMax": "2.3.29", "gradleMin": "7.6.3", "gradleMax": "9.5.99", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.3.10, using 2.3.29 covers patch versions. Documented max Gradle is 9.5.0, using 9.5.99 non inclusive covers patch versions." },
     { "kgpMin": "2.2.20", "kgpMax": "2.3.0", "gradleMin": "7.6.3", "gradleMax": "8.14.99", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.2.21, using 2.3.0 covers patch versions. Documented max Gradle is 8.14, using 8.14.99 non inclusive covers patch versions." },
@@ -109,8 +109,8 @@
     { "kgpMin": "1.7.0", "kgpMax": "1.7.20", "gradleMin": "6.7.1", "gradleMax": "7.0.2", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.7.10." },
     { "kgpMin": "1.6.20", "kgpMax": "1.7.0", "gradleMin": "6.1.1", "gradleMax": "7.0.2", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.6.21." }
   ],
-  "_source_url_agp_kgp_compat": "https://kotlinlang.org/docs/kmp-compatibility-guide.html",
-  "agp_kgp_compat": [
+  "_sourceUrlAgpKgpCompat": "https://kotlinlang.org/docs/kmp-compatibility-guide.html",
+  "agpKgpCompat": [
     { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxAgp": false, "comment": "Documented max KGP is 2.4.0, using 2.4.29 covers patch versions." },
     { "kgpMin": "2.3.10", "kgpMax": "2.3.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxAgp": false, "comment": "Documented max KGP is 2.3.10, using 2.3.29 covers patch versions. Documented max AGP is 9.2.0." },
     { "kgpMin": "2.3.0", "kgpMax": "2.3.10", "agpMin": "8.2.2", "agpMax": "8.14", "inclusiveMaxKgp": false, "inclusiveMaxAgp": false, "comment": "Documented max KGP is 2.3.0. Documented max AGP is 8.13.0." },
@@ -126,8 +126,8 @@
     { "kgpMin": "1.7.20", "kgpMax": "1.8.0", "agpMin": "3.6.4", "agpMax": "7.0.4", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.7.22." },
     { "kgpMin": "1.6.20", "kgpMax": "1.7.20", "agpMin": "3.4.3", "agpMax": "7.0.2", "inclusiveMaxKgp": false, "comment": "Documented gap between 1.6.21 and 1.7.0." }
   ],
-  "_source_url_gradle_version_for_agp": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
-  "gradle_version_for_agp": [
+  "_sourceUrlGradleVersionForAgp": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
+  "gradleVersionForAgp": [
     { "agpMin": "1.0.0", "agpMax": "1.1.3", "minRequiredGradle": "2.3" },
     { "agpMin": "1.2.0", "agpMax": "1.3.1", "minRequiredGradle": "2.9" },
     { "agpMin": "1.5.0", "agpMax": "1.5.0", "minRequiredGradle": "2.2.1" },

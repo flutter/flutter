@@ -5,11 +5,11 @@
 package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.gradle.api.GradleException
+import org.gradle.api.JavaVersion
 
 // Co-evolve with packages/flutter_tools/lib/src/android/android_support_versions.dart
 
@@ -30,7 +30,6 @@ internal data class MaxKnownVersions(
     val gradle: String,
     val kgp: String,
     val agp: String,
-    @SerialName("agp_with_kotlin")
     val agpWithKotlin: String
 )
 
@@ -39,10 +38,8 @@ internal data class OldestConsideredVersions(
     val gradle: String,
     val agp: String,
     val kgp: String,
-    @SerialName("java_agp")
     val javaAgp: String,
     val java: String,
-    @SerialName("java_gradle")
     val javaGradle: String
 )
 
@@ -107,19 +104,25 @@ internal data class AndroidSupportVersions(
     val maxKnownVersions: MaxKnownVersions,
     val oldestConsideredVersions: OldestConsideredVersions,
     val oneMajorVersionHigherJavaVersion: String,
-    @SerialName("gradle_agp_compat")
     val gradleAgpCompat: List<GradleAgpCompat>,
-    @SerialName("java_gradle_compat")
     val javaGradleCompat: List<JavaGradleCompat>,
-    @SerialName("java_agp_compat")
     val javaAgpCompat: List<JavaAgpCompat>,
-    @SerialName("kgp_gradle_compat")
     val kgpGradleCompat: List<KgpGradleCompat>,
-    @SerialName("agp_kgp_compat")
     val agpKgpCompat: List<AgpKgpCompat>,
-    @SerialName("gradle_version_for_agp")
     val gradleVersionForAgp: List<GradleVersionForAgp>
 ) {
+    val warnGradleVersion: Version by lazy { Version.fromString(gradle.warn) }
+    val errorGradleVersion: Version by lazy { Version.fromString(gradle.error) }
+
+    val warnJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(java.warn) }
+    val errorJavaVersion: JavaVersion by lazy { JavaVersion.toVersion(java.error) }
+
+    val warnAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(agp.warn) }
+    val errorAGPVersion: AndroidPluginVersion by lazy { parseAgpVersion(agp.error) }
+
+    val warnKGPVersion: Version by lazy { Version.fromString(kgp.warn) }
+    val errorKGPVersion: Version by lazy { Version.fromString(kgp.error) }
+
     companion object {
         private const val AGP_MAJOR_VERSION_INDEX = 0
         private const val AGP_MINOR_VERSION_INDEX = 1
