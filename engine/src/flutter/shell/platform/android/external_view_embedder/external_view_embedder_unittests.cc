@@ -1113,7 +1113,8 @@ TEST(AndroidExternalViewEmbedder, TeardownDoesNotCallJNIMethod) {
   embedder->Teardown();
 }
 
-TEST(AndroidExternalViewEmbedder2, SwapsTransactionsAfterDisplayingPlatformViews) {
+TEST(AndroidExternalViewEmbedder2,
+     SwapsTransactionsAfterDisplayingPlatformViews) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
@@ -1127,8 +1128,25 @@ TEST(AndroidExternalViewEmbedder2, SwapsTransactionsAfterDisplayingPlatformViews
       thread_host.ui_thread->GetTaskRunner(),        // ui
       thread_host.io_thread->GetTaskRunner()         // io
   );
+  auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>([]() {
+    auto android_surface = std::make_unique<AndroidSurfaceMock>();
+    EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*android_surface, CreateGPUSurface(_))
+        .WillRepeatedly(Return(ByMove(std::make_unique<SurfaceMock>())));
+    return android_surface;
+  });
+
+  fml::RefPtr<AndroidNativeWindow> window =
+      fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
+  EXPECT_CALL(*jni_mock, createOverlaySurface2())
+      .WillRepeatedly(Return(
+          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+              0, window))));
+
   auto embedder = std::make_unique<AndroidExternalViewEmbedder2>(
-      *android_context, jni_mock, nullptr, task_runners);
+      *android_context, jni_mock, surface_factory, task_runners);
 
   const DlISize frame_size(100, 100);
   const int64_t view_id = 42;
@@ -1143,8 +1161,8 @@ TEST(AndroidExternalViewEmbedder2, SwapsTransactionsAfterDisplayingPlatformViews
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50,
-                                                  50, mutators));
+    EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50,
+                                                  mutators));
     EXPECT_CALL(*jni_mock, swapTransaction());
     EXPECT_CALL(*jni_mock, onEndFrame2());
   }
@@ -1156,16 +1174,14 @@ TEST(AndroidExternalViewEmbedder2, SwapsTransactionsAfterDisplayingPlatformViews
       [](const SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/frame_size);
 
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners.GetRasterTaskRunner(), [&]() {
-        embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
-                                    std::move(surface_frame));
-      });
+  fml::TaskRunner::RunNowOrPostTask(task_runners.GetRasterTaskRunner(), [&]() {
+    embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                std::move(surface_frame));
+  });
 
   fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners.GetPlatformTaskRunner(),
-      [&latch]() { latch.Signal(); });
+  fml::TaskRunner::RunNowOrPostTask(task_runners.GetPlatformTaskRunner(),
+                                    [&latch]() { latch.Signal(); });
   latch.Wait();
 
   embedder->Teardown();
