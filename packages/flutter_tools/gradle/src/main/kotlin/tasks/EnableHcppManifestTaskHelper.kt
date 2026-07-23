@@ -50,9 +50,14 @@ object EnableHcppManifestTaskHelper {
 
         if (metaDataNode != null) {
             val existingValueStr = metaDataNode.attribute(MANIFEST_VALUE_KEY)?.toString()
-            val existingValueBool = existingValueStr?.toBoolean()
+            val existingValueBool =
+                when (existingValueStr?.trim()?.lowercase()) {
+                    "true" -> true
+                    "false" -> false
+                    else -> null
+                }
 
-            if (explicitEnableHcpp != null && existingValueBool != null && explicitEnableHcpp != existingValueBool) {
+            if (explicitEnableHcpp != null && (existingValueBool == null || explicitEnableHcpp != existingValueBool)) {
                 val flagName = if (explicitEnableHcpp) "--enable-hcpp" else "--no-enable-hcpp"
                 logger?.warn(
                     "The merged Android manifest explicitly sets $HCPP_METADATA_NAME to \"$existingValueStr\"; " +

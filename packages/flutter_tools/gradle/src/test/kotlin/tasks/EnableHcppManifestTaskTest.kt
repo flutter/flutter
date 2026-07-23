@@ -222,6 +222,41 @@ class EnableHcppManifestTaskTest {
     }
 
     @Test
+    fun warnsWhenExplicitFlagConflictsWithResourceRef() {
+        val manifestFile =
+            createTempManifestFile(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="$defaultNamespace">
+                    <application android:label="Test App">
+                        <meta-data android:name="${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME}" android:value="@bool/enable_hcpp" />
+                    </application>
+                </manifest>
+                """
+            )
+        val updatedManifest = createTempOutputFile()
+        val logger = mockk<Logger>(relaxed = true)
+
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true,
+            explicitEnableHcpp = true,
+            logger = logger,
+        )
+
+        verify(exactly = 1) {
+            logger.warn(
+                match { message ->
+                    message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"@bool/enable_hcpp\"") &&
+                        message.contains("--enable-hcpp does not affect this artifact")
+                }
+            )
+        }
+    }
+
+    @Test
     fun addsApplicationElementWhenAbsent() {
         // A library (add-to-app module) manifest may not contain an application element.
         val manifestFile =
