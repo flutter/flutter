@@ -13,7 +13,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.LoggingManager
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessForkOptions
@@ -349,9 +348,7 @@ class BaseFlutterTaskHelperTest {
         val baseFlutterTask = mockk<BaseFlutterTask>()
         val mockLoggingManager = mockk<LoggingManager>()
         val mockFile = mockk<File>()
-        // Mocking the serviceOf() extension below requires us to specify this internal type
-        // unfortunately.
-        val mockProject = mockk<org.gradle.api.internal.project.ProjectInternal>()
+        val mockProject = mockk<Project>()
 
         // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
         // before creating a BaseFlutterTaskHelper object.
@@ -362,9 +359,7 @@ class BaseFlutterTaskHelperTest {
         every { mockLoggingManager.captureStandardError(any()) } returns mockLoggingManager
         every { baseFlutterTask.project } returns mockProject
         val mockExecOperations = mockk<ExecOperations>()
-        every {
-            mockProject.serviceOf<ExecOperations>()
-        } returns mockExecOperations
+        every { baseFlutterTask.execOperations } returns mockExecOperations
         every { mockExecOperations.exec(any<Action<ExecSpec>>()) } returns mockk()
 
         BaseFlutterTaskHelper.buildBundle(baseFlutterTask)
