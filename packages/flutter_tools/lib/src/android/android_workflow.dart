@@ -239,6 +239,12 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
+    final String? avdManagerPath = androidSdk.avdManagerPath;
+    if (avdManagerPath == null || !_processManager.canRun(avdManagerPath)) {
+      messages.add(ValidationMessage.error(_userMessages.androidMissingAvdManager));
+      return ValidationResult(ValidationType.partial, messages);
+    }
+
     _task = 'Validating Android SDK licenses';
     if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(_userMessages.androidSdkLicenseOnly(kAndroidHome)));
