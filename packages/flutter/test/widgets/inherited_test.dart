@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
@@ -55,32 +55,23 @@ class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
   const ChangeNotifierInherited({super.key, required super.child, super.notifier});
 }
 
-class ThemedCard extends SingleChildRenderObjectWidget {
-  const ThemedCard({super.key}) : super(child: const SizedBox.expand());
+class _ValueDecoratedBox extends SingleChildRenderObjectWidget {
+  const _ValueDecoratedBox({super.key}) : super(child: const SizedBox.expand());
 
-  @override
-  RenderPhysicalShape createRenderObject(BuildContext context) {
-    final CardThemeData cardTheme = CardTheme.of(context);
-
-    return RenderPhysicalShape(
-      clipper: ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder()),
-      clipBehavior: cardTheme.clipBehavior ?? Clip.antiAlias,
-      color: cardTheme.color ?? Colors.white,
-      elevation: cardTheme.elevation ?? 0.0,
-      shadowColor: cardTheme.shadowColor ?? Colors.black,
-    );
+  BoxDecoration _decorationOf(BuildContext context) {
+    final ValueInherited valueInherited = context
+        .dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+    return BoxDecoration(color: Color(valueInherited.value));
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
-    final CardThemeData cardTheme = CardTheme.of(context);
+  RenderDecoratedBox createRenderObject(BuildContext context) {
+    return RenderDecoratedBox(decoration: _decorationOf(context));
+  }
 
-    renderObject
-      ..clipper = ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder())
-      ..clipBehavior = cardTheme.clipBehavior ?? Clip.antiAlias
-      ..color = cardTheme.color ?? Colors.white
-      ..elevation = cardTheme.elevation ?? 0.0
-      ..shadowColor = cardTheme.shadowColor ?? Colors.black;
+  @override
+  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
+    renderObject.decoration = _decorationOf(context);
   }
 }
 
@@ -523,69 +514,29 @@ void main() {
   });
 
   testWidgets('InheritedWidgets can trigger RenderObject updates', (WidgetTester tester) async {
-    var cardThemeData = const CardThemeData(color: Colors.white);
+    var value = 0xFF0000FF;
     late StateSetter setState;
 
-    // Verifies that the "themed card" is rendered
-    // with the appropriate inherited theme data.
-    void expectCardToMatchTheme() {
-      final RenderPhysicalShape renderShape = tester.renderObject(find.byType(ThemedCard));
-
-      if (cardThemeData.color != null) {
-        expect(renderShape.color, cardThemeData.color);
-      }
-      if (cardThemeData.elevation != null) {
-        expect(renderShape.elevation, cardThemeData.elevation);
-      }
-      if (cardThemeData.shadowColor != null) {
-        expect(renderShape.shadowColor, cardThemeData.shadowColor);
-      }
-      if (cardThemeData.shape != null) {
-        final CustomClipper<Path>? clipper = renderShape.clipper;
-        expect(clipper, isA<ShapeBorderClipper>());
-        expect((clipper! as ShapeBorderClipper).shape, cardThemeData.shape);
-      }
-      if (cardThemeData.clipBehavior != null) {
-        expect(renderShape.clipBehavior, cardThemeData.clipBehavior);
-      }
+    void expectDecoratedBoxToMatchInheritedValue() {
+      // Verifies that the render object is updated with the inherited value.
+      final RenderDecoratedBox renderObject = tester.renderObject(find.byType(_ValueDecoratedBox));
+      expect(renderObject.decoration, BoxDecoration(color: Color(value)));
     }
 
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
-          return Theme(
-            data: ThemeData(cardTheme: cardThemeData),
-            child: const ThemedCard(),
-          );
+          return ValueInherited(value: value, child: const _ValueDecoratedBox());
         },
       ),
     );
-    expectCardToMatchTheme();
+    expectDecoratedBoxToMatchInheritedValue();
 
     setState(() {
-      cardThemeData = const CardThemeData(
-        shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-      );
+      value = 0xFFFF0000;
     });
     await tester.pump();
-    expectCardToMatchTheme();
-
-    setState(() {
-      cardThemeData = const CardThemeData(clipBehavior: Clip.hardEdge);
-    });
-    await tester.pump();
-    expectCardToMatchTheme();
-
-    setState(() {
-      cardThemeData = const CardThemeData(
-        elevation: 5.0,
-        shadowColor: Colors.blueGrey,
-        shape: ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-      );
-    });
-    await tester.pump();
-    expectCardToMatchTheme();
+    expectDecoratedBoxToMatchInheritedValue();
   });
 }
