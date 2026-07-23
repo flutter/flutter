@@ -7,7 +7,6 @@
 #include <WinUser.h>
 #include <flutter/flutter_engine.h>
 #include <flutter/method_channel.h>
-#include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
 
 #include <cstdint>
@@ -18,11 +17,8 @@
 #include "flutter/generated_plugin_registrant.h"
 
 void RegisterMethodChannel(flutter::FlutterEngine* engine) {
-  FlutterDesktopPluginRegistrarRef plugin_registrar_ref =
-      engine->GetRegistrarForPlugin("platform_view");
   flutter::PluginRegistrarWindows* registrar =
-      flutter::PluginRegistrarManager::GetInstance()
-          ->GetRegistrar<flutter::PluginRegistrarWindows>(plugin_registrar_ref);
+      engine->GetPluginRegistrar("platform_view");
   auto channel =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           registrar->messenger(), "samples.flutter.io/platform_view",

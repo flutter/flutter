@@ -6,6 +6,7 @@
 #include <string>
 
 #include "flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h"
+#include "flutter/shell/platform/windows/client_wrapper/include/flutter/plugin_registrar_windows.h"
 #include "flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h"
 #include "gtest/gtest.h"
 
@@ -213,6 +214,20 @@ TEST(FlutterEngineTest, SetNextFrameCallback) {
   test_api->run_next_frame_callback();
 
   EXPECT_TRUE(success);
+}
+
+TEST(FlutterEngineTest, GetPluginRegistrar) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+  engine.Run();
+
+  PluginRegistrarWindows* registrar = engine.GetPluginRegistrar("some_plugin");
+  EXPECT_NE(registrar, nullptr);
+
+  // Calling again with the same name returns the same cached instance.
+  EXPECT_EQ(engine.GetPluginRegistrar("some_plugin"), registrar);
 }
 
 TEST(FlutterEngineTest, ProcessExternalWindowMessage) {

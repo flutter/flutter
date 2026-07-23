@@ -9,6 +9,7 @@
 
 #include "binary_messenger_impl.h"
 #include "flutter_windows.h"
+#include "include/flutter/plugin_registrar_windows.h"
 
 namespace flutter {
 
@@ -96,6 +97,20 @@ FlutterDesktopPluginRegistrarRef FlutterEngine::GetRegistrarForPlugin(
     return nullptr;
   }
   return FlutterDesktopEngineGetPluginRegistrar(engine_, plugin_name.c_str());
+}
+
+PluginRegistrarWindows* FlutterEngine::GetPluginRegistrar(
+    const std::string& plugin_name) {
+  if (!engine_) {
+    std::cerr << "Cannot get plugin registrar on an engine that isn't running; "
+                 "call Run first."
+              << std::endl;
+    return nullptr;
+  }
+
+  return PluginRegistrarManager::GetInstance()
+      ->GetRegistrar<PluginRegistrarWindows>(
+          GetRegistrarForPlugin(plugin_name));
 }
 
 void FlutterEngine::SetNextFrameCallback(std::function<void()> callback) {
