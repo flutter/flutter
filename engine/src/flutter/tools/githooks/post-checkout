@@ -3,12 +3,5 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
-DART="$REPO_ROOT/bin/cache/dart-sdk/bin/dart"
-if [ ! -f "$DART" ]; then
-  DART="$REPO_ROOT/engine/src/flutter/third_party/dart/tools/sdks/dart-sdk/bin/dart"
-fi
-
-cd "$REPO_ROOT/dev/tools/githooks"
-"$DART" pub get --offline 2>/dev/null || true
+echo "ERROR: Githooks have moved to dev/tools/githooks. Please run 'python3 dev/tools/githooks/setup.py' to update your git configuration." >&2
 exit 0
