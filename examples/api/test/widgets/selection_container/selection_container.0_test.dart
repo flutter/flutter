@@ -5,7 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/material/selection_container/selection_container.0.dart'
+import 'package:flutter_api_samples/widgets/selection_container/selection_container.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 

@@ -230,7 +230,7 @@ class ExpansibleController extends ChangeNotifier {
 /// This example demonstrates how to use the [Expansible] widget and how an
 /// [ExpansibleController] can be used to programmatically expand or collapse it.
 ///
-/// ** See code in examples/api/lib/material/expansible/expansible.0.dart **
+/// ** See code in examples/api/lib/widgets/expansible/expansible.0.dart **
 /// {@end-tool}
 ///
 /// See also:

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/platform_menu_bar/platform_menu_bar.0.dart'
+import 'package:flutter_api_samples/widgets/platform_menu_bar/platform_menu_bar.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
