@@ -5,6 +5,8 @@
 /// @docImport 'java.dart';
 library;
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -14,6 +16,10 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
+
+@visibleForTesting
+const String kSpotlightMdfindCommand =
+    'mdfind \'kMDItemCFBundleIdentifier="com.google.android.studio*"\' & pid=\$!; (sleep 3; kill -9 \$pid 2>/dev/null) & killer=\$!; wait \$pid 2>/dev/null; status=\$?; kill \$killer 2>/dev/null; exit \$status';
 
 const _androidStudioTitle = 'Android Studio';
 const _androidStudioId = 'AndroidStudio';
@@ -322,13 +328,22 @@ class AndroidStudio {
     }
 
     // Query Spotlight for unexpected installation locations.
+    // Spotlight (mds_stores/mdworker) can become unresponsive or hang during heavy indexing on macOS.
+    // Wrap mdfind in a shell execution with a 3-second timeout to prevent flutter doctor
+    // and flutter daemon from hanging indefinitely (https://github.com/flutter/flutter/issues/189177).
     var spotlightQueryResult = '';
     try {
       final ProcessResult spotlightResult = globals.processManager.runSync(<String>[
-        'mdfind',
+        'sh',
+        '-c',
         // com.google.android.studio, com.google.android.studio-EAP
-        'kMDItemCFBundleIdentifier="com.google.android.studio*"',
+        kSpotlightMdfindCommand,
       ]);
+      if (spotlightResult.exitCode != 0) {
+        globals.printTrace(
+          'Spotlight mdfind query failed or timed out with exit code ${spotlightResult.exitCode}',
+        );
+      }
       spotlightQueryResult = spotlightResult.stdout as String;
     } on ProcessException {
       // The Spotlight query is a nice-to-have, continue checking known installation locations.

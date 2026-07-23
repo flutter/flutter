@@ -171,6 +171,15 @@ bool CommandBufferMTL::OnSubmitCommands(bool block_on_schedule,
 #ifdef IMPELLER_DEBUG
   ContextMTL::Cast(*context).GetGPUTracer()->RecordCmdBuffer(buffer_);
 #endif  // IMPELLER_DEBUG
+
+  // Copied so the block keeps the tracker alive past context teardown.
+  std::shared_ptr<GpuSubmissionTracker> tracker =
+      ContextMTL::Cast(*context).GetMutableSubmissionTracker();
+  uint64_t submission_id = tracker->RecordSubmission();
+  [buffer_ addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+    tracker->RecordCompletion(submission_id);
+  }];
+
   if (callback) {
     [buffer_
         addCompletedHandler:^(id<MTLCommandBuffer> buffer) {

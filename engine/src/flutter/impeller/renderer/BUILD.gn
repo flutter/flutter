@@ -173,7 +173,7 @@ impeller_component("renderer_dart_unittests") {
     "//flutter/lib/gpu",
     "//flutter/lib/snapshot",
     "//flutter/runtime",
-    "//flutter/testing",
     "//flutter/testing:fixture_test",
+    "//flutter/testing:testing_lib",
   ]
 }
