@@ -63,14 +63,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   }();
 
   Directory? _xcodeDirectoryWithExtension(String extension) {
-    final List<FileSystemEntity> contents = hostAppRoot.listSync();
-    for (final entity in contents) {
-      if (globals.fs.path.extension(entity.path) == extension &&
-          !globals.fs.path.basename(entity.path).startsWith('.')) {
-        return hostAppRoot.childDirectory(entity.basename);
+    final path = hostAppRoot.fileSystem.path;
+    Directory? fallback;
+    for (final FileSystemEntity entity in hostAppRoot.listSync()) {
+      final String basename = entity.basename;
+      if (path.extension(entity.path) != extension || basename.startsWith('.')) {
+        continue;
       }
+      final Directory directory = hostAppRoot.childDirectory(basename);
+      if (basename == '$_defaultHostAppName$extension') {
+        return directory;
+      }
+      fallback ??= directory;
     }
-    return null;
+    return fallback;
   }
 
   /// The parent of this project.
@@ -410,12 +416,18 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return;
     }
 
+    if (_swiftPackageFetchProcess != null) {
+      return;
+    }
+
     Status? status;
     try {
-      final command = <String>[...xcodebuildProjectCommandArguments, '-resolvePackageDependencies'];
-      if (_swiftPackageFetchProcess != null) {
-        return;
-      }
+      final command = <String>[
+        ...xcodebuildProjectCommandArguments,
+        '-project',
+        xcodeProject.fileSystem.path.absolute(xcodeProject.path),
+        '-resolvePackageDependencies',
+      ];
       final Process process = await processUtils.start(command, workingDirectory: hostAppRoot.path);
       _swiftPackageFetchProcess = process;
       var printFetchWarnings = false;
