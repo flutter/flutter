@@ -546,13 +546,13 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
         child: AnimatedBuilder(
           animation: _stretchDragAnimation,
           builder: (BuildContext context, Widget? child) {
-            return Padding(
-              padding: EdgeInsets.only(
-                top: MediaQuery.heightOf(context) * _stretchDragAnimation.value,
-              ),
-              child: _coverSheetSecondaryTransition(
-                widget.secondaryRouteAnimation,
-                _coverSheetPrimaryTransition(
+            return _coverSheetSecondaryTransition(
+              widget.secondaryRouteAnimation,
+              Padding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.heightOf(context) * _stretchDragAnimation.value,
+                ),
+                child: _coverSheetPrimaryTransition(
                   context,
                   widget.primaryRouteAnimation,
                   widget.linearTransition,

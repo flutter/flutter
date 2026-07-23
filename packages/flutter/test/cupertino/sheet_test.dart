@@ -315,6 +315,79 @@ void main() {
     );
   });
 
+  testWidgets('covered sheet applies secondary transition outside top gap', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+    const pageTwoKey = ValueKey<String>('page-two');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: CupertinoButton(
+              onPressed: () {
+                Navigator.push<void>(
+                  scaffoldKey.currentContext!,
+                  CupertinoSheetRoute<void>(
+                    builder: (BuildContext context) {
+                      return CupertinoPageScaffold(
+                        key: pageTwoKey,
+                        child: Center(
+                          child: CupertinoButton(
+                            onPressed: () {
+                              Navigator.push<void>(
+                                context,
+                                CupertinoSheetRoute<void>(
+                                  builder: (BuildContext context) {
+                                    return const CupertinoPageScaffold(
+                                      child: Center(child: Text('Page 3')),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                            child: const Text('Push Page 3'),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Push Page 2'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Push Page 3'));
+    await tester.pumpAndSettle();
+
+    final pageTwoAncestors = <Widget>[];
+    tester.element(find.byKey(pageTwoKey)).visitAncestorElements((Element ancestor) {
+      pageTwoAncestors.add(ancestor.widget);
+      return true;
+    });
+
+    final int topGapPaddingIndex = pageTwoAncestors.indexWhere((Widget widget) {
+      return widget is Padding &&
+          widget.padding is EdgeInsets &&
+          (widget.padding as EdgeInsets).top > 0.0;
+    });
+    final int secondaryScaleTransitionIndex = pageTwoAncestors.indexWhere((Widget widget) {
+      return widget is ScaleTransition;
+    });
+
+    expect(topGapPaddingIndex, isNonNegative);
+    expect(secondaryScaleTransitionIndex, isNonNegative);
+    expect(topGapPaddingIndex, lessThan(secondaryScaleTransitionIndex));
+  });
+
   testWidgets('by default showCupertinoSheet does not enable nested navigation', (
     WidgetTester tester,
   ) async {
