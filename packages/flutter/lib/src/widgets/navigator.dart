@@ -4137,6 +4137,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _rawNextPagelessRestorationScopeId.dispose();
     _serializableHistory.dispose();
     userGestureInProgressNotifier.dispose();
+    userGestureSettlingNotifier.dispose();
     ServicesBinding.instance.accessibilityFocus.removeListener(_recordLastFocus);
     _history.removeListener(_handleHistoryChanged);
     _history.dispose();
@@ -5858,6 +5859,31 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Notifies its listeners if the value of [userGestureInProgress] changes.
   final ValueNotifier<bool> userGestureInProgressNotifier = ValueNotifier<bool>(false);
 
+  /// Whether a user-initiated route gesture has been released and the transition
+  /// is animating to its rest position.
+  ///
+  /// When true, active user touch input has ended, allowing underlying routes to
+  /// resume receiving pointer events immediately while the transition completes.
+  ///
+  /// Unlike [userGestureInProgress], which remains true throughout both the gesture
+  /// and settling animation to preserve transition curves, [userGestureSettling]
+  /// is true only during the post-release settling phase.
+  ///
+  /// This state is managed internally by back-gesture controllers and is not
+  /// intended for direct use by applications.
+  ///
+  /// See also:
+  ///
+  ///  * [userGestureSettlingNotifier], which notifies its listeners when
+  ///    [userGestureSettling] changes.
+  bool get userGestureSettling => userGestureSettlingNotifier.value;
+  set userGestureSettling(bool value) {
+    userGestureSettlingNotifier.value = value;
+  }
+
+  /// Notifies its listeners if the value of [userGestureSettling] changes.
+  final ValueNotifier<bool> userGestureSettlingNotifier = ValueNotifier<bool>(false);
+
   /// The navigator is being controlled by a user gesture.
   ///
   /// For example, called when the user beings an iOS back gesture.
@@ -5866,6 +5892,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void didStartUserGesture() {
     _userGesturesInProgress += 1;
     if (_userGesturesInProgress == 1) {
+      // A new gesture starts fresh; clear any settling state left by a previous
+      // gesture that was interrupted before it finished settling.
+      userGestureSettling = false;
       final int routeIndex = _getIndexBefore(
         _history.length - 1,
         _RouteEntry.willBePresentPredicate,
@@ -5889,6 +5918,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(_userGesturesInProgress > 0);
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
+      // The gesture is fully finished; it can no longer be settling.
+      userGestureSettling = false;
       for (final NavigatorObserver observer in _effectiveObservers) {
         observer.didStopUserGesture();
       }
