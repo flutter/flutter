@@ -891,6 +891,18 @@ public class FlutterView extends FrameLayout
 
   // -------- Start: Process UI I/O that Flutter cares about. -------
   /**
+   * Reports whether this view currently creates an input connection.
+   *
+   * <p>Android uses this result to decide whether a focused window still contains a text editor.
+   */
+  @Override
+  public boolean onCheckIsTextEditor() {
+    return isAttachedToFlutterEngine()
+        && textInputPlugin != null
+        && textInputPlugin.isInputConnectionTarget();
+  }
+
+  /**
    * Creates an {@link InputConnection} to work with a {@link
    * android.view.inputmethod.InputMethodManager}.
    *
