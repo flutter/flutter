@@ -130,9 +130,13 @@ bool BufferBindingsGLES::ReadUniformsBindingsV3(const ProcTableGLES& gl,
 
     GLuint block_index = gl.GetUniformBlockIndex(program, name.data());
     gl.UniformBlockBinding(program_handle_, block_index, i);
+    GLint block_data_size = 0;
+    gl.GetActiveUniformBlockiv(program, i, GL_UNIFORM_BLOCK_DATA_SIZE,
+                               &block_data_size);
 
     ubo_locations_[std::string{name.data(), static_cast<size_t>(length)}] =
-        std::make_pair(block_index, i);
+        UBOInfo{static_cast<GLint>(block_index), static_cast<GLuint>(i),
+                block_data_size};
   }
   use_ubo_ = true;
   return ReadUniformsBindingsV2(gl, program);
@@ -370,15 +374,14 @@ bool BufferBindingsGLES::BindUniformBufferV3(
     const BufferView& buffer,
     const ShaderMetadata* metadata,
     const DeviceBufferGLES& device_buffer_gles) {
-  absl::flat_hash_map<std::string, std::pair<GLint, GLuint>>::iterator it =
-      ubo_locations_.find(metadata->name);
+  auto it = ubo_locations_.find(metadata->name);
   if (it == ubo_locations_.end()) {
     // This should only happen if we have GLESv3 but are using v2 shaders,
     // as GLESv3 shaders compiled by impeller always have
     // **named** uniform buffer blocks
     return BindUniformBufferV2(gl, buffer, metadata, device_buffer_gles);
   }
-  const auto& [block_index, binding_point] = it->second;
+  const auto& ubo_info = it->second;
   if (!device_buffer_gles.BindAndUploadDataIfNecessary(
           DeviceBufferGLES::BindingType::kUniformBuffer)) {
     return false;
@@ -387,8 +390,10 @@ bool BufferBindingsGLES::BindUniformBufferV3(
   if (!handle.has_value()) {
     return false;
   }
-  gl.BindBufferRange(GL_UNIFORM_BUFFER, binding_point, handle.value(),
-                     buffer.GetRange().offset, buffer.GetRange().length);
+  size_t length = std::max<size_t>(buffer.GetRange().length,
+                                   static_cast<size_t>(ubo_info.data_size));
+  gl.BindBufferRange(GL_UNIFORM_BUFFER, ubo_info.binding_point, handle.value(),
+                     buffer.GetRange().offset, length);
   return true;
 }
 
