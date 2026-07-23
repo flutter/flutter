@@ -458,11 +458,31 @@ class ManifestAssetBundle implements AssetBundle {
           continue;
         }
         // Collect any additional licenses from each package.
+        final bool isAppItself = packageFlutterManifest.appName == flutterManifest.appName;
         final licenseFiles = <File>[];
         for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
           final String absoluteLicensePath = _fileSystem.path.fromUri(
             package.root.resolve(relativeLicensePath),
           );
+          // A dependency must not declare a license path that escapes its own
+          // package directory (e.g. '../secret'). Otherwise the build would read
+          // an arbitrary file outside the package and bundle its contents into
+          // the app's NOTICES. This mirrors the containment check applied to
+          // dependency-declared asset paths in `_ensureAssetPathIsValid`.
+          if (!isAppItself) {
+            final String packageRoot = _fileSystem.path.canonicalize(
+              _fileSystem.path.fromUri(package.root),
+            );
+            final String resolvedLicense = _fileSystem.path.canonicalize(absoluteLicensePath);
+            if (packageRoot != resolvedLicense &&
+                !_fileSystem.path.isWithin(packageRoot, resolvedLicense)) {
+              throwToolExit(
+                'Package "${packageFlutterManifest.appName}" specified a license path '
+                '"$relativeLicensePath" that escapes its package directory. License paths '
+                'declared by a package must stay within that package.',
+              );
+            }
+          }
           licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
         }
         additionalLicenseFiles[packageFlutterManifest.appName] = licenseFiles;
