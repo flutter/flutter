@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import '../base/file_system.dart';
+import '../base/version.dart';
 
 @immutable
 class VersionThresholds {
@@ -459,7 +460,6 @@ class AndroidSupportVersions {
     required this.minSdkVersion,
     required this.maxKnownVersions,
     required this.oldestConsideredVersions,
-    required this.oneMajorVersionHigherJavaVersion,
     required this.gradleAgpCompat,
     required this.javaGradleCompat,
     required this.javaAgpCompat,
@@ -477,7 +477,6 @@ class AndroidSupportVersions {
       'minSdkVersion': final Map<String, dynamic> minSdkVersion,
       'maxKnownVersions': final Map<String, dynamic> maxKnownVersions,
       'oldestConsideredVersions': final Map<String, dynamic> oldestConsideredVersions,
-      'oneMajorVersionHigherJavaVersion': final String oneMajorVersionHigherJavaVersion,
       'gradleAgpCompat': final Map<String, dynamic> gradleAgpCompat,
       'javaGradleCompat': final Map<String, dynamic> javaGradleCompat,
       'javaAgpCompat': final Map<String, dynamic> javaAgpCompat,
@@ -493,7 +492,6 @@ class AndroidSupportVersions {
         minSdkVersion: MinSdkThresholds.fromJson(minSdkVersion),
         maxKnownVersions: MaxKnownVersions.fromJson(maxKnownVersions),
         oldestConsideredVersions: OldestConsideredVersions.fromJson(oldestConsideredVersions),
-        oneMajorVersionHigherJavaVersion: oneMajorVersionHigherJavaVersion,
         gradleAgpCompat: CompatMatrix.fromJson(gradleAgpCompat, GradleAgpCompat.fromJson),
         javaGradleCompat: CompatMatrix.fromJson(javaGradleCompat, JavaGradleCompat.fromJson),
         javaAgpCompat: CompatMatrix.fromJson(javaAgpCompat, JavaAgpCompat.fromJson),
@@ -520,18 +518,31 @@ class AndroidSupportVersions {
   final MinSdkThresholds minSdkVersion;
   final MaxKnownVersions maxKnownVersions;
   final OldestConsideredVersions oldestConsideredVersions;
-  final String oneMajorVersionHigherJavaVersion;
   final CompatMatrix<GradleAgpCompat> gradleAgpCompat;
   final CompatMatrix<JavaGradleCompat> javaGradleCompat;
   final CompatMatrix<JavaAgpCompat> javaAgpCompat;
   final CompatMatrix<KgpGradleCompat> kgpGradleCompat;
   final CompatMatrix<AgpKgpCompat> agpKgpCompat;
   final CompatMatrix<GradleVersionForAgp> gradleVersionForAgp;
+
+  String get oneMajorVersionHigherJavaVersion {
+    Version? maxJava;
+    for (final JavaGradleCompat rule in javaGradleCompat.rules) {
+      final Version? ruleJavaMax = Version.parse(rule.javaMax);
+      if (ruleJavaMax == null) {
+        continue;
+      }
+      if (maxJava == null || ruleJavaMax > maxJava) {
+        maxJava = ruleJavaMax;
+      }
+    }
+    return maxJava?.toString() ?? '26';
+  }
 }
 
 @immutable
 class CompatMatrix<T> {
-  const CompatMatrix({required this.comment, required this.sourceUrls, required this.rules});
+  const CompatMatrix({required this.comment, required this.sourceUrl, required this.rules});
 
   factory CompatMatrix.fromJson(
     Map<String, dynamic> json,
@@ -539,12 +550,12 @@ class CompatMatrix<T> {
   ) {
     if (json case {
       'comment': final String comment,
-      'sourceUrls': final List<dynamic> sourceUrls,
+      'sourceUrl': final String sourceUrl,
       'rules': final List<dynamic> rules,
     }) {
       return CompatMatrix<T>(
         comment: comment,
-        sourceUrls: sourceUrls.cast<String>(),
+        sourceUrl: sourceUrl,
         rules: rules.map((e) => ruleFromJson(e as Map<String, dynamic>)).toList(),
       );
     }
@@ -552,19 +563,19 @@ class CompatMatrix<T> {
   }
 
   final String comment;
-  final List<String> sourceUrls;
+  final String sourceUrl;
   final List<T> rules;
 
   @override
   bool operator ==(Object other) =>
       other is CompatMatrix<T> &&
       other.comment == comment &&
-      const ListEquality<String>().equals(other.sourceUrls, sourceUrls) &&
+      other.sourceUrl == sourceUrl &&
       const ListEquality<dynamic>().equals(other.rules, rules);
 
   @override
-  int get hashCode => Object.hash(comment, Object.hashAll(sourceUrls), Object.hashAll(rules));
+  int get hashCode => Object.hash(comment, sourceUrl, Object.hashAll(rules));
 
   @override
-  String toString() => 'CompatMatrix(comment: $comment, sourceUrls: $sourceUrls, rules: $rules)';
+  String toString() => 'CompatMatrix(comment: $comment, sourceUrl: $sourceUrl, rules: $rules)';
 }

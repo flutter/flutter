@@ -1,5 +1,5 @@
 {
-  "_comment": "Before updating any 'error' version, ensure you updated 'warn' version first. See go/android-dependency-versions",
+  "_comment": "Before updating any 'error' version, ensure you updated 'warn' version first. See flutter.dev/go/android-dependency-versions",
   "gradle": {
     "warn": "9.1.0",
     "error": "8.14.0"
@@ -34,12 +34,9 @@
     "java": "1.8",
     "javaGradle": "2.0"
   },
-  "oneMajorVersionHigherJavaVersion": "26",
   "gradleAgpCompat": {
     "comment": "Gradle-AGP compatibility matrix",
-    "sourceUrls": [
-      "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
-    ],
+    "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
     "rules": [
       { "agpMin": "9.1.0", "agpMax": "9.1.99", "gradleMin": "9.3.1" },
       { "agpMin": "9.0.0", "agpMax": "9.0.99", "gradleMin": "9.0" },
@@ -72,16 +69,14 @@
   },
   "javaGradleCompat": {
     "comment": "Java-Gradle compatibility matrix",
-    "sourceUrls": [
-      "https://docs.gradle.org/current/userguide/compatibility.html#java"
-    ],
+    "sourceUrl": "https://docs.gradle.org/current/userguide/compatibility.html#java",
     "rules": [
       { "javaMin": "25", "javaMax": "26", "gradleMin": "9.1.0" },
       { "javaMin": "24", "javaMax": "25", "gradleMin": "8.14" },
       { "javaMin": "23", "javaMax": "24", "gradleMin": "8.10" },
-      { "javaMin": "22", "javaMax": "23", "gradleMin": "8.7" },
-      { "javaMin": "21", "javaMax": "22", "gradleMin": "8.4" },
-      { "javaMin": "20", "javaMax": "21", "gradleMin": "8.1" },
+      { "javaMin": "22", "javaMax": "23", "gradleMin": "8.8" },
+      { "javaMin": "21", "javaMax": "22", "gradleMin": "8.5" },
+      { "javaMin": "20", "javaMax": "21", "gradleMin": "8.3" },
       { "javaMin": "19", "javaMax": "20", "gradleMin": "7.6" },
       { "javaMin": "18", "javaMax": "19", "gradleMin": "7.5" },
       { "javaMin": "17", "javaMax": "18", "gradleMin": "7.3" },
@@ -98,9 +93,7 @@
   },
   "javaAgpCompat": {
     "comment": "Java-AGP compatibility matrix",
-    "sourceUrls": [
-      "https://developer.android.com/studio/releases/gradle-plugin#compatibility"
-    ],
+    "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#compatibility",
     "rules": [
       { "javaMin": "17", "javaDefault": "17", "agpMin": "8.0", "agpMax": "9.2" },
       { "javaMin": "11", "javaDefault": "11", "agpMin": "7.0", "agpMax": "7.4" },
@@ -109,31 +102,28 @@
   },
   "kgpGradleCompat": {
     "comment": "Kotlin-Gradle compatibility matrix",
-    "sourceUrls": [
-      "https://kotlinlang.org/docs/gradle.html#compatibility"
-    ],
+    "sourceUrl": "https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin",
     "rules": [
-      { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "8.5", "gradleMax": "9.5.99", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.4.0, using 2.4.29 covers patch versions." },
-      { "kgpMin": "2.3.0", "kgpMax": "2.3.29", "gradleMin": "7.6.3", "gradleMax": "9.5.99", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.3.10, using 2.3.29 covers patch versions. Documented max Gradle is 9.5.0, using 9.5.99 non inclusive covers patch versions." },
-      { "kgpMin": "2.2.20", "kgpMax": "2.3.0", "gradleMin": "7.6.3", "gradleMax": "8.14.99", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.2.21, using 2.3.0 covers patch versions. Documented max Gradle is 8.14, using 8.14.99 non inclusive covers patch versions." },
-      { "kgpMin": "2.2.0", "kgpMax": "2.2.10", "gradleMin": "7.6.3", "gradleMax": "8.14.99", "inclusiveMaxGradle": false, "comment": "Documented max Gradle is 8.14, using 8.14.99 non inclusive covers patch versions." },
-      { "kgpMin": "2.1.20", "kgpMax": "2.1.21", "gradleMin": "7.6.3", "gradleMax": "8.12.99", "inclusiveMaxGradle": false, "comment": "Documented max Gradle is 8.12.1, using 8.12.99 non inclusive covers patch versions." },
+      { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "7.6.3", "gradleMax": "9.6", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.4.0, using 2.4.29 covers patch versions. Documented max Gradle is 9.5.0, using 9.6 non inclusive covers patch versions." },
+      { "kgpMin": "2.3.20", "kgpMax": "2.3.29", "gradleMin": "7.6.3", "gradleMax": "9.4", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.3.21, using 2.3.29 covers patch versions. Documented max Gradle is 9.3.0, using 9.4 non inclusive covers patch versions." },
+      { "kgpMin": "2.3.0", "kgpMax": "2.3.19", "gradleMin": "7.6.3", "gradleMax": "9.1", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.3.10, using 2.3.19 covers patch versions. Documented max Gradle is 9.0.0, using 9.1 non inclusive covers patch versions." },
+      { "kgpMin": "2.2.20", "kgpMax": "2.3.0", "inclusiveMaxKgp": false, "gradleMin": "7.6.3", "gradleMax": "8.15", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.2.21. Documented max Gradle is 8.14, using 8.15 non inclusive covers patch versions." },
+      { "kgpMin": "2.2.0", "kgpMax": "2.2.10", "gradleMin": "7.6.3", "gradleMax": "8.15", "inclusiveMaxGradle": false, "comment": "Documented max Gradle is 8.14, using 8.15 non inclusive covers patch versions." },
+      { "kgpMin": "2.1.20", "kgpMax": "2.1.21", "gradleMin": "7.6.3", "gradleMax": "8.13", "inclusiveMaxGradle": false, "comment": "Documented max Gradle is 8.12.1, using 8.13 non inclusive covers patch versions." },
       { "kgpMin": "2.1.0", "kgpMax": "2.1.10", "gradleMin": "7.6.3", "gradleMax": "8.11", "inclusiveMaxGradle": false, "comment": "Documented max Gradle is 8.10, using 8.11 non inclusive covers patch versions." },
-      { "kgpMin": "2.0.20", "kgpMax": "2.1", "gradleMin": "6.8.3", "gradleMax": "8.9", "inclusiveMaxKgp": false, "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.0.21. Documented max Gradle is 8.5, using 8.9 non inclusive covers patch versions. Kotlin Multiplatform can throw warnings on 8.8." },
-      { "kgpMin": "2.0", "kgpMax": "2.0.20", "gradleMin": "6.8.3", "gradleMax": "8.6", "inclusiveMaxKgp": false, "inclusiveMaxGradle": false, "comment": "Documented max Gradle is 8.5, using 8.6 non inclusive covers patch versions." },
-      { "kgpMin": "1.9.20", "kgpMax": "2.0", "gradleMin": "6.8.3", "gradleMax": "8.1.1", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.9.25." },
-      { "kgpMin": "1.8.20", "kgpMax": "1.9.20", "gradleMin": "6.8.3", "gradleMax": "7.6.0", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.9.10." },
-      { "kgpMin": "1.8.0", "kgpMax": "1.8.20", "gradleMin": "6.8.3", "gradleMax": "7.3.3", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.8.11." },
-      { "kgpMin": "1.7.20", "kgpMax": "1.8.0", "gradleMin": "6.7.1", "gradleMax": "7.1.1", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.7.22." },
-      { "kgpMin": "1.7.0", "kgpMax": "1.7.20", "gradleMin": "6.7.1", "gradleMax": "7.0.2", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.7.10." },
-      { "kgpMin": "1.6.20", "kgpMax": "1.7.0", "gradleMin": "6.1.1", "gradleMax": "7.0.2", "inclusiveMaxKgp": false, "comment": "Documented max KGP is 1.6.21." }
+      { "kgpMin": "2.0.20", "kgpMax": "2.1.0", "inclusiveMaxKgp": false, "gradleMin": "6.8.3", "gradleMax": "8.9", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 2.0.21. Documented max Gradle is 8.8, using 8.9 non inclusive covers patch versions." },
+      { "kgpMin": "2.0.0", "kgpMax": "2.0.20", "inclusiveMaxKgp": false, "gradleMin": "6.8.3", "gradleMax": "8.6", "inclusiveMaxGradle": false, "comment": "Documented max Gradle is 8.5, using 8.6 non inclusive covers patch versions." },
+      { "kgpMin": "1.9.20", "kgpMax": "2.0.0", "inclusiveMaxKgp": false, "gradleMin": "6.8.3", "gradleMax": "8.2", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 1.9.25. Documented max Gradle is 8.1.1, using 8.2 non inclusive." },
+      { "kgpMin": "1.8.20", "kgpMax": "1.9.20", "inclusiveMaxKgp": false, "gradleMin": "6.8.3", "gradleMax": "7.7", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 1.9.10. Documented max Gradle is 7.6.0, using 7.7 non inclusive." },
+      { "kgpMin": "1.8.0", "kgpMax": "1.8.20", "inclusiveMaxKgp": false, "gradleMin": "6.8.3", "gradleMax": "7.4", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 1.8.11. Documented max Gradle is 7.3.3, using 7.4 non inclusive." },
+      { "kgpMin": "1.7.20", "kgpMax": "1.8.0", "inclusiveMaxKgp": false, "gradleMin": "6.7.1", "gradleMax": "7.2", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 1.7.22. Documented max Gradle is 7.1.1, using 7.2 non inclusive." },
+      { "kgpMin": "1.7.0", "kgpMax": "1.7.20", "inclusiveMaxKgp": false, "gradleMin": "6.7.1", "gradleMax": "7.1", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 1.7.10. Documented max Gradle is 7.0.2, using 7.1 non inclusive." },
+      { "kgpMin": "1.6.20", "kgpMax": "1.7.0", "inclusiveMaxKgp": false, "gradleMin": "6.1.1", "gradleMax": "7.1", "inclusiveMaxGradle": false, "comment": "Documented max KGP is 1.6.21. Documented max Gradle is 7.0.2, using 7.1 non inclusive." }
     ]
   },
   "agpKgpCompat": {
     "comment": "AGP-Kotlin compatibility matrix",
-    "sourceUrls": [
-      "https://kotlinlang.org/docs/kmp-compatibility-guide.html"
-    ],
+    "sourceUrl": "https://kotlinlang.org/docs/multiplatform-compatibility-guide.html",
     "rules": [
       { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxAgp": false, "comment": "Documented max KGP is 2.4.0, using 2.4.29 covers patch versions." },
       { "kgpMin": "2.3.10", "kgpMax": "2.3.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxAgp": false, "comment": "Documented max KGP is 2.3.10, using 2.3.29 covers patch versions. Documented max AGP is 9.2.0." },
@@ -153,9 +143,7 @@
   },
   "gradleVersionForAgp": {
     "comment": "Gradle version requirement for AGP",
-    "sourceUrls": [
-      "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
-    ],
+    "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
     "rules": [
       { "agpMin": "1.0.0", "agpMax": "1.1.3", "minRequiredGradle": "2.3" },
       { "agpMin": "1.2.0", "agpMax": "1.3.1", "minRequiredGradle": "2.9" },

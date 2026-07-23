@@ -52,57 +52,44 @@ void main() {
     "java": "1.8",
     "javaGradle": "2.0"
   },
-  "oneMajorVersionHigherJavaVersion": "26",
   "gradleAgpCompat": {
     "comment": "Gradle-AGP compatibility matrix",
-    "sourceUrls": [
-      "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
-    ],
+    "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
     "rules": [
       { "agpMin": "9.1.0", "agpMax": "9.1.99", "gradleMin": "9.3.1", "inclusiveMaxAgp": true }
     ]
   },
   "javaGradleCompat": {
     "comment": "Java-Gradle compatibility matrix",
-    "sourceUrls": [
-      "https://docs.gradle.org/current/userguide/compatibility.html#java"
-    ],
+    "sourceUrl": "https://docs.gradle.org/current/userguide/compatibility.html#java",
     "rules": [
       { "javaMin": "25", "javaMax": "26", "gradleMin": "9.1.0", "gradleMax": "9.2.0" }
     ]
   },
   "javaAgpCompat": {
     "comment": "Java-AGP compatibility matrix",
-    "sourceUrls": [
-      "https://developer.android.com/studio/releases/gradle-plugin#compatibility"
-    ],
+    "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#compatibility",
     "rules": [
       { "javaMin": "17", "javaDefault": "17", "agpMin": "8.0", "agpMax": "9.2" }
     ]
   },
   "kgpGradleCompat": {
     "comment": "Kotlin-Gradle compatibility matrix",
-    "sourceUrls": [
-      "https://kotlinlang.org/docs/gradle.html#compatibility"
-    ],
+    "sourceUrl": "https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin",
     "rules": [
       { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "8.5", "gradleMax": "9.5.99", "inclusiveMaxKgp": false, "inclusiveMaxGradle": false }
     ]
   },
   "agpKgpCompat": {
     "comment": "AGP-Kotlin compatibility matrix",
-    "sourceUrls": [
-      "https://kotlinlang.org/docs/kmp-compatibility-guide.html"
-    ],
+    "sourceUrl": "https://kotlinlang.org/docs/multiplatform-compatibility-guide.html",
     "rules": [
       { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxKgp": false, "inclusiveMaxAgp": false }
     ]
   },
   "gradleVersionForAgp": {
     "comment": "Gradle version requirement for AGP",
-    "sourceUrls": [
-      "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
-    ],
+    "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
     "rules": [
       { "agpMin": "1.0.0", "agpMax": "1.1.3", "minRequiredGradle": "2.3" }
     ]
@@ -139,7 +126,7 @@ void main() {
 
     expect(versions.gradleAgpCompat.comment, 'Gradle-AGP compatibility matrix');
     expect(
-      versions.gradleAgpCompat.sourceUrls.first,
+      versions.gradleAgpCompat.sourceUrl,
       'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle',
     );
     expect(versions.gradleAgpCompat.rules.length, 1);
@@ -150,7 +137,7 @@ void main() {
 
     expect(versions.javaGradleCompat.comment, 'Java-Gradle compatibility matrix');
     expect(
-      versions.javaGradleCompat.sourceUrls.first,
+      versions.javaGradleCompat.sourceUrl,
       'https://docs.gradle.org/current/userguide/compatibility.html#java',
     );
     expect(versions.javaGradleCompat.rules.length, 1);
@@ -161,7 +148,7 @@ void main() {
 
     expect(versions.javaAgpCompat.comment, 'Java-AGP compatibility matrix');
     expect(
-      versions.javaAgpCompat.sourceUrls.first,
+      versions.javaAgpCompat.sourceUrl,
       'https://developer.android.com/studio/releases/gradle-plugin#compatibility',
     );
     expect(versions.javaAgpCompat.rules.length, 1);
@@ -172,8 +159,8 @@ void main() {
 
     expect(versions.kgpGradleCompat.comment, 'Kotlin-Gradle compatibility matrix');
     expect(
-      versions.kgpGradleCompat.sourceUrls.first,
-      'https://kotlinlang.org/docs/gradle.html#compatibility',
+      versions.kgpGradleCompat.sourceUrl,
+      'https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin',
     );
     expect(versions.kgpGradleCompat.rules.length, 1);
     expect(versions.kgpGradleCompat.rules.first.kgpMin, '2.4.0');
@@ -185,8 +172,8 @@ void main() {
 
     expect(versions.agpKgpCompat.comment, 'AGP-Kotlin compatibility matrix');
     expect(
-      versions.agpKgpCompat.sourceUrls.first,
-      'https://kotlinlang.org/docs/kmp-compatibility-guide.html',
+      versions.agpKgpCompat.sourceUrl,
+      'https://kotlinlang.org/docs/multiplatform-compatibility-guide.html',
     );
     expect(versions.agpKgpCompat.rules.length, 1);
     expect(versions.agpKgpCompat.rules.first.kgpMin, '2.4.0');
@@ -198,7 +185,7 @@ void main() {
 
     expect(versions.gradleVersionForAgp.comment, 'Gradle version requirement for AGP');
     expect(
-      versions.gradleVersionForAgp.sourceUrls.first,
+      versions.gradleVersionForAgp.sourceUrl,
       'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle',
     );
     expect(versions.gradleVersionForAgp.rules.length, 1);

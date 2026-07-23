@@ -450,57 +450,44 @@ class DependencyVersionCheckerTest {
                 "java": "1.8",
                 "javaGradle": "2.0"
               },
-              "oneMajorVersionHigherJavaVersion": "26",
               "gradleAgpCompat": {
                 "comment": "Gradle-AGP compatibility matrix",
-                "sourceUrls": [
-                  "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
-                ],
+                "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
                 "rules": [
                   { "agpMin": "9.1.0", "agpMax": "9.1.99", "gradleMin": "9.3.1", "inclusiveMaxAgp": true }
                 ]
               },
               "javaGradleCompat": {
                 "comment": "Java-Gradle compatibility matrix",
-                "sourceUrls": [
-                  "https://docs.gradle.org/current/userguide/compatibility.html#java"
-                ],
+                "sourceUrl": "https://docs.gradle.org/current/userguide/compatibility.html#java",
                 "rules": [
                   { "javaMin": "25", "javaMax": "26", "gradleMin": "9.1.0", "gradleMax": "9.2.0" }
                 ]
               },
               "javaAgpCompat": {
                 "comment": "Java-AGP compatibility matrix",
-                "sourceUrls": [
-                  "https://developer.android.com/studio/releases/gradle-plugin#compatibility"
-                ],
+                "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#compatibility",
                 "rules": [
                   { "javaMin": "17", "javaDefault": "17", "agpMin": "8.0", "agpMax": "9.2" }
                 ]
               },
               "kgpGradleCompat": {
                 "comment": "Kotlin-Gradle compatibility matrix",
-                "sourceUrls": [
-                  "https://kotlinlang.org/docs/gradle.html#compatibility"
-                ],
+                "sourceUrl": "https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin",
                 "rules": [
                   { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "8.5", "gradleMax": "9.5.99", "inclusiveMaxKgp": false, "inclusiveMaxGradle": false }
                 ]
               },
               "agpKgpCompat": {
                 "comment": "AGP-Kotlin compatibility matrix",
-                "sourceUrls": [
-                  "https://kotlinlang.org/docs/kmp-compatibility-guide.html"
-                ],
+                "sourceUrl": "https://kotlinlang.org/docs/multiplatform-compatibility-guide.html",
                 "rules": [
                   { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxKgp": false, "inclusiveMaxAgp": false }
                 ]
               },
               "gradleVersionForAgp": {
                 "comment": "Gradle version requirement for AGP",
-                "sourceUrls": [
-                  "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
-                ],
+                "sourceUrl": "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
                 "rules": [
                   { "agpMin": "1.0.0", "agpMax": "1.1.3", "minRequiredGradle": "2.3" }
                 ]
@@ -535,7 +522,7 @@ class DependencyVersionCheckerTest {
         assertEquals("26", versions.oneMajorVersionHigherJavaVersion)
 
         assertEquals("Gradle-AGP compatibility matrix", versions.gradleAgpCompat.comment)
-        assertEquals("https://developer.android.com/studio/releases/gradle-plugin#updating-gradle", versions.gradleAgpCompat.sourceUrls[0])
+        assertEquals("https://developer.android.com/studio/releases/gradle-plugin#updating-gradle", versions.gradleAgpCompat.sourceUrl)
         assertEquals(1, versions.gradleAgpCompat.rules.size)
         assertEquals("9.1.0", versions.gradleAgpCompat.rules[0].agpMin)
         assertEquals("9.1.99", versions.gradleAgpCompat.rules[0].agpMax)
@@ -543,7 +530,7 @@ class DependencyVersionCheckerTest {
         assertEquals(true, versions.gradleAgpCompat.rules[0].inclusiveMaxAgp)
 
         assertEquals("Java-Gradle compatibility matrix", versions.javaGradleCompat.comment)
-        assertEquals("https://docs.gradle.org/current/userguide/compatibility.html#java", versions.javaGradleCompat.sourceUrls[0])
+        assertEquals("https://docs.gradle.org/current/userguide/compatibility.html#java", versions.javaGradleCompat.sourceUrl)
         assertEquals(1, versions.javaGradleCompat.rules.size)
         assertEquals("25", versions.javaGradleCompat.rules[0].javaMin)
         assertEquals("26", versions.javaGradleCompat.rules[0].javaMax)
@@ -551,7 +538,7 @@ class DependencyVersionCheckerTest {
         assertEquals("9.2.0", versions.javaGradleCompat.rules[0].gradleMax)
 
         assertEquals("Java-AGP compatibility matrix", versions.javaAgpCompat.comment)
-        assertEquals("https://developer.android.com/studio/releases/gradle-plugin#compatibility", versions.javaAgpCompat.sourceUrls[0])
+        assertEquals("https://developer.android.com/studio/releases/gradle-plugin#compatibility", versions.javaAgpCompat.sourceUrl)
         assertEquals(1, versions.javaAgpCompat.rules.size)
         assertEquals("17", versions.javaAgpCompat.rules[0].javaMin)
         assertEquals("17", versions.javaAgpCompat.rules[0].javaDefault)
@@ -559,7 +546,7 @@ class DependencyVersionCheckerTest {
         assertEquals("9.2", versions.javaAgpCompat.rules[0].agpMax)
 
         assertEquals("Kotlin-Gradle compatibility matrix", versions.kgpGradleCompat.comment)
-        assertEquals("https://kotlinlang.org/docs/gradle.html#compatibility", versions.kgpGradleCompat.sourceUrls[0])
+        assertEquals("https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin", versions.kgpGradleCompat.sourceUrl)
         assertEquals(1, versions.kgpGradleCompat.rules.size)
         assertEquals("2.4.0", versions.kgpGradleCompat.rules[0].kgpMin)
         assertEquals("2.4.29", versions.kgpGradleCompat.rules[0].kgpMax)
@@ -569,7 +556,7 @@ class DependencyVersionCheckerTest {
         assertEquals(false, versions.kgpGradleCompat.rules[0].inclusiveMaxGradle)
 
         assertEquals("AGP-Kotlin compatibility matrix", versions.agpKgpCompat.comment)
-        assertEquals("https://kotlinlang.org/docs/kmp-compatibility-guide.html", versions.agpKgpCompat.sourceUrls[0])
+        assertEquals("https://kotlinlang.org/docs/multiplatform-compatibility-guide.html", versions.agpKgpCompat.sourceUrl)
         assertEquals(1, versions.agpKgpCompat.rules.size)
         assertEquals("2.4.0", versions.agpKgpCompat.rules[0].kgpMin)
         assertEquals("2.4.29", versions.agpKgpCompat.rules[0].kgpMax)
@@ -579,10 +566,7 @@ class DependencyVersionCheckerTest {
         assertEquals(false, versions.agpKgpCompat.rules[0].inclusiveMaxAgp)
 
         assertEquals("Gradle version requirement for AGP", versions.gradleVersionForAgp.comment)
-        assertEquals(
-            "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
-            versions.gradleVersionForAgp.sourceUrls[0]
-        )
+        assertEquals("https://developer.android.com/studio/releases/gradle-plugin#updating-gradle", versions.gradleVersionForAgp.sourceUrl)
         assertEquals(1, versions.gradleVersionForAgp.rules.size)
         assertEquals("1.0.0", versions.gradleVersionForAgp.rules[0].agpMin)
         assertEquals("1.1.3", versions.gradleVersionForAgp.rules[0].agpMax)
