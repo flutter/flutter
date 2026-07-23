@@ -510,13 +510,15 @@ void main() {
     }, skip: isExamplesRoot(libraryName)); // [intended]: The root directory should not have examples
   }
 
-  for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
-      in crossImportsExamplesApiTestCases) {
+  for (final String libraryName in crossImportsExamplesApiTestCases) {
     // This flag is defined here, instead of near the `skip:` below,
     // due to a formatter bug with comments and named arguments,
     // which causes `dev/bots/analyze.dart` to fail, since the skip test comment gets put on the next line.
     // TODO(navaronbracke): Remove this when https://github.com/dart-lang/dart_style/pull/1848 rolls into Flutter
-    final bool noCrossImports = hasNoKnownCrossImports(libraryName, knownCrossImports);
+    final bool noCrossImports = hasNoKnownCrossImports(
+      libraryName,
+      ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
+    );
 
     test('non-Dart files are ignored in $libraryName', () async {
       buildKnownCrossImportExamplesFiles();
@@ -569,7 +571,10 @@ void main() {
     test(
       'when not all $libraryName knowns have cross imports',
       () async {
-        final String excludedSample = getFirstCrossImportForLibrary(libraryName, knownCrossImports);
+        final String excludedSample = getFirstCrossImportForLibrary(
+          libraryName,
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
+        );
 
         buildKnownCrossImportExamplesFiles(excludes: <String>{excludedSample});
 
@@ -582,7 +587,7 @@ void main() {
           '║ Huzzah! The following files in $libraryName no longer contain cross imports!',
           '║   $excludedSample',
           '║ However, they now need to be removed from the',
-          '║ $knownCrossImportsListName list in the script /dev/bots/check_examples_cross_imports.dart.',
+          '║ knownExamplesSlashApiCrossImports list in the script /dev/bots/check_examples_cross_imports.dart.',
           '╚═══════════════════════════════════════════════════════════════════════════════',
         ].join('\n');
         expect(result, equals('$lines\n'));
@@ -1006,23 +1011,23 @@ class _CrossImportsExamplesDirectories {
 
     for (final directory in <Directory>[libDirectory, testDirectory]) {
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('animation')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('foundation')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('gestures')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('painting')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('rendering')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('sample_templates')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiSampleTemplatesCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('services')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('ui')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('widgets')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports;
+          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
     }
 
     return <Directory, Set<String>>{
@@ -1099,7 +1104,7 @@ class _CrossImportsExamplesDirectories {
 // dart format off
 final crossImportsGenericExamplesTestCases = <(String, String, Set<String>)>[
   ('examples', 'knownExamplesCrossImports', ExamplesCrossImportChecker.knownExamplesCrossImports),
-  ('examples/api', 'knownExamplesSlashApiCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports),
+  ('examples/api', 'knownExamplesSlashApiRootCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRootCrossImports),
   ('examples/flutter_view', 'knownExamplesFlutterViewCrossImports', ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports),
   ('examples/hello_world', 'knownExamplesHelloWorldCrossImports', ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports),
   ('examples/image_list', 'knownExamplesImageListCrossImports', ExamplesCrossImportChecker.knownExamplesImageListCrossImports),
@@ -1115,24 +1120,21 @@ final crossImportsGenericExamplesTestCases = <(String, String, Set<String>)>[
 
 // A mapping of `examples/api/lib/**` and `examples/api/test/**` test cases for the cross imports checker,
 // excluding `examples/api/lib/sample_templates` and `examples/api/test/sample_templates`.
-final crossImportsExamplesApiTestCases = <(String, String, Set<String>)>[
-  // dart format off
-  ('examples/api/lib/animation', 'knownExamplesSlashApiAnimationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports),
-  ('examples/api/lib/foundation', 'knownExamplesSlashApiFoundationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports),
-  ('examples/api/lib/gestures', 'knownExamplesSlashApiGesturesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports),
-  ('examples/api/lib/painting', 'knownExamplesSlashApiPaintingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports),
-  ('examples/api/lib/rendering', 'knownExamplesSlashApiRenderingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports),
-  ('examples/api/lib/services', 'knownExamplesSlashApiServicesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports),
-  ('examples/api/lib/ui', 'knownExamplesSlashApiUICrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports),
-  ('examples/api/lib/widgets', 'knownExamplesSlashApiWidgetsCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports),
-
-  ('examples/api/test/animation', 'knownExamplesSlashApiAnimationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports),
-  ('examples/api/test/foundation', 'knownExamplesSlashApiFoundationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports),
-  ('examples/api/test/gestures', 'knownExamplesSlashApiGesturesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports),
-  ('examples/api/test/painting', 'knownExamplesSlashApiPaintingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports),
-  ('examples/api/test/rendering', 'knownExamplesSlashApiRenderingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports),
-  ('examples/api/test/services', 'knownExamplesSlashApiServicesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports),
-  ('examples/api/test/ui', 'knownExamplesSlashApiUICrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports),
-  ('examples/api/test/widgets', 'knownExamplesSlashApiWidgetsCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports),
-  // dart format on
+const crossImportsExamplesApiTestCases = <String>[
+  'examples/api/lib/animation',
+  'examples/api/lib/foundation',
+  'examples/api/lib/gestures',
+  'examples/api/lib/painting',
+  'examples/api/lib/rendering',
+  'examples/api/lib/services',
+  'examples/api/lib/ui',
+  'examples/api/lib/widgets',
+  'examples/api/test/animation',
+  'examples/api/test/foundation',
+  'examples/api/test/gestures',
+  'examples/api/test/painting',
+  'examples/api/test/rendering',
+  'examples/api/test/services',
+  'examples/api/test/ui',
+  'examples/api/test/widgets',
 ];
