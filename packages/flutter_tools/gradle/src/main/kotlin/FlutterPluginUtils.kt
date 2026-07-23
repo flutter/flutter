@@ -17,6 +17,7 @@ import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -1197,13 +1198,14 @@ object FlutterPluginUtils {
             val hcppManifestUpdater =
                 project.tasks.register(
                     "enableHcppInManifest${capitalize(variant.name)}",
-                    EnableHcppManifestTask::class.java
-                ) { task ->
-                    task.requestedEnableHcpp.set(enableHcpp)
-                    if (explicitEnableHcpp != null) {
-                        task.explicitEnableHcpp.set(explicitEnableHcpp)
+                    EnableHcppManifestTask::class.java,
+                    Action { task ->
+                        task.requestedEnableHcpp.set(enableHcpp)
+                        if (explicitEnableHcpp != null) {
+                            task.explicitEnableHcpp.set(explicitEnableHcpp)
+                        }
                     }
-                }
+                )
             variant.artifacts
                 .use(hcppManifestUpdater)
                 .wiredWithFiles(
