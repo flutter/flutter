@@ -95,9 +95,10 @@ class Capabilities {
 
   /// @brief Whether a texture whose mip levels were uploaded by hand (rather
   ///        than produced by `BlitPass::GenerateMipmap`) samples with correct
-  ///        per-level selection. True everywhere except OpenGL ES 2.0 without
+  ///        per-level selection. False on OpenGL ES 2.0 without
   ///        GL_APPLE_texture_max_level, where the sampled mip range cannot be
-  ///        bounded to the levels the texture declares.
+  ///        bounded to the levels the texture declares, and on devices whose
+  ///        driver workarounds disable mip sampling entirely (Adreno Vulkan).
   virtual bool SupportsManuallyMippedTextures() const = 0;
 
   /// @brief  Returns a supported `PixelFormat` for textures that store
