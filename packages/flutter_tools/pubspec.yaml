@@ -61,6 +61,7 @@ dependencies:
   hooks: 2.1.0
   code_assets: 1.2.1
   data_assets: 0.20.0
+  flutter_hook_config: 0.1.0
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -127,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 8tnhd7
+# PUBSPEC CHECKSUM: brlbtc

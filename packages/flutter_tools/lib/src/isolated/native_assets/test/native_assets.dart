@@ -46,6 +46,12 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     globals.logger,
     runPackageName,
     includeDevDependencies: true,
+    flutterExtension: createFlutterExtension(
+      artifacts: globals.artifacts!,
+      engineVersion: globals.artifacts!.usesLocalArtifacts
+          ? null
+          : globals.flutterVersion.engineRevision,
+    ),
     pubspecPath,
   );
 
