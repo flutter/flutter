@@ -21,6 +21,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'autofill.dart';
 import 'binding.dart';
 import 'clipboard.dart' show Clipboard;
+import 'content_insertion_channel.dart';
 import 'keyboard_inserted_content.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
@@ -1967,6 +1968,15 @@ class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
     _channel.setMethodCallHandler(_loudlyHandleTextInputInvocation);
+    // Listen on the binary content insertion channel, which uses
+    // [StandardMethodCodec] to transfer large content (such as images) without
+    // the per-byte JSON serialization overhead of the textinput channel.
+    // See https://github.com/flutter/flutter/issues/188977.
+    contentInsertionChannel.onContentInserted = _handleContentInserted;
+  }
+
+  void _handleContentInserted(KeyboardInsertedContent content) {
+    _currentConnection?._client.insertContent(content);
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
