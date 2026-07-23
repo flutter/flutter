@@ -35,7 +35,7 @@ const String _kGoldctlPresubmitKey = 'GOLD_TRYJOB';
 /// for more information.
 ///
 /// May optionally provide a [namePrefix] to be used when uploading images.
-Future<void> enableSkiaGoldComparator({String? namePrefix}) async {
+Future<void> enableSkiaGoldComparator({String? namePrefix, String? localOutputDir}) async {
   assert(
     goldenFileComparator is NaiveLocalFileComparator,
     'The flutter_goldens_fork library should be used from a *_test.dart file '
@@ -75,6 +75,7 @@ Future<void> enableSkiaGoldComparator({String? namePrefix}) async {
     skiaGoldClient,
     namePrefix: namePrefix,
     presubmit: isPresubmit,
+    localOutputDir: localOutputDir,
   );
 }
 
@@ -84,22 +85,30 @@ Future<void> enableSkiaGoldComparatorForTesting(
   SkiaGoldClient skiaGoldClient, {
   required bool presubmit,
   String? namePrefix,
+  String? localOutputDir,
 }) async {
   await skiaGoldClient.auth();
   goldenFileComparator = _SkiaGoldComparator(
     skiaGoldClient,
     namePrefix: namePrefix,
     isPresubmit: presubmit,
+    localOutputDir: localOutputDir,
   );
 }
 
 final class _SkiaGoldComparator extends GoldenFileComparator {
-  _SkiaGoldComparator(this.skiaClient, {required this.isPresubmit, this.namePrefix, Uri? baseDir})
-    : baseDir = baseDir ?? Uri.parse(path.dirname(io.Platform.script.path));
+  _SkiaGoldComparator(
+    this.skiaClient, {
+    required this.isPresubmit,
+    this.namePrefix,
+    this.localOutputDir,
+    Uri? baseDir,
+  }) : baseDir = baseDir ?? Uri.parse(path.dirname(io.Platform.script.path));
 
   final Uri baseDir;
   final SkiaGoldClient skiaClient;
   final String? namePrefix;
+  final String? localOutputDir;
   final bool isPresubmit;
 
   @override
@@ -149,6 +158,10 @@ final class _SkiaGoldComparator extends GoldenFileComparator {
   }
 
   io.File _getGoldenFile(Uri uri) {
+    if (localOutputDir != null) {
+      final String fileName = path.basename(uri.path);
+      return io.File.fromUri(baseDir.resolve('$localOutputDir/$fileName'));
+    }
     return io.File.fromUri(baseDir.resolveUri(uri));
   }
 
