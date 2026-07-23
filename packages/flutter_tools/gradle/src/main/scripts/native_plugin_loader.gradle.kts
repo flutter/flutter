@@ -59,10 +59,23 @@ class NativePluginLoader {
             // of a federated plugin).
             val needsBuild = androidPlugin[NATIVE_BUILD_KEY] as? Boolean ?: true
             if (needsBuild) {
+                val pluginDirectory = File(androidPlugin["path"] as String, "android")
+                val propertiesFile = File(pluginDirectory, "gradle.properties")
+                val isMigrated = if (propertiesFile.exists()) {
+                    val props = java.util.Properties()
+                    propertiesFile.inputStream().use { props.load(it) }
+                    props.getProperty("flutter.plugin.migrated") == "true"
+                } else {
+                    false
+                }
+
                 // Suppress the unchecked cast warning as we define the structure of the JSON in
                 // the tool and we have already mostly validated the structure.
                 @Suppress("UNCHECKED_CAST")
-                nativePlugins.add(androidPlugin as Map<String, Any>)
+                val pluginMap = (androidPlugin as Map<String, Any>).toMutableMap()
+                pluginMap["is_migrated"] = isMigrated
+
+                nativePlugins.add(pluginMap.toMap())
             }
         }
         return nativePlugins.toList() // Return immutable list

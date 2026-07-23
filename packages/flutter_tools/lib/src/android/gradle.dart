@@ -29,7 +29,10 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../platform_plugins.dart';
+import '../plugins.dart';
 import '../project.dart';
 import 'android_builder.dart';
 import 'android_sdk.dart';
@@ -573,6 +576,20 @@ class AndroidGradleBuilder implements AndroidBuilder {
       options.add('-Psplit-per-abi=true');
     }
 
+    // Migrated plugins are consumed as Gradle composite (included) builds. AGP currently requires
+    // every build participating in a composite to resolve the same AGP version, so query the
+    // version the host app resolved and forward it to the included plugin builds.
+    //
+    // The version is passed as a JVM system property (-D) rather than written to each plugin's
+    // local.properties: -D propagates to every build in the invocation (unlike -P project
+    // properties), needs no on-disk mutation, and works for plugins resolved from the pub cache.
+    //
+    // This whole handshake is a stopgap.
+    // TODO(gmackall): Remove once AGP natively unifies its version across composite builds.
+    if (await _hasMigratedAndroidPlugins(project)) {
+      options.add('-Pflutter.hasMigratedPlugins=true');
+    }
+
     options.addAll(_getAndroidNdkProvisioningProperties());
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(
@@ -666,6 +683,30 @@ class AndroidGradleBuilder implements AndroidBuilder {
         await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
       }
     }
+  }
+
+  // Whether any Android plugin used by [project] has opted into the composite-build
+  // ("migrated") model, signaled by `flutter.plugin.migrated=true` in its
+  // `android/gradle.properties`.
+  //
+  // TODO(gmackall): Remove once AGP natively unifies its version across composite builds; the
+  // AGP-version handshake that this gates is unneeded at that point.
+  Future<bool> _hasMigratedAndroidPlugins(FlutterProject project) async {
+    final List<Plugin> plugins = await findPlugins(project);
+    for (final plugin in plugins) {
+      if (!plugin.platforms.containsKey(AndroidPlugin.kConfigKey)) {
+        continue;
+      }
+      final File gradleProperties = _fileSystem
+          .directory(plugin.path)
+          .childDirectory('android')
+          .childFile('gradle.properties');
+      if (gradleProperties.existsSync() &&
+          gradleProperties.readAsStringSync().contains('flutter.plugin.migrated=true')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // Checks whether AGP has successfully stripped debug symbols from native libraries

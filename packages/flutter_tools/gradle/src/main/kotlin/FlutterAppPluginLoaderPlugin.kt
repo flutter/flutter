@@ -25,6 +25,7 @@ private const val FLUTTER_SDK_PATH = "flutterSdkPath"
 @Suppress("unused") // This class is used by packages/flutter_tools/gradle/build.gradle.kts.
 class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
     override fun apply(settings: Settings) {
+
         val flutterProjectRoot: File = settings.settingsDir.parentFile
 
         if (!settings.extraProperties.has(FLUTTER_SDK_PATH)) {
@@ -60,8 +61,20 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
                     pluginDirectory.exists()
                 ) { "Plugin directory does not exist: ${pluginDirectory.absolutePath}" }
                 val pluginName = androidPlugin["name"] as String
-                settings.include(":$pluginName")
-                settings.project(":$pluginName").projectDir = pluginDirectory
+
+                val isMigrated = androidPlugin["is_migrated"] as? Boolean ?: false
+
+                if (isMigrated) {
+                    settings.includeBuild(pluginDirectory) {
+                        name = pluginName
+                        dependencySubstitution {
+                            substitute(module("dev.flutter.plugins:$pluginName")).using(project(":"))
+                        }
+                    }
+                } else {
+                    settings.include(":$pluginName")
+                    settings.project(":$pluginName").projectDir = pluginDirectory
+                }
             }
     }
 }
