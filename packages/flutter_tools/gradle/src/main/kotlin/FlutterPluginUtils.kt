@@ -1198,14 +1198,13 @@ object FlutterPluginUtils {
             val hcppManifestUpdater =
                 project.tasks.register(
                     "enableHcppInManifest${capitalize(variant.name)}",
-                    EnableHcppManifestTask::class.java,
-                    Action { task ->
-                        task.requestedEnableHcpp.set(enableHcpp)
-                        if (explicitEnableHcpp != null) {
-                            task.explicitEnableHcpp.set(explicitEnableHcpp)
-                        }
+                    EnableHcppManifestTask::class.java
+                ) {
+                    this.requestedEnableHcpp.set(enableHcpp)
+                    if (explicitEnableHcpp != null) {
+                        this.explicitEnableHcpp.set(explicitEnableHcpp)
                     }
-                )
+                }
             variant.artifacts
                 .use(hcppManifestUpdater)
                 .wiredWithFiles(
