@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/src/widgets/basic.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/src/widgets/scroll_view.dart';
+
+import 'package:flutter_test/src/widget_tester.dart';
 
 void main() {
   testWidgets('Can be placed in an infinite box', (WidgetTester tester) async {

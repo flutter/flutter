@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/physics.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/src/foundation/constants.dart';
+import 'package:flutter/src/physics/friction_simulation.dart';
+import 'package:flutter/src/physics/gravity_simulation.dart';
+import 'package:flutter/src/physics/spring_simulation.dart';
+import 'package:flutter/src/widgets/scroll_simulation.dart';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/src/matchers.dart';
+import 'package:flutter_test/src/test_compat.dart';
+import 'package:flutter_test/src/widget_tester.dart';
 
 void main() {
   test('test_friction', () {

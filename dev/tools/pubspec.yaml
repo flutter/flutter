@@ -18,6 +18,7 @@ dependencies:
   pub_semver: any
   yaml: any
 
+  analyzer: any
   collection: any
   file: any
   platform: any
