@@ -401,6 +401,9 @@ config("compiler") {
       cflags += [ "--target=aarch64-linux-gnu" ]
       ldflags += [ "--target=aarch64-linux-gnu" ]
       cflags += [ "-DBORINGSSL_CLANG_SUPPORTS_DOT_ARCH" ]
+    } else if (current_cpu == "riscv64") {
+      cflags += [ "--target=riscv64-linux-gnu" ]
+      ldflags += [ "--target=riscv64-linux-gnu" ]
     }
   }
 
