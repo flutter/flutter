@@ -7,9 +7,9 @@ package com.flutter.gradle.tasks
 import groovy.util.Node
 import groovy.xml.XmlNodePrinter
 import groovy.xml.XmlParser
+import org.gradle.api.logging.Logger
 import java.io.File
 import java.io.PrintWriter
-import org.gradle.api.logging.Logger
 
 /**
  * Stateless object to contain the logic used in [EnableHcppManifestTask].
