@@ -116,9 +116,9 @@ class Checkbox extends StatefulWidget {
   ///
   /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
   /// [fillColor], [hoverColor], [overlayColor], [splashRadius],
-  /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
-  /// [side] will still affect the [CupertinoCheckbox] and should be handled if
-  /// native fidelity is important.
+  /// [materialTapTargetSize], [visualDensity], [isError], [markInsets]. However,
+  /// [shape] and [side] will still affect the [CupertinoCheckbox] and should be
+  /// handled if native fidelity is important.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
