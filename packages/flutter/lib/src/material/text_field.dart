@@ -153,7 +153,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// [TextEditingController] using [TextEditingController.text].
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.EditableText.onChanged}
+/// {@macro flutter.widgets.editableText.onChangedComplexCharacters}
 ///
 /// In the live Dartpad example above, try typing the emoji 👨‍👩‍👦
 /// into the field and submitting. Because the example code measures the length
