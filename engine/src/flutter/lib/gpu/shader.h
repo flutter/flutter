@@ -85,6 +85,9 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   impeller::ShaderStage GetShaderStage() const;
 
+  /// The shader's entrypoint name, for identifying it in error messages.
+  const std::string& GetEntrypoint() const;
+
   const Shader::UniformBinding* GetUniformStruct(const std::string& name) const;
 
   const Shader::TextureBinding* GetUniformTexture(

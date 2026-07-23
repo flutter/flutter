@@ -12,6 +12,7 @@
 #include "flutter/lib/gpu/shader.h"
 #include "fml/make_copyable.h"
 #include "fml/memory/ref_ptr.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -39,6 +40,7 @@ const std::shared_ptr<const impeller::Context>& RenderPass::GetContext() const {
 }
 
 impeller::RenderTarget& RenderPass::GetRenderTarget() {
+  pipeline_state_dirty_ = true;
   return render_target_;
 }
 
@@ -48,6 +50,7 @@ const impeller::RenderTarget& RenderPass::GetRenderTarget() const {
 
 impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
     size_t color_attachment_index) {
+  pipeline_state_dirty_ = true;
   auto color = color_descriptors_.find(color_attachment_index);
   if (color == color_descriptors_.end()) {
     return color_descriptors_[color_attachment_index] = {};
@@ -57,21 +60,33 @@ impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
 
 impeller::DepthAttachmentDescriptor&
 RenderPass::GetDepthAttachmentDescriptor() {
+  pipeline_state_dirty_ = true;
   return depth_desc_;
 }
 
 impeller::StencilAttachmentDescriptor&
 RenderPass::GetStencilFrontAttachmentDescriptor() {
+  pipeline_state_dirty_ = true;
   return stencil_front_desc_;
 }
 
 impeller::StencilAttachmentDescriptor&
 RenderPass::GetStencilBackAttachmentDescriptor() {
+  pipeline_state_dirty_ = true;
   return stencil_back_desc_;
 }
 
 impeller::PipelineDescriptor& RenderPass::GetPipelineDescriptor() {
+  pipeline_state_dirty_ = true;
   return pipeline_descriptor_;
+}
+
+bool RenderPass::IsPipelineStateDirtyForTesting() const {
+  return pipeline_state_dirty_;
+}
+
+void RenderPass::ClearPipelineStateDirtyForTesting() {
+  pipeline_state_dirty_ = false;
 }
 
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
@@ -85,6 +100,7 @@ bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
 }
 
 void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
+  pipeline_state_dirty_ = true;
   // On debug this makes a difference, but not on release builds.
   // NOLINTNEXTLINE(performance-move-const-arg)
   render_pipeline_ = std::move(pipeline);
@@ -105,6 +121,15 @@ void RenderPass::ClearBindings() {
 
 std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
 RenderPass::GetOrCreatePipeline() {
+  // Consecutive draws overwhelmingly reuse the same pipeline state; skip the
+  // descriptor rebuild, hash, and pipeline-library lookup entirely until a
+  // state mutation marks it dirty. Draw rates reach tens of thousands per
+  // frame, so this path stays free of per-draw allocation and hashing.
+  if (!pipeline_state_dirty_ && memoized_pipeline_) {
+    return memoized_pipeline_;
+  }
+  memoized_pipeline_ = nullptr;
+
   // Infer the pipeline layout based on the shape of the RenderTarget.
   auto pipeline_desc = pipeline_descriptor_;
 
@@ -146,8 +171,10 @@ RenderPass::GetOrCreatePipeline() {
 
   auto& context = *GetContext();
 
-  render_pipeline_->BindToPipelineDescriptor(*context.GetShaderLibrary(),
-                                             pipeline_desc);
+  if (!render_pipeline_->BindToPipelineDescriptor(*context.GetShaderLibrary(),
+                                                  pipeline_desc)) {
+    return nullptr;
+  }
 
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
 
@@ -179,7 +206,17 @@ RenderPass::GetOrCreatePipeline() {
     pipeline = context.GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   }
 
-  FML_DCHECK(pipeline) << "Couldn't resolve render pipeline";
+  if (!pipeline) {
+    VALIDATION_LOG << "Failed to build the render pipeline. The vertex and "
+                      "fragment shaders may be incompatible (for example, a "
+                      "fragment input with no matching vertex output).";
+    return nullptr;
+  }
+
+  // GetColorAttachmentDescriptor above re-marked the state dirty during the
+  // rebuild, so clear the flag only now that the pipeline is built.
+  memoized_pipeline_ = pipeline;
+  pipeline_state_dirty_ = false;
   return pipeline;
 }
 
@@ -195,7 +232,14 @@ bool RenderPass::Draw(size_t element_count,
     return false;
   }
 
-  render_pass_->SetPipeline(impeller::PipelineRef(GetOrCreatePipeline()));
+  auto pipeline = GetOrCreatePipeline();
+  if (!pipeline) {
+    // The failure was already validation-logged with the specifics; failing
+    // the draw surfaces a Dart exception instead of crashing on a null
+    // pipeline in the backend.
+    return false;
+  }
+  render_pass_->SetPipeline(impeller::PipelineRef(std::move(pipeline)));
 
   for (const auto& [_, buffer] : vertex_uniform_bindings) {
     render_pass_->BindDynamicResource(
