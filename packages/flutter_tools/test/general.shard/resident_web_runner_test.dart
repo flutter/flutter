@@ -32,6 +32,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
@@ -1148,6 +1149,66 @@ name: my_app
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
       BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  // Regression tests for https://github.com/flutter/flutter/issues/172006.
+  //
+  // Assertions here spell out the concrete compiler-per-target picked in each
+  // case, per @nshahan's review comment on #186253: the JS build is always
+  // dart2js (JsCompilerConfig), never DDC. DDC is used through a separate
+  // WebDevFS path that this getter is not consulted for; see the docstring
+  // on ResidentWebRunner._compilerConfigs for the full mode/wasm matrix.
+  testUsingContext(
+    '--wasm produces both a Wasm (dart2wasm) and a JS (dart2js) compiler config, '
+    'in loader-preference order, so the runtime web loader can fall back to JS '
+    'on browsers without WasmGC support',
+    () async {
+      final residentWebRunner =
+          setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.dummy, webUseWasm: true),
+          )
+              as ResidentWebRunner;
+
+      final List<WebCompilerConfig> configs = residentWebRunner.debugCompilerConfigs;
+
+      expect(configs, hasLength(2));
+      // Wasm must come first — the loader takes the first matching build, so
+      // WasmGC-capable browsers must reach the wasm build before the JS one.
+      expect(configs[0], isA<WasmCompilerConfig>());
+      expect(configs[0].compileTarget, CompileTarget.wasm);
+      // JS side is dart2js (JsCompilerConfig), NOT DDC. DDC is not reachable
+      // when --wasm is set — see the docstring on _compilerConfigs and
+      // reloadIsRestart.
+      expect(configs[1], isA<JsCompilerConfig>());
+      expect(configs[1].compileTarget, CompileTarget.js);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'no --wasm produces only a JS (dart2js) compiler config',
+    () async {
+      final residentWebRunner = setUpResidentRunner(flutterDevice) as ResidentWebRunner;
+
+      final List<WebCompilerConfig> configs = residentWebRunner.debugCompilerConfigs;
+
+      expect(configs, hasLength(1));
+      // Single JS build via dart2js. In debug mode without --wasm, this
+      // getter is not consulted at all — see the docstring on _compilerConfigs
+      // for the mode/wasm matrix; DDC is used instead via WebDevFS.
+      expect(configs.single, isA<JsCompilerConfig>());
+      expect(configs.single.compileTarget, CompileTarget.js);
+    },
+    overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Pub: ThrowingPub.new,
