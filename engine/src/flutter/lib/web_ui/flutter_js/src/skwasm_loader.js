@@ -7,11 +7,8 @@ import { resolveUrlWithSegments } from "./utils.js";
 
 export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   const needsHeavy = (!browserEnvironment.hasImageCodecs || !browserEnvironment.hasChromiumBreakIterators)
-  if (needsHeavy && config.enableWimp) {
-    console.error('Flutter Web: wimp_heavy is required but it hasn\'t been implmented yet.');
-  }
   const fileStem = needsHeavy
-     ? 'skwasm_heavy'
+     ? (config.enableWimp ? 'wimp_heavy' : 'skwasm_heavy')
      : (config.enableWimp ? 'wimp' : 'skwasm');
   const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
   let skwasmUrl = rawSkwasmUrl;
