@@ -61,36 +61,43 @@ void testParagraphStyle() {
   );
   final ps3 = ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0);
   final ps4 = ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: kTextHeightNone);
+  final ps5 = ParagraphStyle(hyphens: Hyphens.hidden);
 
   test('ParagraphStyle toString works', () {
     expect(
       ps0.toString(),
       equals(
-        'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 14.0, height: unspecified, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified)',
+        'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 14.0, height: unspecified, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified, hyphens: unspecified)',
       ),
     );
     expect(
       ps1.toString(),
       equals(
-        'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 14.0, height: unspecified, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified)',
+        'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 14.0, height: unspecified, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified, hyphens: unspecified)',
       ),
     );
     expect(
       ps2.toString(),
       equals(
-        'ParagraphStyle(textAlign: TextAlign.center, textDirection: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 10.0, height: 100.0x, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified)',
+        'ParagraphStyle(textAlign: TextAlign.center, textDirection: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 10.0, height: 100.0x, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified, hyphens: unspecified)',
       ),
     );
     expect(
       ps3.toString(),
       equals(
-        'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 12.0, height: 123.0x, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified)',
+        'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 12.0, height: 123.0x, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified, hyphens: unspecified)',
       ),
     );
     expect(
       ps4.toString(),
       equals(
-        'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 12.0, height: unspecified, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified)',
+        'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: 12.0, height: unspecified, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified, hyphens: unspecified)',
+      ),
+    );
+    expect(
+      ps5.toString(),
+      equals(
+        'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, textHeightBehavior: unspecified, fontFamily: unspecified, fontSize: unspecified, height: unspecified, strutStyle: unspecified, ellipsis: unspecified, locale: unspecified, hyphens: Hyphens.hidden)',
       ),
     );
   });
