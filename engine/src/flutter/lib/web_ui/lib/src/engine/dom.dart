@@ -261,15 +261,23 @@ external DomSymbol get domSymbol;
 @JS('createImageBitmap')
 external JSPromise<JSAny?> _createImageBitmap(JSAny source, [int x, int y, int width, int height]);
 Future<DomImageBitmap> createImageBitmap(
-  JSAny source, [
-  ({int x, int y, int width, int height})? bounds,
-]) {
+  JSAny source, {
+  int? x,
+  int? y,
+  int? width,
+  int? height,
+}) {
+  assert(
+    (x == null && y == null && width == null && height == null) ||
+        (x != null && y != null && width != null && height != null),
+    'All or none of x, y, width, and height must be provided.',
+  );
   if (debugThrowOnCreateImageBitmapIfDisabled && !browserSupportsCreateImageBitmap) {
     throw UnsupportedError('createImageBitmap is not supported in this browser');
   }
   JSPromise<JSAny?> jsPromise;
-  if (bounds != null) {
-    jsPromise = _createImageBitmap(source, bounds.x, bounds.y, bounds.width, bounds.height);
+  if (x != null) {
+    jsPromise = _createImageBitmap(source, x, y!, width!, height!);
   } else {
     jsPromise = _createImageBitmap(source);
   }

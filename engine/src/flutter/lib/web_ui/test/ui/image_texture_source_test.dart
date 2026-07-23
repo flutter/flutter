@@ -62,7 +62,7 @@ Future<void> testMain() async {
     );
     await completer.future;
 
-    final DomImageBitmap bitmap = await createImageBitmap(image, (x: 0, y: 0, width: 1, height: 1));
+    final DomImageBitmap bitmap = await createImageBitmap(image, x: 0, y: 0, width: 1, height: 1);
 
     final ui.Image uiImage = await ui_web.createImageFromTextureSource(
       bitmap,

@@ -286,12 +286,13 @@ class BitmapTestCodec extends TestCodec {
 
     await imageElement.decode();
 
-    final DomImageBitmap bitmap = await createImageBitmap(imageElement, (
+    final DomImageBitmap bitmap = await createImageBitmap(
+      imageElement,
       x: 0,
       y: 0,
       width: imageElement.naturalWidth.toInt(),
       height: imageElement.naturalHeight.toInt(),
-    ));
+    );
 
     final ui.Image image = await codecFactory(bitmap);
     return BitmapSingleFrameCodec(bitmap, image);
