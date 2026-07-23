@@ -525,7 +525,11 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _handleFocusChanged() {
     if (!_focusNode.hasFocus) {
-      if (_webContextMenuEnabled) {
+      if (kIsWeb) {
+        // Detach regardless of the current (dynamic) _webContextMenuEnabled
+        // value: the browser context menu may have been disabled after this
+        // delegate attached, and detach is a no-op for a client that was
+        // never the active one.
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
       if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
@@ -540,8 +544,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
-    }
-    if (_webContextMenuEnabled) {
+    } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
@@ -1935,6 +1938,9 @@ class SelectableRegionState extends State<SelectableRegion>
   void dispose() {
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
+    if (kIsWeb) {
+      PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+    }
     _selectionDelegate.dispose();
     _selectionStatusNotifier.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier

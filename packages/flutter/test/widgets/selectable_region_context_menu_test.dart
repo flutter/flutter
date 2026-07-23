@@ -5,6 +5,8 @@
 @TestOn('browser') // This file contains web-only library.
 library;
 
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -141,6 +143,266 @@ void main() {
     expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   }, variant: _browserContextMenuEnabledVariants);
+
+  // Regression test for https://github.com/flutter/flutter/issues/189575.
+  testWidgets('right click does not dispatch event to previous stale client after losing focus', (
+    WidgetTester tester,
+  ) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final spy = UniqueKey();
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: SelectionSpy(key: spy),
+        ),
+      ),
+    );
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
+    focusNode.requestFocus();
+    await tester.pump();
+    focusNode.unfocus();
+    await tester.pump();
+    final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(
+      find.byKey(spy),
+    );
+    renderSelectionSpy.events.clear();
+    // Before the fix, losing focus re-attached the client instead of
+    // detaching it, so the right click below dispatched a
+    // SelectWordSelectionEvent to the stale, no-longer-focused client.
+    element.dispatchEvent(
+      web.MouseEvent('mousedown', web.MouseEventInit(button: 2, clientX: 200, clientY: 300)),
+    );
+    expect(renderSelectionSpy.events, isEmpty);
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('right click after the SelectableRegion is disposed does not crash', (
+    WidgetTester tester,
+  ) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: const SelectionSpy(),
+        ),
+      ),
+    );
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+    // Removing the SelectableRegion disposes its state without ever
+    // losing focus on the externally-owned focus node, so only the
+    // dispose-time detach can clear the static reference.
+    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+
+    // Before the fix, the static active-client pointer outlived the
+    // disposed delegate, so this right click reached into its defunct
+    // render context and crashed instead of being a no-op.
+    web.Event? capturedError;
+    final JSExportedDartFunction onWindowError = (web.Event event) {
+      capturedError = event;
+    }.toJS;
+    web.window.addEventListener('error', onWindowError);
+    addTearDown(() => web.window.removeEventListener('error', onWindowError));
+    element.dispatchEvent(
+      web.MouseEvent('mousedown', web.MouseEventInit(button: 2, clientX: 200, clientY: 300)),
+    );
+    expect(tester.takeException(), isNull);
+    expect(capturedError, isNull, reason: 'window reported an uncaught error: $capturedError');
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('detach only clears the active client when detaching the active client', (
+    WidgetTester tester,
+  ) async {
+    final focusNodeA = FocusNode();
+    final focusNodeB = FocusNode();
+    addTearDown(focusNodeA.dispose);
+    addTearDown(focusNodeB.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 100,
+              child: SelectableRegion(
+                focusNode: focusNodeA,
+                selectionControls: emptyTextSelectionControls,
+                child: const SelectionSpy(),
+              ),
+            ),
+            SizedBox(
+              height: 100,
+              child: SelectableRegion(
+                focusNode: focusNodeB,
+                selectionControls: emptyTextSelectionControls,
+                child: const SelectionSpy(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    focusNodeA.requestFocus();
+    await tester.pump();
+    final SelectionContainerDelegate delegateA =
+        PlatformSelectableRegionContextMenu.debugActiveClient!;
+
+    focusNodeB.requestFocus();
+    await tester.pump();
+    final SelectionContainerDelegate delegateB =
+        PlatformSelectableRegionContextMenu.debugActiveClient!;
+    expect(delegateB, isNot(same(delegateA)));
+
+    // Detaching a client that is not the active client must not clear
+    // the active client.
+    PlatformSelectableRegionContextMenu.detach(delegateA);
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, same(delegateB));
+
+    // Detaching the active client must clear it.
+    PlatformSelectableRegionContextMenu.detach(delegateB);
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('losing focus detaches the client and does not reattach it', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: const SelectionSpy(),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('disposing a SelectableRegion detaches its client from the context menu', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: const SelectionSpy(),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+    // Removing the SelectableRegion disposes its state without ever
+    // losing focus on the externally-owned focus node, so only the
+    // dispose-time detach can clear the static reference.
+    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+  }, variant: _browserContextMenuEnabledVariants);
+
+  group('when the browser context menu is disabled after attaching', () {
+    setUp(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.contextMenu,
+        (MethodCall call) => Future<void>.value(),
+      );
+    });
+
+    tearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.contextMenu,
+        null,
+      );
+    });
+
+    testWidgets('losing focus still detaches the client', (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: emptyTextSelectionControls,
+            child: const SelectionSpy(),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+      // Disabling the browser context menu after the delegate attached
+      // must not prevent the eventual detach: _webContextMenuEnabled is
+      // re-evaluated dynamically and would otherwise report false here.
+      await BrowserContextMenu.disableContextMenu();
+
+      focusNode.unfocus();
+      await tester.pump();
+
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+    }, variant: _browserContextMenuEnabledVariants);
+
+    testWidgets('disposing still detaches the client', (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: emptyTextSelectionControls,
+            child: const SelectionSpy(),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+      await BrowserContextMenu.disableContextMenu();
+
+      // Removing the SelectableRegion disposes its state without ever
+      // losing focus on the externally-owned focus node, so only the
+      // dispose-time detach can clear the static reference.
+      await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+
+      expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+    }, variant: _browserContextMenuEnabledVariants);
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/157579
   testWidgets('prevents default action of mousedown events', (WidgetTester tester) async {

@@ -56,12 +56,18 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
 
   /// See `_platform_selectable_region_context_menu_io.dart`.
   static void detach(SelectionContainerDelegate client) {
-    if (_activeClient != client) {
+    if (_activeClient == client) {
       _activeClient = null;
     }
   }
 
   static SelectionContainerDelegate? _activeClient;
+
+  /// The client currently attached to the [PlatformSelectableRegionContextMenu].
+  ///
+  /// This should only be used for testing.
+  @visibleForTesting
+  static SelectionContainerDelegate? get debugActiveClient => _activeClient;
 
   // Keeps track if this widget has already registered its view factories or not.
   static String? _registeredViewType;
