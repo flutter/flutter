@@ -522,6 +522,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -569,6 +571,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -620,6 +624,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -671,6 +677,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -724,6 +732,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -782,6 +792,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',

@@ -633,8 +633,8 @@ TEST_P(AiksTest, ReleasesTextureOnTeardown) {
 TEST_P(AiksTest, MatrixImageFilterMagnify) {
   Scalar scale = 2.0;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Scale", &scale, 1, 2);
       ImGui::End();
     }

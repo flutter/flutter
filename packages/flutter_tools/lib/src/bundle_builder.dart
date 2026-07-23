@@ -81,7 +81,9 @@ class BundleBuilder {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError(
           'Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal ? measurement.stackTrace : null,
+          stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
+              ? measurement.stackTrace
+              : null,
         );
       }
       throwToolExit('Failed to build bundle.');

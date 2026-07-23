@@ -48,7 +48,10 @@ class FlutterDevice {
     required this.generator,
     required this.developmentShaderCompiler,
     this.userIdentifier,
+    @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
   });
+
+  final Duration logFlushDelay;
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
@@ -68,6 +71,7 @@ class FlutterDevice {
         fileSystem: globals.fs,
       ),
       fileSystem: globals.fs,
+      logger: globals.logger,
     );
 
     final ResidentCompiler generator = residentCompilerFactory.create(
@@ -1286,14 +1290,23 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.connect(
-        debuggingOptions: debuggingOptions,
-        reloadSources: reloadSources,
-        restart: restart,
-        compileExpression: compileExpression,
-        hostVmServicePort: debuggingOptions.hostVmServicePort,
-        printStructuredErrorLogMethod: printStructuredErrorLog,
-      );
+      if (device == null) {
+        continue;
+      }
+      try {
+        await device.connect(
+          debuggingOptions: debuggingOptions,
+          reloadSources: reloadSources,
+          restart: restart,
+          compileExpression: compileExpression,
+          hostVmServicePort: debuggingOptions.hostVmServicePort,
+          printStructuredErrorLogMethod: printStructuredErrorLog,
+        );
+      } catch (error) {
+        // Allow time for buffered/async log messages (e.g. engine crash logs) to arrive and flush.
+        await Future<void>.delayed(device.logFlushDelay);
+        rethrow;
+      }
       await device.vmService!.getFlutterViews();
 
       // This hooks up callbacks for when the connection stops in the future.

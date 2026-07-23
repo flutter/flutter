@@ -30,13 +30,15 @@ Analytics getAnalytics({
 }) {
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
   final suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final String? aiAgentName = AiAgent.detectAgentName(environment);
+  final hasAiAgent = aiAgentName != null;
 
   if ( // Ignore local user branches.
   version.startsWith('[user-branch]') ||
       // Many CI systems don't do a full git checkout.
       version.endsWith('/unknown') ||
-      // Ignore bots.
-      runningOnBot ||
+      // Ignore bots, unless run by an AI agent.
+      (runningOnBot && !hasAiAgent) ||
       // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
       suppressEnvFlag) {
     return const NoOpAnalytics();
@@ -56,6 +58,7 @@ Analytics getAnalytics({
     enableAsserts: enableAsserts,
     clientIde: clientIde,
     enabledFeatures: getEnabledFeatures(config),
+    agent: aiAgentName,
   );
 }
 

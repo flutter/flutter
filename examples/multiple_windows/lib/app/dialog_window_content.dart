@@ -44,7 +44,7 @@ class DialogWindowContent extends StatelessWidget {
                               onDestroyed: () => windowRegistry.unregister(entry),
                             ),
                             title: 'Modal Dialog',
-                            preferredSize: windowSettings.dialogSize,
+                            size: windowSettings.dialogSize,
                             parent: dialogWindowController,
                           );
 
