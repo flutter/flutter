@@ -276,6 +276,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  @override
   bool get enableHcpp => boolArg('enable-hcpp');
   bool get testFlag => boolArg('test-flag');
 
