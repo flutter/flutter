@@ -73,6 +73,13 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
   // The returned value is never null.
   private Long getPhysicalKey(@NonNull KeyEvent event) {
     final long scancode = event.getScanCode();
+    // Android IR Remotes send scanCode 97 (0x61) and keyCode 23 (KEYCODE_DPAD_CENTER).
+    // Scan code 97 is otherwise mapped to PhysicalKeyboardKey.controlRight.
+    // Since DPAD_CENTER is not a modifier key, override the mapping to return
+    // PhysicalKeyboardKey.select to prevent key synchronization issues.
+    if (scancode == 0x61 && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER) {
+      return 0x0000070077L; // PhysicalKeyboardKey.select
+    }
     // Scancode 0 can occur during emulation using `adb shell input keyevent`. Synthesize a physical
     // key from the key code so that keys can be told apart.
     if (scancode == 0) {
