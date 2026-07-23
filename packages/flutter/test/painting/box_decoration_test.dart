@@ -2,14 +2,84 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _TestBoxBorder extends BoxBorder {
+  const _TestBoxBorder(this.width);
+
+  final double width;
+
+  @override
+  BorderSide get bottom => BorderSide(width: width);
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.all(width);
+
+  @override
+  bool get isUniform => true;
+
+  @override
+  BorderSide get top => BorderSide(width: width);
+
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    TextDirection? textDirection,
+    BoxShape shape = BoxShape.rectangle,
+    BorderRadius? borderRadius,
+  }) {}
+
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+    if (a is _TestBoxBorder) {
+      return _TestBoxBorder(lerpDouble(a.width, width, t)!);
+    }
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    if (b is _TestBoxBorder) {
+      return _TestBoxBorder(lerpDouble(width, b.width, t)!);
+    }
+    return super.lerpTo(b, t);
+  }
+
+  @override
+  ShapeBorder scale(double t) => _TestBoxBorder(width * t);
+
+  @override
+  bool operator ==(Object other) => other is _TestBoxBorder && other.width == width;
+
+  @override
+  int get hashCode => width.hashCode;
+}
 
 void main() {
   test('BoxDecoration.lerp identical a,b', () {
     expect(BoxDecoration.lerp(null, null, 0), null);
     const decoration = BoxDecoration();
     expect(identical(BoxDecoration.lerp(decoration, decoration, 0.5), decoration), true);
+  });
+
+  test('BoxDecoration.lerp supports custom BoxBorder subclasses', () {
+    final BoxDecoration? decoration = BoxDecoration.lerp(
+      const BoxDecoration(border: _TestBoxBorder(2.0)),
+      const BoxDecoration(border: _TestBoxBorder(6.0)),
+      0.25,
+    );
+
+    expect(decoration!.border, const _TestBoxBorder(3.0));
+  });
+
+  test('BoxDecoration.scale supports custom BoxBorder subclasses', () {
+    final BoxDecoration decoration = const BoxDecoration(border: _TestBoxBorder(8.0)).scale(0.25);
+
+    expect(decoration.border, const _TestBoxBorder(2.0));
   });
 
   test('BoxDecoration with BorderRadiusDirectional', () {

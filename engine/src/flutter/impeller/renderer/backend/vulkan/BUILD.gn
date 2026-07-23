@@ -196,6 +196,8 @@ if (is_android) {
     sources = [
       "android/ahb_swapchain_vk_unittests.cc",
       "android/ahb_texture_source_vk_unittests.cc",
+      "android/android_test_utils.cc",
+      "android/android_test_utils.h",
     ]
 
     deps = [
