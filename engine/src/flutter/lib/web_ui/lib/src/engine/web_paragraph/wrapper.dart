@@ -38,7 +38,7 @@ class TextWrapper {
   }
 
   bool _isHardLineBreak(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.hardLineBreak);
+    return _layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
   }
 
   void breakLines(double maxWidth) {
@@ -47,21 +47,25 @@ class TextWrapper {
 
     final line = _LineBuilder(_layout, maxWidth);
 
-    var hardLineBreak = false;
+    var hardLineBreakClusterIndex = -1;
     for (var index = 0; index < _layout.allClusters.length - 1; index += 1) {
       final WebCluster cluster = _layout.allClusters[index];
-      final double widthCluster = cluster.advance.width;
-      hardLineBreak = _isHardLineBreak(cluster);
+      double widthCluster = cluster.advance.width;
+      hardLineBreakClusterIndex = _isHardLineBreak(cluster) ? index : -1;
 
-      if (hardLineBreak) {
+      if (hardLineBreakClusterIndex != -1) {
+        // We do not count '\n' in the line width because we no not paint it (just use as a formatting mark)
+        widthCluster = 0.0;
         // Break the line and then continue with the current cluster as usual
         line.consumePendingText();
 
         // This is the case when the ellipsis will be added to the empty line; weird...
         line.ellipsize(index);
-        line.build(hardLineBreak);
+        line.build(hardLineBreakClusterIndex);
         if (line.reachedMaxLines()) {
           break;
+        } else {
+          continue;
         }
       } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
@@ -104,7 +108,7 @@ class TextWrapper {
         // Add ellipsis if needed (and correct all the structures accordingly)
         line.ellipsize(index);
         // Add the line
-        line.build(hardLineBreak);
+        line.build(hardLineBreakClusterIndex);
         if (line.reachedMaxLines()) {
           break;
         }
@@ -127,26 +131,32 @@ class TextWrapper {
         line._minIntrinsicWidth = line._widthWhitespaces;
         line._longestLine = line._widthWhitespaces;
         line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
-        line.build(hardLineBreak);
+        line.build(hardLineBreakClusterIndex);
         // Nothing to ellipsize in this case;
       }
       // Add the last line if there's anything left to add
       else if (line.isNotEmpty) {
         // Treat the end of text as a soft line break
         line.markSoftLineBreak(_layout.allClusters.length - 1);
-        line.build(hardLineBreak);
+        line.build(hardLineBreakClusterIndex);
         // This is the line line with the text that fits in the given width, no need to ellipsize it
       }
     }
 
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
     // This empty line gets in a way of detecting line visual runs (there isn't any)
-    if (hardLineBreak) {
+    if (hardLineBreakClusterIndex != -1) {
       final emptyClusterRange = ClusterRange(
         start: _layout.allClusters.length - 1,
         end: _layout.allClusters.length - 1,
       );
-      line._top += _layout.addLine(emptyClusterRange, emptyClusterRange, false, line._top);
+      line._top += _layout.addLine(
+        emptyClusterRange,
+        emptyClusterRange,
+        false,
+        hardLineBreakClusterIndex,
+        line._top,
+      );
     }
 
     _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
@@ -211,7 +221,6 @@ class _LineBuilder {
     // When `start` and `pendingTextEnd` are equal, we know there was no text, whitespaces
     // or pending text added to the line.
     final empty = start == _pendingTextEnd;
-
     if (empty) {
       assert(
         // Check that all widths are zero when the line is empty.
@@ -261,7 +270,6 @@ class _LineBuilder {
 
   bool get hasPendingText {
     final bool result = _pendingTextEnd > _whitespaceEnd;
-
     assert(() {
       if (!result) {
         // When there's no pending text, make sure the width of pending text is also 0.
@@ -294,7 +302,9 @@ class _LineBuilder {
   }
 
   bool reachedEndOfText() {
-    return _pendingTextEnd == _layout.allClusters.length - 1;
+    // We reached the end of the text if we have consumed all clusters in the paragraph (including possible hard line break at the end that we ignore)
+    return (_pendingTextEnd == _layout.allClusters.length - 1) ||
+        (_whitespaceEnd == _layout.allClusters.length - 1);
   }
 
   void addWhitespace(int index, double width) {
@@ -340,17 +350,22 @@ class _LineBuilder {
   /// After calling [build], the line builder instance is ready for the next line.
   ///
   /// Returns the height of the line.
-  double build(bool hardLineBreak) {
+  double build(int hardLineBreakClusterIndex) {
     _longestLine = math.max(_longestLine, _widthConsumedText);
     _maxLineWidthWithTrailingSpaces = math.max(
       _maxLineWidthWithTrailingSpaces,
       _widthConsumedText + _widthWhitespaces,
     );
 
+    // The line ends at the end of the last whitespace or at the end of the hard line break cluster if it exists
+    final int endLineText = hardLineBreakClusterIndex != -1
+        ? hardLineBreakClusterIndex + 1
+        : _whitespaceEnd;
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),
-      ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
-      hardLineBreak,
+      ClusterRange(start: _whitespaceStart, end: endLineText),
+      hardLineBreakClusterIndex != -1,
+      hardLineBreakClusterIndex != -1 ? hardLineBreakClusterIndex : _whitespaceEnd,
       _top,
     );
 
@@ -358,14 +373,19 @@ class _LineBuilder {
 
     _hasSoftLineBreak = false;
 
-    start = _whitespaceEnd;
+    start = endLineText;
     _whitespaceStart = start;
     _whitespaceEnd = start;
 
     _widthConsumedText = 0.0;
     _widthWhitespaces = 0.0;
 
-    // Leave `pendingTextEnd` and `widthPendingText` untouched so they are used in the next line.
+    // Leave `pendingTextEnd` and `widthPendingText` untouched so they are used in the next line
+    // Except if we have a hard line break, in which case we reset them to 0 because the next line starts after the hard line break
+    if (hardLineBreakClusterIndex != -1) {
+      _pendingTextEnd = endLineText;
+      _widthPendingText = 0.0;
+    }
 
     _top += height;
 
