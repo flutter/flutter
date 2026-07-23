@@ -765,8 +765,10 @@ class AndroidDevice extends Device {
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
     final String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
     final Match? match = RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
-    assert(match != null, 'could not parse dumpsys meminfo output');
-    return <String, dynamic>{'total_kb': int.parse(match!.group(1)!)};
+    if (match == null) {
+      throw DeviceException('could not parse dumpsys meminfo output for $packageName: $meminfo');
+    }
+    return <String, dynamic>{'total_kb': int.parse(match.group(1)!)};
   }
 
   @override
