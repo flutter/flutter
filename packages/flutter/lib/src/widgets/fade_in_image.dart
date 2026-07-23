@@ -117,8 +117,8 @@ class FadeInImage extends StatefulWidget {
     this.imageErrorBuilder,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
-    this.fadeOutDuration = const Duration(milliseconds: 300),
-    this.fadeOutCurve = Curves.easeOut,
+    this.fadeOutDuration = _defaultFadeOutDuration,
+    this.fadeOutCurve = _defaultFadeOutCurve,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
     this.color,
@@ -135,7 +135,12 @@ class FadeInImage extends StatefulWidget {
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
     this.transition = FadeInImageTransition.sequential,
-  });
+  }) : assert(
+         transition != FadeInImageTransition.fadeInOver ||
+             (fadeOutDuration == _defaultFadeOutDuration && fadeOutCurve == _defaultFadeOutCurve),
+         'fadeOutDuration and fadeOutCurve have no effect when transition is '
+         'FadeInImageTransition.fadeInOver and must be left at their defaults.',
+       );
 
   /// Creates a widget that uses a placeholder image stored in memory while
   /// loading the final image from the network.
@@ -175,8 +180,8 @@ class FadeInImage extends StatefulWidget {
     double imageScale = 1.0,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
-    this.fadeOutDuration = const Duration(milliseconds: 300),
-    this.fadeOutCurve = Curves.easeOut,
+    this.fadeOutDuration = _defaultFadeOutDuration,
+    this.fadeOutCurve = _defaultFadeOutCurve,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
     this.width,
@@ -197,7 +202,13 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : placeholder = ResizeImage.resizeIfNeeded(
+  }) : assert(
+         transition != FadeInImageTransition.fadeInOver ||
+             (fadeOutDuration == _defaultFadeOutDuration && fadeOutCurve == _defaultFadeOutCurve),
+         'fadeOutDuration and fadeOutCurve have no effect when transition is '
+         'FadeInImageTransition.fadeInOver and must be left at their defaults.',
+       ),
+       placeholder = ResizeImage.resizeIfNeeded(
          placeholderCacheWidth,
          placeholderCacheHeight,
          MemoryImage(placeholder, scale: placeholderScale),
@@ -246,8 +257,8 @@ class FadeInImage extends StatefulWidget {
     double imageScale = 1.0,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
-    this.fadeOutDuration = const Duration(milliseconds: 300),
-    this.fadeOutCurve = Curves.easeOut,
+    this.fadeOutDuration = _defaultFadeOutDuration,
+    this.fadeOutCurve = _defaultFadeOutCurve,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
     this.width,
@@ -268,7 +279,13 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : placeholder = placeholderScale != null
+  }) : assert(
+         transition != FadeInImageTransition.fadeInOver ||
+             (fadeOutDuration == _defaultFadeOutDuration && fadeOutCurve == _defaultFadeOutCurve),
+         'fadeOutDuration and fadeOutCurve have no effect when transition is '
+         'FadeInImageTransition.fadeInOver and must be left at their defaults.',
+       ),
+       placeholder = placeholderScale != null
            ? ResizeImage.resizeIfNeeded(
                placeholderCacheWidth,
                placeholderCacheHeight,
@@ -306,16 +323,24 @@ class FadeInImage extends StatefulWidget {
   /// the exception by providing a replacement widget, or rethrow the exception.
   final ImageErrorWidgetBuilder? imageErrorBuilder;
 
+  // Defaults for the fade-out animation. Because the fade-out has no effect
+  // when [transition] is [FadeInImageTransition.fadeInOver], the constructors
+  // assert that these are left unchanged in that mode.
+  static const Duration _defaultFadeOutDuration = Duration(milliseconds: 300);
+  static const Curve _defaultFadeOutCurve = Curves.easeOut;
+
   /// The duration of the fade-out animation for the [placeholder].
   ///
   /// This has no effect when [transition] is [FadeInImageTransition.fadeInOver],
-  /// since the [placeholder] is not faded out in that mode.
+  /// since the [placeholder] is not faded out in that mode, and must be left at
+  /// its default value in that case.
   final Duration fadeOutDuration;
 
   /// The curve of the fade-out animation for the [placeholder].
   ///
   /// This has no effect when [transition] is [FadeInImageTransition.fadeInOver],
-  /// since the [placeholder] is not faded out in that mode.
+  /// since the [placeholder] is not faded out in that mode, and must be left at
+  /// its default value in that case.
   final Curve fadeOutCurve;
 
   /// The duration of the fade-in animation for the [image].
@@ -463,9 +488,11 @@ class FadeInImage extends StatefulWidget {
   /// How the widget transitions from the [placeholder] to the [image] once it
   /// has loaded.
   ///
-  /// Defaults to [FadeInImageTransition.sequential], which fades the
-  /// [placeholder] out before fading the [image] in. See
-  /// [FadeInImageTransition] for the available behaviors.
+  /// [FadeInImageTransition.sequential] fades the [placeholder] out before
+  /// fading the [image] in, while [FadeInImageTransition.fadeInOver] fades the
+  /// [image] in on top of the still-visible [placeholder].
+  ///
+  /// Defaults to [FadeInImageTransition.sequential].
   final FadeInImageTransition transition;
 
   @override
