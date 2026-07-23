@@ -587,11 +587,12 @@ abstract class ScrollView extends StatelessWidget {
   }
 }
 
-combines multiple [slivers] in one scrollable view.
-///
 /// A [ScrollView] that combines multiple [slivers] in one scrollable view.
+///
 /// A [CustomScrollView] lets you combine lists, grids, and other widgets in a
-/// single scrollable view by supplying [slivers] directly. Slivers can/// represent lists, grids, and expanding headers. Widgets that use the box
+/// single scrollable view by supplying [slivers] directly. Slivers can
+/// represent lists, grids, and expanding headers. Widgets that use the box
+/// layout model can be included using a [SliverToBoxAdapter]. For example, to
 /// create a scroll view that contains an expanding app bar followed by a list
 /// and a grid, use a list of three slivers: [SliverAppBar], [SliverList], and
 /// [SliverGrid].
@@ -717,7 +718,8 @@ combines multiple [slivers] in one scrollable view.
 ///  * [IndexedSemantics], which allows annotating child lists with an index
 ///    for scroll announcements.
 class CustomScrollView extends ScrollView {
-  /// layout model can be included using a [SliverToBoxAdapter]. For example, to
+  /// Creates a [ScrollView] that combines multiple slivers in one scrollable
+  /// view.
   ///
   /// See the [ScrollView] constructor for more details on these arguments.
   const CustomScrollView({
