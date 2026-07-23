@@ -134,7 +134,8 @@ bool PlaygroundTest::OpenPlaygroundHere(InteropPlaygroundCallback callback) {
   if (!interop_context) {
     return false;
   }
-  return Playground::OpenPlaygroundHere([&](RenderTarget& target) -> bool {
+  return Playground::OpenPlaygroundHere([&](RenderTarget& target,
+                                            bool is_onscreen) -> bool {
     auto impeller_surface = std::make_shared<impeller::Surface>(target);
     auto surface = CreateSharedSurface(GetBackend(),                //
                                        *interop_context.Get(),      //
