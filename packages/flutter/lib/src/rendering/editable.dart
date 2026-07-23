@@ -1336,7 +1336,7 @@ class RenderEditable extends RenderBox
     // https://github.com/flutter/flutter/issues/77957
     if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null) &&
         defaultTargetPlatform != TargetPlatform.macOS) {
-      assert(readOnly && !obscureText);
+      assert(!obscureText);
       // For Selectable rich text with recognizer, we need to create a semantics
       // node for each text fragment.
       config
