@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
+import 'test_page_tester.dart';
 
 void main() {
   const kBlack = Color(0xFF000000);
@@ -1869,6 +1870,329 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), Size.zero);
   });
+
+  testWidgets(
+    '_SelectableTextContainerDelegate._compareScreenOrder does not crash with unlaid-out fragments',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/151536
+      //
+      // Drives _SelectableTextContainerDelegate._compareScreenOrder by using
+      // Text.rich with WidgetSpan children. Each WidgetSpan placeholder splits
+      // the text into a separate _SelectableFragment, so the delegate must sort
+      // them — which invokes the comparator that accesses boundingBoxes.first
+      // on each fragment. See paragraph.dart:_getSelectableFragments — fragments
+      // are only created when placeholder characters exist in the plain text.
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Navigator(
+            pages: <Page<void>>[
+              TestPage<void>(
+                child: SelectableRegion(
+                  focusNode: focusNode,
+                  selectionControls: EmptyTextSelectionControls(),
+                  child: const Text.rich(
+                    TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(text: 'Before '),
+                        WidgetSpan(child: SizedBox(width: 8, height: 8)),
+                        TextSpan(text: ' middle '),
+                        WidgetSpan(child: SizedBox(width: 8, height: 8)),
+                        TextSpan(text: ' after'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const TestPage<void>(child: Text('Top page')),
+            ],
+            onDidRemovePage: _noopRemovePage,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Top page'), findsOneWidget);
+    },
+  );
+
+  testWidgets('_SelectableTextContainerDelegate._compareScreenOrder catches StateError '
+      'from unlaid-out selectables', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Red/green test that exercises the `on StateError` catch branch of
+    // _SelectableTextContainerDelegate._compareScreenOrder (text.dart).
+    // Registers mock throwing Selectables inside a Text.rich via WidgetSpan
+    // children; the enclosing _SelectableTextContainer's delegate picks them
+    // up through SelectionContainer.maybeOf(context), and the post-frame
+    // sort routes them through text.dart's comparator override.
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: EmptyTextSelectionControls(),
+          child: const Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                TextSpan(text: 'before '),
+                WidgetSpan(child: _ThrowingSelectionSpy(throwKind: _ThrowKind.stateError)),
+                TextSpan(text: ' middle '),
+                WidgetSpan(child: _ThrowingSelectionSpy(throwKind: _ThrowKind.stateError)),
+                TextSpan(text: ' after'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('_SelectableTextContainerDelegate._compareScreenOrder catches '
+      'AssertionError from unlaid-out selectables', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Red/green test for the `on AssertionError` catch in text.dart, which
+    // covers debug-mode builds where `assert(hasSize)` fires before the
+    // `_size ?? throw StateError(...)` expression in RenderBox.size.
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: EmptyTextSelectionControls(),
+          child: const Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                TextSpan(text: 'before '),
+                WidgetSpan(child: _ThrowingSelectionSpy(throwKind: _ThrowKind.assertionError)),
+                TextSpan(text: ' middle '),
+                WidgetSpan(child: _ThrowingSelectionSpy(throwKind: _ThrowKind.assertionError)),
+                TextSpan(text: ' after'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('_SelectableTextContainerDelegate._compareScreenOrder places unlaid-out selectables '
+      'last and keeps laid-out ones in a consistent, deterministic order', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Mixes laid-out and unlaid-out WidgetSpan selectables. The unlaid-out
+    // one sits between the two laid-out ones in the span order, but the
+    // sort must still place it after both — otherwise `List.sort`, which
+    // requires a consistent comparator, could scramble the laid-out ones'
+    // relative order too.
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    SelectedContent? content;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          selectionControls: EmptyTextSelectionControls(),
+          child: const Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(child: _OrderProbeSelectionSpy(label: 'A')),
+                WidgetSpan(child: _OrderProbeSelectionSpy(label: 'Z', unlaidOut: true)),
+                WidgetSpan(child: _OrderProbeSelectionSpy(label: 'B')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    state.selectAll();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(content?.plainText, 'ABZ');
+  });
+}
+
+void _noopRemovePage(Page<Object?> page) {}
+
+// Mock Selectable whose [boundingBoxes] getter throws — used by the text.dart
+// `_SelectableTextContainerDelegate._compareScreenOrder` regression tests for
+// https://github.com/flutter/flutter/issues/151536 to directly exercise the
+// `on StateError` / `on AssertionError` catch branches.
+enum _ThrowKind { stateError, assertionError }
+
+class _ThrowingSelectionSpy extends LeafRenderObjectWidget {
+  const _ThrowingSelectionSpy({required this.throwKind});
+
+  final _ThrowKind throwKind;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderThrowingSelectionSpy(SelectionContainer.maybeOf(context), throwKind);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
+}
+
+class _RenderThrowingSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderThrowingSelectionSpy(SelectionRegistrar? registrar, this._throwKind) {
+    this.registrar = registrar;
+  }
+
+  final _ThrowKind _throwKind;
+
+  @override
+  List<Rect> get boundingBoxes {
+    switch (_throwKind) {
+      case _ThrowKind.stateError:
+        throw StateError('Bad state: RenderBox was not laid out (test)');
+      case _ThrowKind.assertionError:
+        throw AssertionError('RenderBox was not laid out (test)');
+    }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.smallest;
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) => SelectionResult.end;
+
+  @override
+  SelectedContent? getSelectedContent() => null;
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  int get contentLength => 0;
+
+  @override
+  final SelectionGeometry value = const SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
+}
+
+// Mock Selectable with a fixed [size] and [getSelectedContent] result, and an
+// optional forced-unlaid-out `boundingBoxes` — used by the text.dart
+// `_SelectableTextContainerDelegate._compareScreenOrder` ordering regression
+// test for https://github.com/flutter/flutter/issues/151536 to observe the
+// resulting selectable order through the concatenated selected content.
+class _OrderProbeSelectionSpy extends LeafRenderObjectWidget {
+  const _OrderProbeSelectionSpy({required this.label, this.unlaidOut = false});
+
+  final String label;
+  final bool unlaidOut;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderOrderProbeSelectionSpy(SelectionContainer.maybeOf(context), label, unlaidOut);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
+}
+
+class _RenderOrderProbeSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderOrderProbeSelectionSpy(SelectionRegistrar? registrar, this._label, this._unlaidOut) {
+    this.registrar = registrar;
+  }
+
+  final String _label;
+  final bool _unlaidOut;
+
+  @override
+  List<Rect> get boundingBoxes {
+    if (_unlaidOut) {
+      throw StateError('Bad state: RenderBox was not laid out (test)');
+    }
+    return <Rect>[Offset.zero & size];
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => const Size(20, 20);
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) => SelectionResult.end;
+
+  @override
+  SelectedContent? getSelectedContent() => SelectedContent(plainText: _label);
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  int get contentLength => _label.length;
+
+  @override
+  final SelectionGeometry value = const SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
 }
 
 Future<void> _pumpTextWidget({

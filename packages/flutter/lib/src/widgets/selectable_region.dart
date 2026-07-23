@@ -2575,9 +2575,39 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   Comparator<Selectable> get compareOrder => _compareScreenOrder;
 
+  // Returns null instead of throwing when `selectable`'s RenderBox isn't laid
+  // out. This happens when _RenderTheater skips layout for an obscured
+  // OverlayEntry but selectables remain registered: accessing `size` throws
+  // StateError in release mode, while debug-mode asserts (hasSize /
+  // debugNeedsLayout) throw AssertionError first.
+  // See https://github.com/flutter/flutter/issues/151536
+  static Rect? _getScreenRect(Selectable selectable) {
+    try {
+      return MatrixUtils.transformRect(
+        selectable.getTransformTo(null),
+        _getBoundingBox(selectable),
+      );
+    } on StateError {
+      return null;
+    } on AssertionError {
+      return null;
+    }
+  }
+
   static int _compareScreenOrder(Selectable a, Selectable b) {
-    final Rect rectA = MatrixUtils.transformRect(a.getTransformTo(null), _getBoundingBox(a));
-    final Rect rectB = MatrixUtils.transformRect(b.getTransformTo(null), _getBoundingBox(b));
+    final Rect? rectA = _getScreenRect(a);
+    final Rect? rectB = _getScreenRect(b);
+    if (rectA == null && rectB == null) {
+      return 0;
+    }
+    if (rectA == null) {
+      // Unavailable selectables sort after available ones instead of
+      // crashing the sort.
+      return 1;
+    }
+    if (rectB == null) {
+      return -1;
+    }
     final int result = _compareVertically(rectA, rectB);
     if (result != 0) {
       return result;
