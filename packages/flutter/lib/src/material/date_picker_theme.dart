@@ -273,8 +273,8 @@ class DatePickerThemeData with Diagnosticable {
   final WidgetStateProperty<Color?>? todayBackgroundColor;
 
   /// Overrides the border used to paint the
-  /// [DatePickerDialog.currentDate] label in the grid of the date
-  /// picker.
+  /// [DatePickerDialog.currentDate] label in both the day grid and the year
+  /// selector of the date picker.
   ///
   /// If the border side's [BorderSide.color] is transparent (has 0 opacity),
   /// [todayForegroundColor] is used instead. Otherwise, the border's color
