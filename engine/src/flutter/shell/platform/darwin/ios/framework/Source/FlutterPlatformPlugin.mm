@@ -50,7 +50,13 @@ using namespace flutter;
 static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
   UIApplication* flutterApplication = FlutterSharedApplication.application;
   if (flutterApplication) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // -[UIApplication setStatusBarHidden] is deprecated in iOS9 in favor of
+    // delegating to the view controller. There's no UIScene equivalent for
+    // setting the value per UIScene.
     flutterApplication.statusBarHidden = hidden;
+#pragma clang diagnostic pop
   } else {
     [FlutterLogger logWarning:@"Application based status bar styling is not available in app "
                                "extension."];
@@ -60,9 +66,13 @@ static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
 static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   UIApplication* flutterApplication = FlutterSharedApplication.application;
   if (flutterApplication) {
-    // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
-    // in favor of delegating to the view controller.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // -[UIApplication setStatusBarStyle] is deprecated in iOS9 in favor of
+    // delegating to the view controller. There's no UIScene equivalent for
+    // setting the value per UIScene.
     [flutterApplication setStatusBarStyle:style];
+#pragma clang diagnostic pop
   } else {
     [FlutterLogger logWarning:@"Application based status bar styling is not available in app "
                                "extension."];
@@ -197,7 +207,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
       [[UIActivityViewController alloc] initWithActivityItems:itemsToShare
                                         applicationActivities:nil];
 
-  if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+  if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
     // On iPad, the share screen is presented in a popover view, and requires a
     // sourceView and sourceRect
     FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
