@@ -218,6 +218,17 @@ dependencies:
   lints: 6.1.0
   quiver: 3.2.2
   yaml_edit: 2.2.4
+  flutter:
+    sdk: flutter
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+  http: ^1.2.0
+  shared_preferences: ^2.2.0
+  video_player: ^2.8.2
+  image_picker: ^1.1.2
+  path_provider: ^2.1.3
+  record: ^5.2.0       # أضف هذا السطر هنا بيدك
+  audioplayers: ^6.0.0  # وأضف هذا السطر أيضاً هنا بيدك
 
 dev_dependencies:
   ffigen: 20.1.1
