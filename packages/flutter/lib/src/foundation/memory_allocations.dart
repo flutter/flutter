@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui;
 
+import 'package:listen/listen.dart';
+
 import 'assertions.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
@@ -114,7 +116,16 @@ typedef MemoryAllocations = FlutterMemoryAllocations;
 /// The class is optimized for massive event flow and small number of
 /// added or removed listeners.
 class FlutterMemoryAllocations {
-  FlutterMemoryAllocations._();
+  FlutterMemoryAllocations._() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      Listenable.debugMaybeDispatchCreated = (String className, Object object) {
+        dispatchObjectCreated(library: 'foundation', className: className, object: object);
+      };
+      Listenable.debugMaybeDispatchDisposed = (Object object) {
+        dispatchObjectDisposed(object: object);
+      };
+    }
+  }
 
   /// The shared instance of [FlutterMemoryAllocations].
   ///
