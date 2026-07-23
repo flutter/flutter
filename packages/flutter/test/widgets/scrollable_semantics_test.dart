@@ -35,14 +35,12 @@ class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
 const double _kToolbarHeight = 56.0;
 
 void main() {
-  SemanticsTester semantics;
-
   setUp(() {
     debugResetSemanticsIdCounter();
   });
 
   testWidgets('scrollable exposes the correct semantic actions', (WidgetTester tester) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -101,7 +99,7 @@ void main() {
   });
 
   testWidgets('Vertical scrollable responds to scrollToOffset', (WidgetTester tester) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -132,7 +130,7 @@ void main() {
   });
 
   testWidgets('Horizontal scrollable responds to scrollToOffset', (WidgetTester tester) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -166,7 +164,7 @@ void main() {
   testWidgets('Unscrollable scrollable does not respond to scrollToOffset', (
     WidgetTester tester,
   ) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -185,7 +183,7 @@ void main() {
   testWidgets('Scrollable exposes implicit scrolling before dimensions are available', (
     WidgetTester tester,
   ) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final controller = _NoDimensionsDuringSemanticsScrollController();
     addTearDown(controller.dispose);
 
@@ -212,7 +210,7 @@ void main() {
   testWidgets('scrollToOffset respects implicit scrolling configuration', (
     WidgetTester tester,
   ) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final ScrollPhysics physics = _NoImplicitScrollingScrollPhysics();
     await tester.pumpWidget(
       Directionality(
@@ -233,7 +231,7 @@ void main() {
   });
 
   testWidgets('showOnScreen works in scrollable', (WidgetTester tester) async {
-    semantics = SemanticsTester(tester); // enables semantics tree generation
+    final semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const kItemHeight = 40.0;
 
@@ -280,7 +278,7 @@ void main() {
   testWidgets('showOnScreen works with pinned app bar and sliver list', (
     WidgetTester tester,
   ) async {
-    semantics = SemanticsTester(tester); // enables semantics tree generation
+    final semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const kItemHeight = 100.0;
     const kExpandedAppBarHeight = 56.0;
@@ -343,7 +341,7 @@ void main() {
   testWidgets('showOnScreen works with pinned app bar and individual slivers', (
     WidgetTester tester,
   ) async {
-    semantics = SemanticsTester(tester); // enables semantics tree generation
+    final semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const kItemHeight = 100.0;
     const kExpandedAppBarHeight = 256.0;
@@ -401,7 +399,7 @@ void main() {
   });
 
   testWidgets('correct scrollProgress', (WidgetTester tester) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -452,7 +450,7 @@ void main() {
   });
 
   testWidgets('correct scrollProgress for unbound', (WidgetTester tester) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -513,7 +511,7 @@ void main() {
   });
 
   testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
-    semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     final children = List<Widget>.generate(
       80,
@@ -571,7 +569,7 @@ void main() {
     expect(tester.binding.pipelineOwner.semanticsOwner, isNull);
 
     // Semantics on
-    semantics = SemanticsTester(tester);
+    var semantics = SemanticsTester(tester);
     await tester.pumpAndSettle();
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
     expect(
@@ -624,7 +622,7 @@ void main() {
     });
 
     testWidgets('brings item above leading edge to leading edge', (WidgetTester tester) async {
-      semantics = SemanticsTester(tester); // enables semantics tree generation
+      final semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
 
@@ -646,7 +644,7 @@ void main() {
     });
 
     testWidgets('brings item below trailing edge to trailing edge', (WidgetTester tester) async {
-      semantics = SemanticsTester(tester); // enables semantics tree generation
+      final semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
 
@@ -670,7 +668,7 @@ void main() {
     testWidgets('does not change position of items already fully on-screen', (
       WidgetTester tester,
     ) async {
-      semantics = SemanticsTester(tester); // enables semantics tree generation
+      final semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
 
@@ -747,7 +745,7 @@ void main() {
     });
 
     testWidgets('brings item above leading edge to leading edge', (WidgetTester tester) async {
-      semantics = SemanticsTester(tester); // enables semantics tree generation
+      final semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
 
@@ -769,7 +767,7 @@ void main() {
     });
 
     testWidgets('brings item below trailing edge to trailing edge', (WidgetTester tester) async {
-      semantics = SemanticsTester(tester); // enables semantics tree generation
+      final semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
 
@@ -793,7 +791,7 @@ void main() {
     testWidgets('does not change position of items already fully on-screen', (
       WidgetTester tester,
     ) async {
-      semantics = SemanticsTester(tester); // enables semantics tree generation
+      final semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
 
@@ -818,7 +816,7 @@ void main() {
   testWidgets(
     'transform of inner node from useTwoPaneSemantics scrolls correctly with nested scrollables',
     (WidgetTester tester) async {
-      semantics = SemanticsTester(tester); // enables semantics tree generation
+      final semantics = SemanticsTester(tester); // enables semantics tree generation
 
       // Context: https://github.com/flutter/flutter/issues/61631
       await tester.pumpWidget(
