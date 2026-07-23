@@ -48,14 +48,19 @@ const impeller::RenderTarget& RenderPass::GetRenderTarget() const {
   return render_target_;
 }
 
-impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
+impeller::ColorAttachmentDescriptor& RenderPass::ColorAttachmentDescriptorAt(
     size_t color_attachment_index) {
-  pipeline_state_dirty_ = true;
   auto color = color_descriptors_.find(color_attachment_index);
   if (color == color_descriptors_.end()) {
     return color_descriptors_[color_attachment_index] = {};
   }
   return color->second;
+}
+
+impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
+    size_t color_attachment_index) {
+  pipeline_state_dirty_ = true;
+  return ColorAttachmentDescriptorAt(color_attachment_index);
 }
 
 impeller::DepthAttachmentDescriptor&
@@ -124,10 +129,14 @@ RenderPass::GetOrCreatePipeline() {
   // Consecutive draws overwhelmingly reuse the same pipeline state; skip the
   // descriptor rebuild, hash, and pipeline-library lookup entirely until a
   // state mutation marks it dirty. Draw rates reach tens of thousands per
-  // frame, so this path stays free of per-draw allocation and hashing.
-  if (!pipeline_state_dirty_ && memoized_pipeline_) {
+  // frame, so this path stays free of per-draw allocation and hashing. A
+  // memoized null is a build failure that was already reported for this
+  // exact state; returning it without retrying keeps a broken pipeline from
+  // re-logging on every draw.
+  if (!pipeline_state_dirty_) {
     return memoized_pipeline_;
   }
+  pipeline_state_dirty_ = false;
   memoized_pipeline_ = nullptr;
 
   // Infer the pipeline layout based on the shape of the RenderTarget.
@@ -137,7 +146,7 @@ RenderPass::GetOrCreatePipeline() {
 
   render_target_.IterateAllColorAttachments(
       [&](size_t index, const impeller::ColorAttachment& attachment) -> bool {
-        auto& color = GetColorAttachmentDescriptor(index);
+        auto& color = ColorAttachmentDescriptorAt(index);
         color.format = render_target_.GetRenderTargetPixelFormat();
         return true;
       });
@@ -213,10 +222,7 @@ RenderPass::GetOrCreatePipeline() {
     return nullptr;
   }
 
-  // GetColorAttachmentDescriptor above re-marked the state dirty during the
-  // rebuild, so clear the flag only now that the pipeline is built.
   memoized_pipeline_ = pipeline;
-  pipeline_state_dirty_ = false;
   return pipeline;
 }
 

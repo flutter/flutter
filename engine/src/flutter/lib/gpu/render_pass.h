@@ -112,10 +112,17 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
   GetOrCreatePipeline();
 
-  // The pipeline built for the current pipeline-affecting state. Every
-  // mutable-state accessor above marks the state dirty; consecutive draws
-  // with unchanged state reuse this directly, skipping the descriptor
-  // rebuild, hash, and pipeline-library lookup.
+  // The non-dirtying counterpart of GetColorAttachmentDescriptor, for the
+  // pipeline rebuild itself.
+  impeller::ColorAttachmentDescriptor& ColorAttachmentDescriptorAt(
+      size_t color_attachment_index);
+
+  // The result of building a pipeline for the current pipeline-affecting
+  // state, null when that build failed (memoized so a broken pipeline is
+  // reported once, not per draw). Every mutable-state accessor above marks
+  // the state dirty; consecutive draws with unchanged state reuse this
+  // directly, skipping the descriptor rebuild, hash, and pipeline-library
+  // lookup.
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
       memoized_pipeline_;
   bool pipeline_state_dirty_ = true;
