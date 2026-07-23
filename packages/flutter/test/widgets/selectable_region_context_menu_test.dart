@@ -12,7 +12,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
+import 'editable_text_tester.dart';
 import 'web_platform_view_registry_utils.dart';
+import 'widgets_app_tester.dart';
 
 extension on web.HTMLCollection {
   Iterable<web.Element?> get iterable =>
@@ -41,11 +43,23 @@ void main() {
     fakePlatformViewRegistry = FakePlatformViewRegistry();
     PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory =
         fakePlatformViewRegistry.registerViewFactory;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      (MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      },
+    );
   });
 
   tearDown(() {
     PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = null;
     PlatformSelectableRegionContextMenu.debugResetRegistry();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      null,
+    );
   });
 
   testWidgets('DOM element is set up correctly', (WidgetTester tester) async {
@@ -166,6 +180,44 @@ void main() {
       element.dispatchEvent(event);
       expect(event.defaultPrevented, isTrue);
     }
+  }, variant: _browserContextMenuEnabledVariants);
+
+  // Regression test for https://github.com/flutter/flutter/issues/186459
+  testWidgets('can rebuild SelectableRegion as browser context menu toggles', (
+    WidgetTester tester,
+  ) async {
+    await BrowserContextMenu.enableContextMenu();
+    addTearDown(BrowserContextMenu.enableContextMenu);
+
+    late StateSetter rebuild;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            rebuild = setState;
+            return SelectableRegion(
+              selectionControls: testTextSelectionHandleControls,
+              child: const Text('How are you?'),
+            );
+          },
+        ),
+      ),
+    );
+
+    Future<void> updateContextMenu(Future<void> update, {bool settle = false}) async {
+      await update;
+      rebuild(() {});
+      if (settle) {
+        await tester.pumpAndSettle();
+      } else {
+        await tester.pump();
+      }
+      expect(tester.takeException(), isNull);
+    }
+
+    await updateContextMenu(BrowserContextMenu.disableContextMenu());
+    await updateContextMenu(BrowserContextMenu.enableContextMenu());
+    await updateContextMenu(BrowserContextMenu.disableContextMenu(), settle: true);
   }, variant: _browserContextMenuEnabledVariants);
 }
 
