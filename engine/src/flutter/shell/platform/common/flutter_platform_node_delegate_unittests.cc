@@ -43,7 +43,7 @@ TEST(FlutterPlatformNodeDelegateTest, NodeDelegateHasUniqueId) {
 TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   root.id = 0;
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.is_text_field = true;
@@ -92,7 +92,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
   // Set up a flutter accessibility node.
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   root.id = 0;
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.is_text_field = true;
@@ -122,7 +122,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -140,7 +140,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -173,7 +173,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -191,7 +191,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -272,11 +272,87 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   EXPECT_EQ(result, false);
 }
 
+TEST(FlutterPlatformNodeDelegateTest,
+     canCalculateBoundsWithHitTestTransformParent) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{};
+  constexpr FlutterTransformation kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  constexpr FlutterTransformation kTraversalChildTransform = {1, 0, 100, 0, 1,
+                                                              0, 0, 0,   1};
+  constexpr FlutterTransformation kHitTestParentTransform = {1, 0, 200, 0, 1,
+                                                             0, 0, 0,   1};
+  constexpr FlutterTransformation kHitTestChildTransform = {1, 0, 25, 0, 1,
+                                                            0, 0, 0,  1};
+
+  std::vector<int32_t> root_traversal_children{1, 2};
+  std::vector<int32_t> root_hit_test_children{2};
+  FlutterSemanticsNode2 root{sizeof(FlutterSemanticsNode2), 0};
+  root.label = "root";
+  root.flags2 = &flags;
+  root.rect = {0, 0, 400, 400};
+  root.transform = kIdentity;
+  root.hit_test_transform = kIdentity;
+  root.child_count = root_traversal_children.size();
+  root.children_in_traversal_order = root_traversal_children.data();
+  root.hit_test_child_count = root_hit_test_children.size();
+  root.children_in_hit_test_order = root_hit_test_children.data();
+
+  std::vector<int32_t> traversal_parent_children{3};
+  FlutterSemanticsNode2 traversal_parent{sizeof(FlutterSemanticsNode2), 1};
+  traversal_parent.label = "traversal parent";
+  traversal_parent.flags2 = &flags;
+  traversal_parent.rect = {0, 0, 400, 400};
+  traversal_parent.transform = kIdentity;
+  traversal_parent.hit_test_transform = kIdentity;
+  traversal_parent.child_count = traversal_parent_children.size();
+  traversal_parent.children_in_traversal_order =
+      traversal_parent_children.data();
+  traversal_parent.hit_test_child_count = 0;
+
+  std::vector<int32_t> hit_test_parent_children{3};
+  FlutterSemanticsNode2 hit_test_parent{sizeof(FlutterSemanticsNode2), 2};
+  hit_test_parent.label = "hit-test parent";
+  hit_test_parent.flags2 = &flags;
+  hit_test_parent.rect = {0, 0, 400, 400};
+  hit_test_parent.transform = kHitTestParentTransform;
+  hit_test_parent.hit_test_transform = kHitTestParentTransform;
+  hit_test_parent.child_count = 0;
+  hit_test_parent.hit_test_child_count = hit_test_parent_children.size();
+  hit_test_parent.children_in_hit_test_order = hit_test_parent_children.data();
+
+  FlutterSemanticsNode2 overlay_child{sizeof(FlutterSemanticsNode2), 3};
+  overlay_child.label = "overlay child";
+  overlay_child.flags2 = &flags;
+  overlay_child.rect = {0, 0, 10, 10};
+  overlay_child.transform = kTraversalChildTransform;
+  overlay_child.hit_test_transform = kHitTestChildTransform;
+
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->AddFlutterSemanticsNodeUpdate(traversal_parent);
+  bridge->AddFlutterSemanticsNodeUpdate(hit_test_parent);
+  bridge->AddFlutterSemanticsNodeUpdate(overlay_child);
+
+  bridge->CommitUpdates();
+  auto overlay_node = bridge->GetFlutterPlatformNodeDelegateFromID(3).lock();
+  ASSERT_TRUE(overlay_node);
+  bool offscreen = false;
+  gfx::RectF bounds =
+      overlay_node->GetOwnerBridge().lock()->RelativeToGlobalBounds(
+          overlay_node->GetAXNode(), offscreen, true);
+
+  EXPECT_EQ(overlay_node->GetData().relative_bounds.offset_container_id, 2);
+  EXPECT_EQ(bounds.x(), 225);
+  EXPECT_EQ(bounds.y(), 0);
+  EXPECT_EQ(bounds.width(), 10);
+  EXPECT_EQ(bounds.height(), 10);
+}
+
 TEST(FlutterPlatformNodeDelegateTest, selfIsLowestPlatformAncestor) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -301,7 +377,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -317,7 +393,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";

@@ -563,6 +563,40 @@ TEST(AccessibilityBridgeTest, CanReparentNodeWithChild) {
               Contains(ui::AXEventGenerator::Event::ROLE_CHANGED).Times(1));
 }
 
+// Verify that a traversal parent update cannot corrupt AXTree if the update
+// names a grafted child whose node data is unavailable in the same batch.
+TEST(AccessibilityBridgeTest, SkipsUnavailableTraversalChild) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  const int32_t root_id = 0;
+  const int32_t portal_id = 1;
+  const int32_t overlay_child_id = 4;
+
+  std::vector<int32_t> root_children{portal_id};
+  FlutterSemanticsNode2 root =
+      CreateSemanticsNode(root_id, "root", &root_children);
+  FlutterSemanticsNode2 portal = CreateSemanticsNode(portal_id, "portal");
+
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->AddFlutterSemanticsNodeUpdate(portal);
+  bridge->CommitUpdates();
+  ASSERT_TRUE(bridge->GetTree()->error().empty());
+
+  std::vector<int32_t> portal_children{overlay_child_id};
+  portal.child_count = portal_children.size();
+  portal.children_in_traversal_order = portal_children.data();
+
+  bridge->AddFlutterSemanticsNodeUpdate(portal);
+  bridge->CommitUpdates();
+
+  EXPECT_TRUE(bridge->GetTree()->error().empty());
+  auto portal_node =
+      bridge->GetFlutterPlatformNodeDelegateFromID(portal_id).lock();
+  ASSERT_TRUE(portal_node);
+  EXPECT_EQ(portal_node->GetChildCount(), 0);
+}
+
 TEST(AccessibilityBridgeTest, AXTreeManagerTest) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();

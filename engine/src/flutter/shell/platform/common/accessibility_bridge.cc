@@ -7,6 +7,7 @@
 #include <functional>
 #include <utility>
 
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "flutter/third_party/accessibility/ax/ax_tree_manager_map.h"
 #include "flutter/third_party/accessibility/ax/ax_tree_update.h"
 #include "flutter/third_party/accessibility/base/logging.h"
@@ -18,6 +19,14 @@ constexpr int kHasScrollingAction =
     FlutterSemanticsAction::kFlutterSemanticsActionScrollRight |
     FlutterSemanticsAction::kFlutterSemanticsActionScrollUp |
     FlutterSemanticsAction::kFlutterSemanticsActionScrollDown;
+
+std::unique_ptr<gfx::Transform> CreateTransform(
+    const FlutterTransformation& transform) {
+  return std::make_unique<gfx::Transform>(
+      transform.scaleX, transform.skewX, transform.transX, 0, transform.skewY,
+      transform.scaleY, transform.transY, 0, transform.pers0, transform.pers1,
+      transform.pers2, 0, 0, 0, 0, 0);
+}
 
 // AccessibilityBridge
 AccessibilityBridge::AccessibilityBridge()
@@ -71,6 +80,7 @@ void AccessibilityBridge::CommitUpdates() {
   // Second, apply the pending node updates. This also moves reparented nodes to
   // their new parents if needed.
   ui::AXTreeUpdate update{.tree_data = tree_->data()};
+  UpdateHitTestParentIds();
 
   // Figure out update order, ui::AXTree only accepts update in tree order,
   // where parent node must come before the child node in
@@ -81,18 +91,22 @@ void AccessibilityBridge::CommitUpdates() {
   // before child updates. If the root is in the update, it is guaranteed to
   // be the first node of the last list.
   std::vector<std::vector<SemanticsNode>> results;
+  std::unordered_set<int32_t> update_node_ids;
   while (!pending_semantics_node_updates_.empty()) {
     auto begin = pending_semantics_node_updates_.begin();
     SemanticsNode target = begin->second;
     std::vector<SemanticsNode> sub_tree_list;
     GetSubTreeList(target, sub_tree_list);
+    for (const SemanticsNode& node : sub_tree_list) {
+      update_node_ids.insert(node.id);
+    }
     results.push_back(sub_tree_list);
     pending_semantics_node_updates_.erase(begin);
   }
 
   for (size_t i = results.size(); i > 0; i--) {
     for (const SemanticsNode& node : results[i - 1]) {
-      ConvertFlutterUpdate(node, update);
+      ConvertFlutterUpdate(node, update_node_ids, update);
     }
   }
 
@@ -201,8 +215,9 @@ void AccessibilityBridge::OnAtomicUpdateFinished(
   for (const auto& change : changes) {
     ui::AXNode* node = change.node;
     const ui::AXNodeData& data = node->data();
-    AccessibilityNodeId offset_container_id = -1;
-    if (node->parent()) {
+    AccessibilityNodeId offset_container_id =
+        data.relative_bounds.offset_container_id;
+    if (offset_container_id == ui::AXNode::kInvalidAXID && node->parent()) {
       offset_container_id = node->parent()->id();
     }
     node->SetLocation(offset_container_id, data.relative_bounds.bounds,
@@ -230,10 +245,13 @@ AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
         continue;
       }
 
-      // This pending update moves the current child node.
-      // That new child must have a corresponding pending update.
-      assert(pending_semantics_node_updates_.find(child_id) !=
-             pending_semantics_node_updates_.end());
+      // This pending update moves the current child node. If the new child
+      // does not have node data in the same pending update, AXTree cannot
+      // re-add it under the new parent in this atomic update.
+      if (pending_semantics_node_updates_.find(child_id) ==
+          pending_semantics_node_updates_.end()) {
+        continue;
+      }
 
       // Create an update to remove the child from its previous parent.
       int32_t parent_id = child->parent()->id();
@@ -266,6 +284,22 @@ AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
   return update;
 }
 
+void AccessibilityBridge::UpdateHitTestParentIds() {
+  for (const auto& node_update : pending_semantics_node_updates_) {
+    for (auto iter = hit_test_parent_ids_.begin();
+         iter != hit_test_parent_ids_.end();) {
+      if (iter->second == node_update.first) {
+        iter = hit_test_parent_ids_.erase(iter);
+      } else {
+        iter++;
+      }
+    }
+    for (int32_t child_id : node_update.second.children_in_hit_test_order) {
+      hit_test_parent_ids_[child_id] = node_update.first;
+    }
+  }
+}
+
 // Private method.
 void AccessibilityBridge::GetSubTreeList(const SemanticsNode& target,
                                          std::vector<SemanticsNode>& result) {
@@ -280,8 +314,10 @@ void AccessibilityBridge::GetSubTreeList(const SemanticsNode& target,
   }
 }
 
-void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
-                                               ui::AXTreeUpdate& tree_update) {
+void AccessibilityBridge::ConvertFlutterUpdate(
+    const SemanticsNode& node,
+    const std::unordered_set<int32_t>& update_node_ids,
+    ui::AXTreeUpdate& tree_update) {
   ui::AXNodeData node_data;
   node_data.id = node.id;
   SetRoleFromFlutterUpdate(node_data, node);
@@ -298,13 +334,19 @@ void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
   node_data.relative_bounds.bounds.SetRect(node.rect.left, node.rect.top,
                                            node.rect.right - node.rect.left,
                                            node.rect.bottom - node.rect.top);
-  node_data.relative_bounds.transform = std::make_unique<gfx::Transform>(
-      node.transform.scaleX, node.transform.skewX, node.transform.transX, 0,
-      node.transform.skewY, node.transform.scaleY, node.transform.transY, 0,
-      node.transform.pers0, node.transform.pers1, node.transform.pers2, 0, 0, 0,
-      0, 0);
+  auto hit_test_parent_iter = hit_test_parent_ids_.find(node.id);
+  if (hit_test_parent_iter != hit_test_parent_ids_.end()) {
+    node_data.relative_bounds.offset_container_id =
+        hit_test_parent_iter->second;
+    node_data.relative_bounds.transform =
+        CreateTransform(node.hit_test_transform);
+  } else {
+    node_data.relative_bounds.transform = CreateTransform(node.transform);
+  }
   for (auto child : node.children_in_traversal_order) {
-    node_data.child_ids.push_back(child);
+    if (tree_->GetFromId(child) || update_node_ids.contains(child)) {
+      node_data.child_ids.push_back(child);
+    }
   }
   SetTreeData(node, tree_update);
   tree_update.nodes.push_back(node_data);
@@ -622,10 +664,24 @@ AccessibilityBridge::FromFlutterSemanticsNode(
   result.text_direction = flutter_node.text_direction;
   result.rect = flutter_node.rect;
   result.transform = flutter_node.transform;
+  const FlutterSemanticsNode2* flutter_node_ptr = &flutter_node;
+  result.hit_test_transform =
+      STRUCT_HAS_MEMBER(flutter_node_ptr, hit_test_transform)
+          ? flutter_node.hit_test_transform
+          : flutter_node.transform;
   if (flutter_node.child_count > 0) {
     result.children_in_traversal_order = std::vector<int32_t>(
         flutter_node.children_in_traversal_order,
         flutter_node.children_in_traversal_order + flutter_node.child_count);
+  }
+  const size_t hit_test_child_count =
+      STRUCT_HAS_MEMBER(flutter_node_ptr, hit_test_child_count)
+          ? flutter_node.hit_test_child_count
+          : flutter_node.child_count;
+  if (hit_test_child_count > 0 && flutter_node.children_in_hit_test_order) {
+    result.children_in_hit_test_order = std::vector<int32_t>(
+        flutter_node.children_in_hit_test_order,
+        flutter_node.children_in_hit_test_order + hit_test_child_count);
   }
   if (flutter_node.custom_accessibility_actions_count > 0) {
     result.custom_accessibility_actions = std::vector<int32_t>(

@@ -35,7 +35,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
@@ -73,7 +73,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{.is_text_field = true, .is_read_only = true};
   root.id = 0;
   root.flags2 = &flags;
@@ -116,7 +116,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{.is_text_field = true, .is_read_only = true};
   root.id = 0;
   root.flags2 = &flags;
@@ -164,7 +164,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{};
   root.flags2 = &flags;
   root.id = 0;
@@ -181,7 +181,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{};
   child1.flags2 = &child_flags;
   child1.id = 1;
@@ -245,7 +245,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
 
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{.is_text_field = true};
   root.id = 0;
@@ -270,7 +270,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   double rectSize = 50;
   double transformFactor = 0.5;
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   child1.id = 1;
   child1.flags2 = &child_flags;
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
@@ -327,7 +327,7 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
 
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   root.id = 0;
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.flags2 = &flags;
@@ -351,7 +351,7 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   double rectSize = 50;
   double transformFactor = 0.5;
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   child1.flags2 = &child_flags;
   child1.id = 1;

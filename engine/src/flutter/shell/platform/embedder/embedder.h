@@ -1631,11 +1631,14 @@ typedef struct {
   /// The transform from this node's coordinate system to its parent's
   /// coordinate system.
   FlutterTransformation transform;
-  /// The number of children this node has.
+  /// The number of children this node has in traversal order.
   size_t child_count;
   /// Array of child node IDs in traversal order. Has length `child_count`.
   const int32_t* children_in_traversal_order;
   /// Array of child node IDs in hit test order. Has length `child_count`.
+  ///
+  /// @deprecated     Use `hit_test_child_count` as the length for this array
+  ///                 when the field is available.
   const int32_t* children_in_hit_test_order;
   /// The number of custom accessibility action associated with this node.
   size_t custom_accessibility_actions_count;
@@ -1714,11 +1717,12 @@ typedef struct {
   /// The transform from this node's coordinate system to its parent's
   /// coordinate system.
   FlutterTransformation transform;
-  /// The number of children this node has.
+  /// The number of children this node has in traversal order.
   size_t child_count;
   /// Array of child node IDs in traversal order. Has length `child_count`.
   const int32_t* children_in_traversal_order;
-  /// Array of child node IDs in hit test order. Has length `child_count`.
+  /// Array of child node IDs in hit test order. Has length
+  /// `hit_test_child_count`.
   const int32_t* children_in_hit_test_order;
   /// The number of custom accessibility action associated with this node.
   size_t custom_accessibility_actions_count;
@@ -1767,6 +1771,11 @@ typedef struct {
   /// This is usually used for UI testing with tools that work by querying the
   /// native accessibility, like UI Automator, XCUITest, or Appium.
   const char* identifier;
+  /// The transform from this node's coordinate system to its hit-test parent's
+  /// coordinate system.
+  FlutterTransformation hit_test_transform;
+  /// The number of children this node has in hit-test order.
+  size_t hit_test_child_count;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
