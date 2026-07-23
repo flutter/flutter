@@ -239,7 +239,7 @@ class KernelSnapshot extends Target {
       .macos || .windows => true,
       .linux => targetPlatform.cpuArch == .x64,
       .unsupported => TargetPlatform.throwUnsupportedTarget(),
-      _ => false,
+      .web || .android || .ios || .fuchsia || .custom || .tester => false,
     };
 
     final String? targetOS = switch (targetPlatform.type) {
