@@ -100,10 +100,19 @@ public final class FlutterInjector {
     return deferredComponentManager;
   }
 
+  /**
+   * Returns the {@link java.util.concurrent.ExecutorService} used by the Flutter Android engine
+   * embedding to run background tasks.
+   */
+  @NonNull
   public ExecutorService executorService() {
     return executorService;
   }
 
+  /**
+   * Returns the {@link io.flutter.embedding.engine.FlutterJNI.Factory} instance used to create
+   * {@link io.flutter.embedding.engine.FlutterJNI} instances.
+   */
   @NonNull
   public FlutterJNI.Factory getFlutterJNIFactory() {
     return flutterJniFactory;
@@ -140,17 +149,33 @@ public final class FlutterInjector {
       return this;
     }
 
+    /**
+     * Sets the {@link io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager}
+     * override.
+     *
+     * <p>The default value is null.
+     */
     public Builder setDeferredComponentManager(
         @Nullable DeferredComponentManager deferredComponentManager) {
       this.deferredComponentManager = deferredComponentManager;
       return this;
     }
 
+    /**
+     * Sets the {@link io.flutter.embedding.engine.FlutterJNI.Factory} override.
+     *
+     * <p>A reasonable default will be used if unspecified.
+     */
     public Builder setFlutterJNIFactory(@NonNull FlutterJNI.Factory factory) {
       this.flutterJniFactory = factory;
       return this;
     }
 
+    /**
+     * Sets the {@link java.util.concurrent.ExecutorService} override.
+     *
+     * <p>A reasonable default will be used if unspecified.
+     */
     public Builder setExecutorService(@NonNull ExecutorService executorService) {
       this.executorService = executorService;
       return this;
