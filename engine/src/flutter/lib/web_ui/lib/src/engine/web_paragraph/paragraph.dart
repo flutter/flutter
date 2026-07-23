@@ -932,6 +932,7 @@ class WebParagraph implements ui.Paragraph {
     final ui.GlyphInfo? result = getGlyphInfoAt(
       position.offset + (position.affinity == ui.TextAffinity.downstream ? 0 : -1),
     );
+
     if (result == null) {
       WebParagraphDebug.apiTrace(
         'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
@@ -939,7 +940,6 @@ class WebParagraph implements ui.Paragraph {
       );
       return null;
     }
-
     WebParagraphDebug.apiTrace(
       'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
       'TextPosition(${position.offset}, ${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
@@ -1040,21 +1040,32 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
-    for (final TextLine line in _layout.lines) {
-      if (line.allLineTextRange.isBefore(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
-        continue;
-      }
-      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        break;
-      }
-
-      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
-      return line.lineNumber;
+    if (_layout.lines.isEmpty || (_layout.lines.last.hardLineBreakRange.end <= codeUnitOffset)) {
+      return null;
     }
 
-    assert(false, 'getLineNumberAt($codeUnitOffset): null (out of range, should not happen)');
-    return null;
+    // This is the algorithm that works in SkParagraph
+    var startLine = 0;
+    int endLine = _layout.lines.length - 1;
+    while (endLine > startLine) {
+      // startLine + 1 <= endLine, so we have startLine <= midLine <= endLine - 1.
+      final int midLine = ((endLine + startLine) / 2).floor();
+      final TextLine line = _layout.lines[midLine];
+      // We need to take into account hard line break, too
+      final midLineRange = ui.TextRange(
+        start: line.allLineTextRange.start,
+        end: line.hardLineBreakRange.end,
+      );
+      if (codeUnitOffset < midLineRange.start) {
+        endLine = midLine - 1;
+      } else if (midLineRange.end <= codeUnitOffset) {
+        startLine = midLine + 1;
+      } else {
+        return midLine;
+      }
+    }
+    assert(startLine == endLine);
+    return startLine;
   }
 
   void clearPaintCache() {
