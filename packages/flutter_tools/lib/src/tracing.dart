@@ -97,7 +97,7 @@ class Tracing {
           timer.cancel();
         }
         // The exception is rethrown, so don't catch only Exceptions.
-      } catch (exception) {
+      } catch (_) {
         status.cancel();
         rethrow;
       }
