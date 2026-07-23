@@ -178,6 +178,53 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
     });
 
+    test(
+      'dispatches SemanticsAction.setText from input on an inactive field that allows it',
+      () async {
+        final actionLog = <ui.SemanticsActionEvent>[];
+        ui.PlatformDispatcher.instance.onSemanticsActionEvent = actionLog.add;
+        addTearDown(() {
+          ui.PlatformDispatcher.instance.onSemanticsActionEvent = null;
+        });
+
+        // The field is not focused, so it is not the active HybridTextEditing
+        // field. Browser automation and autofill write to it directly.
+        createTextFieldSemantics(value: '', hasSetText: true);
+
+        final input =
+            owner().semanticsHost.querySelector('input[data-semantics-role="text-field"]')!
+                as DomHTMLInputElement;
+        input.value = 'hello@example.com';
+        input.dispatchEvent(createDomEvent('Event', 'input'));
+
+        expect(actionLog, hasLength(1));
+        final ui.SemanticsActionEvent event = actionLog.single;
+        expect(event.nodeId, 0);
+        expect(event.type, ui.SemanticsAction.setText);
+        final text =
+            const StandardMessageCodec().decodeMessage(event.arguments! as ByteData) as String;
+        expect(text, 'hello@example.com');
+      },
+    );
+
+    test('does not dispatch setText from input when the field does not allow it', () async {
+      final actionLog = <ui.SemanticsActionEvent>[];
+      ui.PlatformDispatcher.instance.onSemanticsActionEvent = actionLog.add;
+      addTearDown(() {
+        ui.PlatformDispatcher.instance.onSemanticsActionEvent = null;
+      });
+
+      createTextFieldSemantics(value: '');
+
+      final input =
+          owner().semanticsHost.querySelector('input[data-semantics-role="text-field"]')!
+              as DomHTMLInputElement;
+      input.value = 'hello@example.com';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(actionLog, isEmpty);
+    });
+
     test('Syncs semantic state from framework', () async {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
@@ -624,6 +671,7 @@ SemanticsObject createTextFieldSemantics({
   bool isMultiline = false,
   bool isObscured = false,
   bool? isRequired,
+  bool hasSetText = false,
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
@@ -646,6 +694,7 @@ SemanticsObject createTextFieldSemantics({
           : (isRequired ? ui.Tristate.isTrue : ui.Tristate.isFalse),
     ),
     hasTap: true,
+    hasSetText: hasSetText,
     rect: rect,
     textDirection: ui.TextDirection.ltr,
     textSelectionBase: textSelectionBase,

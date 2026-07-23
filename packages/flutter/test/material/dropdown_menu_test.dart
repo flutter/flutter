@@ -3728,6 +3728,9 @@ void main() {
         label: 'Test',
         textDirection: TextDirection.ltr,
         hasExpandedState: true,
+        // On web, an enabled text field exposes setText even before focus so
+        // browser automation can drive it.
+        hasSetTextAction: kIsWeb,
       ),
     );
 

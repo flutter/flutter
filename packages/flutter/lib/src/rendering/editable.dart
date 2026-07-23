@@ -1387,7 +1387,12 @@ class RenderEditable extends RenderBox
       config.onSetSelection = _handleSetSelection;
     }
 
-    if (hasFocus && !readOnly) {
+    // On the web, expose setText even before the field is focused so browser
+    // automation and autofill can drive the text value through the semantics
+    // DOM input before Flutter's focused semantics update arrives. On other
+    // platforms keep the focus requirement to avoid changing screen-reader
+    // behavior for unfocused fields.
+    if (!readOnly && (kIsWeb || hasFocus)) {
       config.onSetText = _handleSetText;
     }
 

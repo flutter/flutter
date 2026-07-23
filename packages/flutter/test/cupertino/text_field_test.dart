@@ -571,6 +571,9 @@ void main() {
                               SemanticsAction.focus,
                               SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.didLoseAccessibilityFocus,
+                              // On web, an enabled text field exposes setText even
+                              // before focus so browser automation can drive it.
+                              if (kIsWeb) SemanticsAction.setText,
                             ],
                             textDirection: TextDirection.ltr,
                           ),
@@ -7764,6 +7767,9 @@ void main() {
         hasEnabledState: true,
         hasTapAction: true,
         hasFocusAction: true,
+        // On web, an enabled text field exposes setText even before focus so
+        // browser automation can drive it.
+        hasSetTextAction: kIsWeb,
       ),
     );
   });
@@ -10587,6 +10593,9 @@ void main() {
                               SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.didLoseAccessibilityFocus,
                             ],
+                            // On web, an enabled text field exposes setText even
+                            // before focus so browser automation can drive it.
+                            if (kIsWeb) SemanticsAction.setText,
                             // TODO(gspencergoog): also test for the presence of SemanticsAction.focus when
                             // this iOS issue is addressed: https://github.com/flutter/flutter/issues/150030
                           ],
