@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
@@ -56,6 +57,24 @@ abstract class UnpackDarwin extends Target {
         'Failed to copy framework (exit ${result.exitCode}:\n'
         '${result.stdout}\n---\n${result.stderr}',
       );
+    }
+    final String copiedPath = environment.outputDir
+        .childDirectory(environment.fileSystem.path.basename(basePath))
+        .path;
+    try {
+      final ProcessResult chmodResult = await environment.processManager.run(<String>[
+        'chmod',
+        '-R',
+        'u+w',
+        copiedPath,
+      ]);
+      if (chmodResult.exitCode != 0) {
+        throwToolExit(
+          'Failed to explicitly make framework writable at $copiedPath: ${chmodResult.stderr}',
+        );
+      }
+    } on ProcessException catch (e) {
+      throwToolExit('Failed to run chmod for $copiedPath: $e');
     }
   }
 

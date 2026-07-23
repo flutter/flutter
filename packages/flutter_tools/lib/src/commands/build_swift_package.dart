@@ -651,6 +651,24 @@ class FlutterFrameworkDependency {
           '${result.stdout}\n---\n${result.stderr}',
         );
       }
+      final String copiedPath = xcframeworkOutput
+          .childDirectory('${_targetPlatform.binaryName}.xcframework')
+          .path;
+      try {
+        final ProcessResult chmodResult = await _utils.processManager.run(<String>[
+          'chmod',
+          '-R',
+          'u+w',
+          copiedPath,
+        ]);
+        if (chmodResult.exitCode != 0) {
+          throwToolExit(
+            'Failed to explicitly make XCFramework writable at $copiedPath: ${chmodResult.stderr}',
+          );
+        }
+      } on ProcessException catch (e) {
+        throwToolExit('Failed to run chmod for $copiedPath: $e');
+      }
       if (codesignIdentity != null) {
         final Directory copiedXCFramework = xcframeworkOutput.childDirectory(
           '${_targetPlatform.binaryName}.xcframework',
