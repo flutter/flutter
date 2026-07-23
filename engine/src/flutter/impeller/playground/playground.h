@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_PLAYGROUND_PLAYGROUND_H_
 #define FLUTTER_IMPELLER_PLAYGROUND_PLAYGROUND_H_
 
+#include <atomic>
 #include <chrono>
 #include <memory>
 
@@ -46,6 +47,8 @@ class Playground {
                       const PlaygroundSwitches& switches);
 
   virtual ~Playground();
+
+  static void OnTearDownTestEnvironment();
 
   static bool ShouldOpenNewPlaygrounds();
 
@@ -171,16 +174,6 @@ class Playground {
   /// @see PlatformSupportsWideGamut()
   [[nodiscard]] virtual bool EnsureContextSupportsWideGamut();
 
-  /// @brief Make sure that when the context is later created that it
-  ///        will support the experimental AA lines flag.
-  ///
-  /// Must be called before any other method except for the Ensure family
-  /// of methods.
-  ///
-  /// Callers should abort (such as via GTEST_SKIP) if the method returns
-  /// false if their behavior depends on the experimental AA lines.
-  [[nodiscard]] virtual bool EnsureContextSupportsAntialiasLines();
-
   /// @brief  Return an unmodifiable reference to the current switches.
   ///         The switches might change at the start of a test as it
   ///         has a brief opportunity to call any of the Ensure* methods
@@ -197,6 +190,9 @@ class Playground {
   virtual testing::GoldenDigestManager* GetGoldenDigestManager() const;
 
  private:
+  static void InitializeGLFWOnce();
+  static std::atomic<bool> glfw_initialized_;
+
   const PlaygroundBackend backend_;
   PlaygroundSwitches switches_;
 

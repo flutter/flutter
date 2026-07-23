@@ -17,7 +17,6 @@ import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
 import 'test_page_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const kBlue = Color(0xFF0000FF);
