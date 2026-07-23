@@ -784,7 +784,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(value >= 0.0 && value <= 1.0);
 
     final int divisions = widget.divisions!;
-    return (value * divisions).round() / divisions;
+    // Add a small epsilon before rounding to fix IEEE 754 representation errors
+    // where values like 0.35 * 10 produce 3.4999... instead of 3.5, causing
+    // them to round to the wrong (lower) division.
+    return clampDouble(((value * divisions) + 1e-10).round() / divisions, 0.0, 1.0);
   }
 
   double _convert(double value) {
@@ -1273,6 +1276,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     isDiscrete: false,
   );
 
+  // Tick marks and the thumb are painted in an adjusted coordinate space that
+  // reserves half a track height of padding on each end for discrete rounded
+  // tracks, so gesture math needs to account for that same padding to stay
+  // aligned with the visual tick positions.
+  double get _discreteRoundedTrackPadding =>
+      (isDiscrete && _sliderTheme.trackShape!.isRounded) ? _trackRect.height : 0.0;
+
   bool get isInteractive => onChanged != null;
 
   bool get isDiscrete => divisions != null && divisions! > 0;
@@ -1577,15 +1587,25 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {
-    final double visualPosition =
-        (globalToLocal(globalPosition).dx - _trackRect.left) / _trackRect.width;
+    final double localDx = globalToLocal(globalPosition).dx;
+    final double padding = _discreteRoundedTrackPadding;
+    final double adjustedWidth = _trackRect.width - padding;
+    // Invert the padded track-geometry formula (see _discreteRoundedTrackPadding)
+    // so tap coordinates align with the visual tick positions. Without this, the
+    // snap midpoints in tap space diverge from the visual midpoints between tick
+    // marks, biasing lower-half taps toward the wrong (lower) division.
+    final double visualPosition = adjustedWidth <= 0.0
+        ? 0.5
+        : (localDx - _trackRect.left - padding / 2) / adjustedWidth;
     return _getValueFromVisualPosition(visualPosition);
   }
 
   double _discretize(double value) {
     double result = clampDouble(value, 0.0, 1.0);
     if (isDiscrete) {
-      result = (result * divisions!).round() / divisions!;
+      // Add a small epsilon before rounding to fix IEEE 754 representation
+      // errors where values like 0.35 * 10 produce 3.4999... instead of 3.5.
+      result = clampDouble(((result * divisions!) + 1e-10).round() / divisions!, 0.0, 1.0);
     }
     return result;
   }
@@ -1661,7 +1681,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case SliderInteraction.slideOnly:
       case SliderInteraction.slideThumb:
         if (_active && isInteractive) {
-          final double valueDelta = details.primaryDelta! / _trackRect.width;
+          // Use the same coordinate width as _getValueFromGlobalPosition so
+          // that dragging immediately after a tap does not jump.
+          final double effectiveWidth = _trackRect.width - _discreteRoundedTrackPadding;
+          if (effectiveWidth <= 0.0) {
+            break;
+          }
+          final double valueDelta = details.primaryDelta! / effectiveWidth;
           _currentDragValue += switch (textDirection) {
             TextDirection.rtl => -valueDelta,
             TextDirection.ltr => valueDelta,
