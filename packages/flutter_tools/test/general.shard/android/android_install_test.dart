@@ -23,6 +23,17 @@ const kAdbStartServerCommand = FakeCommand(command: <String>['adb', 'start-serve
 const kInstallCommand = FakeCommand(
   command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app-debug.apk'],
 );
+const kMkdirCommand = FakeCommand(
+  command: <String>[
+    'adb',
+    '-s',
+    '1234',
+    'shell',
+    'mkdir',
+    '-p',
+    '/storage/emulated/10/Android/data/app',
+  ],
+);
 const kStoreShaCommand = FakeCommand(
   command: <String>[
     'adb',
@@ -33,7 +44,7 @@ const kStoreShaCommand = FakeCommand(
     '-n',
     '',
     '>',
-    '/data/local/tmp/sky.app.sha1',
+    '/storage/emulated/10/Android/data/app/sky.sha1',
   ],
 );
 
@@ -105,6 +116,7 @@ void main() {
           stdout: '[ro.build.version.sdk]: [${gradle_utils.minSdkVersion}]',
         ),
         kInstallCommand,
+        kMkdirCommand,
         kStoreShaCommand,
       ]);
       final File apk = fileSystem.file('app-debug.apk')..createSync();
@@ -127,6 +139,7 @@ void main() {
       kAdbStartServerCommand,
       const FakeCommand(command: <String>['adb', '-s', '1234', 'shell', 'getprop']),
       kInstallCommand,
+      kMkdirCommand,
       kStoreShaCommand,
     ]);
     final File apk = fileSystem.file('app-debug.apk')..createSync();
@@ -202,11 +215,22 @@ void main() {
           '-s',
           '1234',
           'shell',
+          'mkdir',
+          '-p',
+          '/storage/emulated/10/Android/data/app',
+        ],
+      ),
+      const FakeCommand(
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
           'echo',
           '-n',
           'example_sha',
           '>',
-          '/data/local/tmp/sky.app.sha1',
+          '/storage/emulated/10/Android/data/app/sky.sha1',
         ],
         stdout: 'example_sha',
       ),
@@ -275,11 +299,22 @@ void main() {
             '-s',
             '1234',
             'shell',
+            'mkdir',
+            '-p',
+            '/storage/emulated/10/Android/data/app',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'adb',
+            '-s',
+            '1234',
+            'shell',
             'echo',
             '-n',
             'example_sha',
             '>',
-            '/data/local/tmp/sky.app.sha1',
+            '/storage/emulated/10/Android/data/app/sky.sha1',
           ],
         ),
       ]);
