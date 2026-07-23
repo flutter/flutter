@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
@@ -1110,6 +1111,65 @@ TEST(AndroidExternalViewEmbedder, TeardownDoesNotCallJNIMethod) {
 
   EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(0);
   embedder->Teardown();
+}
+
+TEST(AndroidExternalViewEmbedder2, SwapsTransactionsAfterDisplayingPlatformViews) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners(
+      "test",
+      thread_host.platform_thread->GetTaskRunner(),  // platform
+      thread_host.raster_thread->GetTaskRunner(),    // raster
+      thread_host.ui_thread->GetTaskRunner(),        // ui
+      thread_host.io_thread->GetTaskRunner()         // io
+  );
+  auto embedder = std::make_unique<AndroidExternalViewEmbedder2>(
+      *android_context, jni_mock, nullptr, task_runners);
+
+  const DlISize frame_size(100, 100);
+  const int64_t view_id = 42;
+  MutatorsStack mutators;
+  DlMatrix matrix = DlMatrix::MakeTranslation({0, 0});
+
+  embedder->PrepareFlutterView(frame_size, 1.0);
+  embedder->PrerollCompositeEmbeddedView(
+      view_id,
+      std::make_unique<EmbeddedViewParams>(matrix, DlSize(50, 50), mutators));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50,
+                                                  50, mutators));
+    EXPECT_CALL(*jni_mock, swapTransaction());
+    EXPECT_CALL(*jni_mock, onEndFrame2());
+  }
+
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  auto surface_frame = std::make_unique<SurfaceFrame>(
+      SkSurfaces::Null(100, 100), framebuffer_info,
+      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
+      [](const SurfaceFrame& surface_frame) { return true; },
+      /*frame_size=*/frame_size);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners.GetRasterTaskRunner(), [&]() {
+        embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                    std::move(surface_frame));
+      });
+
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners.GetPlatformTaskRunner(),
+      [&latch]() { latch.Signal(); });
+  latch.Wait();
+
+  embedder->Teardown();
+  embedder.reset();
 }
 
 }  // namespace testing
