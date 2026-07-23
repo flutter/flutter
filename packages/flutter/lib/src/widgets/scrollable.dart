@@ -932,15 +932,36 @@ class ScrollableState extends State<Scrollable>
   // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
-    final bool flipAxes =
-        pressed.any(_configuration.pointerAxisModifiers.contains) &&
-        // Axes are only flipped for physical mouse wheel input.
-        // On some platforms, like web, trackpad input is handled through pointer
-        // signals, but should not be included in this axis modifying behavior.
-        // This is because on a trackpad, all directional axes are available to
-        // the user, while mouse scroll wheels typically are restricted to one
-        // axis.
-        event.kind == PointerDeviceKind.mouse;
+    final bool flipAxes;
+    if (pressed.any(_configuration.pointerAxisModifiers.contains) && event.kind == PointerDeviceKind.mouse) {
+      // Axes are only flipped for physical mouse wheel input.
+      // On some platforms, like web, trackpad input is handled through pointer
+      // signals, but should not be included in this axis modifying behavior.
+      // This is because on a trackpad, all directional axes are available to
+      // the user, while mouse scroll wheels typically are restricted to one
+      // axis.
+      if (kIsWeb) {
+        // Browsers sometimes swap the x and y values, when shift is pressed.
+        // See:
+        // - Firefox: mousewheel.with_shift.action = 4
+        //   https://searchfox.org/firefox-main/source/modules/libpref/init/all.js#1823
+        // - Chromium:
+        //   https://github.com/chromium/chromium/blob/7fb58bbd8fa63eb7a9d7cb68761e367e5faf4f34/content/browser/renderer_host/input/mouse_wheel_event_queue.cc#L131
+        //
+        // There's no way to find out, if the browser flipped the values:
+        // https://github.com/w3c/pointerevents/issues/586
+        // So we ignore the flip, if dy is not 0, as then it is likely that the
+        // browser already flipped the values. Otherwise a horizontal scroll
+        // wheel must have created this event, which most mice don't have.
+        // In case they have a horizontal scroll wheel, they likely would not
+        // use the shift key for scrolling.
+        flipAxes = event.scrollDelta.dx == 0 && event.scrollDelta.dy != 0;
+      } else {
+        flipAxes = true;
+      }
+    } else {
+      flipAxes = false;
+    }
 
     final Axis axis = flipAxes ? flipAxis(widget.axis) : widget.axis;
     final double delta = switch (axis) {
