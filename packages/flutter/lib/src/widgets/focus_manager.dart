@@ -396,6 +396,24 @@ enum UnfocusDisposition {
 /// call [dispose] when the node is done being used.
 /// {@endtemplate}
 ///
+/// {@template flutter.widgets.FocusNode.focusInvariants}
+/// ## Focus Invariants
+///
+/// The Flutter focus system maintains the following invariant:
+/// **Only nodes with `canRequestFocus = true` can have primary focus.**
+///
+/// This means that if a [FocusNode] has [hasPrimaryFocus] return `true`, then
+/// [canRequestFocus] must also return `true`. This invariant is enforced by the
+/// [FocusManager] and is crucial for ensuring consistent keyboard navigation
+/// behavior.
+///
+/// When `canRequestFocus` is set to `false` on a node that currently has primary
+/// focus, the focus will be moved to another focusable node if possible, or lost
+/// entirely. The focus system will attempt to restore focus to the previously
+/// focused node, then to the first traversable descendant in the scope, and
+/// finally to the root scope as a last resort.
+/// {@endtemplate}
+///
 /// {@template flutter.widgets.FocusNode.keyEvents}
 /// ## Key Event Propagation
 ///
@@ -1984,8 +2002,16 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       _markedForFocus = rootScope;
     }
     assert(_focusDebug(() => 'Refreshing focus state. Next focus will be $_markedForFocus'));
-    // A node has requested to be the next focus, and isn't already the primary
-    // focus.
+
+    // Handle when focus is requested to a non-primary node, but the node is no longer focusable.
+    // Find an alternative focusable node.
+    if (_markedForFocus != null &&
+        _markedForFocus != _primaryFocus &&
+        !_markedForFocus!.canRequestFocus) {
+      _markedForFocus = _findValidFocusOrFallback(previousFocus);
+    }
+
+    // Handle the requested non-primary focus if focusable
     if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
       final Set<FocusNode> previousPath = previousFocus?.ancestors.toSet() ?? <FocusNode>{};
       final Set<FocusNode> nextPath = _markedForFocus!.ancestors.toSet();
@@ -1995,6 +2021,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       _dirtyNodes.addAll(previousPath.difference(nextPath));
 
       _primaryFocus = _markedForFocus;
+    }
+    if (_markedForFocus != null) {
       _markedForFocus = null;
     }
     assert(_markedForFocus == null);
@@ -2021,6 +2049,34 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       }
       return true;
     }());
+  }
+
+  /// Finds a valid focusable node or returns a fallback node.
+  ///
+  /// This method is called when [_markedForFocus] is set to a node that cannot
+  /// request focus. It attempts to find an alternative focusable node.
+  FocusNode _findValidFocusOrFallback(FocusNode? previousFocus) {
+    // Try to restore focus to previous node if it's still focusable
+    if (previousFocus != null && previousFocus.canRequestFocus) {
+      return previousFocus;
+    }
+
+    // If [_markedForFocus] is no longer focusable, try to find an alternative
+    // focusable node within the nearest scope
+    final FocusScopeNode scope = previousFocus?.nearestScope ?? rootScope;
+    FocusNode? fallbackFocus;
+
+    if (scope.descendants.isNotEmpty) {
+      // Get all traversable descendants, and give the focus to the first one if found any
+      // [traversalDescendants] filters [canRequestFocus]
+      final Iterable<FocusNode> traversalDescendants = scope.traversalDescendants;
+      if (traversalDescendants.isNotEmpty) {
+        fallbackFocus = traversalDescendants.first;
+      }
+    }
+
+    // Return fallback focus or restore to [rootScope] as a safe and last option
+    return fallbackFocus ?? rootScope;
   }
 
   /// Enables this [FocusManager] to listen to changes of the application
