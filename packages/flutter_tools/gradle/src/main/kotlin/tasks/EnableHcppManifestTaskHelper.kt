@@ -10,6 +10,8 @@ import groovy.xml.XmlParser
 import java.io.File
 import java.io.PrintWriter
 
+import org.gradle.api.logging.Logger
+
 /**
  * Stateless object to contain the logic used in [EnableHcppManifestTask].
  */
@@ -19,20 +21,20 @@ object EnableHcppManifestTaskHelper {
     internal const val HCPP_METADATA_NAME = "io.flutter.embedding.android.EnableHcpp"
 
     /**
-     * Copies [manifestFile] to [updatedManifest], adding a
-     * `<meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="true"/>`
-     * element to the `<application>` element if no meta-data with that name is already present.
+     * Processes [manifestFile] and writes to [updatedManifest].
      *
-     * If the meta-data is already present (with any value), the manifest is copied unmodified so
-     * that an explicit value always wins over the feature flag based injection.
+     * If [requestedEnableHcpp] is true and no `EnableHcpp` metadata is present, injects:
+     * `<meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="true"/>`.
      *
-     * When injecting, the manifest is reparsed and rewritten. XML comments are not preserved;
-     * the merged manifest is an intermediate artifact consumed by aapt2, which ignores them.
-     * All elements and attributes are preserved.
+     * If [explicitEnableHcpp] is specified (non-null) and conflicts with an existing metadata
+     * value in the merged manifest, logs a warning via [logger].
      */
-    fun addEnableHcppMetadataIfAbsent(
+    fun processHcppManifest(
         manifestFile: File,
-        updatedManifest: File
+        updatedManifest: File,
+        requestedEnableHcpp: Boolean = true,
+        explicitEnableHcpp: Boolean? = null,
+        logger: Logger? = null,
     ) {
         val manifest: Node =
             XmlParser(false, false)
@@ -41,21 +43,51 @@ object EnableHcppManifestTaskHelper {
             manifest.children().filterIsInstance<Node>().find { node ->
                 node.name() == "application"
             } ?: Node(manifest, "application")
-        val alreadySpecified: Boolean =
-            applicationNode.children().filterIsInstance<Node>().any { node ->
+        val metaDataNode: Node? =
+            applicationNode.children().filterIsInstance<Node>().find { node ->
                 node.name() == "meta-data" && node.attribute(MANIFEST_NAME_KEY) == HCPP_METADATA_NAME
             }
-        if (alreadySpecified) {
+
+        if (metaDataNode != null) {
+            val existingValueStr = metaDataNode.attribute(MANIFEST_VALUE_KEY)?.toString()
+            val existingValueBool = existingValueStr?.toBoolean()
+
+            if (explicitEnableHcpp != null && existingValueBool != null && explicitEnableHcpp != existingValueBool) {
+                val flagName = if (explicitEnableHcpp) "--enable-hcpp" else "--no-enable-hcpp"
+                logger?.warn(
+                    "The merged Android manifest explicitly sets $HCPP_METADATA_NAME to \"$existingValueStr\"; " +
+                        "therefore $flagName does not affect this artifact."
+                )
+            }
             manifestFile.copyTo(updatedManifest, overwrite = true)
             return
         }
-        applicationNode.appendNode(
-            "meta-data",
-            mapOf(MANIFEST_NAME_KEY to HCPP_METADATA_NAME, MANIFEST_VALUE_KEY to "true")
-        )
-        updatedManifest.printWriter().use { writer: PrintWriter ->
-            writer.println("""<?xml version="1.0" encoding="utf-8"?>""")
-            XmlNodePrinter(writer).print(manifest)
+
+        if (requestedEnableHcpp) {
+            applicationNode.appendNode(
+                "meta-data",
+                mapOf(MANIFEST_NAME_KEY to HCPP_METADATA_NAME, MANIFEST_VALUE_KEY to "true")
+            )
+            updatedManifest.printWriter().use { writer: PrintWriter ->
+                writer.println("""<?xml version="1.0" encoding="utf-8"?>""")
+                XmlNodePrinter(writer).print(manifest)
+            }
+        } else {
+            manifestFile.copyTo(updatedManifest, overwrite = true)
         }
+    }
+
+    /**
+     * Legacy wrapper for [processHcppManifest] with [requestedEnableHcpp] = true.
+     */
+    fun addEnableHcppMetadataIfAbsent(
+        manifestFile: File,
+        updatedManifest: File,
+    ) {
+        processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true,
+        )
     }
 }

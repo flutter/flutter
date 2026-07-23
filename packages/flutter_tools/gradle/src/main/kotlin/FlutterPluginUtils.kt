@@ -40,6 +40,7 @@ object FlutterPluginUtils {
     internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
     internal const val PROP_ENABLE_HCPP = "enable-hcpp"
+    internal const val PROP_EXPLICIT_ENABLE_HCPP = "explicit-enable-hcpp"
     internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
     internal const val PROP_TARGET = "target"
@@ -1182,7 +1183,11 @@ object FlutterPluginUtils {
         }
         val enableHcpp: Boolean =
             project.findProperty(PROP_ENABLE_HCPP)?.toString()?.toBoolean() ?: false
-        if (!enableHcpp) {
+        val explicitEnableHcpp: Boolean? =
+            if (project.hasProperty(PROP_EXPLICIT_ENABLE_HCPP)) {
+                project.findProperty(PROP_EXPLICIT_ENABLE_HCPP)?.toString()?.toBoolean()
+            } else null
+        if (!enableHcpp && explicitEnableHcpp == null) {
             return
         }
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
@@ -1191,7 +1196,12 @@ object FlutterPluginUtils {
                 project.tasks.register(
                     "enableHcppInManifest${capitalize(variant.name)}",
                     EnableHcppManifestTask::class.java
-                )
+                ) { task ->
+                    task.requestedEnableHcpp.set(enableHcpp)
+                    if (explicitEnableHcpp != null) {
+                        task.explicitEnableHcpp.set(explicitEnableHcpp)
+                    }
+                }
             variant.artifacts
                 .use(hcppManifestUpdater)
                 .wiredWithFiles(

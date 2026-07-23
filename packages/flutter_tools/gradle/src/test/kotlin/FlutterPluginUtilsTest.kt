@@ -2687,10 +2687,11 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
-    fun `addTasksForEnableHcppManifest skips app projects when enable-hcpp is not true`() {
+    fun `addTasksForEnableHcppManifest skips app projects when enable-hcpp is not true and no explicit flag passed`() {
         val project = mockk<Project>()
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
         every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "false"
+        every { project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns false
 
         FlutterPluginUtils.addTasksForEnableHcppManifest(project)
 
@@ -2698,18 +2699,35 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
-    fun `addTasksForEnableHcppManifest registers manifest transform on app projects`() {
+    fun `addTasksForEnableHcppManifest registers manifest transform on app projects when enable-hcpp is true`() {
         val project = mockk<Project>()
         val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
         val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions } returns extensions
         every { extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
         every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "true"
+        every { project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns false
         every { extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
 
         FlutterPluginUtils.addTasksForEnableHcppManifest(project)
 
-        // The components extension is only fetched (and variants wired) once both gates pass.
+        verify(exactly = 1) { extensions.getByType(AndroidComponentsExtension::class.java) }
+    }
+
+    @Test
+    fun `addTasksForEnableHcppManifest registers manifest transform when explicit-enable-hcpp is present even if enable-hcpp is false`() {
+        val project = mockk<Project>()
+        val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
+        val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        every { project.extensions } returns extensions
+        every { extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
+        every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "false"
+        every { project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns true
+        every { project.findProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns "false"
+        every { extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
+
+        FlutterPluginUtils.addTasksForEnableHcppManifest(project)
+
         verify(exactly = 1) { extensions.getByType(AndroidComponentsExtension::class.java) }
     }
 }

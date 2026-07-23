@@ -108,39 +108,6 @@ void main() {
     );
 
     testUsingContext(
-      'warns when an explicit --no-enable-hcpp conflicts with an explicit manifest value',
-      () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=app'],
-        );
-        final File manifestFile = globals.fs.file(
-          globals.fs.path.join(projectPath, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
-        );
-        manifestFile.writeAsStringSync(
-          manifestFile.readAsStringSync().replaceFirst(
-            '</application>',
-            '    <meta-data android:name="io.flutter.embedding.android.EnableHcpp" '
-                'android:value="true" />\n'
-                '    </application>',
-          ),
-        );
-
-        await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
-        expect(
-          testLogger.warningText,
-          contains('The --no-enable-hcpp flag does not affect this build'),
-        );
-      },
-      overrides: <Type, Generator>{
-        AndroidBuilder: () => FakeAndroidBuilder(),
-        Analytics: () => fakeAnalytics,
-        FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      },
-    );
-
-    testUsingContext(
       'reports hcpp analytics from an explicit --no-enable-hcpp over the enable-hcpp feature flag',
       () async {
         final String projectPath = await createProject(

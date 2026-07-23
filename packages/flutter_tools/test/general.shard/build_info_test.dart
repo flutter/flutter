@@ -328,13 +328,20 @@ void main() {
       treeShakeIcons: true,
       packageConfigPath: 'foo/.dart_tool/package_config.json',
       androidEnableHcpp: true,
+      explicitAndroidEnableHcpp: true,
     );
 
     expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+    expect(buildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
     expect(
       buildInfo.copyWith().androidEnableHcpp,
       isTrue,
       reason: 'copyWith should preserve androidEnableHcpp',
+    );
+    expect(
+      buildInfo.copyWith().explicitAndroidEnableHcpp,
+      isTrue,
+      reason: 'copyWith should preserve explicitAndroidEnableHcpp',
     );
 
     const disabledBuildInfo = BuildInfo(
@@ -343,8 +350,10 @@ void main() {
       treeShakeIcons: true,
       packageConfigPath: 'foo/.dart_tool/package_config.json',
       androidEnableHcpp: false,
+      explicitAndroidEnableHcpp: false,
     );
     expect(disabledBuildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+    expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
 
     const unsetBuildInfo = BuildInfo(
       BuildMode.debug,
@@ -355,6 +364,11 @@ void main() {
     expect(
       unsetBuildInfo.toGradleConfig(),
       isNot(anyElement(contains('-Penable-hcpp'))),
+      reason: 'no property should be passed when unset',
+    );
+    expect(
+      unsetBuildInfo.toGradleConfig(),
+      isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
       reason: 'no property should be passed when unset',
     );
   });

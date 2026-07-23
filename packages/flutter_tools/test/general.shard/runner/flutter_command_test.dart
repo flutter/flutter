@@ -727,7 +727,9 @@ void main() {
         );
         expect(flutterCommand.explicitEnableHcpp, isFalse);
         expect(buildInfo.androidEnableHcpp, isFalse);
+        expect(buildInfo.explicitAndroidEnableHcpp, isFalse);
         expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+        expect(buildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -747,7 +749,9 @@ void main() {
         );
         expect(flutterCommand.explicitEnableHcpp, isTrue);
         expect(buildInfo.androidEnableHcpp, isTrue);
+        expect(buildInfo.explicitAndroidEnableHcpp, isTrue);
         expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+        expect(buildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,

@@ -1340,8 +1340,9 @@ abstract class FlutterCommand extends Command<void> {
       ? boolArg('enable-hcpp')
       : null;
 
-  /// The effective HCPP preference: [explicitEnableHcpp] if the flag was
-  /// passed, otherwise the `enable-hcpp` feature flag.
+  /// The requested HCPP default for an Android artifact:
+  /// [explicitEnableHcpp] if supplied, otherwise the `enable-hcpp` feature
+  /// flag. A pre-existing value in the merged manifest still wins.
   ///
   /// This is the value passed to gradle builds, where it is injected into the
   /// manifest only when the manifest does not already contain an explicit
@@ -1550,6 +1551,7 @@ abstract class FlutterCommand extends Command<void> {
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       androidEnableHcpp: enableHcpp,
+      explicitAndroidEnableHcpp: explicitEnableHcpp,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,

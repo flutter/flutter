@@ -121,7 +121,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
     if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
     }
-    warnIfHcppFlagConflictsWithManifest(FlutterProject.current());
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),

@@ -7,22 +7,22 @@ package com.flutter.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
 /**
- * Adds the `io.flutter.embedding.android.EnableHcpp` meta-data to the merged
- * AndroidManifest, unless the merged manifest already contains it.
+ * Manages the `io.flutter.embedding.android.EnableHcpp` meta-data in the merged
+ * AndroidManifest.
  *
- * This task is only registered when the flutter tool passes `-Penable-hcpp=true`. The tool
- * does that when the `enable-hcpp` feature flag is enabled, or when `--enable-hcpp` is passed
- * explicitly to the flutter tool (these are not the same thing: an explicit `--enable-hcpp`
- * sets the property regardless of the feature flag). Because the injection is skipped when the
- * meta-data is already present, an explicit value from the developer's manifest (or one merged
- * in from a manifest of a dependency) always takes priority.
+ * If [requestedEnableHcpp] is true, injects the metadata element if absent.
+ * If [explicitEnableHcpp] is provided and conflicts with an explicit metadata value
+ * in the merged manifest, logs a warning.
  */
 @CacheableTask
 abstract class EnableHcppManifestTask : DefaultTask() {
@@ -33,11 +33,22 @@ abstract class EnableHcppManifestTask : DefaultTask() {
     @get:OutputFile
     abstract val updatedManifest: RegularFileProperty
 
+    @get:Input
+    @get:Optional
+    abstract val requestedEnableHcpp: Property<Boolean>
+
+    @get:Input
+    @get:Optional
+    abstract val explicitEnableHcpp: Property<Boolean>
+
     @TaskAction
     fun processManifest() {
-        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(
-            manifestFile.get().asFile,
-            updatedManifest.get().asFile
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile.get().asFile,
+            updatedManifest = updatedManifest.get().asFile,
+            requestedEnableHcpp = requestedEnableHcpp.getOrElse(true),
+            explicitEnableHcpp = explicitEnableHcpp.orNull,
+            logger = logger,
         )
     }
 }

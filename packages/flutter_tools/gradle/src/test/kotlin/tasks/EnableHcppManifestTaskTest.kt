@@ -5,11 +5,14 @@
 package com.flutter.gradle.tasks
 
 import groovy.util.Node
+import io.mockk.mockk
+import io.mockk.verify
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import org.gradle.api.logging.Logger
 
 /**
  * Tests for [EnableHcppManifestTaskHelper].
@@ -118,6 +121,104 @@ class EnableHcppManifestTaskTest {
             updatedManifest.readText(),
             "Manifest with an explicit value should be copied unmodified"
         )
+    }
+
+    @Test
+    fun warnsWhenExplicitEnableHcppConflictsWithManifestFalse() {
+        val manifestFile =
+            createTempManifestFile(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="$defaultNamespace">
+                    <application android:label="Test App">
+                        <meta-data android:name="${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME}" android:value="false" />
+                    </application>
+                </manifest>
+                """
+            )
+        val updatedManifest = createTempOutputFile()
+        val logger = mockk<Logger>(relaxed = true)
+
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true,
+            explicitEnableHcpp = true,
+            logger = logger,
+        )
+
+        verify(exactly = 1) {
+            logger.warn(
+                match { message ->
+                    message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"false\"") &&
+                        message.contains("--enable-hcpp does not affect this artifact")
+                }
+            )
+        }
+    }
+
+    @Test
+    fun warnsWhenExplicitNoEnableHcppConflictsWithManifestTrue() {
+        val manifestFile =
+            createTempManifestFile(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="$defaultNamespace">
+                    <application android:label="Test App">
+                        <meta-data android:name="${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME}" android:value="true" />
+                    </application>
+                </manifest>
+                """
+            )
+        val updatedManifest = createTempOutputFile()
+        val logger = mockk<Logger>(relaxed = true)
+
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = false,
+            explicitEnableHcpp = false,
+            logger = logger,
+        )
+
+        verify(exactly = 1) {
+            logger.warn(
+                match { message ->
+                    message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"true\"") &&
+                        message.contains("--no-enable-hcpp does not affect this artifact")
+                }
+            )
+        }
+    }
+
+    @Test
+    fun doesNotWarnWhenExplicitFlagMatchesManifest() {
+        val manifestFile =
+            createTempManifestFile(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="$defaultNamespace">
+                    <application android:label="Test App">
+                        <meta-data android:name="${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME}" android:value="true" />
+                    </application>
+                </manifest>
+                """
+            )
+        val updatedManifest = createTempOutputFile()
+        val logger = mockk<Logger>(relaxed = true)
+
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true,
+            explicitEnableHcpp = true,
+            logger = logger,
+        )
+
+        verify(exactly = 0) { logger.warn(any()) }
     }
 
     @Test

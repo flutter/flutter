@@ -130,7 +130,6 @@ class BuildApkCommand extends BuildSubCommand {
     validateBuild(androidBuildInfo);
     globals.terminal.usesTerminalUi = true;
     final FlutterProject project = FlutterProject.current();
-    warnIfHcppFlagConflictsWithManifest(project);
     await androidBuilder?.buildApk(
       project: project,
       target: targetFile,
