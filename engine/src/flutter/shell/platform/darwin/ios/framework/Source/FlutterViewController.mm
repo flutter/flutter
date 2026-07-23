@@ -43,6 +43,11 @@ FLUTTER_ASSERT_ARC
 static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
 static constexpr CGFloat kScrollViewContentSize = 2.0;
 
+// All known notch/Dynamic Island bars are >=44pt; non-notch (iPad, iPhone SE)
+// are <=32pt. 40pt sits safely in the gap between them.
+// See: https://github.com/flutter/flutter/issues/175520
+static constexpr CGFloat kNotchStatusBarThreshold = 40.0;
+
 static NSString* const kFlutterRestorationStateAppData = @"FlutterRestorationStateAppData";
 
 NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemanticsUpdate";
@@ -1533,7 +1538,21 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   CGFloat scale = screen.scale;
-  _viewportMetrics.physical_padding_top = self.view.safeAreaInsets.top * scale;
+  CGFloat topPadding = self.view.safeAreaInsets.top;
+  if (@available(iOS 26.0, *)) {
+    // On iOS 26+, safeAreaInsets.top is not reduced when the status bar hides.
+    // It keeps the pre-hiding status-bar height. Subtract it to get the correct
+    // usable-area inset (0 on non-notch devices with no bar visible).
+    // Only correct on non-notch devices where the status bar is the sole top
+    // safe-area contributor. Notch/Dynamic Island devices have safeAreaInsets.top
+    // driven by the physical cutout and must not be adjusted.
+    UIWindowScene* scene = (UIWindowScene*)self.view.window.windowScene;
+    if (scene.statusBarManager.isStatusBarHidden && self.statusBarHeightBeforeHiding > 0 &&
+        self.statusBarHeightBeforeHiding < kNotchStatusBarThreshold) {
+      topPadding = MAX(0.0, topPadding - self.statusBarHeightBeforeHiding);
+    }
+  }
+  _viewportMetrics.physical_padding_top = topPadding * scale;
   _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
   _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
   _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
@@ -1955,8 +1974,28 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (void)setPrefersStatusBarHidden:(BOOL)hidden {
   if (hidden != self.flutterPrefersStatusBarHidden) {
+    if (@available(iOS 26.0, *)) {
+      if (hidden) {
+        // Capture the status bar height now, before setNeedsStatusBarAppearanceUpdate
+        // causes UIKit to process the change. On iOS 26+, statusBarFrame.size.height
+        // returns 0 once the bar is hidden, so this is the only reliable moment.
+        UIWindowScene* scene = (UIWindowScene*)self.viewIfLoaded.window.windowScene;
+        self.statusBarHeightBeforeHiding = scene.statusBarManager.statusBarFrame.size.height;
+      } else {
+        self.statusBarHeightBeforeHiding = 0;
+      }
+    }
     self.flutterPrefersStatusBarHidden = hidden;
     [self setNeedsStatusBarAppearanceUpdate];
+    if (@available(iOS 26.0, *)) {
+      // Schedule a layout pass so that viewDidLayoutSubviews invokes
+      // setViewportMetricsPaddings, which will then read the updated
+      // status bar visibility state.
+      // See: https://github.com/flutter/flutter/issues/175520
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self.viewIfLoaded setNeedsLayout];
+      });
+    }
   }
 }
 
