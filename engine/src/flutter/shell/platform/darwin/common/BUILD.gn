@@ -164,6 +164,7 @@ source_set("InternalFlutterSwiftCommon") {
   configs += [ ":config" ]
   bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
   sources = [
+    "framework/Source/FlutterJSONMessageCodec+SafeDecode.swift",
     "framework/Source/Logger.swift",
     "framework/Source/Tracing+TraceScope.swift",
   ]
@@ -244,6 +245,7 @@ executable("framework_common_swift_unittests") {
     ":swift_testing_config",
   ]
   sources = [
+    "framework/Source/FlutterCodecsTest.swift",
     "framework/Source/LoggerTest.swift",
     "framework/Source/TracingTest.swift",
   ]
