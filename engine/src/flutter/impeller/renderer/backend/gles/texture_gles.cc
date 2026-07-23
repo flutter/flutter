@@ -163,6 +163,7 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
   if (!GetTextureDescriptor().IsValid()) {
     return;
   }
+
   // Ensure the texture doesn't exceed device capabilities.
   const auto tex_size = GetTextureDescriptor().size;
   const auto max_size =
@@ -261,10 +262,29 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
       texture_type = GL_TEXTURE_CUBE_MAP;
       texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
       break;
+    case TextureType::kTexture2DArray:
+      texture_type = GL_TEXTURE_2D_ARRAY;
+      texture_target = GL_TEXTURE_2D_ARRAY;
+      break;
     case TextureType::kTextureExternalOES:
       texture_type = GL_TEXTURE_EXTERNAL_OES;
       texture_target = GL_TEXTURE_EXTERNAL_OES;
       break;
+  }
+
+  // Array textures allocate all layers up front (glTexImage3D); a per-layer
+  // upload then fills one layer with glTexSubImage3D, so make sure the storage
+  // exists before uploading.
+  const bool is_array = tex_descriptor.type == TextureType::kTexture2DArray;
+  if (is_array) {
+    // Bail out synchronously on contexts without array support (e.g. ES 2.0).
+    // The glTexImage3D/glTexSubImage3D procs are null there, so queuing the
+    // upload would dereference a null proc on the reactor thread.
+    if (!reactor_->GetProcTable().GetCapabilities()->SupportsTextureArray()) {
+      VALIDATION_LOG << "2D array textures are not supported on this context.";
+      return false;
+    }
+    InitializeContentsIfNecessary();
   }
 
   std::optional<PixelFormatGLES> gles_format =
@@ -284,7 +304,9 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
        size = tex_descriptor.size,                               //
        image_size = tex_descriptor.GetByteSizeOfBaseMipLevel(),  //
        texture_type,                                             //
-       texture_target                                            //
+       texture_target,                                           //
+       is_array,                                                 //
+       slice                                                     //
   ](const auto& reactor) {
         auto gl_handle = reactor.GetGLHandle(handle);
         if (!gl_handle.has_value()) {
@@ -303,7 +325,37 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
           TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
                        std::to_string(mapping->GetSize()).c_str());
           gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-          if (format.is_compressed) {
+          if (is_array) {
+            // Storage for every layer is allocated by the initializer; fill the
+            // requested layer (slice) of the already-allocated base mip level.
+            if (format.is_compressed) {
+              gl.CompressedTexSubImage3D(
+                  /*target=*/texture_target,              //
+                  /*level=*/0u,                           //
+                  /*xoffset=*/0u,                         //
+                  /*yoffset=*/0u,                         //
+                  /*zoffset=*/static_cast<GLint>(slice),  //
+                  /*width=*/size.width,                   //
+                  /*height=*/size.height,                 //
+                  /*depth=*/1,                            //
+                  /*format=*/format.internal_format,      //
+                  /*image_size=*/image_size,              //
+                  /*data=*/tex_data);                     //
+            } else {
+              gl.TexSubImage3D(
+                  /*target=*/texture_target,              //
+                  /*level=*/0u,                           //
+                  /*xoffset=*/0u,                         //
+                  /*yoffset=*/0u,                         //
+                  /*zoffset=*/static_cast<GLint>(slice),  //
+                  /*width=*/size.width,                   //
+                  /*height=*/size.height,                 //
+                  /*depth=*/1,                            //
+                  /*format=*/format.external_format,      //
+                  /*type=*/format.type,                   //
+                  /*data=*/tex_data);                     //
+            }
+          } else if (format.is_compressed) {
             gl.CompressedTexImage2D(texture_target,          // target
                                     0u,                      // LOD level
                                     format.internal_format,  // internal format
@@ -453,6 +505,31 @@ void TextureGLES::InitializeContentsIfNecessary() {
           );
           MarkSliceMipLevelInitialized(face, 0);
         }
+      } else if (desc.type == TextureType::kTexture2DArray) {
+        if (!gl.GetCapabilities()->SupportsTextureArray()) {
+          VALIDATION_LOG << "2D array textures are not supported on this "
+                            "context.";
+          return;
+        }
+        // Array textures allocate the whole base mip level (all layers) in one
+        // glTexImage3D call; individual layers are then filled with
+        // glTexSubImage3D. Non-zero mip levels are allocated lazily.
+        gl.BindTexture(GL_TEXTURE_2D_ARRAY, handle.value());
+        gl.TexImage3D(
+            /*target=*/GL_TEXTURE_2D_ARRAY,                    //
+            /*level=*/0u,                                      //
+            /*internal_format=*/gles_format->internal_format,  //
+            /*width=*/size.width,                              //
+            /*height=*/size.height,                            //
+            /*depth=*/desc.array_layer_count,                  //
+            /*border=*/0u,                                     //
+            /*format=*/gles_format->external_format,           //
+            /*type=*/gles_format->type,                        //
+            /*data=*/nullptr                                   //
+        );
+        // glTexImage3D allocated every layer of the base level at once, so a
+        // single entry covers the whole level.
+        MarkSliceMipLevelInitialized(0, 0);
       } else {
         // 2D / multisampled. External-OES textures are always wrapped, so
         // they returned at the is_wrapped_ check above. Only the base mip
@@ -609,6 +686,8 @@ bool TextureGLES::GenerateMipmap() {
       return false;
     case TextureType::kTextureCube:
       break;
+    case TextureType::kTexture2DArray:
+      break;
     case TextureType::kTextureExternalOES:
       break;
   }
@@ -665,6 +744,36 @@ bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
     return false;
   }
   ISize size = GetSize();
+  const GLsizei mip_width =
+      static_cast<GLsizei>(std::max<int64_t>(1, size.width >> mip_level));
+  const GLsizei mip_height =
+      static_cast<GLsizei>(std::max<int64_t>(1, size.height >> mip_level));
+
+  if (desc.type == TextureType::kTexture2DArray) {
+    // glTexImage3D allocates this mip level for every layer at once, so a
+    // single entry (slice 0) tracks the whole level regardless of which layer
+    // was requested. Guard on that entry so a request for a non-zero layer
+    // does not re-allocate and orphan already-uploaded layers.
+    if (IsSliceMipLevelInitialized(0, mip_level)) {
+      return true;
+    }
+    gl.BindTexture(GL_TEXTURE_2D_ARRAY, handle.value());
+    gl.TexImage3D(
+        /*target=*/GL_TEXTURE_2D_ARRAY,                    //
+        /*level=*/static_cast<GLint>(mip_level),           //
+        /*internal_format=*/gles_format->internal_format,  //
+        /*width=*/mip_width,                               //
+        /*height=*/mip_height,                             //
+        /*depth=*/desc.array_layer_count,                  //
+        /*border=*/0u,                                     //
+        /*format=*/gles_format->external_format,           //
+        /*type=*/gles_format->type,                        //
+        /*data=*/nullptr                                   //
+    );
+    MarkSliceMipLevelInitialized(0, mip_level);
+    return true;
+  }
+
   bool is_cube = desc.type == TextureType::kTextureCube;
   GLenum image_target =
       is_cube ? GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice : GL_TEXTURE_2D;
@@ -672,14 +781,12 @@ bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
   gl.TexImage2D(image_target,                   // target
                 static_cast<GLint>(mip_level),  // LOD level
                 gles_format->internal_format,   // internal
-                static_cast<GLsizei>(
-                    std::max<int64_t>(1, size.width >> mip_level)),  // width
-                static_cast<GLsizei>(
-                    std::max<int64_t>(1, size.height >> mip_level)),  // height
-                0u,                                                   // border
-                gles_format->external_format,                         // format
-                gles_format->type,                                    // type
-                nullptr                                               // data
+                mip_width,                      // width
+                mip_height,                     // height
+                0u,                             // border
+                gles_format->external_format,   // format
+                gles_format->type,              // type
+                nullptr                         // data
   );
   MarkSliceMipLevelInitialized(slice, mip_level);
   return true;

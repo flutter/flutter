@@ -77,6 +77,31 @@ TEST(AllocatorTest, TextureDescriptorCompatibility) {
     ASSERT_EQ(desc_a, desc_b);
     ASSERT_NE(desc_a, desc_c);
   }
+  // Array layer count.
+  {
+    TextureDescriptor desc_a = {.type = TextureType::kTexture2DArray,
+                                .array_layer_count = 4};
+    TextureDescriptor desc_b = {.type = TextureType::kTexture2DArray,
+                                .array_layer_count = 4};
+    TextureDescriptor desc_c = {.type = TextureType::kTexture2DArray,
+                                .array_layer_count = 8};
+
+    EXPECT_EQ(desc_a, desc_b);
+    EXPECT_NE(desc_a, desc_c);
+  }
+}
+
+TEST(AllocatorTest, TextureDescriptorArrayValidity) {
+  // A 2D array descriptor is valid with a layer count and invalid with zero
+  // layers.
+  TextureDescriptor desc = {.type = TextureType::kTexture2DArray,
+                            .format = PixelFormat::kR8G8B8A8UNormInt,
+                            .size = ISize(16, 16),
+                            .array_layer_count = 4};
+  EXPECT_TRUE(desc.IsValid());
+
+  desc.array_layer_count = 0;
+  EXPECT_FALSE(desc.IsValid());
 }
 
 TEST(AllocatorTest, RangeTest) {

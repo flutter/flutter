@@ -122,8 +122,31 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
     proc_ivar.error_fn = error_fn;                              \
   }
 
-  if (description_->GetGlVersion().IsAtLeast(Version(3))) {
+  const bool supports_gl3 = description_->GetGlVersion().IsAtLeast(Version(3));
+  if (supports_gl3) {
     FOR_EACH_IMPELLER_GLES3_PROC(IMPELLER_PROC);
+  }
+
+  // 2D array textures need the 3D texture entry points. They are core on
+  // GL/GLES 3.0, exposed on desktop GL 2.x through GL_EXT_texture_array (which
+  // uses the same entry-point names), and on OpenGL ES 2.0 through
+  // GL_NV_texture_array (which suffixes them with NV). The NV entry points
+  // share the core signatures, so they are resolved as aliases into the core
+  // procs and the rest of the backend can call them without branching.
+  if (supports_gl3 || description_->HasExtension("GL_EXT_texture_array")) {
+    FOR_EACH_IMPELLER_TEXTURE_ARRAY_PROC(IMPELLER_PROC);
+  } else if (description_->HasExtension("GL_NV_texture_array")) {
+#define IMPELLER_PROC_ALIAS(proc_ivar, gl_name)                 \
+  if (auto fn_ptr = resolver(gl_name)) {                        \
+    proc_ivar.function =                                        \
+        reinterpret_cast<decltype(proc_ivar.function)>(fn_ptr); \
+    proc_ivar.error_fn = error_fn;                              \
+  }
+    IMPELLER_PROC_ALIAS(TexImage3D, "glTexImage3DNV");
+    IMPELLER_PROC_ALIAS(TexSubImage3D, "glTexSubImage3DNV");
+    IMPELLER_PROC_ALIAS(CompressedTexImage3D, "glCompressedTexImage3DNV");
+    IMPELLER_PROC_ALIAS(CompressedTexSubImage3D, "glCompressedTexSubImage3DNV");
+#undef IMPELLER_PROC_ALIAS
   }
 
   FOR_EACH_IMPELLER_EXT_PROC(IMPELLER_PROC);
