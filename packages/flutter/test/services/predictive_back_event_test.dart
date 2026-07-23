@@ -26,6 +26,16 @@ void main() {
     expect(event.isButtonEvent, isFalse);
   });
 
+  test('fromMap can be created with valid Map - SwipeEdge.none', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 2,
+    });
+    expect(event.swipeEdge, SwipeEdge.none);
+    expect(event.isButtonEvent, isFalse);
+  });
+
   test('fromMap can be created with valid Map - isButtonEvent zero position', () async {
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 0.0],
@@ -60,7 +70,7 @@ void main() {
       () => PredictiveBackEvent.fromMap(const <String?, Object?>{
         'touchOffset': <double>[0.0, 100.0],
         'progress': 0.0,
-        'swipeEdge': 2,
+        'swipeEdge': 3,
       }),
       throwsRangeError,
     );
