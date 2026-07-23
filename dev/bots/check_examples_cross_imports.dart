@@ -75,14 +75,9 @@ void main(List<String> args) {
 /// [ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports] and
 /// [ExamplesCrossImportChecker.knownExamplesImageListCrossImports].
 ///
-/// In short, the Material examples can import the Material library.
-/// Otherwise, examples should not import Material.
-///
-/// The guiding principles behind this organization of our examples are as follows:
-///
-///  - Cupertino examples can import the Cupertino library.
-///  - Material examples can import the Material library.
-///  - Any other examples should not import Material or Cupertino.
+/// No examples should import Material or Cupertino.
+/// Any Material or Cupertino specific examples should go in
+/// packages/material_ui or packages/cupertino_ui respectively.
 class ExamplesCrossImportChecker {
   ExamplesCrossImportChecker({
     required this.examplesDirectory,
@@ -126,22 +121,6 @@ class ExamplesCrossImportChecker {
     'examples/api/test/animation/curves/curve2_d.0_test.dart',
   };
 
-  /// The known cross imports in the `examples/api/lib/cupertino`
-  /// and `examples/api/test/cupertino` directories.
-  ///
-  /// These cross imports will be resolved first in flutter/packages/cupertino_ui
-  /// but until then, the old samples will be excluded here.
-  /// Eventually the old samples in flutter/flutter should be deleted,
-  /// at which point this exclusion list can be emptied.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesSlashApiCupertinoCrossImports = <String>{
-    'examples/api/lib/cupertino/list_tile/cupertino_list_tile.0.dart',
-    'examples/api/test/cupertino/list_tile/cupertino_list_tile.0_test.dart',
-    'examples/api/test/cupertino/context_menu/cupertino_context_menu.1_test.dart',
-    'examples/api/test/cupertino/context_menu/cupertino_context_menu.0_test.dart',
-  };
-
   /// The known cross imports in the `examples/api/lib/foundation`
   /// and `examples/api/test/foundation` directories.
   ///
@@ -166,23 +145,6 @@ class ExamplesCrossImportChecker {
     'examples/api/lib/gestures/tap_and_drag/tap_and_drag.0.dart',
     'examples/api/test/gestures/pointer_signal_resolver/pointer_signal_resolver.0_test.dart',
     'examples/api/test/gestures/tap_and_drag/tap_and_drag.0_test.dart',
-  };
-
-  /// The known cross imports in the `examples/api/lib/material`
-  /// and `examples/api/test/material` directories.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesSlashApiMaterialCrossImports = <String>{
-    'examples/api/lib/material/page_transitions_theme/page_transitions_theme.0.dart',
-    'examples/api/lib/material/dialog/adaptive_alert_dialog.0.dart',
-    'examples/api/lib/material/switch/switch.3.dart',
-    'examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart',
-    'examples/api/test/material/page_transitions_theme/page_transitions_theme.0_test.dart',
-    'examples/api/test/material/context_menu/editable_text_toolbar_builder.2_test.dart',
-    'examples/api/test/material/context_menu/editable_text_toolbar_builder.0_test.dart',
   };
 
   /// The known cross imports in the `examples/api/lib/painting`
@@ -828,10 +790,8 @@ class ExamplesCrossImportChecker {
     ...knownExamplesCrossImports,
     ...knownExamplesSlashApiCrossImports,
     ...knownExamplesSlashApiAnimationCrossImports,
-    ...knownExamplesSlashApiCupertinoCrossImports,
     ...knownExamplesSlashApiFoundationCrossImports,
     ...knownExamplesSlashApiGesturesCrossImports,
-    ...knownExamplesSlashApiMaterialCrossImports,
     ...knownExamplesSlashApiPaintingCrossImports,
     ...knownExamplesSlashApiRenderingCrossImports,
     ...knownExamplesSlashApiSampleTemplatesCrossImports,
@@ -1163,8 +1123,6 @@ class ExamplesCrossImportChecker {
       }
     }
 
-    // TODO(justinmc): The examples checker needs an exemption list for specific core widgets
-    // For example the Material and Cupertino text magnifier or context menu builders.
     return valid;
   }
 }
@@ -1248,10 +1206,8 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
       'knownExamplesCrossImports' => ExamplesCrossImportChecker.knownExamplesCrossImports,
       'knownExamplesSlashApiCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
       'knownExamplesSlashApiAnimationCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports,
-      'knownExamplesSlashApiCupertinoCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports,
       'knownExamplesSlashApiFoundationCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports,
       'knownExamplesSlashApiGesturesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports,
-      'knownExamplesSlashApiMaterialCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports,
       'knownExamplesSlashApiPaintingCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports,
       'knownExamplesSlashApiRenderingCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports,
       'knownExamplesSlashApiSampleTemplatesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiSampleTemplatesCrossImports,
@@ -1305,10 +1261,6 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
               libraryName.startsWith('examples/api/test/animation') =>
         'knownExamplesSlashApiAnimationCrossImports',
       _
-          when libraryName.startsWith('examples/api/lib/cupertino') ||
-              libraryName.startsWith('examples/api/test/cupertino') =>
-        'knownExamplesSlashApiCupertinoCrossImports',
-      _
           when libraryName.startsWith('examples/api/lib/foundation') ||
               libraryName.startsWith('examples/api/test/foundation') =>
         'knownExamplesSlashApiFoundationCrossImports',
@@ -1316,10 +1268,6 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
           when libraryName.startsWith('examples/api/lib/gestures') ||
               libraryName.startsWith('examples/api/test/gestures') =>
         'knownExamplesSlashApiGesturesCrossImports',
-      _
-          when libraryName.startsWith('examples/api/lib/material') ||
-              libraryName.startsWith('examples/api/test/material') =>
-        'knownExamplesSlashApiMaterialCrossImports',
       _
           when libraryName.startsWith('examples/api/lib/painting') ||
               libraryName.startsWith('examples/api/test/painting') =>
@@ -1381,7 +1329,12 @@ final class _CupertinoApiExampleLibrary extends _ExamplesLibrary {
 
   @override
   bool canImport(LibraryCrossImportStatementType import) {
-    return import == LibraryCrossImportStatementType.cupertino;
+    // While the Cupertino examples under `examples/api` are not allowed to import Material,
+    // the actual samples have been relocated to `packages/cupertino_ui`,
+    // where their cross imports will be addressed separately.
+    // The existing samples in `examples/api` are the now defunct orginal samples.
+    // For the purpose of the checker, allow all imports.
+    return true;
   }
 }
 
@@ -1398,7 +1351,12 @@ final class _MaterialApiExampleLibrary extends _ExamplesLibrary {
 
   @override
   bool canImport(LibraryCrossImportStatementType import) {
-    return import == LibraryCrossImportStatementType.material;
+    // While the Material examples under `examples/api` are not allowed to import Cupertino,
+    // the actual samples have been relocated to `packages/material_ui`,
+    // where their cross imports will be addressed separately.
+    // The existing samples in `examples/api` are the now defunct orginal samples.
+    // For the purpose of the checker, allow all imports.
+    return true;
   }
 }
 
