@@ -177,10 +177,26 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   Directory get relativeSwiftPackagesDirectory =>
       flutterSwiftPackagesDirectory.childDirectory('.packages');
 
+  /// The name of the generated Swift package for this project's plugins.
+  ///
+  /// Derived from the Flutter app name to ensure uniqueness when multiple
+  /// Flutter apps share a single Xcode project (e.g. main app + App Clip).
+  /// See https://github.com/flutter/flutter/issues/189585.
+  ///
+  /// Converts the app name from snake_case to PascalCase and appends a fixed
+  /// suffix, e.g. `my_app` → `MyAppFlutterPlugins`.
+  late final String flutterPluginSwiftPackageName = () {
+    final pascalName = parent.manifest.appName
+        .split('_')
+        .map((s) => s.isEmpty ? '' : '${s[0].toUpperCase()}${s.substring(1)}')
+        .join();
+    return '${pascalName}FlutterPlugins';
+  }();
+
   /// The Flutter generated directory for the Swift package handling plugin
   /// dependencies.
   Directory get flutterPluginSwiftPackageDirectory =>
-      flutterSwiftPackagesDirectory.childDirectory(kFlutterGeneratedPluginSwiftPackageName);
+      flutterSwiftPackagesDirectory.childDirectory(flutterPluginSwiftPackageName);
 
   /// The Flutter generated directory for the Swift package handling the Flutter framework.
   Directory get flutterFrameworkSwiftPackageDirectory => relativeSwiftPackagesDirectory
@@ -191,11 +207,18 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
-  /// Checks if FlutterGeneratedPluginSwiftPackage has been added to the
+  /// Checks if the generated plugin Swift package has been added to the
   /// project's build settings by checking the contents of the pbxproj.
+  ///
+  /// Checks for both the project-specific name and the legacy hardcoded name
+  /// for backward compatibility.
   bool get flutterPluginSwiftPackageInProjectSettings {
-    return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return false;
+    }
+    final String contents = xcodeProjectInfoFile.readAsStringSync();
+    return contents.contains(flutterPluginSwiftPackageName) ||
+        contents.contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 
   /// Checks if FlutterFramework has been added to the project's build settings by checking the

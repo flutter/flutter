@@ -1441,7 +1441,9 @@ String? _swiftPackageManagerMinPlatformMismatchMessageFromStdout(String? stdout)
     final Version? requiredMinVersion = Version.parse(match.group(2));
     final Version? targetSupportedVersion = Version.parse(match.group(4));
     final String? targetName = match.group(5);
-    if (targetName != kFlutterGeneratedPluginSwiftPackageName) {
+    if (targetName != null &&
+        !targetName.startsWith(kFlutterGeneratedPluginSwiftPackageName) &&
+        !targetName.endsWith('FlutterPlugins')) {
       continue;
     }
     if (requiredByProduct == null || requiredMinVersion == null || targetSupportedVersion == null) {
