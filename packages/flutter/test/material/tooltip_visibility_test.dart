@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const String tooltipText = 'TIP';
@@ -204,7 +203,7 @@ void main() {
         ),
       );
 
-      expect(_semanticsNodeWithLabel(tester, 'Bar')?.tooltip, tooltipText);
+      expect(tester.getSemantics(find.text('Bar')).tooltip, tooltipText);
       handle.dispose();
     },
   );
@@ -223,7 +222,7 @@ void main() {
         ),
       );
 
-      expect(_semanticsNodeWithLabel(tester, 'Bar')?.tooltip, isEmpty);
+      expect(tester.getSemantics(find.text('Bar')).tooltip, isEmpty);
       handle.dispose();
     },
   );
@@ -251,29 +250,4 @@ Future<void> setWidgetForTooltipMode(
 Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
   await tester.tap(tooltip);
   await tester.pump(const Duration(milliseconds: 10));
-}
-
-// Searches the whole semantics tree for a node with the given [label],
-// regardless of how deeply its own SemanticsNode has been merged into an
-// ancestor. Used instead of `tester.getSemantics(finder)` because that method
-// walks *up* from the finder's render object looking for the nearest
-// non-merged node, which can land on an unrelated ancestor (e.g. the root
-// route-scoping node) when nothing between the labelled node and the root
-// introduces its own semantics boundary.
-SemanticsNode? _semanticsNodeWithLabel(WidgetTester tester, String label) {
-  SemanticsNode? found;
-  bool visit(SemanticsNode node) {
-    if (node.label == label) {
-      found = node;
-      return false;
-    }
-    node.visitChildren(visit);
-    return found == null;
-  }
-
-  final SemanticsNode? root = tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode;
-  if (root != null) {
-    visit(root);
-  }
-  return found;
 }
