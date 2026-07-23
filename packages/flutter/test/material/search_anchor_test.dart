@@ -3495,51 +3495,49 @@ void main() {
     expect(box.size.height, 32);
   });
 
-  testWidgets(
-    'Tapping outside searchbar should unfocus the searchbar on mobile',
-    (WidgetTester tester) async {
-      final focusNode = FocusNode(debugLabel: 'Test Node');
-      addTearDown(focusNode.dispose);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchAnchor(
-              builder: (BuildContext context, SearchController controller) {
-                return SearchBar(
-                  controller: controller,
-                  onTap: () {
-                    controller.openView();
-                  },
-                  onTapOutside: (PointerDownEvent event) {
-                    focusNode.unfocus();
-                  },
-                  onChanged: (_) {
-                    controller.openView();
-                  },
-                  autoFocus: true,
-                  focusNode: focusNode,
-                );
-              },
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
-                return List<ListTile>.generate(5, (int index) {
-                  final item = 'item $index';
-                  return ListTile(title: Text(item));
-                });
-              },
-            ),
+  testWidgets('Tapping outside searchbar should unfocus the searchbar on mobile', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode(debugLabel: 'Test Node');
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return SearchBar(
+                controller: controller,
+                onTap: () {
+                  controller.openView();
+                },
+                onTapOutside: (PointerDownEvent event) {
+                  focusNode.unfocus();
+                },
+                onChanged: (_) {
+                  controller.openView();
+                },
+                autoFocus: true,
+                focusNode: focusNode,
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<ListTile>.generate(5, (int index) {
+                final item = 'item $index';
+                return ListTile(title: Text(item));
+              });
+            },
           ),
         ),
-      );
-      await tester.pump();
-      expect(focusNode.hasPrimaryFocus, isTrue);
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
 
-      await tester.tapAt(const Offset(50, 50));
-      await tester.pump();
+    await tester.tapAt(const Offset(50, 50));
+    await tester.pump();
 
-      expect(focusNode.hasPrimaryFocus, isFalse);
-    },
-    variant: TargetPlatformVariant.mobile(),
-  );
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('The default clear button only shows when text input is not empty '
       'on the search view', (WidgetTester tester) async {
@@ -4382,6 +4380,143 @@ void main() {
     await tester.pump();
     expect(find.text('X'), findsOne);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/186154.
+  testWidgets('SearchAnchor full-screen view expands to fit screen when rotated', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.reset);
+
+    // Start in portrait mode.
+    const portraitModeWidth = 360.0;
+    const portraitModeHeight = 800.0;
+    tester.view.physicalSize = const Size(portraitModeWidth, portraitModeHeight);
+    tester.view.devicePixelRatio = 1.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SearchAnchor(
+            isFullScreen: true,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    // Verify starting sizes match portrait mode.
+    final Size startingSize = getSearchViewSize(tester);
+    expect(startingSize.width, portraitModeWidth);
+    expect(startingSize.height, portraitModeHeight);
+
+    // Rotate to landscape mode.
+    const landscapeModeWidth = portraitModeHeight;
+    const landscapeModeHeight = portraitModeWidth;
+    tester.view.physicalSize = const Size(landscapeModeWidth, landscapeModeHeight);
+    await tester.pumpAndSettle();
+
+    // Verify the view expands to match landscape mode.
+    final Size rotatedSize = getSearchViewSize(tester);
+    expect(rotatedSize.width, landscapeModeWidth);
+    expect(rotatedSize.height, landscapeModeHeight);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/186154.
+  testWidgets('SearchAnchor resizes itself to match Navigator parent', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
+    var parentHeight = 400.0;
+    var parentWidth = 600.0;
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              return SizedBox(
+                height: parentHeight,
+                width: parentWidth,
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings settings) {
+                    return MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          body: SearchAnchor(
+                            isFullScreen: true,
+                            builder: (BuildContext context, SearchController controller) {
+                              return IconButton(
+                                icon: const Icon(Icons.search),
+                                onPressed: () {
+                                  controller.openView();
+                                },
+                              );
+                            },
+                            suggestionsBuilder:
+                                (BuildContext context, SearchController controller) {
+                                  return <Widget>[];
+                                },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    // Verify search view size matches parent.
+    Size size = getSearchViewSize(tester);
+    expect(size.height, 400.0);
+    expect(size.width, 600.0);
+
+    // Resize the parent container larger.
+    setState(() {
+      parentHeight = 500.0;
+      parentWidth = 700.0;
+    });
+    await tester.pumpAndSettle();
+
+    // Verify the view expands to match parent.
+    size = getSearchViewSize(tester);
+    expect(size.height, 500.0);
+    expect(size.width, 700.0);
+
+    // Resize the parent container smaller.
+    setState(() {
+      parentHeight = 300.0;
+      parentWidth = 400.0;
+    });
+    await tester.pumpAndSettle();
+
+    // Verify the view shrinks to match parent.
+    size = getSearchViewSize(tester);
+    expect(size.height, 300.0);
+    expect(size.width, 400.0);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
@@ -4480,5 +4615,11 @@ Finder findViewContent() {
 Material getSearchViewMaterial(WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(of: findViewContent(), matching: find.byType(Material)).first,
+  );
+}
+
+Size getSearchViewSize(WidgetTester tester) {
+  return tester.getSize(
+    find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
   );
 }
