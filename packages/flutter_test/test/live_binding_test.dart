@@ -9,36 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
-  PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
-    return PageRouteBuilder<T>(
-      settings: settings,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => builder(context),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) => child,
-    );
-  }
-
-  Widget buildTestApp({required Widget child}) {
-    return WidgetsApp(
-      color: const Color(0xFFFFFFFF),
-      pageRouteBuilder: defaultPageRouteBuilder,
-      home: SizedBox.expand(child: Center(child: child)),
-    );
-  }
-
   final binding = LiveTestWidgetsFlutterBinding();
   testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
-    await tester.pumpWidget(buildTestApp(child: const Text('Test')));
+    await tester.pumpWidget(const TestWidgetsApp(home: Text('Test')));
     await tester.pump();
     final TestGesture gesture = await tester.createGesture();
     // This mimics the start of a gesture as seen on a device, where inputs
@@ -50,8 +23,8 @@ void main() {
   testWidgets('Input PointerHoverEvent', (WidgetTester tester) async {
     PointerHoverEvent? hoverEvent;
     await tester.pumpWidget(
-      buildTestApp(
-        child: MouseRegion(
+      TestWidgetsApp(
+        home: MouseRegion(
           child: const Text('Test'),
           onHover: (PointerHoverEvent event) {
             hoverEvent = event;
@@ -71,8 +44,8 @@ void main() {
   testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
     var invocations = 0;
     await tester.pumpWidget(
-      buildTestApp(
-        child: GestureDetector(
+      TestWidgetsApp(
+        home: GestureDetector(
           onTap: () {
             invocations++;
           },
@@ -100,7 +73,7 @@ void main() {
 
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
     addTearDown(binding.resetLayers);
-    await tester.pumpWidget(buildTestApp(child: const Text('Test')));
+    await tester.pumpWidget(const TestWidgetsApp(home: Center(child: Text('Test'))));
 
     final Size windowCenter = tester.view.physicalSize / tester.view.devicePixelRatio / 2;
     final double windowCenterX = windowCenter.width;

@@ -93,7 +93,7 @@ void main() {
   TestBinding.ensureInitialized();
 
   test('Test pump on LiveWidgetController', () async {
-    runApp(buildTestApp(child: const CountButton()));
+    runApp(const TestWidgetsApp(home: CountButton()));
 
     await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
@@ -106,7 +106,7 @@ void main() {
   });
 
   test('Test pumpAndSettle on LiveWidgetController', () async {
-    runApp(buildTestApp(child: const AnimateSample()));
+    runApp(const TestWidgetsApp(home: AnimateSample()));
     await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
     expect(find.text('Value: 1.0'), findsNothing);
@@ -117,8 +117,8 @@ void main() {
   test('Input event array on LiveWidgetController', () async {
     final logs = <String>[];
     runApp(
-      buildTestApp(
-        child: Listener(
+      TestWidgetsApp(
+        home: Listener(
           onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
           onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
           onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
@@ -182,28 +182,4 @@ void main() {
     }
     expect(logs.last, 'up $b');
   });
-}
-
-PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
-  return PageRouteBuilder<T>(
-    settings: settings,
-    pageBuilder:
-        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
-            builder(context),
-    transitionsBuilder:
-        (
-          BuildContext context,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
-          Widget child,
-        ) => child,
-  );
-}
-
-Widget buildTestApp({required Widget child}) {
-  return WidgetsApp(
-    color: const Color(0xFFFFFFFF),
-    pageRouteBuilder: defaultPageRouteBuilder,
-    home: SizedBox.expand(child: Center(child: child)),
-  );
 }
