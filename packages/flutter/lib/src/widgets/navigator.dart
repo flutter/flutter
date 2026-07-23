@@ -3028,11 +3028,7 @@ class Navigator extends StatefulWidget {
         return true;
       }());
       result.add(
-        navigator._routeNamed<dynamic>(
-          Navigator.defaultRouteName,
-          arguments: null,
-          allowNull: true,
-        ),
+        navigator._routeNamed(Navigator.defaultRouteName, arguments: null, allowNull: true),
       );
       final List<String> routeParts = initialRouteName.split('/');
       if (initialRouteName.isNotEmpty) {
@@ -3043,7 +3039,7 @@ class Navigator extends StatefulWidget {
             debugRouteNames!.add(routeName);
             return true;
           }());
-          result.add(navigator._routeNamed<dynamic>(routeName, arguments: null, allowNull: true));
+          result.add(navigator._routeNamed(routeName, arguments: null, allowNull: true));
         }
       }
       if (result.last == null) {
@@ -3067,9 +3063,7 @@ class Navigator extends StatefulWidget {
     } else if (initialRouteName != Navigator.defaultRouteName) {
       // If initialRouteName wasn't '/', then we try to get it with allowNull:true, so that if that fails,
       // we fall back to '/' (without allowNull:true, see below).
-      result.add(
-        navigator._routeNamed<dynamic>(initialRouteName, arguments: null, allowNull: true),
-      );
+      result.add(navigator._routeNamed(initialRouteName, arguments: null, allowNull: true));
     }
     // Null route might be a result of gap in initialRouteName
     //
@@ -3079,7 +3073,7 @@ class Navigator extends StatefulWidget {
     // result = ['A', 'A/B/C'].
     result.removeWhere((Route<dynamic>? route) => route == null);
     if (result.isEmpty) {
-      result.add(navigator._routeNamed<dynamic>(Navigator.defaultRouteName, arguments: null));
+      result.add(navigator._routeNamed(Navigator.defaultRouteName, arguments: null));
     }
     return result.cast<Route<dynamic>>();
   }
@@ -4685,7 +4679,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return index < _history.length ? _history[index] : null;
   }
 
-  Route<T?>? _routeNamed<T>(String name, {required Object? arguments, bool allowNull = false}) {
+  Route<Object?>? _routeNamed(String name, {required Object? arguments, bool allowNull = false}) {
     assert(!_debugLocked);
     if (allowNull && widget.onGenerateRoute == null) {
       return null;
@@ -4704,7 +4698,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }());
     final settings = RouteSettings(name: name, arguments: arguments);
-    var route = widget.onGenerateRoute!(settings) as Route<T?>?;
+    Route<Object?>? route = widget.onGenerateRoute!(settings);
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
@@ -4725,7 +4719,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         }
         return true;
       }());
-      route = widget.onUnknownRoute!(settings) as Route<T?>?;
+      route = widget.onUnknownRoute!(settings);
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -4772,8 +4766,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    during state restoration.
   @awaitNotRequired
   @optionalTypeArgs
-  Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) {
-    return push<T?>(_routeNamed<T>(routeName, arguments: arguments)!);
+  Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) async {
+    final Object? result = await push<Object?>(_routeNamed(routeName, arguments: arguments)!);
+    return result as T?;
   }
 
   /// Push a named route onto the navigator.
@@ -4842,11 +4837,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     String routeName, {
     TO? result,
     Object? arguments,
-  }) {
-    return pushReplacement<T?, TO>(
-      _routeNamed<T>(routeName, arguments: arguments)!,
+  }) async {
+    final Object? value = await pushReplacement<Object?, Object?>(
+      _routeNamed(routeName, arguments: arguments)!,
       result: result,
     );
+    return value as T?;
   }
 
   /// Replace the current route of the navigator by pushing the route named
@@ -4986,8 +4982,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     String newRouteName,
     RoutePredicate predicate, {
     Object? arguments,
-  }) {
-    return pushAndRemoveUntil<T?>(_routeNamed<T>(newRouteName, arguments: arguments)!, predicate);
+  }) async {
+    final Object? result = await pushAndRemoveUntil<Object?>(
+      _routeNamed(newRouteName, arguments: arguments)!,
+      predicate,
+    );
+    return result as T?;
   }
 
   /// Push the route with the given name onto the navigator, and then remove all
@@ -6084,8 +6084,7 @@ class _NamedRestorationInformation extends _RestorationInformation {
 
   @override
   Route<dynamic> createRoute(NavigatorState navigator) {
-    final Route<dynamic> route = navigator._routeNamed<dynamic>(name, arguments: arguments)!;
-    return route;
+    return navigator._routeNamed(name, arguments: arguments)!;
   }
 }
 
