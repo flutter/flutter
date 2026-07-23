@@ -11,6 +11,7 @@ library;
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -23,6 +24,7 @@ import 'actions.dart';
 import 'basic.dart';
 import 'context_menu_button_item.dart';
 import 'debug.dart';
+import 'default_selection_style.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -249,6 +251,8 @@ class SelectableRegion extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
     required this.selectionControls,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     required this.child,
   });
 
@@ -278,6 +282,12 @@ class SelectableRegion extends StatefulWidget {
   /// The [emptyTextSelectionControls] global variable provides a default
   /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
+
+  /// {@macro flutter.widgets.selectionHeightStyle}
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// {@macro flutter.widgets.selectionWidthStyle}
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
@@ -1972,18 +1982,22 @@ class SelectableRegionState extends State<SelectableRegion>
           _focusNode.unfocus();
         }
       },
-      child: CompositedTransformTarget(
-        link: _toolbarLayerLink,
-        child: RawGestureDetector(
-          gestures: _gestureRecognizers,
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          child: Actions(
-            actions: _actions,
-            child: Focus.withExternalFocusNode(
-              includeSemantics: false,
-              focusNode: _focusNode,
-              child: result,
+      child: DefaultSelectionStyle.merge(
+        selectionHeightStyle: widget.selectionHeightStyle,
+        selectionWidthStyle: widget.selectionWidthStyle,
+        child: CompositedTransformTarget(
+          link: _toolbarLayerLink,
+          child: RawGestureDetector(
+            gestures: _gestureRecognizers,
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            child: Actions(
+              actions: _actions,
+              child: Focus.withExternalFocusNode(
+                includeSemantics: false,
+                focusNode: _focusNode,
+                child: result,
+              ),
             ),
           ),
         ),

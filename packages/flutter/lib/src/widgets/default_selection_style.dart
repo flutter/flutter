@@ -8,6 +8,8 @@
 /// @docImport 'text.dart';
 library;
 
+import 'dart:ui' as ui;
+
 import 'basic.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
@@ -33,6 +35,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     this.cursorColor,
     this.selectionColor,
     this.mouseCursor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     required super.child,
   });
 
@@ -48,6 +52,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     : cursorColor = null,
       selectionColor = null,
       mouseCursor = null,
+      selectionHeightStyle = null,
+      selectionWidthStyle = null,
       super(child: const _NullWidget());
 
   /// Creates a default selection style that overrides the selection styles in
@@ -60,6 +66,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     Color? cursorColor,
     Color? selectionColor,
     MouseCursor? mouseCursor,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     required Widget child,
   }) {
     return Builder(
@@ -70,6 +78,8 @@ class DefaultSelectionStyle extends InheritedTheme {
           cursorColor: cursorColor ?? parent.cursorColor,
           selectionColor: selectionColor ?? parent.selectionColor,
           mouseCursor: mouseCursor ?? parent.mouseCursor,
+          selectionHeightStyle: selectionHeightStyle ?? parent.selectionHeightStyle,
+          selectionWidthStyle: selectionWidthStyle ?? parent.selectionWidthStyle,
           child: child,
         );
       },
@@ -96,6 +106,16 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// If this property is null, [SystemMouseCursors.text] will be used.
   final MouseCursor? mouseCursor;
 
+  /// {@template flutter.widgets.selectionHeightStyle}
+  /// The box height style to use for painting selection highlights.
+  /// {@endtemplate}
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// {@template flutter.widgets.selectionWidthStyle}
+  /// The box width style to use for painting selection highlights.
+  /// {@endtemplate}
+  final ui.BoxWidthStyle? selectionWidthStyle;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// If no such instance exists, returns an instance created by
@@ -117,6 +137,8 @@ class DefaultSelectionStyle extends InheritedTheme {
       cursorColor: cursorColor,
       selectionColor: selectionColor,
       mouseCursor: mouseCursor,
+      selectionHeightStyle: selectionHeightStyle,
+      selectionWidthStyle: selectionWidthStyle,
       child: child,
     );
   }
@@ -125,7 +147,9 @@ class DefaultSelectionStyle extends InheritedTheme {
   bool updateShouldNotify(DefaultSelectionStyle oldWidget) {
     return cursorColor != oldWidget.cursorColor ||
         selectionColor != oldWidget.selectionColor ||
-        mouseCursor != oldWidget.mouseCursor;
+        mouseCursor != oldWidget.mouseCursor ||
+        selectionHeightStyle != oldWidget.selectionHeightStyle ||
+        selectionWidthStyle != oldWidget.selectionWidthStyle;
   }
 }
 
