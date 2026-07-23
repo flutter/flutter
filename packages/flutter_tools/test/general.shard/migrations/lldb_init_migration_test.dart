@@ -74,35 +74,6 @@ void main() {
         );
       });
 
-      testWithoutContext('fails if Xcode workspace not found', () async {
-        final memoryFileSystem = MemoryFileSystem();
-        final testLogger = BufferLogger.test();
-        final project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-        );
-        _createProjectFiles(project);
-        project.xcodeWorkspace = null;
-
-        final migration = LLDBInitMigration(
-          project,
-          BuildInfo.debug,
-          testLogger,
-          environmentType: EnvironmentType.physical,
-          fileSystem: memoryFileSystem,
-        );
-        await migration.migrate();
-        expect(testLogger.traceText, contains('Xcode workspace not found.'));
-        expect(
-          testLogger.errorText,
-          contains(
-            'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
-            'scheme does not have it set.',
-          ),
-        );
-      });
-
       testWithoutContext('fails if scheme not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
@@ -477,6 +448,36 @@ void main() {
         logger: testLogger,
       );
       _createProjectFiles(project);
+      project.xcodeProjectSchemeFile().writeAsStringSync(_validScheme());
+
+      final migration = LLDBInitMigration(
+        project,
+        BuildInfo.debug,
+        testLogger,
+        environmentType: EnvironmentType.physical,
+        fileSystem: memoryFileSystem,
+      );
+      await migration.migrate();
+      expect(testLogger.errorText, isEmpty);
+      expect(
+        project.xcodeProjectSchemeFile().readAsStringSync(),
+        _validScheme(
+          lldbInitFile:
+              '\n      customLLDBInitFile = "\$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"',
+        ),
+      );
+    });
+
+    testWithoutContext('succeeds with no Runner.xcworkspace', () async {
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
+        platform: SupportedPlatform.ios.name,
+        fileSystem: memoryFileSystem,
+        logger: testLogger,
+      );
+      _createProjectFiles(project);
+      project.xcodeWorkspace = null;
       project.xcodeProjectSchemeFile().writeAsStringSync(_validScheme());
 
       final migration = LLDBInitMigration(

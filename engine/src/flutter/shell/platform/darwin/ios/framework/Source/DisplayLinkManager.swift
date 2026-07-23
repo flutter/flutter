@@ -36,7 +36,9 @@ public final class DisplayLinkManager: NSObject, @unchecked Sendable {
   /// The shared DisplayLinkManager.
   ///
   /// The first access performs a one-time read of `UIScreen.main`, and must happen on the main
-  /// thread; this is enforced by an assertion in `init()`.
+  /// thread; `@MainActor` isolation enforces this for Swift callers at compile time. Objective-C
+  /// callers remain responsible for calling from the main thread themselves.
+  @MainActor
   @objc
   public static let shared = DisplayLinkManager()
 
@@ -90,6 +92,7 @@ public final class DisplayLinkManager: NSObject, @unchecked Sendable {
   ///
   /// Queries the system plist and main screen properties on the main thread, then starts observing
   /// for changes that can affect the cached refresh rate.
+  @MainActor
   private override init() {
     assert(
       Thread.isMainThread,

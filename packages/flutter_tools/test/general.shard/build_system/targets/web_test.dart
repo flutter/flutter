@@ -135,6 +135,31 @@ name: foo
   );
 
   test(
+    'WebEntrypointTarget declares package_config.json, pubspec.yaml, and plugin dependencies as inputs',
+    () => testbed.run(() async {
+      const target = WebEntrypointTarget();
+      expect(
+        target.inputs,
+        equals(<Source>[
+          const Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart',
+          ),
+          const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+          const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+          const Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies', optional: true),
+        ]),
+      );
+      expect(
+        target.outputs,
+        equals(<Source>[
+          const Source.pattern('{BUILD_DIR}/main.dart'),
+          const Source.pattern('{BUILD_DIR}/web_plugin_registrant.dart'),
+        ]),
+      );
+    }),
+  );
+
+  test(
     'version.json is created after release build',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';

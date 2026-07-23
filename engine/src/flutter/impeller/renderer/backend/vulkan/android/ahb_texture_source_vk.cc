@@ -261,6 +261,7 @@ AHBTextureSourceVK::AHBTextureSourceVK(
     return;
   }
 
+  device_holder_ = context.GetDeviceHolder();
   device_memory_ = std::move(device_memory);
   image_ = std::move(image);
   yuv_conversion_ = std::move(yuv_conversion);
@@ -291,7 +292,17 @@ AHBTextureSourceVK::AHBTextureSourceVK(
 }
 
 // |TextureSourceVK|
-AHBTextureSourceVK::~AHBTextureSourceVK() = default;
+AHBTextureSourceVK::~AHBTextureSourceVK() {
+  // The ASurfaceTransaction completion callback may hold the last reference
+  // to the AHBTextureSourceVK and can be deleted after the ContextVK and
+  // VkDevice have been destroyed.  If the VkDevice is gone, then do not call
+  // APIs to delete Vulkan objects.
+  if (auto device = device_holder_.lock(); !device) {
+    image_view_.release();
+    image_.release();
+    device_memory_.release();
+  }
+}
 
 bool AHBTextureSourceVK::IsValid() const {
   return is_valid_;

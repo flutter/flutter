@@ -15,12 +15,12 @@ using WideStringConverter =
 
 std::string WideStringToUtf8(const std::wstring_view str) {
   WideStringConverter converter;
-  return converter.to_bytes(str.data());
+  return converter.to_bytes(str.data(), str.data() + str.size());
 }
 
 std::wstring Utf8ToWideString(const std::string_view str) {
   WideStringConverter converter;
-  return converter.from_bytes(str.data());
+  return converter.from_bytes(str.data(), str.data() + str.size());
 }
 
 std::u16string WideStringToUtf16(const std::wstring_view str) {
