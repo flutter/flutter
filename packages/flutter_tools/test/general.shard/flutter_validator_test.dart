@@ -861,6 +861,9 @@ class FakeFlutterFeatures extends FeatureFlags {
   bool get isMacOSArm64OnlyEnabled => _enabled;
 
   @override
+  bool get isHcppEnabled => _enabled;
+
+  @override
   final List<Feature> allFeatures;
 
   @override

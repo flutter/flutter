@@ -428,7 +428,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -438,6 +438,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -482,7 +483,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: true,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -492,6 +493,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -789,7 +791,7 @@ void main() {
                 runProjectModule: false,
                 runProjectHostLanguage: '',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -797,6 +799,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -840,7 +843,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -848,6 +851,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -896,7 +900,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -904,6 +908,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -953,7 +958,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -961,10 +966,102 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
       );
+    });
+
+    group('HCPP Gating', () {
+      testUsingContext(
+        'enableHcpp is true when --enable-hcpp is explicitly passed',
+        () async {
+          final devices = <Device>[
+            FakeDevice(
+              targetPlatform: TargetPlatform.android_arm,
+              platformType: PlatformType.android,
+            ),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            await runner.run(<String>['run', '--enable-hcpp']);
+          } on ToolExit {
+            // Ignore
+          }
+          expect(command.enableHcpp, isTrue);
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(),
+        },
+      );
+
+      testUsingContext(
+        'enableHcpp is false when --no-enable-hcpp is explicitly passed',
+        () async {
+          final devices = <Device>[
+            FakeDevice(
+              targetPlatform: TargetPlatform.android_arm,
+              platformType: PlatformType.android,
+            ),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            await runner.run(<String>['run', '--no-enable-hcpp']);
+          } on ToolExit {
+            // Ignore
+          }
+          expect(command.enableHcpp, isFalse);
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        },
+      );
+
+      // When the flag is not explicitly passed, no runtime override is sent to
+      // the device. The enable-hcpp feature flag is instead applied at build
+      // time (see BuildInfo.androidEnableHcpp), so that an explicit value in
+      // the app's manifest takes priority over the feature flag.
+      testUsingContext(
+        'explicitEnableHcpp is null when flag not explicitly passed, even if isHcppEnabled = true',
+        () async {
+          final devices = <Device>[
+            FakeDevice(
+              targetPlatform: TargetPlatform.android_arm,
+              platformType: PlatformType.android,
+            ),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            await runner.run(<String>['run']);
+          } on ToolExit {
+            // Ignore
+          }
+          expect(command.explicitEnableHcpp, isNull);
+          expect(command.enableHcpp, isTrue);
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        },
+      );
+
+      // The piping of the feature flag into BuildInfo.androidEnableHcpp is
+      // covered in flutter_command_test.dart.
     });
 
     group('--web-header', () {
@@ -2236,6 +2333,9 @@ class FakeAnsiTerminal extends Fake implements AnsiTerminal {
 class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isWebEnabled => true;
+
+  @override
+  bool get isHcppEnabled => isEnabled(hcpp);
 
   @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;

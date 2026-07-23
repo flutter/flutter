@@ -35,6 +35,9 @@ found in the LICENSE file. -->
         <meta-data android:name="flutterEmbedding" android:value="2" />
         <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />
         <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="vulkan" />
+        <!-- Don't delete the meta-data below, even if it matches the default.
+             These tests intentionally test explicit platform view modes, and an explicit value
+             here prevents the tool from injecting the enable-hcpp feature flag default. -->
         <meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="false" />
     </application>
     <!-- Required to query activities that can process text, see:

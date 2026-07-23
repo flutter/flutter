@@ -405,9 +405,9 @@ to evolve over time.
 
 # Limitations
 
-The Flutter engine and embedders cannot use Flutter's feature flags directly.
+The Flutter engine and embedders cannot use Flutter's feature flags directly at runtime. However, if a flag can be consumed in the `flutter` tool and piped into the build or engine (for example, by injecting manifest metadata or passing launch arguments), feature flags can still be used for engine/embedder features.
 
-If an embedder needs feature flags, you can instead use the project's platform-specific configuration.
+If an embedder needs feature flags and no such piping exists, you can instead use the project's platform-specific configuration.
 
 On Android, use `AndroidManifest.xml`:
 

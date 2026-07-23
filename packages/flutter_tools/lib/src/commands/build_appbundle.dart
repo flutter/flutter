@@ -38,6 +38,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser.addMultiOption(
       'target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -109,7 +110,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
-      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
+      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(
+        ifAbsent: enableHcpp,
+      ),
     );
   }
 
