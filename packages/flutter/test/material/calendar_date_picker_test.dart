@@ -71,8 +71,10 @@ void main() {
     DateTime? currentDate,
     ValueChanged<DateTime>? onChanged,
     TextDirection textDirection = TextDirection.ltr,
+    ThemeData? theme,
   }) {
     return MaterialApp(
+      theme: theme,
       home: Material(
         child: Directionality(
           textDirection: textDirection,
@@ -2118,6 +2120,84 @@ void main() {
       expect((outerMaterial as dynamic).debugInkFeatures, isNull);
       expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
     });
+  });
+
+  ShapeDecoration? findYearDecoration(WidgetTester tester, String year) {
+    final Container container = tester.widget<Container>(
+      find.ancestor(of: find.text(year), matching: find.byType(Container)).first,
+    );
+
+    return container.decoration as ShapeDecoration?;
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/189298
+  testWidgets('Non-null todayBorder color should be respected over todayBackgroundColor', (
+    WidgetTester tester,
+  ) async {
+    const Color customBorderColor = Colors.red;
+    await tester.pumpWidget(
+      yearPicker(
+        theme: ThemeData(
+          datePickerTheme: DatePickerThemeData(
+            todayBorder: const BorderSide(color: customBorderColor),
+            todayForegroundColor: WidgetStateProperty.all(Colors.blue),
+          ),
+        ),
+      ),
+    );
+
+    // The current year should be painted with custom border color.
+    final ShapeDecoration? decoration = findYearDecoration(tester, '2016');
+    final shape = decoration!.shape as OutlinedBorder;
+    expect(shape.side.color, customBorderColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/189298.
+  testWidgets('Non-null todayBorder color is used even when disabled', (WidgetTester tester) async {
+    const Color customBorderColor = Colors.red;
+    await tester.pumpWidget(
+      yearPicker(
+        firstDate: DateTime(2018, DateTime.june, 9),
+        lastDate: DateTime(2030, DateTime.december, 15),
+        selectedDate: DateTime(2020),
+        currentDate: DateTime(2016), // Not between first and last date.
+        theme: ThemeData(
+          datePickerTheme: DatePickerThemeData(
+            todayBorder: const BorderSide(color: customBorderColor),
+            todayForegroundColor: WidgetStateProperty.all(Colors.blue),
+          ),
+        ),
+      ),
+    );
+
+    // The current year should be painted with the custom border color,
+    // not with foreground color opacity applied, even if it's disabled.
+    final ShapeDecoration? decoration = findYearDecoration(tester, '2016');
+    final shape = decoration!.shape as OutlinedBorder;
+    expect(shape.side.color, customBorderColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/189298.
+  testWidgets('Transparent todayBorder should fall back to foreground color', (
+    WidgetTester tester,
+  ) async {
+    const Color customForegroundColor = Colors.green;
+    await tester.pumpWidget(
+      yearPicker(
+        theme: ThemeData(
+          datePickerTheme: DatePickerThemeData(
+            todayBorder: const BorderSide(color: Color(0x00000000)),
+            todayForegroundColor: WidgetStateProperty.all(customForegroundColor),
+          ),
+        ),
+      ),
+    );
+
+    // The current year should use the foreground color since
+    // todayBorder color is transparent.
+    final ShapeDecoration? decoration = findYearDecoration(tester, '2016');
+    final shape = decoration!.shape as OutlinedBorder;
+    expect(shape.side.color, customForegroundColor);
   });
 
   group('Calendar Delegate', () {
