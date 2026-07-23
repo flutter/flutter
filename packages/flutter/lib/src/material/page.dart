@@ -41,6 +41,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
+    super.includeRouteSemantics = true,
     super.barrierDismissible = false,
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
@@ -191,6 +192,9 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     final Widget result = buildContent(context);
+    if (!includeRouteSemantics) {
+      return result;
+    }
     return Semantics(scopesRoute: true, explicitChildNodes: true, child: result);
   }
 
@@ -233,6 +237,7 @@ class MaterialPage<T> extends Page<T> {
     this.maintainState = true,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    this.includeRouteSemantics = true,
     super.key,
     super.canPop,
     super.onPopInvoked,
@@ -252,6 +257,9 @@ class MaterialPage<T> extends Page<T> {
 
   /// {@macro flutter.widgets.TransitionRoute.allowSnapshotting}
   final bool allowSnapshotting;
+
+  /// {@macro flutter.widgets.PageRoute.includeRouteSemantics}
+  final bool includeRouteSemantics;
 
   @override
   Route<T> createRoute(BuildContext context) {
@@ -281,6 +289,9 @@ class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTran
 
   @override
   bool get fullscreenDialog => _page.fullscreenDialog;
+
+  @override
+  bool get includeRouteSemantics => _page.includeRouteSemantics;
 
   @override
   String get debugLabel => '${super.debugLabel}(${_page.name})';
