@@ -532,7 +532,7 @@ class FlutterPluginUtilsTest {
     @Test
     fun `supportsBuildMode returns true if project should not use local engine`() {
         val project = mockk<Project>()
-        every { project.hasProperty(FlutterPluginUtils.PROP_LOCAL_ENGINE_REPO) } returns false
+        every { project.findProperty(FlutterPluginUtils.PROP_LOCAL_ENGINE_REPO) } returns null
         val result = FlutterPluginUtils.supportsBuildMode(project, "debug")
         assertEquals(true, result)
     }
@@ -540,9 +540,8 @@ class FlutterPluginUtilsTest {
     @Test
     fun `supportsBuildMode returns false if project should use local engine and build mode does not match`() {
         val project = mockk<Project>()
-        every { project.hasProperty(FlutterPluginUtils.PROP_LOCAL_ENGINE_REPO) } returns true
-        every { project.hasProperty(FlutterPluginUtils.PROP_LOCAL_ENGINE_BUILD_MODE) } returns true
-        every { project.property(FlutterPluginUtils.PROP_LOCAL_ENGINE_BUILD_MODE) } returns "debug"
+        every { project.findProperty(FlutterPluginUtils.PROP_LOCAL_ENGINE_REPO) } returns "fake-repo"
+        every { project.findProperty(FlutterPluginUtils.PROP_LOCAL_ENGINE_BUILD_MODE) } returns "debug"
 
         val result = FlutterPluginUtils.supportsBuildMode(project, "release")
         assertEquals(false, result)
@@ -552,7 +551,7 @@ class FlutterPluginUtilsTest {
     @Test
     fun `getTargetPlatforms the default if property is not set`() {
         val project = mockk<Project>()
-        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns false
+        every { project.findProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns null
         val result = FlutterPluginUtils.getTargetPlatforms(project)
         assertEquals(listOf("android-arm", "android-arm64", "android-x64"), result)
     }
@@ -560,8 +559,7 @@ class FlutterPluginUtilsTest {
     @Test
     fun `getTargetPlatforms the value if property is set`() {
         val project = mockk<Project>()
-        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns true
-        every { project.property(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns "android-arm64,android-arm"
+        every { project.findProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns "android-arm64,android-arm"
         val result = FlutterPluginUtils.getTargetPlatforms(project)
         assertEquals(listOf("android-arm64", "android-arm"), result)
     }
@@ -569,8 +567,7 @@ class FlutterPluginUtilsTest {
     @Test
     fun `getTargetPlatforms throws GradleException if property is set to invalid value`() {
         val project = mockk<Project>()
-        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns true
-        every { project.property(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns "android-invalid"
+        every { project.findProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns "android-invalid"
         val gradleException: GradleException =
             assertThrows<GradleException> {
                 FlutterPluginUtils.getTargetPlatforms(project)
@@ -2443,9 +2440,8 @@ class FlutterPluginUtilsTest {
         val buildType: BuildType = mockk<BuildType>()
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
-        every { project.hasProperty("local-engine-repo") } returns true
-        every { project.hasProperty("local-engine-build-mode") } returns true
-        every { project.property("local-engine-build-mode") } returns "release"
+        every { project.findProperty("local-engine-repo") } returns "something"
+        every { project.findProperty("local-engine-build-mode") } returns "release"
         every { project.logger.quiet(any()) } returns Unit
 
         FlutterPluginUtils.addFlutterDependencies(
