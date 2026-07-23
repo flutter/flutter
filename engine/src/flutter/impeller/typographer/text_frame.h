@@ -10,6 +10,7 @@
 
 #include "flutter/display_list/geometry/dl_path.h"
 #include "fml/status_or.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/rational.h"
 #include "impeller/typographer/glyph.h"
 #include "impeller/typographer/glyph_atlas.h"
@@ -18,6 +19,19 @@
 namespace impeller {
 
 using PathCreator = std::function<fml::StatusOr<flutter::DlPath>()>;
+
+//------------------------------------------------------------------------------
+/// @brief      A single vector layer of a COLR/CPAL color glyph: an outline
+///             plus the CPAL color it should be filled with.
+struct ColorGlyphLayer {
+  flutter::DlPath path;
+  Color color;
+  /// When true, fill with the current paint color instead of [color] (COLR
+  /// palette index 0xFFFF = "text foreground color").
+  bool use_foreground_color = false;
+};
+
+using ColorPathCreator = std::function<std::vector<ColorGlyphLayer>()>;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents a collection of shaped text runs.
@@ -31,7 +45,8 @@ class TextFrame {
   TextFrame(std::vector<TextRun>& runs,
             Rect bounds,
             bool has_color,
-            const PathCreator& path_creator = {});
+            const PathCreator& path_creator = {},
+            const ColorPathCreator& color_path_creator = {});
 
   ~TextFrame();
 
@@ -92,6 +107,13 @@ class TextFrame {
 
   fml::StatusOr<flutter::DlPath> GetPath() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      For a COLR/CPAL color text frame, the per-glyph color layer
+  ///             outlines (see [ColorGlyphLayer]). Empty if this frame has no
+  ///             color path data available (e.g. non-color text, or a color
+  ///             format other than COLRv0).
+  std::vector<ColorGlyphLayer> GetColorPaths() const;
+
   /// @brief Toggle the platform-specific contrast and gamma correction in the
   ///        fragment shader.
   ///
@@ -110,6 +132,7 @@ class TextFrame {
   Rect bounds_;
   bool has_color_;
   const PathCreator path_creator_;
+  const ColorPathCreator color_path_creator_;
   std::optional<bool> enable_gamma_correction_ = std::nullopt;
 };
 
