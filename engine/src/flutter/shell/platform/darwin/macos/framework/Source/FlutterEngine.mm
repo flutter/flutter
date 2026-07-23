@@ -1234,7 +1234,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 - (void)sendPointerEvent:(const FlutterPointerEvent&)event {
   _embedderAPI.SendPointerEvent(_engine, &event, 1);
-  _lastViewWithPointerEvent = [self viewControllerForIdentifier:kFlutterImplicitViewId].flutterView;
+  _lastViewWithPointerEvent = [self viewControllerForIdentifier:event.view_id].flutterView;
 }
 
 - (void)setSemanticsEnabled:(BOOL)enabled {
@@ -1525,7 +1525,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 - (void)didUpdateMouseCursor:(NSCursor*)cursor {
   // Mouse cursor plugin does not specify which view is responsible for changing the cursor,
   // so the reasonable assumption here is that cursor change is a result of a mouse movement
-  // and thus the cursor will be paired with last Flutter view that reveived mouse event.
+  // and thus the cursor will be paired with last Flutter view that received a mouse event.
   [_lastViewWithPointerEvent didUpdateMouseCursor:cursor];
 }
 
