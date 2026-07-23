@@ -47,6 +47,10 @@ class ListenableEditingState extends SpannableStringBuilder {
 
   private String mToStringCache;
 
+  // Depth of nested replace() calls.
+  // Used to ignore nested setSpan/removeSpan/clearSpans calls.
+  private int mReplaceDepth = 0;
+
   private String mTextWhenBeginBatchEdit;
   private int mSelectionStartWhenBeginBatchEdit;
   private int mSelectionEndWhenBeginBatchEdit;
@@ -216,7 +220,15 @@ class ListenableEditingState extends SpannableStringBuilder {
     final int composingStart = getComposingStart();
     final int composingEnd = getComposingEnd();
 
-    final SpannableStringBuilder editable = super.replace(start, end, tb, tbstart, tbend);
+    // Increment the depth before calling super.replace to ignore nested span calls.
+    mReplaceDepth++;
+    final SpannableStringBuilder editable;
+    try {
+      editable = super.replace(start, end, tb, tbstart, tbend);
+    } finally {
+      mReplaceDepth--;
+    }
+
     mBatchTextEditingDeltas.add(
         new TextEditingDelta(
             oldText,
@@ -277,16 +289,124 @@ class ListenableEditingState extends SpannableStringBuilder {
 
   @Override
   public void setSpan(Object what, int start, int end, int flags) {
+    // If we are currently replacing text, super.replace will handle updating selection/composing
+    // spans and generating the corresponding delta. We ignore those nested span updates here
+    // to avoid duplicate deltas and notifications.
+    if (mReplaceDepth > 0) {
+      super.setSpan(what, start, end, flags);
+      return;
+    }
+
+    // We must capture the old selection and composing region BEFORE calling super.setSpan,
+    // because super.setSpan will modify them. This is necessary to detect if they actually changed.
+    final int oldSelectionStart = getSelectionStart();
+    final int oldSelectionEnd = getSelectionEnd();
+    final int oldComposingStart = getComposingStart();
+    final int oldComposingEnd = getComposingEnd();
+
     super.setSpan(what, start, end, flags);
-    // Setting a span does not involve mutating the text value in the editing state. Here we create
-    // a non text update delta with any updated selection and composing regions.
-    mBatchTextEditingDeltas.add(
-        new TextEditingDelta(
-            toString(),
-            getSelectionStart(),
-            getSelectionEnd(),
-            getComposingStart(),
-            getComposingEnd()));
+
+    final int newSelectionStart = getSelectionStart();
+    final int newSelectionEnd = getSelectionEnd();
+    final int newComposingStart = getComposingStart();
+    final int newComposingEnd = getComposingEnd();
+
+    final boolean selectionChanged =
+        oldSelectionStart != newSelectionStart || oldSelectionEnd != newSelectionEnd;
+    final boolean composingChanged =
+        oldComposingStart != newComposingStart || oldComposingEnd != newComposingEnd;
+
+    if (selectionChanged || composingChanged) {
+      mBatchTextEditingDeltas.add(
+          new TextEditingDelta(
+              toString(), newSelectionStart, newSelectionEnd, newComposingStart, newComposingEnd));
+
+      if (mBatchEditNestDepth == 0) {
+        notifyListenersIfNeeded(false, selectionChanged, composingChanged);
+      }
+    }
+  }
+
+  @Override
+  public void removeSpan(Object what) {
+    // If we are currently replacing text, super.replace will handle updating selection/composing
+    // spans and generating the corresponding delta. We ignore those nested span updates here
+    // to avoid duplicate deltas and notifications.
+    if (mReplaceDepth > 0) {
+      super.removeSpan(what);
+      return;
+    }
+
+    // We must capture the old selection and composing region BEFORE calling super.removeSpan,
+    // because super.removeSpan will modify them. This is necessary to detect if they actually
+    // changed.
+    final int oldSelectionStart = getSelectionStart();
+    final int oldSelectionEnd = getSelectionEnd();
+    final int oldComposingStart = getComposingStart();
+    final int oldComposingEnd = getComposingEnd();
+
+    super.removeSpan(what);
+
+    final int newSelectionStart = getSelectionStart();
+    final int newSelectionEnd = getSelectionEnd();
+    final int newComposingStart = getComposingStart();
+    final int newComposingEnd = getComposingEnd();
+
+    final boolean selectionChanged =
+        oldSelectionStart != newSelectionStart || oldSelectionEnd != newSelectionEnd;
+    final boolean composingChanged =
+        oldComposingStart != newComposingStart || oldComposingEnd != newComposingEnd;
+
+    if (selectionChanged || composingChanged) {
+      mBatchTextEditingDeltas.add(
+          new TextEditingDelta(
+              toString(), newSelectionStart, newSelectionEnd, newComposingStart, newComposingEnd));
+
+      if (mBatchEditNestDepth == 0) {
+        notifyListenersIfNeeded(false, selectionChanged, composingChanged);
+      }
+    }
+  }
+
+  @Override
+  public void clearSpans() {
+    // If we are currently replacing text, super.replace will handle updating selection/composing
+    // spans and generating the corresponding delta. We ignore those nested span updates here
+    // to avoid duplicate deltas and notifications.
+    if (mReplaceDepth > 0) {
+      super.clearSpans();
+      return;
+    }
+
+    // We must capture the old selection and composing region BEFORE calling super.clearSpans,
+    // because super.clearSpans will modify them. This is necessary to detect if they actually
+    // changed.
+    final int oldSelectionStart = getSelectionStart();
+    final int oldSelectionEnd = getSelectionEnd();
+    final int oldComposingStart = getComposingStart();
+    final int oldComposingEnd = getComposingEnd();
+
+    super.clearSpans();
+
+    final int newSelectionStart = getSelectionStart();
+    final int newSelectionEnd = getSelectionEnd();
+    final int newComposingStart = getComposingStart();
+    final int newComposingEnd = getComposingEnd();
+
+    final boolean selectionChanged =
+        oldSelectionStart != newSelectionStart || oldSelectionEnd != newSelectionEnd;
+    final boolean composingChanged =
+        oldComposingStart != newComposingStart || oldComposingEnd != newComposingEnd;
+
+    if (selectionChanged || composingChanged) {
+      mBatchTextEditingDeltas.add(
+          new TextEditingDelta(
+              toString(), newSelectionStart, newSelectionEnd, newComposingStart, newComposingEnd));
+
+      if (mBatchEditNestDepth == 0) {
+        notifyListenersIfNeeded(false, selectionChanged, composingChanged);
+      }
+    }
   }
 
   @Override
