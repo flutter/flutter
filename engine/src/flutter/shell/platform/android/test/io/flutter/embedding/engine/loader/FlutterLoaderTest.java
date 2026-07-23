@@ -26,6 +26,7 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import androidx.test.core.app.ApplicationProvider;
@@ -134,9 +135,9 @@ public class FlutterLoaderTest {
 
     ActivityManager activityManager =
         (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
-    ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-    activityManager.getMemoryInfo(memInfo);
-    int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+    boolean isLargeHeap = (ctx.getApplicationInfo().flags & ApplicationInfo.FLAG_LARGE_HEAP) != 0;
+    int oldGenHeapSizeMegaBytes =
+        isLargeHeap ? activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
     final String oldGenHeapArg = "--old-gen-heap-size=" + oldGenHeapSizeMegaBytes;
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -843,9 +844,9 @@ public class FlutterLoaderTest {
     // is configured via the manifest.
     ActivityManager activityManager =
         (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
-    ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-    activityManager.getMemoryInfo(memInfo);
-    int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+    boolean isLargeHeap = (ctx.getApplicationInfo().flags & ApplicationInfo.FLAG_LARGE_HEAP) != 0;
+    int oldGenHeapSizeMegaBytes =
+        isLargeHeap ? activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
     testFlagFromMetadataNotPresent(
         "io.flutter.embedding.android.OldGenHeapSize",
         expectedOldGenHeapSize,
