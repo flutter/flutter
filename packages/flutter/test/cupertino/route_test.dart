@@ -3236,6 +3236,146 @@ void main() {
       expect(builder.delegatedTransition, isNotNull);
       expect(builder.delegatedTransition, CupertinoPageTransition.delegatedTransition);
     });
+
+    testWidgets('outgoing route receives a delegated transition from the new route', (
+      WidgetTester tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+
+      final pageRoute = PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+          return CupertinoButton(
+            onPressed: () {
+              final route = CupertinoPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Text('Cupertino Transition');
+                },
+              );
+              Navigator.of(context).push(route);
+            },
+            child: const Text('Cupertino Transition'),
+          );
+        },
+      );
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: CupertinoButton(
+            onPressed: () {
+              navigatorKey.currentState!.push<void>(pageRoute);
+            },
+            child: const Text('Page Route Transition'),
+          ),
+        ),
+      );
+
+      expect(pageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Page Route Transition'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cupertino Transition'), findsOneWidget);
+      expect(find.text('Page Route Transition'), findsNothing);
+      expect(pageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Cupertino Transition'));
+      await tester.pumpAndSettle();
+
+      expect(pageRoute.receivedTransition, isNotNull);
+      expect(pageRoute.receivedTransition, CupertinoPageTransition.delegatedTransition);
+    });
+
+    testWidgets('a received transition animates the same as a non-received transition', (
+      WidgetTester tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+
+      const firstPlaceholderKey = Key('First Placeholder');
+      const secondPlaceholderKey = Key('Second Placeholder');
+
+      final cupertinoPageRoute = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return Column(
+            children: <Widget>[
+              const Placeholder(key: secondPlaceholderKey),
+              CupertinoButton(
+                onPressed: () {
+                  final route = CupertinoPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return Column(
+                        children: <Widget>[
+                          CupertinoButton(onPressed: () {}, child: const Text('Page 3')),
+                        ],
+                      );
+                    },
+                  );
+                  Navigator.of(context).push(route);
+                },
+                child: const Text('Second Cupertino Transition'),
+              ),
+            ],
+          );
+        },
+      );
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Column(
+            children: <Widget>[
+              const Placeholder(key: firstPlaceholderKey),
+              CupertinoButton(
+                onPressed: () {
+                  navigatorKey.currentState!.push<void>(cupertinoPageRoute);
+                },
+                child: const Text('First Cupertino Transition'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Start first page transition. This one will be playing the delegated transition
+      // received from Cupertino page route.
+      await tester.tap(find.text('First Cupertino Transition'));
+      await tester.pump();
+
+      // Save the position of element on the screen at certain intervals.
+      final xLocations = <double>[];
+      for (var i = 0; i < 10; i += 1) {
+        await tester.pump(const Duration(milliseconds: 40));
+        xLocations.add(tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx);
+      }
+      for (var i = 0; i < 2; i += 1) {
+        await tester.pump(const Duration(milliseconds: 50));
+        xLocations.add(tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx);
+      }
+
+      // Give time to the animation to finish.
+      await tester.pumpAndSettle(const Duration(milliseconds: 1));
+
+      // Start the second page transition. This time it's the default secondary
+      // transition of a Cupertino page, with no delegation.
+      await tester.tap(find.text('Second Cupertino Transition'));
+      await tester.pump();
+
+      // Compare against the values from before.
+      for (var i = 0; i < 10; i += 1) {
+        await tester.pump(const Duration(milliseconds: 40));
+        expect(
+          tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+          moreOrLessEquals(xLocations[i], epsilon: 0.1),
+        );
+      }
+      for (var i = 0; i < 2; i += 1) {
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(
+          tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+          moreOrLessEquals(xLocations[10 + i], epsilon: 0.1),
+        );
+      }
+    });
   });
 }
 
