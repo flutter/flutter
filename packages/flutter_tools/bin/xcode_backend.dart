@@ -680,13 +680,16 @@ class Context {
 
     final String targetPlatform;
     final String platformArches;
+    final String deploymentTarget;
     switch (platform) {
       case TargetPlatform.ios:
         targetPlatform = '-dTargetPlatform=ios';
         platformArches = '-dIosArchs=$archs';
+        deploymentTarget = environment['IPHONEOS_DEPLOYMENT_TARGET'] ?? '';
       case TargetPlatform.macos:
         targetPlatform = '-dTargetPlatform=darwin';
         platformArches = '-dDarwinArchs=$archs';
+        deploymentTarget = environment['MACOSX_DEPLOYMENT_TARGET'] ?? '';
     }
 
     flutterArgs.addAll(<String>[
@@ -713,6 +716,7 @@ class Context {
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
       '-dXcodeBuildScript=$command',
+      '-dDeploymentTarget=$deploymentTarget',
     ]);
 
     if (platform == TargetPlatform.ios) {
