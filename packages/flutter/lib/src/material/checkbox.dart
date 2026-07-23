@@ -101,6 +101,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
+    this.markInsets,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null);
 
@@ -115,9 +116,9 @@ class Checkbox extends StatefulWidget {
   ///
   /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
   /// [fillColor], [hoverColor], [overlayColor], [splashRadius],
-  /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
-  /// [side] will still affect the [CupertinoCheckbox] and should be handled if
-  /// native fidelity is important.
+  /// [materialTapTargetSize], [visualDensity], [isError], [markInsets]. However,
+  /// [shape] and [side] will still affect the [CupertinoCheckbox] and should be
+  /// handled if native fidelity is important.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
@@ -141,6 +142,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
+    this.markInsets,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null);
 
@@ -401,6 +403,27 @@ class Checkbox extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticLabel;
 
+  /// {@template flutter.material.checkbox.markInsets}
+  /// The insets applied around the check mark when the checkbox is checked or
+  /// in its indeterminate (tristate) state.
+  ///
+  /// This insets the check mark inward; the size of the checkbox box itself
+  /// is not affected. The check mark and its stroke shrink to fit the
+  /// remaining space, so the mark stays proportional.
+  ///
+  /// On iOS and macOS, when using [Checkbox.adaptive], this property has no
+  /// effect, because the checkbox delegates to [CupertinoCheckbox], which does
+  /// not support insets.
+  ///
+  /// Must be non-negative. If the horizontal or vertical insets are
+  /// greater than or equal to the checkbox size, the check mark or indeterminate
+  /// dash is not painted.
+  ///
+  /// If null, [CheckboxThemeData.markInsets] is used. If that is also null,
+  /// it defaults to [EdgeInsets.zero] and the check mark renders at full size.
+  /// {@endtemplate}
+  final EdgeInsets? markInsets;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -612,6 +635,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final double effectiveSplashRadius =
         widget.splashRadius ?? checkboxTheme.splashRadius ?? defaults.splashRadius!;
 
+    final EdgeInsets markInsets = widget.markInsets ?? checkboxTheme.markInsets ?? EdgeInsets.zero;
+
     return Semantics(
       label: widget.semanticLabel,
       checked: widget.value ?? false,
@@ -641,6 +666,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..previousValue = _previousValue
           ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..activeSide = activeSide
+          ..markInsets = markInsets
           ..inactiveSide = inactiveSide,
       ),
     );
@@ -689,6 +715,16 @@ class _CheckboxPainter extends ToggleablePainter {
     }
     _shape = value;
     notifyListeners();
+  }
+
+  EdgeInsets get markInsets => _markInsets;
+  EdgeInsets _markInsets = EdgeInsets.zero;
+  set markInsets(EdgeInsets value) {
+    if (_markInsets == value) {
+      return;
+    }
+    _markInsets = value;
+    notifyListeners(); // triggers repaint when it changes
   }
 
   BorderSide get activeSide => _activeSide!;
@@ -752,9 +788,20 @@ class _CheckboxPainter extends ToggleablePainter {
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final path = Path();
-    const start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-    const mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-    const end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    final double innerW = (_kEdgeSize - _markInsets.horizontal).clamp(0.0, _kEdgeSize);
+    final double innerH = (_kEdgeSize - _markInsets.vertical).clamp(0.0, _kEdgeSize);
+    if (innerW <= 0 || innerH <= 0) {
+      return;
+    } // no room — paint nothing
+
+    // Shrink the stroke proportionally so a smaller mark doesn't look chunky.
+    final double scale = (innerW < innerH ? innerW : innerH) / _kEdgeSize;
+    paint.strokeWidth = _kStrokeWidth * scale;
+
+    final start = Offset(_markInsets.left + innerW * 0.15, _markInsets.top + innerH * 0.45);
+    final mid = Offset(_markInsets.left + innerW * 0.40, _markInsets.top + innerH * 0.70);
+    final end = Offset(_markInsets.left + innerW * 0.85, _markInsets.top + innerH * 0.25);
+
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
@@ -774,9 +821,19 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    const start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
-    const mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    const end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    final double innerW = (_kEdgeSize - _markInsets.horizontal).clamp(0.0, _kEdgeSize);
+    final double innerH = (_kEdgeSize - _markInsets.vertical).clamp(0.0, _kEdgeSize);
+    if (innerW <= 0 || innerH <= 0) {
+      return;
+    } // nothing to draw
+
+    final double scale = (innerW < innerH ? innerW : innerH) / _kEdgeSize;
+    paint.strokeWidth = _kStrokeWidth * scale; // shrink stroke too
+
+    final start = Offset(_markInsets.left + innerW * 0.2, _markInsets.top + innerH * 0.5);
+    final mid = Offset(_markInsets.left + innerW * 0.5, _markInsets.top + innerH * 0.5);
+    final end = Offset(_markInsets.left + innerW * 0.8, _markInsets.top + innerH * 0.5);
+
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
     final Offset drawEnd = Offset.lerp(mid, end, t)!;
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
