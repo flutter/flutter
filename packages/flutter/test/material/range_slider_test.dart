@@ -1726,6 +1726,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.5, epsilon: 0.03));
     await tester.pumpAndSettle();
 
+    // The drag gesture has finished, so no overlayColor should show up.
     expect(
       sliderBox,
       paints
@@ -3904,7 +3905,7 @@ void main() {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
     });
 
-    const Color overlayColor = Color(0xff800080);
+    const overlayColor = Color(0xff800080);
     var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -3958,7 +3959,7 @@ void main() {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
     });
 
-    const Color overlayColor = Color(0xff800080);
+    const overlayColor = Color(0xff800080);
     var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -4007,7 +4008,7 @@ void main() {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
     });
 
-    const Color overlayColor = Color(0xff800080);
+    const overlayColor = Color(0xff800080);
     var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(

@@ -1275,6 +1275,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     if (hovered && (hoveringStartThumb || hoveringEndThumb)) {
       _state.overlayController.forward();
     } else {
+      // Keep the active drag overlay visible even if the pointer moves outside
+      // the thumb bounds during an in-progress drag.
       if (!_active) {
         _state.overlayController.reverse();
       }
