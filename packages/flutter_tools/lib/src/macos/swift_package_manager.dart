@@ -99,6 +99,22 @@ class SwiftPackageManager {
       targetDependencies.add(flutterFrameworkTargetDependency);
     }
 
+    // Determine the platform version for the generated package.
+    // Use the project's deployment target if it's higher than Flutter's default,
+    // so that plugins requiring a higher version can resolve without errors.
+    // See https://github.com/flutter/flutter/issues/162196.
+    SwiftPackageSupportedPlatform supportedPlatform = platform.supportedPackagePlatform;
+    final String? projectDeploymentTarget = project.deploymentTargetFromPbxproj(platform);
+    if (projectDeploymentTarget != null) {
+      final Version? projectVersion = Version.parse(projectDeploymentTarget);
+      if (projectVersion != null && projectVersion > supportedPlatform.version) {
+        supportedPlatform = SwiftPackageSupportedPlatform(
+          platform: platform.swiftPackagePlatform,
+          version: projectVersion,
+        );
+      }
+    }
+
     // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
     // any dynamic dependencies are linked to Runner and prevent undefined symbols.
     final generatedProduct = SwiftPackageProduct.library(
@@ -115,7 +131,7 @@ class SwiftPackageManager {
     final pluginsPackage = SwiftPackage(
       manifest: project.flutterPluginSwiftPackageManifest,
       name: kFlutterGeneratedPluginSwiftPackageName,
-      platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
+      platforms: <SwiftPackageSupportedPlatform>[supportedPlatform],
       products: <SwiftPackageProduct>[generatedProduct],
       dependencies: packageDependencies,
       targets: <SwiftPackageTarget>[generatedTarget],
