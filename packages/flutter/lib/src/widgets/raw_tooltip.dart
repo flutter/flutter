@@ -14,6 +14,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/_features.dart' show isWindowingEnabled;
+
+import '_window.dart'
+    show
+        BaseWindowController,
+        TooltipWindow,
+        TooltipWindowController,
+        TooltipWindowControllerDelegate,
+        WindowRegistry,
+        WindowScope;
+
+import '_window_positioner.dart' show WindowPositioner, WindowPositionerAnchor;
+
 import 'basic.dart';
 import 'debug.dart';
 import 'feedback.dart';
@@ -22,6 +35,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
+import 'view.dart';
 
 const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
   curve: Curves.fastOutSlowIn,
@@ -251,6 +265,8 @@ class RawTooltip extends StatefulWidget {
     this.enableFeedback = true,
     this.onTriggered,
     this.animationStyle = _kDefaultAnimationStyle,
+    this.preferBelow = true,
+    this.verticalOffset = 0.0,
     this.positionDelegate,
     this.ignorePointer = false,
     required this.child,
@@ -412,6 +428,28 @@ class RawTooltip extends StatefulWidget {
   // the tooltip's underlying animation.
   final AnimationStyle animationStyle;
 
+  /// {@template flutter.widgets.RawTooltip.preferBelow}
+  /// Whether the tooltip defaults to being displayed below the widget.
+  ///
+  /// If there is insufficient space to display the tooltip in the preferred
+  /// direction, the tooltip will be displayed in the opposite direction.
+  ///
+  /// Defaults to true.
+  /// {@endtemplate}
+  final bool preferBelow;
+
+  /// {@template flutter.widgets.RawTooltip.verticalOffset}
+  /// The vertical gap between the widget and the displayed tooltip.
+  ///
+  /// When [preferBelow] is set to true and tooltips have sufficient space to
+  /// display themselves, this property defines how much vertical space tooltips
+  /// will position themselves above or below their corresponding widgets
+  /// depending on the value of [preferBelow]
+  ///
+  /// Defaults to 0.0.
+  /// {@endtemplate}
+  final double verticalOffset;
+
   /// {@template flutter.widgets.RawTooltip.positionDelegate}
   /// A custom position delegate function for computing where the tooltip should
   /// be positioned.
@@ -522,6 +560,16 @@ class RawTooltip extends StatefulWidget {
       FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
     );
     properties.add(
+      FlagProperty(
+        'position',
+        value: preferBelow,
+        ifTrue: 'below',
+        ifFalse: 'above',
+        showName: true,
+      ),
+    );
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: 0.0));
+    properties.add(
       DiagnosticsProperty<TooltipPositionDelegate>(
         'positionDelegate',
         positionDelegate,
@@ -531,12 +579,108 @@ class RawTooltip extends StatefulWidget {
   }
 }
 
+/// Common interface for showing/hiding the tooltip, abstracting over the
+/// [OverlayPortal]-based and [TooltipWindowController]-based implementations.
+sealed class _TooltipShowController {
+  void show();
+  void hide();
+  bool get isShowing;
+  void dispose();
+}
+
+/// Shows the tooltip using an [OverlayPortalController] (the non-windowing path).
+class _OverlayTooltipShowController implements _TooltipShowController {
+  final OverlayPortalController overlayController = OverlayPortalController();
+
+  @override
+  void show() => overlayController.show();
+
+  @override
+  void hide() => overlayController.hide();
+
+  @override
+  bool get isShowing => overlayController.isShowing;
+
+  @override
+  void dispose() {
+    // OverlayPortalController has nothing to dispose.
+  }
+}
+
+/// Shows the tooltip using a [TooltipWindowController] and [WindowRegistry]
+/// (the windowing path).
+class _WindowTooltipShowController implements _TooltipShowController {
+  _WindowTooltipShowController({
+    required this.parent,
+    required this.anchorRectGetter,
+    required this.positionerBuilder,
+    required this.onChanged,
+  });
+
+  final BaseWindowController parent;
+  final Rect? Function() anchorRectGetter;
+  final WindowPositioner Function() positionerBuilder;
+  final VoidCallback onChanged;
+
+  TooltipWindowController? _controller;
+
+  TooltipWindowController? get windowController => _controller;
+
+  @override
+  void show() {
+    if (_controller != null) {
+      return;
+    }
+    final Rect? anchorRect = anchorRectGetter();
+    if (anchorRect == null) {
+      return;
+    }
+    _controller = TooltipWindowController(
+      parent: parent,
+      anchorRect: anchorRect,
+      positioner: positionerBuilder(),
+      delegate: _RawTooltipWindowControllerDelegate(onDestroyed: hide),
+    );
+    onChanged();
+  }
+
+  @override
+  void hide() {
+    _controller?.destroy();
+    _controller = null;
+    onChanged();
+  }
+
+  @override
+  bool get isShowing => _controller != null;
+
+  @override
+  void dispose() {
+    if (isShowing) {
+      _controller?.destroy();
+      _controller = null;
+    }
+  }
+}
+
+class _RawTooltipWindowControllerDelegate extends TooltipWindowControllerDelegate {
+  _RawTooltipWindowControllerDelegate({required this.onDestroyed});
+
+  final VoidCallback onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+}
+
 /// Contains the state for a [RawTooltip].
 ///
 /// This class can be used to programmatically show the [RawTooltip]. See the
 /// [ensureTooltipVisible] method.
 class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMixin {
-  final OverlayPortalController _overlayController = OverlayPortalController();
+  late final _TooltipShowController _showController;
 
   Timer? _timer;
   AnimationController? _backingController;
@@ -572,9 +716,9 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     switch ((_animationStatus.isDismissed, status.isDismissed)) {
       case (false, true):
         RawTooltip._openedTooltips.remove(this);
-        _overlayController.hide();
+        _showController.hide();
       case (true, false):
-        _overlayController.show();
+        _showController.show();
         RawTooltip._openedTooltips.add(this);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
@@ -798,6 +942,54 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
   }
 
+  bool _showControllerInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_showControllerInitialized) {
+      return;
+    }
+
+    _showControllerInitialized = true;
+    final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
+    if (windowRegistry != null && isWindowingEnabled) {
+      final BaseWindowController? windowController = WindowScope.maybeOf(context);
+      if (windowController == null) {
+        // If there's no window controller in the widget tree, we won't be able
+        // to show the tooltip window, so we fallback to using the overlay.
+        _showController = _OverlayTooltipShowController();
+        return;
+      }
+
+      _showController = _WindowTooltipShowController(
+        parent: windowController,
+        anchorRectGetter: _getAnchorRect,
+        positionerBuilder: _buildWindowPositioner,
+        onChanged: () => setState(() {}),
+      );
+    } else {
+      _showController = _OverlayTooltipShowController();
+    }
+  }
+
+  Rect? _getAnchorRect() {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox != null && renderBox.hasSize) {
+      final Offset position = renderBox.localToGlobal(Offset.zero);
+      return position & renderBox.size;
+    }
+    return null;
+  }
+
+  WindowPositioner _buildWindowPositioner() {
+    return WindowPositioner(
+      parentAnchor: widget.preferBelow ? WindowPositionerAnchor.bottom : WindowPositionerAnchor.top,
+      childAnchor: widget.preferBelow ? WindowPositionerAnchor.top : WindowPositionerAnchor.bottom,
+      offset: Offset(0.0, widget.preferBelow ? widget.verticalOffset : -widget.verticalOffset),
+    );
+  }
+
   Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
     if (layoutInfo.childPaintTransform.determinant() == 0.0) {
       // The child is not visible.
@@ -824,6 +1016,8 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
         delegate: _TooltipPositionDelegate(
           target: target,
           targetSize: layoutInfo.childSize,
+          preferBelow: widget.preferBelow,
+          verticalOffset: widget.verticalOffset,
           positionDelegate: widget.positionDelegate,
         ),
         child: tooltip,
@@ -851,6 +1045,9 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     _timer?.cancel();
     _backingController?.dispose();
     _backingOverlayAnimation?.dispose();
+    if (_showControllerInitialized) {
+      _showController.dispose();
+    }
     super.dispose();
   }
 
@@ -862,7 +1059,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     if (widget.semanticsTooltip?.isEmpty ?? false) {
       return widget.child;
     }
-    assert(debugCheckHasOverlay(context));
+
     final bool excludeFromSemantics =
         widget.semanticsTooltip == null || widget.semanticsTooltip!.isEmpty;
     // TODO(victorsanni): https://github.com/flutter/flutter/issues/180320
@@ -883,11 +1080,23 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       ),
     );
 
-    return OverlayPortal.overlayChildLayoutBuilder(
-      controller: _overlayController,
-      overlayChildBuilder: _buildTooltipOverlay,
-      child: result,
-    );
+    switch (_showController) {
+      case final _OverlayTooltipShowController overlayTooltipShowController:
+        assert(debugCheckHasOverlay(context));
+        return OverlayPortal.overlayChildLayoutBuilder(
+          controller: overlayTooltipShowController.overlayController,
+          overlayChildBuilder: _buildTooltipOverlay,
+          child: result,
+        );
+      case final _WindowTooltipShowController windowTooltipShowController:
+        return ViewAnchor(
+          view: TooltipWindow(
+            controller: windowTooltipShowController.windowController!,
+            child: widget.tooltipBuilder(context, _overlayAnimation),
+          ),
+          child: result,
+        );
+    }
   }
 }
 
@@ -895,7 +1104,13 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 /// below a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
-  _TooltipPositionDelegate({required this.target, required this.targetSize, this.positionDelegate});
+  _TooltipPositionDelegate({
+    required this.target,
+    required this.targetSize,
+    this.preferBelow = true,
+    this.verticalOffset = 0.0,
+    this.positionDelegate,
+  });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -903,6 +1118,12 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   /// The size of the target widget that triggers the tooltip.
   final Size targetSize;
+
+  /// Whether the tooltip prefers to be positioned below the target.
+  final bool preferBelow;
+
+  /// The vertical gap between the widget and the displayed tooltip.
+  final double verticalOffset;
 
   /// A custom position delegate function for computing where the tooltip should be positioned.
   ///
@@ -922,7 +1143,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
           targetSize: targetSize,
           tooltipSize: childSize,
           overlaySize: size,
-          verticalOffset: 0.0,
+          verticalOffset: verticalOffset,
+          preferBelow: preferBelow,
         ),
       );
     }
@@ -930,7 +1152,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
       size: size,
       childSize: childSize,
       target: target,
-      preferBelow: true,
+      verticalOffset: verticalOffset,
+      preferBelow: preferBelow,
     );
   }
 
@@ -938,6 +1161,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target ||
         targetSize != oldDelegate.targetSize ||
+        preferBelow != oldDelegate.preferBelow ||
+        verticalOffset != oldDelegate.verticalOffset ||
         positionDelegate != oldDelegate.positionDelegate;
   }
 }
