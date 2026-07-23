@@ -17,7 +17,7 @@ typedef ImageCodecChunkCallback = void Function(int cumulativeBytesLoaded, int e
 /// The [chunkCallback] is called with progress updates as image chunks are
 /// loaded.
 Future<ui.Codec> createImageCodecFromUrl(Uri uri, {ImageCodecChunkCallback? chunkCallback}) {
-  return renderer.instantiateImageCodecFromUrl(uri, chunkCallback: chunkCallback);
+  return engineInstantiateImageCodecFromUrl(uri, chunkCallback: chunkCallback);
 }
 
 /// Creates a [ui.Image] from an ImageBitmap object.

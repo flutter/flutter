@@ -187,6 +187,8 @@ class EngineImage implements ui.Image, StackTraceDebugger {
               formatStr == 'BGRX') {
             return await readPixelsFromVideoFrame(videoFrame, format);
           }
+        case final CanvasImageSourceWrapper s:
+          return await readPixelsFromDomImageSource(s.canvasImageSource, format, s.width, s.height);
         case null:
           break;
       }
@@ -218,7 +220,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
           rawData.lengthInBytes,
         );
         final DomImageData imageData = createDomImageData(
-          clampedBytes,
+          clampedBytes.toJS,
           cloneImage.width,
           cloneImage.height,
         );

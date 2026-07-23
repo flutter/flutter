@@ -286,12 +286,15 @@ class BitmapTestCodec extends TestCodec {
 
     await imageElement.decode();
 
-    final DomImageBitmap bitmap = await createImageBitmap(imageElement, (
-      x: 0,
-      y: 0,
-      width: imageElement.naturalWidth.toInt(),
-      height: imageElement.naturalHeight.toInt(),
-    ));
+    final DomImageBitmap bitmap = await createImageBitmap(
+      imageElement,
+      bounds: (
+        x: 0,
+        y: 0,
+        width: imageElement.naturalWidth.toInt(),
+        height: imageElement.naturalHeight.toInt(),
+      ),
+    );
 
     final ui.Image image = await codecFactory(bitmap);
     return BitmapSingleFrameCodec(bitmap, image);
@@ -315,7 +318,7 @@ class BitmapSingleFrameCodec implements ui.Codec {
 
   @override
   Future<ui.FrameInfo> getNextFrame() async {
-    return SingleFrameInfo(image);
+    return AnimatedImageFrameInfo(Duration.zero, image);
   }
 
   @override
@@ -393,6 +396,11 @@ Future<void> testMain() async {
 
           expect(image.width, isNonZero);
           expect(image.height, isNonZero);
+
+          if (testCodec.description.contains('300 x 300')) {
+            expect(image.width, 300);
+            expect(image.height, 300);
+          }
 
           final ByteData? byteData = await image.toByteData();
           expect(
