@@ -5149,7 +5149,15 @@ class EditableTextState extends State<EditableText>
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
-    final shouldShowCaret = widget.readOnly ? _value.selection != value.selection : _value != value;
+    // Do not automatically scroll to the caret during a selection drag.
+    // Viewport scrolling is instead managed downstream by _bringIntoViewBySelectionState
+    // (called via _formatAndSetValue), which ensures the active handle is kept in view.
+    // Bypassing the default caret auto-scroll here prevents conflicts that would snap
+    // the viewport back to the opposite, static selection end.
+    final bool shouldShowCaret =
+        (widget.readOnly ? _value.selection != value.selection : _value != value) &&
+        cause != SelectionChangedCause.drag;
+
     if (shouldShowCaret) {
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
