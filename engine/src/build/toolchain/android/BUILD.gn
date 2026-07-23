@@ -74,7 +74,7 @@ template("android_toolchain") {
     if (host_os == "linux") {
       host_dir = "linux-x64"
     } else if (host_os == "mac") {
-      host_dir = "mac-x64"
+      host_dir = "mac-${host_cpu}"
     } else {
       assert(false, "Unknown host")
     }
